@@ -376,14 +376,17 @@ class JSTooling:
 
     @staticmethod
     def has_active_usage(content: str, word: str) -> bool:
-        """Checks if a word is used outside of a comment line.
+        """Checks if a word is called as a function (``word(``) outside of a comment line.
+
+        Unlike :meth:`has_active_raw_usage`, this matches only whole-word function call
+        sites (uses ``\\b<word>(`` regex), not arbitrary occurrences of the pattern.
 
         Args:
             content: The file content.
             word: The word to look for (e.g., 'useEffect').
 
         Returns:
-            True if at least one usage is not commented out.
+            True if at least one non-commented function call site is found.
         """
         for match in re.finditer(rf'\b{word}\(', content):
             if not JSTooling.is_commented(content, match.start()):
@@ -391,8 +394,52 @@ class JSTooling:
         return False
 
     @staticmethod
-    def replace_usage(content: str, old_name: str, new_name: str) -> str:
-        """Replaces usage on lines that aren't comments.
+    def has_active_raw_usage(content: str, word: str) -> bool:
+        """Checks if a raw pattern occurs outside of a comment line.
+
+        Unlike :meth:`has_active_usage`, this matches any occurrence of ``word``
+        as-is (no word-boundary or ``(`` suffix), so ``word`` can be any regex pattern.
+
+        Args:
+            content: The file content.
+            word: The pattern to look for (e.g., 'useEffect').
+
+        Returns:
+            True if at least one non-commented occurrence is found.
+        """
+        for match in re.finditer(word, content):
+            if not JSTooling.is_commented(content, match.start()):
+                return True
+        return False
+
+    @staticmethod
+    def replace_usage(content: str, old_name: str, new_name: str, match_words: bool = True) -> str:
+        """Replaces all non-commented occurrences of ``old_name`` with ``new_name``.
+
+        Args:
+            content: The file content.
+            old_name: The identifier or pattern to replace.
+            new_name: The replacement string.
+            match_words: When ``True`` (default), wraps ``old_name`` with ``\\b`` word
+                boundaries so only whole-word matches are replaced (e.g. ``foo`` won't
+                match inside ``fooBar``). Set to ``False`` when ``old_name`` is a raw
+                regex pattern that already includes its own boundaries or when partial
+                matches are intentional.
+
+        Returns:
+            The updated content with all non-commented occurrences replaced.
+        """
+        def replacer(match):
+            if JSTooling.is_commented(content, match.start()):
+                return match.group(0)  # Return unchanged
+            return new_name
+
+        b = r'\b' if match_words else ''
+        return re.sub(rf'{b}{old_name}{b}', replacer, content)
+
+    @staticmethod
+    def replace_usage_with_one_arg(content: str, old_name: str, new_name: str) -> dict:
+        """Replaces usage on lines that aren't comments when the call only has one arg.
 
         Args:
             content: The file content.
@@ -401,12 +448,65 @@ class JSTooling:
         Returns:
             The updated content.
         """
+        pattern = rf'\b{old_name}\b(?=\s*\()'
+        count_unchanged = 0
+        count_changed = 0
+
+        def is_trailing_comma(comma_idx, content):
+            for j in range(comma_idx + 1, len(content)):
+                next_char = content[j]
+                if not next_char.isspace():
+                    if next_char == ')':
+                        break
+                    else:
+                        return False
+            return True
+
         def replacer(match):
-            if JSTooling.is_commented(content, match.start()):
-                return match.group(0)  # Return unchanged
+            nonlocal count_unchanged
+            nonlocal count_changed
+
+            start_idx = match.start()
+            if JSTooling.is_commented(content, start_idx):
+                return match.group(0)
+            open_paren_idx = content.find('(', match.end())
+            if open_paren_idx == -1:
+                return match.group(0)
+
+            depth = 0
+            current_string_delimiter = None
+            for i in range(open_paren_idx, len(content)):
+                char = content[i]
+                # Commas inside strings are not relevant here
+                if current_string_delimiter:
+                    if char == current_string_delimiter:
+                        current_string_delimiter = None
+                    continue
+                if char in ["'", '"', "`"]:
+                    current_string_delimiter = char
+                elif char in ['[', '(', '{']:
+                    depth += 1
+                elif char in [']', ')', '}']:
+                    depth -= 1
+                    # The opening parenthesis is closed
+                    if depth == 0:
+                        break
+                # Comma at first level of depth
+                elif char == ',' and depth == 1:
+                    if is_trailing_comma(i, content):
+                        count_changed += 1
+                        return new_name
+                    else:
+                        count_unchanged += 1
+                        return match.group(0)
+            count_changed += 1
             return new_name
 
-        return re.sub(rf'\b{old_name}\b', replacer, content)
+        return {
+            "content": re.sub(pattern, replacer, content),
+            "count_unchanged": count_unchanged,
+            "count_changed": count_changed,
+        }
 
     @staticmethod
     def clean_whitespace(content: str) -> str:
@@ -473,7 +573,7 @@ class MigrationCollector:
         def log_error(path, err):
             errors.append(f"  ❌ {path}: {err}")
 
-        func(self.file_manager, log_info, log_error, **kwargs)
+        func(self.file_manager, name, log_info, log_error, **kwargs)
 
         modified_after = sum(1 for f in self.file_manager if f.dirty)
         count = modified_after - modified_before
@@ -493,7 +593,7 @@ class MigrationCollector:
             self.file_manager.add_to_summary("\n".join(self.reports))
 
 
-def upgrade_useeffect(file_manager, log_info, log_error):
+def upgrade_useeffect(file_manager, name, log_info, log_error):
     """Sub-task: Migrate useEffect to useLayoutEffect, ignoring comments."""
     js_files = JSTooling.get_js_files(file_manager)
 
@@ -506,10 +606,10 @@ def upgrade_useeffect(file_manager, log_info, log_error):
             file.content = JSTooling.add_import(file.content, 'useLayoutEffect', '@web/owl2/utils')
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
-        file_manager.print_progress(fileno, len(js_files))
+        file_manager.print_progress(fileno, len(js_files), name)
 
 
-def upgrade_onwillrender(file_manager, log_info, log_error):
+def upgrade_onwillrender(file_manager, name, log_info, log_error):
     """Sub-task: Migrate onWillRender, ignoring comments."""
     js_files = JSTooling.get_js_files(file_manager)
 
@@ -521,10 +621,10 @@ def upgrade_onwillrender(file_manager, log_info, log_error):
             file.content = JSTooling.add_import(file.content, 'onWillRender', '@web/owl2/utils')
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
-        file_manager.print_progress(fileno, len(js_files))
+        file_manager.print_progress(fileno, len(js_files), name)
 
 
-def upgrade_onrendered(file_manager, log_info, log_error):
+def upgrade_onrendered(file_manager, name, log_info, log_error):
     """Sub-task: Migrate onRendered, ignoring comments."""
     js_files = JSTooling.get_js_files(file_manager)
 
@@ -536,10 +636,10 @@ def upgrade_onrendered(file_manager, log_info, log_error):
             file.content = JSTooling.add_import(file.content, 'onRendered', '@web/owl2/utils')
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
-        file_manager.print_progress(fileno, len(js_files))
+        file_manager.print_progress(fileno, len(js_files), name)
 
 
-def upgrade_usecomponent(file_manager, log_info, log_error):
+def upgrade_usecomponent(file_manager, name, log_info, log_error):
     """Sub-task: Migrate useComponent, ignoring comments."""
     js_files = JSTooling.get_js_files(file_manager)
 
@@ -551,10 +651,10 @@ def upgrade_usecomponent(file_manager, log_info, log_error):
             file.content = JSTooling.add_import(file.content, 'useComponent', '@web/owl2/utils')
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
-        file_manager.print_progress(fileno, len(js_files))
+        file_manager.print_progress(fileno, len(js_files), name)
 
 
-def upgrade_useenv(file_manager, log_info, log_error):
+def upgrade_useenv(file_manager, name, log_info, log_error):
     """Sub-task: Migrate useEnv, ignoring comments."""
     js_files = JSTooling.get_js_files(file_manager)
 
@@ -566,10 +666,10 @@ def upgrade_useenv(file_manager, log_info, log_error):
             file.content = JSTooling.add_import(file.content, 'useEnv', '@web/owl2/utils')
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
-        file_manager.print_progress(fileno, len(js_files))
+        file_manager.print_progress(fileno, len(js_files), name)
 
 
-def upgrade_usesubenv(file_manager, log_info, log_error):
+def upgrade_usesubenv(file_manager, name, log_info, log_error):
     """Sub-task: Migrate useSubEnv, ignoring comments."""
     js_files = JSTooling.get_js_files(file_manager)
 
@@ -581,10 +681,10 @@ def upgrade_usesubenv(file_manager, log_info, log_error):
             file.content = JSTooling.add_import(file.content, 'useSubEnv', '@web/owl2/utils')
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
-        file_manager.print_progress(fileno, len(js_files))
+        file_manager.print_progress(fileno, len(js_files), name)
 
 
-def upgrade_usechildsubenv(file_manager, log_info, log_error):
+def upgrade_usechildsubenv(file_manager, name, log_info, log_error):
     """Sub-task: Migrate useChildSubEnv, ignoring comments."""
     js_files = JSTooling.get_js_files(file_manager)
 
@@ -596,10 +696,10 @@ def upgrade_usechildsubenv(file_manager, log_info, log_error):
             file.content = JSTooling.add_import(file.content, 'useChildSubEnv', '@web/owl2/utils')
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
-        file_manager.print_progress(fileno, len(js_files))
+        file_manager.print_progress(fileno, len(js_files), name)
 
 
-def upgrade_useref(file_manager, log_info, log_error):
+def upgrade_useref(file_manager, name, log_info, log_error):
     """Sub-task: Migrate useRef, ignoring comments."""
     js_files = JSTooling.get_js_files(file_manager)
 
@@ -611,10 +711,10 @@ def upgrade_useref(file_manager, log_info, log_error):
             file.content = JSTooling.add_import(file.content, 'useRef', '@web/owl2/utils')
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
-        file_manager.print_progress(fileno, len(js_files))
+        file_manager.print_progress(fileno, len(js_files), name)
 
 
-def upgrade_usestate_from_compatibility(file_manager, log_info, log_error):
+def upgrade_usestate_from_compatibility(file_manager, name, log_info, log_error):
     """
     Sub-task: Migrate useState, ignoring comments.
     This function migrates useState from the owl2 compatibility layer to owl3.
@@ -631,10 +731,10 @@ def upgrade_usestate_from_compatibility(file_manager, log_info, log_error):
             file.content = JSTooling.replace_usage(file.content, 'useState', 'proxy')
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
-        file_manager.print_progress(fileno, len(js_files))
+        file_manager.print_progress(fileno, len(js_files), name)
 
 
-def upgrade_usestate(file_manager, log_info, log_error):
+def upgrade_usestate(file_manager, name, log_info, log_error):
     """Sub-task: Migrate useState, ignoring comments."""
     js_files = JSTooling.get_js_files(file_manager)
 
@@ -647,25 +747,58 @@ def upgrade_usestate(file_manager, log_info, log_error):
             file.content = JSTooling.replace_usage(file.content, 'useState', 'proxy')
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
-        file_manager.print_progress(fileno, len(js_files))
+        file_manager.print_progress(fileno, len(js_files), name)
 
 
-def upgrade_reactive(file_manager, log_info, log_error):
-    """Sub-task: Migrate reactive, ignoring comments."""
+def upgrade_reactive_from_compatibility(file_manager, name, log_info, log_error):
+    """
+    Sub-task: Migrate reactive, ignoring comments.
+    This function migrate from owl2 to the owl2 compatibility layer.
+    """
     js_files = JSTooling.get_js_files(file_manager)
 
     for fileno, file in enumerate(js_files, start=1):
         try:
             if not JSTooling.has_active_usage(file.content, 'reactive'):
                 continue
-            file.content = JSTooling.remove_import(file.content, 'reactive', '@odoo/owl')
-            file.content = JSTooling.add_import(file.content, 'reactive', '@web/owl2/utils')
+
+            result = JSTooling.replace_usage_with_one_arg(file.content, 'reactive', 'proxy')
+            file.content = result["content"]
+            if result["count_changed"] > 0:
+                file.content = JSTooling.add_import(file.content, 'proxy', '@odoo/owl')
+            if result["count_unchanged"] == 0:
+                file.content = JSTooling.remove_import(file.content, 'reactive', '@web/owl2/utils')
+
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
-        file_manager.print_progress(fileno, len(js_files))
+        file_manager.print_progress(fileno, len(js_files), name)
 
 
-def upgrade_use_external_listener(file_manager, log_info, log_error):
+def upgrade_reactive(file_manager, name, log_info, log_error):
+    """
+    Sub-task: Migrate reactive, ignoring comments.
+    This function migrate from owl2 to owl3.
+    """
+    js_files = JSTooling.get_js_files(file_manager)
+
+    for fileno, file in enumerate(js_files, start=1):
+        try:
+            if not JSTooling.has_active_usage(file.content, 'reactive'):
+                continue
+
+            result = JSTooling.replace_usage_with_one_arg(file.content, 'reactive', 'proxy')
+            file.content = result["content"]
+            if result["count_changed"] > 0:
+                file.content = JSTooling.add_import(file.content, 'proxy', '@odoo/owl')
+            if result["count_unchanged"] == 0:
+                file.content = JSTooling.remove_import(file.content, 'reactive', '@odoo/owl')
+
+        except Exception as e:  # noqa: BLE001
+            log_error(file.path, e)
+        file_manager.print_progress(fileno, len(js_files), name)
+
+
+def upgrade_use_external_listener(file_manager, name, log_info, log_error):
     """ Changes the imports from useExternalListeners from "@odoo/owl" to "@web/owl2/utils". """
     js_files = JSTooling.get_js_files(file_manager)
 
@@ -677,10 +810,10 @@ def upgrade_use_external_listener(file_manager, log_info, log_error):
             file.content = JSTooling.add_import(file.content, 'useExternalListener', '@web/owl2/utils')
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
-        file_manager.print_progress(fileno, len(js_files))
+        file_manager.print_progress(fileno, len(js_files), name)
 
 
-def upgrade_tportal(file_manager, log_info, log_error):
+def upgrade_tportal(file_manager, name, log_info, log_error):
     """Sub-task: Migrate t-portal, ignoring comments."""
     files = JSTooling.get_template_files(file_manager)
     if not files:
@@ -704,10 +837,10 @@ def upgrade_tportal(file_manager, log_info, log_error):
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
 
-        file_manager.print_progress(fileno, len(files))
+        file_manager.print_progress(fileno, len(files), name)
 
 
-def upgrade_t_esc(file_manager, log_info, log_error):
+def upgrade_t_esc(file_manager, name, log_info, log_error):
     """Replaces the t-esc directive in xml templates with the t-out directive"""
     files = JSTooling.get_template_files(file_manager)
     if not files:
@@ -745,10 +878,10 @@ def upgrade_t_esc(file_manager, log_info, log_error):
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
 
-        file_manager.print_progress(fileno, len(files))
+        file_manager.print_progress(fileno, len(files), name)
 
 
-def upgrade_t_ref(file_manager, log_info, log_error):
+def upgrade_t_ref(file_manager, name, log_info, log_error):
     files = JSTooling.get_template_files(file_manager)
     reg_t_ref = re.compile(r'\b(?<!-)t-ref([^=\s]*\s*=)')
 
@@ -772,10 +905,10 @@ def upgrade_t_ref(file_manager, log_info, log_error):
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
 
-        file_manager.print_progress(fileno, len(files))
+        file_manager.print_progress(fileno, len(files), name)
 
 
-def upgrade_t_model(file_manager, log_info, log_error):
+def upgrade_t_model(file_manager, name, log_info, log_error):
     files = JSTooling.get_template_files(file_manager)
     reg_t_model = re.compile(r'\b(?<!-)t-model([^=\s]*\s*=)')
 
@@ -799,7 +932,7 @@ def upgrade_t_model(file_manager, log_info, log_error):
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
 
-        file_manager.print_progress(fileno, len(files))
+        file_manager.print_progress(fileno, len(files), name)
 
 
 WEB_WHITELIST = {
@@ -967,9 +1100,13 @@ MISC_WHITELIST = {
     "website.form_checkbox": {'record_index', 'record'},  # dynamic t-calls from loops
     "website_sale.DynamicSnippetProductsOption": {'filteredTemplates', 'isSingleMode'},  # dynamic t-calls from loops
 }
+# serviceName: [PluginClass, ImportPath]
+SERVICES_MAPPING = {
+    "notification": ['NotificationPlugin', '@web/core/notifications/notification_plugin'],
+}
 
 
-def upgrade_parametric_tcall(file_manager, log_info, log_error):
+def upgrade_parametric_tcall(file_manager, name, log_info, log_error):
     """Converts parametric t-call children (t-set nodes) into inline t-call attributes.
     """
     xml_files = JSTooling.get_xml_files(file_manager)
@@ -988,10 +1125,10 @@ def upgrade_parametric_tcall(file_manager, log_info, log_error):
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
 
-        file_manager.print_progress(fileno, len(xml_files))
+        file_manager.print_progress(fileno, len(xml_files), name)
 
 
-def upgrade_this(file_manager, log_info, log_error, targets=[]):
+def upgrade_this(file_manager, name, log_info, log_error, targets=[]):
     """ Adds `this.` to all .xml templates variables coming from components
         (in other words to all variables not defined in the template with t-set, t-foreach...)
 
@@ -1041,8 +1178,10 @@ def upgrade_this(file_manager, log_info, log_error, targets=[]):
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
 
+        file_manager.print_progress(fileno, len(xml_files), name)
 
-def upgrade_this_in_js(file_manager, log_info, log_error, targets=[]):
+
+def upgrade_this_in_js(file_manager, name, log_info, log_error, targets=[]):
     """ Adds `this.` to all .js templates variables coming from components
         (in other words to all variables not defined in the template with t-set, t-foreach...)
 
@@ -1053,7 +1192,7 @@ def upgrade_this_in_js(file_manager, log_info, log_error, targets=[]):
     """
     js_files = JSTooling.get_js_files(file_manager, include_test_files=True)
     pattern = re.compile(r"(\bxml\s*`)(.*?)(`)", re.DOTALL)
-    for _, file in enumerate(js_files, start=1):
+    for fileno, file in enumerate(js_files, start=1):
         if targets and not any(
             f"/{module}/" in file.path._str or f"/{module}_" in file.path._str
             for module in targets
@@ -1086,8 +1225,10 @@ def upgrade_this_in_js(file_manager, log_info, log_error, targets=[]):
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
 
+        file_manager.print_progress(fileno, len(js_files), name)
 
-def upgrade_t_slot(file_manager, log_info, log_error):
+
+def upgrade_t_slot(file_manager, name, log_info, log_error):
     files = JSTooling.get_template_files(file_manager)
     reg_t_slot = re.compile(r'\b(?<!-)t-slot(\s*=)')
 
@@ -1111,7 +1252,35 @@ def upgrade_t_slot(file_manager, log_info, log_error):
         except Exception as e:  # noqa: BLE001
             log_error(file.path, e)
 
-        file_manager.print_progress(fileno, len(files))
+        file_manager.print_progress(fileno, len(files), name)
+
+
+def upgrade_useservice(file_manager, name, log_info, log_error):
+    """Sub-task: Migrate useService to plugin, ignoring comments."""
+    js_files = JSTooling.get_js_files(file_manager)
+
+    for fileno, file in enumerate(js_files, start=1):
+        try:
+            # Skip the whole file if useService is not present
+            if not JSTooling.has_active_usage(file.content, 'useService'):
+                continue
+
+            for service_name, (plugin_class, import_path) in SERVICES_MAPPING.items():
+                pattern = fr'useService\(([\'"]){service_name}\1\)'
+                # Skip the file if the service_name is not used with useService
+                if not JSTooling.has_active_raw_usage(file.content, pattern):
+                    continue
+
+                file.content = JSTooling.replace_usage(file.content, pattern, f'plugin({plugin_class})', match_words=False)
+                file.content = JSTooling.add_import(file.content, 'plugin', '@odoo/owl')
+                file.content = JSTooling.add_import(file.content, plugin_class, import_path)
+
+            if not JSTooling.has_active_usage(file.content, 'useService'):
+                file.content = JSTooling.remove_import(file.content, 'useService', '@web/core/utils/hooks')
+        except Exception as e:  # noqa: BLE001
+            log_error(file.path, e)
+
+        file_manager.print_progress(fileno, len(js_files), name)
 
 
 def upgrade(file_manager) -> str:
@@ -1126,9 +1295,10 @@ def upgrade(file_manager) -> str:
     collector.run_sub("Migrating useSubEnv", upgrade_usesubenv)
     collector.run_sub("Migrating useChildSubEnv", upgrade_usechildsubenv)
     collector.run_sub("Migrating useRef", upgrade_useref)
-    collector.run_sub("Migrating useState", upgrade_usestate_from_compatibility)
     collector.run_sub("Migrating useState", upgrade_usestate)
+    collector.run_sub("Migrating useState from compatibility", upgrade_usestate_from_compatibility)
     collector.run_sub("Migrating reactive", upgrade_reactive)
+    collector.run_sub("Migrating reactive from compatibility", upgrade_reactive_from_compatibility)
     collector.run_sub("Migrating useExternalListener", upgrade_use_external_listener)
     collector.run_sub("Migrating t-portal", upgrade_tportal)
     collector.run_sub("Migrating t-esc", upgrade_t_esc)
@@ -1138,5 +1308,6 @@ def upgrade(file_manager) -> str:
     collector.run_sub("Migrating this. in test.js xml fragments", upgrade_this_in_js, targets=[])
     collector.run_sub("Migrating t-slot", upgrade_t_slot)
     collector.run_sub("Migrating parametric t-call", upgrade_parametric_tcall)
+    collector.run_sub("Migrating useService", upgrade_useservice)
 
     collector.finalize()

@@ -134,7 +134,7 @@ class MrpProduction(models.Model):
     use_create_components_lots = fields.Boolean(related='picking_type_id.use_create_components_lots')
     location_src_id = fields.Many2one(
         'stock.location', 'Components Location',
-        compute='_compute_locations', store=True, check_company=True,
+        compute='_compute_location_src_id', store=True, check_company=True,
         readonly=False, required=True, precompute=True, index=True,
         domain="[('usage','=','internal')]",
         help="Location where the system will look for components.")
@@ -142,7 +142,7 @@ class MrpProduction(models.Model):
     warehouse_id = fields.Many2one(related='location_src_id.warehouse_id')
     location_dest_id = fields.Many2one(
         'stock.location', 'Finished Products Location',
-        compute='_compute_locations', store=True, check_company=True,
+        compute='_compute_location_dest_id', store=True, check_company=True,
         readonly=False, required=True, precompute=True,
         domain="[('usage','=','internal')]",
         help="Location where the system will stock the finished products.")
@@ -377,12 +377,19 @@ class MrpProduction(models.Model):
                 production.uom_id = False
 
     @api.depends('picking_type_id')
-    def _compute_locations(self):
+    def _compute_location_src_id(self):
         for production in self:
             if not production.picking_type_id.default_location_src_id or not production.picking_type_id.default_location_dest_id:
                 company_id = production.company_id.id if (production.company_id and production.company_id in self.env.companies) else self.env.company.id
                 fallback_loc = self.env['stock.warehouse'].search([('company_id', '=', company_id)], limit=1).lot_stock_id
             production.location_src_id = production.picking_type_id.default_location_src_id.id or fallback_loc.id
+
+    @api.depends('picking_type_id')
+    def _compute_location_dest_id(self):
+        for production in self:
+            if not production.picking_type_id.default_location_src_id or not production.picking_type_id.default_location_dest_id:
+                company_id = production.company_id.id if (production.company_id and production.company_id in self.env.companies) else self.env.company.id
+                fallback_loc = self.env['stock.warehouse'].search([('company_id', '=', company_id)], limit=1).lot_stock_id
             production.location_dest_id = production.picking_type_id.default_location_dest_id.id or fallback_loc.id
 
     @api.model
@@ -2572,19 +2579,19 @@ class MrpProduction(models.Model):
     def button_unbuild(self):
         self.ensure_one()
         return {
-            'name': _('Unbuild: %s', self.product_id.display_name),
             'view_mode': 'form',
             'res_model': 'mrp.unbuild',
-            'view_id': self.env.ref('mrp.mrp_unbuild_form_view_simplified').id,
             'type': 'ir.actions.act_window',
-            'context': {'default_product_id': self.product_id.id,
-                        'default_lot_id': self.lot_producing_ids[:1].id,
-                        'default_mo_id': self.id,
-                        'default_company_id': self.company_id.id,
-                        'default_location_id': self.location_dest_id.id,
-                        'default_location_dest_id': self.location_src_id.id,
-                        'create': False, 'edit': False},
-            'target': 'new',
+            'context': {
+                'default_product_id': self.product_id.id,
+                'default_product_qty': self.qty_producing,
+                'default_lot_ids': self.lot_producing_ids.ids,
+                'default_mo_id': self.id,
+                'default_company_id': self.company_id.id,
+                'default_location_id': self.location_dest_id.id,
+                'default_location_dest_id': self.location_src_id.id,
+                'create': False,
+            },
         }
 
     def action_split(self):

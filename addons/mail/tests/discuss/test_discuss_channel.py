@@ -217,7 +217,6 @@ class TestChannelInternals(MailCommon, HttpCase):
                             {
                                 "all_employee_ids": [],
                                 "should_display_in_call_im_status": False,
-                                "employee_ids": [],
                                 "id": self.test_user.id,
                                 "im_status": "offline",
                                 "im_status_access_token": self.test_user._get_im_status_access_token(),
@@ -275,7 +274,6 @@ class TestChannelInternals(MailCommon, HttpCase):
                                 "id": self.test_user.id,
                                 "im_status": "offline",
                                 "im_status_access_token": self.test_user._get_im_status_access_token(),
-                                "employee_ids": [],
                                 "partner_id": self.test_partner.id,
                                 "share": False,
                             },
@@ -356,11 +354,17 @@ class TestChannelInternals(MailCommon, HttpCase):
     def test_channel_special_mention(self):
         """ Posting a message on a channel should support special mention """
         self.test_channel._add_members(users=self.user_employee | self.user_employee_nomail)
+        self.user_employee.im_status = "online"
         with self.mock_mail_gateway():
             new_msg = self.test_channel.message_post(
                 body="Test", special_mentions=["everyone"],
                 message_type="comment", subtype_xmlid="mail.mt_comment")
         self.assertEqual(new_msg.partner_ids, self.test_channel.channel_member_ids.partner_id)
+        with self.mock_mail_gateway():
+            new_msg = self.test_channel.message_post(
+                body="Test", special_mentions=["here"],
+                message_type="comment", subtype_xmlid="mail.mt_comment")
+        self.assertEqual(new_msg.partner_ids, self.user_employee.partner_id)
 
     @mute_logger('odoo.models.unlink')
     def test_channel_user_synchronize(self):
@@ -520,7 +524,6 @@ class TestChannelInternals(MailCommon, HttpCase):
                             {
                                 "all_employee_ids": [],
                                 "should_display_in_call_im_status": False,
-                                "employee_ids": [],
                                 "id": self.test_user.id,
                                 "im_status": self.test_user.im_status,
                                 "im_status_access_token": self.test_user._get_im_status_access_token(),
@@ -577,7 +580,6 @@ class TestChannelInternals(MailCommon, HttpCase):
                             {
                                 "all_employee_ids": [],
                                 "should_display_in_call_im_status": False,
-                                "employee_ids": [],
                                 "id": self.test_user.id,
                                 "im_status": self.test_user.im_status,
                                 "im_status_access_token": self.test_user._get_im_status_access_token(),
@@ -662,7 +664,7 @@ class TestChannelInternals(MailCommon, HttpCase):
         """ Test that a partner can leave a channel/group but not a chat."""
         group_restricted_channel = self.env['discuss.channel']._create_channel(name='Channel for Groups', group_id=self.env.ref('base.group_user').id)
         public_channel = self.env['discuss.channel']._create_channel(name='Channel for Everyone', group_id=None)
-        private_group = self.env['discuss.channel']._create_group(partners_to=self.user_employee.partner_id.ids, name="Group")
+        private_group = self.env['discuss.channel']._create_group(users_to=self.user_employee, name="Group")
         chat_user_current = self.env['discuss.channel']._get_or_create_chat(self.env.user.partner_id.ids)
         self.assertEqual(len(group_restricted_channel.channel_member_ids), 1)
         self.assertEqual(len(public_channel.channel_member_ids), 1)
@@ -737,7 +739,7 @@ class TestChannelInternals(MailCommon, HttpCase):
 
     def test_channel_should_generate_correct_default_avatar(self):
         test_channel = self.env['discuss.channel']._create_channel(name='Channel', group_id=self.env.ref('base.group_user').id)
-        private_group = self.env['discuss.channel']._create_group(partners_to=self.user_employee.partner_id.ids)
+        private_group = self.env['discuss.channel']._create_group(users_to=self.user_employee)
         bgcolor_channel = html_escape(get_random_ui_color_from_seed(str(test_channel.id)))
         bgcolor_group = html_escape(get_random_ui_color_from_seed(str(private_group.id)))
         expected_avatar_channel = (channel_avatar.replace('fill="#875a7b"', f'fill="{bgcolor_channel}"')).encode()

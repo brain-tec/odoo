@@ -128,9 +128,10 @@ class TestTraceability(TestMrpCommon):
             self.assertEqual(len(lines), 3, "There should be 3 lines. 1 for untracked, 1 for lot, and 1 for serial")
 
             for line in lines:
-                tracking = line['columns'][1].split(' ')[1]
+                columns = {column['name']: column['value'] for column in line['columns']}
+                tracking = columns['product'].split(' ')[1]
                 self.assertEqual(
-                    line['columns'][-1], "1.00 Units", 'Part with tracking type "%s", should have quantity = 1' % (tracking)
+                    columns['quantity'], "1.00 Units", 'Part with tracking type "%s", should have quantity = 1' % (tracking)
                 )
                 unfoldable = tracking in ['lot', 'serial']
                 self.assertEqual(
@@ -333,7 +334,7 @@ class TestTraceability(TestMrpCommon):
 
         unbuild_form = Form(self.env['mrp.unbuild'])
         unbuild_form.mo_id = mo
-        unbuild_form.lot_id = lot
+        unbuild_form.lot_ids = lot
         unbuild_form.save().action_unbuild()
 
         mo_form = Form(self.env['mrp.production'])
@@ -928,7 +929,7 @@ class TestTraceability(TestMrpCommon):
 
         unbuild_form = Form(self.env['mrp.unbuild'])
         unbuild_form.mo_id = mo_produce_sn
-        unbuild_form.lot_id = sn
+        unbuild_form.lot_ids = sn
         unbuild_form.save().action_unbuild()
 
         self.env['stock.quant']._update_available_quantity(component, self.stock_location, 1, lot_id=sn)

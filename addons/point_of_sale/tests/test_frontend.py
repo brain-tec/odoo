@@ -1747,6 +1747,7 @@ class TestUi(TestPointOfSaleHttpCommon):
     def test_order_refund_flow(self):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('test_order_refund_flow')
+        self.assertEqual(self.env['mail.mail'].search_count([('email_to', '=', 'test@narendradamodardasmodi.com')]), 1)
 
     def test_refund_few_quantities(self):
         """ Test to check that refund works with quantities of less than 0.5 """
@@ -3199,6 +3200,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'iface_print_auto': True,
             'iface_print_skip_screen': True,
             'receipt_printer_ids': [self.printer.id],
+            'other_devices': True,
         })
 
         self.main_pos_config.with_user(self.pos_user).open_ui()

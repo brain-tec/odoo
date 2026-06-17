@@ -11,6 +11,7 @@ import { renderToFragment } from "@web/core/utils/render";
 import { Component, onWillDestroy, xml, proxy } from "@odoo/owl";
 import { FormController } from "@web/views/form/form_controller";
 import { registry } from "@web/core/registry";
+import { addLoadingEffect } from "@web/core/utils/ui";
 
 export class PageDependencies extends Component {
     static template = "website.PageDependencies";
@@ -25,6 +26,7 @@ export class PageDependencies extends Component {
         resIds: Array,
         resModel: String,
         mode: String,
+        onDependenciesLoaded: { type: Function, optional: true },
     };
 
     setup() {
@@ -41,7 +43,8 @@ export class PageDependencies extends Component {
             () => []
         );
         this.state = proxy({
-            dependencies: {},
+            dependencies: null,
+            dependencyCount: 0,
         });
 
         onWillDestroy(async () => {
@@ -58,6 +61,9 @@ export class PageDependencies extends Component {
             this.props.resModel,
             await this.getResIds(),
         ]);
+        const dependencyCount = Object.values(this.state.dependencies).flat().length;
+        this.state.dependencyCount = dependencyCount;
+        this.props.onDependenciesLoaded?.(dependencyCount);
     }
 
     showDependencies() {
@@ -145,7 +151,15 @@ export class DeletePageDialog extends Component {
 
         this.state = proxy({
             confirm: false,
+            hasDependencies: false,
         });
+        this.onDependenciesLoaded = this.onDependenciesLoaded.bind(this);
+    }
+
+    onDependenciesLoaded(dependencyCount) {
+        this.state.hasDependencies = dependencyCount > 0;
+        // To enable the delete button if there are no dependencies.
+        this.state.confirm = dependencyCount === 0;
     }
 
     onConfirmCheckboxChange(checked) {
@@ -241,7 +255,7 @@ export class PagePropertiesDialog extends FormViewDialog {
             ),
             ...(this.isPage
                 ? {
-                      buttonTemplate: "website.PagePropertiesDialogButtons",
+                      buttonDialogTemplate: "website.PagePropertiesDialogButtons",
                       clonePage: this.clonePage.bind(this),
                       deletePage: this.deletePage.bind(this),
                   }
@@ -283,7 +297,8 @@ export class PagePropertiesDialog extends FormViewDialog {
         });
     }
 
-    async deletePage() {
+    async deletePage(ev) {
+        const restoreButton = addLoadingEffect(ev.currentTarget);
         const pageIds = [this.targetId];
         const newPageTemplateFields = await this.orm.read("website.page", pageIds, [
             "is_new_page_template",
@@ -299,5 +314,6 @@ export class PagePropertiesDialog extends FormViewDialog {
             },
             hasNewPageTemplate: newPageTemplateFields[0].is_new_page_template,
         });
+        restoreButton();
     }
 }

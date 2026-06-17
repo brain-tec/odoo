@@ -553,6 +553,7 @@ export class Composer extends Component {
             },
             isLoading: !!searchTerm && loading,
             options: [],
+            rememberPosition: false,
         };
         if (!this.hasSuggestions) {
             return props;
@@ -707,7 +708,15 @@ export class Composer extends Component {
             default_partner_ids:
                 this.props.type === "note"
                     ? []
-                    : allRecipients.map((recipient) => recipient.partner_id),
+                    : allRecipients
+                          .filter((r) => r.recipient_type !== "cc")
+                          .map((r) => r.partner_id),
+            default_partner_cc_ids:
+                this.props.type === "note"
+                    ? []
+                    : allRecipients
+                          .filter((r) => r.recipient_type === "cc")
+                          .map((r) => r.partner_id),
             default_res_ids: [this.thread.id],
             default_subtype_xmlid: this.props.type === "note" ? "mail.mt_note" : "mail.mt_comment",
             clicked_on_full_composer: true,
@@ -880,12 +889,12 @@ export class Composer extends Component {
 
     get postData() {
         return {
-            attachments: this.props.composer.attachments || [],
+            attachments: [...(this.props.composer.attachments || [])],
             emailAddSignature: this.props.composer.emailAddSignature,
             isNote: this.props.type === "note",
-            mentionedChannels: this.props.composer.mentionedChannels || [],
-            mentionedPartners: this.props.composer.mentionedPartners || [],
-            mentionedRoles: this.props.composer.mentionedRoles || [],
+            mentionedChannels: [...(this.props.composer.mentionedChannels || [])],
+            mentionedPartners: [...(this.props.composer.mentionedPartners || [])],
+            mentionedRoles: [...(this.props.composer.mentionedRoles || [])],
             cannedResponseIds: this.props.composer.cannedResponses.map((c) => c.id),
             parentId: this.props.composer.replyToMessage?.id,
         };
