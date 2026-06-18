@@ -890,6 +890,26 @@ test("Can add a reaction", async () => {
     await contains(".o-mail-MessageReaction:text('😅 1')");
 });
 
+test("Can add a reaction (small but desktop)", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({
+        channel_type: "channel",
+        name: "channel1",
+    });
+    pyEnv["mail.message"].create({
+        body: "Hello world",
+        res_id: channelId,
+        message_type: "comment",
+        model: "discuss.channel",
+    });
+    patchUiSize({ size: SIZES.SM });
+    await start();
+    await openDiscuss(channelId);
+    await click("[title='Add a Reaction']");
+    await click(".o-Emoji", { text: "😅" });
+    await contains(".o-mail-MessageReaction", { text: "😅1" });
+});
+
 test("Can remove a reaction", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({
@@ -1409,7 +1429,7 @@ test('Quick edit (edit from Composer with ArrowUp) ignores empty ("deleted") mes
     await contains(".o-mail-Message .o-mail-Composer-input", { value: "not empty" });
 });
 
-test("Editing a message to clear its composer opens message delete dialog.", async () => {
+test("Can delete a message", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({
         name: "general",
@@ -1419,6 +1439,7 @@ test("Editing a message to clear its composer opens message delete dialog.", asy
         author_id: serverState.partnerId,
         body: "not empty",
         model: "discuss.channel",
+        subject: "Hello, wanderer",
         res_id: channelId,
         message_type: "comment",
     });
@@ -1431,6 +1452,8 @@ test("Editing a message to clear its composer opens message delete dialog.", asy
     await contains(
         ".modal-body p:text('Are you sure you want to bid farewell to this message forever?')"
     );
+    await click("button:text('Delete')");
+    await contains(".o-mail-Message:has(:text('This message has been removed'))");
 });
 
 test("Clear message body should not open message delete dialog if it has attachments", async () => {
