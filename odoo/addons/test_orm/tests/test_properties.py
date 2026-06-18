@@ -1274,7 +1274,7 @@ class PropertiesCase(TestPropertiesMixin):
         def name_get(records):
             return list(zip(records._ids, records.mapped('display_name')))
 
-        with self.assertQueryCount(4):
+        with self.assertQueryCount(3):
             self.message_1.attributes = [
                 {
                     "name": "moderator_partner_ids",
@@ -1376,7 +1376,7 @@ class PropertiesCase(TestPropertiesMixin):
             }]
 
     @users('test')
-    @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.fields')
+    @mute_logger('odoo.addons.base.models.ir_access', 'odoo.fields')
     def test_properties_field_many2many_filtering(self):
         # a user read a properties with a many2many and he doesn't have access to all records
         tags = self.env['test_orm.multi.tag'].create(
@@ -1395,16 +1395,13 @@ class PropertiesCase(TestPropertiesMixin):
             }],
         })
 
-        self.env['ir.rule'].sudo().create({
+        # restrict access to tags
+        self.env['ir.access'].sudo().create({
             'name': 'test_rule_tags',
             'model_id': self.env['ir.model']._get('test_orm.multi.tag').id,
-            'domain_force': [('id', 'not in', tags[5:].ids)],
-            'perm_read': True,
-            'perm_create': True,
-            'perm_write': True,
+            'operation': 'crud',
+            'domain': [('id', 'not in', tags[5:].ids)],
         })
-
-        self.env.invalidate_all()
 
         values = message.read(['attributes'])[0]['attributes'][0]['value']
         self.assertEqual(values, [(tag.id, None if i >= 5 else tag.name) for i, tag in enumerate(tags.sudo())])
@@ -1600,10 +1597,11 @@ class PropertiesCase(TestPropertiesMixin):
         of the new property definition should be added should be added even if
         the record is not accessible.
         """
-        self.env['ir.rule'].sudo().create({
+        self.env['ir.access'].sudo().create({
             'name': 'only discussion_1',
             'model_id': self.env['ir.model']._get('test_orm.message').id,
-            'domain_force': [('discussion', '=', self.discussion_1.id)],
+            'operation': 'crud',
+            'domain': [('discussion', '=', self.discussion_1.id)],
         })
 
         message = self.env['test_orm.message'].create({
@@ -1772,7 +1770,7 @@ class PropertiesCase(TestPropertiesMixin):
         messages = self.message_1 | self.message_2 | self.message_3
         self.env.invalidate_all()
 
-        with self.assertQueryCount(9):
+        with self.assertQueryCount(7):
             messages[0]['attributes']['many2many']
             messages[1]['attributes']['many2many']
 

@@ -166,7 +166,6 @@ class TestSaleStockReports(TestReportsCommon):
             'login': 'other',
             'group_ids': [
                 Command.link(self.env.ref('sales_team.group_sale_salesman').id),
-                Command.link(self.env.ref('stock.group_stock_user').id),
             ],
         })
 

@@ -19,8 +19,7 @@
     ],
     "data": [
         # Security
-        "security/ir.model.access.csv",
-        "security/ir_rules.xml",
+        "security/ir_access.xml",
         "security/res_groups.xml",
         # Record data
         "data/mail_template_data.xml",
@@ -92,6 +91,7 @@
         "templates/snippets/s_mega_menu/thumbnails.xml",
         "templates/snippets/snippet_category_template_data.xml",
         "templates/generate_primary_template.xml",
+        'security/ir.access.csv',
     ],
     "demo": [
         "data/demo.xml",
