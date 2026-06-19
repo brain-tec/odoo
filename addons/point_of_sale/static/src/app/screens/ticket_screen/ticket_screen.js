@@ -31,6 +31,8 @@ import { NumberPopup } from "@point_of_sale/app/components/popups/number_popup/n
 import { ConnectionLostError } from "@web/core/network/rpc";
 import { TipCell } from "@point_of_sale/app/screens/ticket_screen/tip_cell/tip_cell";
 import { ProgressBar } from "@point_of_sale/app/screens/ticket_screen/progress_bar/progress_bar";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { logPosMessage } from "@point_of_sale/app/utils/pretty_console_log";
 import { SendReceiptPopup } from "@point_of_sale/app/components/popups/send_receipt_popup/send_receipt_popup";
 import { PrintPopup } from "@point_of_sale/app/components/popups/print_popup/print_popup";
@@ -63,6 +65,8 @@ export class TicketScreen extends Component {
         BarcodeVideoScanner,
         TipCell,
         ProgressBar,
+        Dropdown,
+        DropdownItem,
     };
     props = props(ticketScreenProps);
 
@@ -786,6 +790,9 @@ export class TicketScreen extends Component {
     }
 
     async setOrder(order) {
+        if (this.pos.isOrderSyncing(order)) {
+            return;
+        }
         if (this.pos.config.isShareable) {
             await this.pos.syncAllOrders();
         }
@@ -881,10 +888,6 @@ export class TicketScreen extends Component {
         // are under the category of `Active`.
         states.set("ONGOING", {
             text: _t("Ongoing"),
-            indented: true,
-        });
-        states.set("RECEIPT", {
-            text: _t("Receipt"),
             indented: true,
         });
         if (this.pos.config.set_tip_after_payment) {

@@ -152,6 +152,9 @@
             <t t-snippet="website.s_achievements_list" string="Achievements List" group="columns">
                 <keywords>achievements, awards, recognitions, certifications, press, records, milestones, honors, two columns, list, stats, numbers, accomplishments, highlights</keywords>
             </t>
+            <t t-snippet="website.s_about_bold" string="About Bold" group="columns">
+                <keywords>content, picture, photo, illustration, media, visual, article, story, combination, showcase, announcement, reveal</keywords>
+            </t>
 
             <!-- Content group -->
             <t t-snippet="website.s_text_image" string="Text - Image" group="content">
@@ -335,6 +338,9 @@
             <t t-snippet="website.s_masonry_block_alternation_image_text_template" string="Masonry" group="images">
                 <keywords>masonry, grid, column, pictures, photos, album, showcase, visuals, portfolio, mosaic, collage, arrangement, collection, visual-grid</keywords>
             </t>
+            <t t-snippet="website.s_masonry_block_quad_template" string="Masonry" group="images">
+                <keywords>masonry, grid, column, pictures, photos, album, showcase, visuals, portfolio, mosaic, collage, arrangement, collection, visual-grid</keywords>
+            </t>
             <t t-snippet="website.s_quadrant" string="Quadrant" group="images">
                 <keywords>four sections, column, grid, division, split, segments, pictures, illustration, media, photos, tiles, arrangement, gallery, images-grid, mixed, collection, stacking, visual-grid, showcase, visuals, portfolio, thumbnails, engage, call to action, cta, showcase</keywords>
             </t>
@@ -403,6 +409,9 @@
             <t t-snippet="website.s_references_grid" string="References Grid" group="people">
                 <keywords>customers, clients, sponsors, partners, supporters, case-studies, collaborators, associations, associates, testimonials, endorsements</keywords>
             </t>
+            <t t-snippet="website.s_references_tiles" string="References Tiles" group="people">
+                <keywords>customers, clients, sponsors, partners, logos, brand, supporters, collaborators, associations, trusted, references, tiles</keywords>
+            </t>
             <t t-snippet="website.s_quotes_carousel" string="Quotes" group="people" label="Carousel">
                 <keywords>cite, testimonials, endorsements, reviews, feedback, statements, references, sayings, comments, appreciations, citations, carousel</keywords>
             </t>
@@ -431,6 +440,9 @@
             </t>
             <t t-snippet="website.s_text_bold" string="Text Bold" group="text">
                 <keywords>bold, bold text, paragraph, statement, large text, tagline, typography, impactful, mission statement, quote, big text</keywords>
+            </t>
+            <t t-snippet="website.s_awards_list" string="Awards List" group="text">
+                <keywords>awards, achievements, prizes, honors, recognition, list, accomplishments</keywords>
             </t>
             <t t-snippet="website.s_faq_collapse" string="FAQ Block" group="text">
                 <keywords>common answers, common questions</keywords>

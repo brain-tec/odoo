@@ -486,7 +486,7 @@ class HrEmployee(models.Model):
         return super()._has_field_access(field, operation) and (
             self.env.su
             or self.env.user.has_group("hr.group_hr_user")
-            or field.name not in ('activity_calendar_event_id', 'rating_ids', 'website_message_ids', 'message_has_sms_error')
+            or field.name not in ('activity_calendar_event_id', 'rating_ids', 'message_has_sms_error')
         )
 
     def check_no_existing_contract(self, date):
@@ -1773,11 +1773,10 @@ class HrEmployee(models.Model):
                 'menu_id': hr_root_menu.id,
                 'text': self.env._('onboarding plan'),
             }
-            message = Markup('<b>%(title)s</b> %(text)s') % {
+            message = Markup('<b>%(title)s</b> %(text)s %(onboarding_plan_link)s?') % {
                 'title': self.env._('Congratulations!'),
-                'text': self.env._('May I recommend you to setup an %(onboarding_plan_link)s?') % {
-                    'onboarding_plan_link': link,
-                },
+                'text': self.env._('May I recommend you to setup an'),
+                'onboarding_plan_link': link,
             }
             onboarding_notes_bodies[employee.id] = message
         employees._message_log_batch(onboarding_notes_bodies)

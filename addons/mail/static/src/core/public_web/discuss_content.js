@@ -35,7 +35,7 @@ export class DiscussContent extends Component {
         });
         this.ui = useService("ui");
         this.notification = useService("notification");
-        this.rootRef = signal(null, { type: types.instanceOf(HTMLDivElement) });
+        this.rootRef = signal.ref(HTMLDivElement);
         this.threadActions = useThreadActions({ rootRef: this.rootRef, thread: () => this.thread });
         this.correspondentLocalDateTimeFormatted = signal("");
         this.state = proxy({ jumpThreadPresent: 0 });
@@ -48,18 +48,17 @@ export class DiscussContent extends Component {
             () => this.actionPanelAutoOpenFn(),
             () => [this.thread]
         );
-        useDynamicInterval(
-            (partnerTz, currentUserTz) => {
-                this.correspondentLocalDateTimeFormatted.set(
-                    formatLocalDateTime(partnerTz, currentUserTz)
-                );
-                if (!this.correspondentLocalDateTimeFormatted()) {
-                    return;
-                }
-                return 60000 - (Date.now() % 60000);
-            },
-            () => [this.thread?.channel?.correspondent?.persona?.tz, this.store.self?.tz]
-        );
+        useDynamicInterval(() => {
+            const formatted = formatLocalDateTime(
+                this.thread?.channel?.correspondent?.persona?.tz,
+                this.store.self?.tz
+            );
+            this.correspondentLocalDateTimeFormatted.set(formatted);
+            if (!formatted) {
+                return;
+            }
+            return 60000 - (Date.now() % 60000);
+        });
     }
 
     actionPanelAutoOpenFn() {

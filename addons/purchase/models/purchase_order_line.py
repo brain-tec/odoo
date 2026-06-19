@@ -11,7 +11,7 @@ from odoo.tools.float_utils import float_compare, float_round
 
 class PurchaseOrderLine(models.Model):
     _name = 'purchase.order.line'
-    _inherit = ['analytic.mixin']
+    _inherit = ['analytic.mixin', 'res.currency.rate.consolidation.mixin']
     _description = 'Purchase Order Line'
     _order = 'order_id, sequence, id'
 
@@ -284,11 +284,11 @@ class PurchaseOrderLine(models.Model):
             else:
                 line.selected_seller_id = False
 
-    @api.depends('price_unit', 'qty_invoiced_at_date', 'qty_received_at_date')
+    @api.depends('price_unit_discounted', 'qty_invoiced_at_date', 'qty_received_at_date')
     @api.depends_context('accrual_entry_date')
     def _compute_amount_to_invoice_at_date(self):
         for line in self:
-            line.amount_to_invoice_at_date = (line.qty_received_at_date - line.qty_invoiced_at_date) * line.price_unit
+            line.amount_to_invoice_at_date = (line.qty_received_at_date - line.qty_invoiced_at_date) * line.price_unit_discounted
 
     @api.model_create_multi
     def create(self, vals_list):

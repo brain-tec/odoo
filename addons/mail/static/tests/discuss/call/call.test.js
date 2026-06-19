@@ -8,7 +8,9 @@ import {
     insertText,
     listenStoreFetch,
     makeMockRtcNetwork,
+    mockBrowserFullscreen,
     mockGetMedia,
+    mockPipWindow,
     openDiscuss,
     patchUiSize,
     setupChatHub,
@@ -32,7 +34,6 @@ import {
     beforeEach,
     describe,
     expect,
-    getFixture,
     hover,
     manuallyDispatchProgrammaticEvent,
     mockDate,
@@ -49,7 +50,6 @@ import {
     patchWithCleanup,
     serverState,
 } from "@web/../tests/web_test_helpers";
-import { browser } from "@web/core/browser/browser";
 
 import { waitNotifications } from "@bus/../tests/bus_test_helpers";
 import { isMobileOS } from "@web/core/browser/feature_detection";
@@ -288,7 +288,7 @@ test("can share user camera", async () => {
     await click("[title='Start Call']");
     await click("[title='Turn camera on']");
     await contains("video");
-    await click("[title='Stop camera']");
+    await click("[title='Turn camera off']");
     await contains("video", { count: 0 });
 });
 
@@ -315,11 +315,11 @@ test("Camera video stream stays in focus when on/off", async () => {
     await openDiscuss(channelId);
     await click("[title='Start Call']");
     await click("[title='Turn camera on']");
-    await click("[title='Stop camera']");
+    await click("[title='Turn camera off']");
     await click("[title='Turn camera on']");
     await contains("video[type='camera']:not(.o-inset)");
     // test screen sharing then camera on to check camera aside
-    await click("[title='Stop camera']");
+    await click("[title='Turn camera off']");
     await click("[title='Share Screen']");
     await triggerEvents(".o-discuss-Call-mainCards", ["mousemove"]);
     await click("[title='Turn camera on']");
@@ -479,45 +479,7 @@ test("'New Meeting' in mobile", async () => {
 });
 
 test("Dropzones below fullscreen meeting view are disabled", async () => {
-    const popoutIframe = document.createElement("iframe");
-    const outsideArea = document.createElement("div");
-    getFixture().appendChild(outsideArea);
-    const popoutWindow = {
-        addEventListener: () => {},
-        removeEventListener: () => {},
-        closed: false,
-        get document() {
-            const doc = popoutIframe.contentDocument;
-            if (!doc) {
-                return undefined;
-            }
-            const originalWrite = doc.write;
-            doc.write = (content) => {
-                // This avoids duplicating the test script in the popoutWindow
-                const sanitizedContent = content.replace(
-                    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-                    ""
-                );
-                originalWrite.call(doc, sanitizedContent);
-            };
-            return doc;
-        },
-        close: () => {
-            popoutWindow.closed = true;
-            popoutIframe.remove(
-                popoutWindow.document.querySelector(".o-mail-PopoutAttachmentView")
-            );
-        },
-    };
-    patchWithCleanup(window, { documentPictureInPicture: false });
-    patchWithCleanup(browser, {
-        open: () => {
-            popoutWindow.closed = false;
-            outsideArea.append(popoutIframe);
-            return popoutWindow;
-        },
-    });
-
+    const { popoutIframe } = mockPipWindow();
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "Partner 2" });
     pyEnv["res.users"].create({ partner_id: partnerId });
@@ -557,6 +519,93 @@ test("Dropzones below fullscreen meeting view are disabled", async () => {
     await contains(".o-Dropzone"); // only dropzone in discuss app
     await dropFiles(".o-Dropzone", [textFile_2]);
     await contains(".o-mail-Discuss .o-mail-AttachmentContainer:not(.o-isUploading)", { count: 2 });
+});
+
+test("Fullscreen button enters browser fullscreen and the label reflects it", async () => {
+    const fullscreen = mockBrowserFullscreen();
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    const env = await start();
+    const rtc = env.services["discuss.rtc"];
+    await openDiscuss(channelId);
+    await click("[title='Start Call']");
+    await click(".o-discuss-CallActionList button[title='More']");
+    await contains("[name='fullscreen'][aria-label='Fullscreen']");
+    await click("[name='fullscreen']");
+    await contains(".o-mail-Meeting.o-fullscreen");
+    expect(fullscreen.isBrowserFullscreen()).toBe(true);
+    expect(rtc.isBrowserFullscreen).toBe(true);
+    // The action mirrors the real browser fullscreen state and now offers to exit it.
+    await click(".o-mail-Meeting [title='More']");
+    await contains("[name='fullscreen'][aria-label='Exit Fullscreen']");
+    await click("[name='fullscreen']");
+    await contains(".o-mail-Meeting", { count: 0 });
+    expect(fullscreen.isBrowserFullscreen()).toBe(false);
+    expect(rtc.isBrowserFullscreen).toBe(false);
+});
+
+test("Fullscreen button label reflects a denied browser fullscreen request", async () => {
+    const fullscreen = mockBrowserFullscreen({ grant: false });
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    const env = await start();
+    const rtc = env.services["discuss.rtc"];
+    await openDiscuss(channelId);
+    await click("[title='Start Call']");
+    await click(".o-discuss-CallActionList button[title='More']");
+    await click("[name='fullscreen']");
+    // The meeting still opens as the windowed overlay, but browser fullscreen was denied.
+    await contains(".o-mail-Meeting.o-fullscreen");
+    expect(fullscreen.isBrowserFullscreen()).toBe(false);
+    expect(rtc.isBrowserFullscreen).toBe(false);
+    // The action keeps offering "Fullscreen" instead of wrongly showing "Exit Fullscreen".
+    await click(".o-mail-Meeting [title='More']");
+    await contains("[name='fullscreen'][aria-label='Fullscreen']");
+});
+
+test("Leaving browser fullscreen externally (e.g. Escape) closes the meeting view", async () => {
+    const fullscreen = mockBrowserFullscreen();
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    const env = await start();
+    const rtc = env.services["discuss.rtc"];
+    await openDiscuss(channelId);
+    await click("[title='Start Call']");
+    await click(".o-discuss-CallActionList button[title='More']");
+    await click("[name='fullscreen']");
+    await contains(".o-mail-Meeting.o-fullscreen");
+    expect(rtc.isBrowserFullscreen).toBe(true);
+    // The browser leaving fullscreen on its own is reflected declaratively and tears down the view.
+    fullscreen.leaveBrowserFullscreen();
+    await contains(".o-mail-Meeting", { count: 0 });
+    expect(rtc.isBrowserFullscreen).toBe(false);
+});
+
+test("Closing picture-in-picture from browser fullscreen restores the windowed meeting view", async () => {
+    const fullscreen = mockBrowserFullscreen();
+    mockPipWindow();
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    const env = await start();
+    const rtc = env.services["discuss.rtc"];
+    await openDiscuss(channelId);
+    await click("[title='Start Call']");
+    await click(".o-discuss-CallActionList button[title='More']");
+    await click("[name='fullscreen']");
+    await contains(".o-mail-Meeting.o-fullscreen");
+    expect(fullscreen.isBrowserFullscreen()).toBe(true);
+    expect(rtc.isBrowserFullscreen).toBe(true);
+    // Opening PiP leaves browser fullscreen and closes the meeting view in the main window.
+    await click(".o-mail-Meeting [title='More']");
+    await click("[name='picture-in-picture']");
+    await contains(".o-mail-Meeting", { count: 0 });
+    expect(fullscreen.isBrowserFullscreen()).toBe(false);
+    // Closing PiP restores the meeting as the windowed overlay rather than re-entering browser
+    // fullscreen, which would require a user gesture we cannot trigger programmatically.
+    await rtc.closePip();
+    await contains(".o-mail-Meeting.o-fullscreen");
+    expect(fullscreen.isBrowserFullscreen()).toBe(false);
+    expect(rtc.isBrowserFullscreen).toBe(false);
 });
 
 test("Systray icon shows latest action", async () => {
@@ -618,7 +667,7 @@ test("Systray icon keeps track of earlier actions", async () => {
     await click("[title='Unmute']");
     // stack: ["video", "share-screen"]
     await contains(".o-discuss-CallMenu-buttonContent .fa-video-camera");
-    await click("[title='Stop camera']");
+    await click("[title='Turn camera off']");
     // stack: ["share-screen"]
     await contains(".o-discuss-CallMenu-buttonContent .fa-desktop");
 });
@@ -809,7 +858,7 @@ test("show call participants after stopping camera share", async () => {
     await click("[title='Start Call']");
     await click("[title='Turn camera on']");
     await contains("video");
-    await click("[title='Stop camera']");
+    await click("[title='Turn camera off']");
     await contains("video", { count: 0 });
     // when all participant cards are shown they are minimized
     await contains(".o-discuss-Call-mainCards .o-discuss-CallParticipantCard .o-minimized");
@@ -1064,9 +1113,9 @@ test("Shows warning badge on mic/camera on non-granted permission in meeting con
     await openDiscuss(channelId);
     await click("button[title='New Meeting']");
     await contains(".o-mail-Meeting");
-    await contains("button[title='Stop camera']");
-    await contains("button[title='Stop camera'].o-tag-DANGER");
-    await contains("button[title='Stop camera'].o-tag-WARNING_BADGE");
+    await contains("button[title='Turn camera off']");
+    await contains("button[title='Turn camera off'].o-tag-DANGER");
+    await contains("button[title='Turn camera off'].o-tag-WARNING_BADGE");
     await rtc.exitFullscreen();
     await click(".o-mail-DiscussSidebarChannel:text('General')");
     await click("[title='Join Call']");
@@ -1172,14 +1221,14 @@ test("all streams are properly closed when requesting new ones and tuning the fe
     await contains(".o-discuss-CallParticipantCard video");
     const cameraStream1 = streams.at(-1);
     expect(cameraStream1.getTracks()[0].readyState).toBe("live");
-    await click("[title='Stop camera']");
+    await click("[title='Turn camera off']");
     await contains(".o-discuss-CallParticipantCard video", { count: 0 });
     await click("[title='Turn camera on']");
     await contains(".o-discuss-CallParticipantCard video");
     const cameraStream2 = streams.at(-1);
     expect(cameraStream1.getTracks()[0].readyState).toBe("ended");
     expect(cameraStream2.getTracks()[0].readyState).toBe("live");
-    await click("[title='Stop camera']");
+    await click("[title='Turn camera off']");
     await contains(".o-discuss-CallParticipantCard video", { count: 0 });
     await click("[title='Share Screen']");
     await contains(".o-discuss-CallParticipantCard video");

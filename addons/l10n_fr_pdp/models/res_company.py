@@ -10,6 +10,9 @@ PDP_identifier_re = re.compile(r'^([0-9]{9})(_[0-9]{14})?(_.+)?$')
 
 _logger = logging.getLogger(__name__)
 
+ENDPOINT = 'https://pdp.odoo.com'
+TEST_ENDPOINT = 'https://pdp.test.odoo.com'
+
 
 class ResCompany(models.Model):
     _inherit = 'res.company'
@@ -82,11 +85,11 @@ class ResCompany(models.Model):
         groups='account.group_account_invoice',
     )
 
-    @api.depends('peppol_eas', 'peppol_endpoint')
+    @api.depends('partner_id.routing_identifier')
     def _compute_pdp_identifier(self):
         for record in self:
             partner = record.partner_id
-            record.pdp_identifier = partner.peppol_endpoint if partner.peppol_eas == '0225' else False
+            record.pdp_identifier = partner.routing_endpoint if partner.routing_scheme == '0225' else False
 
     def _inverse_pdp_identifier(self):
         for record in self:
@@ -95,11 +98,12 @@ class ResCompany(models.Model):
             if not siren:
                 continue
             siret = match.group(2)[1:] if match and match.group(2) else False  # Remove `_` at the start
-            record.partner_id.write({
-                'peppol_eas': '0225',
-                'peppol_endpoint': record.pdp_identifier,  # Will be verified by `_check_peppol_fields` constraint
-                'company_registry': siret or siren,
-            })
+            # Set the registry identifier first: writes `additional_identifiers`, which
+            # would recompute `routing_scheme`/`routing_endpoint` and overwrite the 0225
+            # routing set below otherwise.
+            if registry := (siret or siren):
+                record.partner_id._set_additional_identifier('FR_SIRET' if len(registry) == 14 else 'FR_SIREN', registry)
+            record.partner_id.write({'routing_identifier': f'0225:{record.pdp_identifier}'})
 
     @api.depends('l10n_fr_pdp_annuaire_start_date', 'account_peppol_proxy_state')
     def _compute_l10n_fr_pdp_registered(self):
@@ -197,9 +201,13 @@ class ResCompany(models.Model):
                 and company.currency_id == self.env.ref('base.EUR')
             )
 
+    def _pdp_get_iap_url(self):
+        self.ensure_one()
+        return ENDPOINT if self._get_peppol_edi_mode() == 'prod' else TEST_ENDPOINT
+
     def _refresh_pdp_authentication_status(self):
         self.ensure_one()
-        base_url = self.env['pdp.registration']._get_iap_url()
+        base_url = self._pdp_get_iap_url()
         response = iap_tools.iap_jsonrpc(f'{base_url}/api/signaturit_id_authentication/1/kyc_status', params={
             'object_uuid': self.pdp_authentication_uuid,
         })

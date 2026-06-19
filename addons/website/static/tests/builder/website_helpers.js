@@ -41,9 +41,6 @@ import { BackgroundShapeOptionPlugin } from "@html_builder/plugins/background_op
 
 class Website extends models.Model {
     _name = "website";
-    get_current_website() {
-        return [1];
-    }
 }
 
 class IrUiView extends models.Model {
@@ -64,6 +61,7 @@ export function defineWebsiteModels({ includeMailModels = true } = {}) {
         defineMailModels();
     }
     defineModels([Website, IrUiView]);
+    onRpc("/website/get_current_website_id", () => 1);
     onRpc("/website/theme_customize_data_get", () => []);
     onRpc("website", "web_search_read", () => ({
         length: 1,
@@ -504,7 +502,7 @@ export async function setupSidebarBuilderForTranslation(options) {
     // on the "Edit" button of the systray. The goal of this hack is to avoid
     // the handling of an extra reload of the action to arrive in translate
     // mode.
-    patchWithCleanup(Builder.prototype, {
+    patchWithCleanup(WebsiteBuilder.prototype, {
         setup() {
             super.setup();
             this.env.services.website = websiteServiceInTranslateMode;

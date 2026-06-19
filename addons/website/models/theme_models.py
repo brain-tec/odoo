@@ -252,6 +252,24 @@ class ThemeUtils(models.AbstractModel):
         'website.header_width_full',
     ]
 
+    # Templates managing header and footer options that are not mutually
+    # exclusive.
+    # Active by default.
+    _header_footer_active_option_templates = [
+        # Header
+        'website.option_header_brand_logo',
+        'website.header_text_element',
+        'website.header_search_box',
+        'website.header_call_to_action',
+    ]
+    # Unactive by default.
+    _header_footer_unactive_option_templates = [
+        # Header
+        'website.header_social_links',
+        # Footer
+        'website.footer_no_copyright',
+    ]
+
     def _post_copy(self, mod):
         # Call specific theme post copy
         theme_post_copy = '_%s_post_copy' % mod.name
@@ -301,6 +319,12 @@ class ThemeUtils(models.AbstractModel):
         for view in self._header_width_templates:
             self.disable_view(view)
 
+        # Reinitialize some header and footer options.
+        for view in self._header_footer_active_option_templates:
+            self.enable_view(view)
+        for view in self._header_footer_unactive_option_templates:
+            self.disable_view(view)
+
         # Reinitialize some page options
         self.set_page_option("header_overlay", False)
 
@@ -308,15 +332,14 @@ class ThemeUtils(models.AbstractModel):
     def _toggle_asset(self, key, active):
         ThemeIrAsset = self.env['theme.ir.asset'].sudo().with_context(active_test=False)
         obj = ThemeIrAsset.search([('key', '=', key)])
-        website = self.env['website'].get_current_website()
         if obj:
-            obj = obj.copy_ids.filtered(lambda x: x.website_id == website)
+            obj = obj.copy_ids.filtered(lambda x: x.website_id == self.env.website)
         else:
             Asset = self.env['ir.asset'].sudo().with_context(active_test=False)
             obj = Asset.search([('key', '=', key)], limit=1)
             has_specific = obj.key and Asset.search_count([
                 ('key', '=', obj.key),
-                ('website_id', '=', website.id)
+                ('website_id', '=', self.env.website.id)
             ]) >= 1
             if not has_specific and active == obj.active:
                 return
@@ -325,10 +348,9 @@ class ThemeUtils(models.AbstractModel):
     @api.model
     def _toggle_view(self, xml_id, active):
         obj = self.env.ref(xml_id)
-        website = self.env['website'].get_current_website()
         if obj._name == 'theme.ir.ui.view':
             obj = obj.with_context(active_test=False)
-            obj = obj.copy_ids.filtered(lambda x: x.website_id == website)
+            obj = obj.copy_ids.filtered(lambda x: x.website_id == self.env.website)
         else:
             # If a theme post copy wants to enable/disable a view, this is to
             # enable/disable a given functionality which is disabled/enabled
@@ -338,7 +360,7 @@ class ThemeUtils(models.AbstractModel):
             View = self.env['ir.ui.view'].with_context(active_test=False)
             has_specific = obj.key and View.search_count([
                 ('key', '=', obj.key),
-                ('website_id', '=', website.id)
+                ('website_id', '=', self.env.website.id)
             ]) >= 1
             if not has_specific and active == obj.active:
                 return
@@ -371,12 +393,11 @@ class ThemeUtils(models.AbstractModel):
 
     @api.model
     def set_page_option(self, page_option, value):
-        website = self.env['website'].get_current_website()
         # Only for the homepage and if it is a simple page, as it could break
         # technical pages.
-        homepage_url = website.homepage_url or '/'
+        homepage_url = self.env.website.homepage_url or '/'
         homepage = self.env['website.page'].search([
-            ('website_id', '=', website.id),
+            ('website_id', '=', self.env.website.id),
             ('url', '=', homepage_url),
         ], limit=1)
 

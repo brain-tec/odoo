@@ -152,13 +152,13 @@ export class Composer extends Component {
         this.composerService = useService("mail.composer");
         this.ref = useRef("textarea");
         this.fakeTextarea = useRef("fakeTextarea");
-        this.inputContainerRef = signal(null, { type: t.ref(HTMLSpanElement) });
+        this.inputContainerRef = signal.ref(HTMLSpanElement);
         this.pickerContainerRef = useRef("picker-container");
         this.state = proxy({
             active: true,
             isFullComposerOpen: false,
         });
-        this.rootRef = signal(null, { type: t.ref(HTMLDivElement) });
+        this.rootRef = signal.ref(HTMLDivElement);
         this.fullComposerRecoveryPopover = usePopover(FullComposerRecoveryPopover, {
             closeOnClickAway: false,
             closeOnEscape: false,
@@ -195,12 +195,13 @@ export class Composer extends Component {
             window,
             "click",
             (ev) => {
+                const target = ev.composedPath()[0];
                 if (
                     this.ui.isSmall &&
                     this.composerActions.activeAction &&
                     this.pickerContainerRef.el &&
-                    ev.target !== this.pickerContainerRef.el &&
-                    !this.pickerContainerRef.el.contains(ev.target)
+                    target !== this.pickerContainerRef.el &&
+                    !this.pickerContainerRef.el.contains(target)
                 ) {
                     this.composerActions.activeAction.actionPanelClose();
                 }
@@ -887,7 +888,6 @@ export class Composer extends Component {
             attachments: [...(this.props.composer.attachments || [])],
             emailAddSignature: this.props.composer.emailAddSignature,
             isNote: this.props.type === "note",
-            mentionedChannels: [...(this.props.composer.mentionedChannels || [])],
             mentionedPartners: [...(this.props.composer.mentionedPartners || [])],
             mentionedRoles: [...(this.props.composer.mentionedRoles || [])],
             cannedResponseIds: this.props.composer.cannedResponses.map((c) => c.id),
@@ -900,7 +900,6 @@ export class Composer extends Component {
      * @property {import("models").Attachment[]} attachments
      * @property {boolean} isNote
      * @property {number} parentId
-     * @property {integer[]} mentionedChannelIds
      * @property {integer[]} mentionedPartnerIds
      */
 
@@ -934,7 +933,6 @@ export class Composer extends Component {
         if (!this.askDeleteFromEdit) {
             await this.processMessage(async (value) =>
                 this.props.composer.message.edit(value, this.props.composer.attachments, {
-                    mentionedChannels: this.props.composer.mentionedChannels,
                     mentionedPartners: this.props.composer.mentionedPartners,
                     mentionedRoles: this.props.composer.mentionedRoles,
                 })

@@ -15,6 +15,7 @@ from odoo.exceptions import RedirectWarning, UserError, AccessError
 from odoo.http import request
 from odoo.tools import BinaryBytes, html2plaintext, sql
 from odoo.tools.pdf import PdfFileReader
+from odoo.addons.portal.controllers.thread import PortalWebClientController
 
 _logger = logging.getLogger(__name__)
 
@@ -237,10 +238,17 @@ class SlideSlide(models.Model):
         for slide in self:
             slide.questions_count = len(slide.question_ids)
 
-    @api.depends('website_message_ids.res_id', 'website_message_ids.model', 'website_message_ids.message_type')
+    @api.depends("message_ids")
     def _compute_comments_count(self):
+        count_by_slide = dict(
+            self.env["mail.message"]._read_group(
+                PortalWebClientController._get_portal_message_fetch_domain(self),
+                groupby=["res_id"],
+                aggregates=["__count"],
+            )
+        )
         for slide in self:
-            slide.comments_count = len(slide.website_message_ids)
+            slide.comments_count = count_by_slide.get(slide.id, 0)
 
     @api.depends('slide_views', 'public_views')
     def _compute_total(self):
@@ -975,7 +983,7 @@ class SlideSlide(models.Model):
           (e.g: 'Video could not be found') """
 
         self.ensure_one()
-        google_app_key = self.env['website'].get_current_website().sudo().website_slide_google_app_key
+        google_app_key = self.env.website.website_slide_google_app_key
         error_message = False
         try:
             response = requests.get(
@@ -1067,7 +1075,7 @@ class SlideSlide(models.Model):
                 params['access_token'] = access_token
 
         if not params.get('access_token'):
-            params['key'] = self.env['website'].get_current_website().sudo().website_slide_google_app_key
+            params['key'] = self.env.website.website_slide_google_app_key
 
         error_message = False
         try:
@@ -1320,6 +1328,9 @@ class SlideSlide(models.Model):
     def get_base_url(self):
         """As website_id is not defined on this record, we rely on channel website_id for base URL."""
         return self.channel_id.get_base_url()
+
+    def _get_customer_portal_message_types(self):
+        return ["comment", "email"]
 
     def _mail_get_partner_fields(self, introspect_fields=False):
         return []

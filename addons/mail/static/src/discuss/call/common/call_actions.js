@@ -88,7 +88,7 @@ export const quickActionSettings = {
         !owner.env.inCallMenu && channel?.isSelfInCall && !owner.env.pipWindow,
     dropdown: true,
     dropdownComponent: QuickVoiceSettings,
-    dropdownMenuClass: "p-2",
+    dropdownMenuClass: "p-1 overflow-x-hidden",
     dropdownPosition: "top-end",
     icon: "oi oi-chevron-up o-xsmaller",
     name: _t("Voice Settings"),
@@ -124,7 +124,7 @@ export const cameraOnAction = {
         store.rtc?.isRemote
             ? _t("Camera is unavailable outside the call tab.")
             : store.rtc.selfSession?.is_camera_on
-            ? _t("Stop camera")
+            ? _t("Turn camera off")
             : _t("Turn camera on"),
     isActive: ({ store }) => store.rtc.selfSession?.is_camera_on,
     icon: "fa fa-video-camera",
@@ -152,7 +152,7 @@ export const quickVideoSettings = {
         !owner.env.inCallMenu && channel?.isSelfInCall && !owner.env.pipWindow,
     dropdown: true,
     dropdownComponent: QuickVideoSettings,
-    dropdownMenuClass: "p-2",
+    dropdownMenuClass: "p-1 overflow-x-hidden",
     dropdownPosition: "top-end",
     icon: "oi oi-chevron-up o-xsmaller",
     name: _t("Video Settings"),
@@ -181,7 +181,10 @@ registerCallAction("raise-hand", {
     onSelected: ({ store }) => store.rtc.raiseHand(!store.rtc.selfSession.raisingHand),
     sequence: 50,
     sequenceGroup: 200,
-    tags: ACTION_TAGS.CALL_ACTION_TRACKED,
+    tags: ({ action }) => [
+        ACTION_TAGS.CALL_ACTION_TRACKED,
+        action.isActive ? ACTION_TAGS.SUCCESS : undefined,
+    ],
 });
 registerCallAction("share-screen", {
     condition: ({ channel }) => channel?.isSelfInCall && !isMobileOS(),
@@ -210,7 +213,7 @@ registerCallAction("fullscreen", {
     onSelected: ({ channel, store }) => {
         channel.promoteFullscreen = CALL_PROMOTE_FULLSCREEN.DISCARDED;
         if (store.rtc.isBrowserFullscreen) {
-            store.rtc.exitFullscreen();
+            store.rtc.exitBrowserFullscreen();
         } else {
             store.rtc.closePip();
             store.rtc.enterFullscreen(undefined, { browserFullscreen: true });
