@@ -295,8 +295,11 @@ class AccountEdiCommon(models.AbstractModel):
             'model': self,
         }
 
+    def _get_document_type(self, vals):
+        return vals.get('_document_type', {}).get('name')
+
     def _is_document(self, vals, *document_types):
-        return vals.get('_document_type', {}).get('name') in document_types
+        return self._get_document_type(vals) in document_types
 
     def module_installed(self, module_name):
         return self.env['ir.module.module']._get(module_name).state == 'installed'
@@ -714,7 +717,8 @@ class AccountEdiCommon(models.AbstractModel):
                 mimetype = attachment_data.attrib.get('mimeCode')
                 if not (extension := SUPPORTED_FILE_TYPES.get(mimetype)):
                     continue
-                text = (attachment_data.text or '').strip()
+                # Strip internal newlines/spaces to prevent 'raw' field validation failure on create
+                text = ''.join((attachment_data.text or '').split())
                 # Normalize the name of the file : some e-fff emitters put the full path of the file
                 # (Windows or Linux style) and/or the name of the xml instead of the pdf.
                 # Get only the filename with the right extension.
