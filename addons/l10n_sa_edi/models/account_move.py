@@ -4,9 +4,34 @@ from collections import defaultdict
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
+TRANSACTION_TYPES = ('party', 'nominal', 'export', 'summary', 'self_bill')
+
 
 class AccountMove(models.Model):
     _inherit = 'account.move'
+
+    l10n_sa_edi_transaction_type_ids = fields.Many2many(
+        comodel_name="l10n_sa_edi.transaction.type",
+        string="Transaction type",
+        compute="_compute_l10n_sa_edi_transaction_type_ids",
+        store=True,
+        readonly=False,
+    )
+    l10n_sa_is_csid_ready = fields.Boolean(compute='_compute_l10n_sa_is_csid_ready')
+    l10n_sa_compliance_checks_passed = fields.Boolean(related='journal_id.l10n_sa_compliance_checks_passed')
+
+    @api.depends('commercial_partner_id.country_id', 'company_id.country_id')
+    def _compute_l10n_sa_edi_transaction_type_ids(self):
+        for move in self:
+            if move.commercial_partner_id.country_id != move.company_id.country_id and move.l10n_sa_invoice_type == 'tax':
+                move.l10n_sa_edi_transaction_type_ids = self.env.ref('l10n_sa_edi.transaction_type_export', raise_if_not_found=False)
+            else:
+                move.l10n_sa_edi_transaction_type_ids = None
+
+    @api.depends('journal_id.l10n_sa_production_csid_json')
+    def _compute_l10n_sa_is_csid_ready(self):
+        for move in self:
+            move.l10n_sa_is_csid_ready = bool(move.journal_id.sudo().l10n_sa_production_csid_json)
 
     def _l10n_sa_is_phase_2_applicable(self, check_document=True):
         return self._l10n_sa_is_phase_1_applicable() and self.is_sale_document() and self.state == 'posted' and \
@@ -31,6 +56,8 @@ class AccountMove(models.Model):
             'l10n_sa_edi_invalid_date_moves': self.env._("Please set the Invoice Date to be either less than or equal to today as per the Asia/Riyadh time zone, since ZATCA does not allow future-dated invoicing."),
             'l10n_sa_edi_empty_reason_moves': self.env._("Please make sure the 'ZATCA Reason' for the issuance of the Credit/Debit Note is specified."),
             'l10n_sa_edi_invalid_ref_moves': self.env._("Please make sure the 'Customer Reference' contains the sequential number of the original invoice(s) that the Credit/Debit Note is related to."),
+            'l10n_sa_edi_empty_supply_end_date': self.env._("To issue the selected Invoice and Transaction Type, please fill in the 'Supply End Date' by going to Other Info > Supply End Date."),
+            'l10n_sa_edi_invalid_supply_end_date': self.env._("Supply Date cannot be greater than the Supply End Date. Please adapt it."),
         }
         invalid_scheme_partners = self.env['res.partner']
         empty_vat_partners = self.env['res.partner']
@@ -51,6 +78,12 @@ class AccountMove(models.Model):
 
             if move.l10n_sa_show_reason and not move._l10n_sa_check_billing_reference():
                 invalid_moves_dict['l10n_sa_edi_invalid_ref_moves'] += move
+
+            if move.l10n_sa_invoice_type == 'simplified' and 'summary' in move.l10n_sa_edi_transaction_type_ids.mapped('code') and not move.l10n_sa_edi_supply_end_date:
+                invalid_moves_dict['l10n_sa_edi_empty_supply_end_date'] += move
+
+            if move.l10n_sa_edi_supply_end_date and move.l10n_sa_edi_supply_end_date < move.delivery_date:
+                invalid_moves_dict['l10n_sa_edi_invalid_supply_end_date'] += move
 
             if (
                 any(
@@ -233,6 +266,27 @@ class AccountMove(models.Model):
     def _get_l10n_sa_journal(self):
         self.ensure_one()
         return self.journal_id
+
+    def _get_l10n_sa_edi_invoice_type_code(self):
+        """
+        Generates 7-character ZATCA transaction code (NNPNESB).
+
+        Structure Breakdown:
+        - NN (Pos 1-2): Invoice type ('01' = Tax, '02' = Simplified)
+        - P  (Pos 3)  : Third Party
+        - N  (Pos 4)  : Nominal
+        - E  (Pos 5)  : Export
+        - S  (Pos 6)  : Summary
+        - B  (Pos 7)  : Self-billed
+        """
+        self.ensure_one()
+
+        code = '01' if self.l10n_sa_invoice_type == 'tax' else '02'
+        active_transaction_types = self.l10n_sa_edi_transaction_type_ids.mapped('code')
+        # as of now Third party and Self-billed are not implemented
+        for transaction_type in TRANSACTION_TYPES:
+            code += '1' if transaction_type in active_transaction_types else '0'
+        return code
 
     def action_open_chain_head(self):
         """

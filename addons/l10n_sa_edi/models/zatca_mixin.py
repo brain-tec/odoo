@@ -6,6 +6,7 @@ class ZatcaMixin(models.AbstractModel):
 
     _inherit = "zatca.mixin"
 
+    l10n_sa_edi_supply_end_date = fields.Date(string="Supply End Date", copy=False, help="Date when the supply of goods or services is completed, mainly used for continuous supplies.")
     l10n_sa_uuid = fields.Char(string='Document UUID (SA)', copy=False, help="Universally unique identifier of the Invoice")
     l10n_sa_invoice_signature = fields.Char("Unsigned XML Signature", copy=False)
     l10n_sa_edi_document_id = fields.Many2one(comodel_name="l10n_sa_edi.document", copy=False)
@@ -33,7 +34,7 @@ class ZatcaMixin(models.AbstractModel):
     def _l10n_sa_build_qr(self):
         self.ensure_one()
         if self._l10n_sa_is_phase_2_applicable():
-            return self.l10n_sa_edi_document_id._l10n_sa_get_phase_2_qr(self._l10n_sa_is_simplified())
+            return self.l10n_sa_edi_document_id._l10n_sa_get_phase_2_qr(self.l10n_sa_invoice_type == 'simplified')
         return super()._l10n_sa_build_qr()
 
     def _l10n_sa_get_payment_means_code(self):

@@ -61,7 +61,7 @@ from .commands import Command
 from .domains import Domain
 from .fields import Field, determine
 from .fields_misc import Id
-from .fields_temporal import Date, Datetime
+from .fields_temporal import Datetime
 from .fields_textual import Char, StoredTranslations
 
 from .identifiers import NewId
@@ -2037,19 +2037,8 @@ class BaseModel(metaclass=MetaModel):
                 raise ValueError(f'Aggregator "sum_currency" only works on currency field for {fname!r}')
 
             currency_field_name = field.get_currency_field(self)
-            rate_subquery_table = SQL(
-                "(%s)",
-                self.env['res.currency']._get_rates_query(self.env.company, Date.context_today(self)),
-            )
-            alias_rate = table._make_alias(f'{currency_field_name}__rates')
-            condition = SQL("%s = %s", table[currency_field_name], alias_rate.id)
-            table._query.add_join('LEFT JOIN', alias_rate, rate_subquery_table, condition)
-
-            return SQL(
-                "SUM(%s / COALESCE(%s, 1.0))",
-                table[fname],
-                alias_rate.rate,
-            )
+            rate_sql = self.env['res.currency']._current_rate_sql(table, currency_field_name)
+            return SQL("SUM(%s / %s)", table[fname], rate_sql)
 
         if func not in READ_GROUP_AGGREGATE:
             raise ValueError(f"Invalid aggregate method {func!r} for {aggregate_spec!r}.")

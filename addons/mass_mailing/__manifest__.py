@@ -157,23 +157,27 @@
             'mass_mailing/static/src/action/**/*',
             'mass_mailing/static/src/components/**/*',
             'mass_mailing/static/src/views/mailing_preview_form_view.js',
+            'mass_mailing/static/src/views/mailing_preview_form_view.xml',
             'mass_mailing/static/src/views/format_utils.js',
             'mass_mailing/static/src/views/fields/**/*',
+            'mass_mailing/static/src/views/mailing_filter*/**/*.js',
             'mass_mailing/static/src/editor/**/*',
             'mass_mailing/static/src/fields/**/*',
             'mass_mailing/static/src/themes/*',
             'mass_mailing/static/src/themes/theme_selector/**/*',
             'mass_mailing/static/src/iframe/**/*',
-            'mass_mailing/static/src/scss/mailing_filter_widget.scss',
             'mass_mailing/static/src/scss/mass_mailing.scss',
             'mass_mailing/static/src/scss/mass_mailing_mobile.scss',
             'mass_mailing/static/src/scss/mass_mailing_mobile_preview.scss',
-            'mass_mailing/static/src/js/mailing_m2o_filter.js',
-            'mass_mailing/static/src/xml/mailing_filter_widget.xml',
             'mass_mailing/static/src/js/tours/**/*',
+            # Don't include dark mode files in light mode
+            ('remove', 'mass_mailing/static/src/**/*.dark.scss'),
         ],
         'web.assets_backend_lazy': [
             'mass_mailing/static/src/views/mass_mailing_subscription_graph_renderer.js',
+        ],
+        'web.assets_web_dark': [
+            'mass_mailing/static/src/**/*.dark.scss',
         ],
         'mass_mailing.assets_mail_themes': [
             'mass_mailing/static/src/scss/themes/**/*',
@@ -187,11 +191,11 @@
         'web.assets_unit_tests': [
             ('include', 'mass_mailing.assets_builder'),
             'mass_mailing/static/tests/mailing_contact_to_list.test.js',
-            'mass_mailing/static/tests/mass_mailing_favourite_filter.test.js',
             'mass_mailing/static/tests/mass_mailing_html_field.test.js',
             'mass_mailing/static/tests/mass_mailing_link_plugin.test.js',
         ],
     },
+    'post_init_hook': '_update_demo_data',
     'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

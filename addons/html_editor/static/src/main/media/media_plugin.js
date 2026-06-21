@@ -72,7 +72,7 @@ export class MediaPlugin extends Plugin {
                 isAvailable: isHtmlContentSupported,
             },
         ],
-        toolbar_groups: withSequence(31, { id: "image_actions", namespaces: ["image", "icon"] }),
+        toolbar_groups: withSequence(31, { id: "image_actions", namespaces: ["image"] }),
         toolbar_items: [
             withSequence(40, {
                 id: "replace_image",
@@ -264,6 +264,7 @@ export class MediaPlugin extends Plugin {
             resModel,
             resId,
             field,
+            document: this.document,
             useMediaLibrary: !!(
                 field &&
                 ((resModel === "ir.ui.view" && field === "arch") || type === "html")

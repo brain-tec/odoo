@@ -127,7 +127,7 @@ export class IconPlugin extends Plugin {
                 id: "icon_replace",
                 groupId: "icon_replace",
                 commandId: "replaceIcon",
-                text: _t("Replace"),
+                icon: "fa-file-image-o",
             },
         ],
         click_overrides: this.onClickIcon.bind(this),
@@ -221,6 +221,7 @@ export class IconPlugin extends Plugin {
             visibleTabs: ["ICONS"],
             media: selectedIcon,
             save: (el) => this.onSaveIcon(el, selectedIcon),
+            document: this.document,
         });
     }
 

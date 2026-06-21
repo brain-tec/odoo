@@ -13,7 +13,7 @@ from odoo import api, fields, models, _
 from odoo.addons.web.controllers.utils import clean_action
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Command, Domain
-from odoo.tools import SQL, format_datetime
+from odoo.tools import float_is_zero, SQL, format_datetime
 from odoo.tools.misc import OrderedSet, format_date, groupby as tools_groupby, topological_sort
 
 from odoo.addons.stock.models.stock_move import PROCUREMENT_PRIORITIES
@@ -995,7 +995,7 @@ class MrpProduction(models.Model):
             return False
         if self.state not in ('progress', 'done'):
             self.state = 'progress'
-        if self.product_tracking == 'serial' and self.lot_producing_ids:
+        if self.product_tracking == 'serial' and self.lot_producing_ids and float_is_zero(self.qty_producing, precision_digits=0):
             self.qty_producing = len(self.lot_producing_ids)
         productions_bypass_qty_producting = self.filtered(lambda p: p.lot_producing_ids and p.product_tracking == 'lot' and p._origin and p._origin.qty_producing == p.qty_producing)
         # sudo needed for portal users
@@ -1460,18 +1460,11 @@ class MrpProduction(models.Model):
         self.move_byproduct_ids.picked = True
 
     def _set_qty_producing(self, mark_moves_picked=True):
-        if self.product_id.tracking == 'serial':
-            qty_producing_uom = self.uom_id._compute_quantity(self.qty_producing, self.product_id.uom_id, rounding_method='HALF-UP')
-            qty_production_uom = self.uom_id._compute_quantity(self.product_qty, self.product_id.uom_id, rounding_method='HALF-UP')
-            # allow changing a non-zero value to a 0 to not block mass produce feature
-            if qty_producing_uom != qty_production_uom and not (qty_producing_uom == 0 and self._origin.qty_producing != self.qty_producing):
-                self.qty_producing = self.product_id.uom_id._compute_quantity(len(self.lot_producing_ids), self.uom_id, rounding_method='HALF-UP')
-
-        # waiting for a preproduction move before assignement
-        is_waiting = self.warehouse_id.manufacture_steps != 'mrp_one_step' and self.picking_ids.filtered(lambda p: p.picking_type_id == self.warehouse_id.pbm_type_id and p.state not in ('done', 'cancel'))
+        if self.product_tracking == 'serial' and self.lot_producing_ids and float_is_zero(self.qty_producing, precision_digits=0):
+            self.qty_producing = self.product_id.uom_id._compute_quantity(len(self.lot_producing_ids), self.uom_id, rounding_method='HALF-UP')
 
         for move in (
-            self.move_raw_ids.filtered(lambda m: not is_waiting or m.product_id.tracking not in ['lot', 'serial'])
+            self.move_raw_ids
             | self.move_finished_ids.filtered(lambda m: m.product_id != self.product_id or m.product_id.tracking == 'serial')
         ):
             is_byproduct = move in self.move_byproduct_ids
@@ -1481,6 +1474,13 @@ class MrpProduction(models.Model):
                 continue
 
             new_qty = move.uom_id.round((self.qty_producing - self.qty_produced) * move.unit_factor)
+            if move.has_tracking in ['lot', 'serial']:
+                qty_waiting = 0
+                for move_orig in move.move_orig_ids:
+                    if move_orig.state not in ('draft', 'done', 'cancel'):
+                        qty_waiting += move_orig.uom_id._compute_quantity(move_orig.quantity, move.uom_id)
+                if not move.uom_id.is_zero(qty_waiting):
+                    new_qty = min(new_qty, move.product_uom_qty - qty_waiting)
             move._set_quantity_done(new_qty)
             if mark_moves_picked \
                     and move.quantity \
@@ -1691,6 +1691,8 @@ class MrpProduction(models.Model):
             }
             if workorder:
                 action['context']['default_workorder_id'] = workorder.id
+                if self.env.context.get('from_shop_floor'):
+                    action['context']['qty_produced'] = workorder.qty_produced
             return action
 
     def action_confirm(self):
@@ -2288,7 +2290,11 @@ class MrpProduction(models.Model):
 
     def button_mark_done(self):
         for production in self:
-            if production.product_tracking not in ['lot', 'serial'] or production.lot_producing_ids:
+            if production.product_tracking not in ['lot', 'serial']:
+                continue
+            if production.lot_producing_ids:
+                if production.product_tracking == 'serial' and production.qty_producing and int(production.qty_producing) != len(production.lot_producing_ids):
+                    raise UserError(_("Please specify the produced serial numbers."))
                 continue
             if not production.qty_producing:
                 production.qty_producing = production.product_qty - production.qty_produced
