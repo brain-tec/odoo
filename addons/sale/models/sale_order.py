@@ -186,6 +186,17 @@ class SaleOrder(models.Model):
         help="If set, the SO will invoice in this journal; "
         "otherwise the sales journal with the lowest sequence is used.",
     )
+    document_tax_mode = fields.Selection(
+        selection=[
+            ('tax_excluded', "Tax Excl."),
+            ('tax_included', "Tax Incl."),
+        ],
+        compute='_compute_document_tax_mode',
+        precompute=True,
+        store=True,
+        readonly=False,
+        required=True,
+    )
 
     # Partner-based computes
     note = fields.Html(
@@ -480,19 +491,22 @@ class SaleOrder(models.Model):
 
     # === COMPUTE METHODS ===#
 
-    @api.depends("partner_id")
+    @api.depends("name", "partner_id", "client_order_ref")
     @api.depends_context("sale_show_partner_name", "formatted_display_name")
     def _compute_display_name(self):
-        if not self.env.context.get("sale_show_partner_name"):
-            return super()._compute_display_name()
+        super()._compute_display_name()
         for order in self:
-            if order.partner_id.name:
+            order_label = order.name
+            if order.client_order_ref:
+                order_label = f"{order_label} ({order.client_order_ref})"
+
+            if self.env.context.get("sale_show_partner_name") and order.partner_id.name:
                 if self.env.context.get("formatted_display_name"):
-                    order.display_name = f"{order.name} \t --{order.partner_id.name}--"
+                    order.display_name = f"{order_label} \t --{order.partner_id.name}--"
                 else:
-                    order.display_name = f"{order.name} - {order.partner_id.name}"
+                    order.display_name = f"{order_label} - {order.partner_id.name}"
             else:
-                order.display_name = order.name
+                order.display_name = order_label
 
     @api.depends("order_line.product_id")
     def _compute_has_archived_products(self):
@@ -1178,6 +1192,13 @@ class SaleOrder(models.Model):
         for order in self:
             order.has_overages = any(line.qty_overage for line in order.order_line)
 
+    @api.depends('company_id')
+    def _compute_document_tax_mode(self):
+        for order in self:
+            if not order.document_tax_mode:
+                company = order.company_id or self.env.company
+                order.document_tax_mode = company.account_price_include
+
     # === CONSTRAINT METHODS ===#
 
     @api.constrains("company_id", "order_line")
@@ -1822,6 +1843,7 @@ class SaleOrder(models.Model):
             "user_id": self.user_id.id,
             "invoice_incoterm_id": self.incoterm.id,
             "incoterm_location": self.incoterm_location,
+            "document_tax_mode": self.document_tax_mode,
         }
         if self.journal_id:
             values["journal_id"] = self.journal_id.id
