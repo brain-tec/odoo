@@ -3815,7 +3815,7 @@ class AccountMove(models.Model):
         - 'reviewed' or falsy: requires account.group_account_user or account.group_account_manager
         - 'todo', 'anomaly': no restriction
         """
-        if self.env.su:
+        if self.env.su or self.env.context.get('skip_account_review_check', False):
             return
         is_user_able_to_review, is_user_able_to_supervise = self._get_review_state_access_groups()
         if review_state == 'supervised' and not is_user_able_to_supervise:
@@ -5067,8 +5067,10 @@ class AccountMove(models.Model):
 
         def inverse_tax_rep(tax_rep):
             tax = tax_rep.tax_id
-            index = list(tax.invoice_repartition_line_ids).index(tax_rep)
-            return tax.refund_repartition_line_ids[index]
+            source, target = tax.invoice_repartition_line_ids, tax.refund_repartition_line_ids
+            if tax_rep.document_type == 'refund':
+                source, target = target, source
+            return target[list(source).index(tax_rep)]
 
         company = self.company_id
         payment_term_line = self.line_ids.filtered(lambda x: x.display_type == 'payment_term')
