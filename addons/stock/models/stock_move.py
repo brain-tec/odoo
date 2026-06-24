@@ -8,7 +8,7 @@ from re import findall as regex_findall
 from odoo import _, api, Command, fields, models, SUPERUSER_ID
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Domain
-from odoo.tools.float_utils import float_compare, float_round
+from odoo.tools.float_utils import float_compare, float_repr, float_round
 from odoo.tools.misc import clean_context, OrderedSet, groupby
 
 PROCUREMENT_PRIORITIES = [('0', 'Normal'), ('1', 'Urgent')]
@@ -924,6 +924,30 @@ Please change the quantity done or the rounding precision in your settings.""",
             'domain': [('location_id', 'child_of', picking.location_id.id)],
             'context': {
                 'picking_id': picking.id,
+            },
+        }
+
+    def action_print_reception_report(self):
+        # Quantities needs to be expressed as string to support python + js calls to report.
+        quantities = ','.join(float_repr(qty, 0) for qty in self.mapped('product_uom_qty'))
+        data = {
+            'docids': self.ids,
+            'quantity': quantities,
+        }
+        return self.env.ref('stock.label_picking').report_action(self, data=data, config=False)
+
+    def action_open_label_layout(self):
+        view = self.env.ref('stock.product_label_layout_form_picking')
+        return {
+            'name': _('Choose Labels Layout'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'product.label.layout',
+            'views': [(view.id, 'form')],
+            'target': 'new',
+            'context': {
+                'default_product_ids': self.product_id.ids,
+                'default_move_ids': self.ids,
+                'default_move_quantity': 'move',
             },
         }
 
@@ -2199,6 +2223,9 @@ Please change the quantity done or the rounding precision in your settings.""",
 
         move_dests_per_company = defaultdict(lambda: self.env['stock.move'])
 
+        # Apply allocated location if relevant.
+        moves._apply_allocation()
+
         # Break move dest link if move dest and move_dest source are not the same,
         # so that when move_dests._action_assign is called, the move lines are not created with
         # the new location, they should not be created at all.
@@ -2514,6 +2541,14 @@ Please change the quantity done or the rounding precision in your settings.""",
                 move.procure_method = rule.procure_method
             else:
                 move.procure_method = 'make_to_stock'
+
+    def _apply_allocation(self):
+        """ If the moves go to the allocated location, update their destination
+        moves so they use this location as their source. """
+        for move in self:
+            allocated_location = move.picking_type_id.allocated_location_id
+            if allocated_location and move.location_dest_id._child_of(allocated_location) and move.move_dest_ids:
+                move.move_dest_ids.location_id = move.location_dest_id
 
     def _trigger_scheduler(self):
         """ Check for auto-triggered orderpoints and trigger them. """

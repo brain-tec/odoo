@@ -41,6 +41,7 @@
         'report/picking_templates.xml',
         'report/product_templates.xml',
         'report/report_return_slip.xml',
+        'report/stock_allocation_report.xml',
         'data/mail_template_data.xml',
 
         'views/stock_menu_views.xml',
@@ -96,7 +97,6 @@
     'uninstall_hook': 'uninstall_hook',
     'assets': {
         'web.report_assets_common': [
-            'stock/static/src/scss/report_stock_reception.scss',
             'stock/static/src/scss/report_stock_rule.scss',
             'stock/static/src/scss/report_stockpicking_operations.scss',
         ],

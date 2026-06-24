@@ -721,9 +721,8 @@ class TestBatchPicking(TransactionCase):
         Create a third picking with same partner
         - Should be added to the batch
         """
-        self.env.user.group_ids = [(4, self.ref('stock.group_reception_report'))]
         self.env['stock.picking.type'].browse(self.picking_type_in).write({
-            'auto_show_reception_report': True,
+            'auto_show_allocation_report': True,
             'auto_batch': True,
             'batch_group_by_partner': True,
         })
@@ -760,7 +759,7 @@ class TestBatchPicking(TransactionCase):
         res = Form.from_action(self.env, receipt01.button_validate()).save().process()
         self.assertEqual(receipt01.state, 'done')
         self.assertIsInstance(res, dict)
-        self.assertEqual(res.get('res_model'), 'report.stock.report_reception')
+        self.assertEqual(res.get('res_model'), 'stock.allocation.report')
 
         backorder = receipt01.backorder_ids
         self.assertTrue(backorder)

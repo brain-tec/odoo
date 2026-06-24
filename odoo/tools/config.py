@@ -351,7 +351,7 @@ class configmanager:
         group.add_option("--logfile", dest="logfile", type='path', my_default='',
                          help="file where the server log will be stored")
         group.add_option("--syslog", action="store_true", dest="syslog", my_default=False,
-                         help="Send the log to the syslog server")
+                         help="Send the log to the syslog server (deprecated)")
         group.add_option('--log-handler', action="append", type='comma', my_default=[':INFO'], metavar="MODULE:LEVEL",
                          help='setup a handler at LEVEL for a given MODULE. An empty MODULE indicates the root logger. '
                               'This option can be repeated. Example: "odoo.orm:DEBUG" or "werkzeug:CRITICAL" (default: ":INFO")')
@@ -361,6 +361,9 @@ class configmanager:
                          help='shortcut for --log-handler=odoo.sql_db:DEBUG')
         group.add_option('--log-db', dest='log_db', help="Logging database", my_default='')
         group.add_option('--log-db-level', dest='log_db_level', my_default='warning', help="Logging database level")
+        group.add_option('--log-config', dest='log_config', type='path', my_default='',
+                         help="JSON logging configuration file, in dictconfig format ("
+                              "https://docs.python.org/3/library/logging.config.html#logging-config-dictschema).")
         # For backward-compatibility, map the old log levels to something
         # quite close.
         levels = [

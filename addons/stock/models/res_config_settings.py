@@ -37,12 +37,11 @@ class ResConfigSettings(models.TransientModel):
         help="Store products in specific locations of your warehouse (e.g. bins, racks) and to track inventory accordingly.")
     annual_inventory_month = fields.Selection(related='company_id.annual_inventory_month', readonly=False)
     annual_inventory_day = fields.Integer(related='company_id.annual_inventory_day', readonly=False)
-    group_stock_reception_report = fields.Boolean("Reception Report", implied_group='stock.group_reception_report')
     module_stock_dropshipping = fields.Boolean("Dropshipping")
     barcode_separator = fields.Char(
         "Separator", config_parameter='stock.barcode_separator',
         help="Character(s) used to separate data contained within an aggregate barcode (i.e. a barcode containing multiple barcode encodings)")
-    module_stock_fleet = fields.Boolean("Dispatch Management System")
+    module_stock_fleet = fields.Boolean("Transport Management")
     replenish_on_order = fields.Boolean("Replenish on Order (MTO)", compute='_compute_replenish_on_order', inverse='_inverse_replenish_on_order')
     stock_text_confirmation = fields.Boolean(related='company_id.stock_text_confirmation', string='Stock Text Validation with stock move', readonly=False)
     stock_confirmation_type = fields.Selection(related='company_id.stock_confirmation_type', string='Stock Text Validation type', readonly=False)
