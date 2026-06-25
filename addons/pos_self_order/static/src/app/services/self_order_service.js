@@ -58,8 +58,8 @@ export class SelfOrder extends Reactive {
 
         // data
         this.models = this.data.models;
-        this.session = this.models["pos.session"].getFirst();
-        this.config = this.models["pos.config"].getFirst();
+        this.session = this.models["pos.session"].get(odoo.pos_session_id);
+        this.config = this.models["pos.config"].get(odoo.pos_config_id);
         this.company = this.config.company_id;
         this.currency = this.config.currency_id;
 
@@ -721,7 +721,10 @@ export class SelfOrder extends Reactive {
     isValidSelection(slot, partner) {
         const preset = this.currentOrder.preset_id || {};
         const { id, name, email, phone, street, city, country_id, zip } = partner || {};
-        const partnerInfo = name && phone && street && city && country_id && zip;
+        const partnerInfo = this.config._has_google_places_api_key
+            ? name && phone && street && city && country_id && zip
+            : name && phone && street;
+
         const selectedPartner = typeof id === "number" && !isNaN(id);
         const validPartnerInfos = partnerInfo || selectedPartner;
 

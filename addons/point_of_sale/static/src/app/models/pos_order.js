@@ -80,7 +80,7 @@ export class PosOrder extends PosOrderAccounting {
     }
 
     get config() {
-        return this.models["pos.config"].getFirst();
+        return this.models["pos.config"].get(odoo.pos_config_id);
     }
 
     get currency() {
@@ -88,7 +88,7 @@ export class PosOrder extends PosOrderAccounting {
     }
 
     get session() {
-        return this.models["pos.session"].getFirst();
+        return this.models["pos.session"].get(odoo.pos_session_id);
     }
 
     get finalized() {
@@ -700,6 +700,8 @@ export class PosOrder extends PosOrderAccounting {
             noteChange: data.noteChange,
             noteUpdate: data.noteUpdate,
             removedQuantity: data.removedQuantity,
+            internal_note: data.internal_note,
+            general_customer_note: data.general_customer_note,
         });
     }
 

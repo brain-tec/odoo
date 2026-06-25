@@ -501,6 +501,10 @@ export class PosStore extends WithLazyGetterTrap {
         return this.data.models["pos.session"].get(odoo.pos_session_id);
     }
 
+    get config() {
+        return this.data.models["pos.config"].get(odoo.pos_config_id);
+    }
+
     get company() {
         return this.config.company_id;
     }
@@ -512,7 +516,6 @@ export class PosStore extends WithLazyGetterTrap {
         // These fields should be unique for the pos_config
         // and should not change during the session, so we can
         // safely take the first element.this.models
-        this.config = this.data.models["pos.config"].getFirst();
         this.user = this.data.models["res.users"].getFirst();
         this.currency = this.config.currency_id;
         this.models = this.data.models;
@@ -1429,7 +1432,7 @@ export class PosStore extends WithLazyGetterTrap {
             order.partner_id = this.getDefaultPartnerId();
         }
 
-        if (this.config.use_presets && !data["preset_id"]) {
+        if (this.config.use_presets && !data["preset_id"] && !order.isRefund) {
             this.selectPreset(this.config.default_preset_id, order, this.shouldSelectPreset(order));
         }
 
