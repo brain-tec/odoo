@@ -1,5 +1,5 @@
 import { onWillRender, useRef } from "@web/owl2/utils";
-import { Component, onMounted, onWillUnmount, props, proxy, t } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, props, proxy, t, useApp } from "@odoo/owl";
 import { loadBundle, loadCSS } from "@web/core/assets";
 import { isBrowserFirefox } from "@web/core/browser/feature_detection";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -12,7 +12,7 @@ import { useAutofocus, useChildRef, useService } from "@web/core/utils/hooks";
 import { SnippetViewer } from "./snippet_viewer";
 
 /**
- * @typedef {((arg: { iframe: HTMLIFrameElement }) => void)[]} snippet_preview_dialog_stylesheets_processors
+ * @typedef {((arg: { iframe: HTMLIFrameElement }) => { iframe: HTMLIFrameElement })[]} snippet_preview_dialog_stylesheets_processors
  * @typedef {string[]} snippet_preview_dialog_bundles
  */
 
@@ -57,6 +57,7 @@ export class AddSnippetDialog extends Component {
                 : "ltr",
         };
 
+        const app = useApp();
         let root;
         onMounted(async () => {
             const isFirefox = isBrowserFirefox();
@@ -83,7 +84,7 @@ export class AddSnippetDialog extends Component {
 
             this.hotkeyService.registerIframe(this.iframeRef.el);
 
-            root = this.__owl__.app.createRoot(SnippetViewer, {
+            root = app.createRoot(SnippetViewer, {
                 env: Object.create(this.env),
                 props: this.snippetViewerProps,
             });

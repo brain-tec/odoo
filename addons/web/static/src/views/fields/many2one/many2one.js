@@ -59,9 +59,12 @@ export function computeM2OProps(fieldProps) {
         readonly: fieldProps.readonly,
         relation: fieldProps.record.fields[fieldProps.name].relation,
         searchThreshold: fieldProps.searchThreshold,
+        preventMemoization: fieldProps.preventMemoization,
         string: fieldProps.string || fieldProps.record.fields[fieldProps.name].string || "",
         update: (value, options = {}) =>
             fieldProps.record.update({ [fieldProps.name]: value }, options),
+        willOpenRecordInDialog: () => fieldProps.record.save(),
+        onRecordSaved: () => fieldProps.record.load(),
         value: toRaw(fieldProps.record.data[fieldProps.name]),
     };
 }
@@ -92,10 +95,13 @@ export const many2OneProps = {
     relation: t.string(),
     searchMoreLabel: t.string().optional(),
     searchThreshold: t.number().optional(),
+    preventMemoization: t.boolean().optional(),
     slots: t.object().optional(),
     specification: t.object().optional(),
     string: t.string().optional(""),
     update: t.function(),
+    willOpenRecordInDialog: t.function().optional(() => () => true),
+    onRecordSaved: t.function().optional(() => {}),
     value: t.or([t.array(), t.object(), t.literal(false)]).optional(),
 };
 
@@ -121,15 +127,7 @@ export class Many2One extends Component {
                 onClose: () => {
                     this.input.focus();
                 },
-                onRecordSaved: async () => {
-                    const resId = this.props.value?.id;
-                    const fieldNames = ["display_name"];
-                    // use unity read + relatedFields from Field Component
-                    const records = await this.orm.read(this.props.relation, [resId], fieldNames, {
-                        context: this.props.context,
-                    });
-                    await this.update(records[0] ? extractData(records[0]) : false);
-                },
+                onRecordSaved: this.props.onRecordSaved,
                 onRecordDiscarded: () => {},
                 resModel: this.props.relation,
             }),
@@ -160,6 +158,7 @@ export class Many2One extends Component {
             resModel: this.props.relation,
             searchMoreLabel: this.props.searchMoreLabel,
             searchThreshold: this.props.searchThreshold,
+            preventMemoization: this.props.preventMemoization,
             setInputFloats: (isFloating) => {
                 this.state.isFloating = isFloating;
             },
@@ -265,10 +264,13 @@ export class Many2One extends Component {
     }
 
     async openRecordInDialog() {
-        return this.recordDialog.open({
-            resId: this.props.value?.id,
-            context: this.props.context,
-        });
+        const canProceed = await this.props.willOpenRecordInDialog();
+        if (canProceed) {
+            return this.recordDialog.open({
+                resId: this.props.value?.id,
+                context: this.props.context,
+            });
+        }
     }
 
     async processScannedBarcode(barcode) {

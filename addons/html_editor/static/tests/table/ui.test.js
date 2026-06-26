@@ -2,6 +2,8 @@ import { describe, expect, test } from "@odoo/hoot";
 import {
     click,
     hover,
+    manuallyDispatchProgrammaticEvent,
+    press,
     queryAll,
     queryAllAttributes,
     queryOne,
@@ -139,6 +141,7 @@ test("should display the resizeCursor if the table element isContentEditable=tru
     expect(".o_col_resize").toHaveCount(1);
 });
 
+test.tags("desktop");
 test("should not display the resizeCursor if the table element isContentEditable=false", async () => {
     const { el } = await setupEditor(`
         <table contenteditable="false"><tbody><tr>
@@ -152,6 +155,122 @@ test("should not display the resizeCursor if the table element isContentEditable
 
     await animationFrame();
     expect(".o_col_resize").toHaveCount(0);
+});
+
+test.tags("desktop");
+test("should not resize a table with a non-primary mouse button", async () => {
+    const content = unformat(`
+        <table class="table table-bordered o_table">
+            <tbody>
+                <tr>
+                    <td>
+                        <p>[]<br></p>
+                    </td>
+                    <td><p><br></p></td>
+                </tr>
+                <tr>
+                    <td><p><br></p></td>
+                    <td><p><br></p></td>
+                </tr>
+            </tbody>
+        </table>
+    `);
+    const { el } = await setupEditor(content);
+
+    const firstTd = el.querySelector("td");
+    const initialCellWidth = firstTd.clientWidth;
+
+    const cellRect = firstTd.getBoundingClientRect();
+    const clientX = cellRect.right;
+    const clientY = cellRect.top + cellRect.height / 2;
+
+    // Trigger resize via pointer hover
+    manuallyDispatchProgrammaticEvent(firstTd, "pointermove", {
+        clientX,
+        clientY,
+    });
+
+    // Simulate pointerdown at the right border of first cell.
+    await manuallyDispatchProgrammaticEvent(firstTd, "pointerdown", {
+        button: 2,
+        clientX,
+        clientY,
+    });
+
+    // Simulate pointermove.
+    manuallyDispatchProgrammaticEvent(firstTd, "pointermove", {
+        clientX: clientX + 100,
+        clientY,
+    });
+    manuallyDispatchProgrammaticEvent(firstTd, "pointerup", {
+        button: 2,
+        clientX: clientX + 100,
+        clientY,
+    });
+    await animationFrame();
+
+    expect(firstTd.clientWidth).toBe(initialCellWidth); // Not resized.
+});
+
+test.tags("desktop");
+test("should not allow key events during resize", async () => {
+    const content = unformat(`
+        <table class="table table-bordered o_table">
+            <tbody>
+                <tr>
+                    <td>
+                        <p>[<br></p>
+                    </td>
+                    <td><p><br></p></td>
+                </tr>
+                <tr>
+                    <td><p><br></p></td>
+                    <td><p><br>]</p></td>
+                </tr>
+            </tbody>
+        </table>
+    `);
+    const { el } = await setupEditor(content);
+
+    const firstTd = el.querySelector("td");
+    const cellRect = firstTd.getBoundingClientRect();
+    const clientX = cellRect.right;
+    const clientY = cellRect.top + cellRect.height / 2;
+
+    // Trigger resize via pointer hover
+    manuallyDispatchProgrammaticEvent(firstTd, "pointermove", {
+        clientX,
+        clientY,
+    });
+
+    // Simulate pointerdown at the right border of first cell.
+    await manuallyDispatchProgrammaticEvent(firstTd, "pointerdown", {
+        button: 0,
+        clientX,
+        clientY,
+    });
+
+    // Simulate pointermove.
+    manuallyDispatchProgrammaticEvent(firstTd, "pointermove", {
+        clientX: clientX + 100,
+        clientY,
+    });
+    expect(el).toHaveClass("o_col_resize");
+    await expectElementCount(".o_table", 1);
+
+    // Try to Remove table via backspace key
+    await press("backspace");
+    await animationFrame();
+
+    // Table should not be removed
+    await expectElementCount(".o_table", 1);
+
+    manuallyDispatchProgrammaticEvent(el, "pointermove", {
+        clientX: clientX + 110,
+        clientY,
+    });
+    // Resizing should still be active
+    expect(el).toHaveClass("o_col_resize");
 });
 
 test("should show the table UI menus when hovering a list inside a table cell", async () => {

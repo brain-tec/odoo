@@ -18,7 +18,14 @@ class ResUsers(models.Model):
         - add a welcome message
         - add suggestion preference
     """
-    _inherit = 'res.users'
+    _name = "res.users"
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'res.users']
+    _mail_post_access = 'read'
+
+    name = fields.Char(tracking=1)
+    email = fields.Char(tracking=2)
+    phone = fields.Char(tracking=3)
+    login = fields.Char(tracking=4)
 
     role_ids = fields.Many2many(
         "res.role",
@@ -191,9 +198,9 @@ class ResUsers(models.Model):
             for user in users:
                 if user._is_portal():
                     body = user._get_portal_access_update_body(True)
-                    user.partner_id.message_post(
+                    user.message_post(
                         body=body,
-                        message_type='notification',
+                        message_type='tracking',
                         subtype_xmlid='mail.mt_note'
                     )
         return users
@@ -224,9 +231,9 @@ class ResUsers(models.Model):
                 portal_access_changed = user_has_group != user_portal_access_dict[user.id]
                 if portal_access_changed:
                     body = user._get_portal_access_update_body(user_has_group)
-                    user.partner_id.message_post(
+                    user.message_post(
                         body=body,
-                        message_type='notification',
+                        message_type='tracking',
                         subtype_xmlid='mail.mt_note'
                     )
 
@@ -260,8 +267,20 @@ class ResUsers(models.Model):
         return write_res
 
     def action_archive(self):
-        activities_to_delete = self.env['mail.activity'].sudo().search([('user_id', 'in', self.ids)])
-        activities_to_delete.unlink()
+        activities_sudo = self.env['mail.activity'].sudo().search_fetch(
+            [('user_id', 'in', self.ids)],
+            ['res_model', 'role_id', 'create_uid', 'user_id'],
+        )
+        record_activities_sudo = activities_sudo.filtered('res_model')
+        if personal_activities_sudo := activities_sudo - record_activities_sudo:
+            personal_activities_sudo.unlink()
+        to_unassign_sudo = record_activities_sudo.filtered(
+            lambda a: a.role_id or not a.create_uid.active or a.create_uid in self)
+        if to_unassign_sudo:
+            to_unassign_sudo.user_id = False
+        if to_reassign_sudo := (record_activities_sudo - to_unassign_sudo).grouped('create_uid'):
+            for creator_sudo, activities_sudo in to_reassign_sudo.items():
+                activities_sudo.user_id = creator_sudo
         return super().action_archive()
 
     def _notify_security_setting_update(self, subject, content, mail_values=None, **kwargs):
@@ -473,6 +492,18 @@ class ResUsers(models.Model):
         res.one("partner_id", "_store_partner_fields")
 
     @api.model
+    @api.readonly
+    def _get_activities_to_assign_count(self):
+        """Activities targeting one of the current user's roles (including archived), not yet assigned to anyone."""
+        role_ids = self.env.user.with_context(active_test=False).role_ids.ids
+        if not role_ids:
+            return 0
+        return self.env['mail.activity'].search_count([
+            ('user_id', '=', False),
+            ('role_id', 'in', role_ids),
+        ])
+
+    @api.model
     def _get_activity_groups(self):
         search_limit = self.env['ir.config_parameter'].sudo().get_int('mail.activity.systray.limit') or 1000
         activities = self.env["mail.activity"].search(
@@ -538,7 +569,7 @@ class ResUsers(models.Model):
             model = self.env["ir.model"]._get(model_name).with_prefetch(model_ids)
             user_activities[model_name] = {
                 "id": model.id,
-                "name": model.name if model_name != "mail.activity" else _("Other activities"),
+                "name": model.name if model_name != "mail.activity" else _("Other Activities"),
                 "model": model_name,
                 "type": "activity",
                 "icon": icon,
