@@ -3594,6 +3594,15 @@ class AccountMove(models.Model):
     @contextmanager
     def _sync_dynamic_line(self, existing_key_fname, needed_vals_fname, needed_dirty_fname, line_type, container):
         def existing():
+            if line_type == 'epd':
+                # Keep keyless EPD lines in the sync map so they can be cleaned/rebuilt
+                # when invoice lines/taxes are overwritten (e.g. PO auto-complete on OCR bills).
+                return {
+                    line: frozendict(line[existing_key_fname] or {'epd_line_id': line.id})
+                    for line in container['records'].line_ids
+                    if line.display_type == 'epd'
+                    if line[existing_key_fname] or line.id
+                }
             return {
                 line: frozendict(line_value)
                 for line in container['records'].line_ids
@@ -6197,9 +6206,11 @@ class AccountMove(models.Model):
                     fiscal_position=line.move_id.fiscal_position_id,
                     product_taxes_after_fp=new_taxes,
                 )
-        lines_to_recompute._compute_price_unit()
-        self.invoice_line_ids._compute_tax_ids()
-        self.line_ids._compute_account_id()
+        container = {'records': self}
+        with self._check_balanced(container), self._sync_dynamic_lines(container):
+            self.env.add_to_compute(lines_to_recompute._fields['price_unit'], lines_to_recompute)
+            self.env.add_to_compute(self.invoice_line_ids._fields['tax_ids'], self.invoice_line_ids)
+            self.env.add_to_compute(self.line_ids._fields['account_id'], self.line_ids)
 
     def open_created_caba_entries(self):
         self.ensure_one()
@@ -7126,6 +7137,14 @@ class AccountMove(models.Model):
             file_name = safe_eval(report.print_report_name, {'object': self})
         else:
             file_name = self.name
+        return f"{file_name.replace('/', '_')}.{extension}"
+
+    def _get_invoice_mail_template_dynamic_report_filename(self, report, extension='pdf'):
+        """ Get the filename of the generated invoice report for a dynamic report. """
+        self.ensure_one()
+        if not report.print_report_name:
+            return False
+        file_name = safe_eval(report.print_report_name, {'object': self})
         return f"{file_name.replace('/', '_')}.{extension}"
 
     def _get_invoice_proforma_pdf_report_filename(self):
