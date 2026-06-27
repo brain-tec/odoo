@@ -1974,7 +1974,7 @@ export class PosStore extends WithLazyGetterTrap {
         });
     }
     canEditPayment(order) {
-        return !this.config.iface_print_auto && order.nb_print === 0 && order.state === "paid";
+        return !this.config.autoPrint && order.nb_print === 0 && order.state === "paid";
     }
     openFinalizedOrders() {
         const order = this.getOrder();
@@ -2582,15 +2582,24 @@ export class PosStore extends WithLazyGetterTrap {
         const srcKey = srcLine.preparationKey;
         const destKey = destLine.preparationKey;
         const srcQty = srcPrep[srcKey]?.quantity;
+        const existingDestQty = destPrep[destKey]?.quantity || 0;
 
         if (srcQty) {
             if (srcQty <= qty) {
-                const newPrep = { ...srcPrep[srcKey], uuid: destLine.uuid };
+                const newPrep = {
+                    ...srcPrep[srcKey],
+                    uuid: destLine.uuid,
+                    quantity: existingDestQty + srcQty,
+                };
                 destPrep[destKey] = newPrep;
                 delete srcPrep[srcKey];
             } else {
                 srcPrep[srcKey].quantity = srcQty - qty;
-                destPrep[destKey] = { ...srcPrep[srcKey], uuid: destLine.uuid, quantity: qty };
+                destPrep[destKey] = {
+                    ...srcPrep[srcKey],
+                    uuid: destLine.uuid,
+                    quantity: existingDestQty + qty,
+                };
             }
         }
     }
