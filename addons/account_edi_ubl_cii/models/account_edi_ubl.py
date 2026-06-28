@@ -2537,7 +2537,10 @@ class AccountEdiUBL(models.AbstractModel):
             # discount_amount = 250.0
             if not currency.is_zero(price_subtotal):
                 quantity = subtotal * price_quantity / (price_subtotal - price_discount_amount)
-                price_unit = (subtotal / quantity) + (price_discount_amount / price_quantity)
+                if quantity:
+                    price_unit = (subtotal / quantity) + (price_discount_amount / price_quantity)
+                else:
+                    price_unit = price_amount
                 discount_amount += price_discount_amount * quantity / price_quantity
 
         elif (
@@ -3109,7 +3112,7 @@ class AccountEdiUBL(models.AbstractModel):
             if vehicle_values in cache:
                 vehicles = cache[vehicle_values]
             else:
-                vehicles = self.env['fleet.vehicle'].search([  # noqa: OLS03001
+                vehicles = self.env['fleet.vehicle'].sudo().search([  # noqa: OLS03001
                     ('company_id', '=', company.id),
                 ] + Domain.OR([
                     [(field, 'in', vals)] for field, vals in vehicle_values
