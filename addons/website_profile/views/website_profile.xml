@@ -324,7 +324,7 @@
                         <h5>How do I earn badges?</h5>
                         <p>When you finish a course or reach milestones, you're awarded badges.</p>
                         <h5>How do I score more points?</h5>
-                        <p>You can score more points by answering quizzes at the end of each course content. Points can also be earned on the forum. Follow this link to the guidelines of the forum.</p>
+                        <p>You can score more points by answering quizzes at the end of each course content. Points can also be earned on the forum.</p>
                     </div>
                     <div class="col-12 col-md-5 col-lg-4">
                         <div class="card">
@@ -556,6 +556,7 @@
         <t t-set="send_alert_classes" t-value="send_alert_classes if send_alert_classes else 'alert alert-danger alert-dismissable'"/>
         <t t-set="done_alert_classes" t-value="done_alert_classes if done_alert_classes else 'alert alert-success alert-dismissable'"/>
         <t t-set="my_account_redirect" t-value="'/my/account?redirect='+redirect_url"/>
+        <t t-set="user" t-value="env.user"/>
 
         <div t-if="not is_public_user and not user.email" t-att-class="send_alert_classes" role="alert">
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
