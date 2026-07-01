@@ -3,11 +3,12 @@ import sys
 import time
 
 from unittest.mock import patch
+from psycopg2.errors import UndefinedTable
 
 from odoo.exceptions import AccessError
 from odoo.tests.common import BaseCase, TransactionCase, tagged, new_test_user, HttpCase
 from odoo.tests.result import stats_logger
-from odoo.tools import profiler
+from odoo.tools import profiler, mute_logger
 from odoo.tools.profiler import Profiler, ExecutionContext
 from odoo.tools.speedscope import Speedscope
 
@@ -460,6 +461,19 @@ class TestProfiling(TransactionCase):
         self.assertEqual(entries.pop(0)['exec_context'], ((stack_level, {'letter': 'a'}), (stack_level, {'letter': 'c'})))
         self.assertEqual(entries.pop(0)['exec_context'], ((stack_level, {'letter': 'a'}),))
 
+    @mute_logger('odoo.sql_db')
+    def test_failed_sql_query_duration_is_updated(self):
+        with Profiler(db=None, collectors=['sql']) as p:
+            with self.assertRaises(UndefinedTable):
+                with self.env.cr.savepoint():
+                    self.env.cr.execute('SELECT * FROM profiler_missing_table')
+
+        failed_query = next(
+            entry for entry in p.collectors[0].entries
+            if entry['query'] == 'SELECT * FROM profiler_missing_table'
+        )
+        self.assertLess(failed_query['time'], 10)
+
     def test_qweb_recorder(self):
         template = self.env['ir.ui.view'].create({
             'name': 'test',
@@ -582,6 +596,25 @@ class TestProfiling(TransactionCase):
             self.env.cr.execute("SELECT 1")
         p.json()  # check we can call it
         self.assertEqual(p.collectors[0].entries[0]['query'], 'SELECT 1')
+
+    def test_profiler_proxy_ends_on_enter_error(self):
+        class FailingContextManager:
+            def __enter__(self):
+                raise RuntimeError("enter failed")
+
+            def __exit__(self, exc_type, exc_value, traceback):
+                pass
+
+        self.enterContext(self.registry_test_mode())
+        self.startClassPatcher(patch('odoo.sql_db.db_connect', return_value=self.registry))
+
+        p = Profiler(collectors=['sql'], db=self.env.cr.dbname, description='failed enter profile')
+        with self.assertRaises(RuntimeError):
+            with p._get_cm_proxy(FailingContextManager()):
+                pass
+
+        self.assertTrue(p.done)
+        self.assertTrue(p.profile_id)
 
 
 def deep_call(func, depth):

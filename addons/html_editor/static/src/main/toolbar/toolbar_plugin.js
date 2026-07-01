@@ -12,6 +12,7 @@ import { _t } from "@web/core/l10n/translation";
 import { memoize } from "@web/core/utils/functions";
 import { closestElement } from "@html_editor/utils/dom_traversal";
 import { utils } from "@web/core/ui/ui_service";
+import { removeStyle } from "@html_editor/utils/dom";
 
 /** @typedef { import("@html_editor/core/selection_plugin").EditorSelection } EditorSelection */
 /** @typedef {import("@html_editor/core/selection_plugin").SelectionData} SelectionData */
@@ -160,7 +161,7 @@ export class ToolbarPlugin extends Plugin {
     /** @type {import("plugins").EditorResources} */
     resources = {
         on_selectionchange_handlers: this.handleSelectionChange.bind(this),
-        on_selection_leave_handlers: () => this.closeToolbar(),
+        on_selection_leave_handlers: () => this.closeToolbar(null, { force: true }),
         on_selection_enter_handlers: () => this.updateToolbar(),
         on_committed_to_history_handlers: () => this.updateToolbar(),
         on_format_requested_handlers: () => this.updateToolbar(),
@@ -473,7 +474,7 @@ export class ToolbarPlugin extends Plugin {
     /**
      * @param {SelectionData} selectionData
      */
-    closeToolbar(selectionData = null) {
+    closeToolbar(selectionData = null, { force = false } = {}) {
         if (!this.overlay.isOpen) {
             return;
         }
@@ -482,8 +483,9 @@ export class ToolbarPlugin extends Plugin {
             ? selectionData.editableSelection?.anchorNode
             : document.getSelection()?.anchorNode;
         const shouldPreventClosing =
+            !force &&
             anchor?.closest?.("[data-prevent-closing-overlay]")?.dataset?.preventClosingOverlay ===
-            "true";
+                "true";
         if (!shouldPreventClosing) {
             this.overlay.close();
             this.isToolbarExpanded = false;
@@ -584,7 +586,7 @@ class MobileToolbarOverlay {
     close() {
         const modal = this.editable.closest(".o_modal_full");
         if (modal) {
-            modal.style.paddingBottom = "";
+            removeStyle(modal, "padding-bottom");
         }
         registry.category("main_components").remove(this.overlayId, "MobileToolbar");
         this.isOpen = false;
