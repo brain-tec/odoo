@@ -763,7 +763,6 @@ class TestSearchRelated(TransactionCase):
                     SELECT "test_orm_related"."foo_id" AS __inverse
                     FROM "test_orm_related"
                     WHERE "test_orm_related"."id" IN %s
-                    AND "test_orm_related"."foo_id" IS NOT NULL
                 ) AS __sub WHERE __inverse = "test_orm_related_foo"."id")
                 AND "test_orm_related_foo"."id" < %s
             )
@@ -802,7 +801,6 @@ class TestSearchRelated(TransactionCase):
                     SELECT "test_orm_related"."foo_id" AS __inverse
                     FROM "test_orm_related"
                     WHERE "test_orm_related"."id" IN %s
-                    AND "test_orm_related"."foo_id" IS NOT NULL
                 ) AS __sub WHERE __inverse = "test_orm_related__foo_id"."id")
             )
             AND "test_orm_related"."id" < %s

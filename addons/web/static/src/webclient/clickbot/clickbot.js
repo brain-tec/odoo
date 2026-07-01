@@ -24,6 +24,11 @@ const BLACKLISTED_MENUS = new Set([
     "website_sale.menu_open_shop", // menu that opens a website editor
 ]);
 
+const BLACKLISTED_NEW_RECORD = new Set([
+    "website_hr_recruitment.menu_job_pages", // The new button opens a website editor, not a form
+    "stock.menu_action_warehouse_form", // It opens an error dialog : Creating a new warehouse will automatically activate the Storage Locations setting.
+]);
+
 const BLACKLISTED_RECORD_ACTIONS = new Set([
     "website.menu_website_pages_list", // list/kanban opens the website in website editor not a form
     "website.menu_website_technical_pages", // list/kanban opens the website in website editor not a form
@@ -192,6 +197,7 @@ export class Clickbot {
                 testedModals: 0,
                 testedViews: 0,
                 testedFormsViews: 0,
+                testedNewRecord: 0,
                 appIndex: 0,
                 menuIndex: 0,
                 errorMenuCount: 0,
@@ -311,6 +317,7 @@ export class Clickbot {
         }
         console.log(`Tested ${this.state.testedViews} views`);
         console.log(`Tested ${this.state.testedFormsViews} form views`);
+        console.log(`Tested ${this.state.testedNewRecord} new record views`);
         console.log(`Tested ${this.state.testedModals} modals`);
         console.log(`Tested ${this.state.testedFilters} filters`);
         if (this.state.studioCount > 0) {
@@ -348,20 +355,6 @@ export class Clickbot {
     async _waitForNextAnimationFrame() {
         await new Promise(setTimeout);
         await new Promise((r) => requestAnimationFrame(r));
-    }
-
-    async _triggerClick(target, elDescription) {
-        if (!target) {
-            throw new Error(`No element "${elDescription}" found.`);
-        }
-        if (elDescription && this.state.logger) {
-            console.log(`Clicking on: ${elDescription}`);
-        }
-        MOUSE_EVENTS.forEach((type) => {
-            const event = new MouseEvent(type, { bubbles: true, cancelable: true, view: window });
-            target.dispatchEvent(event);
-        });
-        await this._waitForNextAnimationFrame();
     }
 
     async _waitForCondition(stopCondition, message) {
@@ -424,18 +417,33 @@ export class Clickbot {
         }
     }
 
+    async _triggerClick(target, stopCondition, elDescription) {
+        if (!target) {
+            throw new Error(`No element "${elDescription}" found.`);
+        }
+        if (elDescription && this.state.logger) {
+            console.log(`Clicking on: ${elDescription}`);
+        }
+        MOUSE_EVENTS.forEach((type) => {
+            const event = new MouseEvent(type, { bubbles: true, cancelable: true, view: window });
+            target.dispatchEvent(event);
+        });
+        await this._waitForNextAnimationFrame();
+        await this._waitForCondition(stopCondition, `clicking on ${elDescription}`);
+    }
+
     async _testStudio() {
         const studioIcon = document.querySelector(STUDIO_SYSTRAY_ICON_SELECTOR);
         if (!studioIcon) {
             return;
         }
-        await this._triggerClick(studioIcon, "entering studio");
-        await this._waitForCondition(
+        await this._triggerClick(
+            studioIcon,
             () => document.querySelector(".o_in_studio"),
             "entering studio"
         );
-        await this._triggerClick(document.querySelector(".o_web_studio_leave"), "leaving studio");
-        await this._waitForCondition(
+        await this._triggerClick(
+            document.querySelector(".o_web_studio_leave"),
             () => document.querySelector(".o_main_navbar:not(.o_studio_navbar) .o_menu_toggle"),
             "leaving studio"
         );
@@ -452,7 +460,7 @@ export class Clickbot {
         if (!searchBarMenu) {
             return;
         }
-        await this._triggerClick(searchBarMenu);
+        await this._triggerClick(searchBarMenu, () => true);
         const filterMenuButton = document.querySelector(".o_dropdown_container.o_filter_menu");
         if (!filterMenuButton) {
             return;
@@ -472,6 +480,7 @@ export class Clickbot {
                 this.currentFilter = filter.innerText.trim();
                 await this._triggerClick(
                     filter.querySelector(".o_accordion_toggle"),
+                    () => true,
                     `filter "${this.currentFilter}"`
                 );
                 // If a filter has options, it will simply unfold and show all options.
@@ -481,14 +490,16 @@ export class Clickbot {
                 );
                 if (firstOption) {
                     this.currentFilter = `${this.currentFilter} (${firstOption.innerText.trim()})`;
-                    await this._triggerClick(firstOption, `filter "${this.currentFilter}"`);
-                    await this._waitForCondition(() => true, `filter "${this.currentFilter}"`);
+                    await this._triggerClick(
+                        firstOption,
+                        () => true,
+                        `filter "${this.currentFilter}"`
+                    );
                     await this._testClickingRecord();
                 }
             } else {
                 this.currentFilter = filter.innerText.trim();
-                await this._triggerClick(filter, `filter "${this.currentFilter}"`);
-                await this._waitForCondition(() => true, `filter "${this.currentFilter}"`);
+                await this._triggerClick(filter, () => true, `filter "${this.currentFilter}"`);
                 await this._testClickingRecord();
             }
         }
@@ -526,29 +537,23 @@ export class Clickbot {
                 this.recordTested = true;
                 const row = document.querySelectorAll(".o_data_row")[0];
                 // Open the first record in the list
+                const stopCondition = exceptionActions?.list?.toCheck
+                    ? () => document.querySelector(exceptionActions?.list?.toCheck) !== null
+                    : () =>
+                          document.querySelector(".o_form_view") !== null ||
+                          document.querySelector(".o_data_row.o_selected_row") !== null;
+
                 if (document.querySelector(".o_list_record_open_form_view")) {
                     await this._triggerClick(
                         row.querySelector(".o_list_record_open_form_view"),
+                        stopCondition,
                         "open form view from list (View Button)"
                     );
                 } else {
                     await this._triggerClick(
                         row.querySelector(".o_data_cell"),
+                        stopCondition,
                         "open form view from list"
-                    );
-                }
-                if (exceptionActions?.list?.toCheck) {
-                    await this._waitForCondition(
-                        () => document.querySelector(exceptionActions?.list?.toCheck) !== null,
-                        `open record view from list (${exceptionActions?.list?.toCheck})`
-                    );
-                } else {
-                    // Wait for the form view to be loaded or the list to be editable
-                    await this._waitForCondition(
-                        () =>
-                            document.querySelector(".o_form_view") !== null ||
-                            document.querySelector(".o_data_row.o_selected_row") !== null,
-                        `open record view from list`
                     );
                 }
 
@@ -556,6 +561,7 @@ export class Clickbot {
                 if (exceptionActions?.list?.toGoBack) {
                     await this._triggerClick(
                         document.querySelector(exceptionActions?.list?.toGoBack),
+                        () => document.querySelector(`.o_list_view`) !== null,
                         "go back to list view (from special record view)"
                     );
                 } else if (document.querySelector(".o_form_view")) {
@@ -563,18 +569,16 @@ export class Clickbot {
                     this.state.testedFormsViews++;
                     await this._triggerClick(
                         document.querySelector(".o_back_button"),
+                        () => document.querySelector(`.o_list_view`) !== null,
                         "go back to list view (from record view)"
                     );
                 } else {
                     await this._triggerClick(
                         document.querySelector(".o_list_button_discard"),
+                        () => document.querySelector(`.o_list_view`) !== null,
                         "discard the editable list"
                     );
                 }
-                await this._waitForCondition(
-                    () => document.querySelector(`.o_list_view`) !== null,
-                    `go back to list view from record view`
-                );
             }
         } else if (document.querySelector(".o_kanban_view")) {
             if (this.formviewTested && !exceptionActions?.kanban) {
@@ -592,24 +596,17 @@ export class Clickbot {
                 const card = document.querySelectorAll(
                     ".o_kanban_record:not(.o_kanban_ghost).cursor-pointer"
                 )[0];
+                const stopCondition = exceptionActions?.kanban?.toCheck
+                    ? () => document.querySelector(exceptionActions?.kanban?.toCheck) !== null
+                    : () => document.querySelector(".o_form_view") !== null;
                 // Open the first record in the kanban
-                await this._triggerClick(card, "open form view from kanban");
-                if (exceptionActions?.kanban?.toCheck) {
-                    await this._waitForCondition(
-                        () => document.querySelector(exceptionActions?.kanban?.toCheck) !== null,
-                        `open record view from kanban (${exceptionActions?.kanban?.toCheck})`
-                    );
-                } else {
-                    await this._waitForCondition(
-                        () => document.querySelector(`.o_form_view`) !== null,
-                        `open record view from kanban`
-                    );
-                }
+                await this._triggerClick(card, stopCondition, "open form view from kanban");
 
                 // Go back to the kanban
                 if (exceptionActions?.kanban?.toGoBack) {
                     await this._triggerClick(
                         document.querySelector(exceptionActions?.kanban?.toGoBack),
+                        () => document.querySelector(`.o_kanban_view`) !== null,
                         "go back to kanban view (from special record view)"
                     );
                 } else {
@@ -618,20 +615,108 @@ export class Clickbot {
                     this.state.testedFormsViews++;
                     await this._triggerClick(
                         document.querySelector(".o_back_button"),
+                        () => document.querySelector(`.o_kanban_view`) !== null,
                         "go back to kanban view (from record view)"
                     );
                 }
-                await this._waitForCondition(
-                    () => document.querySelector(`.o_kanban_view`) !== null,
-                    `go back to kanban view from record view`
+            }
+        }
+    }
+
+    async _testNewRecord() {
+        if (BLACKLISTED_NEW_RECORD.has(this.currentMenu.xmlid)) {
+            if (this.state.logger) {
+                console.log(
+                    `Skipping blacklisted new record menu ${this.currentMenu.name} (${this.currentMenu.xmlid})`
                 );
             }
+            return;
+        }
+        if (
+            document.querySelector(".o_list_view") &&
+            document.querySelector(".o_list_button_add:not(.dropdown)")
+        ) {
+            await this._triggerClick(
+                document.querySelector(".o_list_button_add"),
+                () =>
+                    document.querySelector(".o_form_view") !== null ||
+                    document.querySelector(".o_data_row.o_selected_row") !== null ||
+                    document.querySelector(".o_dialog:not(.o_error_dialog)") !== null,
+                "list view's new button"
+            );
+
+            this.state.testedNewRecord++;
+
+            // close the modal
+            if (document.querySelector(".o_dialog:not(.o_error_dialog)")) {
+                return this._triggerClick(
+                    document.querySelector(".o_dialog header > .btn-close"),
+                    () => document.querySelector(".o_dialog") === null,
+                    "modal close button"
+                );
+            }
+            // Go back to the list
+            if (document.querySelector(".o_form_view")) {
+                return this._triggerClick(
+                    document.querySelector(".o_back_button"),
+                    () => document.querySelector(`.o_list_view`) !== null,
+                    "go back to list view (from new record form view)"
+                );
+            }
+            if (document.querySelector(".o_data_row.o_selected_row")) {
+                return this._triggerClick(
+                    document.querySelector(".o_list_button_discard"),
+                    () => document.querySelector(`.o_list_view`) !== null,
+                    "discard the editable list (from new record, editable list)"
+                );
+            }
+            throw new Error("Could not find a way to go back to the list view");
+        } else if (
+            document.querySelector(".o_kanban_view") &&
+            document.querySelector(".o-kanban-button-new:not(.dropdown)")
+        ) {
+            await this._triggerClick(
+                document.querySelector(".o-kanban-button-new"),
+                () =>
+                    document.querySelector(".o_form_view") !== null ||
+                    document.querySelector(".o_kanban_quick_create") !== null ||
+                    document.querySelector(".o_dialog:not(.o_error_dialog)") !== null,
+                "kanban view's new button"
+            );
+
+            this.state.testedNewRecord++;
+
+            // close the modal
+            if (document.querySelector(".o_dialog:not(.o_error_dialog)")) {
+                return this._triggerClick(
+                    document.querySelector(".o_dialog header > .btn-close"),
+                    () => document.querySelector(".o_dialog") === null,
+                    "modal close button"
+                );
+            }
+            // Go back to the kanban
+            if (document.querySelector(".o_kanban_quick_create_form")) {
+                return this._triggerClick(
+                    document.querySelector(".o_kanban_cancel"),
+                    () => document.querySelector(`.o_kanban_view`) !== null,
+                    "discard the kanban (from kanban quick create form)"
+                );
+            }
+            if (document.querySelector(".o_form_view")) {
+                return this._triggerClick(
+                    document.querySelector(".o_back_button"),
+                    () => document.querySelector(`.o_kanban_view`) !== null,
+                    "go back to kanban view (from new record form view)"
+                );
+            }
+            throw new Error("Could not find a way to go back to the kanban view");
         }
     }
 
     async _testView(viewType) {
         this.currentView = viewType;
         this.recordTested = false;
+        await this._testNewRecord();
         await this._testClickingRecord();
         await this._testStudio();
         await this._testFilters();
@@ -663,20 +748,18 @@ export class Clickbot {
                 console.log(`Testing view switch: ${viewType}`);
             }
             // timeout to avoid click debounce
-            setTimeout(() => {
-                const target = document.querySelector(
-                    `nav.o_cp_switch_buttons > button.o_switch_view.o_${viewType}`
-                );
-                if (target) {
-                    this._triggerClick(target, `${viewType} view switcher`);
-                }
-            }, 250);
-            await this._waitForCondition(
-                () => document.querySelector(`.o_switch_view.o_${viewType}.active`) !== null,
-                `switch view (${viewType})`
+            const target = document.querySelector(
+                `nav.o_cp_switch_buttons > button.o_switch_view.o_${viewType}`
             );
-            await this._testView(viewType);
-            this.state.testedViews++;
+            if (target) {
+                await this._triggerClick(
+                    target,
+                    () => document.querySelector(`.o_switch_view.o_${viewType}.active`) !== null,
+                    `${viewType} view switcher`
+                );
+                await this._testView(viewType);
+                this.state.testedViews++;
+            }
         }
     }
 
@@ -710,6 +793,7 @@ export class Clickbot {
             if (isModal) {
                 await this._triggerClick(
                     document.querySelector(".o_dialog header > .btn-close"),
+                    () => document.querySelector(".o_dialog") === null,
                     "modal close button"
                 );
             } else {
