@@ -1409,7 +1409,7 @@ class AccountMove(models.Model):
                         untaxed_amount = invoice.amount_untaxed_signed
                     invoice_payment_terms = invoice.invoice_payment_term_id._compute_terms(
                         date_ref=invoice.invoice_date or invoice.date or fields.Date.context_today(invoice),
-                        currency=invoice.currency_id,
+                        currency=invoice.currency_id or invoice.journal_id.currency_id or invoice.company_currency_id,
                         tax_amount_currency=tax_amount_currency,
                         tax_amount=tax_amount,
                         untaxed_amount_currency=untaxed_amount_currency,
@@ -3337,7 +3337,7 @@ class AccountMove(models.Model):
         fake_base_line = AccountTax._prepare_base_line_for_taxes_computation(None)
 
         def get_base_lines(move):
-            return move.line_ids.filtered(lambda line: line.display_type in ('product', 'epd', 'rounding', 'cogs', 'non_deductible_product'))
+            return move.line_ids.filtered(lambda line: line.display_type in ('product', 'epd', 'rounding', 'non_deductible_product'))
 
         def get_tax_lines(move):
             return move.line_ids.filtered('tax_repartition_line_id')
@@ -3951,6 +3951,8 @@ class AccountMove(models.Model):
     def _get_protected_vals(self, vals, records):
         protected = set()
         for fname in vals:
+            if fname == 'tax_totals':
+                continue  # Skip protecting tax_totals since it is updated explicitly after create/write
             field = records._fields[fname]
             if field.inverse or (field.compute and not field.readonly):
                 protected.update(self.pool.field_computed.get(field, [field]))
@@ -6298,10 +6300,11 @@ class AccountMove(models.Model):
                     product_taxes_after_fp=new_taxes,
                     document_tax_mode=line.document_tax_mode,
                 )
-
-        lines_to_recompute._compute_price_unit()
-        self.invoice_line_ids._compute_tax_ids()
-        self.line_ids._compute_account_id()
+        container = {'records': self}
+        with self._check_balanced(container), self._sync_dynamic_lines(container):
+            self.env.add_to_compute(lines_to_recompute._fields['price_unit'], lines_to_recompute)
+            self.env.add_to_compute(self.invoice_line_ids._fields['tax_ids'], self.invoice_line_ids)
+            self.env.add_to_compute(self.line_ids._fields['account_id'], self.line_ids)
 
     def open_created_caba_entries(self):
         self.ensure_one()

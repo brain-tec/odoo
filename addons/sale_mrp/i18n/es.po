@@ -11,10 +11,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~15.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:37+0000\n"
-"PO-Revision-Date: 2026-02-14 12:16+0000\n"
+"POT-Creation-Date: 2026-06-30 00:51+0000\n"
+"PO-Revision-Date: 2026-06-06 13:35+0000\n"
 "Last-Translator: \"Noemi Pla Garcia (nopl)\" <nopl@odoo.com>\n"
-"Language-Team: Spanish <https://translate.odoo.com/projects/odoo-s19-1/"
+"Language-Team: Spanish <https://translate.odoo.com/projects/odoo-s19-3/"
 "sale_mrp/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
 "0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: sale_mrp
 #: model_terms:ir.ui.view,arch_db:sale_mrp.sale_order_portal_content_inherit_sale_mrp
@@ -94,7 +94,6 @@ msgstr "Fecha:"
 #: model:ir.model.fields,field_description:sale_mrp.field_sale_order__display_name
 #: model:ir.model.fields,field_description:sale_mrp.field_sale_order_line__display_name
 #: model:ir.model.fields,field_description:sale_mrp.field_stock_move__display_name
-#: model:ir.model.fields,field_description:sale_mrp.field_stock_move_line__display_name
 #: model:ir.model.fields,field_description:sale_mrp.field_stock_rule__display_name
 msgid "Display Name"
 msgstr "Nombre para mostrar"
@@ -106,7 +105,6 @@ msgstr "Nombre para mostrar"
 #: model:ir.model.fields,field_description:sale_mrp.field_sale_order__id
 #: model:ir.model.fields,field_description:sale_mrp.field_sale_order_line__id
 #: model:ir.model.fields,field_description:sale_mrp.field_stock_move__id
-#: model:ir.model.fields,field_description:sale_mrp.field_stock_move_line__id
 #: model:ir.model.fields,field_description:sale_mrp.field_stock_rule__id
 msgid "ID"
 msgstr "ID"
@@ -143,11 +141,6 @@ msgid "Origin sale order line"
 msgstr "Línea del pedido de venta de origen"
 
 #. module: sale_mrp
-#: model:ir.model,name:sale_mrp.model_stock_move_line
-msgid "Product Moves (Stock Move Line)"
-msgstr "Movimientos de producto (línea de movimiento de stock)"
-
-#. module: sale_mrp
 #: model:ir.model,name:sale_mrp.model_sale_order
 msgid "Sales Order"
 msgstr "Pedido de venta"
@@ -166,7 +159,7 @@ msgstr "Pedidos de venta de origen de %s"
 #. module: sale_mrp
 #: model:ir.model,name:sale_mrp.model_stock_move
 msgid "Stock Move"
-msgstr ""
+msgstr "Movimiento de inventario"
 
 #. module: sale_mrp
 #: model:ir.model,name:sale_mrp.model_stock_rule

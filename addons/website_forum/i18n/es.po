@@ -8,15 +8,15 @@
 # Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2023
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025.
-# "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2025.
+# "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:38+0000\n"
-"PO-Revision-Date: 2025-12-20 09:48+0000\n"
+"POT-Creation-Date: 2026-06-19 17:38+0000\n"
+"PO-Revision-Date: 2026-06-20 14:10+0000\n"
 "Last-Translator: \"Noemi Pla Garcia (nopl)\" <nopl@odoo.com>\n"
-"Language-Team: Spanish <https://translate.odoo.com/projects/odoo-19/"
+"Language-Team: Spanish <https://translate.odoo.com/projects/odoo-s19-3/"
 "website_forum/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
@@ -24,7 +24,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
 "0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_forum
 #. odoo-javascript
@@ -271,7 +271,7 @@ msgid ""
 "web/login\">Sign up</a>"
 msgstr ""
 "<a class=\"btn btn-primary forum_register_url o_translate_inline\" href=\"/"
-"web/login\">Regístrese</a>"
+"web/login\">Registrarse</a>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
@@ -679,6 +679,8 @@ msgid ""
 "<i class=\"oi oi-arrow-right display-inline-block\"/> Return to questions "
 "list"
 msgstr ""
+"<i class=\"oi oi-arrow-right display-inline-block\"/> Volver a la lista de "
+"preguntas"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
@@ -1237,7 +1239,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid "By sharing you answer, you will get additional"
-msgstr ""
+msgstr "Al compartir su respuesta, obtendrá"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__can_accept
@@ -1336,30 +1338,6 @@ msgstr "Cambiar las etiquetas de la pregunta"
 #: model:gamification.challenge,name:website_forum.challenge_chief_commentator
 msgid "Chief Commentator"
 msgstr "Comentarista jefe"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Click here to accept this answer."
-msgstr "Haga clic aquí para aceptar esta respuesta."
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Click to post your answer."
-msgstr "Haga clic para publicar su respuesta."
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Click to post your question."
-msgstr "Haga clic para publicar su pregunta."
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Click to reply."
-msgstr "Haga clic para responder."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
@@ -1535,12 +1513,6 @@ msgid "Create a new forum post"
 msgstr "Crear una publicación nueva en el foro"
 
 #. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Create a new post in this forum by clicking on the button."
-msgstr "Cree una nueva publicación en este foro haciendo clic en el botón."
-
-#. module: website_forum
 #: model_terms:ir.actions.act_window,help:website_forum.forum_tag_action
 msgid "Create a new tag"
 msgstr "Crear una nueva etiqueta"
@@ -1563,7 +1535,7 @@ msgstr "Crear nuevas etiquetas"
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
 msgid "Create option \""
-msgstr ""
+msgstr "Crear opción \""
 
 #. module: website_forum
 #: model_terms:gamification.badge,description:website_forum.badge_32
@@ -1757,6 +1729,11 @@ msgstr "Voto en contra"
 #: code:addons/website_forum/models/forum_post.py:0
 msgid "Downvote for posting offensive contents"
 msgstr "Votar en contra por publicar contenido ofensivo"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.header
+msgid "Drag blocks here to add them on all forum"
+msgstr ""
 
 #. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_1
@@ -2085,6 +2062,9 @@ msgstr "Etiquetas del foro"
 
 #. module: website_forum
 #. odoo-javascript
+#. odoo-python
+#: code:addons/website_forum/models/forum_forum.py:0
+#: code:addons/website_forum/models/forum_post.py:0
 #: code:addons/website_forum/static/src/website_builder/forum_searchbar_option.xml:0
 #: model:ir.actions.act_window,name:website_forum.forum_forum_action
 #: model:ir.ui.menu,name:website_forum.menu_forum_global
@@ -2106,12 +2086,6 @@ msgstr "Reciba una notificación cuando haya actividad en esta publicación"
 #: model_terms:ir.ui.view,arch_db:website_forum.follow_button
 msgid "Get notified when this tag is used"
 msgstr "Reciba una notificación cuando se use esta etiqueta"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Give your post title."
-msgstr "Indique el título de su publicación."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
@@ -2344,12 +2318,6 @@ msgid "Inappropriate and unacceptable statements"
 msgstr "Comentarios inapropiados e inaceptables"
 
 #. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Insert tags related to your question."
-msgstr "Inserte las etiquetas relacionadas con su pregunta."
-
-#. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_11
 msgid "Insulting and offensive language"
 msgstr "Lenguaje insultante y ofensivo"
@@ -2522,7 +2490,7 @@ msgstr "Marcar como spam"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_all_oe_structure_forum_all_top
 msgid "Meet our community members"
-msgstr ""
+msgstr "Conoce a los miembros de la comunidad"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__message_has_error
@@ -2773,7 +2741,7 @@ msgstr "Publicaciones ofensivas"
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid "On average,"
-msgstr ""
+msgstr "Por lo general,"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
@@ -2962,18 +2930,6 @@ msgstr ""
 #: model:gamification.goal.definition,name:website_forum.definition_pundit
 msgid "Pundit"
 msgstr "Experto"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Put your answer here."
-msgstr "Responda aquí."
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Put your question here."
-msgstr "Haga su pregunta aquí."
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__parent_id
@@ -3310,9 +3266,9 @@ msgid ""
 "Share and discuss the best content and new marketing ideas, build your "
 "professional profile and become a better marketer together."
 msgstr ""
-"Comparta y comente sobre el mejor contenido y las mejores ideas de "
-"marketing. Construya su perfil profesional y conviértase en un mejor "
-"mercadólogo."
+"Comparte y comenta el mejor contenido y las mejores ideas de marketing. "
+"Construye tu perfil profesional y conviértete en un profesional del "
+"marketing junto a la comunidad."
 
 #. module: website_forum
 #. odoo-javascript
@@ -3922,21 +3878,11 @@ msgid "Website Absolute URL"
 msgstr ""
 
 #. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_forum_forum__website_message_ids
-msgid "Website Messages"
-msgstr "Mensajes del sitio web"
-
-#. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__website_url
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__website_url
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__website_url
 msgid "Website URL"
 msgstr "URL del sitio web"
-
-#. module: website_forum
-#: model:ir.model.fields,help:website_forum.field_forum_forum__website_message_ids
-msgid "Website communication history"
-msgstr "Historial de comunicación del sitio web"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__website_meta_description
@@ -3976,7 +3922,7 @@ msgstr "Mensaje de bienvenida"
 #: code:addons/website_forum/models/forum_forum.py:0
 #: model_terms:forum.forum,welcome_message:website_forum.forum_help
 msgid "Welcome!"
-msgstr "¡Bienvenido!"
+msgstr "¡Te damos la bienvenida!"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -4252,6 +4198,9 @@ msgid ""
 "if your\n"
 "        answer is selected as the right one. See what you can do with karma"
 msgstr ""
+"si su\n"
+"respuesta es seleccionada como la correcta. Vea lo que puede hacer con el "
+"karma"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
@@ -4322,6 +4271,8 @@ msgid ""
 "on social networks get an answer within\n"
 "        5 hours. Questions shared on two social networks have"
 msgstr ""
+"en las redes sociales obtienen una respuesta dentro de\n"
+"5 horas. Las preguntas compartidas en dos redes sociales tienen un"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_all_all_entries

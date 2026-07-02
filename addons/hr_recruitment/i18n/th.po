@@ -12,26 +12,27 @@
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025.
 # Odoo Translation Bot <c3p@odoo.com>, 2026.
+# Nusara Boonma <nuboo@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-22 17:45+0000\n"
-"PO-Revision-Date: 2026-01-16 05:42+0000\n"
-"Last-Translator: Odoo Translation Bot <c3p@odoo.com>\n"
-"Language-Team: Thai <https://translate.odoo.com/projects/odoo-s19-1/"
+"POT-Creation-Date: 2026-06-30 00:49+0000\n"
+"PO-Revision-Date: 2026-06-20 13:20+0000\n"
+"Last-Translator: Nusara Boonma <nuboo@odoo.com>\n"
+"Language-Team: Thai <https://translate.odoo.com/projects/odoo-s19-3/"
 "hr_recruitment/th/>\n"
 "Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_talent_pool__no_of_talents
 msgid "# Talents"
-msgstr ""
+msgstr "# กลุ่มผู้สมัครศักยภาพสูง"
 
 #. module: hr_recruitment
 #. odoo-python
@@ -157,6 +158,94 @@ msgid ""
 "</div>\n"
 "        "
 msgstr ""
+"<div style=\"font-size: 13px; margin: 0px; padding: 0px;\">\n"
+"    สวัสดีค่ะ/ครับ\n"
+"    <br/><br/>\n"
+"    เราได้รับใบสมัครงานของคุณเรียบร้อย\n"
+"    \"<a t-att-href=\"hasattr(object.job_id, 'website_url') and "
+"object.job_id.website_url or ''\" style=\"color:#9A6C8E;\"><strong t-"
+"out=\"object.job_id.name or ''\">นักพัฒนาที่มีประสบการณ์</strong></a>\" ที่ <strong "
+"t-out=\"object.company_id.name or ''\">บริษัทของคุณ</strong>.\n"
+"    <br/><br/>\n"
+"    เราจะติดต่อกลับคุณในไม่ช้า\n"
+"\n"
+"    <div t-if=\"'website_url' in object.job_id and "
+"object.job_id.website_url\" style=\"padding: 16px 8px 16px 8px;\">\n"
+"        <a t-att-href=\"object.job_id.website_url\" t-attf-"
+"style=\"background-color: {{object.company_id.email_secondary_color or "
+"'#875A7B'}}; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; padding: 8px 16px "
+"8px 16px; border-radius: 5px;\">รายละเอียดงาน</a>\n"
+"    </div>\n"
+"\n"
+"    <hr width=\"97%\" style=\"background-color: rgb(204,204,204); border: "
+"medium none; clear: both; display: block; font-size: 0px; min-height: 1px; "
+"line-height: 0; margin: 16px 0px 16px 0px;\"/>\n"
+"    <t t-if=\"object.recruiter_id and object.recruiter_id.user_id\">\n"
+"        <h3 style=\"color:#9A6C8E;\"><strong>ข้อมูลติดต่อของคุณ:</strong></h3>\n"
+"        <p>\n"
+"            <strong t-out=\"object.recruiter_id.name or ''\">Mitchell Admin</"
+"strong><br/>\n"
+"            <span>อีเมล: <t t-out=\"object.recruiter_id.work_email or "
+"''\">admin@yourcompany.example.com</t></span><br/>\n"
+"            <span>Phone: <t t-out=\"object.recruiter_id.work_phone or "
+"''\">+1 650-123-4567</t></span>\n"
+"        </p>\n"
+"        <hr width=\"97%\" style=\"background-color: rgb(204,204,204); "
+"border: medium none; clear: both; display: block; font-size: 0px; min-"
+"height: 1px; line-height: 0; margin: 16px 0px 16px 0px;\"/>\n"
+"    </t>\n"
+"\n"
+"    <h3 style=\"color:#9A6C8E;\"><strong>ขั้นตอนต่อไปคืออะไร?</strong></h3>\n"
+"    โดยปกติ <strong>เราจะตอบกลับใบสมัครโดยเร็วที่สุด</strong><br/><br/>\n"
+"    หากคุณ<strong>ต้องการคำตอบที่รวดเร็วขึ้น\n"
+"    </strong> หรือไม่ได้รับข่าวสารจากเราเร็วพอ\n"
+"    โปรดติดต่อเราได้เลย (เพียงตอบกลับอีเมลนี้)\n"
+"\n"
+"    <hr width=\"97%\" style=\"background-color: rgb(204,204,204); border: "
+"medium none; clear: both; display: block; font-size: 0px; min-height: 1px; "
+"line-height: 0; margin: 17px 0px 16px 0px;\"/>\n"
+"    <t t-set=\"location\" t-value=\"''\"/>\n"
+"    <t t-if=\"object.job_id.address_id.name\">\n"
+"        <strong t-out=\"object.job_id.address_id.name or ''\">Teksa SpA</"
+"strong><br/>\n"
+"    </t>\n"
+"    <t t-if=\"object.job_id.address_id.street\">\n"
+"        <t t-out=\"object.job_id.address_id.street or ''\">Puerto Madero "
+"9710</t><br/>\n"
+"        <t t-set=\"location\" t-value=\"object.job_id.address_id.street\"/>\n"
+"    </t>\n"
+"    <t t-if=\"object.job_id.address_id.street2\">\n"
+"        <t t-out=\"object.job_id.address_id.street2 or ''\">Of A15, Santiago "
+"(RM)</t><br/>\n"
+"        <t t-set=\"location\" t-value=\"'%s, %s' % (location, "
+"object.job_id.address_id.street2)\"/>\n"
+"    </t>\n"
+"    <t t-if=\"object.job_id.address_id.city\">\n"
+"        <t t-out=\"object.job_id.address_id.city or ''\">Pudahuel</t>,\n"
+"        <t t-set=\"location\" t-value=\"'%s, %s' % (location, "
+"object.job_id.address_id.city)\"/>\n"
+"    </t>\n"
+"    <t t-if=\"object.job_id.address_id.state_id.name\">\n"
+"        <t t-out=\"object.job_id.address_id.state_id.name or ''\">C1</t>,\n"
+"        <t t-set=\"location\" t-value=\"'%s, %s' % (location, "
+"object.job_id.address_id.state_id.name)\"/>\n"
+"    </t>\n"
+"    <t t-if=\"object.job_id.address_id.zip\">\n"
+"        <t t-out=\"object.job_id.address_id.zip or ''\">98450</t>\n"
+"        <t t-set=\"location\" t-value=\"'%s, %s' % (location, "
+"object.job_id.address_id.zip)\"/>\n"
+"    </t>\n"
+"    <br/>\n"
+"    <t t-if=\"object.job_id.address_id.country_id.name\">\n"
+"        <t t-out=\"object.job_id.address_id.country_id.name or "
+"''\">Argentina</t><br/>\n"
+"        <t t-set=\"location\" t-value=\"'%s, %s' % (location, "
+"object.job_id.address_id.country_id.name)\"/>\n"
+"    </t>\n"
+"    <br/>\n"
+"</div>\n"
+"        "
 
 #. module: hr_recruitment
 #: model:mail.template,body_html:hr_recruitment.email_template_data_applicant_refuse
@@ -344,6 +433,107 @@ msgid ""
 "</div>\n"
 "        "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"    <div style=\"text-align: center\">\n"
+"        <h2>ขอแสดงความยินดีด้วย!</h2>\n"
+"        <div style=\"color:grey;\">เรซูเม่ของคุณได้รับการพิจารณาในเชิงบวกแล้ว</div>\n"
+"    </div>\n"
+"    <div style=\"font-size: 13px; margin: 0px; padding: 0px;\">\n"
+"        เราเพิ่งตรวจสอบเรซูเม่ของคุณ และเราสนใจข้อมูลของคุณมาก\n"
+"        เนื่องจากเราคิดว่าคุณน่าจะเหมาะกับตำแหน่งนี้\n"
+"        ใบสมัครของคุณจึงผ่านการคัดเลือกเพื่อการสัมภาษณ์\n"
+"        ทางโทรศัพท์\n"
+"        <br/><br/>\n"
+"        <div t-if=\"'website_url' in object.job_id and "
+"object.job_id.website_url\" style=\"padding: 16px 8px 16px 8px;\">\n"
+"            <a t-att-href=\"object.job_id.website_url\" t-attf-"
+"style=\"background-color: {{object.company_id.email_secondary_color or "
+"'#875A7B'}}; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; padding: 8px 16px "
+"8px 16px; border-radius: 5px;\">รายละเอียดงาน</a>\n"
+"        </div>\n"
+"\n"
+"        <t t-if=\"object.recruiter_id and object.recruiter_id.user_id\">\n"
+"            คุณจะได้รับการติดต่อในกลับในไม่ช้า:<br/>\n"
+"            <strong t-out=\"object.recruiter_id.name or ''\">Mitchell Admin</"
+"strong><br/>\n"
+"            <span>อีเมล: <t t-out=\"object.recruiter_id.work_email or "
+"''\">admin@yourcompany.example.com</t></span><br/>\n"
+"            <span>เบอร์โทร: <t t-out=\"object.recruiter_id.work_phone or "
+"''\">+1 650-123-4567</t></span>\n"
+"            <br/><br/>\n"
+"        </t>\n"
+"        แล้วพบกันเร็วๆ นี้\n"
+"        <div style=\"font-size: 11px; color: grey;\">\n"
+"            -- <br/>\n"
+"            ทีมทรัพยากรบุคคล\n"
+"            <t t-if=\"'website_url' in object.job_id and "
+"hasattr(object.job_id, 'website_url') and object.job_id.website_url\">\n"
+"                ค้นพบ <a href=\"/jobs\" style=\"text-"
+"decoration:none;color:#717188;\">กิจกรรมทั้งหมดของเรา</a><br/>\n"
+"            </t>\n"
+"        </div>\n"
+"\n"
+"        <hr width=\"97%\" style=\"background-color: rgb(204,204,204); "
+"border: medium none; clear: both; display: block; font-size: 0px; min-"
+"height: 1px; line-height: 0; margin: 16px 0px 16px 0px;\"/>\n"
+"        <h3 style=\"color:#9A6C8E;\"><strong>ขั้นตอนต่อไปคืออะไร?</strong></h3>\n"
+"        โดยปกติแล้ว <strong>เราจะตอบกลับใบสมัครภายในไม่กี่วัน</strong>.\n"
+"        <br/><br/>\n"
+"        ขั้นตอนต่อไปคือการโทรหรือนัดการประชุมที่ออฟฟิศของเรา\n"
+"        <br/>\n"
+"        <strong>โปรดติดต่อเราหากคุณต้องการคำติชมที่รวดเร็วยิ่งขึ้น\n"
+"        </strong> หรือหากคุณไม่ได้รับการติดต่อจากเราอย่างรวดเร็วเพียงพอ\n"
+"        (โดยการตอบกลับอีเมลนี้)\n"
+"        <br/>\n"
+"\n"
+"        <hr width=\"97%\" style=\"background-color: rgb(204,204,204); "
+"border: medium none; clear: both; display: block; font-size: 0px; min-"
+"height: 1px; line-height: 0; margin: 17px 0px 16px 0px;\"/>\n"
+"        <t t-set=\"location\" t-value=\"''\"/>\n"
+"        <t t-if=\"object.job_id.address_id.name\">\n"
+"            <strong t-out=\"object.job_id.address_id.name or ''\">Teksa SpA</"
+"strong><br/>\n"
+"        </t>\n"
+"        <t t-if=\"object.job_id.address_id.street\">\n"
+"            <t t-out=\"object.job_id.address_id.street or ''\">Puerto Madero "
+"9710</t><br/>\n"
+"            <t t-set=\"location\" t-"
+"value=\"object.job_id.address_id.street\"/>\n"
+"        </t>\n"
+"        <t t-if=\"object.job_id.address_id.street2\">\n"
+"            <t t-out=\"object.job_id.address_id.street2 or ''\">Of A15, "
+"Santiago (RM)</t><br/>\n"
+"            <t t-set=\"location\" t-value=\"'%s, %s' % (location, "
+"object.job_id.address_id.street2)\"/>\n"
+"        </t>\n"
+"        <t t-if=\"object.job_id.address_id.city\">\n"
+"            <t t-out=\"object.job_id.address_id.city or ''\">Pudahuel</t>,\n"
+"            <t t-set=\"location\" t-value=\"'%s, %s' % (location, "
+"object.job_id.address_id.city)\"/>\n"
+"        </t>\n"
+"        <t t-if=\"object.job_id.address_id.state_id.name\">\n"
+"            <t t-out=\"object.job_id.address_id.state_id.name or ''\">C1</"
+"t>,\n"
+"            <t t-set=\"location\" t-value=\"'%s, %s' % (location, "
+"object.job_id.address_id.state_id.name)\"/>\n"
+"        </t>\n"
+"        <t t-if=\"object.job_id.address_id.zip\">\n"
+"            <t t-out=\"object.job_id.address_id.zip or ''\">98450</t>\n"
+"            <t t-set=\"location\" t-value=\"'%s, %s' % (location, "
+"object.job_id.address_id.zip)\"/>\n"
+"        </t>\n"
+"        <br/>\n"
+"        <t t-if=\"object.job_id.address_id.country_id.name\">\n"
+"            <t t-out=\"object.job_id.address_id.country_id.name or "
+"''\">Argentina</t><br/>\n"
+"            <t t-set=\"location\" t-value=\"'%s, %s' % (location, "
+"object.job_id.address_id.country_id.name)\"/>\n"
+"        </t>\n"
+"        <br/>\n"
+"    </div>\n"
+"</div>\n"
+"        "
 
 #. module: hr_recruitment
 #. odoo-javascript
@@ -597,6 +787,11 @@ msgid "Add to Pool"
 msgstr ""
 
 #. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.job_add_applicants_from_job_view_form
+msgid "Add to this Job"
+msgstr ""
+
+#. module: hr_recruitment
 #: model:ir.actions.act_window,name:hr_recruitment.mail_followers_edit_action_from_hr_recruitment
 msgid "Add/Remove Followers"
 msgstr ""
@@ -783,7 +978,6 @@ msgstr "อีเมลการสมัคร"
 #: code:addons/hr_recruitment/models/hr_applicant.py:0
 #: model:ir.actions.act_window,name:hr_recruitment.action_hr_job_applications
 #: model:ir.actions.act_window,name:hr_recruitment.crm_case_categ0_act_job
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__applicant_ids
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__linked_applicant_ids
 #: model:ir.model.fields,field_description:hr_recruitment.field_job_add_applicants__applicant_ids
 #: model:ir.ui.menu,name:hr_recruitment.menu_crm_case_categ0_act_job
@@ -811,6 +1005,7 @@ msgid "Applied on"
 msgstr "นำไปใช้เมื่อ"
 
 #. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.job_add_applicants_from_job_view_form
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.job_add_applicants_view_form
 msgid "Apply"
 msgstr ""
@@ -875,11 +1070,6 @@ msgid ""
 msgstr "ผู้สมัครอย่างน้อยหนึ่งรายไม่มีอีเมล คุณไม่สามารถใช้ตัวเลือกส่งอีเมลได้"
 
 #. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_send_mail_view_form
-msgid "Attach a file"
-msgstr "แนบเอกสาร"
-
-#. module: hr_recruitment
 #: model:ir.model,name:hr_recruitment.model_ir_attachment
 msgid "Attachment"
 msgstr "การแนบ"
@@ -892,15 +1082,9 @@ msgstr "จำนวนสิ่งที่แนบมา"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__attachment_ids
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__attachment_ids
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__attachment_ids
 msgid "Attachments"
 msgstr "แนบ"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__author_id
-msgid "Author"
-msgstr "ผู้เขียน"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__availability
@@ -936,7 +1120,6 @@ msgstr "บล็อก"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__body_has_template_value
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__body_has_template_value
 msgid "Body content is the same as the template"
 msgstr "เนื้อหาเนื้อความเหมือนกับเทมเพลต"
 
@@ -986,7 +1169,6 @@ msgstr ""
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__can_edit_body
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__can_edit_body
 msgid "Can Edit Body"
 msgstr "แก้ไขเนื้อหาหลักได้"
 
@@ -1069,7 +1251,6 @@ msgstr "เนื้อหา"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__body
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__body
 msgid "Contents"
 msgstr "เนื้อหา"
 
@@ -1151,7 +1332,6 @@ msgstr ""
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__create_uid
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__create_uid
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__create_uid
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant_category__create_uid
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant_refuse_reason__create_uid
@@ -1168,7 +1348,6 @@ msgstr "สร้างโดย"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__create_date
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__create_date
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant_category__create_date
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant_refuse_reason__create_date
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job_platform__create_date
@@ -1372,7 +1551,6 @@ msgstr "แสดง CV ในแบบฟอร์มใบสมัคร"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__display_name
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__display_name
 #: model:ir.model.fields,field_description:hr_recruitment.field_calendar_event__display_name
 #: model:ir.model.fields,field_description:hr_recruitment.field_digest_digest__display_name
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__display_name
@@ -1454,6 +1632,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__duplicates_count
 msgid "Duplicates Count"
 msgstr "จำนวนรายการที่ซ้ำกัน"
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.job_add_applicants_from_job_view_form
+msgid "Duplicates the selected Talent profile(s) for the selected Job Position"
+msgstr ""
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.job_add_applicants_view_form
@@ -1716,7 +1899,6 @@ msgstr ""
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__id
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__id
 #: model:ir.model.fields,field_description:hr_recruitment.field_calendar_event__id
 #: model:ir.model.fields,field_description:hr_recruitment.field_digest_digest__id
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__id
@@ -1914,7 +2096,6 @@ msgstr ""
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__is_mail_template_editor
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__is_mail_template_editor
 msgid "Is Editor"
 msgstr "เป็นผู้แก้ไข"
 
@@ -2062,7 +2243,6 @@ msgstr "ค่าการสมัครเพื่อนร่วมงาน
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__lang
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__lang
 msgid "Language"
 msgstr "ภาษา"
 
@@ -2085,7 +2265,6 @@ msgstr "อัปเดตขั้นตอนสุดท้าย"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__write_uid
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__write_uid
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__write_uid
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant_category__write_uid
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant_refuse_reason__write_uid
@@ -2102,7 +2281,6 @@ msgstr "อัปเดตครั้งล่าสุดโดย"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__write_date
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__write_date
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__write_date
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant_category__write_date
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant_refuse_reason__write_date
@@ -2178,19 +2356,9 @@ msgid "Load sample data"
 msgstr ""
 
 #. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_send_mail_view_form
-msgid "Load template"
-msgstr "โหลดเทมเพลต"
-
-#. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_incoming_local
 msgid "Local-part based incoming detection"
 msgstr "การตรวจจับขาเข้าตามชิ้นส่วนในพื้นที่"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__template_id
-msgid "Mail Template"
-msgstr "เทมเพลตเมล"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__message_main_attachment_id
@@ -2201,6 +2369,12 @@ msgstr "เอกสารหลักที่แนบมา"
 #: model:hr.recruitment.degree,name:hr_recruitment.degree_licenced
 msgid "Master Degree"
 msgstr "ปริญญาโท"
+
+#. module: hr_recruitment
+#. odoo-python
+#: code:addons/hr_recruitment/models/hr_job.py:0
+msgid "Matching Talents"
+msgstr ""
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__salary_max
@@ -2425,6 +2599,11 @@ msgid "No talent pools yet"
 msgstr ""
 
 #. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
+msgid "Non-Linked Talents"
+msgstr ""
+
+#. module: hr_recruitment
 #: model:ir.model.fields.selection,name:hr_recruitment.selection__hr_applicant__priority__0
 msgid "Normal"
 msgstr "ปกติ"
@@ -2551,7 +2730,6 @@ msgstr ""
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_applicant_get_refuse_reason__lang
-#: model:ir.model.fields,help:hr_recruitment.field_applicant_send_mail__lang
 msgid ""
 "Optional translation language (ISO code) to select when sending out an "
 "email. If not set, the main partner's language will be used. This should "
@@ -2868,7 +3046,6 @@ msgstr "ระยะไกล"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__render_model
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__render_model
 msgid "Rendering Model"
 msgstr "โมเดลการแสดงผล"
 
@@ -3046,19 +3223,12 @@ msgid "Select where the applicant comes from"
 msgstr ""
 
 #. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_send_mail_view_form
-msgid "Send"
-msgstr "ส่ง"
-
-#. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_res_config_settings__module_hr_recruitment_extract
 msgid "Send CV to OCR to fill applications"
 msgstr "ส่ง CV ไปที่ OCR เพื่อกรอกใบสมัคร"
 
 #. module: hr_recruitment
-#. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
-#: model:ir.actions.server,name:hr_recruitment.action_applicant_send_mail
+#: model:ir.actions.act_window,name:hr_recruitment.action_applicant_mass_mail
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__send_mail
 msgid "Send Email"
 msgstr "ส่งอีเมล"
@@ -3084,11 +3254,6 @@ msgstr "ส่งแบบสอบถามการสัมภาษณ์ใ
 #: code:addons/hr_recruitment/models/hr_applicant.py:0
 msgid "Send applications to"
 msgstr ""
-
-#. module: hr_recruitment
-#: model:ir.model,name:hr_recruitment.model_applicant_send_mail
-msgid "Send mails to applicants"
-msgstr "ส่งอีเมลถึงผู้สมัคร"
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.res_config_settings_view_form
@@ -3241,7 +3406,6 @@ msgstr "เวลาสถานะ"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__subject
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__subject
 msgid "Subject"
 msgstr "หัวเรื่อง"
 
@@ -3328,6 +3492,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:hr_recruitment.action_hr_talent_pool_applications
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_talent_pool_view_kanban
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.job_add_applicants_from_job_view_form
 msgid "Talents"
 msgstr ""
 
@@ -3385,12 +3550,6 @@ msgstr ""
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__availability
 msgid "The date at which the applicant will be available to start working"
 msgstr "วันที่ผู้สมัครพร้อมที่จะเริ่มงาน"
-
-#. module: hr_recruitment
-#. odoo-python
-#: code:addons/hr_recruitment/wizard/applicant_send_mail.py:0
-msgid "The following applicants are missing an email address: %s."
-msgstr "ผู้สมัครต่อไปนี้ไม่มีที่อยู่อีเมล: %s"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_job__alias_model_id
@@ -3613,18 +3772,6 @@ msgid "Want to analyse where applications come from ?"
 msgstr "ต้องการวิเคราะห์ว่าการสมัครมาจากไหน ?"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__website_message_ids
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_talent_pool__website_message_ids
-msgid "Website Messages"
-msgstr "ข้อความเว็บไซต์"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__website_message_ids
-#: model:ir.model.fields,help:hr_recruitment.field_hr_talent_pool__website_message_ids
-msgid "Website communication history"
-msgstr "ประวัติการสื่อสารของเว็บไซต์"
-
-#. module: hr_recruitment
 #: model:ir.model.fields.selection,name:hr_recruitment.selection__hr_applicant__schedule_pay__weekly
 #: model:ir.model.fields.selection,name:hr_recruitment.selection__hr_job__payment_interval__weekly
 msgid "Week"
@@ -3656,11 +3803,6 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:hr_recruitment.action_hr_job_platforms
 msgid "Without a regex: The applicant's name will be the email's subject."
 msgstr "หากไม่มี regex: ชื่อของผู้สมัครจะเป็นหัวเรื่องของอีเมล"
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_send_mail_view_form
-msgid "Write your message here..."
-msgstr "เขียนข้อความของคุณที่นี่..."
 
 #. module: hr_recruitment
 #: model:ir.model.fields.selection,name:hr_recruitment.selection__hr_applicant__schedule_pay__yearly

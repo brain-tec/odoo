@@ -2542,6 +2542,28 @@ class TestLeaveRequests(TestHrHolidaysCommon):
 
         self.assertFalse(leave_req_form.can_approve)
 
+    def test_flexible_single_day_leave_on_public_holiday_include_in_duration(self):
+        """
+        Test that a single-day flexible leave on a public holiday counts
+        as 1 day when include_public_holidays_in_duration is True on the leave type.
+        """
+        self.employee_emp.resource_calendar_id = False
+        self.env['resource.calendar.leaves'].create({
+            'date_from': datetime(2022, 3, 9, 0, 0, 0),
+            'date_to': datetime(2022, 3, 9, 23, 59, 59),
+            'company_id': self.employee_emp.company_id.id,
+            'resource_id': False,
+        })
+        self.holidays_type_1.include_public_holidays_in_duration = True
+        leave = self.env['hr.leave'].with_user(self.user_employee_id).create({
+            'name': 'Holiday Request',
+            'employee_id': self.employee_emp.id,
+            'work_entry_type_id': self.holidays_type_1.id,
+            'request_date_from': date(2022, 3, 9),
+            'request_date_to': date(2022, 3, 9),
+        })
+        self.assertEqual(leave.number_of_days, 1)
+
     def test_flexible_schedule_full_day_off(self):
         """this tests checks that if the morning and afternoon have been selected as time off and the schedule type of
         the employee is flexible, the time considered off is a full day."""
@@ -2750,3 +2772,14 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         self.assertEqual(len(request.message_partner_ids), 2)
         self.assertIn(self.employee_emp.user_id.partner_id, message_partner_ids)
         self.assertIn(user_admin.partner_id, message_partner_ids)
+
+    def test_group_time_off_wizard_without_work_entry_type(self):
+        """Test group time off wizard creation when no work entry types exist."""
+        # Archive all existing work entry types to control the test environment
+        self.env["hr.work.entry.type"].search([]).write({'active': False})
+
+        wizard = self.env['hr.leave.generate.multi.wizard'].new({
+            'employee_ids': (self.employee_emp + self.employee_hruser).ids,
+        })
+
+        self.assertFalse(wizard.valid_work_entry_type_ids)
