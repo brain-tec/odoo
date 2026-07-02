@@ -8,7 +8,7 @@ import logging
 from odoo import api, fields, models, _
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Command, Domain
-from odoo.tools import float_is_zero, frozendict, plaintext2html
+from odoo.tools import float_is_zero, frozendict, plaintext2html, float_compare
 
 _logger = logging.getLogger(__name__)
 
@@ -486,7 +486,7 @@ class PosSession(models.Model):
                           self.cash_journal_id.name))
 
                 st_line_vals['payment_ref'] = _("Cash difference observed during the counting (Loss) - closing")
-                st_line_vals['counterpart_account_id'] = self.cash_journal_id.loss_account_id.id
+                counterpart_account = self.cash_journal_id.loss_account_id
             else:
                 # self.cash_register_difference  > 0.0
                 if not self.cash_journal_id.profit_account_id:
@@ -495,7 +495,15 @@ class PosSession(models.Model):
                           self.cash_journal_id.name))
 
                 st_line_vals['payment_ref'] = _("Cash difference observed during the counting (Profit) - closing")
-                st_line_vals['counterpart_account_id'] = self.cash_journal_id.profit_account_id.id
+                counterpart_account = self.cash_journal_id.profit_account_id
+
+            if counterpart_account.tax_ids:
+                st_line_vals['line_ids'] = self._prepare_cash_diff_line_ids(
+                    amount, counterpart_account, counterpart_account.tax_ids,
+                    st_line_vals['payment_ref'], st_line_vals['date'],
+                )
+            else:
+                st_line_vals['counterpart_account_id'] = counterpart_account.id
 
             created_line = self.env['account.bank.statement.line'].with_context(no_retrieve_partner=True).create(st_line_vals)
 
@@ -504,6 +512,54 @@ class PosSession(models.Model):
                     "Related Session: %(link)s",
                     link=self._get_html_link()
                 ))
+
+    def _prepare_cash_diff_line_ids(self, amount, counterpart_account, taxes, name, date):
+        company = self.company_id
+        company_currency = company.currency_id
+        journal_currency = self.cash_journal_id.currency_id or company_currency
+
+        def to_company_currency(amount_in_journal_currency):
+            if journal_currency == company_currency:
+                return amount_in_journal_currency
+            return journal_currency._convert(amount_in_journal_currency, company_currency, company, date)
+
+        taxes_res = taxes.with_context(force_price_include=True).compute_all(abs(amount), currency=journal_currency, quantity=1.0)
+        sign = 1.0 if amount > 0 else -1.0
+        cash_amount = sign * taxes_res['total_included']
+        base_amount = -sign * taxes_res['total_excluded']
+
+        line_ids = [
+            Command.create({
+                'name': name,
+                'account_id': self.cash_journal_id.default_account_id.id,
+                'currency_id': journal_currency.id,
+                'amount_currency': cash_amount,
+                'balance': to_company_currency(cash_amount),
+            }),
+            Command.create({
+                'name': name,
+                'account_id': counterpart_account.id,
+                'currency_id': journal_currency.id,
+                'amount_currency': base_amount,
+                'balance': to_company_currency(base_amount),
+                'tax_ids': [Command.set(taxes.ids)],
+                'tax_tag_ids': [Command.set(taxes_res['base_tags'])],
+            }),
+        ]
+        for tax_res in taxes_res['taxes']:
+            tax_amount = -sign * tax_res['amount']
+            line_ids.append(Command.create({
+                'name': tax_res['name'],
+                'account_id': tax_res['account_id'] or counterpart_account.id,
+                'currency_id': journal_currency.id,
+                'amount_currency': tax_amount,
+                'balance': to_company_currency(tax_amount),
+                'tax_base_amount': to_company_currency(taxes_res['total_excluded']),
+                'tax_repartition_line_id': tax_res['tax_repartition_line_id'],
+                'tax_tag_ids': [Command.set(tax_res['tag_ids'])],
+                'display_type': 'tax',
+            }))
+        return line_ids
 
     def _close_session_action(self, amount_to_balance):
         # NOTE This can't handle `bank_payment_method_diffs` because there is no field in the wizard that can carry it.
@@ -948,6 +1004,22 @@ class PosSession(models.Model):
         })
         return data
 
+    def _get_rounding_difference_vals(self, amount, amount_converted):
+        if not self.config_id.cash_rounding:
+            return {}
+
+        compare_result = float_compare(0.0, amount, precision_rounding=self.currency_id.rounding)
+        if not compare_result:
+            return {}
+
+        partial_args = {'name': 'Rounding line', 'move_id': self.move_id.id}
+        if compare_result > 0:    # loss
+            partial_args['account_id'] = self.config_id.rounding_method.loss_account_id.id
+            return self._debit_amounts(partial_args, -amount, -amount_converted)
+
+        partial_args['account_id'] = self.config_id.rounding_method.profit_account_id.id
+        return self._credit_amounts(partial_args, amount, amount_converted)
+
     def _create_non_reconciliable_move_lines(self, data):
         # Create account.move.line records for
         #   - sales
@@ -956,6 +1028,7 @@ class PosSession(models.Model):
         #   - non-cash combine receivables (not for automatic reconciliation)
         taxes = data.get('taxes')
         sales = data.get('sales')
+        rounding_difference = data.get('rounding_difference')
         MoveLine = data.get('MoveLine')
 
         tax_vals = [self._get_tax_vals(key, amounts['amount'], amounts['amount_converted'], amounts['base_amount_converted']) for key, amounts in taxes.items()]
@@ -968,7 +1041,11 @@ class PosSession(models.Model):
                 ', '.join(tax_names_no_account)
             ))
 
-        MoveLine.create(tax_vals)
+        rounding_vals = []
+        if not float_is_zero(rounding_difference['amount'], precision_rounding=self.currency_id.rounding) or not float_is_zero(rounding_difference['amount_converted'], precision_rounding=self.currency_id.rounding):
+            rounding_vals = [self._get_rounding_difference_vals(rounding_difference['amount'], rounding_difference['amount_converted'])]
+
+        MoveLine.create(tax_vals + rounding_vals)
         move_line_ids = MoveLine.create(list(starmap(self._get_sale_vals, sales.items())))
         for key, ml_id in zip(sales.keys(), move_line_ids.ids):
             sales[key]['move_line_id'] = ml_id
