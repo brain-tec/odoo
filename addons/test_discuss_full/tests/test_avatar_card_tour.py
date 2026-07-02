@@ -2,6 +2,8 @@
 
 from datetime import date, timedelta
 
+from freezegun import freeze_time
+
 from odoo import Command
 from odoo.tests import users
 from odoo.tests.common import HttpCase, new_test_user
@@ -12,6 +14,12 @@ class TestAvatarCardTour(MailCommon, HttpCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        # Freeze on a fixed mid-week day so the time off below (created relative
+        # to "today") always ends on a working day. When it ends on a Sat/Sun
+        # its date_to is the weekend's 00:00, so the "currently on leave" window
+        # closes at midnight and the avatar card's out-of-office indicator flakes
+        # away once the run crosses it (runbot 242512).
+        cls.startClassPatcher(freeze_time("2024-06-12"))
         new_test_user(
             cls.env,
             login="hr_user",
@@ -98,6 +106,9 @@ class TestAvatarCardTour(MailCommon, HttpCase):
         )
 
     def _setup_channel(self, user):
+        # Clear the user's pre-existing (demo) activities so the systray counter
+        # snapshot computed at page load reflects only this test's activities.
+        self.env["mail.activity"].with_user(user).search([("user_id", "=", user.id)]).unlink()
         self.user_employee_c2.partner_id.sudo().with_user(self.user_employee_c2).message_post(
             body="Test message in chatter",
             message_type="comment",
@@ -119,11 +130,13 @@ class TestAvatarCardTour(MailCommon, HttpCase):
             summary="Test Activity for Company 3",
             user_id=user.id,
         )
+        # The unlink/schedule above emit "mail.activity/updated"; drop those bus rows so the
+        # systray counter baseline (activity_counter_bus_id, captured at page load) starts
+        # clean and none of them lands after it and gets double-counted (runbot 237779).
+        self._reset_bus()
 
     @users("admin", "hr_user")
     def test_avatar_card_tour_multi_company(self):
-        # Clear existing activities to avoid interference with the test
-        self.env["mail.activity"].with_user(self.env.user).search([]).unlink()
         self._setup_channel(self.env.user)
         self.start_tour(
             f"/odoo/res.partner/{self.user_employee_c2.partner_id.id}",
