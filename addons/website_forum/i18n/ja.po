@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:38+0000\n"
-"PO-Revision-Date: 2026-05-04 13:45+0000\n"
+"POT-Creation-Date: 2026-06-19 17:38+0000\n"
+"PO-Revision-Date: 2026-06-06 13:40+0000\n"
 "Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-s19-3/"
 "website_forum/ja/>\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.17\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_forum
 #. odoo-javascript
@@ -186,7 +186,7 @@ msgstr "投稿のリンクを解除するには、%dカルマが必要です。"
 #. odoo-python
 #: code:addons/website_forum/models/forum_post.py:0
 msgid "%d karma required to update a flagged post."
-msgstr ""
+msgstr "%d フラグが立てられた投稿を更新するには、一定数のカルマが必要です。"
 
 #. module: website_forum
 #. odoo-python
@@ -204,19 +204,19 @@ msgstr "投稿を検証するには%dカルマが必要です。"
 #. odoo-python
 #: code:addons/website_forum/models/forum_post_comment.py:0
 msgid "%i karma required to comment."
-msgstr ""
+msgstr "コメントするには%iカルマが必要です。"
 
 #. module: website_forum
 #. odoo-python
 #: code:addons/website_forum/models/forum_post_comment.py:0
 msgid "%i karma required to delete a comment."
-msgstr ""
+msgstr "コメントを削除するには、%iカルマが必要です。"
 
 #. module: website_forum
 #. odoo-python
 #: code:addons/website_forum/models/forum_post_comment.py:0
 msgid "%i karma required to edit a comment."
-msgstr ""
+msgstr "コメントを編集するには%iカルマが必要です。"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_index_tags
@@ -962,7 +962,7 @@ msgstr "回答に15票以上の同意がえられました"
 #. odoo-python
 #: code:addons/website_forum/models/forum_post.py:0
 msgid "Answer converted to comment in \"%s\""
-msgstr ""
+msgstr "回答は「%s 」のコメントに変換されました"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_gen_answer_downvote
@@ -1212,13 +1212,13 @@ msgstr "最善の回答"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_comment__body
 msgid "Body"
-msgstr ""
+msgstr "本文"
 
 #. module: website_forum
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid "By sharing you answer, you will get additional"
-msgstr ""
+msgstr "回答を共有してそれが正しいと評価されると、追加で"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__can_accept
@@ -1299,13 +1299,13 @@ msgstr "見ることができます"
 #. odoo-python
 #: code:addons/website_forum/models/forum_post_comment.py:0
 msgid "Cannot change the post of a comment."
-msgstr ""
+msgstr "コメントの投稿日時を変更することはできません。"
 
 #. module: website_forum
 #. odoo-python
 #: code:addons/website_forum/models/forum_post.py:0
 msgid "Cannot convert a question to a comment"
-msgstr ""
+msgstr "質問をコメントに変換できません"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_edit_retag
@@ -1317,30 +1317,6 @@ msgstr "質問タグを変更"
 #: model:gamification.challenge,name:website_forum.challenge_chief_commentator
 msgid "Chief Commentator"
 msgstr "コメント王"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Click here to accept this answer."
-msgstr "この回答同意するにはここをクリックしてください。"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Click to post your answer."
-msgstr "クリックして回答を投稿してください。"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Click to post your question."
-msgstr "あなたの質問を投稿するにはクリックしてください。"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Click to reply."
-msgstr "クリックして回答します。"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
@@ -1435,7 +1411,7 @@ msgstr "コメンテーター"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__comment_ids
 msgid "Comments"
-msgstr ""
+msgstr "コメント"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_all_oe_structure_forum_all_top
@@ -1467,7 +1443,7 @@ msgstr "コンテンツ"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__write_date_content
 msgid "Content Updated on"
-msgstr ""
+msgstr "コンテンツ更新日"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_comment_convert_all
@@ -1516,12 +1492,6 @@ msgid "Create a new forum post"
 msgstr "新しいフォーラム投稿を作成する"
 
 #. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Create a new post in this forum by clicking on the button."
-msgstr "ボタンをクリックして、このフォーラムに新しい投稿を作成します。"
-
-#. module: website_forum
 #: model_terms:ir.actions.act_window,help:website_forum.forum_tag_action
 msgid "Create a new tag"
 msgstr "タグを作成しましょう。"
@@ -1544,7 +1514,7 @@ msgstr "タグを新規作成"
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
 msgid "Create option \""
-msgstr ""
+msgstr "作成オプション「"
 
 #. module: website_forum
 #: model_terms:gamification.badge,description:website_forum.badge_32
@@ -1740,6 +1710,11 @@ msgid "Downvote for posting offensive contents"
 msgstr "不快な内容を投稿した場合、ダウン投票を行います。"
 
 #. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.header
+msgid "Drag blocks here to add them on all forum"
+msgstr ""
+
+#. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_1
 msgid "Duplicate post"
 msgstr "投稿を複製"
@@ -1799,7 +1774,7 @@ msgstr "エディタ機能: 画像およびリンク"
 #. module: website_forum
 #: model:ir.model,name:website_forum.model_mail_thread
 msgid "Email Thread"
-msgstr ""
+msgstr "メールスレッド"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
@@ -2038,7 +2013,7 @@ msgstr "フォーラム投稿"
 #. module: website_forum
 #: model:ir.model,name:website_forum.model_forum_post_comment
 msgid "Forum Post Comment"
-msgstr ""
+msgstr "フォーラムの投稿コメント"
 
 #. module: website_forum
 #: model:ir.actions.act_window,name:website_forum.forum_post_action
@@ -2064,6 +2039,9 @@ msgstr "フォーラムタグ"
 
 #. module: website_forum
 #. odoo-javascript
+#. odoo-python
+#: code:addons/website_forum/models/forum_forum.py:0
+#: code:addons/website_forum/models/forum_post.py:0
 #: code:addons/website_forum/static/src/website_builder/forum_searchbar_option.xml:0
 #: model:ir.actions.act_window,name:website_forum.forum_forum_action
 #: model:ir.ui.menu,name:website_forum.menu_forum_global
@@ -2085,12 +2063,6 @@ msgstr "この投稿に活動があった際に通知を受け取ります"
 #: model_terms:ir.ui.view,arch_db:website_forum.follow_button
 msgid "Get notified when this tag is used"
 msgstr "このタグが使用された時に通知を受け取ります"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Give your post title."
-msgstr "投稿にタイトルを付けます。"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
@@ -2167,12 +2139,12 @@ msgstr "達人(15)"
 #. module: website_forum
 #: model:ir.model,name:website_forum.model_ir_http
 msgid "HTTP Routing"
-msgstr ""
+msgstr "HTTPルーティング"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__can_access
 msgid "Has Access"
-msgstr ""
+msgstr "アクセス権あり"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__uid_has_answered
@@ -2319,12 +2291,6 @@ msgstr "画像512"
 #: model:forum.post.reason,name:website_forum.reason_13
 msgid "Inappropriate and unacceptable statements"
 msgstr "不適切で容認できない発言"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Insert tags related to your question."
-msgstr "質問に関連するタグを挿入します。"
 
 #. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_11
@@ -2499,7 +2465,7 @@ msgstr "スパムとしてマークする"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_all_oe_structure_forum_all_top
 msgid "Meet our community members"
-msgstr ""
+msgstr "コミュニティメンバーの紹介"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__message_has_error
@@ -2601,7 +2567,7 @@ msgstr "新しい答え"
 #: model:mail.message.subtype,description:website_forum.mt_comment_new
 #: model:mail.message.subtype,name:website_forum.mt_comment_new
 msgid "New Comment"
-msgstr ""
+msgstr "新規コメント"
 
 #. module: website_forum
 #: model:ir.actions.act_window,name:website_forum.forum_forum_action_add
@@ -2626,7 +2592,7 @@ msgstr "新しい質問"
 #. odoo-python
 #: code:addons/website_forum/models/forum_post_comment.py:0
 msgid "New comment in %s"
-msgstr ""
+msgstr "新しいコメント%s"
 
 #. module: website_forum
 #: model:ir.model.fields.selection,name:website_forum.selection__forum_forum__default_order__create_date_desc
@@ -2939,18 +2905,6 @@ msgstr ""
 #: model:gamification.goal.definition,name:website_forum.definition_pundit
 msgid "Pundit"
 msgstr "達人"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Put your answer here."
-msgstr "回答をここに記入してください。"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Put your question here."
-msgstr "質問をここに記入してください。"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__parent_id
@@ -3895,21 +3849,11 @@ msgid "Website Absolute URL"
 msgstr "ウェブサイト絶対URL"
 
 #. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_forum_forum__website_message_ids
-msgid "Website Messages"
-msgstr "ウェブサイトメッセージ"
-
-#. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__website_url
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__website_url
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__website_url
 msgid "Website URL"
 msgstr "サイトURL"
-
-#. module: website_forum
-#: model:ir.model.fields,help:website_forum.field_forum_forum__website_message_ids
-msgid "Website communication history"
-msgstr "ウェブサイト通信履歴"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__website_meta_description

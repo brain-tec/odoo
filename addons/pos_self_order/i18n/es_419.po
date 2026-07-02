@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-22 17:47+0000\n"
-"PO-Revision-Date: 2026-05-09 01:13+0000\n"
+"POT-Creation-Date: 2026-06-30 00:51+0000\n"
+"PO-Revision-Date: 2026-06-20 13:52+0000\n"
 "Last-Translator: \"Fernanda Alvarez (mfar)\" <mfar@odoo.com>\n"
 "Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
 "odoo-s19-3/pos_self_order/es_419/>\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.17\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: pos_self_order
 #: model:ir.actions.report,print_report_name:pos_self_order.report_self_order_qr_codes_page
@@ -211,7 +211,7 @@ msgstr "Activar"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/combo_page/combo_page.xml:0
 msgid "Add"
-msgstr ""
+msgstr "Agregar"
 
 #. module: pos_self_order
 #: model_terms:ir.ui.view,arch_db:pos_self_order.res_config_settings_view_form_menu
@@ -222,7 +222,7 @@ msgstr "Agregar idiomas"
 #: model:ir.model.fields,field_description:pos_self_order.field_pos_config__self_ordering_image_home_ids
 #: model:ir.model.fields,field_description:pos_self_order.field_res_config_settings__pos_self_ordering_image_home_ids
 msgid "Add Media"
-msgstr ""
+msgstr "Agregar archivo multimedia"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -239,6 +239,12 @@ msgstr "Agregar al carrito"
 
 #. module: pos_self_order
 #. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/components/preset_info_popup/preset_info_popup.xml:0
+msgid "Address"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/services/self_order_service.js:0
 msgid "Afternoon"
 msgstr "Tarde"
@@ -247,7 +253,7 @@ msgstr "Tarde"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/product_list_page/product_list_page.xml:0
 msgid "All"
-msgstr ""
+msgstr "Todos"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -257,9 +263,15 @@ msgstr "Ocurrió un error"
 
 #. module: pos_self_order
 #. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/pages/payment_page/payment_page.js:0
+msgid "Are you sure you want to cancel the cash machine payment?"
+msgstr "¿De verdad quieres cancelar el pago en la caja registradora?"
+
+#. module: pos_self_order
+#. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/cancel_popup/cancel_popup.xml:0
 msgid "Are you sure you want to cancel this order?"
-msgstr ""
+msgstr "¿De verdad quieres cancelar esta orden?"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -299,7 +311,7 @@ msgstr "Idiomas disponibles para la interfaz"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/eating_location_page/eating_location_page.xml:0
 msgid "Average time:"
-msgstr ""
+msgstr "Tiempo promedio:"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -338,6 +350,12 @@ msgstr "Cancelar orden"
 #: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.js:0
 msgid "Cancel order"
 msgstr "Cancelar orden"
+
+#. module: pos_self_order
+#. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/pages/payment_page/payment_page.xml:0
+msgid "Cancellation in progress"
+msgstr "Cancelación en curso"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -386,6 +404,7 @@ msgstr "Ciudad"
 #: code:addons/pos_self_order/static/src/app/components/network_connectionLost_popup/network_connectionLost_popup.xml:0
 #: code:addons/pos_self_order/static/src/app/components/product_info_popup/product_info_popup.xml:0
 #: code:addons/pos_self_order/static/src/app/pages/confirmation_page/confirmation_page.xml:0
+#: code:addons/pos_self_order/static/src/app/services/self_order_service.js:0
 msgid "Close"
 msgstr "Cerrar"
 
@@ -422,7 +441,13 @@ msgstr "Ajustes de configuración"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/pills_selection_popup/pills_selection_popup.xml:0
 msgid "Confirm"
-msgstr ""
+msgstr "Confirmar"
+
+#. module: pos_self_order
+#. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/pages/payment_page/payment_page.js:0
+msgid "Confirm cancellation"
+msgstr "Confirmar cancelación"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -605,7 +630,7 @@ msgstr "Unidad de distancia"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/network_connectionLost_popup/network_connectionLost_popup.xml:0
 msgid "Do not refresh the page."
-msgstr ""
+msgstr "No actualices la página."
 
 #. module: pos_self_order
 #: model_terms:ir.ui.view,arch_db:pos_self_order.res_config_settings_view_form_menu
@@ -616,7 +641,7 @@ msgstr "Descargar códigos QR"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/confirmation_page/confirmation_page.xml:0
 msgid "Download your receipt here"
-msgstr ""
+msgstr "Descarga tu recibo aquí"
 
 #. module: pos_self_order
 #. odoo-python
@@ -686,6 +711,12 @@ msgid "Enter your tracker number"
 msgstr "Ingresa tu número de seguimiento"
 
 #. module: pos_self_order
+#. odoo-python
+#: code:addons/pos_self_order/models/pos_order.py:0
+msgid "Error while creating the order. Please try again."
+msgstr ""
+
+#. module: pos_self_order
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/services/self_order_service.js:0
 msgid "Evening"
@@ -695,7 +726,7 @@ msgstr "Noche"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/combo_page/combo_page.xml:0
 msgid "Extra:"
-msgstr ""
+msgstr "Extra:"
 
 #. module: pos_self_order
 #: model_terms:ir.ui.view,arch_db:pos_self_order.qr_codes_page
@@ -749,7 +780,7 @@ msgstr "Genérico"
 #: code:addons/pos_self_order/static/src/overrides/components/navbar/navbar.xml:0
 #: code:addons/pos_self_order/static/src/overrides/screens/floor_screen/floor_screen.xml:0
 msgid "Get QR Codes"
-msgstr ""
+msgstr "Obtén códigos QR"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -774,6 +805,8 @@ msgid ""
 "Hey, looks like you forgot to create products or add them to pos_config. "
 "Please add them before using the Self Order"
 msgstr ""
+"Parece que olvidaste crear productos o agregarlos a pos_config. Agrégalos "
+"antes de utilizar Autopedido."
 
 #. module: pos_self_order
 #: model_terms:ir.ui.view,arch_db:pos_self_order.res_config_settings_view_form_menu
@@ -784,7 +817,7 @@ msgstr "Botones de inicio"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/confirmation_page/confirmation_page.xml:0
 msgid "Hope you enjoyed your meal!"
-msgstr ""
+msgstr "Esperamos que hayas disfrutado tus alimentos."
 
 #. module: pos_self_order
 #: model_terms:ir.ui.view,arch_db:pos_self_order.qr_codes_page
@@ -856,6 +889,12 @@ msgstr "Imagen para mostrar en la pantalla de autopedido"
 
 #. module: pos_self_order
 #. odoo-python
+#: code:addons/pos_self_order/models/pos_order.py:0
+msgid "Impossible to create a new order."
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-python
 #: code:addons/pos_self_order/models/res_config_settings.py:0
 msgid ""
 "In Self-Order mode, you must have at least one table to generate QR codes"
@@ -895,13 +934,13 @@ msgstr "Facturado (clientes)"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/unavailable_product_dialog/unavailable_product_dialog.xml:0
 msgid "It seems that"
-msgstr ""
+msgstr "Parece que"
 
 #. module: pos_self_order
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/network_connectionLost_popup/network_connectionLost_popup.xml:0
 msgid "It seems that the network connection was lost."
-msgstr ""
+msgstr "Al parecer se perdió la conexión a internet."
 
 #. module: pos_self_order
 #. odoo-python
@@ -1009,7 +1048,7 @@ msgstr "Comida"
 #: model:ir.model.fields,help:pos_self_order.field_pos_config__self_ordering_image_home_ids
 #: model:ir.model.fields,help:pos_self_order.field_res_config_settings__pos_self_ordering_image_home_ids
 msgid "Media items to display on the self order screen"
-msgstr ""
+msgstr "Elementos multimedia a mostrar en la pantalla de autopedido"
 
 #. module: pos_self_order
 #: model_terms:ir.ui.view,arch_db:pos_self_order.pos_self_order_menu_item
@@ -1031,7 +1070,7 @@ msgstr "Mañana"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/landing_page/landing_page.xml:0
 msgid "My Order"
-msgstr ""
+msgstr "Mi orden"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -1108,7 +1147,7 @@ msgstr "En proceso"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/network_connectionLost_popup/network_connectionLost_popup.xml:0
 msgid "Online"
-msgstr ""
+msgstr "En línea"
 
 #. module: pos_self_order
 #. odoo-python
@@ -1144,7 +1183,7 @@ msgstr "Ordenar ahora"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/confirmation_page/confirmation_page.xml:0
 msgid "Order for"
-msgstr ""
+msgstr "Orden para"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -1160,6 +1199,7 @@ msgstr "Origen"
 #. module: pos_self_order
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/combo_page/combo_page.xml:0
+#: code:addons/pos_self_order/static/src/app/pages/product_list_page/product_list_page.xml:0
 msgid "Out of stock"
 msgstr "Agotado"
 
@@ -1205,6 +1245,8 @@ msgid ""
 "Personalize your splash screen by adding one or multiple media items to "
 "create a slideshow"
 msgstr ""
+"Personalice su pantalla de inicio con una o varios elementos audiovisuales "
+"para crear una presentación."
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -1414,7 +1456,7 @@ msgstr "Selección de cantidad"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/payment_page/payment_page.xml:0
 msgid "Remaining:"
-msgstr ""
+msgstr "Restante:"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -1459,7 +1501,7 @@ msgstr "Se volverá a intentar en %s segundos…"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/network_connectionLost_popup/network_connectionLost_popup.xml:0
 msgid "Retrying..."
-msgstr ""
+msgstr "Intentando de nuevo…"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -1728,7 +1770,7 @@ msgstr "Impuesto:"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.xml:0
 msgid "Taxes:"
-msgstr ""
+msgstr "Impuestos:"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -1760,6 +1802,13 @@ msgid "The mail template with xmlid %s has been deleted."
 msgstr "La plantilla de correo con xmlid %s ha sido eliminada."
 
 #. module: pos_self_order
+#. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/services/self_order_service.js:0
+msgid ""
+"The shop is currently closed but you can still place an order for later."
+msgstr ""
+
+#. module: pos_self_order
 #. odoo-python
 #: code:addons/pos_self_order/models/res_config_settings.py:0
 msgid "The user must be a POS user"
@@ -1770,11 +1819,10 @@ msgstr "El usuario debe ser un usuario del punto de venta"
 #: code:addons/pos_self_order/static/src/app/pages/combo_page/combo_page.xml:0
 #: code:addons/pos_self_order/static/src/app/pages/product_page/product_page.xml:0
 msgid "This combination does not exist."
-msgstr ""
+msgstr "Esta combinación no existe."
 
 #. module: pos_self_order
 #. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/components/pills_selection_popup/pills_selection_popup.js:0
 #: code:addons/pos_self_order/static/src/app/models/pos_preset.js:0
 msgid "Today"
 msgstr "Hoy"
@@ -1783,12 +1831,6 @@ msgstr "Hoy"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/models/pos_preset.js:0
 msgid "Tommorrow"
-msgstr "Mañana"
-
-#. module: pos_self_order
-#. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/components/pills_selection_popup/pills_selection_popup.js:0
-msgid "Tomorrow"
 msgstr "Mañana"
 
 #. module: pos_self_order
@@ -1816,12 +1858,6 @@ msgstr "URL:"
 
 #. module: pos_self_order
 #. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/pages/product_list_page/product_list_page.xml:0
-msgid "Unavailable"
-msgstr "No disponible"
-
-#. module: pos_self_order
-#. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/services/self_order_service.js:0
 msgid "Uncategorised"
 msgstr "Sin categoría"
@@ -1830,7 +1866,7 @@ msgstr "Sin categoría"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.xml:0
 msgid "Utensils, special instructions, etc."
-msgstr ""
+msgstr "Utensilios, instrucciones especiales, etc."
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -1842,7 +1878,7 @@ msgstr "Valida tu selección"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/preset_info_popup/preset_info_popup.xml:0
 msgid "Validating..."
-msgstr ""
+msgstr "Validando…"
 
 #. module: pos_self_order
 #: model:ir.model.fields.selection,name:pos_self_order.selection__pos_self_order_custom_link__style__warning
@@ -1856,6 +1892,8 @@ msgid ""
 "We couldn't locate this address. Please enter a complete address with a "
 "street number."
 msgstr ""
+"No pudimos ubicar esta dirección. Ingresa una dirección completa con número "
+"de calle."
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -1887,7 +1925,7 @@ msgstr "Está cerrado por el momento"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/self_order_index.xml:0
 msgid "We're currently closed."
-msgstr ""
+msgstr "Estamos cerrados por el momento."
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -1922,7 +1960,7 @@ msgstr "Sí"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/network_connectionLost_popup/network_connectionLost_popup.xml:0
 msgid "You are back online. You can complete your order now."
-msgstr ""
+msgstr "Ya tienes conexión de nuevo. Puedes completar tu orden."
 
 #. module: pos_self_order
 #. odoo-python
@@ -1987,13 +2025,13 @@ msgstr "a"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/unavailable_product_dialog/unavailable_product_dialog.xml:0
 msgid "are"
-msgstr ""
+msgstr "son"
 
 #. module: pos_self_order
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/confirmation_page/confirmation_page.xml:0
 msgid "at the counter"
-msgstr ""
+msgstr "en el mostrador"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -2021,13 +2059,13 @@ msgstr "https://odoo.com"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/combo_page/combo_page.xml:0
 msgid "included &"
-msgstr ""
+msgstr "incluido y"
 
 #. module: pos_self_order
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/unavailable_product_dialog/unavailable_product_dialog.xml:0
 msgid "is"
-msgstr ""
+msgstr "está"
 
 #. module: pos_self_order
 #: model:ir.model.fields.selection,name:pos_self_order.selection__pos_preset__delivery_distance_unit__km
@@ -2043,19 +2081,19 @@ msgstr "mi"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/eating_location_page/eating_location_page.xml:0
 msgid "min"
-msgstr ""
+msgstr "min"
 
 #. module: pos_self_order
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/eating_location_page/eating_location_page.xml:0
 msgid "minutes"
-msgstr ""
+msgstr "minutos"
 
 #. module: pos_self_order
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/unavailable_product_dialog/unavailable_product_dialog.xml:0
 msgid "no longer available. Please go back and edit your order."
-msgstr ""
+msgstr "sin disponibilidad. Edita tu orden."
 
 #. module: pos_self_order
 #: model_terms:ir.ui.view,arch_db:pos_self_order.custom_link_tree
@@ -2066,11 +2104,11 @@ msgstr "odoo"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/combo_page/combo_page.xml:0
 msgid "per extra unit"
-msgstr ""
+msgstr "por unidad adicional"
 
 #. module: pos_self_order
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.xml:0
 #: code:addons/pos_self_order/static/src/app/pages/combo_page/combo_page.xml:0
 msgid "x"
-msgstr ""
+msgstr "x"
