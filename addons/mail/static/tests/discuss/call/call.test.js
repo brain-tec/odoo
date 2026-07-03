@@ -45,6 +45,7 @@ import {
 import { press } from "@odoo/hoot-dom";
 import {
     Command,
+    getService,
     mockService,
     onRpc,
     patchWithCleanup,
@@ -53,6 +54,8 @@ import {
 
 import { waitNotifications } from "@bus/../tests/bus_test_helpers";
 import { isMobileOS } from "@web/core/browser/feature_detection";
+import { deserializeDateTime } from "@web/core/l10n/dates";
+import { user } from "@web/core/user";
 
 describe.current.tags("desktop");
 defineMailModels();
@@ -396,8 +399,8 @@ test("Inset card is hidden when sidebar is open", async () => {
         }),
         channel_id: channelId,
     });
-    const env = await start();
-    const store = env.services["mail.store"];
+    await start();
+    const store = getService("mail.store");
     store.settings.callLayout = CALL_GRID_LAYOUT.SPOTLIGHT;
     await openDiscuss(channelId);
     await click("[title='Join Call']");
@@ -528,8 +531,8 @@ test("Fullscreen button enters browser fullscreen and the label reflects it", as
     const fullscreen = mockBrowserFullscreen();
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
-    const env = await start();
-    const rtc = env.services["discuss.rtc"];
+    await start();
+    const rtc = getService("discuss.rtc");
     await openDiscuss(channelId);
     await click("[title='Start Call']");
     await click(".o-discuss-CallActionList button[title='More']");
@@ -551,8 +554,8 @@ test("Fullscreen button label reflects a denied browser fullscreen request", asy
     const fullscreen = mockBrowserFullscreen({ grant: false });
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
-    const env = await start();
-    const rtc = env.services["discuss.rtc"];
+    await start();
+    const rtc = getService("discuss.rtc");
     await openDiscuss(channelId);
     await click("[title='Start Call']");
     await click(".o-discuss-CallActionList button[title='More']");
@@ -570,8 +573,8 @@ test("Leaving browser fullscreen externally (e.g. Escape) closes the meeting vie
     const fullscreen = mockBrowserFullscreen();
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
-    const env = await start();
-    const rtc = env.services["discuss.rtc"];
+    await start();
+    const rtc = getService("discuss.rtc");
     await openDiscuss(channelId);
     await click("[title='Start Call']");
     await click(".o-discuss-CallActionList button[title='More']");
@@ -589,8 +592,8 @@ test("Closing picture-in-picture from browser fullscreen restores the windowed m
     mockPipWindow();
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
-    const env = await start();
-    const rtc = env.services["discuss.rtc"];
+    await start();
+    const rtc = getService("discuss.rtc");
     await openDiscuss(channelId);
     await click("[title='Start Call']");
     await click(".o-discuss-CallActionList button[title='More']");
@@ -1070,8 +1073,8 @@ test("dynamic focus switches to talking participant", async () => {
         channel_id: channelId,
     });
 
-    const env = await start();
-    const rtc = env.services["discuss.rtc"];
+    await start();
+    const rtc = getService("discuss.rtc");
     await openDiscuss(channelId);
     await click("[title='Join Call']");
     await contains(".o-discuss-CallParticipantCard[aria-label='Mitchell Admin']");
@@ -1109,8 +1112,8 @@ test("Shows warning badge on mic/camera on non-granted permission in meeting con
         }),
         channel_id: channelId,
     });
-    const env = await start();
-    const rtc = env.services["discuss.rtc"];
+    await start();
+    const rtc = getService("discuss.rtc");
     rtc.microphonePermission = "denied";
     rtc.cameraPermission = "denied";
     await openDiscuss(channelId);
@@ -1165,8 +1168,8 @@ test("should not show context menu on participant card when not in a call", asyn
 test("all streams are properly closed when abruptly disconnected", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
-    const env = await start();
-    const rtc = env.services["discuss.rtc"];
+    await start();
+    const rtc = getService("discuss.rtc");
     await openDiscuss(channelId);
     await click("[title='Start Call']");
     await contains(".o-discuss-Call");
@@ -1473,20 +1476,26 @@ test("open conversation from call invitation (discuss app)", async () => {
 
 test("Meeting chat panel excludes call notifications for 'New Meeting' channels", async () => {
     mockDate("2026-01-01 10:00:00");
-    const env = await start();
-    const rtc = env.services["discuss.rtc"];
+    const pyEnv = await startServer();
+    await start();
+    const rtc = getService("discuss.rtc");
     await openDiscuss();
     await click("[title='New Meeting']");
     await contains(".o-mail-MeetingReadyBanner");
     await press("escape");
     await contains(".o-mail-Thread:has(:text('Meeting, Jan 1'))");
-    await contains(".o-mail-NotificationMessage:text('Mitchell Admin started a call.11:00 AM')");
+    const messages = pyEnv["mail.message"].search_read([["message_type", "=", "notification"]]);
+    const time = deserializeDateTime(messages.at(-1).date).toLocaleString(
+        luxon.DateTime.TIME_SIMPLE,
+        { locale: user.lang }
+    );
+    await contains(`.o-mail-NotificationMessage:text('Mitchell Admin started a call.${time}')`);
     await rtc.enterFullscreen();
     await contains(".o-mail-Meeting");
     await click("[title='Chat']");
     await contains(".o-mail-ActionPanel-header:text('In call messages')");
     await contains(".o-mail-Thread:has(:text('Meeting, Jan 1'))");
-    await contains(".o-mail-NotificationMessage:text('Mitchell Admin started a call.11:00 AM')", {
+    await contains(`.o-mail-NotificationMessage:text('Mitchell Admin started a call.${time}')`, {
         count: 0,
     });
 });
@@ -1501,7 +1510,7 @@ test("shows a presenter bar when screen-sharing in discuss calls and meetings", 
     ]);
     const env = await start();
     const network = await makeMockRtcNetwork({ env, channelId });
-    const rtc = env.services["discuss.rtc"];
+    const rtc = getService("discuss.rtc");
     await openDiscuss(channelId);
     await click("[title='Start Call']");
     await contains(".o-discuss-Call");
@@ -1621,8 +1630,8 @@ test("Adjust view: switching between Tiled and Spotlight changes the meeting gri
             channel_id: channelId,
         });
     }
-    const env = await start();
-    const store = env.services["mail.store"];
+    await start();
+    const store = getService("mail.store");
     store.settings.callLayout = "auto";
     await openDiscuss(channelId);
     await click("[title='Join Call']");
@@ -1647,8 +1656,8 @@ test("Adjust view: switching between Tiled and Spotlight changes the meeting gri
 test("Auto layout switches to the sidebar while someone is presenting", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
-    const env = await start();
-    const store = env.services["mail.store"];
+    await start();
+    const store = getService("mail.store");
     store.settings.callLayout = "auto";
     await openDiscuss(channelId);
     await click("[title='Start Call']");
@@ -1669,8 +1678,8 @@ test("Auto layout switches to the sidebar while someone is presenting", async ()
 test("Adjust view: sidebar layout always shows the sidebar, even alone", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
-    const env = await start();
-    const store = env.services["mail.store"];
+    await start();
+    const store = getService("mail.store");
     store.settings.callLayout = "sidebar";
     await openDiscuss(channelId);
     await click("[title='Start Call']");
