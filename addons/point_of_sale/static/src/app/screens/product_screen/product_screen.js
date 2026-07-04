@@ -7,7 +7,7 @@ import { useBarcodeReader } from "@point_of_sale/app/hooks/barcode_reader_hook";
 import { _t } from "@web/core/l10n/translation";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { user } from "@web/core/user";
-import { Component, onMounted, onWillUnmount, computed, proxy } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, computed, proxy, props, t } from "@odoo/owl";
 import { CategorySelector } from "@point_of_sale/app/components/category_selector/category_selector";
 import { Input } from "@point_of_sale/app/components/inputs/input/input";
 import {
@@ -47,12 +47,12 @@ export class ProductScreen extends Component {
         ProductCard,
         BarcodeVideoScanner,
     };
-    static props = {
-        orderUuid: { type: String },
-    };
+
+    props = props({
+        orderUuid: t.string(),
+    });
 
     setup() {
-        super.setup();
         this.pos = usePos();
         this.ui = useService("ui");
         this.dialog = useService("dialog");
@@ -62,7 +62,7 @@ export class ProductScreen extends Component {
             quantityByProductTmplId: {},
         });
 
-        useRouterParamsChecker();
+        useRouterParamsChecker(this.constructor.name);
         onMounted(() => {
             this.currentOrder.deselectOrderline();
             this.pos.openOpeningControl();
@@ -98,13 +98,13 @@ export class ProductScreen extends Component {
         this.sound = useService("mail.sound_effects");
 
         useBarcodeReader({
-            product: this._barcodeProductAction,
-            quantity: this._barcodeProductAction,
-            weight: this._barcodeProductAction,
-            price: this._barcodeProductAction,
-            client: this._barcodePartnerAction,
-            discount: this._barcodeDiscountAction,
-            gs1: this._barcodeGS1Action,
+            product: this._barcodeProductAction.bind(this),
+            quantity: this._barcodeProductAction.bind(this),
+            weight: this._barcodeProductAction.bind(this),
+            price: this._barcodeProductAction.bind(this),
+            client: this._barcodePartnerAction.bind(this),
+            discount: this._barcodeDiscountAction.bind(this),
+            gs1: this._barcodeGS1Action.bind(this),
         });
 
         this.numberBuffer.use({
@@ -346,7 +346,6 @@ export class ProductScreen extends Component {
     }
     async _barcodeProductAction(code) {
         const product = await this._getProductByBarcode(code);
-
         if (!product) {
             this.sound.play("scan-error");
             this.barcodeReader.showNotFoundNotification(code);
@@ -358,11 +357,14 @@ export class ProductScreen extends Component {
             return;
         }
 
-        await this.pos.addLineToCurrentOrder(
+        const allocation = this.autoCourseAllocation(product);
+        const result = await this.pos.addLineToCurrentOrder(
             { product_id: product, product_tmpl_id: product.product_tmpl_id },
             { code },
             product.needToConfigure()
         );
+        this.cleanAutoCourseAllocation(result, allocation);
+
         this.numberBuffer.reset();
         this.showOptionalProductPopupIfNeeded(product);
     }
@@ -480,6 +482,45 @@ export class ProductScreen extends Component {
             await this.pos.validateOrderFast(paymentMethod);
         } finally {
             this.isValidatingOrder = false;
+        }
+    }
+
+    autoCourseAllocation(product) {
+        const config = this.pos.config;
+        if (!config.module_pos_restaurant || !config.use_course_allocation) {
+            return null;
+        }
+
+        const order = this.pos.getOrder();
+
+        const categories = product.pos_categ_ids
+            .map((c) => c.id)
+            .includes(this.pos.selectedCategory?.id)
+            ? [this.pos.selectedCategory]
+            : product.pos_categ_ids;
+
+        const courseCandidate = categories
+            .map((c) => c.course_id)
+            .filter(Boolean)
+            .sort((a, b) => a.sequence - b.sequence);
+
+        if (courseCandidate.length === 0) {
+            return null;
+        }
+
+        let isNew = false;
+        let course = order.course_ids.find((c) => c.name === courseCandidate[0].name);
+        if (!course) {
+            isNew = true;
+            course = this.pos.addCourse({ backendCourse: courseCandidate[0] });
+        }
+
+        order.selectCourse(course);
+        return { course, isNew };
+    }
+    cleanAutoCourseAllocation(result, allocation) {
+        if (!result && allocation?.isNew) {
+            allocation.course.delete();
         }
     }
 }

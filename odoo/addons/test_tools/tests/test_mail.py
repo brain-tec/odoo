@@ -113,6 +113,7 @@ class TestSanitizer(BaseCase):
             ("<META HTTP-EQUIV=\"Link\" Content=\"<http://ha.ckers.org/xss.css>; REL=stylesheet\">"),  # remote style sheet 3
             ("<STYLE>BODY{-moz-binding:url(\"http://ha.ckers.org/xssmoz.xml#xss\")}</STYLE>"),  # remote style sheet 4
             ("<IMG STYLE=\"xss:expr/*XSS*/ession(alert('XSS'))\">"),  # style attribute using a comment to break up expression
+            ("<SVG XMLNS:XLINK=\"http://www.w3.org/1999/xlink\"><A XLINK:HREF=\"javascript:alert('XSS')\">X</A></SVG>"),  # xlink:href
 
             # custom payloads
             ("<a href=j\u0000avascript:alert(1)>Hello</a>"),  # unicode control character in the scheme

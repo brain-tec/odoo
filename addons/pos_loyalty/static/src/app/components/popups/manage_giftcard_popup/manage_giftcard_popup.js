@@ -1,5 +1,4 @@
-import { useRef } from "@web/owl2/utils";
-import { Component, onMounted, props, proxy, t } from "@odoo/owl";
+import { Component, onMounted, props, proxy, signal, t } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { useService } from "@web/core/utils/hooks";
 import { DateTimeInput } from "@web/core/datetime/datetime_input";
@@ -10,6 +9,7 @@ import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { debounce } from "@bus/workers/bus_worker_utils";
 import { logPosMessage } from "@point_of_sale/app/utils/pretty_console_log";
 import { roundCurrency } from "@point_of_sale/app/models/utils/currency";
+import { PosOrderline } from "@point_of_sale/app/models/pos_order_line";
 
 export class ManageGiftCardPopup extends Component {
     static template = "pos_loyalty.ManageGiftCardPopup";
@@ -19,10 +19,13 @@ export class ManageGiftCardPopup extends Component {
         placeholder: t.string().optional(""),
         rows: t.number().optional(1),
         startingValue: t.string().optional(""),
-        line: t.object(),
+        line: t.instanceOf(PosOrderline),
         getPayload: t.function(),
         close: t.function(),
     });
+
+    inputRef = signal(null);
+    amountInputRef = signal(null);
 
     setup() {
         this.ui = useService("ui");
@@ -37,8 +40,6 @@ export class ManageGiftCardPopup extends Component {
             amountError: false,
             expirationDate: luxon.DateTime.now().plus({ year: 1 }),
         });
-        this.inputRef = useRef("input");
-        this.amountInputRef = useRef("amountInput");
         this.batchedGiftcardCodeKeydown = debounce(this.checkGiftCard.bind(this), 500);
         onMounted(this.onMounted);
     }
@@ -49,7 +50,7 @@ export class ManageGiftCardPopup extends Component {
         const expirationDateInput = document.querySelector(".o_exp_date_container").children[1];
         expirationDateInput.classList.remove("o_input");
         expirationDateInput.classList.add("form-control", "form-control-lg");
-        this.inputRef.el.focus();
+        this.inputRef()?.focus();
     }
 
     onKeydownGiftCardCode() {
