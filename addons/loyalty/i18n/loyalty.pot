@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.4a1\n"
+"Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:37+0000\n"
-"PO-Revision-Date: 2026-06-19 17:37+0000\n"
+"POT-Creation-Date: 2026-07-03 17:39+0000\n"
+"PO-Revision-Date: 2026-07-03 17:39+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -392,6 +392,11 @@ msgid "All Discount Product"
 msgstr ""
 
 #. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
+msgid "All Pricelist"
+msgstr ""
+
+#. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_reward_view_form
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_rule_view_form
 msgid "Among"
@@ -449,6 +454,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
 msgid "Automatic promo: 10% off on orders higher than $50"
+msgstr ""
+
+#. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
+msgid "Availability Dates"
 msgstr ""
 
 #. module: loyalty
@@ -872,11 +882,6 @@ msgstr ""
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
-msgid "Displayed as"
-msgstr ""
-
-#. module: loyalty
-#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
 msgid ""
 "Drive repeat purchases by sending a unique, single-use coupon code for the "
 "next purchase when a customer buys something in your store."
@@ -939,6 +944,7 @@ msgstr ""
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_generate_wizard__mode
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
 msgid "For"
 msgstr ""
 
@@ -1436,6 +1442,11 @@ msgid "Odoo"
 msgstr ""
 
 #. module: loyalty
+#: model:ir.model.fields,field_description:loyalty.field_loyalty_program__once_per_user
+msgid "Once per user"
+msgstr ""
+
+#. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_history__order_id
 #: model:ir.model.fields.selection,name:loyalty.selection__loyalty_reward__discount_applicability__order
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_card_history_template
@@ -1551,7 +1562,6 @@ msgstr ""
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__name
-#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
 msgid "Program Name"
 msgstr ""
 
@@ -1721,7 +1731,12 @@ msgstr ""
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
-msgid "Show points Unit"
+msgid "Settings"
+msgstr ""
+
+#. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
+msgid "Show Points Unit"
 msgstr ""
 
 #. module: loyalty
@@ -1866,6 +1881,11 @@ msgid "Trigger"
 msgstr ""
 
 #. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
+msgid "Type"
+msgstr ""
+
+#. module: loyalty
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_card.py:0
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_card_update_balance_form
@@ -1903,6 +1923,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_history__used
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_card_history_template
 msgid "Used"
+msgstr ""
+
+#. module: loyalty
+#: model:ir.model.fields,field_description:loyalty.field_loyalty_program__partner_ids
+msgid "Used by"
 msgstr ""
 
 #. module: loyalty
@@ -2067,12 +2092,6 @@ msgstr ""
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_report
 msgid "loyalty Reward"
-msgstr ""
-
-#. module: loyalty
-#. odoo-python
-#: code:addons/loyalty/models/loyalty_program.py:0
-msgid "mail.template"
 msgstr ""
 
 #. module: loyalty

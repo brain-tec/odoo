@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.4a1\n"
+"Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:36+0000\n"
-"PO-Revision-Date: 2026-06-19 17:36+0000\n"
+"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"PO-Revision-Date: 2026-07-03 17:38+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -106,6 +106,12 @@ msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
+#: code:addons/point_of_sale/static/src/app/screens/product_screen/order_summary/order_summary.js:0
+msgid "%s + Others"
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/services/pos_ticket_printer_service.js:0
 msgid "%s almost runs out of paper."
 msgstr ""
@@ -171,6 +177,30 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/product_screen/product_screen.js:0
 msgid "%s update not allowed"
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/wizard/pos_price_inclusion_wizard.py:0
+msgid "(%(price_excl)s) + %(amount)s = %(price_recalc)s incl."
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/wizard/pos_price_inclusion_wizard.py:0
+msgid "(%(price_excl)s) × %(factor)s = %(price_recalc)s incl."
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/wizard/pos_price_inclusion_wizard.py:0
+msgid "(%(price_incl)s) ÷ %(factor)s = %(price_excl)s excl."
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/wizard/pos_price_inclusion_wizard.py:0
+msgid "(%(price_incl)s) − %(amount)s = %(price_excl)s excl."
 msgstr ""
 
 #. module: point_of_sale
@@ -754,6 +784,7 @@ msgstr ""
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/ticket_screen/ticket_screen.js:0
+#: model:ir.model.fields,field_description:point_of_sale.field_pos_category__active
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__active
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_payment_method__active
 msgid "Active"
@@ -790,6 +821,12 @@ msgstr ""
 #: code:addons/point_of_sale/static/src/app/components/popups/optional_products_popup/optional_products_popup.xml:0
 #: code:addons/point_of_sale/static/src/app/components/popups/product_configurator_popup/product_configurator_popup.xml:0
 msgid "Add"
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/app/components/popups/product_quick_create/product_quick_create_dialog.xml:0
+msgid "Add & New"
 msgstr ""
 
 #. module: point_of_sale
@@ -1101,7 +1138,7 @@ msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/screens/feedback_screen/feedback_screen.xml:0
+#: code:addons/point_of_sale/static/src/app/components/feedback_payment_summary/feedback_payment_summary.xml:0
 msgid "Amount Paid"
 msgstr ""
 
@@ -1241,6 +1278,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_payment_method_view_form
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_payment_method_view_search
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_partner_form_pos_ui
+#: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_category_search
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_config_search
 msgid "Archived"
 msgstr ""
@@ -1690,6 +1728,8 @@ msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
+#. odoo-python
+#: code:addons/point_of_sale/receipt/pos_order_receipt.py:0
 #: code:addons/point_of_sale/static/src/app/utils/printer/generate_printer_data.js:0
 msgid "CANCELLED"
 msgstr ""
@@ -1738,6 +1778,7 @@ msgstr ""
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/ticket_screen/order_details_dialog/order_details_dialog.js:0
+#: code:addons/point_of_sale/static/src/app/screens/ticket_screen/ticket_screen.js:0
 #: model:ir.model.fields.selection,name:point_of_sale.selection__pos_order__state__cancel
 #: model:ir.model.fields.selection,name:point_of_sale.selection__report_pos_order__state__cancel
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_order_filter
@@ -2124,14 +2165,6 @@ msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/hooks/hooks.js:0
-msgid ""
-"Check the internet connection then try to sync again by clicking on the red "
-"wifi button (upper right of the screen)."
-msgstr ""
-
-#. module: point_of_sale
-#. odoo-javascript
 #: code:addons/point_of_sale/static/src/backend/test_epos/test_epos.js:0
 msgid ""
 "Check the printer configuration for the 'Device ID' setting.\n"
@@ -2513,6 +2546,23 @@ msgid "Complete Name"
 msgstr ""
 
 #. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/wizard/pos_price_inclusion_wizard.py:0
+msgid "Computed tax amount: %(price_excl)s → %(price_recalc)s incl."
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/wizard/pos_price_inclusion_wizard.py:0
+msgid "Computed tax amount: %(price_incl)s → %(price_excl)s excl."
+msgstr ""
+
+#. module: point_of_sale
+#: model:ir.model.fields,field_description:point_of_sale.field_pos_price_inclusion_wizard__config_id
+msgid "Config"
+msgstr ""
+
+#. module: point_of_sale
 #: model:ir.model,name:point_of_sale.model_res_config_settings
 msgid "Config Settings"
 msgstr ""
@@ -2868,6 +2918,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_prep_line__create_uid
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_prep_order__create_uid
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_preset__create_uid
+#: model:ir.model.fields,field_description:point_of_sale.field_pos_price_inclusion_wizard__create_uid
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_printer__create_uid
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_product_template_snooze__create_uid
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__create_uid
@@ -2892,6 +2943,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_prep_line__create_date
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_prep_order__create_date
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_preset__create_date
+#: model:ir.model.fields,field_description:point_of_sale.field_pos_price_inclusion_wizard__create_date
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_printer__create_date
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_product_template_snooze__create_date
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__create_date
@@ -3409,6 +3461,7 @@ msgstr ""
 #: code:addons/point_of_sale/static/src/app/components/popups/sync_popup/sync_popup.xml:0
 #: code:addons/point_of_sale/static/src/app/components/popups/text_input_popup/text_input_popup.xml:0
 #: code:addons/point_of_sale/static/src/app/screens/partner_list/partner_list.xml:0
+#: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_price_inclusion_wizard_form
 msgid "Discard"
 msgstr ""
 
@@ -3473,6 +3526,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_prep_line__display_name
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_prep_order__display_name
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_preset__display_name
+#: model:ir.model.fields,field_description:point_of_sale.field_pos_price_inclusion_wizard__display_name
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_printer__display_name
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_product_template_snooze__display_name
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__display_name
@@ -3775,6 +3829,16 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/utils/order_payment_validation.js:0
 msgid "Error: no internet connection."
+msgstr ""
+
+#. module: point_of_sale
+#: model:ir.model.fields,field_description:point_of_sale.field_pos_price_inclusion_wizard__example_text
+msgid "Example Text"
+msgstr ""
+
+#. module: point_of_sale
+#: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_price_inclusion_wizard_form
+msgid "Example:"
 msgstr ""
 
 #. module: point_of_sale
@@ -4232,14 +4296,6 @@ msgid ""
 msgstr ""
 
 #. module: point_of_sale
-#. odoo-python
-#: code:addons/point_of_sale/models/product_template.py:0
-msgid ""
-"Hold up! Archiving products while POS sessions are active is like pulling a plate mid-meal.\n"
-"Make sure to close all sessions first to avoid any issues."
-msgstr ""
-
-#. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/backend/views/pos_search_model.js:0
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order__preset_time
@@ -4249,6 +4305,13 @@ msgstr ""
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_order__preset_time
 msgid "Hour of the day for the order"
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/pos_config.py:0
+#: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_price_inclusion_wizard_form
+msgid "How do you want to display prices?"
 msgstr ""
 
 #. module: point_of_sale
@@ -4317,6 +4380,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_prep_line__id
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_prep_order__id
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_preset__id
+#: model:ir.model.fields,field_description:point_of_sale.field_pos_price_inclusion_wizard__id
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_printer__id
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_product_template_snooze__id
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__id
@@ -4899,6 +4963,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_prep_line__write_uid
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_prep_order__write_uid
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_preset__write_uid
+#: model:ir.model.fields,field_description:point_of_sale.field_pos_price_inclusion_wizard__write_uid
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_printer__write_uid
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_product_template_snooze__write_uid
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__write_uid
@@ -4923,6 +4988,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_prep_line__write_date
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_prep_order__write_date
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_preset__write_date
+#: model:ir.model.fields,field_description:point_of_sale.field_pos_price_inclusion_wizard__write_date
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_printer__write_date
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_product_template_snooze__write_date
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__write_date
@@ -5445,12 +5511,16 @@ msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
+#. odoo-python
+#: code:addons/point_of_sale/receipt/pos_order_receipt.py:0
 #: code:addons/point_of_sale/static/src/app/utils/printer/generate_printer_data.js:0
 msgid "NEW"
 msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
+#. odoo-python
+#: code:addons/point_of_sale/receipt/pos_order_receipt.py:0
 #: code:addons/point_of_sale/static/src/app/utils/printer/generate_printer_data.js:0
 msgid "NOTE UPDATE"
 msgstr ""
@@ -5890,6 +5960,14 @@ msgstr ""
 #. module: point_of_sale
 #: model:product.template,name:point_of_sale.product_odoo_sneakers_product_template
 msgid "Odoo Sneakers"
+msgstr ""
+
+#. module: point_of_sale
+#: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_price_inclusion_wizard_form
+msgid ""
+"Odoo stores one price per product. How tax is applied to\n"
+"                            that price is not mathematically reversible so rounding\n"
+"                            creates permanent discrepancies."
 msgstr ""
 
 #. module: point_of_sale
@@ -6729,6 +6807,12 @@ msgid "Percent"
 msgstr ""
 
 #. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/wizard/pos_price_inclusion_wizard.py:0
+msgid "Percentage"
+msgstr ""
+
+#. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/components/popups/send_receipt_popup/send_receipt_popup.js:0
 #: code:addons/point_of_sale/static/src/app/screens/ticket_screen/order_details_dialog/order_details_dialog.js:0
@@ -6846,12 +6930,6 @@ msgstr ""
 msgid ""
 "Please go on the %s journal and define a Profit Account. This account will "
 "be used to record cash difference."
-msgstr ""
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/hooks/hooks.js:0
-msgid "Please print the invoice from the backend"
 msgstr ""
 
 #. module: point_of_sale
@@ -7042,6 +7120,12 @@ msgid "Point of Sale Order Receipt Generator"
 msgstr ""
 
 #. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/pos_order.py:0
+msgid "Point of Sale Order cancelled"
+msgstr ""
+
+#. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_order_search
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_pos_form
 msgid "Point of Sale Orders"
@@ -7068,8 +7152,18 @@ msgid "Point of Sale Payment Methods"
 msgstr ""
 
 #. module: point_of_sale
+#: model:ir.model,name:point_of_sale.model_pos_price_inclusion_wizard
+msgid "Point of Sale Price Inclusion Wizard"
+msgstr ""
+
+#. module: point_of_sale
 #: model:ir.model,name:point_of_sale.model_pos_printer
 msgid "Point of Sale Printer"
+msgstr ""
+
+#. module: point_of_sale
+#: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_category_search
+msgid "Point of Sale Product Categories"
 msgstr ""
 
 #. module: point_of_sale
@@ -7584,7 +7678,7 @@ msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/screens/feedback_screen/feedback_screen.xml:0
+#: code:addons/point_of_sale/static/src/app/components/feedback_payment_summary/feedback_payment_summary.xml:0
 msgid "Processing..."
 msgstr ""
 
@@ -9266,6 +9360,11 @@ msgid "Tax Excl."
 msgstr ""
 
 #. module: point_of_sale
+#: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_price_inclusion_wizard_form
+msgid "Tax Excluded"
+msgstr ""
+
+#. module: point_of_sale
 #: model:ir.model,name:point_of_sale.model_account_tax_group
 msgid "Tax Group"
 msgstr ""
@@ -9282,6 +9381,11 @@ msgid "Tax Incl."
 msgstr ""
 
 #. module: point_of_sale
+#: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_price_inclusion_wizard_form
+msgid "Tax Included"
+msgstr ""
+
+#. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "Tax Name"
 msgstr ""
@@ -9290,6 +9394,18 @@ msgstr ""
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__tax_regime_selection
 #: model:ir.model.fields,field_description:point_of_sale.field_res_config_settings__pos_tax_regime_selection
 msgid "Tax Regime Selection value"
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/wizard/pos_price_inclusion_wizard.py:0
+msgid "Tax excluded:"
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/wizard/pos_price_inclusion_wizard.py:0
+msgid "Tax included:"
 msgstr ""
 
 #. module: point_of_sale
@@ -9360,12 +9476,6 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/backend/test_epos/test_epos_button.xml:0
 msgid "Test"
-msgstr ""
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/customer_display/customer_display.xml:0
-msgid "Thank you."
 msgstr ""
 
 #. module: point_of_sale
@@ -9588,24 +9698,10 @@ msgid "The number of point of sales orders related to this customer"
 msgstr ""
 
 #. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/hooks/hooks.js:0
-msgid "The order could not be sent to the server due to an unknown error"
-msgstr ""
-
-#. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_order.py:0
 msgid ""
 "The order delivery / pickup date is in the future. You cannot cancel it."
-msgstr ""
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/hooks/hooks.js:0
-msgid ""
-"The order has been synchronized earlier. Please make the invoice from the "
-"backend for the order: "
 msgstr ""
 
 #. module: point_of_sale
@@ -9750,12 +9846,6 @@ msgstr ""
 msgid ""
 "The selected pricelists must belong to no company or the company of the "
 "point of sale."
-msgstr ""
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/hooks/hooks.js:0
-msgid "The server encountered an error while receiving your order."
 msgstr ""
 
 #. module: point_of_sale
@@ -10274,16 +10364,6 @@ msgid "To Weigh"
 msgstr ""
 
 #. module: point_of_sale
-#. odoo-python
-#: code:addons/point_of_sale/models/product_product.py:0
-#: code:addons/point_of_sale/models/product_template.py:0
-msgid ""
-"To delete a product, make sure all point of sale sessions are closed.\n"
-"\n"
-"Deleting a product available in a session would be like attempting to snatch a hamburger from a customer’s hand mid-bite; chaos will ensue as ketchup and mayo go flying everywhere!"
-msgstr ""
-
-#. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/payment_screen/payment_screen.js:0
 msgid ""
@@ -10543,12 +10623,6 @@ msgid "Unable to show information about this error."
 msgstr ""
 
 #. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/hooks/hooks.js:0
-msgid "Unable to sync order"
-msgstr ""
-
-#. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.ticket_request_with_code
 msgid "Unique code"
 msgstr ""
@@ -10576,7 +10650,6 @@ msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/hooks/hooks.js:0
 #: code:addons/point_of_sale/static/src/app/utils/error_handlers.js:0
 msgid "Unknown Error"
 msgstr ""
@@ -10819,7 +10892,7 @@ msgstr ""
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/customer_display/customer_display.xml:0
-msgid "Welcome."
+msgid "Welcome"
 msgstr ""
 
 #. module: point_of_sale
@@ -11001,10 +11074,35 @@ msgstr ""
 
 #. module: point_of_sale
 #. odoo-python
+#: code:addons/point_of_sale/models/pos_category.py:0
+msgid ""
+"You cannot archive/delete PoS Product Categories that are used in an active Point of Sale session.\n"
+"Close all related PoS sessions first and try again."
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/pos_category.py:0
+msgid ""
+"You cannot archive/delete a category which is currently in use in a point of"
+" sale."
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-python
 #: code:addons/point_of_sale/models/product_template.py:0
 msgid ""
-"You cannot archive a product that is set as a special product in a Point of "
-"Sale configuration. Please change the configuration first."
+"You cannot archive/delete a product that is set as a special product in a "
+"Point of Sale configuration. Please change the configuration first."
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/product_template.py:0
+msgid ""
+"You cannot archive/delete product(s) that are available in an active Point of Sale session.\n"
+"\n"
+"Archiving/Deleting a product available in a session would be like attempting to snatch a hamburger from a customer’s hand mid-bite; chaos will ensue as ketchup and mayo go flying everywhere!"
 msgstr ""
 
 #. module: point_of_sale
@@ -11038,13 +11136,6 @@ msgstr ""
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_session.py:0
 msgid "You cannot delete a cash move that is not linked to this session."
-msgstr ""
-
-#. module: point_of_sale
-#. odoo-python
-#: code:addons/point_of_sale/models/pos_category.py:0
-msgid ""
-"You cannot delete a category which is currently in use in a point of sale."
 msgstr ""
 
 #. module: point_of_sale
@@ -11130,6 +11221,12 @@ msgid "You don't have the access rights to perform a cash in/out."
 msgstr ""
 
 #. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/app/components/popups/opening_control_popup/opening_control_popup.xml:0
+msgid "You have"
+msgstr ""
+
+#. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_session.py:0
 msgid ""
@@ -11179,8 +11276,15 @@ msgstr ""
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/components/popups/closing_popup/closing_popup.xml:0
-#: code:addons/point_of_sale/static/src/app/components/popups/opening_control_popup/opening_control_popup.xml:0
 msgid "You still have"
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/wizard/pos_price_inclusion_wizard.py:0
+msgid ""
+"You want to sell a product at %(price_incl)s using tax \"%(tax_name)s\" "
+"(%(amount_type_label)s)"
 msgstr ""
 
 #. module: point_of_sale
@@ -11497,8 +11601,13 @@ msgstr ""
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/components/popups/closing_popup/closing_popup.xml:0
-#: code:addons/point_of_sale/static/src/app/components/popups/opening_control_popup/opening_control_popup.xml:0
 msgid "open orders for the next few days."
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/app/components/popups/opening_control_popup/opening_control_popup.xml:0
+msgid "order(s) for the next few days:"
 msgstr ""
 
 #. module: point_of_sale

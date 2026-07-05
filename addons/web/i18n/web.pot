@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.4a1\n"
+"Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:38+0000\n"
-"PO-Revision-Date: 2026-06-19 17:38+0000\n"
+"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"PO-Revision-Date: 2026-07-03 17:40+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -462,7 +462,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/control_panel/control_panel.js:0
+#: code:addons/web/static/src/search/control_panel/embedded_actions.js:0
 msgid "A name for your new action is required."
 msgstr ""
 
@@ -624,6 +624,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 #: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
 #: code:addons/web/static/src/views/kanban/kanban_record_quick_create.xml:0
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
@@ -649,6 +650,12 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/properties/properties_definition_field.xml:0
 #: code:addons/web/static/src/views/fields/properties/properties_field.xml:0
 msgid "Add Property"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/property_definition.js:0
+msgid "Add Property Field"
 msgstr ""
 
 #. module: web
@@ -835,7 +842,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/control_panel/control_panel.js:0
+#: code:addons/web/static/src/search/control_panel/embedded_actions.js:0
 msgid "An action with the same name already exists."
 msgstr ""
 
@@ -920,7 +927,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/control_panel/control_panel.js:0
+#: code:addons/web/static/src/search/control_panel/embedded_actions.js:0
 msgid "Are you sure that you want to remove this embedded action?"
 msgstr ""
 
@@ -1538,6 +1545,7 @@ msgstr ""
 #: code:addons/web/static/src/core/notifications/notification.xml:0
 #: code:addons/web/static/src/core/pwa/install_prompt.xml:0
 #: code:addons/web/static/src/views/fields/dynamic_placeholder_popover.xml:0
+#: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 #: code:addons/web/static/src/views/fields/relational_utils.xml:0
 #: code:addons/web/static/src/views/kanban/kanban_column_examples_dialog.xml:0
 #: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
@@ -1955,7 +1963,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/control_panel/control_panel.js:0
+#: code:addons/web/static/src/search/control_panel/embedded_actions.js:0
 msgid "Custom %s"
 msgstr ""
 
@@ -1966,7 +1974,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/control_panel/control_panel.js:0
+#: code:addons/web/static/src/search/control_panel/embedded_actions.js:0
 msgid "Custom Embedded Action"
 msgstr ""
 
@@ -2196,7 +2204,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/tags_list/avatar_tag.xml:0
 #: code:addons/web/static/src/core/tags_list/badge_tag.js:0
-#: code:addons/web/static/src/search/control_panel/control_panel.js:0
+#: code:addons/web/static/src/search/control_panel/embedded_actions.js:0
 #: code:addons/web/static/src/views/calendar/calendar_common/calendar_common_popover.xml:0
 #: code:addons/web/static/src/views/calendar/calendar_controller.js:0
 #: code:addons/web/static/src/views/fields/many2many_binary/many2many_binary_field.xml:0
@@ -2226,7 +2234,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/control_panel/control_panel.xml:0
+#: code:addons/web/static/src/search/control_panel/embedded_actions.xml:0
 msgid "Delete item"
 msgstr ""
 
@@ -2321,6 +2329,7 @@ msgstr ""
 #: code:addons/web/static/src/search/search_bar/search_bar.js:0
 #: code:addons/web/static/src/search/search_model.js:0
 #: code:addons/web/static/src/views/fields/dynamic_placeholder_popover.xml:0
+#: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 #: code:addons/web/static/src/views/fields/relational_utils.xml:0
 #: code:addons/web/static/src/views/fields/translation_dialog.xml:0
 #: code:addons/web/static/src/views/form/form_controller.xml:0
@@ -4199,7 +4208,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/control_panel/control_panel.xml:0
+#: code:addons/web/static/src/search/control_panel/embedded_actions.xml:0
 msgid "Make this embedded action available to other users"
 msgstr ""
 
@@ -4664,6 +4673,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/calendar/quick_create/calendar_quick_create.xml:0
 msgid "Name:"
+msgstr ""
+
+#. module: web
+#. odoo-python
+#: code:addons/web/models/models.py:0
+msgid "Need at least one item to groupby"
 msgstr ""
 
 #. module: web
@@ -6085,7 +6100,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/control_panel/control_panel.xml:0
+#: code:addons/web/static/src/search/control_panel/embedded_actions.xml:0
 #: code:addons/web/static/src/search/custom_favorite_item/custom_favorite_item.xml:0
 #: code:addons/web/static/src/views/fields/relational_utils.xml:0
 #: code:addons/web/static/src/views/fields/translation_dialog.xml:0
@@ -6117,7 +6132,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/control_panel/control_panel.xml:0
+#: code:addons/web/static/src/search/control_panel/embedded_actions.xml:0
 msgid "Save View"
 msgstr ""
 
@@ -6505,7 +6520,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/control_panel/control_panel.xml:0
+#: code:addons/web/static/src/search/control_panel/embedded_actions.xml:0
 msgid "Shared"
 msgstr ""
 
@@ -7090,7 +7105,7 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/control_panel/control_panel.js:0
+#: code:addons/web/static/src/search/control_panel/embedded_actions.js:0
 msgid "This embedded action is global and will be removed for everyone."
 msgstr ""
 
@@ -7495,8 +7510,15 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
 msgid "Update"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/property_definition.js:0
+msgid "Update Property Field"
 msgstr ""
 
 #. module: web
@@ -7816,7 +7838,7 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/errors/error_dialogs.js:0
-#: code:addons/web/static/src/search/control_panel/control_panel.js:0
+#: code:addons/web/static/src/search/control_panel/embedded_actions.js:0
 #: code:addons/web/static/src/views/fields/domain/domain_field.xml:0
 #: code:addons/web/static/src/views/fields/json_checkboxes/json_checkboxes_field.xml:0
 msgid "Warning"

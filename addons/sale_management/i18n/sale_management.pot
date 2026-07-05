@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.4a1\n"
+"Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:36+0000\n"
-"PO-Revision-Date: 2026-06-19 17:36+0000\n"
+"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"PO-Revision-Date: 2026-07-03 17:38+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -280,11 +280,6 @@ msgid "Number of days for the validity date computation of the quotation"
 msgstr ""
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template__require_payment
-msgid "Online Payment"
-msgstr ""
-
-#. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__require_signature
 msgid "Online Signature"
 msgstr ""
@@ -313,7 +308,7 @@ msgstr ""
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__prepayment_percent
-msgid "Prepayment percentage"
+msgid "Prepayment"
 msgstr ""
 
 #. module: sale_management
@@ -387,13 +382,6 @@ msgstr ""
 #: model:ir.model.fields,help:sale_management.field_sale_order_template__require_signature
 msgid ""
 "Request a online signature to the customer in order to confirm orders "
-"automatically."
-msgstr ""
-
-#. module: sale_management
-#: model:ir.model.fields,help:sale_management.field_sale_order_template__require_payment
-msgid ""
-"Request an online payment to the customer in order to confirm orders "
 "automatically."
 msgstr ""
 
@@ -651,9 +639,4 @@ msgstr ""
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
 msgid "e.g. Standard Consultancy Package"
-msgstr ""
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
-msgid "of"
 msgstr ""

@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.4a1\n"
+"Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:36+0000\n"
-"PO-Revision-Date: 2026-06-19 17:36+0000\n"
+"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"PO-Revision-Date: 2026-07-03 17:38+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -146,17 +146,23 @@ msgstr ""
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
-msgid "<i class=\"d-none d-md-block fa fa-envelope\" title=\"Work Email\"/>"
+msgid ""
+"<i class=\"d-none d-md-block fa fa-envelope\" title=\"Work Email\" "
+"invisible=\"not work_email\"/>"
 msgstr ""
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
-msgid "<i class=\"d-none d-md-block fa fa-mobile\" title=\"Work Mobile\"/>"
+msgid ""
+"<i class=\"d-none d-md-block fa fa-mobile\" title=\"Work Mobile\" "
+"invisible=\"not mobile_phone\"/>"
 msgstr ""
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
-msgid "<i class=\"d-none d-md-block fa fa-phone\" title=\"Work Phone\"/>"
+msgid ""
+"<i class=\"d-none d-md-block fa fa-phone\" title=\"Work Phone\" "
+"invisible=\"not work_phone\"/>"
 msgstr ""
 
 #. module: hr
@@ -840,6 +846,24 @@ msgid "Archived"
 msgstr ""
 
 #. module: hr
+#. odoo-python
+#: code:addons/hr/models/hr_employee.py:0
+msgid "As of"
+msgstr ""
+
+#. module: hr
+#. odoo-python
+#: code:addons/hr/models/hr_employee.py:0
+msgid "As of %(start)s to %(end)s"
+msgstr ""
+
+#. module: hr
+#. odoo-python
+#: code:addons/hr/models/hr_employee.py:0
+msgid "As of %s"
+msgstr ""
+
+#. module: hr
 #: model:ir.model.fields,field_description:hr.field_mail_activity_plan_template__responsible_type
 msgid "Assignment"
 msgstr ""
@@ -1471,7 +1495,6 @@ msgstr ""
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__country_of_birth
-#: model:ir.model.fields,field_description:hr.field_res_users__country_of_birth
 msgid "Country of Birth"
 msgstr ""
 
@@ -1824,7 +1847,6 @@ msgstr ""
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__children
 #: model:ir.model.fields,field_description:hr.field_hr_version__children
-#: model:ir.model.fields,field_description:hr.field_res_users__children
 msgid "Dependent Children"
 msgstr ""
 
@@ -2517,7 +2539,6 @@ msgid "Familiarity with web development frameworks"
 msgstr ""
 
 #. module: hr
-#: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_preferences
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Family"
 msgstr ""
@@ -2671,11 +2692,6 @@ msgstr ""
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_version_search_view
 msgid "Future Contracts"
-msgstr ""
-
-#. module: hr
-#: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_preferences
-msgid "Gender"
 msgstr ""
 
 #. module: hr
@@ -3333,7 +3349,6 @@ msgstr ""
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__legal_name
-#: model:ir.model.fields,field_description:hr.field_res_users__legal_name
 msgid "Legal Name"
 msgstr ""
 
@@ -3472,7 +3487,6 @@ msgstr ""
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__marital
 #: model:ir.model.fields,field_description:hr.field_hr_version__marital
-#: model:ir.model.fields,field_description:hr.field_res_users__marital
 msgid "Marital Status"
 msgstr ""
 
@@ -3575,24 +3589,6 @@ msgstr ""
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__mobile_phone_sanitized
 msgid "Mobile Phone Sanitized"
-msgstr ""
-
-#. module: hr
-#. odoo-python
-#: code:addons/hr/models/hr_employee.py:0
-msgid "Modified"
-msgstr ""
-
-#. module: hr
-#. odoo-python
-#: code:addons/hr/models/hr_employee.py:0
-msgid "Modified from %(start)s to %(end)s"
-msgstr ""
-
-#. module: hr
-#. odoo-python
-#: code:addons/hr/models/hr_employee.py:0
-msgid "Modified from %s"
 msgstr ""
 
 #. module: hr
@@ -4096,7 +4092,6 @@ msgid "Personal"
 msgstr ""
 
 #. module: hr
-#: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_preferences
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Personal Information"
 msgstr ""
@@ -4136,7 +4131,6 @@ msgstr ""
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__place_of_birth
-#: model:ir.model.fields,field_description:hr.field_res_users__place_of_birth
 msgid "Place of Birth"
 msgstr ""
 
@@ -4265,11 +4259,6 @@ msgid "Private Address"
 msgstr ""
 
 #. module: hr
-#: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_preferences
-msgid "Private Address & Contact"
-msgstr ""
-
-#. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__private_city
 #: model:ir.model.fields,field_description:hr.field_hr_version__private_city
 #: model:ir.model.fields,field_description:hr.field_res_users__private_city
@@ -4293,6 +4282,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr.field_res_users__private_email
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_preferences
 msgid "Private Email"
+msgstr ""
+
+#. module: hr
+#: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_preferences
+msgid "Private Information"
 msgstr ""
 
 #. module: hr
@@ -4724,7 +4718,6 @@ msgstr ""
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__sex
 #: model:ir.model.fields,field_description:hr.field_hr_version__sex
-#: model:ir.model.fields,field_description:hr.field_res_users__sex
 msgid "Sex"
 msgstr ""
 
@@ -4745,6 +4738,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__show_hr_icon_display
 #: model:ir.model.fields,field_description:hr.field_resource_resource__show_hr_icon_display
 msgid "Show Hr Icon Display"
+msgstr ""
+
+#. module: hr
+#: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_preferences
+msgid "Show To All Employees"
 msgstr ""
 
 #. module: hr
@@ -4800,14 +4798,12 @@ msgstr ""
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__spouse_birthdate
 #: model:ir.model.fields,field_description:hr.field_hr_version__spouse_birthdate
-#: model:ir.model.fields,field_description:hr.field_res_users__spouse_birthdate
 msgid "Spouse Birthdate"
 msgstr ""
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__spouse_complete_name
 #: model:ir.model.fields,field_description:hr.field_hr_version__spouse_complete_name
-#: model:ir.model.fields,field_description:hr.field_res_users__spouse_complete_name
 msgid "Spouse Legal Name"
 msgstr ""
 
@@ -5088,7 +5084,6 @@ msgstr ""
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__legal_name
-#: model:ir.model.fields,help:hr.field_res_users__legal_name
 msgid ""
 "The employee's official name as per government-issued or legal documents."
 msgstr ""
@@ -5213,7 +5208,6 @@ msgstr ""
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__sex
 #: model:ir.model.fields,help:hr.field_hr_version__sex
-#: model:ir.model.fields,help:hr.field_res_users__sex
 msgid ""
 "This is the legal sex as recognized by the state, used for official and "
 "statutory purposes."
