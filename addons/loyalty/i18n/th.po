@@ -7,17 +7,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:37+0000\n"
-"PO-Revision-Date: 2025-09-16 21:26+0000\n"
-"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
-"Language-Team: Thai <https://translate.odoo.com/projects/odoo-19/loyalty/th/"
-">\n"
+"POT-Creation-Date: 2026-07-03 17:39+0000\n"
+"PO-Revision-Date: 2026-06-19 12:38+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Thai <https://translate.odoo.com/projects/odoo-master/loyalty/"
+"th/>\n"
 "Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: loyalty
 #: model:ir.model.fields,help:loyalty.field_loyalty_program__trigger
@@ -467,6 +467,11 @@ msgid "All Discount Product"
 msgstr "สินค้าลดราคาทั้งหมด"
 
 #. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
+msgid "All Pricelist"
+msgstr ""
+
+#. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_reward_view_form
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_rule_view_form
 msgid "Among"
@@ -525,6 +530,11 @@ msgstr "โดยอัตโนมัติ"
 #: code:addons/loyalty/models/loyalty_program.py:0
 msgid "Automatic promo: 10% off on orders higher than $50"
 msgstr "โปรโมชั่นอัตโนมัติ: ส่วนลด 10% สำหรับการสั่งซื้อที่มากกว่า $50"
+
+#. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
+msgid "Availability Dates"
+msgstr ""
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__available_on
@@ -947,11 +957,6 @@ msgstr "แสดงชื่อ"
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
-msgid "Displayed as"
-msgstr "แสดงเป็น"
-
-#. module: loyalty
-#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
 msgid ""
 "Drive repeat purchases by sending a unique, single-use coupon code for the "
 "next purchase when a customer buys something in your store."
@@ -1014,6 +1019,7 @@ msgstr "ผู้ติดตาม (พาร์ทเนอร์)"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_generate_wizard__mode
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
 msgid "For"
 msgstr "สำหรับ"
 
@@ -1519,6 +1525,11 @@ msgid "Odoo"
 msgstr "Odoo"
 
 #. module: loyalty
+#: model:ir.model.fields,field_description:loyalty.field_loyalty_program__once_per_user
+msgid "Once per user"
+msgstr ""
+
+#. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_history__order_id
 #: model:ir.model.fields.selection,name:loyalty.selection__loyalty_reward__discount_applicability__order
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_card_history_template
@@ -1634,7 +1645,6 @@ msgstr "โปรแกรม"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__name
-#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
 msgid "Program Name"
 msgstr "ชื่อโปรแกรม"
 
@@ -1804,8 +1814,13 @@ msgstr "ตั้งค่ากฎแบบมีเงื่อนไขใน
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
-msgid "Show points Unit"
-msgstr "แสดงหน่วยจุด"
+msgid "Settings"
+msgstr ""
+
+#. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
+msgid "Show Points Unit"
+msgstr ""
 
 #. module: loyalty
 #: model:ir.model.fields.selection,name:loyalty.selection__loyalty_reward__discount_applicability__specific
@@ -1949,6 +1964,11 @@ msgid "Trigger"
 msgstr "เปิดใช้งาน"
 
 #. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
+msgid "Type"
+msgstr ""
+
+#. module: loyalty
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_card.py:0
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_card_update_balance_form
@@ -1989,6 +2009,11 @@ msgid "Used"
 msgstr "ใช้แล้ว"
 
 #. module: loyalty
+#: model:ir.model.fields,field_description:loyalty.field_loyalty_program__partner_ids
+msgid "Used by"
+msgstr ""
+
+#. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_reward__user_has_debug
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_rule__user_has_debug
 msgid "User Has Debug"
@@ -2009,16 +2034,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
 msgid "Visible to all"
 msgstr ""
-
-#. module: loyalty
-#: model:ir.model.fields,field_description:loyalty.field_loyalty_card__website_message_ids
-msgid "Website Messages"
-msgstr "ข้อความเว็บไซต์"
-
-#. module: loyalty
-#: model:ir.model.fields,help:loyalty.field_loyalty_card__website_message_ids
-msgid "Website communication history"
-msgstr "ประวัติการสื่อสารของเว็บไซต์"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_mail__trigger
@@ -2172,12 +2187,6 @@ msgstr "รางวัลสมาชิก"
 
 #. module: loyalty
 #. odoo-python
-#: code:addons/loyalty/models/loyalty_program.py:0
-msgid "mail.template"
-msgstr ""
-
-#. module: loyalty
-#. odoo-python
 #: code:addons/loyalty/models/loyalty_rule.py:0
 msgid "money"
 msgstr ""
@@ -2272,3 +2281,15 @@ msgstr ""
 #: code:addons/loyalty/models/loyalty_reward.py:0
 msgid "your order"
 msgstr "คำสั่งซื้อของคุณ"
+
+#~ msgid "Displayed as"
+#~ msgstr "แสดงเป็น"
+
+#~ msgid "Show points Unit"
+#~ msgstr "แสดงหน่วยจุด"
+
+#~ msgid "Website Messages"
+#~ msgstr "ข้อความเว็บไซต์"
+
+#~ msgid "Website communication history"
+#~ msgstr "ประวัติการสื่อสารของเว็บไซต์"

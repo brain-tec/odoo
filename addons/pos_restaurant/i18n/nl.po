@@ -14,17 +14,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-29 17:38+0000\n"
-"PO-Revision-Date: 2026-05-08 09:07+0000\n"
-"Last-Translator: Bren Driesen <brdri@odoo.com>\n"
-"Language-Team: Dutch <https://translate.odoo.com/projects/odoo-s19-3/"
+"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"PO-Revision-Date: 2026-06-19 16:52+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Dutch <https://translate.odoo.com/projects/odoo-master/"
 "pos_restaurant/nl/>\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.17\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: pos_restaurant
 #. odoo-python
@@ -69,6 +69,11 @@ msgstr ""
 "200 g Ierse Black Angus rundvlees, gekarameliseerde uien met paprika, "
 "gehakte ijsbergsla, rode uien, gegrild spek, tomatensaus, augurken, "
 "barbecuesaus"
+
+#. module: pos_restaurant
+#: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_order_change_receipt
+msgid "<br/>Guest"
+msgstr ""
 
 #. module: pos_restaurant
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_restaurant_pos_category_kanban_view
@@ -159,11 +164,6 @@ msgid "Alignment"
 msgstr "Uitlijning"
 
 #. module: pos_restaurant
-#: model_terms:ir.ui.view,arch_db:pos_restaurant.res_config_settings_view_form
-msgid "Allow Bill Splitting"
-msgstr "Sta rekening splitsen toe"
-
-#. module: pos_restaurant
 #: model:product.attribute.value,name:pos_restaurant.pav_extras_pizza_anchovy
 msgid "Anchovy"
 msgstr "Ansjovis"
@@ -234,7 +234,6 @@ msgstr "Huisgemaakte frietjes"
 #. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/screens/split_bill_screen/split_bill_screen.xml:0
-#: model:ir.model.fields,field_description:pos_restaurant.field_pos_config__iface_splitbill
 msgid "Bill Splitting"
 msgstr "Rekening splitsen"
 
@@ -558,11 +557,6 @@ msgid "Enable Course Allocation"
 msgstr "Gangtoewijzing inschakelen"
 
 #. module: pos_restaurant
-#: model:ir.model.fields,help:pos_restaurant.field_pos_config__iface_splitbill
-msgid "Enables Bill Splitting in the Point of Sale."
-msgstr "Sta splitsen van rekeningen toe in de kassa."
-
-#. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/components/numpad_dropdown/numpad_dropdown.xml:0
 #: code:addons/pos_restaurant/static/src/app/screens/product_screen/product_screen.xml:0
@@ -720,7 +714,6 @@ msgstr "Gegrilde groenten"
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/screens/product_screen/control_buttons/control_buttons.xml:0
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_preset__use_guest
-#: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_order_change_receipt
 msgid "Guest"
 msgstr "Gast"
 
@@ -940,11 +933,6 @@ msgid "Old Fashioned"
 msgstr "Old Fashioned"
 
 #. module: pos_restaurant
-#: model_terms:ir.ui.view,arch_db:pos_restaurant.view_pos_preset_form_inherit_pos_restaurant
-msgid "Options"
-msgstr "Opties"
-
-#. module: pos_restaurant
 #: model:ir.model.fields,field_description:pos_restaurant.field_restaurant_order_course__line_ids
 msgid "Order Lines"
 msgstr "Orderregels"
@@ -1092,11 +1080,6 @@ msgstr "Kassa's"
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_course__category_ids
 msgid "Pos Category"
 msgstr "Kassacategorie"
-
-#. module: pos_restaurant
-#: model:ir.model.fields,field_description:pos_restaurant.field_res_config_settings__pos_iface_splitbill
-msgid "Pos Iface Splitbill"
-msgstr "Kassa Iface Rekening splitsen"
 
 #. module: pos_restaurant
 #: model:product.attribute.value,name:pos_restaurant.pav_sides_potato_thyme
@@ -1321,11 +1304,6 @@ msgid "Shapes"
 msgstr "Vormen"
 
 #. module: pos_restaurant
-#: model:product.attribute,name:pos_restaurant.pa_sides
-msgid "Sides"
-msgstr "Bijgerecht"
-
-#. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/screens/floor_screen/floor_plan_editor/edit_decor/edit_decor.xml:0
 msgid "Size"
@@ -1357,11 +1335,6 @@ msgstr "Pikante tonijnen sandwich"
 #: code:addons/pos_restaurant/static/src/app/screens/split_bill_screen/split_bill_screen.xml:0
 msgid "Split Order"
 msgstr "Bestelling splitsen"
-
-#. module: pos_restaurant
-#: model_terms:ir.ui.view,arch_db:pos_restaurant.res_config_settings_view_form
-msgid "Split total or order lines"
-msgstr "Splits de totale rekening of enkele orderregels"
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -1398,10 +1371,15 @@ msgstr "Zaalweergave wisselen"
 
 #. module: pos_restaurant
 #. odoo-javascript
+#: code:addons/pos_restaurant/static/src/app/utils/printer/generate_printer_data.js:0
+msgid "T %s"
+msgstr ""
+
+#. module: pos_restaurant
+#. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/screens/payment_screen/order_details_dialog.js:0
 #: code:addons/pos_restaurant/static/src/app/screens/ticket_screen/ticket_screen.xml:0
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_order__table_id
-#: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_order_change_receipt
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_order_receipt_header
 msgid "Table"
 msgstr "Tafel"
@@ -1694,6 +1672,24 @@ msgstr "items"
 #: code:addons/pos_restaurant/static/src/app/screens/split_bill_screen/split_bill_screen.xml:0
 msgid "product(s) selected"
 msgstr "Geselecteerde product(en)"
+
+#~ msgid "Allow Bill Splitting"
+#~ msgstr "Sta rekening splitsen toe"
+
+#~ msgid "Enables Bill Splitting in the Point of Sale."
+#~ msgstr "Sta splitsen van rekeningen toe in de kassa."
+
+#~ msgid "Pos Iface Splitbill"
+#~ msgstr "Kassa Iface Rekening splitsen"
+
+#~ msgid "Split total or order lines"
+#~ msgstr "Splits de totale rekening of enkele orderregels"
+
+#~ msgid "Options"
+#~ msgstr "Opties"
+
+#~ msgid "Sides"
+#~ msgstr "Bijgerecht"
 
 #~ msgid " and $1"
 #~ msgstr " en € 1"

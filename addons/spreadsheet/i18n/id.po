@@ -4,23 +4,23 @@
 #
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
 # "Abe Manyo (abem)" <abem@odoo.com>, 2025, 2026.
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 # "Nurul Aini Akrima Sabila (nuaas)" <nuaas@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-29 17:40+0000\n"
-"PO-Revision-Date: 2026-04-13 19:31+0000\n"
-"Last-Translator: \"Nurul Aini Akrima Sabila (nuaas)\" <nuaas@odoo.com>\n"
-"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-s19-2/"
+"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"PO-Revision-Date: 2026-06-21 12:56+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/"
 "spreadsheet/id/>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.16.2\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -79,6 +79,24 @@ msgstr "% total kolom"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "%(count)s matches in %(sheetName)s"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "%(count)s matches in all sheets"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "%(count)s matches in range %(range)s of %(sheetName)s"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "%(hour)s AM"
 msgstr "%(hour)s AM"
 
@@ -97,20 +115,9 @@ msgstr "%(hour_number)sj"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/list/plugins/list_ui_plugin.js:0
+#, fuzzy
 msgid "%(list_name)s (List #%(list_id)s)"
-msgstr ""
-
-#. module: spreadsheet
-#. odoo-javascript
-#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "%(matches)s matches in %(sheetName)s"
-msgstr "%(matches)s cocok di %(sheetName)s"
-
-#. module: spreadsheet
-#. odoo-javascript
-#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "%(matches)s matches in range %(range)s of %(sheetName)s"
-msgstr "%(matches)s cocok di range %(range)s dari %(sheetName)s"
+msgstr "%(list_name)s (Daftar #%(list_id)s)"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -280,12 +287,6 @@ msgstr "%s bukan merupakan minggu valid (harus angka antara 0 dan 53)"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "%s matches in all sheets"
-msgstr "%s cocok di semua sheet"
-
-#. module: spreadsheet
-#. odoo-javascript
-#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "'${str}'"
 msgstr ""
 
@@ -328,26 +329,30 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "+ Add another rule"
-msgstr ""
+msgstr "+ Tambahkan peraturan lain"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "+ Add chart"
-msgstr ""
+msgstr "+ Tambahkan bagan"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "+ Add data view"
-msgstr ""
+msgstr "+ Tambahkan tampilan data"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "- [optional]"
-msgstr ""
+msgstr "- [optional]"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -382,6 +387,24 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "1 column"
 msgstr "1 kolom"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "1 match in %(sheetName)s"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "1 match in all sheets"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "1 match in range %(range)s of %(sheetName)s"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -422,8 +445,9 @@ msgstr "=PIVOT(${"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "A"
-msgstr ""
+msgstr "A"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -742,8 +766,9 @@ msgstr "Value absolute dari angka."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/actions/spreadsheet_download_action.js:0
+#, fuzzy
 msgid "Access Error"
-msgstr ""
+msgstr "Akses Eror"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -775,7 +800,7 @@ msgstr "Accrued interest of security paying at maturity."
 
 #. module: spreadsheet
 #. odoo-javascript
-#: code:addons/spreadsheet/static/src/global_filters/plugins/global_filters_core_view_plugin.js:0
+#: code:addons/spreadsheet/static/src/global_filters/plugins/global_filters_ui_plugin.js:0
 msgid "Active Filters"
 msgstr "Filter Aktif"
 
@@ -833,6 +858,12 @@ msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "Add a description text"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 msgid "Add a key value description"
 msgstr "Tambahkan keterangan key value"
@@ -840,8 +871,15 @@ msgstr "Tambahkan keterangan key value"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
-msgid "Add another item"
+msgid "Add a redirection link"
 msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
+msgid "Add another item"
+msgstr "Tambahkan item lagi"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -852,8 +890,9 @@ msgstr "Tambahkan huruf atau simbol apapun"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Add calculated measure"
-msgstr ""
+msgstr "Tambahkan ukuran yang dihitung"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -888,8 +927,9 @@ msgstr "Tambahkan kolom baru untuk menghindari menimpa cell"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Add range"
-msgstr ""
+msgstr "Tambahkan range"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -936,6 +976,13 @@ msgid ""
 msgstr ""
 "Semua range di [[FUNCTION_NAME]] harus memiliki jumlah kolom yang sama "
 "(memiliki %s)."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid ""
+"All ranges in [[FUNCTION_NAME]] must have the same number of rows (got %s)."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1106,14 +1153,21 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Analyze performance"
-msgstr ""
+msgstr "Analisis performa"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Angle from the X axis to a point (x,y), in radians."
 msgstr "Sudut dari X axis ke poin (x,y), dalam radians."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "Annotation"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1354,8 +1408,8 @@ msgstr "Setidaknya satu delimiter harus disediakan."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "At least one measure and/or dimension is not correct."
-msgstr "Setidaknya satu ukuran dan/atau dimensi tidak tepat."
+msgid "At least one measure/dimension and/or filter is not correct."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1380,6 +1434,12 @@ msgstr "Sesuaikan-otomatis ke hasil formula"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Automatic"
 msgstr "Otomatis"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "Automatic evaluation is disabled. Press F9 to recalculate."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1555,8 +1615,9 @@ msgstr "Hitam"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Blue"
-msgstr ""
+msgstr "Biru"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1624,8 +1685,9 @@ msgstr "Bawah kanan"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Bubble"
-msgstr ""
+msgstr "Gelembung"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1814,6 +1876,12 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "Calculation"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Calendar"
 msgstr "Kalender"
 
@@ -1826,8 +1894,9 @@ msgstr "Opsi bagan kalender"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Cancel"
-msgstr ""
+msgstr "Batal"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1986,8 +2055,9 @@ msgstr "Kategori warna"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Caused by"
-msgstr ""
+msgstr "Dihasilkan oleh"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2016,8 +2086,14 @@ msgstr "Center radius"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "Change color"
-msgstr "Ubah warna"
+msgid "Change grid color"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "Change tab color"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2052,6 +2128,18 @@ msgstr "Bagan"
 #: code:addons/spreadsheet/static/src/index.js:0
 msgid "Chart #%(odooChartId)s"
 msgstr "Bagan #%(odooChartId)s"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "Chart Info"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/chart/odoo_link/chart_menu.js:0
+msgid "Chart Odoo Link"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2355,14 +2443,16 @@ msgstr "Kolom kanan"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Column statistics"
-msgstr ""
+msgstr "Statistik kolom"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Columns"
-msgstr ""
+msgstr "Kolom"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2508,8 +2598,9 @@ msgstr "Formatting kondisional"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Configuration"
-msgstr ""
+msgstr "Konfigurasi"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3006,8 +3097,9 @@ msgstr "Validasi data"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Data visualization"
-msgstr ""
+msgstr "Visualisasi data"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3398,8 +3490,9 @@ msgstr "Urutan menurun"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Design"
-msgstr ""
+msgstr "Desain"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3718,8 +3811,9 @@ msgstr "Jarak"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Distribution"
-msgstr ""
+msgstr "Distribusi"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3732,6 +3826,12 @@ msgstr "Membagi dengan nol"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Do not switch to straight-line depreciation"
 msgstr "Jangan ganti ke straight-line depreciation"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "Domain"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3748,8 +3848,6 @@ msgstr "Donat"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-#: code:addons/spreadsheet/static/src/public_readonly_app/public_readonly.js:0
-#: model_terms:ir.ui.view,arch_db:spreadsheet.public_spreadsheet_layout
 msgid "Download"
 msgstr "Unduh"
 
@@ -3870,6 +3968,18 @@ msgstr "Insinyur"
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/global_filters/helpers.js:0
+msgid "Enter a value"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/global_filters/helpers.js:0
+msgid "Enter one or several values"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Entire workbook"
 msgstr ""
@@ -3980,8 +4090,9 @@ msgstr "Keluar dari Layar Penuh"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Exit fullscreen"
-msgstr ""
+msgstr "Keluar dari layar penuh"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4168,12 +4279,6 @@ msgstr "Filter berdasarkan value"
 
 #. module: spreadsheet
 #. odoo-javascript
-#: code:addons/spreadsheet/static/src/public_readonly_app/public_readonly.xml:0
-msgid "Filters"
-msgstr "Penyaring"
-
-#. module: spreadsheet
-#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Financial"
 msgstr "Keuangan"
@@ -4205,8 +4310,8 @@ msgstr "Kode mata uang pertama."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "First day of the month preceding a date."
-msgstr "Hari pertama bulan sebelum tanggal."
+msgid "First day of the month a date falls in."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4363,8 +4468,9 @@ msgstr "Tipe format"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Formatting"
-msgstr ""
+msgstr "Formatting"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4393,8 +4499,9 @@ msgstr "Freeze"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Frequency"
-msgstr ""
+msgstr "Frekuensi"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4738,8 +4845,9 @@ msgstr "Lebih besar dari atau sama dengan."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Green"
-msgstr ""
+msgstr "Hijau"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5136,6 +5244,12 @@ msgstr "Termasuk cell kosong (default)"
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "Include hidden results"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Incompatible units of measure ('%s' vs '%s')"
 msgstr "Satuan ukuran yang tidak ompatibel ('%s' vs '%s')"
@@ -5339,6 +5453,12 @@ msgstr "Bilangan Bulat"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Interest rate of an annuity investment."
 msgstr "Interest rate of an annuity investment."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/public_spreadsheet/odoo_menu_fill.js:0
+msgid "Internal link"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5670,8 +5790,9 @@ msgstr "Label tidak valid"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Landscape"
-msgstr ""
+msgstr "Lanskap"
 
 #. module: spreadsheet
 #: model:ir.model,name:spreadsheet.model_res_lang
@@ -5729,8 +5850,8 @@ msgstr "Tanggal hari terakhir dari bulan sebelum atau setelah tanggal."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "Last day of the month following a date."
-msgstr "Tanggal terakhir bulan mengikuti tanggal."
+msgid "Last day of the month a date falls in."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5856,8 +5977,9 @@ msgstr "List #%(list_id)s"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Load more..."
-msgstr ""
+msgstr "Muat lebih..."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5976,6 +6098,18 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "Manual"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "Manual calculation"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "March"
 msgstr "Maret"
 
@@ -6003,6 +6137,12 @@ msgstr "Cocokkan ke akhir"
 msgid ""
 "Match(es) cannot be replaced as they are part of a formula or inside a "
 "locked sheet"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "Matches in the following hidden sheets:"
 msgstr ""
 
 #. module: spreadsheet
@@ -6100,8 +6240,9 @@ msgstr "Opsi-opsi pengukuran \"%s\""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Measures"
-msgstr ""
+msgstr "Pengukuran"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -6129,7 +6270,7 @@ msgstr "Medium"
 
 #. module: spreadsheet
 #. odoo-javascript
-#: code:addons/spreadsheet/static/src/ir_ui_menu/index.js:0
+#: code:addons/spreadsheet/static/src/ir_ui_menu/spreadsheet_link_service.js:0
 msgid "Menu %s not found. You may not have the required access rights."
 msgstr ""
 "Menu %s tidak ditemukan. Anda mungkin tidak memiliki hak akses yang "
@@ -6421,8 +6562,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Name"
-msgstr ""
+msgstr "Nama"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -6493,8 +6635,9 @@ msgstr "Pivot baru"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Next"
-msgstr ""
+msgstr "Next"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -6505,8 +6648,9 @@ msgstr "Tanggal kupon berikutnya setelah tanggal settlement."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/hooks.js:0
+#, fuzzy
 msgid "No"
-msgstr ""
+msgstr "Tidak"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -6553,6 +6697,12 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "No match found in DGET evaluation."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "No match found in FILTER evaluation"
 msgstr "Tidak ada hasil cocok yang ditemukan di evaluasi FILTER"
 
@@ -6577,8 +6727,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "No results"
-msgstr ""
+msgstr "Tidak ada hasil"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -6828,8 +6979,9 @@ msgstr "OFFSET evaluates to an out of bounds range."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/helpers/geo_json_service.js:0
+#, fuzzy
 msgid "Oceania"
-msgstr ""
+msgstr "Oseania"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7010,8 +7162,9 @@ msgstr "Urutkan berdasarkan"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Orientation"
-msgstr ""
+msgstr "Orientasi"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7034,8 +7187,9 @@ msgstr "Format Paint"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Paper"
-msgstr ""
+msgstr "Kertas"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7110,8 +7264,9 @@ msgstr "Persentil"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Performance"
-msgstr ""
+msgstr "Performa"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7140,8 +7295,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Pivot"
-msgstr ""
+msgstr "Poros"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7252,8 +7408,9 @@ msgstr "Piramida Populasi"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Portrait"
-msgstr ""
+msgstr "Tegak"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7342,8 +7499,9 @@ msgstr "Price of a security paying periodic interest."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Print"
-msgstr ""
+msgstr "Cetak"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7547,6 +7705,12 @@ msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "Re-enable"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Re-insert dynamic pivot"
 msgstr "Masukkan ulang pivot dinamis"
@@ -7560,8 +7724,9 @@ msgstr "Masukkan ulang pivot statik"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Readonly Access"
-msgstr ""
+msgstr "Akses Readonly"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7687,8 +7852,9 @@ msgstr "Ganti"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Replace all"
-msgstr ""
+msgstr "Ganti semua"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7711,8 +7877,9 @@ msgstr "Mengganti bagian dari string teks dengan teks yang berbeda."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Reset"
-msgstr ""
+msgstr "Reset"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8095,8 +8262,9 @@ msgstr "Nomor baris dari cell tertentu."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Rows"
-msgstr ""
+msgstr "Baris"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8149,8 +8317,9 @@ msgstr "Simpan"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Scale"
-msgstr ""
+msgstr "Timbangan"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8259,6 +8428,18 @@ msgstr "Kode mata uang kedua."
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "See more"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "See more link"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "See pivot properties"
 msgstr "Lihat properti pivot"
@@ -8286,6 +8467,12 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 msgid "Select all"
 msgstr "Pilih semua"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/global_filters/helpers.js:0
+msgid "Select one or several criteria"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8350,8 +8537,9 @@ msgstr "Pengaturan"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/components/share_button/share_button.xml:0
+#, fuzzy
 msgid "Share"
-msgstr ""
+msgstr "Bagikan"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8410,12 +8598,6 @@ msgstr "Tampilkan"
 
 #. module: spreadsheet
 #. odoo-javascript
-#: code:addons/spreadsheet/static/src/public_readonly_app/public_readonly.xml:0
-msgid "Show Filters"
-msgstr "Tunjukkan Filter"
-
-#. module: spreadsheet
-#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Show a warning"
 msgstr "Tunjukkan peringatan"
@@ -8447,8 +8629,9 @@ msgstr "Tunjukkan bantuan formula"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Show gridlines"
-msgstr ""
+msgstr "Tunjukkan garis grid"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8491,6 +8674,12 @@ msgstr "Tunjukkan slicer"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 msgid "Show subtotals at the end of series"
 msgstr "Tunjukkan subtotal di akhir seri"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "Show totals"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8559,8 +8748,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Sort ascending (A ⟶ Z)"
-msgstr ""
+msgstr "Sortir urutan naik (A ⟶ Z)"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8577,8 +8767,9 @@ msgstr "Sortir kolom-kolom"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Sort descending (Z ⟶ A)"
-msgstr ""
+msgstr "Sortir urutan turun (Z ⟶ A)"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8591,6 +8782,12 @@ msgstr "Sortir pivot"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Sort range"
 msgstr "Sortir range"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "Sorted by measure"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -10498,6 +10695,12 @@ msgstr "last_period (%s) harus positif."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "The length (%s) must be positive or zero."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "The length of the segment to extract."
 msgstr "Panjang segmen untuk diekstrak."
 
@@ -11174,6 +11377,12 @@ msgstr "Angka."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "The number_of_characters (%s) must be positive or null."
 msgstr "number_of_characters (%s) harus positif atau null."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "The number_of_characters (%s) must be positive or zero."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -12928,6 +13137,12 @@ msgstr "Jendela terlalu kecil untuk menampilkan lebih dari satu panel samping."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "The wrap_count (%s) must be strictly positive."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
 "The x coordinate of the endpoint of the line segment for which to calculate "
 "the angle from the x-axis."
@@ -13094,12 +13309,17 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid ""
 "This tool analyzes formulas for patterns and highlights inconsistencies. "
 "Irregularities\n"
 "            may indicate potential errors in formula structures, references "
 "or arguments."
 msgstr ""
+"Alat ini menganalisis formula untuk pola dan menyoroti ketidakkonsistenan. "
+"Penyimpangan\n"
+"            mungkin mengindikasikan potensi error di struktur, referensi "
+"atau argumen formula."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -13314,8 +13534,9 @@ msgstr "Selasa/Rabu adalah akhir pekan"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Turn off"
-msgstr ""
+msgstr "Matika"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -13519,8 +13740,9 @@ msgstr "Sampai dengan baris saat ini"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Update"
-msgstr ""
+msgstr "Perbarui"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -14345,8 +14567,9 @@ msgstr "Tahun"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/hooks.js:0
+#, fuzzy
 msgid "Yes"
-msgstr ""
+msgstr "Ya"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -14377,9 +14600,11 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/actions/spreadsheet_download_action.js:0
+#, fuzzy
 msgid ""
 "You don't have the rights to export data. Please contact an Administrator."
 msgstr ""
+"Anda tidak memiliki hak untuk mengekspor data. Silakan hubungi Administrator."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -14495,8 +14720,9 @@ msgstr "konfirmasi edisi"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "default:"
-msgstr ""
+msgstr "default:"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -14699,8 +14925,9 @@ msgstr "pangkat 6 (Sextic)"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "pages"
-msgstr ""
+msgstr "halaman"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -14729,6 +14956,24 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "search_mode should be a value in [-1, 1, -2, 2]."
 msgstr "searh_mode harus value dalam [-1, 1, -2, 2]."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "showing %s items"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "showing 1 item"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "showing all items"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -14788,12 +15033,33 @@ msgstr "besok"
 
 #. module: spreadsheet
 #. odoo-javascript
-#: code:addons/spreadsheet/static/src/public_readonly_app/public_readonly.xml:0
-msgid "x"
-msgstr ""
-
-#. module: spreadsheet
-#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "yesterday"
 msgstr "kemarin"
+
+#~ msgid "%(matches)s matches in %(sheetName)s"
+#~ msgstr "%(matches)s cocok di %(sheetName)s"
+
+#~ msgid "%(matches)s matches in range %(range)s of %(sheetName)s"
+#~ msgstr "%(matches)s cocok di range %(range)s dari %(sheetName)s"
+
+#~ msgid "%s matches in all sheets"
+#~ msgstr "%s cocok di semua sheet"
+
+#~ msgid "At least one measure and/or dimension is not correct."
+#~ msgstr "Setidaknya satu ukuran dan/atau dimensi tidak tepat."
+
+#~ msgid "Change color"
+#~ msgstr "Ubah warna"
+
+#~ msgid "Filters"
+#~ msgstr "Penyaring"
+
+#~ msgid "First day of the month preceding a date."
+#~ msgstr "Hari pertama bulan sebelum tanggal."
+
+#~ msgid "Last day of the month following a date."
+#~ msgstr "Tanggal terakhir bulan mengikuti tanggal."
+
+#~ msgid "Show Filters"
+#~ msgstr "Tunjukkan Filter"

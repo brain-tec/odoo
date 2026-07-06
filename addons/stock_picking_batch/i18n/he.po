@@ -19,14 +19,15 @@
 # NoaFarkash, 2022
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
 # or balmas <or@laylinetech.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:38+0000\n"
-"PO-Revision-Date: 2025-10-22 07:52+0000\n"
-"Last-Translator: or balmas <or@laylinetech.com>\n"
-"Language-Team: Hebrew <https://translate.odoo.com/projects/odoo-19/"
+"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"PO-Revision-Date: 2026-06-21 16:31+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Hebrew <https://translate.odoo.com/projects/odoo-master/"
 "stock_picking_batch/he/>\n"
 "Language: he\n"
 "MIME-Version: 1.0\n"
@@ -34,7 +35,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=4; plural=(n == 1) ? 0 : ((n == 2) ? 1 : ((n > 10 && "
 "n % 10 == 0) ? 2 : 3));\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: stock_picking_batch
 #. odoo-python
@@ -43,7 +44,7 @@ msgid "%s was removed from the batch, no quantity processed"
 msgstr ""
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_kanban
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_card
 msgid "<i class=\"fa fa-calendar text-primary me-2\" title=\"Calendar\"/>"
 msgstr ""
 
@@ -61,15 +62,19 @@ msgstr ""
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_picking_type_form_inherit
+#, fuzzy
 msgid ""
 "<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">Batch "
 "Grouping</span>"
 msgstr ""
+"<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">קיבוץ "
+"אצווה</span>"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+#, fuzzy
 msgid "<span class=\"o_stat_text\">Moves</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">תנועות</span>"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
@@ -78,8 +83,9 @@ msgstr ""
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+#, fuzzy
 msgid "<strong>FROM</strong>"
-msgstr ""
+msgstr "<strong>מ-</strong>"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
@@ -103,29 +109,38 @@ msgstr "<strong>אחראי:</strong>"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+#, fuzzy
 msgid "<strong>TO</strong>"
-msgstr ""
+msgstr "<strong>ל</strong>"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+#, fuzzy
 msgid "<strong>→</strong>"
-msgstr ""
+msgstr "<strong>→</strong>"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_lines
+#, fuzzy
 msgid ""
 "A transfer will not be automatically added to batches that will exceed this "
 "number of lines if the transfer is added to it.\n"
 "Leave this value as '0' if no line limit."
 msgstr ""
+"העברה לא תתוסף אוטומטית לאצוות אשר יחרגו ממספר השורות הזה אם העברה תתוסף "
+"אליהן.\n"
+"השאר ערך זה כ-'0' אם אין מגבלת שורות."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_pickings
+#, fuzzy
 msgid ""
 "A transfer will not be automatically added to batches that will exceed this "
 "number of transfers.\n"
 "Leave this value as '0' if no transfer limit."
 msgstr ""
+"העברה לא תתוסף אוטומטית לאצוות שיחרגו ממספר ההעברות הזה.\n"
+"השאר ערך זה כ-'0' אם אין מגבלת העברות."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_needaction
@@ -144,8 +159,9 @@ msgstr "סימון פעילות חריגה"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__activity_plans_ids
+#, fuzzy
 msgid "Activity Plans"
-msgstr ""
+msgstr "תכניות פעילויות"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__activity_state
@@ -161,13 +177,15 @@ msgstr "סוג פעילות"
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking.py:0
 #: code:addons/stock_picking_batch/wizard/stock_add_to_wave.py:0
+#, fuzzy
 msgid "Add Operations"
-msgstr ""
+msgstr "הוסף פעולות"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_to_batch_form
+#, fuzzy
 msgid "Add pickings to"
-msgstr ""
+msgstr "הוסף ליקוט ל-"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_add_to_wave_form
@@ -195,19 +213,22 @@ msgstr ""
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+#, fuzzy
 msgid "Allocation"
-msgstr ""
+msgstr "הקצאה"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__allowed_picking_ids
+#, fuzzy
 msgid "Allowed Picking"
-msgstr ""
+msgstr "ליקוט מותר"
 
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking.py:0
+#, fuzzy
 msgid "Assigned to %s Responsible"
-msgstr ""
+msgstr "מוקצה ל-%s אחראי"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_attachment_count
@@ -216,8 +237,9 @@ msgstr "כמות קבצים מצורפים"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_auto_confirm
+#, fuzzy
 msgid "Auto-confirm"
-msgstr ""
+msgstr "אישור אוטומטי"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__auto_batch
@@ -226,23 +248,27 @@ msgstr "העברות אצווה אוטומטיות"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_group_by_partner
+#, fuzzy
 msgid "Automatically group batches by contacts."
-msgstr ""
+msgstr "קיבוץ אצוות באופן אוטומטי לפי אנשי קשר."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_group_by_destination
+#, fuzzy
 msgid "Automatically group batches by destination country."
-msgstr ""
+msgstr "קיבוץ אצוות באופן אוטומטי לפי מדינת היעד."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_group_by_dest_loc
+#, fuzzy
 msgid "Automatically group batches by their destination location."
-msgstr ""
+msgstr "קיבוץ אצוות באופן אוטומטי לפי מיקום היעד שלהן."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_group_by_src_loc
+#, fuzzy
 msgid "Automatically group batches by their source location."
-msgstr ""
+msgstr "קיבוץ אצוות באופן אוטומטי לפי מיקום המקור ."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__auto_batch
@@ -258,8 +284,9 @@ msgstr "ברקוד"
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_form_inherit
+#, fuzzy
 msgid "Batch"
-msgstr ""
+msgstr "אצווה"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_picking_type_form_inherit
@@ -268,13 +295,15 @@ msgstr ""
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+#, fuzzy
 msgid "Batch Name"
-msgstr ""
+msgstr "שם אצווה"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_properties_definition
+#, fuzzy
 msgid "Batch Properties"
-msgstr ""
+msgstr "הגדרות אצווה"
 
 #. module: stock_picking_batch
 #. odoo-python
@@ -316,8 +345,9 @@ msgstr "אצווה הקשורה להעברה זו"
 #. module: stock_picking_batch
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
+#, fuzzy
 msgid "Batch transfers"
-msgstr ""
+msgstr "העברות אצווה"
 
 #. module: stock_picking_batch
 #. odoo-python
@@ -345,13 +375,15 @@ msgstr ""
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_type_kanban_batch
+#, fuzzy
 msgid "Batches"
-msgstr ""
+msgstr "אצוות"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_calendar
+#, fuzzy
 msgid "Calendar View"
-msgstr ""
+msgstr "תצוגת לוח שנה"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
@@ -375,21 +407,11 @@ msgid "Categories to consider when grouping waves."
 msgstr ""
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
-msgid "Check Availability"
-msgstr "בדוק זמינות"
-
-#. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
-msgid "Choose Labels Layout"
-msgstr "בחר תבנית תוויות"
-
-#. module: stock_picking_batch
-#. odoo-python
-#: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+#, fuzzy
 msgid "Choose Type of Labels To Print"
-msgstr ""
+msgstr "בחר סוג תוויות להדפסה"
 
 #. module: stock_picking_batch
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
@@ -442,8 +464,9 @@ msgstr "נוצר ב-"
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__description
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_to_batch__description
+#, fuzzy
 msgid "Description"
-msgstr ""
+msgstr "תיאור"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_group_by_destination
@@ -463,11 +486,13 @@ msgstr "פעולות מפורטות"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_picking_move_tree_inherited
+#, fuzzy
 msgid "Details"
-msgstr ""
+msgstr "פרטים"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__display_name
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_allocation_report__display_name
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move__display_name
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move_line__display_name
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking__display_name
@@ -513,13 +538,15 @@ msgstr "פעילויות עתידיות"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_group_by_dest_loc
+#, fuzzy
 msgid "Group by Destination Location"
-msgstr ""
+msgstr "קבץ לפי מיקום יעד"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_group_by_src_loc
+#, fuzzy
 msgid "Group by Source Location"
-msgstr ""
+msgstr "קבץ לפי מיקום מקור"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
@@ -533,6 +560,7 @@ msgstr "יש הודעה"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__id
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_allocation_report__id
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move__id
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_move_line__id
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking__id
@@ -567,10 +595,13 @@ msgstr "אם מסומן, בחלק מההודעות קיימת שגיאת משל�
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking.py:0
+#, fuzzy
 msgid ""
 "If the Automatic Batches feature is enabled, at least one 'Group by' option "
 "must be selected."
 msgstr ""
+"אם תכונת \"אצוות אוטומטיות\"  מופעלת, יש לבחור לפחות אפשרות אחת תחת \"קיבוץ "
+"לפי\"."
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
@@ -589,8 +620,9 @@ msgstr "עוקב"
 
 #. module: stock_picking_batch
 #: model:ir.ui.menu,name:stock_picking_batch.menu_stock_jobs
+#, fuzzy
 msgid "Jobs"
-msgstr ""
+msgstr "תפקידים"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
@@ -619,10 +651,13 @@ msgstr "פעילויות באיחור"
 #. module: stock_picking_batch
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
+#, fuzzy
 msgid ""
 "Launch picking orders by aisle or area and regroup at packing zone. Ideal "
 "for large warehouses."
 msgstr ""
+"הפעל הוראות ליקוט לפי מעבר או אזור, ואחד אותן באזור האריזה. אידיאלי למחסנים "
+"גדולים."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__line_ids
@@ -636,23 +671,27 @@ msgstr "רשימת העברות הקשורות לאצווה זו"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+#, fuzzy
 msgid "List view of detailed operations"
-msgstr ""
+msgstr "תצוגת רשימה של פעולות מפורטות"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__wave_group_by_location
+#, fuzzy
 msgid "Location"
-msgstr ""
+msgstr "מיקום"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+#, fuzzy
 msgid "Location From Name"
-msgstr ""
+msgstr "שם מיקום מקור"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+#, fuzzy
 msgid "Location To Name"
-msgstr ""
+msgstr "שם מיקום יעד"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__wave_location_ids
@@ -661,28 +700,33 @@ msgstr ""
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+#, fuzzy
 msgid "Lot Number"
-msgstr ""
+msgstr "מספר אצווה"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_move_line_tree
+#, fuzzy
 msgid "Lot/Serial Number"
-msgstr ""
+msgstr "מס' אצווה/ סידורי"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_max_lines
+#, fuzzy
 msgid "Maximum lines"
-msgstr ""
+msgstr "מקסימום שורות"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_max_pickings
+#, fuzzy
 msgid "Maximum transfers"
-msgstr ""
+msgstr "מקסימום העברות"
 
 #. module: stock_picking_batch
 #: model:ir.actions.server,name:stock_picking_batch.action_merge_batch_picking
+#, fuzzy
 msgid "Merge"
-msgstr ""
+msgstr "מזג"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_has_error
@@ -707,8 +751,9 @@ msgstr "שורות תנועה"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
+#, fuzzy
 msgid "My Activities"
-msgstr ""
+msgstr "הפעילויות שלי"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__my_activity_date_deadline
@@ -723,8 +768,9 @@ msgstr "ההעברות שלי"
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+#, fuzzy
 msgid "New"
-msgstr ""
+msgstr "חדש"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__activity_calendar_event_id
@@ -748,8 +794,9 @@ msgstr "סוג הפעילות הבאה"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields.selection,name:stock_picking_batch.selection__stock_picking_batch__priority__0
+#, fuzzy
 msgid "Normal"
-msgstr ""
+msgstr "נורמלי "
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_needaction_counter
@@ -763,8 +810,9 @@ msgstr "מספר השגיאות"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__message_needaction_counter
+#, fuzzy
 msgid "Number of messages requiring action"
-msgstr ""
+msgstr "מספר הודעות הדורשות פעולה"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__message_has_error_counter
@@ -775,11 +823,6 @@ msgstr "מספר הודעות עם שגיאת משלוח"
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_move.py:0
 msgid "Open: Stock Move"
-msgstr ""
-
-#. module: stock_picking_batch
-#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__picking_type_code
-msgid "Operation Category"
 msgstr ""
 
 #. module: stock_picking_batch
@@ -794,23 +837,28 @@ msgstr "פעולות"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+#, fuzzy
 msgid "Package ID"
-msgstr ""
+msgstr "מזהה חבילה"
 
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+#, fuzzy
 msgid "Packages"
-msgstr ""
+msgstr "חבילות"
 
 #. module: stock_picking_batch
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
+#, fuzzy
 msgid ""
 "Pick multiple orders in one trip and prepare orders as you pick. This "
 "reduces packing time and is ideal for small products."
 msgstr ""
+"ליקוט מספר הזמנות בסבב אחד והכנת ההזמנות תוך כדי ליקוט.  שיטה זו מקצרת את "
+"זמן האריזה ומתאימה במיוחד למוצרים קטנים."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__picking_ids
@@ -830,8 +878,9 @@ msgstr ""
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_type_kanban_batch
+#, fuzzy
 msgid "Prepare Batch"
-msgstr ""
+msgstr "הכן אצווה"
 
 #. module: stock_picking_batch
 #: model:ir.actions.act_window,name:stock_picking_batch.action_prepare_wave
@@ -854,8 +903,9 @@ msgstr "הדפס תוויות"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__priority
+#, fuzzy
 msgid "Priority"
-msgstr ""
+msgstr "קְדִימוּת"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__wave_group_by_product
@@ -865,13 +915,15 @@ msgstr "מוצר"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+#, fuzzy
 msgid "Product Barcode"
-msgstr ""
+msgstr "ברקוד מוצר"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__wave_group_by_category
+#, fuzzy
 msgid "Product Category"
-msgstr ""
+msgstr "קטגורית מוצר"
 
 #. module: stock_picking_batch
 #: model:ir.model,name:stock_picking_batch.model_stock_move_line
@@ -880,13 +932,15 @@ msgstr "תנועות המוצר (תנועת שורת מלאי)"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+#, fuzzy
 msgid "Product Name"
-msgstr ""
+msgstr "שם מוצר"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__properties
+#, fuzzy
 msgid "Properties"
-msgstr ""
+msgstr "מאפיינים"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
@@ -901,19 +955,27 @@ msgstr "כמות"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+#, fuzzy
 msgid "Quantity Done"
-msgstr ""
+msgstr "כמות שבוצעה"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__rating_ids
+#, fuzzy
 msgid "Ratings"
-msgstr ""
+msgstr "דירוגים"
 
 #. module: stock_picking_batch
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
+#, fuzzy
 msgid ""
 "Regroup multiple orders into one picking and consolidate at the packing zone."
+msgstr "אחד מספר הזמנות לאיסוף אחד ואחד אותן באזור האריזה."
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+msgid "Reserve"
 msgstr ""
 
 #. module: stock_picking_batch
@@ -964,32 +1026,37 @@ msgstr "חפש העברת אצווה"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_picking_type_form_inherit
+#, fuzzy
 msgid "Select locations you want to group"
-msgstr ""
+msgstr "בחר מיקומים שתרצה לקבץ"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_picking_type_form_inherit
+#, fuzzy
 msgid "Select product categories you want to group"
-msgstr ""
+msgstr "בחר אילו קטגוריות אתה רוצה לקבץ"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking__batch_sequence
+#, fuzzy
 msgid "Sequence"
-msgstr ""
+msgstr "רצף"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__show_allocation
+#, fuzzy
 msgid "Show Allocation Button"
-msgstr ""
-
-#. module: stock_picking_batch
-#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__show_check_availability
-msgid "Show Check Availability"
-msgstr "הצג בדוק זמינות"
+msgstr "הצגת כפתור הקצאה"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__show_lots_text
+#, fuzzy
 msgid "Show Lots Text"
+msgstr "הצג טקסט אצוות"
+
+#. module: stock_picking_batch
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__show_check_availability
+msgid "Show Reserve Button"
 msgstr ""
 
 #. module: stock_picking_batch
@@ -1004,23 +1071,28 @@ msgstr "איתור מקור"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__wave_group_by_location
+#, fuzzy
 msgid ""
 "Split transfers by defined locations, then group transfers with the same "
 "location."
-msgstr ""
+msgstr "פצל העברות לפי מיקומים מוגדרים, ולאחר מכן קבץ העברות עם אותו מיקום."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__wave_group_by_category
+#, fuzzy
 msgid ""
 "Split transfers by product category, then group transfers that have the same "
 "product category."
 msgstr ""
+"פצל העברות לפי קטגוריית מוצר, ולאחר מכן קבץ העברות שיש להן את אותה קטגוריית "
+"מוצר."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__wave_group_by_product
+#, fuzzy
 msgid ""
 "Split transfers by product then group transfers that have the same product."
-msgstr ""
+msgstr "פצל העברות לפי מוצר, ולאחר מכן קבץ העברות שיש להן את אותו מוצר."
 
 #. module: stock_picking_batch
 #: model:mail.message.subtype,description:stock_picking_batch.mt_batch_state
@@ -1053,6 +1125,11 @@ msgstr ""
 "מתוכנן: פעילויות עתידיות."
 
 #. module: stock_picking_batch
+#: model:ir.model,name:stock_picking_batch.model_stock_allocation_report
+msgid "Stock Allocation Report"
+msgstr ""
+
+#. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_tree
 msgid "Stock Batch Transfer"
@@ -1065,8 +1142,9 @@ msgstr "תנועת מלאי"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__move_line_ids
+#, fuzzy
 msgid "Stock move lines"
-msgstr ""
+msgstr "שורות תנועות מלאי"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__move_ids
@@ -1093,12 +1171,18 @@ msgstr ""
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+#, fuzzy
 msgid ""
 "The following transfers cannot be added to batch transfer %(batch)s. Please "
 "check their states and operation types.\n"
 "\n"
 "Incompatibilities: %(incompatible_transfers)s"
 msgstr ""
+"ההעברות הבאות אינן ניתנות להוספה להעברת אצווה %"
+"(batch)s.                                  אנא בדוק את מצבן ואת סוגי הפעולות "
+"שלהן.\n"
+"\n"
+"אי-תאימויות:%(incompatible_transfers)s"
 
 #. module: stock_picking_batch
 #. odoo-python
@@ -1115,26 +1199,30 @@ msgstr ""
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/wizard/stock_add_to_wave.py:0
+#, fuzzy
 msgid "The selected operations should belong to a unique company."
-msgstr ""
+msgstr "הפעולות הנבחרות צריכות להיות שייכות לחברה ייחודית."
 
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/wizard/stock_picking_to_batch.py:0
+#, fuzzy
 msgid "The selected pickings should belong to an unique company."
-msgstr ""
+msgstr "הליקוטים הנבחרים צריכים להיות שייכים לחברה ייחודית."
 
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/wizard/stock_add_to_wave.py:0
+#, fuzzy
 msgid "The selected transfers should belong to a unique company."
-msgstr ""
+msgstr "ההעברות הנבחרות צריכות להיות שייכות לחברה ייחודית."
 
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/wizard/stock_add_to_wave.py:0
+#, fuzzy
 msgid "The selected transfers should belong to the same operation type"
-msgstr ""
+msgstr "ההעברות שנבחרו צריכות להיות מאותו סוג פעולה."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__is_wave
@@ -1154,19 +1242,21 @@ msgstr "פעילויות היום"
 #. module: stock_picking_batch
 #: model:ir.model,name:stock_picking_batch.model_stock_picking
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_kanban
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_card
 msgid "Transfer"
 msgstr "העברה"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+#, fuzzy
 msgid "Transfer Display Name"
-msgstr ""
+msgstr "שם תצוגה של העברה"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+#, fuzzy
 msgid "Transfer Name"
-msgstr ""
+msgstr "שם העברה"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_stock_move_operations
@@ -1181,10 +1271,15 @@ msgstr "הועבר על ידי"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__picking_ids
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_card
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_kanban
 msgid "Transfers"
 msgstr "העברות"
+
+#. module: stock_picking_batch
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__picking_type_code
+msgid "Type of Operation"
+msgstr ""
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__activity_exception_decoration
@@ -1194,18 +1289,21 @@ msgstr "סוג הפעילות החריגה ברשומה."
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking.py:0
+#, fuzzy
 msgid "Unassigned responsible from %s"
-msgstr ""
+msgstr "הוסר הקצאת אחראי מ- %s"
 
 #. module: stock_picking_batch
 #: model:ir.actions.server,name:stock_picking_batch.action_unreserve_batch_picking
+#, fuzzy
 msgid "Unreserve"
-msgstr ""
+msgstr "בטל שמירה"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields.selection,name:stock_picking_batch.selection__stock_picking_batch__priority__1
+#, fuzzy
 msgid "Urgent"
-msgstr ""
+msgstr "דחוף"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
@@ -1247,29 +1345,22 @@ msgstr "העברות גלים"
 #. module: stock_picking_batch
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
+#, fuzzy
 msgid "Wave transfers"
-msgstr ""
-
-#. module: stock_picking_batch
-#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__website_message_ids
-msgid "Website Messages"
-msgstr "הודעות מאתר האינטרנט"
-
-#. module: stock_picking_batch
-#: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__website_message_ids
-msgid "Website communication history"
-msgstr "היסטורית התקשרויות מאתר האינטרנט"
+msgstr "העברות גל"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_to_batch__is_create_draft
+#, fuzzy
 msgid "When checked, create the batch in draft status"
-msgstr ""
+msgstr "כאשר מסומן, צור את האצווה בסטטוס טיוטה"
 
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+#, fuzzy
 msgid "You cannot delete Done batch transfers."
-msgstr ""
+msgstr "לא ניתן למחוק העברות אצווה שבוצעו."
 
 #. module: stock_picking_batch
 #. odoo-python
@@ -1280,13 +1371,15 @@ msgstr ""
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
+#, fuzzy
 msgid "You have to set some pickings to batch."
-msgstr ""
+msgstr "אתה צריך להגדיר כמה ליקוטים לאצווה."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields.selection,name:stock_picking_batch.selection__stock_picking_to_batch__mode__new
+#, fuzzy
 msgid "a new batch transfer"
-msgstr ""
+msgstr "העברת אצווה חדשה"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields.selection,name:stock_picking_batch.selection__stock_add_to_wave__mode__new
@@ -1295,12 +1388,19 @@ msgstr ""
 
 #. module: stock_picking_batch
 #: model:ir.model.fields.selection,name:stock_picking_batch.selection__stock_picking_to_batch__mode__existing
+#, fuzzy
 msgid "an existing batch transfer"
-msgstr ""
+msgstr "העברת אצווה קיימת"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields.selection,name:stock_picking_batch.selection__stock_add_to_wave__mode__existing
 msgid "an existing wave transfer"
+msgstr ""
+
+#. module: stock_picking_batch
+#. odoo-python
+#: code:addons/stock_picking_batch/report/stock_allocation_report.py:0
+msgid "batches"
 msgstr ""
 
 #. module: stock_picking_batch
@@ -1312,3 +1412,18 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__estimated_shipping_weight
 msgid "shipping_weight"
 msgstr ""
+
+#~ msgid "Choose Labels Layout"
+#~ msgstr "בחר תבנית תוויות"
+
+#~ msgid "Check Availability"
+#~ msgstr "בדוק זמינות"
+
+#~ msgid "Show Check Availability"
+#~ msgstr "הצג בדוק זמינות"
+
+#~ msgid "Website Messages"
+#~ msgstr "הודעות מאתר האינטרנט"
+
+#~ msgid "Website communication history"
+#~ msgstr "היסטורית התקשרויות מאתר האינטרנט"

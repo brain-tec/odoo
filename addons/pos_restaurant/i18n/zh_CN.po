@@ -15,17 +15,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-29 17:38+0000\n"
-"PO-Revision-Date: 2026-05-05 08:30+0000\n"
-"Last-Translator: \"Chloe Wang (chwa)\" <chwa@odoo.com>\n"
+"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"PO-Revision-Date: 2026-06-19 04:33+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
-"projects/odoo-s19-3/pos_restaurant/zh_Hans/>\n"
+"projects/odoo-master/pos_restaurant/zh_Hans/>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.17\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: pos_restaurant
 #. odoo-python
@@ -69,6 +69,11 @@ msgid ""
 msgstr ""
 "200 克爱尔兰黑安格斯牛肉、焦糖红辣椒洋葱、切碎冰山沙拉、红洋葱、烤培根、番茄"
 "酱、泡菜、烤肉酱"
+
+#. module: pos_restaurant
+#: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_order_change_receipt
+msgid "<br/>Guest"
+msgstr ""
 
 #. module: pos_restaurant
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_restaurant_pos_category_kanban_view
@@ -159,11 +164,6 @@ msgid "Alignment"
 msgstr ""
 
 #. module: pos_restaurant
-#: model_terms:ir.ui.view,arch_db:pos_restaurant.res_config_settings_view_form
-msgid "Allow Bill Splitting"
-msgstr "允许账单拆分"
-
-#. module: pos_restaurant
 #: model:product.attribute.value,name:pos_restaurant.pav_extras_pizza_anchovy
 msgid "Anchovy"
 msgstr "鳀鱼"
@@ -234,7 +234,6 @@ msgstr "比利时新鲜自制薯条"
 #. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/screens/split_bill_screen/split_bill_screen.xml:0
-#: model:ir.model.fields,field_description:pos_restaurant.field_pos_config__iface_splitbill
 msgid "Bill Splitting"
 msgstr "账单拆分"
 
@@ -558,11 +557,6 @@ msgid "Enable Course Allocation"
 msgstr ""
 
 #. module: pos_restaurant
-#: model:ir.model.fields,help:pos_restaurant.field_pos_config__iface_splitbill
-msgid "Enables Bill Splitting in the Point of Sale."
-msgstr "POS中允许账单拆分。"
-
-#. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/components/numpad_dropdown/numpad_dropdown.xml:0
 #: code:addons/pos_restaurant/static/src/app/screens/product_screen/product_screen.xml:0
@@ -716,7 +710,6 @@ msgstr "香烤蔬菜"
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/screens/product_screen/control_buttons/control_buttons.xml:0
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_preset__use_guest
-#: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_order_change_receipt
 msgid "Guest"
 msgstr "访客"
 
@@ -934,11 +927,6 @@ msgid "Old Fashioned"
 msgstr "古典酒"
 
 #. module: pos_restaurant
-#: model_terms:ir.ui.view,arch_db:pos_restaurant.view_pos_preset_form_inherit_pos_restaurant
-msgid "Options"
-msgstr "选项"
-
-#. module: pos_restaurant
 #: model:ir.model.fields,field_description:pos_restaurant.field_restaurant_order_course__line_ids
 msgid "Order Lines"
 msgstr "订单明细"
@@ -1085,11 +1073,6 @@ msgstr "POS"
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_course__category_ids
 msgid "Pos Category"
 msgstr ""
-
-#. module: pos_restaurant
-#: model:ir.model.fields,field_description:pos_restaurant.field_res_config_settings__pos_iface_splitbill
-msgid "Pos Iface Splitbill"
-msgstr "POS接口拆分账单"
 
 #. module: pos_restaurant
 #: model:product.attribute.value,name:pos_restaurant.pav_sides_potato_thyme
@@ -1313,11 +1296,6 @@ msgid "Shapes"
 msgstr ""
 
 #. module: pos_restaurant
-#: model:product.attribute,name:pos_restaurant.pa_sides
-msgid "Sides"
-msgstr "配菜/小菜"
-
-#. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/screens/floor_screen/floor_plan_editor/edit_decor/edit_decor.xml:0
 msgid "Size"
@@ -1349,11 +1327,6 @@ msgstr "辣鮪魚三明治"
 #: code:addons/pos_restaurant/static/src/app/screens/split_bill_screen/split_bill_screen.xml:0
 msgid "Split Order"
 msgstr ""
-
-#. module: pos_restaurant
-#: model_terms:ir.ui.view,arch_db:pos_restaurant.res_config_settings_view_form
-msgid "Split total or order lines"
-msgstr "拆分总计或订单明细"
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -1390,10 +1363,15 @@ msgstr ""
 
 #. module: pos_restaurant
 #. odoo-javascript
+#: code:addons/pos_restaurant/static/src/app/utils/printer/generate_printer_data.js:0
+msgid "T %s"
+msgstr ""
+
+#. module: pos_restaurant
+#. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/screens/payment_screen/order_details_dialog.js:0
 #: code:addons/pos_restaurant/static/src/app/screens/ticket_screen/ticket_screen.xml:0
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_order__table_id
-#: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_order_change_receipt
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_order_receipt_header
 msgid "Table"
 msgstr "桌台"
@@ -1674,6 +1652,24 @@ msgstr ""
 #: code:addons/pos_restaurant/static/src/app/screens/split_bill_screen/split_bill_screen.xml:0
 msgid "product(s) selected"
 msgstr ""
+
+#~ msgid "Allow Bill Splitting"
+#~ msgstr "允许账单拆分"
+
+#~ msgid "Enables Bill Splitting in the Point of Sale."
+#~ msgstr "POS中允许账单拆分。"
+
+#~ msgid "Pos Iface Splitbill"
+#~ msgstr "POS接口拆分账单"
+
+#~ msgid "Split total or order lines"
+#~ msgstr "拆分总计或订单明细"
+
+#~ msgid "Options"
+#~ msgstr "选项"
+
+#~ msgid "Sides"
+#~ msgstr "配菜/小菜"
 
 #~ msgid " and $1"
 #~ msgstr " 和 $1"

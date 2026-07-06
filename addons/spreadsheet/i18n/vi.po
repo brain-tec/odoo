@@ -4,22 +4,22 @@
 #
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
 # "Thi Huong Nguyen (thng)" <thng@odoo.com>, 2025, 2026.
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-29 17:40+0000\n"
-"PO-Revision-Date: 2026-04-13 19:32+0000\n"
-"Last-Translator: \"Thi Huong Nguyen (thng)\" <thng@odoo.com>\n"
-"Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-s19-2/"
+"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"PO-Revision-Date: 2026-06-19 01:09+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-master/"
 "spreadsheet/vi/>\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.16.2\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -78,6 +78,24 @@ msgstr "% của tổng hàng"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "%(count)s matches in %(sheetName)s"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "%(count)s matches in all sheets"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "%(count)s matches in range %(range)s of %(sheetName)s"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "%(hour)s AM"
 msgstr "%(hour)s SA"
 
@@ -96,20 +114,9 @@ msgstr "%(hour_number)sh"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/list/plugins/list_ui_plugin.js:0
+#, fuzzy
 msgid "%(list_name)s (List #%(list_id)s)"
-msgstr ""
-
-#. module: spreadsheet
-#. odoo-javascript
-#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "%(matches)s matches in %(sheetName)s"
-msgstr "%(matches)s kết quả trong %(sheetName)s"
-
-#. module: spreadsheet
-#. odoo-javascript
-#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "%(matches)s matches in range %(range)s of %(sheetName)s"
-msgstr "%(matches)s kết quả trong phạm vi %(range)s của %(sheetName)s"
+msgstr "%(list_name)s (Danh sách #%(list_id)s)"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -282,12 +289,6 @@ msgstr "%s không phải là tuần hợp lệ (đây phải là một số từ
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "%s matches in all sheets"
-msgstr "%s kết quả trong tất cả trang tính"
-
-#. module: spreadsheet
-#. odoo-javascript
-#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "'${str}'"
 msgstr ""
 
@@ -330,26 +331,30 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "+ Add another rule"
-msgstr ""
+msgstr "+ Thêm một quy tắc khác"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "+ Add chart"
-msgstr ""
+msgstr "+ Thêm biểu đồ"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "+ Add data view"
-msgstr ""
+msgstr "+ Thêm chế độ xem dữ liệu"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "- [optional]"
-msgstr ""
+msgstr "- [tuỳ chọn]"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -385,6 +390,24 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "1 column"
 msgstr "1 cột"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "1 match in %(sheetName)s"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "1 match in all sheets"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "1 match in range %(range)s of %(sheetName)s"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -736,8 +759,9 @@ msgstr "Giá trị tuyệt đối của một số."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/actions/spreadsheet_download_action.js:0
+#, fuzzy
 msgid "Access Error"
-msgstr ""
+msgstr "Lỗi Truy Cập"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -769,7 +793,7 @@ msgstr "Lãi tích luỹ của chứng khoán được thanh toán khi đáo h�
 
 #. module: spreadsheet
 #. odoo-javascript
-#: code:addons/spreadsheet/static/src/global_filters/plugins/global_filters_core_view_plugin.js:0
+#: code:addons/spreadsheet/static/src/global_filters/plugins/global_filters_ui_plugin.js:0
 msgid "Active Filters"
 msgstr "Bộ lọc đang hoạt động"
 
@@ -827,6 +851,12 @@ msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "Add a description text"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 msgid "Add a key value description"
 msgstr "Thêm mô tả cho cặp khóa và giá trị"
@@ -834,8 +864,15 @@ msgstr "Thêm mô tả cho cặp khóa và giá trị"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
-msgid "Add another item"
+msgid "Add a redirection link"
 msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
+msgid "Add another item"
+msgstr "Thêm một mục khác"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -846,8 +883,9 @@ msgstr "Thêm bất kỳ ký tự hoặc biểu tượng nào"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Add calculated measure"
-msgstr ""
+msgstr "Thêm chỉ số tính toán"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -882,8 +920,9 @@ msgstr "Thêm cột mới để tránh ghi đè ô"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Add range"
-msgstr ""
+msgstr "Thêm phạm vi"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -928,6 +967,13 @@ msgid ""
 "All ranges in [[FUNCTION_NAME]] must have the same number of columns (got "
 "%s)."
 msgstr "Tất cả phạm vi trong [[FUNCTION_NAME]] phải có cùng số cột (có %s)."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid ""
+"All ranges in [[FUNCTION_NAME]] must have the same number of rows (got %s)."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1101,14 +1147,21 @@ msgstr "Đã xảy ra lỗi không mong muốn. Hãy gửi phiếu hỗ trợ t�
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Analyze performance"
-msgstr ""
+msgstr "Phân tích hiệu suất"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Angle from the X axis to a point (x,y), in radians."
 msgstr "Góc từ trục X đến một điểm (x,y), tính bằng radian."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "Annotation"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1351,8 +1404,8 @@ msgstr "Phải cung cấp ít nhất một dấu phân cách."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "At least one measure and/or dimension is not correct."
-msgstr "Có ít nhất một chỉ số và/hoặc chiều dữ liệu không chính xác."
+msgid "At least one measure/dimension and/or filter is not correct."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1377,6 +1430,12 @@ msgstr "Tự động điều chỉnh theo kết quả công thức"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Automatic"
 msgstr "Tự động"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "Automatic evaluation is disabled. Press F9 to recalculate."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1621,8 +1680,9 @@ msgstr "Dưới cùng bên phải"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Bubble"
-msgstr ""
+msgstr "Bong bóng"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1805,6 +1865,12 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "Calculation"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Calendar"
 msgstr "Lịch"
 
@@ -1817,8 +1883,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Cancel"
-msgstr ""
+msgstr "Hủy"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1977,8 +2044,9 @@ msgstr "Màu danh mục"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Caused by"
-msgstr ""
+msgstr "Gây ra bởi"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2007,8 +2075,14 @@ msgstr "Bán kính tâm"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "Change color"
-msgstr "Thay đổi màu"
+msgid "Change grid color"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "Change tab color"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2043,6 +2117,18 @@ msgstr "Biểu đồ"
 #: code:addons/spreadsheet/static/src/index.js:0
 msgid "Chart #%(odooChartId)s"
 msgstr "Biểu đồ #%(odooChartId)s"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "Chart Info"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/chart/odoo_link/chart_menu.js:0
+msgid "Chart Odoo Link"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2355,8 +2441,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Columns"
-msgstr ""
+msgstr "Cột"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2501,8 +2588,9 @@ msgstr "Định dạng có điều kiện"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Configuration"
-msgstr ""
+msgstr "Cấu hình"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2999,8 +3087,9 @@ msgstr "Xác thực dữ liệu"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Data visualization"
-msgstr ""
+msgstr "Trực quan hóa dữ liệu"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3391,8 +3480,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Design"
-msgstr ""
+msgstr "Thiết kế"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3702,14 +3792,16 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Distance"
-msgstr ""
+msgstr "Khoảng cách"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Distribution"
-msgstr ""
+msgstr "Phân bổ"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3721,6 +3813,12 @@ msgstr "Chia cho 0"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Do not switch to straight-line depreciation"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "Domain"
 msgstr ""
 
 #. module: spreadsheet
@@ -3738,8 +3836,6 @@ msgstr "Bánh vòng"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-#: code:addons/spreadsheet/static/src/public_readonly_app/public_readonly.js:0
-#: model_terms:ir.ui.view,arch_db:spreadsheet.public_spreadsheet_layout
 msgid "Download"
 msgstr "Tải xuống"
 
@@ -3752,14 +3848,16 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Dropdown list"
-msgstr ""
+msgstr "Danh sách thả xuống"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Duplicate"
-msgstr ""
+msgstr "Nhân bản"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3770,8 +3868,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Duration"
-msgstr ""
+msgstr "Thời hạn"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3819,8 +3918,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Edit table"
-msgstr ""
+msgstr "Chỉnh sửa bảng"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3849,13 +3949,27 @@ msgstr "Kỳ cuối cùng để tính khấu hao."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Energy"
-msgstr ""
+msgstr "Năng lượng"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Engineering"
+msgstr "Kỹ thuật"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/global_filters/helpers.js:0
+msgid "Enter a value"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/global_filters/helpers.js:0
+msgid "Enter one or several values"
 msgstr ""
 
 #. module: spreadsheet
@@ -3867,8 +3981,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Equal."
-msgstr ""
+msgstr "Bằng."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3916,8 +4031,9 @@ msgstr "Việc đánh giá hàm [[FUNCTION_NAME]] đã gây ra lỗi chia cho 0.
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Exact match"
-msgstr ""
+msgstr "Khớp chính xác"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3969,20 +4085,23 @@ msgstr "Thoát chế độ toàn màn hình"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Exit fullscreen"
-msgstr ""
+msgstr "Thoát chế độ toàn màn hình"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Expand"
-msgstr ""
+msgstr "Mở rộng"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Expand all"
-msgstr ""
+msgstr "Mở tất cả"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4084,8 +4203,9 @@ msgstr "Trường %s không phải là một chỉ số"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Field name."
-msgstr ""
+msgstr "Tên trường"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4102,8 +4222,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "File"
-msgstr ""
+msgstr "Tệp"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4157,15 +4278,10 @@ msgstr "Lọc theo giá trị"
 
 #. module: spreadsheet
 #. odoo-javascript
-#: code:addons/spreadsheet/static/src/public_readonly_app/public_readonly.xml:0
-msgid "Filters"
-msgstr "Bộ lọc"
-
-#. module: spreadsheet
-#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Financial"
-msgstr ""
+msgstr "Tài chính"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4194,8 +4310,8 @@ msgstr "Mã tiền tệ đầu tiên"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "First day of the month preceding a date."
-msgstr "Ngày đầu tiên của tháng trước một ngày."
+msgid "First day of the month a date falls in."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4277,8 +4393,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Flip axes"
-msgstr ""
+msgstr "Xoay trục"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4289,8 +4406,9 @@ msgstr "Cỡ Font"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Font size"
-msgstr ""
+msgstr "Cỡ chữ"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4301,8 +4419,9 @@ msgstr "Chỉ dành cho các bảng dựa trên công thức mảng"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Force"
-msgstr ""
+msgstr "Bắt buộc"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4356,8 +4475,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Formatting"
-msgstr ""
+msgstr "Định dạng"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4374,20 +4494,23 @@ msgstr "Công thức"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Formulas"
-msgstr ""
+msgstr "Công thức"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Freeze"
-msgstr ""
+msgstr "Cố định"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Frequency"
-msgstr ""
+msgstr "Tần suất"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4421,8 +4544,9 @@ msgstr "Phiên bản được cố định - Ai cũng có thể xem"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Full Screen"
-msgstr ""
+msgstr "Toàn Màn hình"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4433,8 +4557,9 @@ msgstr "Ngày giờ đầy đủ"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Function"
-msgstr ""
+msgstr "Tính năng"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4547,8 +4672,9 @@ msgstr "Giá trị tương lai của tiền gốc từ lãi suất."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Gauge"
-msgstr ""
+msgstr "Biểu đồ đo lường"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4577,8 +4703,9 @@ msgstr "Tạo liên kết chia sẻ"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Geo Chart"
-msgstr ""
+msgstr "Biểu đồ địa lý"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4716,8 +4843,9 @@ msgstr "Độ chi tiết"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Gray"
-msgstr ""
+msgstr "Xám"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4728,8 +4856,9 @@ msgstr "Lớn hơn hoặc bằng."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Green"
-msgstr ""
+msgstr "Xanh lá"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4747,14 +4876,16 @@ msgstr "Xám"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Gridlines"
-msgstr ""
+msgstr "Đường lưới"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Group"
-msgstr ""
+msgstr "Nhóm"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4843,8 +4974,9 @@ msgstr "Ẩn cột %s"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Hide columns"
-msgstr ""
+msgstr "Ẩn cột"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4861,8 +4993,9 @@ msgstr "Ẩn hàng %s"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Hide rows"
-msgstr ""
+msgstr "Ẩn hàng"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4873,14 +5006,16 @@ msgstr "Ẩn hàng %s - %s"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Hide sheet"
-msgstr ""
+msgstr "Ẩn trang tính"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Hierarchical"
-msgstr ""
+msgstr "Phân cấp"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4891,14 +5026,16 @@ msgstr "Phân cấp bậc"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Horizontal align"
-msgstr ""
+msgstr "Căn ngang"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Horizontal alignment"
-msgstr ""
+msgstr "Căn ngang"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4916,14 +5053,16 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Horizontal lookup"
-msgstr ""
+msgstr "Tìm kiếm ngang"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Hour"
-msgstr ""
+msgstr "Giờ"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5078,8 +5217,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Image"
-msgstr ""
+msgstr "Hình ảnh"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5121,6 +5261,12 @@ msgstr "ID bản ghi không thể truy cập được/không tồn tại"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Include empty cells (default)"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "Include hidden results"
 msgstr ""
 
 #. module: spreadsheet
@@ -5194,20 +5340,23 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Info"
-msgstr ""
+msgstr "Thông tin"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Information"
-msgstr ""
+msgstr "Thông tin"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Insert"
-msgstr ""
+msgstr "Chèn"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5248,8 +5397,9 @@ msgstr "Chèn %s hàng bên dưới"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Insert cells"
-msgstr ""
+msgstr "Chèn ô"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5266,8 +5416,9 @@ msgstr "Chèn ô và dịch chuyển sang phải"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Insert column"
-msgstr ""
+msgstr "Chèn cột"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5284,14 +5435,16 @@ msgstr "Chèn cột bên phải"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Insert link"
-msgstr ""
+msgstr "Chèn link"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Insert row"
-msgstr ""
+msgstr "Chèn hàng"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5308,26 +5461,35 @@ msgstr "Chèn hàng bên dưới"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Insert sheet"
-msgstr ""
+msgstr "Chèn trang tính"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Insert table"
-msgstr ""
+msgstr "Chèn bảng"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Integer"
-msgstr ""
+msgstr "Integer"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Interest rate of an annuity investment."
 msgstr "Lãi suất của khoản đầu tư niên kim."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/public_spreadsheet/odoo_menu_fill.js:0
+msgid "Internal link"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5368,14 +5530,16 @@ msgstr "Công thức giá trị tối thiểu không hợp lệ"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Invalid expression"
-msgstr ""
+msgstr "Biểu thức không hợp lệ"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Invalid formula"
-msgstr ""
+msgstr "Công thức không hợp lệ"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5428,8 +5592,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Invalid reference"
-msgstr ""
+msgstr "Tham chiếu không hợp lệ"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5440,8 +5605,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Invalid sheet"
-msgstr ""
+msgstr "Trang tính không hợp lệ"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5519,14 +5685,16 @@ msgstr "Bản đồ bất thường"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Is between"
-msgstr ""
+msgstr "Nằm giữa"
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Is empty"
-msgstr ""
+msgstr "Trống"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5658,13 +5826,15 @@ msgstr "Nhãn không hợp lệ"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Landscape"
-msgstr ""
+msgstr "Ngang"
 
 #. module: spreadsheet
 #: model:ir.model,name:spreadsheet.model_res_lang
+#, fuzzy
 msgid "Language"
-msgstr ""
+msgstr "Ngôn ngữ"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5717,8 +5887,8 @@ msgstr "Ngày cuối cùng của tháng trước hoặc sau một ngày."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "Last day of the month following a date."
-msgstr "Ngày cuối cùng của tháng sau một ngày."
+msgid "Last day of the month a date falls in."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5741,8 +5911,9 @@ msgstr "Trái"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Left axis"
-msgstr ""
+msgstr "Trục trái"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5771,8 +5942,9 @@ msgstr "Nhỏ hơn hoặc bằng."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Less than."
-msgstr ""
+msgstr "Nhỏ hơn."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5783,8 +5955,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Light"
-msgstr ""
+msgstr "Sáng"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5795,8 +5968,9 @@ msgstr "Dòng"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Line Break"
-msgstr ""
+msgstr "Ngắt dòng"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5832,8 +6006,9 @@ msgstr "Nhãn liên kết"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Link sheet"
-msgstr ""
+msgstr "Liên kết trang tính"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5844,8 +6019,9 @@ msgstr "Danh sách #%(list_id)s"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Load more..."
-msgstr ""
+msgstr "Tải thêm..."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5868,8 +6044,9 @@ msgstr "Logarit"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Logical"
-msgstr ""
+msgstr "Logic"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5910,8 +6087,9 @@ msgstr "Tìm kiếm một giá trị."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Lookup"
-msgstr ""
+msgstr "Tìm kiếm"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5964,6 +6142,18 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "Manual"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "Manual calculation"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "March"
 msgstr "Tháng 3"
 
@@ -5994,6 +6184,12 @@ msgid ""
 msgstr ""
 "Các kết quả trùng khớp không thể được thay thế vì nằm trong công thức hoặc "
 "trong trang tính bị khóa"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "Matches in the following hidden sheets:"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -6090,8 +6286,9 @@ msgstr "Đo \"%s\" tuỳ chọn"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Measures"
-msgstr ""
+msgstr "Chỉ số"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -6119,7 +6316,7 @@ msgstr "Trung bình"
 
 #. module: spreadsheet
 #. odoo-javascript
-#: code:addons/spreadsheet/static/src/ir_ui_menu/index.js:0
+#: code:addons/spreadsheet/static/src/ir_ui_menu/spreadsheet_link_service.js:0
 msgid "Menu %s not found. You may not have the required access rights."
 msgstr "Không tìm thấy menu %s. Bạn có thể không có quyền truy cập cần thiết."
 
@@ -6408,8 +6605,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Name"
-msgstr ""
+msgstr "Tên"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -6480,8 +6678,9 @@ msgstr "Pivot mới"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Next"
-msgstr ""
+msgstr "Tiếp theo"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -6492,8 +6691,9 @@ msgstr "Ngày tiếp theo của phiếu giảm giá sau ngày thanh toán."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/hooks.js:0
+#, fuzzy
 msgid "No"
-msgstr ""
+msgstr "Không"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -6540,6 +6740,12 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "No match found in DGET evaluation."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "No match found in FILTER evaluation"
 msgstr "Không tìm thấy kết quả trong đánh giá BỘ LỌC"
 
@@ -6564,8 +6770,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "No results"
-msgstr ""
+msgstr "Không có kết quả"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -6813,8 +7020,9 @@ msgstr "OFFSET đánh giá ở phạm vi ngoài giới hạn."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/helpers/geo_json_service.js:0
+#, fuzzy
 msgid "Oceania"
-msgstr ""
+msgstr "Châu Đại Dương"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -6995,8 +7203,9 @@ msgstr "Sắp xếp theo"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Orientation"
-msgstr ""
+msgstr "Chiều giấy"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7019,8 +7228,9 @@ msgstr "Định dạng sơn"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Paper"
-msgstr ""
+msgstr "Giấy"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7095,8 +7305,9 @@ msgstr "Phân vị"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Performance"
-msgstr ""
+msgstr "Hiệu suất"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7125,8 +7336,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Pivot"
-msgstr ""
+msgstr "Pivot"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7237,8 +7449,9 @@ msgstr "Tháp dân số"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Portrait"
-msgstr ""
+msgstr "Dọc"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7327,8 +7540,9 @@ msgstr "Giá của một chứng khoán trả lãi định kỳ."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+#, fuzzy
 msgid "Print"
-msgstr ""
+msgstr "In"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7532,6 +7746,12 @@ msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "Re-enable"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Re-insert dynamic pivot"
 msgstr "Chèn lại pivot động"
@@ -7545,8 +7765,9 @@ msgstr "Chèn lại pivot tĩnh"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Readonly Access"
-msgstr ""
+msgstr "Quyền truy cập chỉ đọc"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7672,8 +7893,9 @@ msgstr "Thay thế"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Replace all"
-msgstr ""
+msgstr "Thay thế tất cả"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7697,8 +7919,9 @@ msgstr "Thay thế một phần của chuỗi văn bản bằng văn bản khác
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Reset"
-msgstr ""
+msgstr "Đặt lại"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8075,8 +8298,9 @@ msgstr "Số hàng của một ô xác định."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Rows"
-msgstr ""
+msgstr "Hàng"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8129,8 +8353,9 @@ msgstr "Lưu"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Scale"
-msgstr ""
+msgstr "Cân"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8238,6 +8463,18 @@ msgstr "Mã tiền tệ thứ hai."
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "See more"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "See more link"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "See pivot properties"
 msgstr "Xem thuộc tính pivot"
@@ -8265,6 +8502,12 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 msgid "Select all"
 msgstr "Chọn tất cả"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/global_filters/helpers.js:0
+msgid "Select one or several criteria"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8329,8 +8572,9 @@ msgstr "Thiết lập"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/components/share_button/share_button.xml:0
+#, fuzzy
 msgid "Share"
-msgstr ""
+msgstr "Chia sẻ"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8389,12 +8633,6 @@ msgstr "Trình diễn"
 
 #. module: spreadsheet
 #. odoo-javascript
-#: code:addons/spreadsheet/static/src/public_readonly_app/public_readonly.xml:0
-msgid "Show Filters"
-msgstr "Hiển thị bộ lọc"
-
-#. module: spreadsheet
-#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Show a warning"
 msgstr "Hiển thị cảnh báo"
@@ -8426,8 +8664,9 @@ msgstr "Hiện trợ giúp công thức"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Show gridlines"
-msgstr ""
+msgstr "Hiển thị đường lưới"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8470,6 +8709,12 @@ msgstr "Hiện slicer"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 msgid "Show subtotals at the end of series"
 msgstr "Hiển thị tổng phụ ở cuối chuỗi"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "Show totals"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8538,8 +8783,9 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Sort ascending (A ⟶ Z)"
-msgstr ""
+msgstr "Sắp xếp tăng dần (A ⟶ Z)"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8556,8 +8802,9 @@ msgstr "Sắp xếp cột"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Sort descending (Z ⟶ A)"
-msgstr ""
+msgstr "Sắp xếp giảm dần (Z ⟶ A)"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8570,6 +8817,12 @@ msgstr "Sắp xếp pivot"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Sort range"
 msgstr "Sắp xếp phạm vi"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "Sorted by measure"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -10467,6 +10720,12 @@ msgstr "last_period (%s) bắt buộc phải là số dương."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "The length (%s) must be positive or zero."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "The length of the segment to extract."
 msgstr "Độ dài của đoạn cần trích xuất."
 
@@ -11122,6 +11381,12 @@ msgstr "Số."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "The number_of_characters (%s) must be positive or null."
 msgstr "number_of_characters (%s) phải là số dương hoặc không có."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "The number_of_characters (%s) must be positive or zero."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -12854,6 +13119,12 @@ msgstr "Cửa sổ quá nhỏ để hiển thị nhiều bảng điều khiển 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "The wrap_count (%s) must be strictly positive."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
 "The x coordinate of the endpoint of the line segment for which to calculate "
 "the angle from the x-axis."
@@ -13016,12 +13287,16 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid ""
 "This tool analyzes formulas for patterns and highlights inconsistencies. "
 "Irregularities\n"
 "            may indicate potential errors in formula structures, references "
 "or arguments."
 msgstr ""
+"Công cụ này phân tích công thức để tìm mẫu và đánh dấu các điểm không nhất "
+"quán. Bất thường \n"
+"có thể cho thấy lỗi tiềm ẩn trong cấu trúc công thức, tham chiếu hoặc đối số."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -13236,8 +13511,9 @@ msgstr "Thứ Ba/Thứ Tư là cuối tuần"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Turn off"
-msgstr ""
+msgstr "Tắt"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -13441,8 +13717,9 @@ msgstr "Lên đến hàng hiện tại"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "Update"
-msgstr ""
+msgstr "Cập nhật"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -14268,8 +14545,9 @@ msgstr "Năm"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/hooks.js:0
+#, fuzzy
 msgid "Yes"
-msgstr ""
+msgstr "Có"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -14300,9 +14578,10 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/actions/spreadsheet_download_action.js:0
+#, fuzzy
 msgid ""
 "You don't have the rights to export data. Please contact an Administrator."
-msgstr ""
+msgstr "Bạn không có quyền xuất dữ liệu. Vui lòng liên hệ với Quản trị viên."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -14414,8 +14693,9 @@ msgstr "xác nhận phiên bản"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "default:"
-msgstr ""
+msgstr "mặc định:"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -14618,8 +14898,9 @@ msgstr "thứ tự 6 (Sextic)"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+#, fuzzy
 msgid "pages"
-msgstr ""
+msgstr "pages"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -14648,6 +14929,24 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "search_mode should be a value in [-1, 1, -2, 2]."
 msgstr "search_mode phải là một giá trị nằm trong [-1, 1, -2, 2]."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "showing %s items"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "showing 1 item"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "showing all items"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -14707,12 +15006,33 @@ msgstr "ngày mai"
 
 #. module: spreadsheet
 #. odoo-javascript
-#: code:addons/spreadsheet/static/src/public_readonly_app/public_readonly.xml:0
-msgid "x"
-msgstr ""
-
-#. module: spreadsheet
-#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "yesterday"
 msgstr "hôm qua"
+
+#~ msgid "%(matches)s matches in %(sheetName)s"
+#~ msgstr "%(matches)s kết quả trong %(sheetName)s"
+
+#~ msgid "%(matches)s matches in range %(range)s of %(sheetName)s"
+#~ msgstr "%(matches)s kết quả trong phạm vi %(range)s của %(sheetName)s"
+
+#~ msgid "%s matches in all sheets"
+#~ msgstr "%s kết quả trong tất cả trang tính"
+
+#~ msgid "At least one measure and/or dimension is not correct."
+#~ msgstr "Có ít nhất một chỉ số và/hoặc chiều dữ liệu không chính xác."
+
+#~ msgid "Change color"
+#~ msgstr "Thay đổi màu"
+
+#~ msgid "Filters"
+#~ msgstr "Bộ lọc"
+
+#~ msgid "First day of the month preceding a date."
+#~ msgstr "Ngày đầu tiên của tháng trước một ngày."
+
+#~ msgid "Last day of the month following a date."
+#~ msgstr "Ngày cuối cùng của tháng sau một ngày."
+
+#~ msgid "Show Filters"
+#~ msgstr "Hiển thị bộ lọc"
