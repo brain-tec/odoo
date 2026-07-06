@@ -13,17 +13,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:38+0000\n"
-"PO-Revision-Date: 2026-05-30 12:09+0000\n"
+"POT-Creation-Date: 2026-06-30 00:51+0000\n"
+"PO-Revision-Date: 2026-06-20 13:45+0000\n"
 "Last-Translator: Nusara Boonma <nuboo@odoo.com>\n"
-"Language-Team: Thai <https://translate.odoo.com/projects/odoo-master/"
+"Language-Team: Thai <https://translate.odoo.com/projects/odoo-s19-3/"
 "sale_timesheet/th/>\n"
 "Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.17\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: sale_timesheet
 #. odoo-python
@@ -83,11 +83,6 @@ msgid ""
 msgstr ""
 "จำเป็นต้องมีแผนวิเคราะห์ '%(missing_plan_names)s' "
 "สำหรับการแจกจ่ายวิเคราะห์ของรายการใบสั่งขาย '%(so_line_name)s' ที่เชื่อมโยงกับตารางเวลา"
-
-#. module: sale_timesheet
-#: model_terms:ir.ui.view,arch_db:sale_timesheet.timesheet_sale_page
-msgid "- Timesheet product"
-msgstr "- ใบบันทึกเวลาสินค้า"
 
 #. module: sale_timesheet
 #: model_terms:hr.job,job_details:sale_timesheet.job_engineer
@@ -216,7 +211,12 @@ msgstr "<span class=\"text-muted small\">เวลาที่จะตอบ</s
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.project_project_view_form
 msgid ""
 "<span class=\"text-muted\">Timesheets without a sales order item are "
-"reported as</span>"
+"reported as </span>"
+msgstr ""
+
+#. module: sale_timesheet
+#: model_terms:ir.ui.view,arch_db:sale_timesheet.report_timesheet_sale_timesheet
+msgid "<span>Sales Order Item: </span>"
 msgstr ""
 
 #. module: sale_timesheet
@@ -361,6 +361,15 @@ msgid ""
 "done\"\n"
 "spirit. To be successful, you will have solid solving problem skills."
 msgstr ""
+"ในฐานะพนักงานของบริษัทของเรา คุณจะได้ <b>ร่วมมือกับทุกแผนก\n"
+"เพื่อสร้างและเปิดตัวผลิตภัณฑ์ที่พลิกโฉมวงการ</b> มาร่วมงานกับบริษัทที่กำลังเติบโต\n"
+"พร้อมสวัสดิการที่ยอดเยี่ยม โอกาสในการก้าวหน้า และเรียนรู้\n"
+"เคียงข้างผู้นำที่ประสบความสำเร็จ เรากำลังมองหาสมาชิกทีมงานที่มีประสบการณ์และโดดเด่น\n"
+"เพื่อเป็นส่วนหนึ่งของทีมเรา\n"
+"<br><br>\n"
+"ตำแหน่งนี้ทั้ง <b>สร้างสรรค์และเข้มงวด</b> โดยคุณต้องคิด\n"
+"นอกกรอบ เราคาดหวังให้ผู้สมัครมีความกระตือรือร้นและมีจิตวิญญาณแบบ \"ทำให้สำเร็จ\"\n"
+"เพื่อที่จะประสบความสำเร็จ คุณจะต้องมีทักษะการแก้ปัญหาที่มั่นคง"
 
 #. module: sale_timesheet
 #: model_terms:hr.job,website_description:sale_timesheet.job_engineer
@@ -501,6 +510,12 @@ msgstr "ค้นพบสินค้าของเรา"
 #: model:ir.model.fields,field_description:sale_timesheet.field_timesheets_analysis_report__display_name
 msgid "Display Name"
 msgstr "แสดงชื่อ"
+
+#. module: sale_timesheet
+#: model:ir.model.fields,field_description:sale_timesheet.field_account_bank_statement_line__display_timesheet_portal_link
+#: model:ir.model.fields,field_description:sale_timesheet.field_account_move__display_timesheet_portal_link
+msgid "Display Timesheet Portal Link"
+msgstr ""
 
 #. module: sale_timesheet
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.timesheet_sale_page
@@ -674,6 +689,7 @@ msgstr "การออกแบบตกแต่งภายใน"
 #: model:ir.model.fields,field_description:sale_timesheet.field_timesheets_analysis_report__reinvoice_move_id
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.portal_my_timesheets_inherit
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.report_timesheet_account_move
+#: model_terms:ir.ui.view,arch_db:sale_timesheet.timesheet_sale_page
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.timesheet_view_search
 msgid "Invoice"
 msgstr "ใบแจ้งหนี้"
@@ -927,6 +943,11 @@ msgstr ""
 "จะถูกออกใบแจ้งหนี้โดยไม่มีส่วนต่าง"
 
 #. module: sale_timesheet
+#: model_terms:ir.ui.view,arch_db:sale_timesheet.timesheet_sale_page
+msgid "Order"
+msgstr ""
+
+#. module: sale_timesheet
 #: model:ir.model.fields.selection,name:sale_timesheet.selection__timesheets_analysis_report__billable_type__30_other_costs
 msgid "Other Costs"
 msgstr ""
@@ -1068,12 +1089,6 @@ msgid "Revenues (Milestones)"
 msgstr ""
 
 #. module: sale_timesheet
-#: model:ir.model.fields.selection,name:sale_timesheet.selection__account_analytic_line__billable_type__03_timesheet_revenues
-#: model:ir.model.fields.selection,name:sale_timesheet.selection__timesheets_analysis_report__billable_type__03_timesheet_revenues
-msgid "Revenues (Time & Material)"
-msgstr ""
-
-#. module: sale_timesheet
 #: model_terms:ir.actions.act_window,help:sale_timesheet.timesheet_action_billing_report
 msgid ""
 "Review your timesheets by billing type and make sure your time is billable."
@@ -1085,11 +1100,6 @@ msgstr ""
 #: model:product.template,name:sale_timesheet.product_product_roofing_product_template
 msgid "Roofing"
 msgstr "การมุงหลังคา"
-
-#. module: sale_timesheet
-#: model_terms:ir.ui.view,arch_db:sale_timesheet.timesheet_sale_page
-msgid "S0001"
-msgstr "S0001"
 
 #. module: sale_timesheet
 #: model:ir.model,name:sale_timesheet.model_sale_advance_payment_inv
@@ -1117,6 +1127,7 @@ msgstr "คำสั่งขาย"
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.portal_my_timesheets_inherit
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.portal_timesheet_table_inherit
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.report_timesheet_sale_order
+#: model_terms:ir.ui.view,arch_db:sale_timesheet.report_timesheet_sale_timesheet
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.timesheet_view_search
 msgid "Sales Order Item"
 msgstr "รายการคำสั่งขาย"
@@ -1127,7 +1138,7 @@ msgid "Sales Order Line"
 msgstr "รายการคำสั่งขาย"
 
 #. module: sale_timesheet
-#: model_terms:ir.ui.view,arch_db:sale_timesheet.project_project_view_kanban_inherit_sale_timesheet_so_button
+#: model_terms:ir.ui.view,arch_db:sale_timesheet.project_project_view_card_inherit_sale_timesheet_so_button
 msgid "Sales Orders"
 msgstr "คำสั่งขาย"
 
@@ -1317,6 +1328,7 @@ msgid "Threshold"
 msgstr "เกณฑ์"
 
 #. module: sale_timesheet
+#: model_terms:ir.ui.view,arch_db:sale_timesheet.project_project_view_form
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.res_config_settings_view_form
 msgid "Time Billing"
 msgstr "เวลาออกบิล"
@@ -1390,6 +1402,7 @@ msgstr "ใบบันทึกเวลาระยะเวลาทั้ง
 #: model:ir.actions.report,name:sale_timesheet.timesheet_report_account_move
 #: model:ir.actions.report,name:sale_timesheet.timesheet_report_sale_order
 #: model:ir.model.fields.selection,name:sale_timesheet.selection__sale_order_line__qty_delivered_method__timesheet
+#: model_terms:ir.ui.view,arch_db:sale_timesheet.timesheet_sale_page
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.timesheets_analysis_report_graph_invoice_type
 #: model_terms:ir.ui.view,arch_db:sale_timesheet.view_hr_timesheet_line_pivot_billing_rate
 msgid "Timesheets"
@@ -1426,11 +1439,6 @@ msgstr "ช่วงเวลาใบบันทึกเวลา"
 #: model:ir.actions.act_window,name:sale_timesheet.timesheet_action_billing_report
 msgid "Timesheets by Billing Type"
 msgstr "ใบบันทึกเวลาตามประเภทการเรียกเก็บเงิน"
-
-#. module: sale_timesheet
-#: model_terms:ir.ui.view,arch_db:sale_timesheet.timesheet_sale_page
-msgid "Timesheets for the"
-msgstr "การบันทึกเวลาสำหรับ"
 
 #. module: sale_timesheet
 #. odoo-python
@@ -1531,6 +1539,17 @@ msgid ""
 "        Make sure to use the right format and order e.g. Improve the "
 "configuration screen 5h #feature #v16 @Mitchell !"
 msgstr ""
+"ใช้คีย์เวิร์ดเหล่านี้ในหัวข้อเพื่อเพิ่มงานใหม่:\n"
+"\n"
+"   30h (30 ชั่วโมง) จัดสรรเวลา 30h (30 ชั่วโมง) ให้กับงานนี้\n"
+"   #แท็ก เพิ่มแท็กในงาน\n"
+"   @ผู้ใช้ มอบหมายงานให้กับผู้ใช้\n"
+"   !  ตั้งค่างานเป็นลำดับความสำคัญปานกลาง\n"
+"   !!  ตั้งค่างานเป็นลำดับความสำคัญสูง\n"
+"   !!!  ตั้งค่างานเป็นลำดับความสำคัญเร่งด่วน\n"
+"\n"
+"   ตรวจสอบให้แน่ใจว่าใช้รูปแบบและลำดับที่ถูกต้อง เช่น ปรับปรุงหน้าจอการกำหนดค่า 5h #ฟีเจอร์ "
+"#v16 @Mitchell !"
 
 #. module: sale_timesheet
 #: model_terms:hr.job,website_description:sale_timesheet.job_engineer

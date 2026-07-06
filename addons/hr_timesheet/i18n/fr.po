@@ -14,10 +14,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-15 17:35+0000\n"
-"PO-Revision-Date: 2026-04-04 12:50+0000\n"
+"POT-Creation-Date: 2026-06-30 00:49+0000\n"
+"PO-Revision-Date: 2026-06-10 10:13+0000\n"
 "Last-Translator: \"Manon Rondou (ronm)\" <ronm@odoo.com>\n"
-"Language-Team: French <https://translate.odoo.com/projects/odoo-s19-2/"
+"Language-Team: French <https://translate.odoo.com/projects/odoo-s19-3/"
 "hr_timesheet/fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -25,7 +25,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
 "1000000 == 0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.16.2\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -128,6 +128,16 @@ msgid ""
 "text-danger\" title=\"Over Due\" invisible=\"not stat_success_rate or "
 "stat_success_rate &lt;= 100\"/>"
 msgstr ""
+"<i class=\"fa fa-fw o_button_icon fa-clock-o\" title=\"Feuilles de temps\" "
+"invisible=\"stat_success_rate\"/>\n"
+"<i class=\"fa fa-fw o_button_icon fa-clock-o text-success\" title=\"Dans les "
+"délais\" invisible=\"not stat_success_rate or stat_success_rate &gt;= 80\"/"
+">\n"
+"<i class=\"fa fa-fw o_button_icon fa-clock-o text-warning\" "
+"title=\"Avertissement\" invisible=\"not stat_success_rate or "
+"stat_success_rate &gt; 100 or stat_success_rate &lt; 80\"/>\n"
+"<i class=\"fa fa-fw o_button_icon fa-clock-o text-danger\" title=\"En "
+"retard\" invisible=\"not stat_success_rate or stat_success_rate &lt;= 100\"/>"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.portal_my_task
@@ -148,13 +158,13 @@ msgstr "<span class=\"o_stat_text\">Feuilles de temps</span>"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.timesheet_table
-msgid "<span style=\"margin-right: 15px;\">Total (Days)</span>"
-msgstr "<span style=\"margin-right: 15px;\">Total (Jours)</span>"
+msgid "<span class=\"pe-1\">Total (Days)</span>"
+msgstr ""
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.timesheet_table
-msgid "<span style=\"margin-right: 15px;\">Total (Hours)</span>"
-msgstr "<span style=\"margin-right: 15px;\">Total (Heures)</span>"
+msgid "<span class=\"pe-1\">Total</span>"
+msgstr ""
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.timesheet_table
@@ -318,7 +328,7 @@ msgstr "Collaborateurs du projet partagé"
 #. module: hr_timesheet
 #: model:ir.model.fields,field_description:hr_timesheet.field_account_analytic_line__color
 msgid "Color Index"
-msgstr ""
+msgstr "Color Index"
 
 #. module: hr_timesheet
 #: model:ir.model,name:hr_timesheet.model_res_company
@@ -372,7 +382,7 @@ msgstr "Jours / Demi-jours"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_sharing_inherit_project_task_view_form
-#: model_terms:ir.ui.view,arch_db:hr_timesheet.view_project_kanban_inherited
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.view_project_card_inherited
 msgid "Days Remaining"
 msgstr "Jours restants"
 
@@ -386,6 +396,8 @@ msgstr "Désactiver le compte."
 #: model:ir.model.fields,help:hr_timesheet.field_res_company__internal_project_id
 msgid "Default project value for timesheet generated from time type."
 msgstr ""
+"Projet par défaut pour les feuilles de temps générées à partir du type de "
+"temps."
 
 #. module: hr_timesheet
 #: model:ir.model.fields,help:hr_timesheet.field_account_analytic_line__employee_id
@@ -419,7 +431,7 @@ msgstr "Décrire votre activité"
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.quick_create_account_analytic_line_form
 msgid "Describe your activity..."
-msgstr ""
+msgstr "Décrivez votre activité..."
 
 #. module: hr_timesheet
 #. odoo-python
@@ -586,7 +598,6 @@ msgstr "L'année dernière"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_invoice_form
-#: model_terms:ir.ui.view,arch_db:hr_timesheet.project_project_view_form_simplified_inherit_timesheet
 msgid "Log time on tasks"
 msgstr "Encodez des feuilles de temps sur les tâches"
 
@@ -766,6 +777,11 @@ msgid "Project's Timesheets"
 msgstr "Feuilles de temps du projet"
 
 #. module: hr_timesheet
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.timesheet_project_task_page
+msgid "Project:"
+msgstr ""
+
+#. module: hr_timesheet
 #: model:ir.model,name:hr_timesheet.model_hr_employee_public
 msgid "Public Employee"
 msgstr "Employé public"
@@ -782,8 +798,8 @@ msgid "Remaining Hours"
 msgstr "Heures restantes"
 
 #. module: hr_timesheet
-#: model_terms:ir.ui.view,arch_db:hr_timesheet.project_sharing_kanban_inherit_project_task_view_kanban
-#: model_terms:ir.ui.view,arch_db:hr_timesheet.view_task_kanban_inherited_progress
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.project_sharing_inherit_project_task_view_card
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.view_task_card_inherited_progress
 msgid "Remaining days"
 msgstr "Jours restants"
 
@@ -796,11 +812,6 @@ msgstr "Analyse"
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.report_timesheet
 msgid "Research and Development"
 msgstr "Recherche & Développement"
-
-#. module: hr_timesheet
-#: model_terms:ir.ui.view,arch_db:hr_timesheet.timesheet_table
-msgid "Research and Development/New Portal System"
-msgstr "Recherche & Développement/Nouveau système portail"
 
 #. module: hr_timesheet
 #: model:portal.entry,description:hr_timesheet.portal_timesheets
@@ -868,6 +879,11 @@ msgid "Settings"
 msgstr "Paramètres"
 
 #. module: hr_timesheet
+#: model:ir.model.fields,field_description:hr_timesheet.field_project_task__show_portal_timesheets
+msgid "Show Portal Timesheets"
+msgstr ""
+
+#. module: hr_timesheet
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_task.py:0
 msgid ""
@@ -924,7 +940,7 @@ msgstr "Analyse des tâches"
 #. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid "Template for Timesheets"
-msgstr ""
+msgstr "Modèle pour les feuilles de temps"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1040,11 +1056,11 @@ msgstr "Congés"
 #: model:ir.model.fields,field_description:hr_timesheet.field_project_project__remaining_hours
 #: model:ir.model.fields,field_description:hr_timesheet.field_project_task__remaining_hours
 #: model:ir.model.fields,field_description:hr_timesheet.field_report_project_task_user__remaining_hours
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.project_sharing_inherit_project_task_view_card
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_sharing_inherit_project_task_view_form
-#: model_terms:ir.ui.view,arch_db:hr_timesheet.project_sharing_kanban_inherit_project_task_view_kanban
-#: model_terms:ir.ui.view,arch_db:hr_timesheet.view_project_kanban_inherited
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.view_project_card_inherited
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.view_task_card_inherited_progress
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.view_task_form2_inherited
-#: model_terms:ir.ui.view,arch_db:hr_timesheet.view_task_kanban_inherited_progress
 msgid "Time Remaining"
 msgstr "Temps restant"
 
@@ -1185,17 +1201,17 @@ msgstr "Temps de la feuille de temps"
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.portal_my_task
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.portal_my_timesheets
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_invoice_form
-#: model_terms:ir.ui.view,arch_db:hr_timesheet.project_project_view_form_simplified_inherit_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_sharing_inherit_project_task_view_form
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.report_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.report_timesheet_task
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.timesheet_project_task_page
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.timesheets_analysis_report_graph_employee
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.timesheets_analysis_report_graph_project
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.timesheets_analysis_report_graph_task
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.view_hr_timesheet_line_graph
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.view_hr_timesheet_line_pivot
-#: model_terms:ir.ui.view,arch_db:hr_timesheet.view_project_kanban_inherited
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.view_project_card_inherited
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.view_task_form2_inherited
 msgid "Timesheets"
 msgstr "Feuilles de temps"
@@ -1483,7 +1499,7 @@ msgstr "pour le"
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_sharing_inherit_project_task_view_form
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.view_task_form2_inherited
 msgid "incl."
-msgstr ""
+msgstr "incl."
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.view_task_form2_inherited
@@ -1491,6 +1507,8 @@ msgid ""
 "on\n"
 "                            <span class=\"fw-bold ms-1\">Sub-tasks</span>"
 msgstr ""
+"sur les\n"
+"                           <span class=\"fw-bold ms-1\">Sous-tâches</span>"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_sharing_inherit_project_task_view_form
@@ -1498,3 +1516,5 @@ msgid ""
 "on\n"
 "                        <span class=\"fw-bold ms-1\">Sub-tasks</span>"
 msgstr ""
+"sur les\n"
+"                           <span class=\"fw-bold ms-1\">Sous-tâches</span>"

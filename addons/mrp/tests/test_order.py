@@ -2067,14 +2067,12 @@ class TestMrpOrder(TestMrpCommon, MailCase):
             'production_id': mo.id,
             'location_id': self.shelf_1.id,
             'location_dest_id': self.scrap_location.id,
-            'lot_ids': sn2.ids,
             'company_id': self.env.company.id,
         })
 
         warning = False
-        warning = scrap._onchange_lot_ids()
-        self.assertTrue(warning, 'Use of wrong serial number location not detected')
-        self.assertEqual(list(warning.keys())[0], 'warning', 'Warning message was not returned')
+        warning = scrap.onchange({'lot_ids': [Command.link(sn2.id)]}, ['lot_ids'], {'lot_ids': {'context': {}}})
+        self.assertIn('Unavailable Serial numbers. Please correct the serial numbers encoded', warning.get('warning', {}).get('message'))
 
     def test_mo_assign_producing_lot(self):
         """ Checks that in an MO tracked by Lot the reservations of the raws are not
@@ -2725,6 +2723,49 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         self.assertEqual(workorder.time_ids[1].duration, real_duration_under_expected, "Original time tracking should be unchanged")
         self.assertEqual(workorder.time_ids[0].loss_type, 'productive', "Remaining time tracking should be productive")
         self.assertEqual(workorder.time_ids[0].duration, real_duration_decreased - real_duration_under_expected, "Time tracking duration should have been reduced to reflect new shorter duration")
+
+    def test_duration_handles_overlaps_and_loss_types(self):
+        """Duration must merge overlapping intervals by time type."""
+        mo = Form(self.env['mrp.production'])
+        mo.bom_id = self.bom_4
+        mo = mo.save()
+        mo.action_confirm()
+        workorder = mo.workorder_ids[0]
+
+        base_dt = datetime(2024, 1, 1, 8, 0, 0)
+        productive_loss = self.env.ref('mrp.block_reason7')  # productive
+        availability_loss = self.env.ref('mrp.block_reason0')  # availability
+
+        self.env['mrp.workcenter.productivity'].create([
+            {   # 08:00-09:00 productive (60 min)
+                'workorder_id': workorder.id,
+                'workcenter_id': workorder.workcenter_id.id,
+                'loss_id': productive_loss.id,
+                'date_start': base_dt,
+                'date_end': base_dt + timedelta(hours=1),
+            },
+            {   # 08:30-09:30 productive - overlaps previous by 30 min
+                'workorder_id': workorder.id,
+                'workcenter_id': workorder.workcenter_id.id,
+                'loss_id': productive_loss.id,
+                'date_start': base_dt + timedelta(minutes=30),
+                'date_end': base_dt + timedelta(hours=1, minutes=30),
+            },
+            {   # 09:00-10:00 availability (60 min) - must NOT be counted in the same interval
+                'workorder_id': workorder.id,
+                'workcenter_id': workorder.workcenter_id.id,
+                'loss_id': availability_loss.id,
+                'date_start': base_dt + timedelta(hours=1, minutes=30),
+                'date_end': base_dt + timedelta(hours=2, minutes=30),
+            },
+        ])
+
+        # Merged productive pool: 08:00-09:30 = 90 min (overlap deduplicated)
+        # Availability alone = 60 min
+        self.assertAlmostEqual(
+            workorder.duration, 150.0, places=1,
+            msg="Overlapping productive intervals must be merged; availability must be completelly added",
+        )
 
     def test_propagate_quantity_on_backorders(self):
         """Create a MO for a product with several work orders.

@@ -8,7 +8,8 @@ import logging
 import werkzeug
 
 from odoo import api, fields, Command, models, _
-from odoo.exceptions import RedirectWarning, UserError, ValidationError
+from odoo.exceptions import AccessError, RedirectWarning, UserError, ValidationError
+from odoo.fields import Domain
 from odoo.tools import clean_context, email_normalize, float_repr, float_round, is_html_empty, format_amount, format_date
 from datetime import timedelta
 
@@ -46,6 +47,7 @@ class HrExpense(models.Model):
     _description = "Expense"
     _order = "date desc, id desc"
     _check_company_auto = True
+    _mail_post_access = 'read'
 
     @api.model
     def _default_employee_id(self):
@@ -894,7 +896,8 @@ class HrExpense(models.Model):
         res = super().write(vals)
 
         if vals.get('state') == 'approved' or vals.get('approval_state') == 'approved':
-            self._check_can_approve()
+            # filter out auto approved expenses
+            self.filtered(lambda expense: expense.manager_id - expense.employee_id.user_id or expense.employee_id.expense_manager_id)._check_can_approve()
         elif vals.get('state') == 'refused' or vals.get('approval_state') == 'refused':
             self._check_can_refuse()
 
@@ -1243,7 +1246,7 @@ class HrExpense(models.Model):
         expenses_autovalidated = self.filtered(lambda expense: expense._can_be_autovalidated())
         (self - expenses_autovalidated).approval_state = 'submitted'
         if expenses_autovalidated:  # Note, this will and should bypass the duplicate check. May be changed later
-            expenses_autovalidated._do_approve(check=False)
+            expenses_autovalidated._do_approve()
         self.sudo().update_activities_and_mails()
 
     def _can_be_autovalidated(self):
@@ -1267,7 +1270,7 @@ class HrExpense(models.Model):
             action = self.env["ir.actions.act_window"]._for_xml_id('hr_expense.hr_expense_approve_duplicate_action')
             action['context'] = {'default_expense_ids': duplicates.ids}
             return action
-        self._do_approve(False)
+        self._do_approve()
 
     def action_refuse(self):
         """ Refuse an expense with a reason """
@@ -1333,7 +1336,18 @@ class HrExpense(models.Model):
 
     def attach_document(self, **kwargs):
         """When an attachment is uploaded as a receipt, set it as the main attachment."""
-        self._message_set_main_attachment_id(self.env["ir.attachment"].browse(kwargs['attachment_ids'][-1:]), force=True)
+        if not self.has_access('write') and self.employee_id.user_id != self.env.user:
+            raise AccessError(self.env._("You don't have the access rights to modify this expense."))
+        attachment_ids = [attachment_id for attachment_id in kwargs.get('attachment_ids', []) if attachment_id]  # Filter out falsy values
+        if not attachment_ids:
+            # If uploading the document fails due to the checks in the create method of ir.attachment, the
+            # attachment_ids will contains [None], so we need to check here to raise the UserError.
+            raise UserError(self.env._("You can't add an attachment to an expense once it has been approved."))
+
+        attachment = self.env['ir.attachment'].browse(attachment_ids[-1:])
+        user_expenses = self.filtered(lambda expense: expense.employee_id.user_id == self.env.user)
+        user_expenses.sudo()._message_set_main_attachment_id(attachment, force=True)
+        (self - user_expenses)._message_set_main_attachment_id(attachment, force=True)
 
     @api.model
     def create_expense_from_attachments(self, attachment_ids=None, view_type='list'):
@@ -1398,12 +1412,15 @@ class HrExpense(models.Model):
         # - To Submit: contains the expenses paid either by the employee or by the company, and that are draft or reported
         # - Waiting approval: contains expenses paid by the employee or paid by the company, and that have been submitted but still need to be approved/refused
         # - To be reimbursed: contains ONLY expenses paid by the employee that are approved, the payment has not yet been made
-        fetched_expenses = self._read_group(
-            [
-                ('employee_id', 'in', self.env.user.employee_ids.ids),
-                '|', ('state', 'in', ('draft', 'submitted')),
-                     '&', ('payment_mode', '!=', 'company_account'), ('state', '=', 'approved')
-            ], ['state'], ['total_amount:sum'])
+        base_domain = [
+            ('employee_id', 'child_of', self.env.user.employee_ids.ids),
+            '|', ('state', 'in', ('draft', 'submitted')),
+            '&', ('payment_mode', '!=', 'company_account'), ('state', '=', 'approved')
+        ]
+        if domain := self.env.context.get('domain'):
+            base_domain = Domain.AND([base_domain, domain])
+
+        fetched_expenses = self._read_group(base_domain, ['state'], ['total_amount:sum'])
         for state, total_amount_sum in fetched_expenses:
             expense_state[state]['amount'] += total_amount_sum
         return expense_state
@@ -1539,8 +1556,6 @@ class HrExpense(models.Model):
             raise UserError(self.env._("Please specify if the expenses were paid by the company, reimbursed to the employee directly, or in a payslip."))
 
     def _do_approve(self, check=True):
-        if check:
-            self._check_can_approve()
         expenses_to_approve = self.filtered(lambda s: s.state in {'submitted', 'draft'})
         for expense in expenses_to_approve:
             expense.write({

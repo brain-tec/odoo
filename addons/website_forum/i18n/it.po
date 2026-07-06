@@ -12,10 +12,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:38+0000\n"
-"PO-Revision-Date: 2026-03-07 14:45+0000\n"
+"POT-Creation-Date: 2026-06-19 17:38+0000\n"
+"PO-Revision-Date: 2026-05-30 12:40+0000\n"
 "Last-Translator: \"Marianna Ciofani (cima)\" <cima@odoo.com>\n"
-"Language-Team: Italian <https://translate.odoo.com/projects/odoo-s19-2/"
+"Language-Team: Italian <https://translate.odoo.com/projects/odoo-s19-3/"
 "website_forum/it/>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
@@ -23,7 +23,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
 "0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.16.1\n"
+"X-Generator: Weblate 5.17\n"
 
 #. module: website_forum
 #. odoo-javascript
@@ -188,6 +188,7 @@ msgstr "Richiesti %d karma per separare un messaggio."
 #: code:addons/website_forum/models/forum_post.py:0
 msgid "%d karma required to update a flagged post."
 msgstr ""
+"Sono necessari %d punti karma per aggiornare una pubblicazione segnalata."
 
 #. module: website_forum
 #. odoo-python
@@ -205,19 +206,19 @@ msgstr "Richiesti %d karma per convalidare un messaggio."
 #. odoo-python
 #: code:addons/website_forum/models/forum_post_comment.py:0
 msgid "%i karma required to comment."
-msgstr ""
+msgstr "Sono richiesti %i punti karma per commentare."
 
 #. module: website_forum
 #. odoo-python
 #: code:addons/website_forum/models/forum_post_comment.py:0
 msgid "%i karma required to delete a comment."
-msgstr ""
+msgstr "Sono richiesti %i punti karma per eliminare un commento."
 
 #. module: website_forum
 #. odoo-python
 #: code:addons/website_forum/models/forum_post_comment.py:0
 msgid "%i karma required to edit a comment."
-msgstr ""
+msgstr "Sono richiesti %i punti karma per modificare un commento."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_index_tags
@@ -974,7 +975,7 @@ msgstr "Risposta accettata con almeno 15 voti"
 #. odoo-python
 #: code:addons/website_forum/models/forum_post.py:0
 msgid "Answer converted to comment in \"%s\""
-msgstr ""
+msgstr "Risposta convertita in commento in \"%s\""
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_gen_answer_downvote
@@ -1224,13 +1225,13 @@ msgstr "Risposta migliore"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post_comment__body
 msgid "Body"
-msgstr ""
+msgstr "Corpo"
 
 #. module: website_forum
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid "By sharing you answer, you will get additional"
-msgstr ""
+msgstr "Condividendo la risposta, otterrai"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__can_accept
@@ -1311,13 +1312,13 @@ msgstr "Può visualizzare"
 #. odoo-python
 #: code:addons/website_forum/models/forum_post_comment.py:0
 msgid "Cannot change the post of a comment."
-msgstr ""
+msgstr "Non è possibile modificare la pubblicazione di un commento."
 
 #. module: website_forum
 #. odoo-python
 #: code:addons/website_forum/models/forum_post.py:0
 msgid "Cannot convert a question to a comment"
-msgstr ""
+msgstr "Non è possibile convertire una domanda in un commento"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_edit_retag
@@ -1329,30 +1330,6 @@ msgstr "Cambiare etichette delle domande"
 #: model:gamification.challenge,name:website_forum.challenge_chief_commentator
 msgid "Chief Commentator"
 msgstr "Commentatore capo"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Click here to accept this answer."
-msgstr "Fai clic per accettare questa risposta."
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Click to post your answer."
-msgstr "Fai clic per pubblicare la risposta."
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Click to post your question."
-msgstr "Fai clic per pubblicare la domanda."
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Click to reply."
-msgstr "Fai clic per rispondere."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
@@ -1447,7 +1424,7 @@ msgstr "Commentatore"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__comment_ids
 msgid "Comments"
-msgstr ""
+msgstr "Commenti"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_all_oe_structure_forum_all_top
@@ -1479,7 +1456,7 @@ msgstr "Contenuto"
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__write_date_content
 msgid "Content Updated on"
-msgstr ""
+msgstr "Contenuto aggiornato il"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__karma_comment_convert_all
@@ -1528,12 +1505,6 @@ msgid "Create a new forum post"
 msgstr "Crea un nuovo messaggio nel forum"
 
 #. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Create a new post in this forum by clicking on the button."
-msgstr "Fai clic sul pulsante per creare un nuovo messaggio nel forum."
-
-#. module: website_forum
 #: model_terms:ir.actions.act_window,help:website_forum.forum_tag_action
 msgid "Create a new tag"
 msgstr "Crea una nuova etichetta"
@@ -1556,7 +1527,7 @@ msgstr "Creare nuove etichette"
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/website_forum_tags_wrapper.xml:0
 msgid "Create option \""
-msgstr ""
+msgstr "Crea l'opzione \""
 
 #. module: website_forum
 #: model_terms:gamification.badge,description:website_forum.badge_32
@@ -1752,6 +1723,11 @@ msgid "Downvote for posting offensive contents"
 msgstr "Voto negativo per aver postato contenuti offensivi"
 
 #. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.header
+msgid "Drag blocks here to add them on all forum"
+msgstr ""
+
+#. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_1
 msgid "Duplicate post"
 msgstr "Messaggio duplicato"
@@ -1811,7 +1787,7 @@ msgstr "Funzionalità da redattore: immagine e link"
 #. module: website_forum
 #: model:ir.model,name:website_forum.model_mail_thread
 msgid "Email Thread"
-msgstr ""
+msgstr "Thread e-mail"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
@@ -2053,7 +2029,7 @@ msgstr "Messaggio forum"
 #. module: website_forum
 #: model:ir.model,name:website_forum.model_forum_post_comment
 msgid "Forum Post Comment"
-msgstr ""
+msgstr "Commento al post nel forum"
 
 #. module: website_forum
 #: model:ir.actions.act_window,name:website_forum.forum_post_action
@@ -2079,6 +2055,9 @@ msgstr "Tag forum"
 
 #. module: website_forum
 #. odoo-javascript
+#. odoo-python
+#: code:addons/website_forum/models/forum_forum.py:0
+#: code:addons/website_forum/models/forum_post.py:0
 #: code:addons/website_forum/static/src/website_builder/forum_searchbar_option.xml:0
 #: model:ir.actions.act_window,name:website_forum.forum_forum_action
 #: model:ir.ui.menu,name:website_forum.menu_forum_global
@@ -2100,12 +2079,6 @@ msgstr "Ricevi una notifica quando c'è un'attività per questo post"
 #: model_terms:ir.ui.view,arch_db:website_forum.follow_button
 msgid "Get notified when this tag is used"
 msgstr "Ricevi una notifica quando il tag viene utilizzato"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Give your post title."
-msgstr "Dai un titolo al messaggio."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
@@ -2182,12 +2155,12 @@ msgstr "Guru (15)"
 #. module: website_forum
 #: model:ir.model,name:website_forum.model_ir_http
 msgid "HTTP Routing"
-msgstr ""
+msgstr "Routing HTTP"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__can_access
 msgid "Has Access"
-msgstr ""
+msgstr "Ha accesso"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__uid_has_answered
@@ -2331,12 +2304,6 @@ msgstr "Immagine a 512"
 #: model:forum.post.reason,name:website_forum.reason_13
 msgid "Inappropriate and unacceptable statements"
 msgstr "Dichiarazioni inopportune e inaccettabili"
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Insert tags related to your question."
-msgstr "Inserisci etichette relative alla domanda."
 
 #. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_11
@@ -2613,7 +2580,7 @@ msgstr "Nuova risposta"
 #: model:mail.message.subtype,description:website_forum.mt_comment_new
 #: model:mail.message.subtype,name:website_forum.mt_comment_new
 msgid "New Comment"
-msgstr ""
+msgstr "Nuovo commento"
 
 #. module: website_forum
 #: model:ir.actions.act_window,name:website_forum.forum_forum_action_add
@@ -2638,7 +2605,7 @@ msgstr "Nuova domanda"
 #. odoo-python
 #: code:addons/website_forum/models/forum_post_comment.py:0
 msgid "New comment in %s"
-msgstr ""
+msgstr "Nuovo commento in %s"
 
 #. module: website_forum
 #: model:ir.model.fields.selection,name:website_forum.selection__forum_forum__default_order__create_date_desc
@@ -2762,7 +2729,7 @@ msgstr "Post offensivi"
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid "On average,"
-msgstr ""
+msgstr "In media,"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
@@ -2913,7 +2880,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/website_forum/models/forum_post.py:0
 msgid "Posting answer on a [Flagged] question is not possible."
-msgstr ""
+msgstr "Non è possibile pubblicare una risposta per una domanda [segnalata]."
 
 #. module: website_forum
 #: model:ir.actions.act_window,name:website_forum.forum_post_action_forum_main
@@ -2954,18 +2921,6 @@ msgid "Pundit"
 msgstr "Esperto"
 
 #. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Put your answer here."
-msgstr "Scrivi qui la tua risposta."
-
-#. module: website_forum
-#. odoo-javascript
-#: code:addons/website_forum/static/src/js/tours/website_forum.js:0
-msgid "Put your question here."
-msgstr "Poni qui la tua domanda."
-
-#. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__parent_id
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 msgid "Question"
@@ -2981,7 +2936,7 @@ msgstr "Domanda %s"
 #: model:mail.message.subtype,description:website_forum.mt_ask_validation
 #: model:mail.message.subtype,name:website_forum.mt_ask_validation
 msgid "Question Ask Validation"
-msgstr ""
+msgstr "Chiedi convalida domanda"
 
 #. module: website_forum
 #. odoo-python
@@ -3255,7 +3210,7 @@ msgstr "Secondo parametro di rilevanza"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_template_new_answer
 msgid "See answer"
-msgstr ""
+msgstr "Vedi risposta"
 
 #. module: website_forum
 #. odoo-python
@@ -3908,21 +3863,11 @@ msgid "Website Absolute URL"
 msgstr "URL assoluto sito web"
 
 #. module: website_forum
-#: model:ir.model.fields,field_description:website_forum.field_forum_forum__website_message_ids
-msgid "Website Messages"
-msgstr "Messaggi sito web"
-
-#. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__website_url
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__website_url
 #: model:ir.model.fields,field_description:website_forum.field_forum_tag__website_url
 msgid "Website URL"
 msgstr "URL sito web"
-
-#. module: website_forum
-#: model:ir.model.fields,help:website_forum.field_forum_forum__website_message_ids
-msgid "Website communication history"
-msgstr "Cronologia comunicazioni sito web"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_forum__website_meta_description
@@ -3997,7 +3942,7 @@ msgstr "È già presente un messaggio in attesa"
 #. odoo-python
 #: code:addons/website_forum/models/forum_post.py:0
 msgid "You can post only one answer."
-msgstr ""
+msgstr "È possibile pubblicare una sola risposta."
 
 #. module: website_forum
 #. odoo-javascript
@@ -4194,6 +4139,8 @@ msgid ""
 "has been posted and requires your validation. Click here to access the "
 "question :"
 msgstr ""
+"è stato pubblicata e richiede una conferma. FaI clic per accedere alla "
+"domanda:"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_template_new_question
@@ -4203,7 +4150,7 @@ msgstr "'. Fare clic per accedere alla domanda:"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_template_new_answer
 msgid "has been posted. Click here to access the question:"
-msgstr ""
+msgstr "è stata pubblicata. Fai clic per accedere alla domanda:"
 
 #. module: website_forum
 #. odoo-javascript
@@ -4237,6 +4184,9 @@ msgid ""
 "if your\n"
 "        answer is selected as the right one. See what you can do with karma"
 msgstr ""
+"aggiuntivi se verrà\n"
+"        selezionata come quella corretta. Per scoprire cosa puoi fare con il "
+"karma fai clic"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
@@ -4307,6 +4257,8 @@ msgid ""
 "on social networks get an answer within\n"
 "        5 hours. Questions shared on two social networks have"
 msgstr ""
+"sui social network ottiene una risposta entro\n"
+"        5 ore. Le domande condivise su due social network hanno"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_all_all_entries

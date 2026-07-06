@@ -8,10 +8,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:38+0000\n"
-"PO-Revision-Date: 2026-04-23 11:53+0000\n"
+"POT-Creation-Date: 2026-06-19 17:38+0000\n"
+"PO-Revision-Date: 2026-05-23 12:32+0000\n"
 "Last-Translator: \"Larissa Manderfeld (lman)\" <lman@odoo.com>\n"
-"Language-Team: German <https://translate.odoo.com/projects/odoo-s19-2/"
+"Language-Team: German <https://translate.odoo.com/projects/odoo-s19-3/"
 "payment_demo/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
@@ -66,6 +66,14 @@ msgid "<small>Street 2</small>"
 msgstr "<small>Adresszeile 2</small>"
 
 #. module: payment_demo
+#: model_terms:ir.ui.view,arch_db:payment_demo.express_checkout_form
+msgid ""
+"<span class=\"badge rounded-pill text-bg-warning ms-1\">\n"
+"                                Test Mode\n"
+"                            </span>"
+msgstr ""
+
+#. module: payment_demo
 #: model_terms:ir.ui.view,arch_db:payment_demo.payment_transaction_form
 msgid "Authorize"
 msgstr "Autorisieren"
@@ -102,6 +110,10 @@ msgid ""
 "you want to charge your customers cards only when you are sure you can ship "
 "the goods to them."
 msgstr ""
+"Erfassen Sie den Betrag von Odoo, wenn die Lieferung abgeschlossen ist.\n"
+"Verwenden Sie diese Funktion, wenn Sie die Karten Ihrer Kunden nur dann "
+"belasten möchten,\n"
+"wenn Sie sicher sind, dass Sie die Lieferung durchführen können."
 
 #. module: payment_demo
 #: model_terms:ir.ui.view,arch_db:payment_demo.express_checkout_form
@@ -137,8 +149,8 @@ msgstr "Demo-Express-Kassiervorgang"
 #. module: payment_demo
 #. odoo-python
 #: code:addons/payment_demo/models/payment_provider.py:0
-msgid "Demo providers should never be enabled."
-msgstr "Demo-Anbieter sollten nie aktiviert werden."
+msgid "Demo providers must never be set in live mode."
+msgstr ""
 
 #. module: payment_demo
 #: model:ir.model.fields,field_description:payment_demo.field_payment_provider__display_name
@@ -152,6 +164,11 @@ msgstr "Anzeigename"
 #: model_terms:ir.ui.view,arch_db:payment_demo.payment_details
 msgid "Error"
 msgstr "Fehler"
+
+#. module: payment_demo
+#: model:payment.method,name:payment_demo.payment_method_unknown
+msgid "Express Checkout"
+msgstr ""
 
 #. module: payment_demo
 #: model:ir.model.fields,field_description:payment_demo.field_payment_provider__id
@@ -275,11 +292,6 @@ msgstr "Erfolgreich"
 #: model_terms:ir.ui.view,arch_db:payment_demo.payment_details
 msgid "Successful payment"
 msgstr "Erfolgreiche Zahlung"
-
-#. module: payment_demo
-#: model_terms:ir.ui.view,arch_db:payment_demo.express_checkout_form
-msgid "Test Mode"
-msgstr "Testmodus"
 
 #. module: payment_demo
 #: model:ir.model.fields,help:payment_demo.field_payment_token__demo_simulated_state

@@ -6,15 +6,15 @@
 # Martin Trigaux, 2022
 # Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2022
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-22 17:47+0000\n"
-"PO-Revision-Date: 2025-11-08 19:16+0000\n"
+"POT-Creation-Date: 2026-06-05 19:34+0000\n"
+"PO-Revision-Date: 2026-06-13 13:36+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Ukrainian <https://translate.odoo.com/projects/odoo-19/"
+"Language-Team: Ukrainian <https://translate.odoo.com/projects/odoo-s19-3/"
 "sale_stock/uk/>\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
@@ -24,7 +24,24 @@ msgstr ""
 "11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % "
 "100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
 "(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.6.1\n"
+
+#. module: sale_stock
+#: model:ir.actions.report,print_report_name:sale_stock.action_report_return_label
+msgid "\"Return - %s\" % (object.name)"
+msgstr ""
+
+#. module: sale_stock
+#. odoo-python
+#: code:addons/sale_stock/controllers/return_order.py:0
+msgid "%(quantity)s x %(product_name)s"
+msgstr ""
+
+#. module: sale_stock
+#. odoo-python
+#: code:addons/sale_stock/controllers/return_order.py:0
+msgid "%s:"
+msgstr ""
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.exception_on_picking
@@ -39,6 +56,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/sale_stock/static/src/sale_stock_forecasted/forecasted_details.xml:0
 msgid "1 Quotation"
+msgstr ""
+
+#. module: sale_stock
+#: model_terms:ir.ui.view,arch_db:sale_stock.return_label
+msgid ""
+"<br/>\n"
+"                                    Quantity:"
 msgstr ""
 
 #. module: sale_stock
@@ -67,12 +91,23 @@ msgid "<i class=\"fa fa-fw fa-truck\"/> Received"
 msgstr "<i class=\"fa fa-fw fa-truck\"/> Отримано"
 
 #. module: sale_stock
+#: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_template
+msgid "<i class=\"fa fa-reply me-2\"/>Return"
+msgstr ""
+
+#. module: sale_stock
+#: model_terms:ir.ui.view,arch_db:sale_stock.res_config_settings_view_form_stock
+msgid "<span class=\"ms-2\">days after delivery</span>"
+msgstr ""
+
+#. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.stock_production_lot_view_form
 msgid "<span class=\"o_stat_text\">Sales</span>"
 msgstr "<span class=\"o_stat_text\">Продажі</span>"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
+#, fuzzy
 msgid ""
 "<span class=\"small badge rounded-pill text-bg-success "
 "orders_label_text_align\">\n"
@@ -80,16 +115,38 @@ msgid ""
 "Shipped\n"
 "                                    </span>"
 msgstr ""
+"<span class=\"small badge rounded-pill text-bg-success "
+"orders_label_text_align\">\n"
+"                                        <i class=\"fa fa-fw fa-truck\"/> "
+"Доставлено\n"
+"                                    </span>"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.report_delivery_document_inherit_sale_stock
+#, fuzzy
 msgid "<strong>Customer Reference</strong>"
-msgstr ""
+msgstr "<strong>Референс клієнта</strong>"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.report_delivery_document_inherit_sale_stock
 msgid "<strong>Incoterm</strong>"
 msgstr "<strong>Інкотерм</strong>"
+
+#. module: sale_stock
+#: model_terms:ir.ui.view,arch_db:sale_stock.return_label
+msgid "<strong>Return reason</strong>"
+msgstr ""
+
+#. module: sale_stock
+#: model_terms:ir.ui.view,arch_db:sale_stock.return_label
+msgid "<strong>Returned products</strong>"
+msgstr ""
+
+#. module: sale_stock
+#. odoo-python
+#: code:addons/sale_stock/controllers/return_order.py:0
+msgid "A return label has been downloaded for the following products:<br/>"
+msgstr ""
 
 #. module: sale_stock
 #: model:ir.model.fields,help:sale_stock.field_sale_order_line__qty_delivered_method
@@ -116,6 +173,18 @@ msgid "All planned operations included"
 msgstr "Включені усі заплановані операції"
 
 #. module: sale_stock
+#: model:ir.model.fields,field_description:sale_stock.field_res_company__allow_spontaneous_returns
+#: model:ir.model.fields,field_description:sale_stock.field_res_config_settings__allow_spontaneous_returns
+#: model:ir.model.fields,field_description:sale_stock.field_stock_picking__allow_spontaneous_returns
+msgid "Allow Spontaneous Returns"
+msgstr ""
+
+#. module: sale_stock
+#: model_terms:ir.ui.view,arch_db:sale_stock.res_config_settings_view_form_stock
+msgid "Allow users to return products"
+msgstr ""
+
+#. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_stock_rules_report__so_route_ids
 msgid "Apply specific routes"
 msgstr "Застосуйте конкретні маршрути"
@@ -140,8 +209,9 @@ msgstr "В наявності"
 #. module: sale_stock
 #. odoo-javascript
 #: code:addons/sale_stock/static/src/widgets/qty_at_date_widget.xml:0
+#, fuzzy
 msgid "Available in stock"
-msgstr ""
+msgstr "Доступний на складі"
 
 #. module: sale_stock
 #: model:ir.model.fields,help:sale_stock.field_stock_rules_report__so_route_ids
@@ -151,8 +221,9 @@ msgstr ""
 
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_res_company
+#, fuzzy
 msgid "Company"
-msgstr ""
+msgstr "Компанія"
 
 #. module: sale_stock
 #: model:ir.model.fields,help:sale_stock.field_sale_order__effective_date
@@ -163,6 +234,22 @@ msgstr "Дата завершення першого замовлення на �
 #: model:ir.model,name:sale_stock.model_res_config_settings
 msgid "Config Settings"
 msgstr "Налаштування"
+
+#. module: sale_stock
+#. odoo-javascript
+#: code:addons/sale_stock/static/src/return_order_dialog/return_order_dialog.xml:0
+msgid "Continue"
+msgstr ""
+
+#. module: sale_stock
+#: model:ir.model.fields,field_description:sale_stock.field_return_reason__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: sale_stock
+#: model:ir.model.fields,field_description:sale_stock.field_return_reason__create_date
+msgid "Created on"
+msgstr ""
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.report_delivery_document_inherit_sale_stock
@@ -208,6 +295,12 @@ msgstr ""
 "використовувати мінімальний або максимальний час виконання рядків замовлення."
 
 #. module: sale_stock
+#. odoo-javascript
+#: code:addons/sale_stock/static/src/return_order_dialog/return_order_dialog.xml:0
+msgid "Delivery:"
+msgstr ""
+
+#. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_account_accrued_orders_wizard__display_name
 #: model:ir.model.fields,field_description:sale_stock.field_account_move__display_name
 #: model:ir.model.fields,field_description:sale_stock.field_account_move_line__display_name
@@ -216,6 +309,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:sale_stock.field_res_company__display_name
 #: model:ir.model.fields,field_description:sale_stock.field_res_config_settings__display_name
 #: model:ir.model.fields,field_description:sale_stock.field_res_users__display_name
+#: model:ir.model.fields,field_description:sale_stock.field_return_reason__display_name
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order__display_name
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order_line__display_name
 #: model:ir.model.fields,field_description:sale_stock.field_sale_report__display_name
@@ -242,6 +336,12 @@ msgstr "Відобразити віджет кількості"
 msgid ""
 "Do not forget to change the partner on the following delivery orders: %s"
 msgstr "Не забудьте змінити партнера на наступному замовленні на доставку: %s"
+
+#. module: sale_stock
+#. odoo-javascript
+#: code:addons/sale_stock/static/src/return_order_dialog/return_order_dialog.js:0
+msgid "Download Return Label"
+msgstr ""
 
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order__effective_date
@@ -311,6 +411,7 @@ msgstr "Має протерміновані надходження"
 #: model:ir.model.fields,field_description:sale_stock.field_res_company__id
 #: model:ir.model.fields,field_description:sale_stock.field_res_config_settings__id
 #: model:ir.model.fields,field_description:sale_stock.field_res_users__id
+#: model:ir.model.fields,field_description:sale_stock.field_return_reason__id
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order__id
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order_line__id
 #: model:ir.model.fields,field_description:sale_stock.field_sale_report__id
@@ -332,6 +433,11 @@ msgid "Impacted Transfer(s):"
 msgstr "Переміщення, що зазнали впливу:"
 
 #. module: sale_stock
+#: model:return.reason,name:sale_stock.return_reason_incorrect_specs
+msgid "Incorrect specifications or compatibility issues"
+msgstr ""
+
+#. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.report_delivery_document_inherit_sale_stock
 msgid "Incoterm details"
 msgstr "Деталі інкотерм"
@@ -348,7 +454,14 @@ msgstr "Виробництво на замовлення"
 
 #. module: sale_stock
 #: model:ir.model.fields,help:sale_stock.field_sale_order__picking_policy
+#, fuzzy
 msgid "It specifies goods to be deliver partially or all at once"
+msgstr ""
+"Це вказує товари, які можуть бути доставлені частково або все одночасно"
+
+#. module: sale_stock
+#: model:return.reason,name:sale_stock.return_reason_damaged_product
+msgid "Item arrived damaged or defective"
 msgstr ""
 
 #. module: sale_stock
@@ -372,10 +485,21 @@ msgid "Last Delivery Orders"
 msgstr "Останні замовлення на доставку"
 
 #. module: sale_stock
+#: model:ir.model.fields,field_description:sale_stock.field_return_reason__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: sale_stock
+#: model:ir.model.fields,field_description:sale_stock.field_return_reason__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order__late_availability
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_stock_sale_order_view_search_inherit
+#, fuzzy
 msgid "Late Availability"
-msgstr ""
+msgstr "Пізня доступність"
 
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order_line__customer_lead
@@ -386,6 +510,18 @@ msgstr "Термін виконання"
 #: model:ir.model,name:sale_stock.model_stock_lot
 msgid "Lot/Serial"
 msgstr "Партія/Серійний номер"
+
+#. module: sale_stock
+#. odoo-javascript
+#: code:addons/sale_stock/static/src/return_order_dialog/return_order_dialog.xml:0
+#: model_terms:ir.ui.view,arch_db:sale_stock.return_label
+msgid "Lot/Serial Number:"
+msgstr ""
+
+#. module: sale_stock
+#: model_terms:ir.ui.view,arch_db:sale_stock.res_config_settings_view_form_stock
+msgid "Manage Return Reasons"
+msgstr ""
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.exception_on_so
@@ -429,13 +565,22 @@ msgstr ""
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_stock_help_message_template
+#, fuzzy
 msgid "No delivery yet! Automate them with sales orders."
 msgstr ""
+"Доставка ще не надходить! Автоматизуйте їх за допомогою замовлень на продаж."
 
 #. module: sale_stock
 #. odoo-javascript
 #: code:addons/sale_stock/static/src/widgets/qty_at_date_widget.xml:0
+#, fuzzy
 msgid "No future availability"
+msgstr "Немає доступності на майбутнє"
+
+#. module: sale_stock
+#. odoo-javascript
+#: code:addons/sale_stock/static/src/return_order_dialog/return_order_dialog.xml:0
+msgid "No products are available to return."
 msgstr ""
 
 #. module: sale_stock
@@ -451,8 +596,9 @@ msgstr "Не доставлено"
 #. module: sale_stock
 #. odoo-javascript
 #: code:addons/sale_stock/static/src/widgets/qty_at_date_widget.xml:0
+#, fuzzy
 msgid "Not enough future availability"
-msgstr ""
+msgstr "Недостатньо доступності на майбутнє"
 
 #. module: sale_stock
 #: model:ir.model.fields,help:sale_stock.field_sale_order_line__customer_lead
@@ -464,13 +610,33 @@ msgstr ""
 #. module: sale_stock
 #. odoo-javascript
 #: code:addons/sale_stock/static/src/widgets/qty_at_date_widget.xml:0
+#, fuzzy
 msgid "On"
+msgstr "Увімкнути"
+
+#. module: sale_stock
+#: model:return.reason,name:sale_stock.return_reason_order_by_mistake
+msgid "Ordered by mistake"
 msgstr ""
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.portal_my_orders
 msgid "Partially Delivered"
 msgstr "Доставлено частково"
+
+#. module: sale_stock
+#. odoo-javascript
+#: code:addons/sale_stock/static/src/return_order_dialog/return_label_info.xml:0
+msgid ""
+"Please download and print the label, attach it to your package, and send the "
+"package to the address below:"
+msgstr ""
+
+#. module: sale_stock
+#. odoo-javascript
+#: code:addons/sale_stock/static/src/return_order_dialog/return_order_dialog.js:0
+msgid "Print the return request label."
+msgstr ""
 
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_product_template
@@ -483,6 +649,11 @@ msgid "Product Moves (Stock Move Line)"
 msgstr "Переміщення товару (Рядок складського переміщення)"
 
 #. module: sale_stock
+#: model:return.reason,name:sale_stock.return_reason_not_meeting_expectations
+msgid "Product does not meet expectations"
+msgstr ""
+
+#. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order_line__qty_to_deliver
 msgid "Qty To Deliver"
 msgstr "К-сть для доставки"
@@ -490,21 +661,32 @@ msgstr "К-сть для доставки"
 #. module: sale_stock
 #. odoo-javascript
 #: code:addons/sale_stock/static/src/sale_stock_forecasted/forecasted_details.xml:0
+#, fuzzy
 msgid "Quotations"
+msgstr "Комерційні пропозиції"
+
+#. module: sale_stock
+#: model:ir.model.fields,field_description:sale_stock.field_return_reason__name
+msgid "Reason"
 msgstr ""
 
 #. module: sale_stock
-#: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
-msgid "RETURN"
-msgstr "ПОВЕРНУТИ"
+#: model:return.reason,name:sale_stock.return_reason_wrong_item
+msgid "Received the wrong item"
+msgstr ""
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_stock_help_message_template
+#, fuzzy
 msgid ""
 "Reduce back orders with reservations, locations management, smart\n"
 "                replenishment propositions, shipping connectors, barcode "
 "scanner, etc."
 msgstr ""
+"Зменшіть кількість замовлень, що залишилися, за допомогою бронювань, "
+"управління локаціями, розумних\n"
+" пропозицій щодо поповнення запасів, конекторів доставки, сканера штрих-"
+"кодів тощо."
 
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_stock_reference
@@ -519,8 +701,9 @@ msgstr "Посилання"
 #. module: sale_stock
 #. odoo-javascript
 #: code:addons/sale_stock/static/src/widgets/qty_at_date_widget.xml:0
+#, fuzzy
 msgid "Remaining demand available at"
-msgstr ""
+msgstr "Залишок попиту доступний в"
 
 #. module: sale_stock
 #. odoo-python
@@ -530,11 +713,53 @@ msgstr "Поповнити замовлення (ВНЗ)"
 
 #. module: sale_stock
 #. odoo-javascript
+#: code:addons/sale_stock/static/src/return_order_dialog/return_order_dialog.xml:0
+msgid "Request a return"
+msgstr ""
+
+#. module: sale_stock
+#. odoo-javascript
 #: code:addons/sale_stock/static/src/widgets/qty_at_date_widget.xml:0
 msgid "Reserved"
 msgstr "Зарезервовано"
 
 #. module: sale_stock
+#: model:ir.actions.report,name:sale_stock.action_report_return_label
+msgid "Return Label"
+msgstr ""
+
+#. module: sale_stock
+#: model:ir.model,name:sale_stock.model_return_reason
+#: model:ir.model.fields,field_description:sale_stock.field_stock_picking__return_reason_id
+msgid "Return Reason"
+msgstr ""
+
+#. module: sale_stock
+#: model:ir.actions.act_window,name:sale_stock.action_open_return_reasons
+msgid "Return Reasons"
+msgstr ""
+
+#. module: sale_stock
+#: model:ir.model.fields,field_description:sale_stock.field_res_company__return_validity_days
+#: model:ir.model.fields,field_description:sale_stock.field_res_config_settings__return_validity_days
+msgid "Return Validity Days"
+msgstr ""
+
+#. module: sale_stock
+#. odoo-javascript
+#: code:addons/sale_stock/static/src/return_order_dialog/return_order_dialog.xml:0
+msgid "Return reason"
+msgstr ""
+
+#. module: sale_stock
+#. odoo-python
+#: code:addons/sale_stock/controllers/return_order.py:0
+msgid "Return reason: %s"
+msgstr ""
+
+#. module: sale_stock
+#: model:ir.actions.act_window,name:sale_stock.action_stock_picking_return_report
+#: model:ir.ui.menu,name:sale_stock.menu_stock_picking_return_report
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
 msgid "Returns"
 msgstr "Повернення"
@@ -614,9 +839,26 @@ msgid "Security Lead Time for Sales"
 msgstr "Безпека часу проведення для продажів"
 
 #. module: sale_stock
+#. odoo-javascript
+#: code:addons/sale_stock/static/src/return_order_dialog/return_order_dialog.xml:0
+msgid "Select a reason..."
+msgstr ""
+
+#. module: sale_stock
+#. odoo-javascript
+#: code:addons/sale_stock/static/src/return_order_dialog/return_order_dialog.xml:0
+msgid "Select at least one product and a return reason."
+msgstr ""
+
+#. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_stock_route__sale_selectable
 msgid "Selectable on Sales Order Line"
 msgstr "Можна обирати у рядках"
+
+#. module: sale_stock
+#: model:ir.model.fields,field_description:sale_stock.field_return_reason__sequence
+msgid "Sequence"
+msgstr ""
 
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order__picking_policy
@@ -667,8 +909,9 @@ msgstr "Звіт складського правила"
 #. module: sale_stock
 #. odoo-javascript
 #: code:addons/sale_stock/static/src/xml/delay_alert.xml:0
+#, fuzzy
 msgid "The delivery"
-msgstr ""
+msgstr "Доставка"
 
 #. module: sale_stock
 #. odoo-javascript
@@ -719,8 +962,9 @@ msgstr "Користувач"
 #. module: sale_stock
 #. odoo-javascript
 #: code:addons/sale_stock/static/src/widgets/qty_at_date_widget.xml:0
+#, fuzzy
 msgid "View Forecast"
-msgstr ""
+msgstr "Переглянути прогноз"
 
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order__warehouse_id
@@ -743,15 +987,18 @@ msgstr "Коли усі товари готові"
 #. module: sale_stock
 #. odoo-python
 #: code:addons/sale_stock/models/sale_order.py:0
+#, fuzzy
 msgid ""
 "You must have a warehouse for line using a delivery in different company."
-msgstr ""
+msgstr "Ви повинні мати склад для рядка з доставкою в іншій компанії."
 
 #. module: sale_stock
 #. odoo-python
 #: code:addons/sale_stock/models/sale_order.py:0
+#, fuzzy
 msgid "You must set a warehouse on your sale order to proceed."
 msgstr ""
+"Щоб продовжити, вам потрібно вказати склад у вашому замовленні на продаж."
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.exception_on_so
@@ -782,8 +1029,6 @@ msgstr "обробляється замість"
 #. module: sale_stock
 #. odoo-javascript
 #: code:addons/sale_stock/static/src/xml/delay_alert.xml:0
+#, fuzzy
 msgid "will be late."
-msgstr ""
-
-#~ msgid "Stock Valuation"
-#~ msgstr "Оцінка складу"
+msgstr "буде запізнено."

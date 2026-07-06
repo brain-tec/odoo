@@ -8,23 +8,23 @@
 # Wil Odoo, 2025
 #
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 # "Tony Ng (ngto)" <ngto@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-29 17:40+0000\n"
-"PO-Revision-Date: 2026-03-14 13:05+0000\n"
-"Last-Translator: \"Tony Ng (ngto)\" <ngto@odoo.com>\n"
+"POT-Creation-Date: 2026-06-30 00:51+0000\n"
+"PO-Revision-Date: 2026-06-13 12:30+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
-"projects/odoo-s19-2/sale/zh_Hant/>\n"
+"projects/odoo-s19-3/sale/zh_Hant/>\n"
 "Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.16.2\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: sale
 #. odoo-javascript
@@ -127,6 +127,10 @@ msgid ""
 "value=\"object.get_portal_last_transaction()\"/>\n"
 "                        Your order <span style=\"font-weight:bold;\" t-"
 "out=\"object.name or ''\">S00049</span>\n"
+"                        <t t-if=\"object.client_order_ref\">\n"
+"                            (<t t-out=\"object.client_order_ref or "
+"''\">CUSTOMER REF</t>)\n"
+"                        </t>\n"
 "                        <t t-if=\"object.state == 'sale' or (tx_sudo and "
 "tx_sudo.state in ('done', 'authorized'))\">\n"
 "                            <t t-if=\"hasattr(object, 'carrier_id') and "
@@ -201,11 +205,12 @@ msgid ""
 "                                        <tr>\n"
 "                                            <td width=\"24%\" style=\"max-"
 "width: 120px; padding: 0 10px 10px 0; vertical-align: top;\">\n"
-"                                                <img t-attf-src=\"/web/image/"
-"product.product/{{ line.product_id.id }}/image_128\" t-attf-style=\"width: "
-"64px; height: {{object.website_id and "
-"object.website_id._get_product_image_ratio_height() or '64px'}}; object-fit: "
-"cover; object-position: center;\" alt=\"Product image\"/>\n"
+"                                                <img t-"
+"if=\"line.product_id\" t-attf-src=\"/web/image/product.product/"
+"{{ line.product_id.id }}/image_128\" t-attf-style=\"width: 64px; height: "
+"{{object.website_id and object.website_id._get_product_image_ratio_height() "
+"or '64px'}}; object-fit: cover; object-position: center;\" alt=\"Product "
+"image\"/>\n"
 "                                            </td>\n"
 "                                            <td align=\"left\" "
 "style=\"vertical-align: top; padding-bottom: 22px;\">\n"
@@ -213,8 +218,8 @@ msgid ""
 "height-rule:exactly; margin:0; font-size: 14px; {{'margin-bottom: 6px;' if "
 "line.product_type == 'combo' else ''}}\">\n"
 "                                                    <strong t-"
-"out=\"line.product_id.name or ''\" t-attf-style=\"color: #{color};\">Taking "
-"care of Trees Course</strong>\n"
+"out=\"line.product_id.name or line.name\" t-attf-style=\"color: #{color};"
+"\">Taking care of Trees Course</strong>\n"
 "                                                    <span t-"
 "if=\"line.product_id.product_template_attribute_value_ids\" style=\"opacity: "
 "0.5;\">\n"
@@ -683,6 +688,9 @@ msgid ""
 "        <t t-if=\"object.origin\">\n"
 "            (with reference: <t t-out=\"object.origin or ''\">S00052</t> )\n"
 "        </t>\n"
+"        <t t-if=\"object.client_order_ref\">\n"
+"            (<t t-out=\"object.client_order_ref or ''\">CUSTOMER REF</t>)\n"
+"        </t>\n"
 "        amounting in <span style=\"font-weight: bold;\" t-"
 "out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
 "10.00</span> is ready for review.\n"
@@ -732,6 +740,9 @@ msgid ""
 "span>\n"
 "        <t t-if=\"object.origin\">\n"
 "            (with reference: <t t-out=\"object.origin or ''\"/> )\n"
+"        </t>\n"
+"        <t t-if=\"object.client_order_ref\">\n"
+"            (<t t-out=\"object.client_order_ref or ''\">CUSTOMER REF</t>)\n"
 "        </t>\n"
 "        amounting in <span style=\"font-weight: bold;\" t-"
 "out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
@@ -933,8 +944,9 @@ msgstr "<strong class=\"d-block mt-3\">送貨地址</strong>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
+#, fuzzy
 msgid "<strong>Contact</strong>"
-msgstr ""
+msgstr "<strong>聯絡人</strong>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -953,8 +965,9 @@ msgstr "<strong>財政狀況備註:</strong>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
+#, fuzzy
 msgid "<strong>Incoterm</strong>"
-msgstr ""
+msgstr "<strong>國際貿易術語</strong>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -1022,8 +1035,9 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order_line__is_storable
+#, fuzzy
 msgid "A storable product is a product for which you manage stock."
-msgstr ""
+msgstr "可儲存產品是需要你管理庫存水平的產品。"
 
 #. module: sale
 #: model:res.groups,name:sale.group_warning_sale
@@ -1130,23 +1144,18 @@ msgstr "加入"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Add a note"
-msgstr "加入備註"
+msgid "Add Line"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Add a product"
-msgstr "加入產品"
+msgid "Add Note"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Add a section"
-msgstr "加入分段標題"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Add note"
-msgstr "加入備註"
+msgid "Add Section"
+msgstr ""
 
 #. module: sale
 #. odoo-javascript
@@ -1161,16 +1170,6 @@ msgid "Add optional products"
 msgstr "加入可選產品"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Add product"
-msgstr "加入產品"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Add section"
-msgstr "加入分段標題"
-
-#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Add several variants to an order from a grid"
 msgstr "從矩陣在訂單增加多個產品變體"
@@ -1178,13 +1177,19 @@ msgstr "從矩陣在訂單增加多個產品變體"
 #. module: sale
 #. odoo-javascript
 #: code:addons/sale/static/src/js/combo_configurator_dialog/combo_configurator_dialog.xml:0
+#, fuzzy
 msgid "Add to order"
-msgstr ""
+msgstr "加入至訂單"
 
 #. module: sale
 #: model:ir.actions.act_window,name:sale.mail_followers_edit_action_from_sale
 msgid "Add/Remove Followers"
 msgstr "加入/移除關注者"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__allow_invoice_overages
+msgid "Allow Invoice Overages"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__allowed_uom_ids
@@ -1272,8 +1277,9 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__analytic_account_id
+#, fuzzy
 msgid "Analytic Account"
-msgstr ""
+msgstr "分析帳戶"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__analytic_distribution
@@ -1383,21 +1389,24 @@ msgid "Authorized Transactions"
 msgstr "已授權的交易"
 
 #. module: sale
-#: model:ir.model.fields,field_description:sale.field_res_config_settings__automatic_invoice
-msgid "Automatic Invoice"
-msgstr "自動發票"
+#: model:ir.model.fields,field_description:sale.field_res_company__sale_automatic_invoice
+#: model:ir.model.fields,field_description:sale.field_res_config_settings__sale_automatic_invoice
+msgid "Automatic Invoicing"
+msgstr ""
 
 #. module: sale
 #. odoo-javascript
 #: code:addons/sale/static/src/js/quantity_availability/qty_at_date_widget.xml:0
+#, fuzzy
 msgid "Availability"
-msgstr ""
+msgstr "可用"
 
 #. module: sale
 #. odoo-javascript
 #: code:addons/sale/static/src/js/quantity_availability/qty_at_date_widget.js:0
+#, fuzzy
 msgid "Available"
-msgstr ""
+msgstr "可用"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_report_view_tree
@@ -1427,11 +1436,15 @@ msgstr "以震撼的報價，擊敗競爭對手！"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__delivery_status
+#, fuzzy
 msgid ""
 "Blue: Not Delivered/Started\n"
 "            Orange: Partially Delivered\n"
 "            Green: Fully Delivered"
 msgstr ""
+"藍色：未送貨/未開始交付\n"
+"            橙色：已部份交付\n"
+"            綠色：已全數交付"
 
 #. module: sale
 #: model_terms:ir.actions.act_window,help:sale.action_quotations
@@ -1496,8 +1509,9 @@ msgstr "取消"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
+#, fuzzy
 msgid "Cancel Order"
-msgstr ""
+msgstr "取消訂單"
 
 #. module: sale
 #: model:ir.model,name:sale.model_sale_mass_cancel_orders
@@ -1573,8 +1587,9 @@ msgstr "類別"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_analytic_lines_service_search
+#, fuzzy
 msgid "Category"
-msgstr ""
+msgstr "類別"
 
 #. module: sale
 #: model:product.template,name:sale.product_product_1_product_template
@@ -1607,8 +1622,9 @@ msgstr ""
 #. module: sale
 #. odoo-javascript
 #: code:addons/sale/static/src/xml/sales_team_progress_bar_template.xml:0
+#, fuzzy
 msgid "Click to define an invoicing target"
-msgstr ""
+msgstr "點選以定義開立應收憑單目標"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form_sale_inherit
@@ -1698,14 +1714,14 @@ msgstr "設定"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Configure Delivery Methods"
-msgstr ""
+msgstr "設定送貨方式"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid ""
 "Configure delivery methods or work with delivery providers using existing "
 "integrations."
-msgstr ""
+msgstr "設定送貨方式，或利用現有整合功能，採用配送服務供應商的服務。"
 
 #. module: sale
 #. odoo-javascript
@@ -1722,8 +1738,9 @@ msgstr "確認"
 
 #. module: sale
 #: model:ir.actions.server,name:sale.model_sale_order_action_quotation_confirm
+#, fuzzy
 msgid "Confirm Orders"
-msgstr ""
+msgstr "確認訂單"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -1737,13 +1754,15 @@ msgstr "確認訊息"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
+#, fuzzy
 msgid "Connect"
-msgstr ""
+msgstr "連接"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
+#, fuzzy
 msgid "Connect Stripe"
-msgstr ""
+msgstr "連線至 Stripe"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
@@ -1764,6 +1783,11 @@ msgstr "連接器"
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__consolidated_billing
 msgid "Consolidated Billing"
 msgstr "合併賬單"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_order_line__consolidation_currency_id
+msgid "Consolidation Currency"
+msgstr ""
 
 #. module: sale
 #: model:ir.model,name:sale.model_res_partner
@@ -1961,8 +1985,9 @@ msgstr "客戶州/省"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__partner_tag_ids
 #: model_terms:ir.ui.view,arch_db:sale.view_order_product_search
+#, fuzzy
 msgid "Customer Tags"
-msgstr ""
+msgstr "客戶標籤"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__partner_zip
@@ -2040,8 +2065,7 @@ msgid "Delete"
 msgstr "刪除"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-#: model_terms:ir.ui.view,arch_db:sale.view_order_tree
+#: model:ir.actions.server,name:sale.model_sale_order_action_deliver_sold_quantity
 msgid "Deliver"
 msgstr ""
 
@@ -2059,6 +2083,8 @@ msgstr "已交貨數量: %s"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__product_template__invoice_policy__delivery
+#: model:ir.model.fields.selection,name:sale.selection__res_company__sale_invoice_policy__delivery
+#: model:ir.model.fields.selection,name:sale.selection__sale_order_line__invoice_policy__delivery
 msgid "Delivered quantities"
 msgstr "已交貨數量"
 
@@ -2092,8 +2118,9 @@ msgstr "交貨數量"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__delivery_status
+#, fuzzy
 msgid "Delivery Status"
-msgstr ""
+msgstr "送餐狀態"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_product_product__sale_delay
@@ -2115,10 +2142,12 @@ msgstr ""
 #. module: sale
 #: model:ir.model.fields,help:sale.field_product_product__sale_delay
 #: model:ir.model.fields,help:sale.field_product_template__sale_delay
+#, fuzzy
 msgid ""
 "Delivery lead time, in days. It's the number of days, promised to the "
 "customer, between the confirmation of the sales order and the delivery."
 msgstr ""
+"送貨提前期， 依日計算.此為承諾給客戶的交期， 即從下單到送貨所需要的天數."
 
 #. module: sale
 #: model:product.template,name:sale.advance_product_0_product_template
@@ -2261,12 +2290,13 @@ msgstr "顯示名稱"
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__display_product_images_on_so
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Display Product Images"
-msgstr ""
+msgstr "顯示產品圖片"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__display_qty_widget
+#, fuzzy
 msgid "Display Qty Widget"
-msgstr ""
+msgstr "顯示數量小部件"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__display_type
@@ -2277,6 +2307,12 @@ msgstr "顯示類型"
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__distribution_analytic_account_ids
 msgid "Distribution Analytic Account"
 msgstr "分佈分析賬戶"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_order__document_tax_mode
+#: model:ir.model.fields,field_description:sale.field_sale_order_line__document_tax_mode
+msgid "Document Tax Mode"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
@@ -2408,7 +2444,7 @@ msgstr "重複訂單"
 
 #. module: sale
 #. odoo-javascript
-#: code:addons/sale/static/src/js/sale_product_field.js:0
+#: code:addons/sale/static/src/js/sale_product_mixin.js:0
 msgid "Edit Configuration"
 msgstr "修改配置"
 
@@ -2460,13 +2496,19 @@ msgstr "到期日："
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_view_search_inherit_quotation
+#, fuzzy
 msgid "Expired"
-msgstr ""
+msgstr "到期"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__extra_tax_data
 msgid "Extra Tax Data"
 msgstr "額外稅務數據"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_order__extra_total_fields
+msgid "Extra Total Fields"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__product_no_variant_attribute_value_ids
@@ -2481,8 +2523,9 @@ msgstr "帶有 %s 的其他明細"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_analytic_lines_service_search
+#, fuzzy
 msgid "Financial Account"
-msgstr ""
+msgstr "財務會計科目"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__fiscal_position_id
@@ -2491,11 +2534,13 @@ msgstr "財務規則"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__fiscal_position_id
+#, fuzzy
 msgid ""
 "Fiscal positions are used to adapt taxes and accounts for particular "
 "customers or sales orders/invoices. The default value comes from the "
 "customer."
 msgstr ""
+"財務狀況用於調整特定客戶的稅金和科目或銷售訂單/應收憑單. 預設值來自客戶."
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_discount__discount_type__amount
@@ -2537,8 +2582,9 @@ msgstr "訂單明細輸入內容錯誤"
 #. module: sale
 #. odoo-javascript
 #: code:addons/sale/static/src/js/quantity_availability/qty_at_date_widget.js:0
+#, fuzzy
 msgid "Forecasted Stock"
-msgstr ""
+msgstr "預測庫存"
 
 #. module: sale
 #: model_terms:ir.actions.act_window,help:sale.action_account_invoice_report_salesteam
@@ -2557,8 +2603,9 @@ msgstr "全額<br/>"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__delivery_status__full
+#, fuzzy
 msgid "Fully Delivered"
-msgstr ""
+msgstr "全數完成送貨"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__invoice_status__invoiced
@@ -2623,7 +2670,7 @@ msgstr ""
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Grant discounts on sales order lines"
-msgstr "在銷售訂單明細授予折扣"
+msgstr "在銷售單資料行給予折扣"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__weight
@@ -2654,6 +2701,11 @@ msgstr "有已確認訂單"
 #: model:ir.model.fields,field_description:sale.field_sale_order__has_message
 msgid "Has Message"
 msgstr "有訊息"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_order__has_overages
+msgid "Has Overages"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__show_update_pricelist
@@ -2790,27 +2842,31 @@ msgstr "在訂單內"
 #. module: sale
 #. odoo-javascript
 #: code:addons/sale/static/src/js/combo_configurator_dialog/combo_configurator_dialog.xml:0
+#, fuzzy
 msgid "Included"
-msgstr ""
+msgstr "已包括"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_partner__incoterm_id
 #: model:ir.model.fields,field_description:sale.field_res_users__incoterm_id
 #: model:ir.model.fields,field_description:sale.field_sale_order__incoterm
+#, fuzzy
 msgid "Incoterm"
-msgstr ""
+msgstr "國際貿易術語"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_partner__incoterm_location
 #: model:ir.model.fields,field_description:sale.field_res_users__incoterm_location
 #: model:ir.model.fields,field_description:sale.field_sale_order__incoterm_location
+#, fuzzy
 msgid "Incoterm Location"
-msgstr ""
+msgstr "國際貿易術語位置"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
+#, fuzzy
 msgid "Incoterm:"
-msgstr ""
+msgstr "國際貿易術語："
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_account_bank_statement_line__sale_warning_text
@@ -2823,10 +2879,11 @@ msgstr "由使用者為合作夥伴或產品設定的內部警告。"
 #: model:ir.model.fields,help:sale.field_res_partner__incoterm_id
 #: model:ir.model.fields,help:sale.field_res_users__incoterm_id
 #: model:ir.model.fields,help:sale.field_sale_order__incoterm
+#, fuzzy
 msgid ""
 "International Commercial Terms are a series of predefined commercial terms "
 "used in international transactions."
-msgstr ""
+msgstr "國際商業條款是一系列用於國際交易的事先定義的商業條款。"
 
 #. module: sale
 #. odoo-python
@@ -2849,8 +2906,9 @@ msgstr "無效的簽署資料."
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_account_analytic_line__reinvoice_move_id
 #: model_terms:ir.ui.view,arch_db:sale.view_analytic_lines_service_search
+#, fuzzy
 msgid "Invoice"
-msgstr ""
+msgstr "發票"
 
 #. module: sale
 #. odoo-python
@@ -2872,6 +2930,12 @@ msgstr "發票數目"
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__invoice_lines
 msgid "Invoice Lines"
 msgstr "發票資料行"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__invoice_overages
+#: model:ir.model.fields,field_description:sale.field_sale_order__invoice_overages
+msgid "Invoice Overages"
+msgstr ""
 
 #. module: sale
 #: model:mail.message.subtype,name:sale.mt_salesteam_invoice_paid
@@ -2921,16 +2985,6 @@ msgid ""
 msgstr ""
 "當月的應收憑單收入. 這是銷售團隊本月開具的應收憑單金額. 它用於計算目前和目標"
 "收入在看板視圖上的進展比率."
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__res_config_settings__default_invoice_policy__delivery
-msgid "Invoice what is delivered"
-msgstr "依已出貨數量"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__res_config_settings__default_invoice_policy__order
-msgid "Invoice what is ordered"
-msgstr "為已訂購項目開立發票"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__qty_invoiced_at_date
@@ -2997,7 +3051,9 @@ msgstr "發票地址"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_product_product__invoice_policy
 #: model:ir.model.fields,field_description:sale.field_product_template__invoice_policy
-#: model:ir.model.fields,field_description:sale.field_res_config_settings__default_invoice_policy
+#: model:ir.model.fields,field_description:sale.field_res_company__sale_invoice_policy
+#: model:ir.model.fields,field_description:sale.field_res_config_settings__sale_invoice_policy
+#: model:ir.model.fields,field_description:sale.field_sale_order_line__invoice_policy
 msgid "Invoicing Policy"
 msgstr "發票政策"
 
@@ -3043,6 +3099,11 @@ msgstr "是關注人"
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__is_product_archived
 msgid "Is Product Archived"
 msgstr "產品是否已封存"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_order_line__mandatory_product
+msgid "Is Product Mandatory"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__is_downpayment
@@ -3192,6 +3253,11 @@ msgid "Manage Sales & teams targets and commissions"
 msgstr "管理銷售人員及團隊的目標及佣金"
 
 #. module: sale
+#: model:ir.model.fields,field_description:sale.field_res_config_settings__sale_order_mandatory_product
+msgid "Mandatory Product"
+msgstr ""
+
+#. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_line__qty_delivered_method__manual
 msgid "Manual"
 msgstr "手動"
@@ -3240,6 +3306,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sale.account_invoice_form
 msgid "Marketing"
 msgstr "市場推廣"
+
+#. module: sale
+#: model:ir.ui.menu,name:sale.menu_sale_marketplaces
+msgid "Marketplaces"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_account_bank_statement_line__medium_id
@@ -3294,8 +3365,9 @@ msgstr "向上移動"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_analytic_lines_service_search
+#, fuzzy
 msgid "My"
-msgstr ""
+msgstr "我的"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_sales_order_filter
@@ -3391,8 +3463,9 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__delivery_status__pending
+#, fuzzy
 msgid "Not Delivered"
-msgstr ""
+msgstr "未送貨"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
@@ -3458,8 +3531,9 @@ msgstr ""
 #. module: sale
 #. odoo-javascript
 #: code:addons/sale/static/src/js/quantity_availability/qty_at_date_widget.xml:0
+#, fuzzy
 msgid "On"
-msgstr ""
+msgstr "開"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_discount__discount_type__sol_discount
@@ -3482,7 +3556,7 @@ msgstr "報價時"
 msgid ""
 "Once a sales order is confirmed, you can't remove one of its lines (we need "
 "to track if something gets invoiced or delivered).\n"
-"Set the quantity to 0instead."
+"Set the quantity to 0 instead."
 msgstr ""
 
 #. module: sale
@@ -3508,11 +3582,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__portal_confirmation_pay
 msgid "Online Payment"
 msgstr "網上付款"
-
-#. module: sale
-#: model:ir.ui.menu,name:sale.payment_menu
-msgid "Online Payments"
-msgstr "網上支付"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_company__portal_confirmation_sign
@@ -3618,6 +3687,11 @@ msgid "Order Invoice Status"
 msgstr "訂單發票狀態"
 
 #. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_report__line_name
+msgid "Order Line Name"
+msgstr ""
+
+#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__order_line
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Order Lines"
@@ -3659,6 +3733,8 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__product_template__invoice_policy__order
+#: model:ir.model.fields.selection,name:sale.selection__res_company__sale_invoice_policy__order
+#: model:ir.model.fields.selection,name:sale.selection__sale_order_line__invoice_policy__order
 msgid "Ordered quantities"
 msgstr "已訂購數量"
 
@@ -3714,13 +3790,15 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__delivery_status__partial
+#, fuzzy
 msgid "Partially Delivered"
-msgstr ""
+msgstr "部份完成送貨"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_analytic_lines_service_search
+#, fuzzy
 msgid "Partner"
-msgstr ""
+msgstr "業務夥伴"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__partner_credit_warning
@@ -3764,18 +3842,8 @@ msgid "Payment Method"
 msgstr "付款方法"
 
 #. module: sale
-#: model:ir.ui.menu,name:sale.payment_method_menu
-msgid "Payment Methods"
-msgstr "付款方式"
-
-#. module: sale
 #: model:ir.model,name:sale.model_payment_provider
 msgid "Payment Provider"
-msgstr "付款服務商"
-
-#. module: sale
-#: model:ir.ui.menu,name:sale.payment_provider_menu
-msgid "Payment Providers"
 msgstr "付款服務商"
 
 #. module: sale
@@ -3789,18 +3857,8 @@ msgid "Payment Terms"
 msgstr "付款條件"
 
 #. module: sale
-#: model:ir.ui.menu,name:sale.payment_token_menu
-msgid "Payment Tokens"
-msgstr "付款代碼(token)"
-
-#. module: sale
 #: model:ir.model,name:sale.model_payment_transaction
 msgid "Payment Transaction"
-msgstr "付款交易"
-
-#. module: sale
-#: model:ir.ui.menu,name:sale.payment_transaction_menu
-msgid "Payment Transactions"
 msgstr "付款交易"
 
 #. module: sale
@@ -3814,6 +3872,7 @@ msgid "Payment terms"
 msgstr "付款條件"
 
 #. module: sale
+#: model:ir.ui.menu,name:sale.payment_provider_menu
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Payments"
 msgstr ""
@@ -3856,6 +3915,11 @@ msgstr "預付百分比"
 #: code:addons/sale/models/sale_order.py:0
 msgid "Prepayment percentage must be a valid percentage."
 msgstr "預付百分比必須為有效百分比。"
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
+msgid "Prevent selling without a linked product"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -3975,11 +4039,6 @@ msgid "Product Image"
 msgstr "產品圖片"
 
 #. module: sale
-#: model:ir.ui.menu,name:sale.menu_product_tags
-msgid "Product Tags"
-msgstr "產品標籤"
-
-#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__product_template_id
 msgid "Product Template"
 msgstr "產品範本"
@@ -4018,7 +4077,6 @@ msgstr "產品價格已重新計算。"
 #: model:ir.actions.act_window,name:sale.product_template_action
 #: model:ir.ui.menu,name:sale.menu_product_template_action
 #: model:ir.ui.menu,name:sale.menu_reporting_product
-#: model:ir.ui.menu,name:sale.prod_config_main
 #: model:ir.ui.menu,name:sale.product_menu_catalog
 msgid "Products"
 msgstr "產品"
@@ -4031,7 +4089,7 @@ msgstr ""
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Promotions, Loyalty & Gift Card"
-msgstr "促銷、忠誠度及禮品卡"
+msgstr "促銷推廣、會員、顧客忠誠度及禮品卡"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_line_tree
@@ -4040,8 +4098,9 @@ msgstr "數量"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__qty_available_today
+#, fuzzy
 msgid "Qty Available Today"
-msgstr ""
+msgstr "今日可用數量"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__qty_delivered
@@ -4059,6 +4118,11 @@ msgid "Qty Ordered"
 msgstr "訂購數量"
 
 #. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_order_line__qty_overage
+msgid "Qty Overage"
+msgstr ""
+
+#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__qty_to_deliver
 msgid "Qty To Deliver"
 msgstr "要交付的數量"
@@ -4074,6 +4138,8 @@ msgid "Quantities to invoice from sales orders"
 msgstr "需從銷售訂單開立發票的數量"
 
 #. module: sale
+#. odoo-javascript
+#: code:addons/sale/static/src/js/quantity_buttons/quantity_buttons.xml:0
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__product_uom_qty
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
@@ -4109,8 +4175,9 @@ msgstr "報價單 #"
 
 #. module: sale
 #: model:ir.actions.report,name:sale.action_report_saleorder
+#, fuzzy
 msgid "Quotation / Order"
-msgstr ""
+msgstr "報價單/訂單"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_utm_campaign__quotation_count
@@ -4196,6 +4263,11 @@ msgid "Quotations to review"
 msgstr "待審閲報價"
 
 #. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_order_line__consolidation_rate
+msgid "Rate"
+msgstr ""
+
+#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__rating_ids
 msgid "Ratings"
 msgstr "評分"
@@ -4230,8 +4302,9 @@ msgstr "根據此價格表重新計算所有價格"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.account_invoice_form
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
+#, fuzzy
 msgid "Reference"
-msgstr ""
+msgstr "編號"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__origin
@@ -4251,8 +4324,9 @@ msgstr "拒絕這個報價單"
 #. module: sale
 #. odoo-javascript
 #: code:addons/sale/static/src/js/product/product.xml:0
+#, fuzzy
 msgid "Remove"
-msgstr ""
+msgstr "移除"
 
 #. module: sale
 #. odoo-javascript
@@ -4681,7 +4755,7 @@ msgstr "使用不同計量單位或包裝單位，去銷售及採購產品"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Sell variants of a product using attributes (size, color, etc.)"
-msgstr "使用屬性(尺寸、顏色等)建立銷售產品的變體"
+msgstr "設定屬性（尺寸、顏色等），為產品建立不同款式變體"
 
 #. module: sale
 #. odoo-python
@@ -4725,8 +4799,9 @@ msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.account_invoice_form
+#, fuzzy
 msgid "Services"
-msgstr ""
+msgstr "服務"
 
 #. module: sale
 #: model:ir.actions.act_window,name:sale.action_service_material
@@ -4743,7 +4818,7 @@ msgstr ""
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Set multiple prices per product, automated discounts, etc."
-msgstr "設定每個產品的多個價格，自動折扣等。"
+msgstr "為同一項產品設定多個價格、自動折扣等。"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -4778,8 +4853,8 @@ msgid "Shopee Sync"
 msgstr "Shopee 同步"
 
 #. module: sale
-#: model:ir.model.fields,field_description:sale.field_sale_order__show_deliver_button
-msgid "Show Deliver Button"
+#: model:ir.model.fields,field_description:sale.field_sale_order__show_ship_button
+msgid "Show Ship Button"
 msgstr ""
 
 #. module: sale
@@ -4861,14 +4936,6 @@ msgstr ""
 #. module: sale
 #. odoo-python
 #: code:addons/sale/models/sale_order.py:0
-msgid ""
-"Some order lines are missing a product, you need to correct them before "
-"going further."
-msgstr ""
-
-#. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
 msgid "Some orders are not in a state requiring confirmation."
 msgstr "部份訂單目前不需要確認。"
 
@@ -4899,8 +4966,9 @@ msgstr "開始使用 Odoo"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__delivery_status__started
+#, fuzzy
 msgid "Started"
-msgstr ""
+msgstr "已發貨"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__state
@@ -4980,7 +5048,6 @@ msgstr "系統參數"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__tag_ids
-#: model:ir.ui.menu,name:sale.menu_tag_config
 msgid "Tags"
 msgstr "標籤"
 
@@ -5002,6 +5069,7 @@ msgid "Tax Country"
 msgstr "稅務國家"
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__sale_order__document_tax_mode__tax_excluded
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Tax Excl."
 msgstr "未連稅"
@@ -5012,6 +5080,7 @@ msgid "Tax ID"
 msgstr "稅務編號"
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__sale_order__document_tax_mode__tax_included
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Tax Incl."
 msgstr "連稅"
@@ -5192,7 +5261,8 @@ msgid ""
 msgstr ""
 
 #. module: sale
-#: model:ir.model.fields,help:sale.field_res_config_settings__automatic_invoice
+#: model:ir.model.fields,help:sale.field_res_company__sale_automatic_invoice
+#: model:ir.model.fields,help:sale.field_res_config_settings__sale_automatic_invoice
 msgid ""
 "The invoice is generated automatically and available in the customer portal "
 "when the transaction is confirmed by the payment provider.\n"
@@ -5450,8 +5520,9 @@ msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_analytic_lines_service_search
+#, fuzzy
 msgid "Today"
-msgstr ""
+msgstr "今天"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_sales_order_filter
@@ -5467,6 +5538,12 @@ msgstr "今天的活動"
 #: model_terms:ir.ui.view,arch_db:sale.view_order_line_tree
 msgid "Total"
 msgstr "總計"
+
+#. module: sale
+#. odoo-python
+#: code:addons/sale/models/sale_order.py:0
+msgid "Total Advantage"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__price_tax
@@ -5492,8 +5569,9 @@ msgstr "總計：%s"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__is_storable
+#, fuzzy
 msgid "Track Inventory"
-msgstr ""
+msgstr "追蹤庫存"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_product_product__service_type
@@ -5579,7 +5657,7 @@ msgid "Unit Price:"
 msgstr "單價:"
 
 #. module: sale
-#: model:ir.ui.menu,name:sale.menu_product_uom_form_action
+#: model:ir.ui.menu,name:sale.uom_uom_menu_list
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Units & Packagings"
 msgstr "單位及包裝"
@@ -5696,8 +5774,9 @@ msgstr "訂單有效期限，之後將無法簽名及支付報價。"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
+#, fuzzy
 msgid "Values set here are company-specific."
-msgstr ""
+msgstr "此處設定的值是特定於每間公司的。"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -5732,8 +5811,9 @@ msgstr "虛擬"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__virtual_available_at_date
+#, fuzzy
 msgid "Virtual Available At Date"
-msgstr ""
+msgstr "虛擬可用日期"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -5773,16 +5853,6 @@ msgstr "銷售單警告"
 #: model_terms:ir.ui.view,arch_db:sale.res_partner_view_buttons
 msgid "Warning on Sales Orders and Invoices"
 msgstr "銷售單及發票警告"
-
-#. module: sale
-#: model:ir.model.fields,field_description:sale.field_sale_order__website_message_ids
-msgid "Website Messages"
-msgstr "網站資訊"
-
-#. module: sale
-#: model:ir.model.fields,help:sale.field_sale_order__website_message_ids
-msgid "Website communication history"
-msgstr "網站溝通記錄"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -5899,8 +5969,9 @@ msgstr "你的參考："
 #. module: sale
 #. odoo-javascript
 #: code:addons/sale/static/src/js/sale_action_helper/sale_action_helper_dialog.xml:0
+#, fuzzy
 msgid "Your browser does not support iframe."
-msgstr ""
+msgstr "你的瀏覽器不支援 iframe。"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
@@ -6044,7 +6115,8 @@ msgstr ""
 #: model:mail.template,subject:sale.mail_template_sale_confirmation
 msgid ""
 "{{ object.company_id.name }} {{ (object.get_portal_last_transaction().state "
-"== 'pending') and 'Pending Order' or 'Order' }} {{ object.name or 'n/a' }}"
+"== 'pending') and 'Pending Order' or 'Order' }} {{ object.name or 'n/a' }} "
+"{{ object.client_order_ref and ('(' + object.client_order_ref + ')') or '' }}"
 msgstr ""
 
 #. module: sale
@@ -6058,37 +6130,6 @@ msgstr ""
 #: model:mail.template,subject:sale.email_template_edi_sale
 msgid ""
 "{{ object.company_id.name }} {{ object.state in ('draft', 'sent') and "
-"'Quotation' or 'Order' }} {{ object.name or 'n/a' }}"
+"'Quotation' or 'Order' }} {{ object.name or 'n/a' }} "
+"{{ object.client_order_ref and ('(' + object.client_order_ref + ')') or '' }}"
 msgstr ""
-
-#~ msgid "Has Fiscal Position Changed"
-#~ msgstr "財政狀況是否改變"
-
-#~ msgid "Product taxes have been recomputed according to fiscal position %s."
-#~ msgstr "已根據財務狀況 %s 重新計算產品稅."
-
-#~ msgid "Recompute all taxes based on this fiscal position"
-#~ msgstr "根據此財務狀況重新計算所有稅款"
-
-#~ msgid ""
-#~ "This will update all taxes based on the currently selected fiscal "
-#~ "position."
-#~ msgstr "這將根據當前選定的財務狀況更新所有稅款."
-
-#~ msgid "Update Taxes"
-#~ msgstr "更新稅款"
-
-#~ msgid "Communication history"
-#~ msgstr "通訊歷史"
-
-#~ msgid "Generate a Payment Link"
-#~ msgstr "產生付款網址"
-
-#~ msgid "Mark Quotation as Sent"
-#~ msgstr "標記報價單為已發送"
-
-#~ msgid "Print"
-#~ msgstr "列印"
-
-#~ msgid "Invoicing Journal"
-#~ msgstr "發票日記賬"

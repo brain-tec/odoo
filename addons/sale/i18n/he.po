@@ -24,16 +24,16 @@
 # ZVI BLONDER <ZVIBLONDER@gmail.com>, 2023
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
 # or balmas <or@laylinetech.com>, 2025.
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 # Odoo Translation Bot <c3p@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-29 17:40+0000\n"
-"PO-Revision-Date: 2026-01-16 05:49+0000\n"
-"Last-Translator: Odoo Translation Bot <c3p@odoo.com>\n"
-"Language-Team: Hebrew <https://translate.odoo.com/projects/odoo-s19-1/sale/"
+"POT-Creation-Date: 2026-06-30 00:51+0000\n"
+"PO-Revision-Date: 2026-06-13 13:09+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Hebrew <https://translate.odoo.com/projects/odoo-s19-3/sale/"
 "he/>\n"
 "Language: he\n"
 "MIME-Version: 1.0\n"
@@ -41,7 +41,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=4; plural=(n == 1) ? 0 : ((n == 2) ? 1 : ((n > 10 && "
 "n % 10 == 0) ? 2 : 3));\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: sale
 #. odoo-javascript
@@ -144,6 +144,10 @@ msgid ""
 "value=\"object.get_portal_last_transaction()\"/>\n"
 "                        Your order <span style=\"font-weight:bold;\" t-"
 "out=\"object.name or ''\">S00049</span>\n"
+"                        <t t-if=\"object.client_order_ref\">\n"
+"                            (<t t-out=\"object.client_order_ref or "
+"''\">CUSTOMER REF</t>)\n"
+"                        </t>\n"
 "                        <t t-if=\"object.state == 'sale' or (tx_sudo and "
 "tx_sudo.state in ('done', 'authorized'))\">\n"
 "                            <t t-if=\"hasattr(object, 'carrier_id') and "
@@ -218,11 +222,12 @@ msgid ""
 "                                        <tr>\n"
 "                                            <td width=\"24%\" style=\"max-"
 "width: 120px; padding: 0 10px 10px 0; vertical-align: top;\">\n"
-"                                                <img t-attf-src=\"/web/image/"
-"product.product/{{ line.product_id.id }}/image_128\" t-attf-style=\"width: "
-"64px; height: {{object.website_id and "
-"object.website_id._get_product_image_ratio_height() or '64px'}}; object-fit: "
-"cover; object-position: center;\" alt=\"Product image\"/>\n"
+"                                                <img t-"
+"if=\"line.product_id\" t-attf-src=\"/web/image/product.product/"
+"{{ line.product_id.id }}/image_128\" t-attf-style=\"width: 64px; height: "
+"{{object.website_id and object.website_id._get_product_image_ratio_height() "
+"or '64px'}}; object-fit: cover; object-position: center;\" alt=\"Product "
+"image\"/>\n"
 "                                            </td>\n"
 "                                            <td align=\"left\" "
 "style=\"vertical-align: top; padding-bottom: 22px;\">\n"
@@ -230,8 +235,8 @@ msgid ""
 "height-rule:exactly; margin:0; font-size: 14px; {{'margin-bottom: 6px;' if "
 "line.product_type == 'combo' else ''}}\">\n"
 "                                                    <strong t-"
-"out=\"line.product_id.name or ''\" t-attf-style=\"color: #{color};\">Taking "
-"care of Trees Course</strong>\n"
+"out=\"line.product_id.name or line.name\" t-attf-style=\"color: #{color};"
+"\">Taking care of Trees Course</strong>\n"
 "                                                    <span t-"
 "if=\"line.product_id.product_template_attribute_value_ids\" style=\"opacity: "
 "0.5;\">\n"
@@ -645,6 +650,9 @@ msgid ""
 "        <t t-if=\"object.origin\">\n"
 "            (with reference: <t t-out=\"object.origin or ''\">S00052</t> )\n"
 "        </t>\n"
+"        <t t-if=\"object.client_order_ref\">\n"
+"            (<t t-out=\"object.client_order_ref or ''\">CUSTOMER REF</t>)\n"
+"        </t>\n"
 "        amounting in <span style=\"font-weight: bold;\" t-"
 "out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
 "10.00</span> is ready for review.\n"
@@ -694,6 +702,9 @@ msgid ""
 "span>\n"
 "        <t t-if=\"object.origin\">\n"
 "            (with reference: <t t-out=\"object.origin or ''\"/> )\n"
+"        </t>\n"
+"        <t t-if=\"object.client_order_ref\">\n"
+"            (<t t-out=\"object.client_order_ref or ''\">CUSTOMER REF</t>)\n"
 "        </t>\n"
 "        amounting in <span style=\"font-weight: bold;\" t-"
 "out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
@@ -896,8 +907,9 @@ msgstr "<strong class=\"d-block mt-3\">כתובת אספקה</strong>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
+#, fuzzy
 msgid "<strong>Contact</strong>"
-msgstr ""
+msgstr "<strong>איש קשר</strong>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -916,8 +928,9 @@ msgstr "<strong>הערת מעמד פיסקלי:</strong>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
+#, fuzzy
 msgid "<strong>Incoterm</strong>"
-msgstr ""
+msgstr "<strong>חוקי סחר ספק/לקוח</strong>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -987,8 +1000,9 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order_line__is_storable
+#, fuzzy
 msgid "A storable product is a product for which you manage stock."
-msgstr ""
+msgstr "מוצר מנוהל מלאי הוא מוצר שאתה מנהל עבורו מלאי."
 
 #. module: sale
 #: model:res.groups,name:sale.group_warning_sale
@@ -1095,23 +1109,18 @@ msgstr "הוסף"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Add a note"
-msgstr "הוסף הערה"
+msgid "Add Line"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Add a product"
-msgstr "הוסף מוצר"
+msgid "Add Note"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Add a section"
-msgstr "הוסף סעיף"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Add note"
-msgstr "הוסף הערה"
+msgid "Add Section"
+msgstr ""
 
 #. module: sale
 #. odoo-javascript
@@ -1126,16 +1135,6 @@ msgid "Add optional products"
 msgstr "הוסף מוצרים אופציונליים:"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Add product"
-msgstr "הוסף מוצר"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Add section"
-msgstr "הוסף סעיף"
-
-#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Add several variants to an order from a grid"
 msgstr "הוסף מספר וריאנטים להזמנה מתצוגת רשת"
@@ -1143,13 +1142,19 @@ msgstr "הוסף מספר וריאנטים להזמנה מתצוגת רשת"
 #. module: sale
 #. odoo-javascript
 #: code:addons/sale/static/src/js/combo_configurator_dialog/combo_configurator_dialog.xml:0
+#, fuzzy
 msgid "Add to order"
-msgstr ""
+msgstr "הוסף להזמנה"
 
 #. module: sale
 #: model:ir.actions.act_window,name:sale.mail_followers_edit_action_from_sale
 msgid "Add/Remove Followers"
 msgstr "הוספה/הסרה של עוקבים"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__allow_invoice_overages
+msgid "Allow Invoice Overages"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__allowed_uom_ids
@@ -1227,8 +1232,9 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__analytic_account_id
+#, fuzzy
 msgid "Analytic Account"
-msgstr ""
+msgstr "חשבון אנליטי"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__analytic_distribution
@@ -1336,21 +1342,24 @@ msgid "Authorized Transactions"
 msgstr "עסקאות מורשות"
 
 #. module: sale
-#: model:ir.model.fields,field_description:sale.field_res_config_settings__automatic_invoice
-msgid "Automatic Invoice"
-msgstr "חשבונית אוטומטית"
+#: model:ir.model.fields,field_description:sale.field_res_company__sale_automatic_invoice
+#: model:ir.model.fields,field_description:sale.field_res_config_settings__sale_automatic_invoice
+msgid "Automatic Invoicing"
+msgstr ""
 
 #. module: sale
 #. odoo-javascript
 #: code:addons/sale/static/src/js/quantity_availability/qty_at_date_widget.xml:0
+#, fuzzy
 msgid "Availability"
-msgstr ""
+msgstr "זמינות"
 
 #. module: sale
 #. odoo-javascript
 #: code:addons/sale/static/src/js/quantity_availability/qty_at_date_widget.js:0
+#, fuzzy
 msgid "Available"
-msgstr ""
+msgstr "זמין"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_report_view_tree
@@ -1452,8 +1461,9 @@ msgstr "בטל"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
+#, fuzzy
 msgid "Cancel Order"
-msgstr ""
+msgstr "בטל הזמנה"
 
 #. module: sale
 #: model:ir.model,name:sale.model_sale_mass_cancel_orders
@@ -1530,8 +1540,9 @@ msgstr "קטגוריות"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_analytic_lines_service_search
+#, fuzzy
 msgid "Category"
-msgstr ""
+msgstr "קטגוריה"
 
 #. module: sale
 #: model:product.template,name:sale.product_product_1_product_template
@@ -1564,8 +1575,9 @@ msgstr ""
 #. module: sale
 #. odoo-javascript
 #: code:addons/sale/static/src/xml/sales_team_progress_bar_template.xml:0
+#, fuzzy
 msgid "Click to define an invoicing target"
-msgstr ""
+msgstr "לחץ להגדרת יעד לחיוב"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form_sale_inherit
@@ -1694,8 +1706,9 @@ msgstr "הודעת אישור"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
+#, fuzzy
 msgid "Connect"
-msgstr ""
+msgstr "התחבר"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -1721,6 +1734,11 @@ msgstr "חיבורים"
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__consolidated_billing
 msgid "Consolidated Billing"
 msgstr "יצירת חשבונית מרכזת"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_order_line__consolidation_currency_id
+msgid "Consolidation Currency"
+msgstr ""
 
 #. module: sale
 #: model:ir.model,name:sale.model_res_partner
@@ -1999,8 +2017,7 @@ msgid "Delete"
 msgstr "מחק"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-#: model_terms:ir.ui.view,arch_db:sale.view_order_tree
+#: model:ir.actions.server,name:sale.model_sale_order_action_deliver_sold_quantity
 msgid "Deliver"
 msgstr ""
 
@@ -2018,6 +2035,8 @@ msgstr "כמות שנשלחה %s"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__product_template__invoice_policy__delivery
+#: model:ir.model.fields.selection,name:sale.selection__res_company__sale_invoice_policy__delivery
+#: model:ir.model.fields.selection,name:sale.selection__sale_order_line__invoice_policy__delivery
 msgid "Delivered quantities"
 msgstr "כמויות שנשלחו"
 
@@ -2051,8 +2070,9 @@ msgstr "כמות שנשלחה"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__delivery_status
+#, fuzzy
 msgid "Delivery Status"
-msgstr ""
+msgstr "סטטוס משלוח"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_product_product__sale_delay
@@ -2075,10 +2095,13 @@ msgstr ""
 #. module: sale
 #: model:ir.model.fields,help:sale.field_product_product__sale_delay
 #: model:ir.model.fields,help:sale.field_product_template__sale_delay
+#, fuzzy
 msgid ""
 "Delivery lead time, in days. It's the number of days, promised to the "
 "customer, between the confirmation of the sales order and the delivery."
 msgstr ""
+"זמן אספקה, בימים. זה מספר הימים, המובטחים ללקוח, מרגע אישור ההזמנה ועד "
+"למשלוח."
 
 #. module: sale
 #: model:product.template,name:sale.advance_product_0_product_template
@@ -2225,8 +2248,9 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__display_qty_widget
+#, fuzzy
 msgid "Display Qty Widget"
-msgstr ""
+msgstr "הצג יישומון כמות"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__display_type
@@ -2237,6 +2261,12 @@ msgstr "סוג תצוגה"
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__distribution_analytic_account_ids
 msgid "Distribution Analytic Account"
 msgstr "מיפוי חשבון אנליטי"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_order__document_tax_mode
+#: model:ir.model.fields,field_description:sale.field_sale_order_line__document_tax_mode
+msgid "Document Tax Mode"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
@@ -2371,7 +2401,7 @@ msgstr "הזמנה משוכפלת"
 
 #. module: sale
 #. odoo-javascript
-#: code:addons/sale/static/src/js/sale_product_field.js:0
+#: code:addons/sale/static/src/js/sale_product_mixin.js:0
 msgid "Edit Configuration"
 msgstr "ערוך תצורה"
 
@@ -2423,12 +2453,18 @@ msgstr "תאריך תפוגה:"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_view_search_inherit_quotation
+#, fuzzy
 msgid "Expired"
-msgstr ""
+msgstr "פג תוקף"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__extra_tax_data
 msgid "Extra Tax Data"
+msgstr ""
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_order__extra_total_fields
+msgid "Extra Total Fields"
 msgstr ""
 
 #. module: sale
@@ -2444,8 +2480,9 @@ msgstr "שורת נוספת עם %s"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_analytic_lines_service_search
+#, fuzzy
 msgid "Financial Account"
-msgstr ""
+msgstr "חשבון פיננסי"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__fiscal_position_id
@@ -2454,11 +2491,14 @@ msgstr "מעמד פיסקלי"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__fiscal_position_id
+#, fuzzy
 msgid ""
 "Fiscal positions are used to adapt taxes and accounts for particular "
 "customers or sales orders/invoices. The default value comes from the "
 "customer."
 msgstr ""
+"סוגי תנועה משמשות להתאמת מסים וחשבונות עבור לקוחות מסוימים או "
+"הזמנות/חשבוניות מכירה. ערך ברירת המחדל מגיע מהלקוח."
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_discount__discount_type__amount
@@ -2500,8 +2540,9 @@ msgstr "ערכים אסורים בשורת הזמנת לקוח שאינה חיי
 #. module: sale
 #. odoo-javascript
 #: code:addons/sale/static/src/js/quantity_availability/qty_at_date_widget.js:0
+#, fuzzy
 msgid "Forecasted Stock"
-msgstr ""
+msgstr "מלאי חזוי"
 
 #. module: sale
 #: model_terms:ir.actions.act_window,help:sale.action_account_invoice_report_salesteam
@@ -2521,8 +2562,9 @@ msgstr "סכום מלא <br/>"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__delivery_status__full
+#, fuzzy
 msgid "Fully Delivered"
-msgstr ""
+msgstr "נשלח במלואו"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__invoice_status__invoiced
@@ -2540,8 +2582,9 @@ msgstr "פעילויות עתידיות"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_sale_gelato
+#, fuzzy
 msgid "Gelato"
-msgstr ""
+msgstr "ג'לאטו"
 
 #. module: sale
 #: model:ir.model,name:sale.model_payment_link_wizard
@@ -2618,6 +2661,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:sale.field_sale_order__has_message
 msgid "Has Message"
 msgstr "יש הודעה"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_order__has_overages
+msgid "Has Overages"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__show_update_pricelist
@@ -2757,27 +2805,31 @@ msgstr "בתוך ההזמנה"
 #. module: sale
 #. odoo-javascript
 #: code:addons/sale/static/src/js/combo_configurator_dialog/combo_configurator_dialog.xml:0
+#, fuzzy
 msgid "Included"
-msgstr ""
+msgstr "כולל"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_partner__incoterm_id
 #: model:ir.model.fields,field_description:sale.field_res_users__incoterm_id
 #: model:ir.model.fields,field_description:sale.field_sale_order__incoterm
+#, fuzzy
 msgid "Incoterm"
-msgstr ""
+msgstr "מונחי סחר בינלאומיים"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_partner__incoterm_location
 #: model:ir.model.fields,field_description:sale.field_res_users__incoterm_location
 #: model:ir.model.fields,field_description:sale.field_sale_order__incoterm_location
+#, fuzzy
 msgid "Incoterm Location"
-msgstr ""
+msgstr "מיקום סחר בינלאומיים"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
+#, fuzzy
 msgid "Incoterm:"
-msgstr ""
+msgstr "תנאי סחר בינלאומיים:"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_account_bank_statement_line__sale_warning_text
@@ -2790,10 +2842,13 @@ msgstr ""
 #: model:ir.model.fields,help:sale.field_res_partner__incoterm_id
 #: model:ir.model.fields,help:sale.field_res_users__incoterm_id
 #: model:ir.model.fields,help:sale.field_sale_order__incoterm
+#, fuzzy
 msgid ""
 "International Commercial Terms are a series of predefined commercial terms "
 "used in international transactions."
 msgstr ""
+"תנאים מסחריים בינלאומיים הם סדרה של מונחים מסחריים מוגדרים מראש המשמשים "
+"בעסקאות בינלאומיות."
 
 #. module: sale
 #. odoo-python
@@ -2816,8 +2871,9 @@ msgstr "נתוני חתימה לא חוקיים."
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_account_analytic_line__reinvoice_move_id
 #: model_terms:ir.ui.view,arch_db:sale.view_analytic_lines_service_search
+#, fuzzy
 msgid "Invoice"
-msgstr ""
+msgstr "חשבונית מס"
 
 #. module: sale
 #. odoo-python
@@ -2839,6 +2895,12 @@ msgstr "כמות חשבוניות"
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__invoice_lines
 msgid "Invoice Lines"
 msgstr "שורות חשבונית"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__invoice_overages
+#: model:ir.model.fields,field_description:sale.field_sale_order__invoice_overages
+msgid "Invoice Overages"
+msgstr ""
 
 #. module: sale
 #: model:mail.message.subtype,name:sale.mt_salesteam_invoice_paid
@@ -2888,16 +2950,6 @@ msgid ""
 msgstr ""
 "הכנסות מחשבוניות לחודש הנוכחי. זה הסכום בו חייב ערוץ המכירות החודש. הוא משמש "
 "לחישוב יחס ההתקדמות של הכנסות הנוכחיות לעומת יעד ההכנסות בתצוגת הקאנבן."
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__res_config_settings__default_invoice_policy__delivery
-msgid "Invoice what is delivered"
-msgstr "חייב מה שנשלח"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__res_config_settings__default_invoice_policy__order
-msgid "Invoice what is ordered"
-msgstr "חייב מה שהוזמן"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__qty_invoiced_at_date
@@ -2964,7 +3016,9 @@ msgstr "כתובת חשבונית"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_product_product__invoice_policy
 #: model:ir.model.fields,field_description:sale.field_product_template__invoice_policy
-#: model:ir.model.fields,field_description:sale.field_res_config_settings__default_invoice_policy
+#: model:ir.model.fields,field_description:sale.field_res_company__sale_invoice_policy
+#: model:ir.model.fields,field_description:sale.field_res_config_settings__sale_invoice_policy
+#: model:ir.model.fields,field_description:sale.field_sale_order_line__invoice_policy
 msgid "Invoicing Policy"
 msgstr "מדיניות חיוב"
 
@@ -3009,6 +3063,11 @@ msgstr "עוקב"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__is_product_archived
 msgid "Is Product Archived"
+msgstr ""
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_order_line__mandatory_product
+msgid "Is Product Mandatory"
 msgstr ""
 
 #. module: sale
@@ -3161,6 +3220,11 @@ msgid "Manage Sales & teams targets and commissions"
 msgstr "נהל יעדים ועמלות של מכירות וצוותים"
 
 #. module: sale
+#: model:ir.model.fields,field_description:sale.field_res_config_settings__sale_order_mandatory_product
+msgid "Mandatory Product"
+msgstr ""
+
+#. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_line__qty_delivered_method__manual
 msgid "Manual"
 msgstr "ידני"
@@ -3210,6 +3274,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sale.account_invoice_form
 msgid "Marketing"
 msgstr "שיווק"
+
+#. module: sale
+#: model:ir.ui.menu,name:sale.menu_sale_marketplaces
+msgid "Marketplaces"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_account_bank_statement_line__medium_id
@@ -3361,8 +3430,9 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__delivery_status__pending
+#, fuzzy
 msgid "Not Delivered"
-msgstr ""
+msgstr "לא נשלח"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
@@ -3428,8 +3498,9 @@ msgstr ""
 #. module: sale
 #. odoo-javascript
 #: code:addons/sale/static/src/js/quantity_availability/qty_at_date_widget.xml:0
+#, fuzzy
 msgid "On"
-msgstr ""
+msgstr "מופעל"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_discount__discount_type__sol_discount
@@ -3452,7 +3523,7 @@ msgstr "בהצעת מחיר"
 msgid ""
 "Once a sales order is confirmed, you can't remove one of its lines (we need "
 "to track if something gets invoiced or delivered).\n"
-"Set the quantity to 0instead."
+"Set the quantity to 0 instead."
 msgstr ""
 
 #. module: sale
@@ -3480,11 +3551,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__portal_confirmation_pay
 msgid "Online Payment"
 msgstr "תשלום מקוון"
-
-#. module: sale
-#: model:ir.ui.menu,name:sale.payment_menu
-msgid "Online Payments"
-msgstr "תשלומים מקוונים"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_company__portal_confirmation_sign
@@ -3590,6 +3656,11 @@ msgid "Order Invoice Status"
 msgstr "סטטוס חשבונית הזמנה"
 
 #. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_report__line_name
+msgid "Order Line Name"
+msgstr ""
+
+#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__order_line
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Order Lines"
@@ -3631,6 +3702,8 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__product_template__invoice_policy__order
+#: model:ir.model.fields.selection,name:sale.selection__res_company__sale_invoice_policy__order
+#: model:ir.model.fields.selection,name:sale.selection__sale_order_line__invoice_policy__order
 msgid "Ordered quantities"
 msgstr "כמויות שהוזמנו"
 
@@ -3686,13 +3759,15 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__delivery_status__partial
+#, fuzzy
 msgid "Partially Delivered"
-msgstr ""
+msgstr "נשלח חלקית"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_analytic_lines_service_search
+#, fuzzy
 msgid "Partner"
-msgstr ""
+msgstr "לקוח/ספק"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__partner_credit_warning
@@ -3736,19 +3811,9 @@ msgid "Payment Method"
 msgstr "אמצעי תשלום"
 
 #. module: sale
-#: model:ir.ui.menu,name:sale.payment_method_menu
-msgid "Payment Methods"
-msgstr "אמצעי תשלום"
-
-#. module: sale
 #: model:ir.model,name:sale.model_payment_provider
 msgid "Payment Provider"
 msgstr "ספק תשלום"
-
-#. module: sale
-#: model:ir.ui.menu,name:sale.payment_provider_menu
-msgid "Payment Providers"
-msgstr "חיבור לתשלומים מקוונים"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__reference
@@ -3761,19 +3826,9 @@ msgid "Payment Terms"
 msgstr "תנאי תשלום"
 
 #. module: sale
-#: model:ir.ui.menu,name:sale.payment_token_menu
-msgid "Payment Tokens"
-msgstr "אסימוני תשלום"
-
-#. module: sale
 #: model:ir.model,name:sale.model_payment_transaction
 msgid "Payment Transaction"
 msgstr "עסקת תשלום"
-
-#. module: sale
-#: model:ir.ui.menu,name:sale.payment_transaction_menu
-msgid "Payment Transactions"
-msgstr "עסקאות תשלום"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__amount_paid
@@ -3786,6 +3841,7 @@ msgid "Payment terms"
 msgstr "תנאי תשלום"
 
 #. module: sale
+#: model:ir.ui.menu,name:sale.payment_provider_menu
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Payments"
 msgstr ""
@@ -3828,6 +3884,11 @@ msgstr "אחוז תשלום מראש"
 #: code:addons/sale/models/sale_order.py:0
 msgid "Prepayment percentage must be a valid percentage."
 msgstr "אחוז התשלום מראש חייב להיות אחוז תקני/"
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
+msgid "Prevent selling without a linked product"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -3947,11 +4008,6 @@ msgid "Product Image"
 msgstr "תמונת מוצר"
 
 #. module: sale
-#: model:ir.ui.menu,name:sale.menu_product_tags
-msgid "Product Tags"
-msgstr "תגיות מוצר"
-
-#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__product_template_id
 msgid "Product Template"
 msgstr "תבנית מוצר"
@@ -3990,7 +4046,6 @@ msgstr "מחירי מוצרים חושבו מחדש."
 #: model:ir.actions.act_window,name:sale.product_template_action
 #: model:ir.ui.menu,name:sale.menu_product_template_action
 #: model:ir.ui.menu,name:sale.menu_reporting_product
-#: model:ir.ui.menu,name:sale.prod_config_main
 #: model:ir.ui.menu,name:sale.product_menu_catalog
 msgid "Products"
 msgstr "מוצרים"
@@ -4012,8 +4067,9 @@ msgstr "כמות"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__qty_available_today
+#, fuzzy
 msgid "Qty Available Today"
-msgstr ""
+msgstr "כמות זמינה היום"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__qty_delivered
@@ -4031,6 +4087,11 @@ msgid "Qty Ordered"
 msgstr "כמות שהוזמנה"
 
 #. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_order_line__qty_overage
+msgid "Qty Overage"
+msgstr ""
+
+#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__qty_to_deliver
 msgid "Qty To Deliver"
 msgstr "כמות למשלוח"
@@ -4046,6 +4107,8 @@ msgid "Quantities to invoice from sales orders"
 msgstr "כמויות לחיוב מהזמנות לקוח"
 
 #. module: sale
+#. odoo-javascript
+#: code:addons/sale/static/src/js/quantity_buttons/quantity_buttons.xml:0
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__product_uom_qty
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
@@ -4081,8 +4144,9 @@ msgstr "הצעת מחיר מס'"
 
 #. module: sale
 #: model:ir.actions.report,name:sale.action_report_saleorder
+#, fuzzy
 msgid "Quotation / Order"
-msgstr ""
+msgstr "הצעת מחיר/הזמנה"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_utm_campaign__quotation_count
@@ -4168,6 +4232,11 @@ msgid "Quotations to review"
 msgstr "הצעות מחיר לבדיקה"
 
 #. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_order_line__consolidation_rate
+msgid "Rate"
+msgstr ""
+
+#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__rating_ids
 msgid "Ratings"
 msgstr "דירוגים"
@@ -4202,8 +4271,9 @@ msgstr "חשב מחדש את כל המחירים בהתבסס על מחירון 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.account_invoice_form
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
+#, fuzzy
 msgid "Reference"
-msgstr ""
+msgstr "מזהה"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__origin
@@ -4223,8 +4293,9 @@ msgstr "דחה הצעת מחיר זו"
 #. module: sale
 #. odoo-javascript
 #: code:addons/sale/static/src/js/product/product.xml:0
+#, fuzzy
 msgid "Remove"
-msgstr ""
+msgstr "הסר"
 
 #. module: sale
 #. odoo-javascript
@@ -4701,8 +4772,9 @@ msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.account_invoice_form
+#, fuzzy
 msgid "Services"
-msgstr ""
+msgstr "שירותים"
 
 #. module: sale
 #: model:ir.actions.act_window,name:sale.action_service_material
@@ -4754,8 +4826,8 @@ msgid "Shopee Sync"
 msgstr ""
 
 #. module: sale
-#: model:ir.model.fields,field_description:sale.field_sale_order__show_deliver_button
-msgid "Show Deliver Button"
+#: model:ir.model.fields,field_description:sale.field_sale_order__show_ship_button
+msgid "Show Ship Button"
 msgstr ""
 
 #. module: sale
@@ -4837,14 +4909,6 @@ msgstr ""
 #. module: sale
 #. odoo-python
 #: code:addons/sale/models/sale_order.py:0
-msgid ""
-"Some order lines are missing a product, you need to correct them before "
-"going further."
-msgstr ""
-
-#. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
 msgid "Some orders are not in a state requiring confirmation."
 msgstr "חלק מההזמנות אינן במצב המחייב אישור."
 
@@ -4875,8 +4939,9 @@ msgstr "התחל ב Odoo"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__delivery_status__started
+#, fuzzy
 msgid "Started"
-msgstr ""
+msgstr "התחיל"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__state
@@ -4956,7 +5021,6 @@ msgstr "פרמטר מערכת"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__tag_ids
-#: model:ir.ui.menu,name:sale.menu_tag_config
 msgid "Tags"
 msgstr "תגיות"
 
@@ -4978,6 +5042,7 @@ msgid "Tax Country"
 msgstr "מס לפי ארץ"
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__sale_order__document_tax_mode__tax_excluded
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Tax Excl."
 msgstr "ללא מיסים"
@@ -4988,6 +5053,7 @@ msgid "Tax ID"
 msgstr "ח.פ / ע.מ"
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__sale_order__document_tax_mode__tax_included
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Tax Incl."
 msgstr "כולל מיסים"
@@ -5170,7 +5236,8 @@ msgid ""
 msgstr ""
 
 #. module: sale
-#: model:ir.model.fields,help:sale.field_res_config_settings__automatic_invoice
+#: model:ir.model.fields,help:sale.field_res_company__sale_automatic_invoice
+#: model:ir.model.fields,help:sale.field_res_config_settings__sale_automatic_invoice
 msgid ""
 "The invoice is generated automatically and available in the customer portal "
 "when the transaction is confirmed by the payment provider.\n"
@@ -5436,8 +5503,9 @@ msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_analytic_lines_service_search
+#, fuzzy
 msgid "Today"
-msgstr ""
+msgstr "היום"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_sales_order_filter
@@ -5453,6 +5521,12 @@ msgstr "פעילויות היום"
 #: model_terms:ir.ui.view,arch_db:sale.view_order_line_tree
 msgid "Total"
 msgstr "סה\"כ"
+
+#. module: sale
+#. odoo-python
+#: code:addons/sale/models/sale_order.py:0
+msgid "Total Advantage"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__price_tax
@@ -5478,8 +5552,9 @@ msgstr "סה\"כ: %s"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__is_storable
+#, fuzzy
 msgid "Track Inventory"
-msgstr ""
+msgstr "עקוב אחר מלאי"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_product_product__service_type
@@ -5565,7 +5640,7 @@ msgid "Unit Price:"
 msgstr "מחיר יחידה:"
 
 #. module: sale
-#: model:ir.ui.menu,name:sale.menu_product_uom_form_action
+#: model:ir.ui.menu,name:sale.uom_uom_menu_list
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Units & Packagings"
 msgstr ""
@@ -5720,8 +5795,9 @@ msgstr "וירטואלי"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__virtual_available_at_date
+#, fuzzy
 msgid "Virtual Available At Date"
-msgstr ""
+msgstr "כמות מדומה זמינה בתאריך"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -5761,16 +5837,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sale.res_partner_view_buttons
 msgid "Warning on Sales Orders and Invoices"
 msgstr ""
-
-#. module: sale
-#: model:ir.model.fields,field_description:sale.field_sale_order__website_message_ids
-msgid "Website Messages"
-msgstr "הודעות מאתר האינטרנט"
-
-#. module: sale
-#: model:ir.model.fields,help:sale.field_sale_order__website_message_ids
-msgid "Website communication history"
-msgstr "היסטורית התקשרויות מאתר האינטרנט"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -6037,7 +6103,8 @@ msgstr ""
 #: model:mail.template,subject:sale.mail_template_sale_confirmation
 msgid ""
 "{{ object.company_id.name }} {{ (object.get_portal_last_transaction().state "
-"== 'pending') and 'Pending Order' or 'Order' }} {{ object.name or 'n/a' }}"
+"== 'pending') and 'Pending Order' or 'Order' }} {{ object.name or 'n/a' }} "
+"{{ object.client_order_ref and ('(' + object.client_order_ref + ')') or '' }}"
 msgstr ""
 
 #. module: sale
@@ -6051,37 +6118,6 @@ msgstr ""
 #: model:mail.template,subject:sale.email_template_edi_sale
 msgid ""
 "{{ object.company_id.name }} {{ object.state in ('draft', 'sent') and "
-"'Quotation' or 'Order' }} {{ object.name or 'n/a' }}"
+"'Quotation' or 'Order' }} {{ object.name or 'n/a' }} "
+"{{ object.client_order_ref and ('(' + object.client_order_ref + ')') or '' }}"
 msgstr ""
-
-#~ msgid "Has Fiscal Position Changed"
-#~ msgstr "האם המעמד הפיסקלי השתנה"
-
-#~ msgid "Product taxes have been recomputed according to fiscal position %s."
-#~ msgstr "מיסי מוצרים חושבו מחדש בהתאם לסוג תנועה %s."
-
-#~ msgid "Recompute all taxes based on this fiscal position"
-#~ msgstr "חשב מחדש את כל המיסים בהתאם לסוג תנועה"
-
-#~ msgid ""
-#~ "This will update all taxes based on the currently selected fiscal "
-#~ "position."
-#~ msgstr "פעולה זו תעדכן את כל המיסים על בסיס הסוג תנועה שנבחרה כעת."
-
-#~ msgid "Update Taxes"
-#~ msgstr "עדכון מיסים"
-
-#~ msgid "Communication history"
-#~ msgstr "היסטוריית התקשרות"
-
-#~ msgid "Generate a Payment Link"
-#~ msgstr "צור קישור לתשלום"
-
-#~ msgid "Mark Quotation as Sent"
-#~ msgstr "סמן הצעת מחיר כנשלחה"
-
-#~ msgid "Print"
-#~ msgstr "הדפס"
-
-#~ msgid "Invoicing Journal"
-#~ msgstr "יומן חשבוניות"

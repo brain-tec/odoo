@@ -17,8 +17,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-22 17:45+0000\n"
-"PO-Revision-Date: 2026-05-04 13:46+0000\n"
+"POT-Creation-Date: 2026-06-30 00:49+0000\n"
+"PO-Revision-Date: 2026-06-06 13:43+0000\n"
 "Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-s19-3/"
 "project/ja/>\n"
@@ -27,7 +27,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.17\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_project__privacy_visibility__portal
@@ -129,7 +129,7 @@ msgstr "(期日"
 #. odoo-javascript
 #: code:addons/project/static/src/project_sharing/components/depend_on_ids_one2many/depend_on_ids_list_renderer.xml:0
 msgid "(other) tasks to which you do not have access."
-msgstr ""
+msgstr "(他の)タスクにアクセスできません。"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.project_message_user_assigned
@@ -463,6 +463,8 @@ msgid ""
 "<i class=\"d-none d-md-inline fa fa-fw fa-user me-2 fa fa-envelope\" "
 "title=\"Email\"/>"
 msgstr ""
+"<i class=\"d-none d-md-inline fa fa-fw fa-user me-2 fa fa-envelope\" "
+"title=\"メール\"/>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
@@ -470,6 +472,8 @@ msgid ""
 "<i class=\"d-none d-md-inline fa fa-fw fa-user me-2 fa fa-phone\" "
 "title=\"Phone\"/>"
 msgstr ""
+"<i class=\"d-none d-md-inline fa fa-fw fa-user me-2 fa fa-phone\" title=\"電"
+"話\"/>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
@@ -477,12 +481,22 @@ msgid ""
 "<i class=\"d-none d-md-inline fa fa-fw fa-user me-2 fa fa-tag\" "
 "title=\"Tags\"/>"
 msgstr ""
+"<i class=\"d-none d-md-inline fa fa-fw fa-user me-2 fa fa-tag\" title=\"タグ"
+"\"/>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
 msgid ""
 "<i class=\"d-none d-md-inline fa fa-fw fa-user me-2\" title=\"Customer\" "
 "name=\"partner_id\"/>"
+msgstr ""
+"<i class=\"d-none d-md-inline fa fa-fw fa-user me-2\" title=\"顧客\" "
+"name=\"partner_id\"/>"
+
+#. module: project
+#: model_terms:ir.ui.view,arch_db:project.project_milestone_view_kanban
+msgid ""
+"<i class=\"fa fa-calendar px-1 mt-1\" role=\"img\" aria-label=\"Deadline\"/>"
 msgstr ""
 
 #. module: project
@@ -546,7 +560,7 @@ msgid "<i class=\"oi oi-arrow-right me-1\"/>Back to edit mode"
 msgstr "<i class=\"oi oi-arrow-right me-1\"/>編集モードへ戻る"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "<i title=\"Private Task\" class=\"fa fa-lock\"/>"
 msgstr "<i title=\"Private Task\" class=\"fa fa-lock\"/>"
 
@@ -566,12 +580,12 @@ msgid "<small class=\"text-muted\">Customer</small>"
 msgstr "<small class=\"text-muted\">顧客</small>"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "<span class=\"fa fa-clock-o me-2\" title=\"Dates\"/>"
 msgstr "<span class=\"fa fa-clock-o me-2\" title=\"Dates\"/>"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid ""
 "<span class=\"fa fa-envelope-o me-2\" aria-label=\"Domain Alias\" "
 "title=\"Domain Alias\"/>"
@@ -590,7 +604,7 @@ msgid "<span class=\"fa fa-fw fa-check me-1\" title=\"Tasks\"/>"
 msgstr ""
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid ""
 "<span class=\"fa fa-user me-2\" aria-label=\"Partner\" title=\"Partner\"/>"
 msgstr ""
@@ -655,6 +669,8 @@ msgid ""
 "<span class=\"o_stat_text\">Burndown</span>\n"
 "                                <span class=\"o_stat_text\">Chart</span>"
 msgstr ""
+"<span class=\"o_stat_text\">バーンダウン</span>\n"
+"                                <span class=\"o_stat_text\">チャート</span>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
@@ -680,7 +696,7 @@ msgstr "<span class=\"o_stat_text\">評価</span>"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
 msgid "<span class=\"o_stat_text\">Status</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">ステータス</span>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
@@ -691,15 +707,15 @@ msgstr "<span class=\"o_stat_text\">サブタスク</span>"
 #: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified
 #: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified_template
 msgid "<span>@</span>"
-msgstr ""
+msgstr "<span>@</span>"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "<span>Reporting</span>"
 msgstr "<span>レポーティング</span>"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "<span>View</span>"
 msgstr "<span>閲覧</span>"
 
@@ -878,7 +894,7 @@ msgstr "活動タイプ"
 #. odoo-javascript
 #: code:addons/project/static/src/components/subtask_kanban_list/subtask_kanban_list.xml:0
 msgid "Add Sub-task"
-msgstr ""
+msgstr "サブタスクを追加"
 
 #. module: project
 #. odoo-javascript
@@ -1198,6 +1214,8 @@ msgid ""
 "Attach all documents or links to the task directly, to have all research "
 "information centralized."
 msgstr ""
+"すべてのドキュメントやリンクを直接タスクに添付し、すべての検索情報を一元化し"
+"ます。"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_milestone__message_attachment_count
@@ -1276,20 +1294,20 @@ msgid "Average Rating (1-5)"
 msgstr "平均評価 (1-5)"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Average Rating: Happy"
 msgstr "平均評価：満足"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Average Rating: Neutral"
 msgstr "平均評価：普通"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Average Rating: Unhappy"
 msgstr "平均評価：不満"
 
@@ -1353,7 +1371,7 @@ msgstr "バグ"
 #: model:ir.model,name:project.model_project_task_burndown_chart_report
 #: model_terms:ir.ui.view,arch_db:project.project_task_burndown_chart_report_view_graph
 #: model_terms:ir.ui.view,arch_db:project.project_task_burndown_chart_report_view_search
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "Burndown Chart"
 msgstr "バーンダウンチャート"
 
@@ -1495,6 +1513,9 @@ msgid ""
 "designs to the task, so that information flows from\n"
 "      designers to the workers who print the t-shirt."
 msgstr ""
+"Eメールゲートウェイを使用して、タスクについて顧客とややり取りします。ロゴデザ"
+"インをタスクに添付し、デザイナからTシャツをプリントする\n"
+"作業者へ情報が流れるようにします。"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__company_id
@@ -1566,6 +1587,12 @@ msgid "Contact Number"
 msgstr "連絡先番号"
 
 #. module: project
+#. odoo-javascript
+#: code:addons/project/static/src/components/project_convert_project_to_template_cog_menu/project_convert_project_to_template_cog_menu.xml:0
+msgid "Convert Project to Template"
+msgstr ""
+
+#. module: project
 #: model_terms:ir.ui.view,arch_db:project.project_task_convert_to_subtask_view_form
 msgid "Convert Task"
 msgstr "タスクを変換"
@@ -1614,20 +1641,25 @@ msgid "Create Date"
 msgstr "作成日"
 
 #. module: project
+#: model:ir.actions.act_window,name:project.open_create_project
+msgid "Create Project"
+msgstr ""
+
+#. module: project
+#. odoo-python
+#: code:addons/project/wizard/project_template_create_wizard.py:0
+msgid "Create Project (Template: %s)"
+msgstr ""
+
+#. module: project
 #: model:ir.model,website_form_label:project.model_res_partner
 msgid "Create a Customer"
 msgstr "顧客を作成"
 
 #. module: project
-#: model:ir.actions.act_window,name:project.open_create_project
-msgid "Create a Project"
-msgstr "プロジェクト作成"
-
-#. module: project
-#. odoo-python
-#: code:addons/project/wizard/project_template_create_wizard.py:0
-msgid "Create a Project from Template %s"
-msgstr "テンプレートからプロジェクトを作成 %s"
+#: model:ir.actions.act_window,name:project.open_create_project_template
+msgid "Create a Project Template"
+msgstr ""
 
 #. module: project
 #: model:ir.model,website_form_label:project.model_project_task
@@ -1673,11 +1705,6 @@ msgid ""
 msgstr ""
 "プロジェクトを作成し、タスクを整理します。プロジェクトごとに異なるワークフ"
 "ローを定義します。"
-
-#. module: project
-#: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified
-msgid "Create tasks by email:"
-msgstr "メールでタスクを作成:"
 
 #. module: project
 #: model_terms:digest.tip,tip_description:project.digest_tip_project_1
@@ -1775,7 +1802,7 @@ msgstr "顧客ポータルURL"
 #. module: project
 #: model:ir.actions.act_window,name:project.rating_rating_action_project_report
 #: model:ir.ui.menu,name:project.rating_rating_menu_project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "Customer Ratings"
 msgstr "顧客評価"
 
@@ -1792,6 +1819,8 @@ msgid ""
 "you can\n"
 "      communicate on the task directly."
 msgstr ""
+"Eメールでのフィードバックを提案する顧客:Odooは自動的にタスクを作成し、\n"
+"タスクについて直接やり取りすることができます。"
 
 #. module: project
 #. odoo-python
@@ -1900,6 +1929,7 @@ msgstr "停滞までの日数"
 #: model:ir.model.fields,field_description:project.field_project_task__date_deadline
 #: model:ir.model.fields,field_description:project.field_project_task_burndown_chart_report__date_deadline
 #: model:ir.model.fields,field_description:project.field_report_project_task_user__date_deadline
+#: model_terms:ir.ui.view,arch_db:project.project_milestone_view_kanban
 #: model_terms:ir.ui.view,arch_db:project.project_sharing_project_task_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form_project_base
 msgid "Deadline"
@@ -2120,7 +2150,7 @@ msgid "Draft"
 msgstr "ドラフト"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Duplicate"
 msgstr "複製"
 
@@ -2224,6 +2254,8 @@ msgstr "エラー: タスクの再帰的階層を作ることはできません�
 #: code:addons/project/static/src/xml/project_task_kanban_examples.xml:0
 msgid "Everyone can propose ideas, and the Editor marks the best ones as"
 msgstr ""
+"誰もがアイデアを提案することができ、編集者はその中から最も優れたものに以下の"
+"印をつけます:"
 
 #. module: project
 #: model:project.tags,name:project.project_tags_02
@@ -2284,7 +2316,7 @@ msgstr "折りたたみ"
 #. odoo-javascript
 #: code:addons/project/static/src/project_sharing/chatter/portal_chatter_patch.xml:0
 msgid "Follow"
-msgstr ""
+msgstr "フォロー"
 
 #. module: project
 #: model:portal.entry,description:project.portal_tasks
@@ -2398,6 +2430,8 @@ msgid ""
 "Handle your idea gathering within Tasks of your new Project and discuss them "
 "in the chatter of the tasks."
 msgstr ""
+"新しいプロジェクトのタスク内でアイデアを集め、タスクのチャットの中で話し合い"
+"ましょう。"
 
 #. module: project
 #. odoo-javascript
@@ -2406,8 +2440,8 @@ msgid "Handoff"
 msgstr "引継ぎ"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Happy face"
 msgstr "ハッピーフェイス"
 
@@ -2422,7 +2456,7 @@ msgstr "メッセージあり"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_report_project_task_user__has_project_template
 msgid "Has Project Template"
-msgstr ""
+msgstr "プロジェクトテンプレートあり"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_report_project_task_user__has_template_ancestor
@@ -2912,7 +2946,7 @@ msgstr "ロゴデザイン"
 #. odoo-javascript
 #: code:addons/project/static/src/xml/project_task_kanban_examples.xml:0
 msgid "Look for the"
-msgstr ""
+msgstr "以下を探す:"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_task__priority__0
@@ -2928,6 +2962,9 @@ msgid ""
 "acquired projects,\n"
 "      assign them and use the"
 msgstr ""
+"かんばんビューでプロジェクトのライフサイクルを管理。新しく取得したプロジェク"
+"トを追加し、\n"
+"割り当て、そして"
 
 #. module: project
 #. odoo-javascript
@@ -2938,7 +2975,7 @@ msgstr "製造"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
 msgid "Map"
-msgstr ""
+msgstr "マップ"
 
 #. module: project
 #. odoo-javascript
@@ -3021,7 +3058,7 @@ msgstr "マイルストン"
 #: model:ir.embedded.actions,name:project.project_embedded_action_project_milestones
 #: model:ir.embedded.actions,name:project.project_embedded_action_update_milestones
 #: model:ir.model.fields,field_description:project.field_project_project__allow_milestones
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "Milestones"
 msgstr "マイルストン"
 
@@ -3069,6 +3106,7 @@ msgstr "自分のプロジェクト"
 #. module: project
 #: model:ir.actions.act_window,name:project.action_view_my_task
 #: model:ir.ui.menu,name:project.menu_project_management_my_tasks
+#: model_terms:ir.ui.view,arch_db:project.project_sharing_project_task_view_search
 #: model_terms:ir.ui.view,arch_db:project.project_task_burndown_chart_report_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form_project_fsm_base
 msgid "My Tasks"
@@ -3097,7 +3135,7 @@ msgstr "名称"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
 msgid "Name of Tasks"
-msgstr ""
+msgstr "タスク名"
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project__label_tasks
@@ -3110,8 +3148,8 @@ msgstr ""
 "ど"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Neutral face"
 msgstr "普通の顔"
 
@@ -3261,6 +3299,11 @@ msgstr "マイルストンが見つかりません。作成しましょう!"
 #: model_terms:ir.actions.act_window,help:project.project_roles_action
 msgid "No project role found. Let's create one!"
 msgstr "プロジェクトが見つかりません。作成しましょう!"
+
+#. module: project
+#: model_terms:ir.actions.act_window,help:project.open_view_project_template
+msgid "No project templates found. Let's create one!"
+msgstr ""
 
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.open_view_project_all
@@ -3549,6 +3592,7 @@ msgstr "個人タスクステージ"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
+#: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified
 #: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified_template
 #: model_terms:ir.ui.view,arch_db:project.view_project
 msgid "Planned Date"
@@ -3789,6 +3833,8 @@ msgstr "プロジェクトテンプレート作成ウィザード"
 #. module: project
 #. odoo-javascript
 #: code:addons/project/static/src/views/components/project_template_dropdown.xml:0
+#: model:ir.actions.act_window,name:project.open_view_project_template
+#: model:ir.ui.menu,name:project.menu_project_config_project_template
 msgid "Project Templates"
 msgstr "プロジェクトテンプレート"
 
@@ -3898,6 +3944,7 @@ msgstr "プロジェクトステータス - {{ object.name }}"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
+#: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified
 #: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified_template
 msgid "Project's Email"
 msgstr ""
@@ -4340,6 +4387,14 @@ msgid "Save the task to be able to paste images in description"
 msgstr "タスクを保存して、説明文に画像を貼り付けられるようにします。"
 
 #. module: project
+#: model_terms:ir.actions.act_window,help:project.open_view_project_template
+msgid ""
+"Save time by using project templates with pre-filled details.<br>\n"
+"                    Standardize workflows and ensure consistency across "
+"projects."
+msgstr ""
+
+#. module: project
 #. odoo-javascript
 #: code:addons/project/static/src/js/tours/project.js:0
 msgid "Schedule your activity once it is ready."
@@ -4422,7 +4477,7 @@ msgid "Security Token"
 msgstr "セキュリティトークン"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "See Parent Task"
 msgstr "親タスクを参照"
 
@@ -4460,7 +4515,7 @@ msgid "Sequence"
 msgstr "シーケンス"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Set Cover Image"
 msgstr "カバーイメージを設定"
 
@@ -4504,7 +4559,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:project.project_config_settings_action
 #: model:ir.ui.menu,name:project.project_config_settings_menu_action
 #: model_terms:ir.ui.view,arch_db:project.edit_project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "Settings"
 msgstr "管理設定"
 
@@ -4519,14 +4574,14 @@ msgstr ""
 #: model:ir.actions.act_window,name:project.project_share_wizard_action
 #: model:ir.actions.server,name:project.action_server_share_project
 #: model_terms:ir.ui.view,arch_db:project.project_share_wizard_view_form
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "Share Project"
 msgstr "プロジェクトを共有"
 
 #. module: project
 #: model:ir.actions.act_window,name:project.portal_share_action
 #: model:ir.actions.server,name:project.action_server_share_task
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Share Task"
 msgstr "タスクを共有"
 
@@ -4991,7 +5046,7 @@ msgstr "タスク:"
 #: model_terms:ir.ui.view,arch_db:project.portal_my_project
 #: model_terms:ir.ui.view,arch_db:project.portal_my_tasks
 #: model_terms:ir.ui.view,arch_db:project.project_task_view_tree_main_base
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 #: model_terms:ir.ui.view,arch_db:project.view_project_task_graph
 #: model_terms:ir.ui.view,arch_db:project.view_project_task_pivot
 #: model_terms:ir.ui.view,arch_db:project.view_task_calendar
@@ -5004,7 +5059,7 @@ msgstr "タスク"
 #: model:ir.actions.act_window,name:project.action_project_task_user_tree
 #: model:ir.model,name:project.model_report_project_task_user
 #: model:ir.ui.menu,name:project.menu_project_report_task_analysis
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 #: model_terms:ir.ui.view,arch_db:project.view_task_project_user_graph
 #: model_terms:ir.ui.view,arch_db:project.view_task_project_user_pivot
 #: model_terms:ir.ui.view,arch_db:project.view_task_project_user_search
@@ -5565,8 +5620,8 @@ msgid "Unfollow"
 msgstr ""
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Unhappy face"
 msgstr "不満顔"
 
@@ -5604,7 +5659,7 @@ msgstr "ステージを更新"
 #. module: project
 #: model:ir.actions.act_window,name:project.project_update_all_action
 #: model:ir.embedded.actions,name:project.project_embedded_action_project_updates
-#: model_terms:ir.ui.view,arch_db:project.project_view_kanban_inherit_project
+#: model_terms:ir.ui.view,arch_db:project.project_view_card_inherit_project
 msgid "Updates"
 msgstr ""
 
@@ -5727,7 +5782,7 @@ msgid "User can user the your employees' schedule"
 msgstr "ユーザは、あなたの従業員のスケジュールを利用できます。"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "View"
 msgstr "照会"
 
@@ -5781,25 +5836,10 @@ msgstr ""
 "す。</i>"
 
 #. module: project
-#: model:ir.model.fields,field_description:project.field_project_milestone__website_message_ids
-#: model:ir.model.fields,field_description:project.field_project_project__website_message_ids
-#: model:ir.model.fields,field_description:project.field_project_update__website_message_ids
-msgid "Website Messages"
-msgstr "ウェブサイトメッセージ"
-
-#. module: project
 #. odoo-javascript
 #: code:addons/project/static/src/views/project_task_kanban/project_task_kanban_examples.js:0
 msgid "Website Redesign"
 msgstr "ウェブサイトリニューアル"
-
-#. module: project
-#: model:ir.model.fields,help:project.field_project_milestone__website_message_ids
-#: model:ir.model.fields,help:project.field_project_project__website_message_ids
-#: model:ir.model.fields,help:project.field_project_task__website_message_ids
-#: model:ir.model.fields,help:project.field_project_update__website_message_ids
-msgid "Website communication history"
-msgstr "ウェブサイト通信履歴"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_task_type__rating_status_period__weekly
@@ -6068,7 +6108,7 @@ msgid ""
 msgstr ""
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.project_sharing_project_task_view_kanban
+#: model_terms:ir.ui.view,arch_db:project.project_sharing_project_task_view_card
 msgid "assignees"
 msgstr "担当者"
 
@@ -6246,7 +6286,7 @@ msgstr ""
 "{{ object.project_id.company_id.name or user.env.company.name }}: 満足度調査"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "{{0}} Milestones reached out of {{1}}"
 msgstr "{{0}} マイルストーン到達 以下のうち: {{1}}"
 
@@ -6262,15 +6302,3 @@ msgstr "👤 未割当"
 #: code:addons/project/static/src/components/project_many2one_field/project_many2one_field.js:0
 msgid "🔒 Private"
 msgstr "🔒 非公開"
-
-#~ msgid "Communication history"
-#~ msgstr "通信履歴"
-
-#~ msgid "State readonly"
-#~ msgstr "ステータス 読取専用"
-
-#~ msgid "<span>Progress</span>"
-#~ msgstr "<span>進捗</span>"
-
-#~ msgid "<span>Status</span>"
-#~ msgstr "<span>ステータス</span>"

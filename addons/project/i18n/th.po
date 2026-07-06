@@ -20,22 +20,22 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-22 17:45+0000\n"
-"PO-Revision-Date: 2026-05-30 12:09+0000\n"
+"POT-Creation-Date: 2026-06-30 00:49+0000\n"
+"PO-Revision-Date: 2026-06-11 04:48+0000\n"
 "Last-Translator: Nusara Boonma <nuboo@odoo.com>\n"
-"Language-Team: Thai <https://translate.odoo.com/projects/odoo-master/project/"
+"Language-Team: Thai <https://translate.odoo.com/projects/odoo-s19-3/project/"
 "th/>\n"
 "Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.17\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_project__privacy_visibility__portal
 msgid " All internal users and invited portal users"
-msgstr ""
+msgstr " ผู้ใช้ภายในทั้งหมดและผู้ใช้พอร์ทัลที่ได้รับเชิญ"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__rating_count
@@ -271,6 +271,112 @@ msgid ""
 "</div>\n"
 "            "
 msgstr ""
+"<div>\n"
+"    <t t-set=\"access_token\" t-value=\"object._rating_get_access_token()\"/"
+">\n"
+"    <t t-set=\"partner\" t-value=\"object._rating_get_partner()\"/>\n"
+"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"width:100%; margin:0px auto;\">\n"
+"    <tbody>\n"
+"        <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"            <t t-if=\"partner.name\">\n"
+"                สวัสดีค่ะ/ครับ <t t-out=\"partner.name or ''\">Brandon Freeman</"
+"t>,<br/><br/>\n"
+"            </t>\n"
+"            <t t-else=\"\">\n"
+"                สวัสดีค่ะ/ครับ<br/><br/>\n"
+"            </t>\n"
+"            โปรดสละเวลาสักครู่เพื่อให้คะแนนบริการของเราที่เกี่ยวข้องกับเรื่องงาน <strong t-"
+"out=\"object.name or ''\">การวางแผนและงบประมาณ</strong> \n"
+"            <t t-if=\"object._rating_get_operator().name\">\n"
+"                มอบหมายให้ <strong t-out=\"object._rating_get_operator().name "
+"or ''\">Mitchell Admin</strong>.<br/>\n"
+"            </t>\n"
+"            <t t-else=\"\">\n"
+"                .<br/>\n"
+"            </t>\n"
+"        </td></tr>\n"
+"        <tr><td style=\"text-align: center;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"width:100%; margin: 32px 0px 32px 0px; display: inline-"
+"table;\">\n"
+"                <tr><td style=\"font-size: 13px;text-align:center;\">\n"
+"                    <strong>โปรดบอกเราว่าคุณรู้สึกอย่างไรเกี่ยวกับบริการของเรา</"
+"strong><br/>\n"
+"                    <span style=\"font-size: 12px; opacity: 0.5; color: "
+"#454748;\">(คลิกที่หน้ายิ้มอันใดอันหนึ่ง)</span>\n"
+"                </td></tr>\n"
+"                <tr><td style=\"font-size: 13px;\">\n"
+"                    <table style=\"width:100%;text-align:center;margin-"
+"top:2rem;\">\n"
+"                        <tr>\n"
+"                            <td>\n"
+"                                <a t-attf-href=\"/rate/{{ access_token }}/"
+"5\" t-att-class=\"'pe-none' if object._rating_get_operator() else ''\">\n"
+"                                    <img alt=\"Happy\" src=\"/rating/static/"
+"src/img/rating_5.png\" title=\"Happy\"/>\n"
+"                                </a>\n"
+"                            </td>\n"
+"                            <td>\n"
+"                                <a t-attf-href=\"/rate/{{ access_token }}/"
+"3\" t-att-class=\"'pe-none' if object._rating_get_operator() else ''\">\n"
+"                                    <img alt=\"Neutral\" src=\"/rating/"
+"static/src/img/rating_3.png\" title=\"Neutral\"/>\n"
+"                                </a>\n"
+"                            </td>\n"
+"                            <td>\n"
+"                                <a t-attf-href=\"/rate/{{ access_token }}/"
+"1\" t-att-class=\"'pe-none' if object._rating_get_operator() else ''\">\n"
+"                                    <img alt=\"Unhappy\" src=\"/rating/"
+"static/src/img/rating_1.png\" title=\"Unhappy\"/>\n"
+"                                </a>\n"
+"                            </td>\n"
+"                        </tr>\n"
+"                    </table>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td></tr>\n"
+"        <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"            เราขอขอบคุณสำหรับข้อเสนอแนะของคุณ "
+"ข้อเสนอแนะของคุณช่วยให้เราปรับปรุงอย่างต่อเนื่อง\n"
+"            <t t-if=\"object.stage_id.rating_status == 'stage'\">\n"
+"                <br/><span style=\"margin: 0; font-size: 12px; opacity: 0.5; "
+"color: #454748;\">แบบสำรวจความพึงพอใจนี้ถูกส่งไปเนื่องจากงานของคุณถูกย้ายไปยังขั้นตอน... "
+"<b t-out=\"object.stage_id.name or ''\">กำลังดำเนินการ</b> </span>\n"
+"            </t>\n"
+"            <t t-if=\"object.stage_id.rating_status == 'periodic'\">\n"
+"                <br/><span style=\"margin: 0; font-size: 12px; opacity: 0.5; "
+"color: #454748;\">แบบสอบถามความพึงพอใจนี้ถูกส่ง <b t-"
+"out=\"object.stage_id.rating_status_period or ''\">รายสัปดาห์</b> "
+"ตราบใดที่งานนั้นอยู่ใน <b t-out=\"object.stage_id.name or ''\">กำลังดำเนินการ</b> </"
+"span>\n"
+"            </t>\n"
+"        </td></tr>\n"
+"        <tr><td><br/>ขอแสดงความนับถืออย่างยิ่ง</td></tr>\n"
+"        <tr><td>\n"
+"           <t t-out=\"object.project_id.company_id.name or ''\">บริษัทของคุณ</"
+"t>\n"
+"        </td></tr>\n"
+"        <tr><td style=\"opacity: 0.5;\">\n"
+"            <t t-out=\"object.project_id.company_id.phone or ''\">1 "
+"650-123-4567</t>\n"
+"            <t t-if=\"object.project_id.company_id.email\">\n"
+"                | <a t-attf-href=\"mailto:"
+"{{ object.project_id.company_id.email }}\" style=\"text-decoration:none; "
+"color: #454748;\" t-out=\"object.project_id.company_id.email or "
+"''\">info@yourcompany.com</a>\n"
+"            </t>\n"
+"            <t t-if=\"object.project_id.company_id.website\">\n"
+"                | <a t-attf-href=\"{{ object.project_id.company_id.website }}"
+"\" style=\"text-decoration:none; color: #454748;\" t-"
+"out=\"object.project_id.company_id.website or ''\">http://www.example.com</"
+"a>\n"
+"            </t>\n"
+"        </td></tr>\n"
+"    </tbody>\n"
+"    </table>\n"
+"</div>\n"
+"            "
 
 #. module: project
 #: model:mail.template,body_html:project.project_done_email_template
@@ -292,6 +398,22 @@ msgid ""
 "out=\"object.stage_id.name or ''\">Done</b></span>\n"
 "            "
 msgstr ""
+"<div>\n"
+"    เรียนคุณ <t t-out=\"object.partner_id.name or 'customer'\">Brandon "
+"Freeman</t><br/>\n"
+"     เรายินดีที่จะแจ้งให้คุณทราบว่าเราได้ดำเนินโปรเจ็กต์ \"<strong t-out=\"object.name "
+"or ''\">การรีโนเวท</strong>\"\n"
+"    <t t-if=\"user.signature\">\n"
+"        <br/>\n"
+"        <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-"
+"out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
+"    </t>\n"
+"</div>\n"
+"<br/><span style=\"margin: 0px 0px 0px 0px; font-size: 12px; opacity: 0.5; "
+"color: #454748;\" "
+"groups=\"project.group_project_stages\">คุณได้รับอีเมลนี้เนื่องจากโปรเจ็กต์ของคุณถูกย้ายไปยังขั้นตอน "
+"<b t-out=\"object.stage_id.name or ''\">เสร็จสิ้นแล้ว</b></span>\n"
+"            "
 
 #. module: project
 #: model:mail.template,body_html:project.mail_template_data_project_task
@@ -342,6 +464,12 @@ msgstr ""
 msgid ""
 "<i class=\"d-none d-md-inline fa fa-fw fa-user me-2\" title=\"Customer\" "
 "name=\"partner_id\"/>"
+msgstr ""
+
+#. module: project
+#: model_terms:ir.ui.view,arch_db:project.project_milestone_view_kanban
+msgid ""
+"<i class=\"fa fa-calendar px-1 mt-1\" role=\"img\" aria-label=\"Deadline\"/>"
 msgstr ""
 
 #. module: project
@@ -398,7 +526,7 @@ msgid "<i class=\"oi oi-arrow-right me-1\"/>Back to edit mode"
 msgstr "<i class=\"oi oi-arrow-right me-1\"/>กลับสู่โหมดแก้ไข"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "<i title=\"Private Task\" class=\"fa fa-lock\"/>"
 msgstr "<i title=\"งานส่วนตัว\" class=\"fa fa-lock\"/>"
 
@@ -418,12 +546,12 @@ msgid "<small class=\"text-muted\">Customer</small>"
 msgstr "<small class=\"text-muted\">ลูกค้า</small>"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "<span class=\"fa fa-clock-o me-2\" title=\"Dates\"/>"
 msgstr "<span class=\"fa fa-clock-o me-2\" title=\"วันที่\"/>"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid ""
 "<span class=\"fa fa-envelope-o me-2\" aria-label=\"Domain Alias\" "
 "title=\"Domain Alias\"/>"
@@ -442,7 +570,7 @@ msgid "<span class=\"fa fa-fw fa-check me-1\" title=\"Tasks\"/>"
 msgstr ""
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid ""
 "<span class=\"fa fa-user me-2\" aria-label=\"Partner\" title=\"Partner\"/>"
 msgstr ""
@@ -542,12 +670,12 @@ msgid "<span>@</span>"
 msgstr ""
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "<span>Reporting</span>"
 msgstr "<span>รายงาน</span>"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "<span>View</span>"
 msgstr "<span>มุมมอง</span>"
 
@@ -1112,20 +1240,20 @@ msgid "Average Rating (1-5)"
 msgstr "คะแนนเฉลี่ย (1-5)"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Average Rating: Happy"
 msgstr "คะแนนเฉลี่ย: พึงพอใจ"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Average Rating: Neutral"
 msgstr "คะแนนเฉลี่ย: ปกติ"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Average Rating: Unhappy"
 msgstr "คะแนนเฉลี่ย: ไม่พึงพอใจ"
 
@@ -1191,7 +1319,7 @@ msgstr "บัก"
 #: model:ir.model,name:project.model_project_task_burndown_chart_report
 #: model_terms:ir.ui.view,arch_db:project.project_task_burndown_chart_report_view_graph
 #: model_terms:ir.ui.view,arch_db:project.project_task_burndown_chart_report_view_search
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "Burndown Chart"
 msgstr "แผนภูมิ Burndown"
 
@@ -1396,6 +1524,12 @@ msgid "Contact Number"
 msgstr "เบอร์ติดต่อ"
 
 #. module: project
+#. odoo-javascript
+#: code:addons/project/static/src/components/project_convert_project_to_template_cog_menu/project_convert_project_to_template_cog_menu.xml:0
+msgid "Convert Project to Template"
+msgstr ""
+
+#. module: project
 #: model_terms:ir.ui.view,arch_db:project.project_task_convert_to_subtask_view_form
 msgid "Convert Task"
 msgstr "แปลงงาน"
@@ -1443,19 +1577,24 @@ msgid "Create Date"
 msgstr "วันที่สร้าง"
 
 #. module: project
+#: model:ir.actions.act_window,name:project.open_create_project
+msgid "Create Project"
+msgstr ""
+
+#. module: project
+#. odoo-python
+#: code:addons/project/wizard/project_template_create_wizard.py:0
+msgid "Create Project (Template: %s)"
+msgstr ""
+
+#. module: project
 #: model:ir.model,website_form_label:project.model_res_partner
 msgid "Create a Customer"
 msgstr "สร้างลูกค้า"
 
 #. module: project
-#: model:ir.actions.act_window,name:project.open_create_project
-msgid "Create a Project"
-msgstr "สร้างโปรเจ็กต์"
-
-#. module: project
-#. odoo-python
-#: code:addons/project/wizard/project_template_create_wizard.py:0
-msgid "Create a Project from Template %s"
+#: model:ir.actions.act_window,name:project.open_create_project_template
+msgid "Create a Project Template"
 msgstr ""
 
 #. module: project
@@ -1483,7 +1622,7 @@ msgstr "สร้างงานย่อยใหม่"
 #: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified_footer
 #: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified_template
 msgid "Create project"
-msgstr "สร้างโปรเจ็กต์"
+msgstr "สร้างโปรเจกต์"
 
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.open_view_project_all_config
@@ -1499,11 +1638,6 @@ msgid ""
 "project."
 msgstr ""
 "สร้างโปรเจ็กต์เพื่อจัดระเบียบงานของคุณ กำหนดขั้นตอนการทำงานที่แตกต่างกันสำหรับแต่ละโปรเจ็กต์"
-
-#. module: project
-#: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified
-msgid "Create tasks by email:"
-msgstr ""
 
 #. module: project
 #: model_terms:digest.tip,tip_description:project.digest_tip_project_1
@@ -1601,7 +1735,7 @@ msgstr "URL พอทัลลูกค้า"
 #. module: project
 #: model:ir.actions.act_window,name:project.rating_rating_action_project_report
 #: model:ir.ui.menu,name:project.rating_rating_menu_project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "Customer Ratings"
 msgstr "การให้คะแนนลูกค้า"
 
@@ -1718,6 +1852,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:project.field_project_task__date_deadline
 #: model:ir.model.fields,field_description:project.field_project_task_burndown_chart_report__date_deadline
 #: model:ir.model.fields,field_description:project.field_report_project_task_user__date_deadline
+#: model_terms:ir.ui.view,arch_db:project.project_milestone_view_kanban
 #: model_terms:ir.ui.view,arch_db:project.project_sharing_project_task_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form_project_base
 msgid "Deadline"
@@ -1936,7 +2071,7 @@ msgid "Draft"
 msgstr "ร่าง"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Duplicate"
 msgstr "ทำซ้ำ"
 
@@ -2215,8 +2350,8 @@ msgid "Handoff"
 msgstr "แฮนด์ออฟ"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Happy face"
 msgstr "ใบหน้ามีความสุข"
 
@@ -2816,7 +2951,7 @@ msgstr "ไมล์สโตน"
 #: model:ir.embedded.actions,name:project.project_embedded_action_project_milestones
 #: model:ir.embedded.actions,name:project.project_embedded_action_update_milestones
 #: model:ir.model.fields,field_description:project.field_project_project__allow_milestones
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "Milestones"
 msgstr "ไมล์สโตน"
 
@@ -2864,6 +2999,7 @@ msgstr "โปรเจ็กต์ของฉัน"
 #. module: project
 #: model:ir.actions.act_window,name:project.action_view_my_task
 #: model:ir.ui.menu,name:project.menu_project_management_my_tasks
+#: model_terms:ir.ui.view,arch_db:project.project_sharing_project_task_view_search
 #: model_terms:ir.ui.view,arch_db:project.project_task_burndown_chart_report_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form_project_fsm_base
 msgid "My Tasks"
@@ -2903,8 +3039,8 @@ msgid ""
 msgstr "ชื่อที่ใช้อ้างถึงงานในโปรเจ็กต์ของคุณ เช่น งาน ทิกเก็ต สปริ้นท์ และอื่นๆ..."
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Neutral face"
 msgstr "ใบหน้าปกติ"
 
@@ -3053,6 +3189,11 @@ msgstr ""
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.project_roles_action
 msgid "No project role found. Let's create one!"
+msgstr ""
+
+#. module: project
+#: model_terms:ir.actions.act_window,help:project.open_view_project_template
+msgid "No project templates found. Let's create one!"
 msgstr ""
 
 #. module: project
@@ -3338,6 +3479,7 @@ msgstr "สถานะงานส่วนตัว"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
+#: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified
 #: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified_template
 #: model_terms:ir.ui.view,arch_db:project.view_project
 msgid "Planned Date"
@@ -3576,6 +3718,8 @@ msgstr "ตัวช่วยสร้างการสร้างเทมเ
 #. module: project
 #. odoo-javascript
 #: code:addons/project/static/src/views/components/project_template_dropdown.xml:0
+#: model:ir.actions.act_window,name:project.open_view_project_template
+#: model:ir.ui.menu,name:project.menu_project_config_project_template
 msgid "Project Templates"
 msgstr ""
 
@@ -3662,6 +3806,7 @@ msgstr "สถานะของโปรเจ็กต์ - {{ object.name }}"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
+#: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified
 #: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified_template
 msgid "Project's Email"
 msgstr ""
@@ -4099,6 +4244,14 @@ msgid "Save the task to be able to paste images in description"
 msgstr "บันทึกงานเพื่อให้สามารถวางภาพในคำอธิบายได้"
 
 #. module: project
+#: model_terms:ir.actions.act_window,help:project.open_view_project_template
+msgid ""
+"Save time by using project templates with pre-filled details.<br>\n"
+"                    Standardize workflows and ensure consistency across "
+"projects."
+msgstr ""
+
+#. module: project
 #. odoo-javascript
 #: code:addons/project/static/src/js/tours/project.js:0
 msgid "Schedule your activity once it is ready."
@@ -4181,7 +4334,7 @@ msgid "Security Token"
 msgstr "โทเคนความปลอดภัย"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "See Parent Task"
 msgstr ""
 
@@ -4219,7 +4372,7 @@ msgid "Sequence"
 msgstr "ลำดับ"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Set Cover Image"
 msgstr "ตั้งค่าภาพหน้าปก"
 
@@ -4261,7 +4414,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:project.project_config_settings_action
 #: model:ir.ui.menu,name:project.project_config_settings_menu_action
 #: model_terms:ir.ui.view,arch_db:project.edit_project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "Settings"
 msgstr "การตั้งค่า"
 
@@ -4276,14 +4429,14 @@ msgstr ""
 #: model:ir.actions.act_window,name:project.project_share_wizard_action
 #: model:ir.actions.server,name:project.action_server_share_project
 #: model_terms:ir.ui.view,arch_db:project.project_share_wizard_view_form
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "Share Project"
 msgstr "แชร์โปรเจ็กต์"
 
 #. module: project
 #: model:ir.actions.act_window,name:project.portal_share_action
 #: model:ir.actions.server,name:project.action_server_share_task
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Share Task"
 msgstr "แชร์งาน"
 
@@ -4746,7 +4899,7 @@ msgstr "งาน:"
 #: model_terms:ir.ui.view,arch_db:project.portal_my_project
 #: model_terms:ir.ui.view,arch_db:project.portal_my_tasks
 #: model_terms:ir.ui.view,arch_db:project.project_task_view_tree_main_base
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 #: model_terms:ir.ui.view,arch_db:project.view_project_task_graph
 #: model_terms:ir.ui.view,arch_db:project.view_project_task_pivot
 #: model_terms:ir.ui.view,arch_db:project.view_task_calendar
@@ -4759,7 +4912,7 @@ msgstr "งาน"
 #: model:ir.actions.act_window,name:project.action_project_task_user_tree
 #: model:ir.model,name:project.model_report_project_task_user
 #: model:ir.ui.menu,name:project.menu_project_report_task_analysis
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 #: model_terms:ir.ui.view,arch_db:project.view_task_project_user_graph
 #: model_terms:ir.ui.view,arch_db:project.view_task_project_user_pivot
 #: model_terms:ir.ui.view,arch_db:project.view_task_project_user_search
@@ -5306,8 +5459,8 @@ msgid "Unfollow"
 msgstr ""
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
-#: model_terms:ir.ui.view,arch_db:project.view_task_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
+#: model_terms:ir.ui.view,arch_db:project.view_task_card
 msgid "Unhappy face"
 msgstr ""
 
@@ -5345,7 +5498,7 @@ msgstr ""
 #. module: project
 #: model:ir.actions.act_window,name:project.project_update_all_action
 #: model:ir.embedded.actions,name:project.project_embedded_action_project_updates
-#: model_terms:ir.ui.view,arch_db:project.project_view_kanban_inherit_project
+#: model_terms:ir.ui.view,arch_db:project.project_view_card_inherit_project
 msgid "Updates"
 msgstr ""
 
@@ -5435,6 +5588,17 @@ msgid ""
 "        Make sure to use the right format and order e.g. Improve the "
 "configuration screen 5h #feature #v16 @Mitchell !"
 msgstr ""
+"ใช้คีย์เวิร์ดเหล่านี้ในหัวข้อเพื่อเพิ่มงานใหม่:\n"
+"\n"
+"   30h (30 ชั่วโมง) จัดสรรเวลา 30h (30 ชั่วโมง) ให้กับงานนี้\n"
+"   #แท็ก เพิ่มแท็กในงาน\n"
+"   @ผู้ใช้ มอบหมายงานให้กับผู้ใช้\n"
+"   !  ตั้งค่างานเป็นลำดับความสำคัญปานกลาง\n"
+"   !!  ตั้งค่างานเป็นลำดับความสำคัญสูง\n"
+"   !!!  ตั้งค่างานเป็นลำดับความสำคัญเร่งด่วน\n"
+"\n"
+"   ตรวจสอบให้แน่ใจว่าใช้รูปแบบและลำดับที่ถูกต้อง เช่น ปรับปรุงหน้าจอการกำหนดค่า 5h #ฟีเจอร์ "
+"#v16 @Mitchell !"
 
 #. module: project
 #: model:ir.model,name:project.model_res_users
@@ -5454,7 +5618,7 @@ msgid "User can user the your employees' schedule"
 msgstr ""
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "View"
 msgstr "ดู"
 
@@ -5506,25 +5670,10 @@ msgid ""
 msgstr "ต้องการวิธีที่ดีกว่าใน<b>การจัดการโปรเจ็กต์</b>ของคุณไหม? <i>เริ่มต้นที่นี่</i>"
 
 #. module: project
-#: model:ir.model.fields,field_description:project.field_project_milestone__website_message_ids
-#: model:ir.model.fields,field_description:project.field_project_project__website_message_ids
-#: model:ir.model.fields,field_description:project.field_project_update__website_message_ids
-msgid "Website Messages"
-msgstr "ข้อความเว็บไซต์"
-
-#. module: project
 #. odoo-javascript
 #: code:addons/project/static/src/views/project_task_kanban/project_task_kanban_examples.js:0
 msgid "Website Redesign"
 msgstr "ออกแบบเว็บไซต์ใหม่"
-
-#. module: project
-#: model:ir.model.fields,help:project.field_project_milestone__website_message_ids
-#: model:ir.model.fields,help:project.field_project_project__website_message_ids
-#: model:ir.model.fields,help:project.field_project_task__website_message_ids
-#: model:ir.model.fields,help:project.field_project_update__website_message_ids
-msgid "Website communication history"
-msgstr "ประวัติการสื่อสารของเว็บไซต์"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_task_type__rating_status_period__weekly
@@ -5783,7 +5932,7 @@ msgid ""
 msgstr ""
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.project_sharing_project_task_view_kanban
+#: model_terms:ir.ui.view,arch_db:project.project_sharing_project_task_view_card
 msgid "assignees"
 msgstr "ผู้รับมอบหมาย"
 
@@ -5962,7 +6111,7 @@ msgstr ""
 "แบบสำรวจความพึงพอใจ"
 
 #. module: project
-#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+#: model_terms:ir.ui.view,arch_db:project.view_project_card
 msgid "{{0}} Milestones reached out of {{1}}"
 msgstr ""
 
@@ -5978,6 +6127,3 @@ msgstr "👤 ยังไม่ได้มอบหมาย"
 #: code:addons/project/static/src/components/project_many2one_field/project_many2one_field.js:0
 msgid "🔒 Private"
 msgstr "🔒 ส่วนตัว"
-
-#~ msgid "Communication history"
-#~ msgstr "ประวัติการติดต่อสื่อสาร"

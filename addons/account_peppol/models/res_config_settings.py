@@ -31,10 +31,6 @@ class ResConfigSettings(models.TransientModel):
         inverse='_inverse_peppol_participation_role',
     )
 
-    def _get_peppol_proxy_type(self):
-        self.ensure_one()
-        return self.account_peppol_edi_user.proxy_type
-
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
@@ -150,5 +146,8 @@ class ResConfigSettings(models.TransientModel):
 
     def button_peppol_reregister(self):
         self.ensure_one()
-        self.account_peppol_edi_user._peppol_deregister_participant()
+        if self.account_peppol_edi_user:
+            self.account_peppol_edi_user._peppol_deregister_participant()
+        else:
+            self.company_id._reset_peppol_configuration()
         return self.action_open_peppol_form()

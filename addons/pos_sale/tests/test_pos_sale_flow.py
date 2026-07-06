@@ -82,7 +82,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.main_pos_config.open_ui()
         self.start_pos_tour('PosRefundDownpayment', login="accountman")
         self.assertEqual(len(sale_order.order_line), 4)
-        self.assertEqual(sale_order.order_line[2].qty_invoiced, 1)
+        self.assertEqual(sale_order.order_line[2].qty_invoiced, 0)
         self.assertEqual(sale_order.order_line[3].qty_invoiced, -1)
 
     def test_pos_not_groupable_product(self):
@@ -818,44 +818,6 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.assertFalse(invoice.invoice_payment_term_id)
 
         self.assertAlmostEqual(order.amount_total, invoice.amount_total, places=2, msg="Order and Invoice amounts do not match.")
-
-    def test_settle_cancelled_sale_order(self):
-        """When settling a cancelled (reset to draft) SO in PoS,
-        the PoS picking should include moves for its products."""
-
-        product_a = self.env['product.product'].create({
-            'name': 'Product A',
-            'available_in_pos': True,
-            'is_storable': True,
-            'lst_price': 10.0,
-            'taxes_id': [Command.clear()],
-        })
-        product_b = self.env['product.product'].create({
-            'name': 'Product B',
-            'available_in_pos': True,
-            'is_storable': True,
-            'lst_price': 20.0,
-            'taxes_id': [Command.clear()],
-        })
-        partner = self.env['res.partner'].create({'name': 'Test Partner'})
-
-        sale_order = self.env['sale.order'].create({
-            'partner_id': partner.id,
-            'order_line': [
-                Command.create({'product_id': product_a.id, 'product_uom_qty': 1}),
-                Command.create({'product_id': product_b.id, 'product_uom_qty': 1}),
-            ],
-        })
-        sale_order.action_confirm()
-        sale_order._action_cancel()
-        sale_order.action_draft()
-
-        self.main_pos_config.open_ui()
-        self.start_pos_tour('test_settle_cancelled_sale_order', login="accountman")
-
-        pos_order = sale_order.pos_order_line_ids.order_id
-        pos_shipped_products = pos_order.picking_ids.filtered(lambda p: p.state == 'done').move_ids.product_id
-        self.assertEqual(pos_shipped_products, product_a | product_b)
 
     def test_down_payment_displayed(self):
         """

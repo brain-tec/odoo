@@ -14,17 +14,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-22 17:46+0000\n"
-"PO-Revision-Date: 2026-04-23 11:52+0000\n"
+"POT-Creation-Date: 2026-06-30 00:49+0000\n"
+"PO-Revision-Date: 2026-06-06 13:35+0000\n"
 "Last-Translator: \"Chloe Wang (chwa)\" <chwa@odoo.com>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
-"projects/odoo-s19-2/stock_account/zh_Hans/>\n"
+"projects/odoo-s19-3/stock_account/zh_Hans/>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.17\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: stock_account
 #. odoo-python
@@ -70,7 +70,7 @@ msgstr ""
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_avco_report__avco_value
 msgid "AVCO Value"
-msgstr ""
+msgstr "加权平均成本值"
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_account_account
@@ -498,7 +498,7 @@ msgstr "ID"
 msgid ""
 "If checked, the product will be valued using the Anglo-Saxon accounting "
 "method."
-msgstr ""
+msgstr "如果勾选，产品将使用英美法会计方法进行估值。"
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_product_product__lot_valuated
@@ -519,7 +519,7 @@ msgstr "期初余额"
 #. odoo-python
 #: code:addons/stock_account/models/stock_location.py:0
 msgid "Invalid search operator or value"
-msgstr ""
+msgstr "无效的搜索运算符或值"
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_stock_inventory_adjustment_name
@@ -559,6 +559,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock_account.view_category_property_form_stock
 msgid "Inventory Valuation"
 msgstr "库存估值"
+
+#. module: stock_account
+#: model:ir.model.fields,field_description:stock_account.field_stock_move__invoice_line_ids
+msgid "Invoice Line"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_move__is_dropship
@@ -743,8 +748,6 @@ msgstr "请在设置中为库存估值配置计价科目。"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_product_category__property_price_difference_account_id
-#: model:ir.model.fields,field_description:stock_account.field_product_product__property_price_difference_account_id
-#: model:ir.model.fields,field_description:stock_account.field_product_template__property_price_difference_account_id
 msgid "Price Difference Account"
 msgstr "价格差异科目"
 
@@ -905,6 +908,7 @@ msgstr "库存日记账"
 #: model:ir.model,name:stock_account.model_stock_move
 #: model:ir.model.fields,field_description:stock_account.field_account_bank_statement_line__stock_move_ids
 #: model:ir.model.fields,field_description:stock_account.field_account_move__stock_move_ids
+#: model:ir.model.fields,field_description:stock_account.field_account_move_line__stock_move_id
 #: model:ir.model.fields.selection,name:stock_account.selection__stock_avco_report__res_model_name__stock_move
 msgid "Stock Move"
 msgstr "库存移动"
@@ -1133,18 +1137,16 @@ msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_product_category__property_price_difference_account_id
-#: model:ir.model.fields,help:stock_account.field_product_product__property_price_difference_account_id
-#: model:ir.model.fields,help:stock_account.field_product_template__property_price_difference_account_id
 msgid ""
 "With perpetual valuation, this account will hold the price difference "
 "between the standard price and the bill price."
-msgstr ""
+msgstr "采用永续盘存计价方式时，该科目用于核算标准价与单据价格之间的差额。"
 
 #. module: stock_account
 #. odoo-python
 #: code:addons/stock_account/models/stock_move.py:0
 msgid "You can only adjust valuation for one move at a time."
-msgstr ""
+msgstr "您一次只能调整一个移动的估值。"
 
 #. module: stock_account
 #. odoo-python
@@ -1152,7 +1154,7 @@ msgstr ""
 msgid ""
 "You can only get the standard price at a given date for products with "
 "'Standard Price' as cost method."
-msgstr ""
+msgstr "仅当产品成本计价方式为标准价时，才可查询指定日期的标准价格。"
 
 #. module: stock_account
 #. odoo-python
@@ -1175,7 +1177,7 @@ msgstr ""
 msgid ""
 "You cannot modify the scheduled date of operation %s because it falls within "
 "a locked fiscal period."
-msgstr ""
+msgstr "您无法修改操作 %s 的计划日期，因为该日期在已锁定的会计期间内。"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_move__account_move_id
@@ -1186,13 +1188,3 @@ msgstr "stock_move_id"
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_account_report_invoice_document
 msgid "units"
 msgstr "单位"
-
-#~ msgid ""
-#~ "Value of the product (automatically computed in AVCO).\n"
-#~ "        Used to value the product when the purchase cost is not known "
-#~ "(e.g. inventory adjustment).\n"
-#~ "        Used to compute margins on sale orders."
-#~ msgstr ""
-#~ "产品价值（在AVCO中自动计算）。\n"
-#~ "        用于在采购成本未知情况下对产品进行估价（例如库存调整）。\n"
-#~ "        用于计算销售订单的利润。"
