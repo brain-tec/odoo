@@ -4,7 +4,8 @@ import { parseXML } from "@web/core/utils/xml";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { useBus, useOwnedDialogs, useService } from "@web/core/utils/hooks";
 
-import { Component, EventBus, onMounted, onWillStart, proxy, useListener } from "@odoo/owl";
+import { Component, EventBus, onMounted, onWillStart, plugin, proxy, useListener } from "@odoo/owl";
+import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { RPCError } from "@web/core/network/rpc";
 import { extractFieldsFromArchInfo } from "@web/model/relational_model/utils";
 import { useSetupAction } from "@web/search/action_hook";
@@ -73,10 +74,13 @@ export class KanbanQuickCreateController extends Component {
         super.setup();
 
         this.uiService = useService("ui");
-        this.offlineService = useService("offline");
+        this.offlinePlugin = plugin(OfflinePlugin);
         this.rootRef = useRef("root");
         this.state = proxy({ disabled: false });
         this.addDialog = useOwnedDialogs();
+        this.formInDialog = 0;
+        useBus(this.env.bus, "FORM-CONTROLLER:FORM-IN-DIALOG:ADD", () => this.formInDialog++);
+        useBus(this.env.bus, "FORM-CONTROLLER:FORM-IN-DIALOG:REMOVE", () => this.formInDialog--);
 
         const { activeFields, fields } = extractFieldsFromArchInfo(
             this.props.archInfo,
@@ -184,7 +188,7 @@ export class KanbanQuickCreateController extends Component {
     }
 
     beforeVisibilityChange() {
-        if (document.visibilityState === "hidden") {
+        if (document.visibilityState === "hidden" && this.formInDialog === 0) {
             return this.validate("close");
         }
     }
@@ -218,7 +222,7 @@ export class KanbanQuickCreateController extends Component {
             this.state.disabled = false;
             return true;
         } else {
-            if (this.offlineService.offline && isValid) {
+            if (this.offlinePlugin.isOffline() && isValid) {
                 this.props.quickCreateState.closeQuickCreate();
             }
             this.state.disabled = false;
