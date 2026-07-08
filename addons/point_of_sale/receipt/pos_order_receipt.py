@@ -87,6 +87,7 @@ class PosOrderReceipt(models.AbstractModel):
 
             data['product_uom_name'] = line.product_id.uom_id.name
             data['price_subtotal_incl'] = self._order_receipt_format_currency(data['price_subtotal_incl'])
+            data['no_discount_price'] = self._order_receipt_format_currency(line._get_price_no_discount(self.config_id))
 
             # Compute line unit price
             taxes = line._compute_amount_line_all(1)
@@ -118,6 +119,9 @@ class PosOrderReceipt(models.AbstractModel):
         buffer = BytesIO()
         img.save(buffer, format="PNG")
         return 'data:image/png;base64,' + base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+    def _order_receipt_generate_cashier_name(self):
+        return self.user_id.name.split(' ')[0] if self.user_id else ''
 
     def order_receipt_generate_data(self, basic_receipt=False):
         self.ensure_one()
@@ -159,7 +163,7 @@ class PosOrderReceipt(models.AbstractModel):
                 'partner_vat_label': self.partner_id.country_id.vat_label if self.partner_id.country_id else _("Tax ID"),
                 'self_invoicing_url': f"{self.env.company.get_base_url()}/pos/ticket",
                 'prices': self._order_receipt_generate_taxe_data(),
-                'cashier_name': self.user_id.name.split(' ')[0] if self.user_id else '',
+                'cashier_name': self._order_receipt_generate_cashier_name(),
                 'company_state_name': company.state_id.name if company.state_id else False,
                 'company_country_name': company.country_id.name if company.country_id else False,
                 'formated_date_order': format_datetime(self.env, self.date_order),
