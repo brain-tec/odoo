@@ -2136,7 +2136,6 @@ test(`field titles are not escaped`, async () => {
         arch: `<list><field name="foo"/></list>`,
     });
     expect(`tbody tr:eq(0) .o_data_cell`).toHaveText("<div>Hello</div>");
-    expect(`tbody tr:eq(0) .o_data_cell`).toHaveAttribute("data-tooltip", "<div>Hello</div>");
 });
 
 test(`record-depending invisible lines are correctly aligned`, async () => {
@@ -2154,16 +2153,6 @@ test(`record-depending invisible lines are correctly aligned`, async () => {
     expect(`.o_data_row`).toHaveCount(4);
     expect(`.o_data_row td:not(.o_list_record_selector)`).toHaveCount(12); // 3 cells per row (td checkboxes selector excluded)
     expect(`.o_data_row td:not(.o_list_record_selector):eq(1)`).toHaveInnerHTML("");
-});
-
-test(`invisble fields must not have a tooltip`, async () => {
-    await mountView({
-        resModel: "foo",
-        type: "list",
-        arch: `<list><field name="foo" invisible="id == 1"/></list>`,
-    });
-    expect(`.o_data_row`).toHaveCount(4);
-    expect(`.o_data_row td[data-tooltip]`).toHaveCount(3);
 });
 
 test(`do not perform extra RPC to read invisible many2one fields`, async () => {
@@ -8864,34 +8853,6 @@ test(`editable list view, should refocus date field`, async () => {
     expect(`.o_field_widget[name=date] button`).toBeFocused();
 });
 
-test(`text field should keep it's selection when clicking on it`, async () => {
-    Foo._records[0].text = "1234";
-
-    await mountView({
-        resModel: "foo",
-        type: "list",
-        arch: `
-            <list editable="bottom" limit="1">
-                <field name="text"/>
-            </list>
-        `,
-    });
-    await contains(`td[name=text]`).click();
-    expect(window.getSelection().toString()).toBe("1234", {
-        message: "the entire content should be selected on initial click",
-    });
-
-    Object.assign(queryOne("[name=text] textarea"), {
-        selectionStart: 0,
-        selectionEnd: 1,
-    });
-
-    await contains(`[name=text] textarea`).click();
-    expect(window.getSelection().toString()).toBe("1", {
-        message: "the selection shouldn't be changed",
-    });
-});
-
 test(`click on a button cell in a list view`, async () => {
     Foo._records[0].foo = "bar";
 
@@ -8913,7 +8874,7 @@ test(`click on a button cell in a list view`, async () => {
         `,
     });
     await contains(`.o_data_cell.o_list_button`).click();
-    expect(window.getSelection().toString()).toBe("bar", {
+    expect(document.activeElement).toHaveValue("bar", {
         message: "Focus should have returned to the editable cell without throwing an error",
     });
     expect(`.o_selected_row`).toHaveCount(1);
@@ -10663,7 +10624,7 @@ test(`navigation: moving right with keydown from text field does not move the fo
     await contains(`.o_field_cell[name=foo]`).click();
     expect(`.o_field_widget[name=foo] textarea`).toBeFocused();
     const textarea = queryOne(".o_field_widget[name=foo] textarea");
-    expect(textarea.selectionStart).toBe(0);
+    expect(textarea.selectionStart).toBe(3);
     expect(textarea.selectionEnd).toBe(3);
 
     await press("arrowright");
@@ -21232,4 +21193,33 @@ test("apply a filter with list_optional_show property containing an unknown fiel
     expect(".o_list_table").toHaveCount(1);
     expect("th[data-name='bar']").toHaveCount(1);
     expect("th[data-name='unknown_field']").toHaveCount(0);
+});
+
+test("editable list: text fields place cursor at the end, numeric fields auto-select content", async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list editable="bottom">
+                <field name="foo"/>
+                <field name="int_field"/>
+            </list>
+        `,
+    });
+
+    await contains(`tbody .o_data_row:eq(0) .o_data_cell[name="foo"]`).click();
+
+    let input = queryFirst(`.o_field_char[name="foo"] input`);
+    expect(input).toBeFocused();
+
+    expect(input.selectionStart).toBe(input.value.length);
+    expect(input.selectionEnd).toBe(input.value.length);
+
+    await contains(`tbody .o_data_row:eq(0) .o_data_cell[name="int_field"]`).click();
+
+    input = queryFirst(`.o_field_integer[name="int_field"] input`);
+    expect(input).toBeFocused();
+
+    expect(input.selectionStart).toBe(0);
+    expect(input.selectionEnd).toBe(input.value.length);
 });

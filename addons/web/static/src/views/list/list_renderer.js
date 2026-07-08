@@ -613,10 +613,7 @@ export class ListRenderer extends Component {
             return;
         }
         el.focus();
-        if (
-            ["text", "search", "url", "tel", "password", "textarea"].includes(el.type) &&
-            el.selectionStart === el.selectionEnd
-        ) {
+        if (["number"].includes(el.type) && el.selectionStart === el.selectionEnd) {
             el.selectionStart = 0;
             el.selectionEnd = el.value.length;
         }
@@ -1133,19 +1130,6 @@ export class ListRenderer extends Component {
             (column.relatedPropertyField && record.selected && record.model.multiEdit) ||
             evaluateBooleanExpr(column.readonly, record.evalContextWithVirtualIds)
         );
-    }
-
-    /**
-     * @param {Column} column
-     * @param {RelationalRecord} record
-     */
-    getCellTitle(column, record) {
-        // Because we freeze the column sizes, it may happen that we have to shorten field values.
-        // In order for the user to have access to the complete value in those situations, we put
-        // the value as title of the cells.
-        if (["many2one", "reference", "char"].includes(this.fields[column.name].type)) {
-            return this.getFormattedValue(column, record);
-        }
     }
 
     getFieldClass(column) {

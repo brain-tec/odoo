@@ -46,7 +46,7 @@ export {
     getMockEnv,
     getService,
     getTestApp,
-    makeMockEnv,
+    makeTestApp,
     mockOffline,
     mockService,
     restoreRegistry,

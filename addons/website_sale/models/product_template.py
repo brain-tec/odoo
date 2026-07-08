@@ -966,34 +966,38 @@ class ProductTemplate(models.Model):
                 website._get_product_available_qty(product_sudo), to_unit=uom, round=False
             )
             free_qty = float_round(computed_qty, precision_digits=0, rounding_method="DOWN")
-            has_stock_notification = product_sudo._has_stock_notification(
-                self.env.user.partner_id
-            ) or (
-                request
-                and product_sudo.id
-                in request.session.get("product_with_stock_notification_enabled", set())
-            )
-            stock_notification_email = request and request.session.get(
-                "stock_notification_email", ""
-            )
+
+            has_stock_notification = False
+            stock_notification_email = ""
+            if not website.is_public_user():
+                has_stock_notification = product_sudo._has_stock_notification(
+                    self.env.user.partner_id
+                )
+            elif request:
+                has_stock_notification = product_sudo.id in request.session.get(
+                    "product_with_stock_notification_enabled", set()
+                )
+                stock_notification_email = request.session.get("stock_notification_email", "")
+
             cart_quantity = 0.0
             if not product_sudo.allow_out_of_stock_order:
                 cart_quantity = product_sudo.uom_id._compute_quantity(
                     request.cart._get_cart_qty(product_sudo.id), to_unit=uom
                 )
+
             digits = self.env["decimal.precision"].precision_get("Product Unit")
-            rounding = 10**-digits
             combination_info.update({
                 "free_qty": free_qty,
                 "cart_qty": cart_quantity,
-                "uom_name": uom.name,
-                "uom_rounding": rounding,
+                "uom_rounding": 10**-digits,
                 "show_availability": product_sudo.show_availability,
                 "out_of_stock_message": product_sudo.out_of_stock_message,
                 "has_stock_notification": has_stock_notification,
                 "stock_notification_email": stock_notification_email,
                 "is_in_wishlist": product_sudo._is_in_wishlist(),
             })
+            if self.env["res.groups"]._is_feature_enabled("uom.group_uom"):
+                combination_info["uom_name"] = uom.name
         else:
             combination_info.update({"free_qty": 0, "cart_qty": 0})
 
@@ -1060,9 +1064,7 @@ class ProductTemplate(models.Model):
         )
 
         if not tax_display:
-            show_tax = (
-                website or self.env.website
-            ).show_line_subtotals_tax_selection
+            show_tax = (website or self.env.website).show_line_subtotals_tax_selection
             tax_display = "total_excluded" if show_tax == "tax_excluded" else "total_included"
 
         return tax_details[tax_display]
@@ -1447,7 +1449,7 @@ class ProductTemplate(models.Model):
         :rtype: dict
         """
         self.ensure_one()
-        website = self.env.website or self.env['website'].browse(self.env.context.get('host_id'))
+        website = self.env.website or self.env["website"].browse(self.env.context.get("host_id"))
 
         if self.product_variant_count == 1:
             vals = self.product_variant_id._prepare_jsonld_vals()
@@ -1494,7 +1496,7 @@ class ProductTemplate(models.Model):
             schemas.append(self._prepare_jsonld_vals())
         elif self:
             category = self.env["product.public.category"].browse(
-                self.env.context.get("shop_category_id"),
+                self.env.context.get("shop_category_id")
             )
             if category:
                 list_path = category.website_url
@@ -1521,7 +1523,7 @@ class ProductTemplate(models.Model):
             category = self.public_categ_ids[:1]
         else:
             category = self.env["product.public.category"].browse(
-                self.env.context.get("shop_category_id"),
+                self.env.context.get("shop_category_id")
             )
         if category:
             for cat in category.parents_and_self:
@@ -1683,9 +1685,7 @@ class ProductTemplate(models.Model):
             product_or_template, date, currency, pricelist, **kwargs
         )
 
-        if (
-            website := self.env.website
-        ) and product_or_template.is_product_variant:
+        if (website := self.env.website) and product_or_template.is_product_variant:
             max_quantity = product_or_template._get_max_quantity(website, request.cart, **kwargs)
             if max_quantity is not None:
                 if uom:
