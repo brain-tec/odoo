@@ -13,6 +13,8 @@ from unittest.mock import patch
 @tagged('post_install', '-at_install')
 class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
 
+    _test_user_groups = None  # FIXME list needed groups
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -2777,17 +2779,17 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
         # create several products with different taxes combination
         product_all_taxes = self.env['product.product'].create({
             'name': 'Product all taxes',
-            'taxes_id': [Command.set((tax_a + tax_b + tax_x + tax_xx).ids)],
+            'taxes_id': [Command.clear()],
             'supplier_taxes_id': [Command.set((tax_a + tax_b + tax_x + tax_xx).ids)],
         })
         product_no_xx_tax = self.env['product.product'].create({
             'name': 'Product no tax from XX',
-            'taxes_id': [Command.set((tax_a + tax_b + tax_x).ids)],
+            'taxes_id': [Command.clear()],
             'supplier_taxes_id': [Command.set((tax_a + tax_b + tax_x).ids)],
         })
         product_no_branch_tax = self.env['product.product'].create({
             'name': 'Product no tax from branch',
-            'taxes_id': [Command.set((tax_a + tax_b).ids)],
+            'taxes_id': [Command.clear()],
             'supplier_taxes_id': [Command.set((tax_a + tax_b).ids)],
         })
         product_no_tax = self.env['product.product'].create({

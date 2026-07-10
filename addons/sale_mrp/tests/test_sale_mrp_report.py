@@ -12,6 +12,8 @@ from odoo.addons.stock.tests.test_report import TestReportsCommon
 @tagged('post_install', '-at_install')
 class TestSaleMrpInvoices(TestSaleCommon):
 
+    _test_user_groups = None  # FIXME list needed groups
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -77,10 +79,12 @@ class TestSaleMrpInvoices(TestSaleCommon):
         mto_route = self.env.ref('stock.route_warehouse0_mto')
         mto_route.active = True
         manufacturing_route = self.env.ref('mrp.route_warehouse0_manufacture')
+        routes = mto_route + manufacturing_route
+        routes.product_selectable = True
         product = self.env['product.product'].create({
             'name': 'SuperProduct',
             'is_storable': True,
-            'route_ids': [Command.set((mto_route + manufacturing_route).ids)]
+            'route_ids': routes,
         })
 
         product.bom_ids = [Command.create({

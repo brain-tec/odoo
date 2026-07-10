@@ -18,6 +18,7 @@ class StockMove(models.Model):
     _name = 'stock.move'
     _description = "Stock Move"
     _explanation = "Represents a request or a completed action to move a specific quantity of a product from a source location to a destination location. These are the lines that make up a stock.picking."
+    _inherit = ['product.catalog.line.mixin']
     _order = 'sequence, id'
     _rec_name = 'reference'
 
@@ -2705,8 +2706,8 @@ Please change the quantity done or the rounding precision in your settings.""",
             return
 
         product_domains = Domain.OR(
-            [('product_id', '=', move.product_id.id), ('location_id', 'parent_of', move.location_dest_id.id)]
-            for move in self
+            [('product_id', 'in', moves.product_id.ids), ('location_id', 'parent_of', location_dest.id)]
+            for location_dest, moves in self.grouped('location_dest_id').items()
         )
         static_domain = [('state', 'in', ['confirmed', 'partially_available']),
                          ('procure_method', '=', 'make_to_stock'),
@@ -2856,19 +2857,6 @@ Please change the quantity done or the rounding precision in your settings.""",
         self.procure_method = 'make_to_stock'
         self._recompute_state()
 
-    def _get_product_catalog_lines_data(self, parent_record=False, **kwargs):
-        if not (parent_record and self):
-            return {
-                'quantity': 0,
-            }
-        self.product_id.ensure_one()
-        return {
-            'price': self.product_id.standard_price,
-            'quantity': self[0].product_uom_qty,
-            'readOnly': len(self) > 1,
-            **parent_record._get_product_catalog_uom_data(self.product_id, self[0].uom_id),
-        }
-
     def _visible_quantity(self):
         self.ensure_one()
         return self.quantity
@@ -2958,3 +2946,11 @@ Please change the quantity done or the rounding precision in your settings.""",
                 'context': ctx,
                 'target': 'new'
             }
+
+    # === CATALOG ===#
+
+    def _get_quantity_field(self) -> str:
+        return "product_uom_qty"
+
+    def _get_product_uom_field(self) -> str:
+        return "uom_id"

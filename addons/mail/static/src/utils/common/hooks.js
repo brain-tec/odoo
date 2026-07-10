@@ -1003,11 +1003,13 @@ export function useForwardRefsToParent(propName, getRefIdFn, ref) {
 export function useOnChange(dependencies, callback, { initialRun } = { initialRun: true }) {
     let firstRun = true;
     useEffect(() => {
+        let cleanup;
         const dep = dependencies();
         if (initialRun || !firstRun) {
-            untrack(() => callback(...dep));
+            untrack(() => (cleanup = callback(...dep)));
         }
         firstRun = false;
+        return cleanup;
     });
 }
 

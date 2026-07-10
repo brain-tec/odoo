@@ -11,6 +11,8 @@ from odoo.addons.base.tests.common import BaseCommon
 @tagged('post_install', '-at_install')
 class TestSaleMrpKitBom(BaseCommon):
 
+    _test_user_groups = None  # FIXME list needed groups
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -652,7 +654,8 @@ class TestSaleMrpKitBom(BaseCommon):
         warehouse = self.env.ref('stock.warehouse0')
         mto_route = self.env.ref('stock.route_warehouse0_mto')
         mto_route.action_unarchive()
-        manufacturing_route_id = self.ref('mrp.route_warehouse0_manufacture')
+        routes = mto_route | self.env.ref('mrp.route_warehouse0_manufacture')
+        routes.product_selectable = True
         kit_product, comp, mto_comp, subcomp = self.env['product.product'].create([
             {
                 'name': 'kit_product',
@@ -667,7 +670,7 @@ class TestSaleMrpKitBom(BaseCommon):
             {
                 'name': 'mto_component',
                 'is_storable': True,
-                'route_ids': [Command.set([mto_route.id, manufacturing_route_id])],
+                'route_ids': routes,
             },
             {
                 'name': 'subcomponent',

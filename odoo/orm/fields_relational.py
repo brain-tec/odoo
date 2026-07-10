@@ -13,7 +13,7 @@ from odoo.tools.misc import SENTINEL, Sentinel, unquote
 
 from .commands import Command
 from .domains import Domain
-from .fields import IR_MODELS, Field, _logger
+from .fields import IR_MODELS, Field, _logger, determine
 from .fields_reference import Many2oneReference
 from .identifiers import NewId
 from .models import BaseModel
@@ -33,7 +33,7 @@ _schema = logging.getLogger('odoo.schema')
 class _Relational(Field[BaseModel]):
     """ Abstract class for relational fields. """
     relational: typing.Literal[True] = True
-    comodel_name: str
+    comodel_name: str = ''
     domain: DomainType = []         # domain for searching values
     context: ContextType = {}       # context for searching values
     bypass_search_access: bool = False  # whether access rights are bypassed on the comodel
@@ -130,6 +130,9 @@ class _Relational(Field[BaseModel]):
             return lambda recs: validated(self.domain(recs.env[self.model_name]))  # pylint: disable=not-callable
         else:
             return validated(self.domain)
+
+    # property used by setup_related() to copy values from related field
+    _related_comodel_name = property(attrgetter('comodel_name'))
 
     _related_context = property(attrgetter('context'))
 
@@ -337,7 +340,7 @@ class Many2one(_Relational):
     def convert_to_column(self, value, record, values=None, validate=True):
         return value or None
 
-    def convert_to_cache(self, value, record, validate=True):
+    def convert_to_cache(self, value, records, validate=True):
         # cache format: id or None
         if type(value) is int or type(value) is NewId:
             id_ = value
@@ -350,13 +353,13 @@ class Many2one(_Relational):
             id_ = value[0] if value else None
         elif isinstance(value, dict):
             # return a new record (with the given field 'id' as origin)
-            comodel = record.env[self.comodel_name]
+            comodel = records.env[self.comodel_name]
             origin = comodel.browse(value.get('id'))
             id_ = comodel.new(value, origin=origin).id
         else:
             id_ = None
 
-        if self.delegate and record and not any(record._ids):
+        if self.delegate and records and not any(records._ids):
             # if all records are new, then so is the parent
             id_ = id_ and NewId(id_)
 
@@ -631,18 +634,34 @@ class _RelationalMulti(_Relational):
             return
         super()._update_cache(records, cache_value, dirty)
 
-    def convert_to_cache(self, value, record, validate=True):
-        # cache format: tuple(ids)
-        if isinstance(value, BaseModel):
+    def convert_to_cache(self, value, records, validate=True):
+        if isinstance(value, tuple):  # (1, 2, 3)
+            if records and not any(records._ids):
+                return tuple(it and NewId(it) for it in value)
+            return value
+
+        elif isinstance(value, BaseModel):  # recordset
             if validate and value._name != self.comodel_name:
                 raise ValueError("Wrong value for %s: %s" % (self, value))
             ids = value._ids
-            if record and not record.id:
+            if records and not any(records._ids):
                 # x2many field value of new record is new records
                 ids = tuple(it and NewId(it) for it in ids)
             return ids
 
-        elif isinstance(value, (list, tuple)):
+        elif value is False or value is None:
+            return ()
+
+        elif isinstance(value, list) and value and not isinstance(value[0], (tuple, list)):  # [1,2,3]
+            if records and not any(records._ids):
+                return tuple(it and NewId(it) for it in value)
+            return tuple(value)
+
+        elif isinstance(value, list):
+            if len(records) > 1:
+                raise ValueError("Wrong value for %s with %d records: %r" % (self, len(records), value))
+            # [(COMMAND.LINK, 100, 0), ...], []
+            record = records
             # value is a list/tuple of commands, dicts or record ids
             comodel = record.env[self.comodel_name]
             # if record is new, the field's value is new records
@@ -660,10 +679,7 @@ class _RelationalMulti(_Relational):
                         ids.add(comodel.new(command[2], ref=command[1]).id)
                     elif command[0] == Command.UPDATE:
                         line = browse(command[1])
-                        if validate:
-                            line.update(command[2])
-                        else:
-                            line._update_cache(command[2], validate=False)
+                        line._update_cache(command[2], validate)
                         ids.add(line.id)
                     elif command[0] in (Command.DELETE, Command.UNLINK):
                         ids.discard(browse(command[1]).id)
@@ -679,9 +695,6 @@ class _RelationalMulti(_Relational):
                     ids.add(browse(command).id)
             # return result as a tuple
             return tuple(ids)
-
-        elif not value:
-            return ()
 
         raise ValueError("Wrong value for %s: %s" % (self, value))
 
@@ -957,6 +970,7 @@ class One2many(_RelationalMulti):
                     inverse_field=self.inverse_name,
                     comodel=self.comodel_name
                 ))
+        assert not self.init_storage, "One2many.init_storage not supported"
 
     def _additional_domain(self, env) -> Domain:
         if self.comodel_name and self.inverse_name:
@@ -1032,6 +1046,7 @@ class One2many(_RelationalMulti):
             to_delete = []                      # line ids to delete
             to_link = defaultdict(OrderedSet)   # {record: line_ids}
             allow_full_delete = not create
+            comodel_domain = self.get_comodel_domain(model).optimize_dynamic(comodel)
 
             def unlink(lines):
                 if getattr(comodel._fields[inverse], 'ondelete', False) == 'cascade':
@@ -1048,13 +1063,17 @@ class One2many(_RelationalMulti):
                     to_delete.clear()
                 if to_create:
                     # create() will add the new lines to the cache of records
-                    comodel.create(to_create)
+                    lines = comodel.create(to_create)
+                    if len(lines.filtered_domain(comodel_domain)) < len(lines):
+                        raise ValueError(f"Cannot link inaccessible records in {self} ({comodel_domain})")
                     to_create.clear()
                 if to_link:
                     for record, line_ids in to_link.items():
                         lines = comodel.browse(line_ids) - before[record]
                         # linking missing lines should fail
                         lines.mapped(inverse)
+                        if len(lines.filtered_domain(comodel_domain)) < len(lines):
+                            raise ValueError(f"Cannot link inaccessible records in {self} ({comodel_domain})")
                         lines[inverse] = record
                     to_link.clear()
 
@@ -1404,7 +1423,24 @@ class Many2many(_RelationalMulti):
             ))
             _schema.debug("Create table %r: m2m relation between %r and %r", self.relation, model._table, comodel._table)
             model.pool.post_init(self.update_db_foreign_keys, model)
-            return True
+
+            # Check if we have a custom init function
+            if self.init_storage:
+                _logger.debug("Table '%s': call %s for column %s", model._table, self.init_storage, self.name)
+                to_compute = determine(self.init_storage, model)
+            else:
+                to_compute = True
+            # Mark computed fields to recompute
+            if to_compute and self.compute:
+                _logger.info("Prepare computation of %s", self)
+                cr.execute(SQL(
+                    "SELECT id FROM %(table)s WHERE id NOT IN (SELECT %(id1)s FROM %(rel)s)",
+                    table=SQL.identifier(model._table),
+                    rel=SQL.identifier(self.relation),
+                    id1=SQL.identifier(self.column1),
+                ))
+                records = model.browse(row[0] for row in cr.fetchall())
+                model.env.add_to_compute(self, records)
 
         model.pool.post_init(self.update_db_foreign_keys, model)
 
@@ -1553,11 +1589,14 @@ class Many2many(_RelationalMulti):
         # check comodel access of added records
         # we check the su flag of the environment of records, because su may be
         # disabled on the comodel
+        lines = comodel.browse(added_ids)
         if not model.env.su:
             try:
-                comodel.browse(added_ids).check_access('read')
+                lines.check_access('read')
             except AccessError as e:
                 raise AccessError(model.env._("Failed to write field %s", self) + "\n" + str(e))
+        if len(lines.filtered_domain(comodel_domain := self.get_comodel_domain(model))) < len(lines):
+            raise ValueError(f"Cannot link inaccessible records in {self} ({comodel_domain})")
 
         # update the cache of self
         for record in records:

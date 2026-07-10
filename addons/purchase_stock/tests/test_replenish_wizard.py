@@ -10,6 +10,8 @@ from .common import PurchaseTestCommon
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestReplenishWizard(PurchaseTestCommon):
+    _test_user_groups = None  # FIXME list needed groups
+
     def _get_purchase_order_from_replenishment(self, replenish_wizard):
         notification = replenish_wizard.launch_replenishment()
         links = notification.get("params", {}).get("links")
@@ -637,7 +639,7 @@ class TestReplenishWizard(PurchaseTestCommon):
             self.assertEqual(f.partner_id, self.vendor2)
 
     def test_product_replenish_wizard_multiple_buy_routes(self):
-        self.route_buy.copy()
+        self.warehouse.route_ids.filtered(lambda r: r.get_external_id()).product_selectable = False
         self.product.write({
             'seller_ids': [Command.create({
                 'partner_id': self.vendor.id,

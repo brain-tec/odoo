@@ -14,6 +14,8 @@ from odoo.fields import Command
 @tagged('post_install', '-at_install')
 class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
 
+    _test_user_groups = None  # FIXME list needed groups
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -678,14 +680,13 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         # set horizon days to 0
         self.env.company.horizon_days = 0
 
+        routes = self.env.ref('mrp.route_warehouse0_manufacture') + self.env.ref('purchase_stock.route_warehouse0_buy')
+        routes.product_selectable = True
         product = self.env['product.product'].create({
             'name': 'super product',
             'is_storable': True,
-            #set route to manufacture + buy
-            'route_ids': [
-                (4, self.env.ref('mrp.route_warehouse0_manufacture').id),
-                (4, self.env.ref('purchase_stock.route_warehouse0_buy').id)
-            ],
+            # set route to manufacture + buy
+            'route_ids': routes,
             'seller_ids': [(0, 0, {
                 'partner_id': self.env['res.partner'].create({'name': 'super vendor'}).id,
                 'min_qty': 1,
@@ -1049,6 +1050,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         route_buy = self.warehouse.buy_pull_id.route_id
         route_mto = self.warehouse.mto_pull_id.route_id
         route_mto.rule_ids.procure_method = "make_to_order"
+        (route_buy + route_mto).product_selectable = True
         self.component_a.write({
             'seller_ids': [
                 Command.create({'partner_id': self.partner_a.id},
@@ -1102,6 +1104,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         route_buy = self.warehouse.buy_pull_id.route_id
         route_mto = self.warehouse.mto_pull_id.route_id
         route_mto.rule_ids.procure_method = "make_to_order"
+        (route_buy + route_mto).product_selectable = True
         self.component_a.write({
             'seller_ids': [
                 Command.create({'partner_id': self.partner_a.id},

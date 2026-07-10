@@ -11,6 +11,8 @@ from odoo.addons.pos_sale.tests.test_pos_sale_flow import TestPoSSale
 
 class TestPoSSaleStock(TestPosStockHttpCommon, TestPoSSale):
 
+    _test_user_groups = None  # FIXME list needed groups
+
     def test_settle_order_with_kit(self):
         if not self.env["ir.module.module"].search([("name", "=", "mrp"), ("state", "=", "installed")]):
             self.skipTest("mrp module is required for this test")
@@ -335,6 +337,7 @@ class TestPoSSaleStock(TestPosStockHttpCommon, TestPoSSale):
         route_buy = self.env.ref('purchase_stock.route_warehouse0_buy')
         route_mto = self.env.ref('stock.route_warehouse0_mto')
         route_mto.rule_ids.procure_method = 'mts_else_mto'
+        (route_buy + route_mto).product_selectable = True
         self.partner_test = self.env['res.partner'].create({
             'name': 'Partner Test A',
             'street': '77 Santa Barbara Rd',

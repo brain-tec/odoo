@@ -5,6 +5,10 @@ from odoo.addons.payment_custom.tests.common import PaymentCustomCommon
 
 
 class CashOnDeliveryCommon(PaymentCustomCommon, DeliveryCommon):
+    _test_user_groups = ('sales_team.group_sale_salesman',)
+
+    _test_user_name = 'Test Sales User'
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()

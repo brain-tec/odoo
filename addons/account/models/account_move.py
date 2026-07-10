@@ -17,7 +17,6 @@ from lxml import etree, html
 from textwrap import shorten
 
 from odoo import api, fields, models, _, SUPERUSER_ID, modules
-from odoo.tools.sql import column_exists, create_column
 from odoo.addons.account.tools import format_structured_reference_iso
 from odoo.exceptions import UserError, ValidationError, AccessError, RedirectWarning
 from odoo.fields import Command, Domain
@@ -818,11 +817,6 @@ class AccountMove(models.Model):
     # used in <account.journal>._query_has_sequence_holes
     _made_gaps = models.Index('(journal_id, state, payment_state, move_type, date) WHERE (made_sequence_gap IS TRUE)')
     _duplicate_bills_idx = models.Index("(ref) WHERE (move_type IN ('in_invoice', 'in_refund'))")
-
-    def _auto_init(self):
-        super()._auto_init()
-        if not column_exists(self.env.cr, "account_move", "preferred_payment_method_line_id"):
-            create_column(self.env.cr, "account_move", "preferred_payment_method_line_id", "int4")
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -2961,118 +2955,38 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
     # CATALOG
     # -------------------------------------------------------------------------
-    def action_add_from_catalog(self):
-        res = super().action_add_from_catalog()
-        res['search_view_id'] = [self.env.ref('account.product_view_search_catalog').id, 'search']
-        return res
 
     def _get_action_add_from_catalog_extra_context(self):
         res = super()._get_action_add_from_catalog_extra_context()
-        if self.is_purchase_document() and self.partner_id:
-            res['search_default_seller_ids'] = self.partner_id.name
+        if self.is_purchase_document():
+            res['is_purchase_document'] = True
+            if self.partner_id:
+                res['search_default_seller_ids'] = self.partner_id.name
 
-        res['product_catalog_currency_id'] = self.currency_id.id
         res['product_catalog_digits'] = self.line_ids._fields['price_unit'].get_digits(self.env)
-        res['show_sections'] = bool(self.id)
         return res
+
+    def _get_catalog_currency(self):
+        return self.currency_id or super()._get_catalog_currency()
 
     def _get_product_catalog_domain(self):
         domain = super()._get_product_catalog_domain()
         if self.is_sale_document():
             return domain & Domain('sale_ok', '=', True)
-        elif self.is_purchase_document():
+        if self.is_purchase_document():
             return domain & Domain('purchase_ok', '=', True)
-        else:  # In case of an entry
-            return domain
+        # In case of an entry
+        return domain
 
-    def _default_order_line_values(self, child_field=False):
-        default_data = super()._default_order_line_values(child_field)
-        new_default_data = self.env['account.move.line']._get_product_catalog_lines_data()
-        return {**default_data, **new_default_data}
+    def _is_readonly(self) -> bool:
+        return super()._is_readonly() or self.state == 'cancel'
 
-    def _get_product_catalog_product_data(self, product, **kwargs):
-        product_data = super()._get_product_catalog_product_data(product)
-        product_data['price'] = product.standard_price if self.is_purchase_document() else product.lst_price
-        return product_data
-
-    def _get_product_catalog_record_lines(self, product_ids, *, section_id=None, **kwargs):
-        grouped_lines = defaultdict(lambda: self.env['account.move.line'])
-        if section_id is None:
-            section_id = (
-                self.line_ids[:1].id
-                if self.line_ids[:1].display_type == 'line_section'
-                else False
-            )
-        for line in self.line_ids:
-            if (
-                line.get_parent_section_line().id == section_id
-                and line.display_type == 'product'
-                and line.product_id.id in product_ids
-            ):
-                grouped_lines[line.product_id] |= line
-        return grouped_lines
-
-    def _update_order_line_info(
-        self, product, quantity, uom, *, section_id=False, child_field='line_ids', **kwargs
-    ):
-        """ Update account_move_line information for a given product or create a
-        new one if none exists yet.
-        :param object product: Recordset of `product.product`.
-        :param int quantity: The quantity selected in the catalog.
-        :param object uom: Recordset of `uom.uom`.
-        :param int section_id: The id of section selected in the catalog.
-        :return: The unit price of the product, based on the pricelist of the
-                 sale order and the quantity selected.
-        :rtype: float
-        """
-        move_line = self.line_ids.filtered(
-            lambda line: line.product_id.id == product.id
-            and line.get_parent_section_line().id == section_id,
-        )
-        if move_line:
-            if quantity != 0:
-                move_line.quantity = quantity
-            elif self.state in {'draft', 'sent'}:
-                price_unit = move_line.price_unit
-                # The catalog is designed to allow the user to select products quickly.
-                # Therefore, sometimes they may select the wrong product or decide to remove
-                # some of them from the quotation. The unlink is there for that reason.
-                move_line.unlink()
-                return price_unit
-            else:
-                move_line.quantity = 0
-        elif quantity > 0:
-            move_line = self.env['account.move.line'].create({
-                'move_id': self.id,
-                'quantity': quantity,
-                'product_id': product.id,
-                'sequence': self._get_new_line_sequence(child_field, section_id),
-                'product_uom_id': uom.id,
-            })
-        return move_line.price_unit
-
-    def _is_readonly(self):
-        """
-            Check if the move has been canceled
-        """
+    def _get_product_price_type(self) -> str:
         self.ensure_one()
-        return self.state == 'cancel'
+        return 'standard_price' if self.is_purchase_document() else 'list_price'
 
-    def _get_parent_field_on_child_model(self):
-        return 'move_id'
-
-    def _is_line_valid_for_section_line_count(self, line):
-        """Check if a line is valid for inclusion in the section's line count.
-
-        :param recordset line: A record of a move line.
-        :return: True if this line is a valid, else False.
-        :rtype: bool
-        """
-        return (
-            line.product_id
-            and line.product_id.product_tmpl_id.type != 'combo'
-            and line.quantity > 0
-        )
+    def _has_sections(self) -> bool:
+        return True
 
     # -------------------------------------------------------------------------
     # EARLY PAYMENT DISCOUNT
@@ -4207,18 +4121,6 @@ class AccountMove(models.Model):
         elif 'invoice_line_ids' in field_names:
             values = {key: val for key, val in values.items() if key != 'line_ids'}
             fields_spec = {key: val for key, val in fields_spec.items() if key != 'line_ids'}
-            # When product_id and price_unit are in values, values is reordered to make sure
-            # that product_id is before price_unit because product_id is triggering an onchange
-            # of price_unit that could override the one defined here if the product_id is set
-            # after price_unit
-            invoice_line_ids = values.get('invoice_line_ids')
-            for invoice_line_idx, invoice_line in enumerate(invoice_line_ids):
-                if (len(invoice_line) == 3 and invoice_line[0] == 1 and isinstance(invoice_line[2], dict) and
-                    'product_id' in invoice_line[2] and 'price_unit' in invoice_line[2]
-                ):
-                    if isinstance(invoice_line, tuple):
-                        invoice_line_ids[invoice_line_idx] = invoice_line = list(invoice_line)
-                    invoice_line[2] = dict(sorted(invoice_line[2].items(), key=lambda item: item[0] != 'product_id'))
         return super().onchange(values, field_names, fields_spec)
 
     # -------------------------------------------------------------------------

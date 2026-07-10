@@ -4,6 +4,13 @@ from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
 
 
 class WebsiteSaleStockCommon(WebsiteSaleCommon):
+    _test_user_groups = (
+        'stock.group_stock_user',
+        'sales_team.group_sale_salesman',
+    )
+
+    _test_user_name = 'Test Sales & Stock User'
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -12,7 +19,7 @@ class WebsiteSaleStockCommon(WebsiteSaleCommon):
 
     @classmethod
     def _add_product_qty_to_wh(cls, product_id, qty, loc_id):
-        cls.env["stock.quant"].with_context(inventory_mode=True).create({
+        cls.env["stock.quant"].with_context(inventory_mode=True).sudo().create({
             "product_id": product_id,
             "inventory_quantity": qty,
             "location_id": loc_id,
@@ -32,7 +39,7 @@ class WebsiteSaleStockCommon(WebsiteSaleCommon):
 
     @classmethod
     def _create_warehouse(cls, **kwargs):
-        return cls.env["stock.warehouse"].create({
+        return cls.env["stock.warehouse"].sudo().create({
             "name": "Test Warehouse",
             "code": "TWH",
             **kwargs,

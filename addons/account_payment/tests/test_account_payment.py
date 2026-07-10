@@ -13,6 +13,8 @@ from odoo.addons.base.models.ir_qweb import QWebError
 @tagged('-at_install', 'post_install')
 class TestAccountPayment(AccountPaymentCommon):
 
+    _test_user_groups = None  # FIXME list needed groups
+
     def test_no_amount_available_for_refund_when_no_tx(self):
         payment = self.env['account.payment'].create({'amount': 10})
         self.assertEqual(
@@ -275,8 +277,8 @@ class TestAccountPayment(AccountPaymentCommon):
                 journal.inbound_payment_method_line_ids = [Command.update(copy_provider_pml.id, {'payment_provider_id': provider.id})]
 
     def test_generate_payment_link_with_no_invoice_line(self):
-        invoice = self.invoice
-        invoice.line_ids.unlink()
+        invoice = self.invoice.copy({'line_ids': self.invoice.line_ids.browse()})
+        assert not invoice.line_ids
         payment_values = invoice._get_default_payment_link_values()
 
         self.assertDictEqual(payment_values, {

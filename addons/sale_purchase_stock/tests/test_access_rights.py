@@ -10,6 +10,8 @@ from odoo.tests import tagged
 @tagged('post_install', '-at_install')
 class TestAccessRights(TestCommonSalePurchaseNoChart):
 
+    _test_user_groups = None  # FIXME list needed groups
+
     @classmethod
     def setUpClass(cls):
         super(TestAccessRights, cls).setUpClass()
@@ -34,6 +36,7 @@ class TestAccessRights(TestCommonSalePurchaseNoChart):
         buy_route = self.env.ref('purchase_stock.route_warehouse0_buy')
         mto_route.rule_ids.procure_method = "make_to_order"
         mto_route.active = True
+        (mto_route + buy_route).product_selectable = True
 
         vendor = self.env['res.partner'].create({'name': 'vendor'})
 

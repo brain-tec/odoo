@@ -4,6 +4,8 @@ from odoo.tests import tagged
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestReplenishment(TestStockCommon):
+    _test_user_groups = None  # FIXME list needed groups
+
     def test_effective_route(self):
         orderpoint = self.env['stock.warehouse.orderpoint'].create({
             'product_id': self.productA.id,
@@ -106,6 +108,7 @@ class TestReplenishment(TestStockCommon):
         })
         manufacture_route = self.warehouse_1.route_ids.filtered(lambda r: any(rule.action == 'manufacture' for rule in r.rule_ids))
         buy_route = self.warehouse_1.route_ids.filtered(lambda r: any(rule.action == 'buy' for rule in r.rule_ids))
+        (buy_route | manufacture_route).product_selectable = False
         self.productA.route_ids = False
 
         # No resupply methods should be set for Product A

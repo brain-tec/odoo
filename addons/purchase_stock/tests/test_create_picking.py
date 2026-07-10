@@ -11,6 +11,8 @@ from odoo.addons.product.tests.common import ProductVariantsCommon
 @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestCreatePicking(ProductVariantsCommon):
 
+    _test_user_groups = None  # FIXME list needed groups
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -142,10 +144,13 @@ class TestCreatePicking(ProductVariantsCommon):
             'name': 'Roger'
         })
 
+        routes = self.env.ref('stock.route_warehouse0_mto') + self.env.ref('purchase_stock.route_warehouse0_buy')
+        routes.product_selectable = True
+
         product = self.env['product.product'].create({
             'name': 'product',
             'is_storable': True,
-            'route_ids': [(4, self.ref('stock.route_warehouse0_mto')), (4, self.ref('purchase_stock.route_warehouse0_buy'))],
+            'route_ids': routes,
             'supplier_taxes_id': [(6, 0, [])],
         })
 
@@ -278,10 +283,12 @@ class TestCreatePicking(ProductVariantsCommon):
         mto_route = self.env.ref('stock.route_warehouse0_mto')
         mto_route.active = True
         mto_route.rule_ids.procure_method = 'mts_else_mto'
+        routes = mto_route + self.env.ref('purchase_stock.route_warehouse0_buy')
+        routes.product_selectable = True
         self.product_id_1 = self.env['product.product'].create({
             'name': 'ProductA',
             'is_storable': True,
-            'route_ids': [(4, self.ref('stock.route_warehouse0_mto')), (4, self.ref('purchase_stock.route_warehouse0_buy'))],
+            'route_ids': routes,
             'seller_ids': [Command.create({
                 'partner_id': self.partner_id.id,
                 'min_qty': 5,

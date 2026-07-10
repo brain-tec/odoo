@@ -18,9 +18,6 @@ class MrpWorkorder(models.Model):
     _description = 'Work Order'
     _order = 'date_start, sequence, id'
 
-    def _default_sequence(self):
-        return self.operation_id.sequence or 100
-
     def _read_group_workcenter_id(self, workcenters, domain):
         workcenter_ids = self.env.context.get('default_workcenter_id')
         if not workcenter_ids:
@@ -31,7 +28,7 @@ class MrpWorkorder(models.Model):
 
     name = fields.Char(
         'Work Order', required=True)
-    sequence = fields.Integer("Sequence", default=_default_sequence)
+    sequence = fields.Integer("Sequence", compute='_compute_sequence', store=True, readonly=False, precompute=True)
     barcode = fields.Char(compute='_compute_barcode', store=True)
     workcenter_id = fields.Many2one(
         'mrp.workcenter', 'Work Center', required=True, index=True, tracking=True,
@@ -156,6 +153,10 @@ class MrpWorkorder(models.Model):
     qty_to_produce = fields.Float('Quantity To Produce', digits='Product Unit', compute='_compute_qty_to_produce',
         help="The quantity to produce in this workorder in the backorders chain.")
     backorder_count = fields.Integer("Count of linked backorders", compute='_compute_backorder')
+
+    def _compute_sequence(self):
+        for workorder in self:
+            workorder.sequence = workorder.operation_id.sequence or 100
 
     @api.depends('qty_ready', 'qty_remaining', 'production_bom_id.continuous')
     def _compute_state(self):
@@ -1130,52 +1131,22 @@ class MrpWorkorder(models.Model):
     # CATALOG
     # -------------------------------------------------------------------------
 
-    def _default_order_line_values(self, child_field=False):
-        default_data = super()._default_order_line_values(child_field)
-        new_default_data = self.env['stock.move']._get_product_catalog_lines_data(parent_record=self)
-
-        return {**default_data, **new_default_data}
-
-    def _get_product_catalog_order_data(self, products, **kwargs):
-        product_catalog = super()._get_product_catalog_order_data(products, **kwargs)
-        for product in products:
-            product_catalog[product.id] |= self._get_product_price_and_data(product)
-        return product_catalog
-
-    def _get_product_price_and_data(self, product):
-        return {'price': product.standard_price}
-
-    def _get_product_catalog_record_lines(self, product_ids, **kwargs):
-        moves = self.move_raw_ids.filtered(lambda move: move.product_id.id in product_ids)
-        return moves.grouped('product_id')
+    def _get_product_price_type(self) -> str:
+        """Specify the price type that should be computed as product 'price' in the catalog."""
+        return 'standard_price'
 
     def _get_product_catalog_domain(self):
         return super()._get_product_catalog_domain() & Domain('type', '=', 'consu')
 
-    def _update_order_line_info(self, product, quantity, uom, **kwargs):
-        move = self.move_raw_ids.filtered(lambda m: m.product_id.id == product.id)
-        if move:
-            if quantity != 0:
-                self._update_catalog_line_quantity(move, quantity, **kwargs)
-            else:
-                move.unlink()
-        elif quantity > 0:
-            new_line_vals = self._get_new_catalog_line_values(product.id, quantity, uom, **kwargs)
-            self.production_id.move_raw_ids = [Command.create(new_line_vals)]
-            new_line = self.move_raw_ids.filtered(lambda mv: mv.product_id.id == product.id)[-1:]
-            self._update_catalog_line_quantity(new_line, quantity, **kwargs)
+    def _get_action_add_from_catalog_extra_context(self):
+        return {
+            **super()._get_action_add_from_catalog_extra_context(),
+            'display_stock': True,
+            'hide_product_type_filters': True,  # Only goods are displayed
+        }
 
-        return self.env['product.product'].browse(product.id).standard_price
-
-    def _update_catalog_line_quantity(self, line, quantity, **kwargs):
-        line.product_uom_qty = quantity
-
-    def _is_display_stock_in_catalog(self):
-        return True
-
-    def _get_new_catalog_line_values(self, product_id, quantity, uom, **kwargs):
-        values = self.production_id._get_new_catalog_line_values(product_id, quantity, uom, **kwargs)
-        values.update({
-            'workorder_id': self.id,
-        })
-        return values
+    def _catalog_create_new_line(self, child_field, *args, **kwargs):  # noqa: ARG002
+        # Forward lines creation to the production order (to trigger some business flows)
+        self.production_id._catalog_create_new_line(
+            'move_raw_ids', *args, workorder_id=self.id, **kwargs
+        )

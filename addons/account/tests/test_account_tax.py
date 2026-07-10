@@ -11,6 +11,8 @@ from odoo.exceptions import UserError, ValidationError
 @tagged('post_install', '-at_install', 'mail_track')
 class TestAccountTax(AccountTestInvoicingCommon, MailCase):
 
+    _test_user_groups = None  # FIXME list needed groups
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -173,7 +175,7 @@ class TestAccountTax(AccountTestInvoicingCommon, MailCase):
                 "invoice_repartition_line_ids": [
                     Command.update(last_invoice_rep_line.id, {
                         'factor_percent': -100,
-                        'tag_ids': [Command.create({'name': 'TaxTag12345'})]
+                        'tag_ids': [Command.create({'name': 'TaxTag12345', 'applicability': 'taxes'})]
                     }),
                 ],
                 "refund_repartition_line_ids": [

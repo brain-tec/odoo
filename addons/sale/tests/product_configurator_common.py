@@ -7,6 +7,10 @@ from odoo.addons.uom.tests.common import UomCommon
 
 
 class TestProductConfiguratorCommon(UomCommon, HttpCase):
+    _test_user_groups = ('product.group_product_manager',)
+
+    _test_user_name = 'Test Product Manager'
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()

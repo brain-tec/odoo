@@ -22,6 +22,7 @@ _logger = logging.getLogger(__name__)
 @tagged('post_install_l10n', 'post_install', '-at_install')
 class TestItEdiImport(TestItEdi, TestAccountEdiProxyUser):
     """ Main test class for the l10n_it_edi vendor bills XML import"""
+    _test_user_groups = None  # FIXME list needed groups
 
     fake_test_content = b"""<?xml version="1.0" encoding="UTF-8"?>
         <p:FatturaElettronica versione="FPR12" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
@@ -164,9 +165,10 @@ class TestItEdiImport(TestItEdi, TestAccountEdiProxyUser):
         if self.env['ir.module.module']._get('purchase').state != 'installed':
             self.skipTest("purchase module is not installed")
 
+        default_purchase_tax = self.default_tax.copy({'type_tax_use': 'purchase'})
         product = self.env['product.product'].create({
             'name': 'DESCRIZIONE DELLA FORNITURA',
-            'supplier_taxes_id': [Command.set(self.default_tax.ids)],
+            'supplier_taxes_id': [Command.set(default_purchase_tax.ids)],
         })
         purchase = self.env['purchase.order'].with_company(self.company).create(
             {
@@ -706,8 +708,8 @@ class TestItEdiImport(TestItEdi, TestAccountEdiProxyUser):
         """Ensure that importing vendor bill with a referenced service product, with a service tax of 22% S
         only applies one tax on the product
         """
-        sale_tax = self.env['account.tax'].search([('display_name', '=', '22%'), ('company_id', '=', self.company.id)])[0]
-        supplier_tax = self.env['account.tax'].search([('display_name', '=', '22% S'), ('company_id', '=', self.company.id)])[0]
+        sale_tax = self.env['account.tax'].search([('display_name', '=', '22%'), ('type_tax_use', '=', 'sale'), ('company_id', '=', self.company.id)])[0]
+        supplier_tax = self.env['account.tax'].search([('display_name', '=', '22% S'), ('type_tax_use', '=', 'purchase'), ('company_id', '=', self.company.id)])[0]
         self.env['product.product'].create({
             'name': 'Servizio tecnico',
             'default_code': 'abcdefgh',

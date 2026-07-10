@@ -12,6 +12,8 @@ from odoo import fields
 @skip('Temporary to fast merge new valuation')
 class TestStockLandedCosts(TestStockLandedCostsCommon):
 
+    _test_user_groups = None  # FIXME list needed groups
+
     def test_stock_landed_costs(self):
         # In order to test the landed costs feature of stock,
         # I create a landed cost, confirm it and check its account move created
@@ -231,12 +233,14 @@ class TestStockLandedCosts(TestStockLandedCostsCommon):
             product=self.landed_cost,
             quantity=1,
             uom=account_move.product_uom_id,
+            child_field='line_ids',
         )
         self.assertTrue(account_move.invoice_line_ids.is_landed_costs_line, "The landed cost should appear in the move line.")
         account_move._update_order_line_info(
             product=self.product,
             quantity=1,
             uom=account_move.product_uom_id,
+            child_field='line_ids',
         )
         move_line_no_landed = account_move.line_ids.filtered(lambda line: line.product_id == self.product)
         self.assertFalse(move_line_no_landed.is_landed_costs_line, "The landed cost should not be set to True.")

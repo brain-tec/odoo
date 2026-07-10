@@ -53,8 +53,9 @@ class Binary(Field[BinaryValue]):
         return False
 
     def update_db(self, model, columns):
-        if self.column_type is None and self.default and model._table_has_rows():
-            model.pool.post_init(self.update_db_binary_attachment, model)
+        if self.column_type is None:
+            if self.default and model.env.execute_query(SQL('SELECT 1 FROM %s LIMIT 1', SQL.identifier(model._table))):
+                model.pool.post_init(self.update_db_binary_attachment, model)
             return False
         return super().update_db(model, columns)
 
@@ -80,7 +81,7 @@ class Binary(Field[BinaryValue]):
                 raise UserError(record.env._("Only admins can upload SVG files."))
         return psycopg2.Binary(value)
 
-    def convert_to_cache(self, value, record, validate=True) -> BinaryValue | None:
+    def convert_to_cache(self, value, records, validate=True) -> BinaryValue | None:
         if not value:
             return None
         if isinstance(value, BinaryValue):

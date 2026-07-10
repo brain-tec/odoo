@@ -8,6 +8,8 @@ from odoo.addons.mrp.tests.common import TestMrpCommon
 @tagged('post_install', '-at_install')
 class TestMrpRepairFlow(TestMrpCommon):
 
+    _test_user_groups = None  # FIXME list needed groups
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -26,11 +28,13 @@ class TestMrpRepairFlow(TestMrpCommon):
         manufacturing_route = self.env['stock.rule'].search([('action', '=', 'manufacture')]).route_id
         rule = mto_route.rule_ids.filtered(lambda r: r.picking_type_id.code == 'repair_operation')
         rule.procure_method = 'make_to_order'
+        (mto_route + manufacturing_route).product_selectable = True
 
         product = self.product_2
         product.write({
             'route_ids': [Command.set([mto_route.id, manufacturing_route.id])],
         })
+        self.env['mrp.bom'].create({'product_tmpl_id': product.product_tmpl_id.id})
 
         repair = self.env['repair.order'].create([
             {

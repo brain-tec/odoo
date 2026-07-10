@@ -17,13 +17,17 @@ from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_c
 # these tests create accounting entries, and therefore need a chart of accounts
 class TestSaleMrpFlowCommon(ValuationReconciliationTestCommon, TestSaleCommon):
 
+    _test_user_groups = None  # FIXME list needed groups
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
 
         # Required for `uom_id` to be visible in the view
         cls._enable_uom()
-        cls.env.ref('stock.route_warehouse0_mto').active = True
+        mto_route = cls.env.ref('stock.route_warehouse0_mto')
+        mto_route.active = True
+        mto_route.product_selectable = True
 
         # Useful models
         cls.StockMove = cls.env['stock.move']
@@ -211,6 +215,8 @@ class TestSaleMrpFlowCommon(ValuationReconciliationTestCommon, TestSaleCommon):
 
 @common.tagged('post_install', '-at_install')
 class TestSaleMrpFlow(TestSaleMrpFlowCommon):
+    _test_user_groups = None  # FIXME list needed groups
+
     @skip('Temporary to fast merge new valuation')
     def test_00_sale_mrp_flow(self):
         """ Test sale to mrp flow with diffrent unit of measure."""
@@ -2361,6 +2367,11 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         self.assertEqual(len(invoice.line_ids.filtered('reconciled')), 1)
 
     def test_avoid_removing_kit_bom_in_use(self):
+        """
+        Check that we can not unlink, archive or change the bom type of a kit bom
+        that is used by a relevant sale order line. In particular, sols
+        from an other company should not block these operations.
+        """
         so = self.env['sale.order'].create({
             'partner_id': self.partner_a.id,
             'order_line': [
@@ -2372,6 +2383,21 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
                     'tax_ids': False,
                 })],
         })
+        company2 = self.env['res.company'].create({'name': 'company 2'})
+        so_2 = self.env['sale.order'].with_company(company2).create({
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({
+                'name': self.kit_1.name,
+                'product_id': self.kit_1.id,
+                'product_uom_qty': 1.0,
+                'product_uom_id': self.kit_1.uom_id.id,
+                'price_unit': 5,
+                'tax_ids': False,
+            })],
+        })
+        so_2.action_confirm()
+        self.bom_kit_1.write({'type': 'normal'})
+        self.bom_kit_1.write({'type': 'phantom'})
         self.bom_kit_1.action_archive()
         self.bom_kit_1.action_unarchive()
 
@@ -2549,6 +2575,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         route_manufacture = self.company_data['default_warehouse'].manufacture_pull_id.route_id
         route_mto = self.company_data['default_warehouse'].mto_pull_id.route_id
         self.product_a.route_ids = [Command.set([route_manufacture.id, route_mto.id])]
+        self.env['mrp.bom'].create({'product_tmpl_id': self.product_a.product_tmpl_id.id})
         # Set the procure method to 'mts_else_mto'
         route_mto.rule_ids.filtered(lambda r: r.location_dest_id.usage == 'production').procure_method = 'mts_else_mto'
         # Create and confirm a Sale Order
