@@ -1,3 +1,4 @@
+import copy
 import odoo
 
 from freezegun import freeze_time
@@ -879,6 +880,131 @@ class TestPointOfSaleFlow(CommonPosTest):
         self.assertRecordValues(account_moves.sorted(), [
             {'amount_total': 50},
             {'amount_total': 500},
+        ])
+
+    def test_paid_order_synced_twice_no_duplicate_change(self):
+        """A paid order that reaches the server twice (e.g. a retried/duplicated
+        sync) must not re-create the server-side change payment, nor duplicate its
+        lines or regular payments."""
+        self.pos_config_usd.open_ui()
+        pos_session = self.pos_config_usd.current_session_id
+        cash_payment_method = pos_session.payment_method_ids.filtered('is_cash_count')[:1]
+        order_data = {
+            'amount_paid': 500,
+            'amount_return': -50,
+            'amount_tax': 0,
+            'amount_total': 450,
+            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'fiscal_position_id': False,
+            'pricelist_id': self.pos_config_usd.pricelist_id.id,
+            'lines': [[0, 0, {
+                'discount': 0,
+                'id': 42,
+                'pack_lot_ids': [],
+                'price_unit': 450.0,
+                'product_id': self.product.id,
+                'price_subtotal': 450.0,
+                'price_subtotal_incl': 450.0,
+                'tax_ids': [[6, False, []]],
+                'qty': 1,
+                'uuid': 'line-12346-123-1234',
+            }]],
+            'name': 'Order 12346-123-1234',
+            'partner_id': self.partner.id,
+            'session_id': pos_session.id,
+            'payment_ids': [[0, 0, {
+                'amount': 500,
+                'name': fields.Datetime.to_string(fields.Datetime.now()),
+                'payment_method_id': self.bank_payment_method.id,
+                'uuid': 'pay-bank-12346-123-1234',
+            }]],
+            'uuid': '12346-123-1234',
+            'user_id': self.env.uid,
+        }
+
+        self.env['pos.order'].sync_from_ui([copy.deepcopy(order_data)])
+        order = self.env['pos.order'].search([('uuid', '=', '12346-123-1234')])
+        self.assertEqual(order.state, 'paid')
+        self.assertRecordValues(order.payment_ids.sorted(), [
+            {'amount': -50.0, 'payment_method_id': cash_payment_method.id, 'is_change': True},
+            {'amount': 500.0, 'payment_method_id': self.bank_payment_method.id, 'is_change': False},
+        ])
+
+        # Re-sync the exact same paid order (duplicate / retried sync).
+        self.env['pos.order'].sync_from_ui([copy.deepcopy(order_data)])
+        self.assertEqual(len(order.lines), 1, "Re-syncing must not duplicate the order lines.")
+        self.assertRecordValues(order.payment_ids.sorted(), [
+            {'amount': -50.0, 'payment_method_id': cash_payment_method.id, 'is_change': True},
+            {'amount': 500.0, 'payment_method_id': self.bank_payment_method.id, 'is_change': False},
+        ])
+
+    def test_paid_order_resync_replays_payment_deletion(self):
+        """Editing the payments of an already paid order and syncing it twice must
+        be idempotent: replaying a delete command for a payment that the first sync
+        already removed must not raise MissingError nor duplicate the new payment."""
+        self.pos_config_usd.open_ui()
+        pos_session = self.pos_config_usd.current_session_id
+        order_data = {
+            'amount_paid': 450,
+            'amount_return': 0,
+            'amount_tax': 0,
+            'amount_total': 450,
+            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'fiscal_position_id': False,
+            'pricelist_id': self.pos_config_usd.pricelist_id.id,
+            'lines': [[0, 0, {
+                'discount': 0,
+                'id': 43,
+                'pack_lot_ids': [],
+                'price_unit': 450.0,
+                'product_id': self.product.id,
+                'price_subtotal': 450.0,
+                'price_subtotal_incl': 450.0,
+                'tax_ids': [[6, False, []]],
+                'qty': 1,
+                'uuid': 'line-22346-123-1234',
+            }]],
+            'name': 'Order 22346-123-1234',
+            'partner_id': self.partner.id,
+            'session_id': pos_session.id,
+            'payment_ids': [[0, 0, {
+                'amount': 450,
+                'name': fields.Datetime.to_string(fields.Datetime.now()),
+                'payment_method_id': self.cash_payment_method.id,
+                'uuid': 'pay-cash-22346-123-1234',
+            }]],
+            'uuid': '22346-123-1234',
+            'user_id': self.env.uid,
+        }
+        self.env['pos.order'].sync_from_ui([copy.deepcopy(order_data)])
+        order = self.env['pos.order'].search([('uuid', '=', '22346-123-1234')])
+        cash_payment = order.payment_ids
+        self.assertEqual(len(cash_payment), 1)
+
+        # The cashier removes the cash payment and pays with the bank instead.
+        edit_data = copy.deepcopy(order_data)
+        edit_data['payment_ids'] = [
+            [2, cash_payment.id],
+            [0, 0, {
+                'amount': 450,
+                'name': fields.Datetime.to_string(fields.Datetime.now()),
+                'payment_method_id': self.bank_payment_method.id,
+                'uuid': 'pay-bank-22346-123-1234',
+            }],
+        ]
+
+        # First edit-sync applies the change.
+        self.env['pos.order'].sync_from_ui([copy.deepcopy(edit_data)])
+        self.assertFalse(cash_payment.exists(), "The cash payment should have been removed.")
+        self.assertRecordValues(order.payment_ids, [
+            {'amount': 450.0, 'payment_method_id': self.bank_payment_method.id},
+        ])
+
+        # The same edit synced again replays the now stale [2, id] delete command:
+        # it must be skipped silently instead of raising MissingError.
+        self.env['pos.order'].sync_from_ui([copy.deepcopy(edit_data)])
+        self.assertRecordValues(order.payment_ids, [
+            {'amount': 450.0, 'payment_method_id': self.bank_payment_method.id},
         ])
 
     def test_refund_qty_refund_cancel(self):
@@ -1816,3 +1942,71 @@ class TestPointOfSaleFlow(CommonPosTest):
             f"Order name should contain 'POS-{current_year}', got: {order.name}")
         self.assertIn(f'-{current_month}', order.name,
             f"Order name should contain '-{current_month}', got: {order.name}")
+
+    def test_onchange_qty_fiscal_position_applied(self):
+        """
+        Test that _onchange_qty correctly applies the fiscal position tax mapping
+        when computing price_subtotal and price_subtotal_incl on a pos.order.line.
+        """
+        self.pos_config_usd.open_ui()
+        current_session = self.pos_config_usd.current_session_id
+
+        fiscal_position = self.env['account.fiscal.position'].create({
+            'name': 'fp',
+            'sequence': 3,
+        })
+
+        tax_15 = self.env['account.tax'].create({
+            'name': 'Tax 15%',
+            'amount': 15.0,
+            'amount_type': 'percent',
+            'type_tax_use': 'sale',
+            'price_include': False,
+        })
+        tax_10 = self.env['account.tax'].create({
+            'name': 'Tax 10%',
+            'amount': 10.0,
+            'amount_type': 'percent',
+            'type_tax_use': 'sale',
+            'price_include': False,
+            'fiscal_position_ids': fiscal_position,
+        })
+        tax_10.original_tax_ids = tax_15
+
+        product = self.env['product.product'].create({
+            'name': 'FP Test Product',
+            'type': 'consu',
+            'list_price': 100,
+            'taxes_id': [(6, 0, [tax_15.id])],
+        })
+
+        order = self.env['pos.order'].create({
+            'company_id': self.env.company.id,
+            'session_id': current_session.id,
+            'partner_id': self.partner.id,
+            'pricelist_id': self.partner.property_product_pricelist.id,
+            'fiscal_position_id': fiscal_position.id,
+            'lines': [
+                (0, 0, {
+                    'name': "OL/0001",
+                    'product_id': product.id,
+                    'price_unit': 100,
+                    'discount': 0,
+                    'qty': 1,
+                    'tax_ids': [(6, 0, [tax_15.id])],
+                    'price_subtotal': 100,
+                    'price_subtotal_incl': 120,
+                }),
+            ],
+            'amount_total': 100.0,
+            'amount_tax': 10.0,
+            'amount_paid': 0.0,
+            'amount_return': 0.0,
+        })
+
+        with Form(order) as order_form:
+            with order_form.lines.edit(0) as line:
+                line.qty = 0
+                line.qty = 1
+                self.assertEqual(line.price_subtotal, 100)
+                self.assertEqual(line.price_subtotal_incl, 110)

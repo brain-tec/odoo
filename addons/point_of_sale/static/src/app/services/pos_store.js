@@ -817,7 +817,14 @@ export class PosStore extends WithLazyGetterTrap {
                     : values.filter((value) => attrValueIds.has(value.id))
             );
         }
-        if (attributeLinesValues.some((values) => values.length > 1 || values[0].is_custom)) {
+        if (
+            attributeLinesValues.some(
+                (values) =>
+                    values.length > 1 ||
+                    values[0].is_custom ||
+                    values[0].attribute_id.display_type === "multi"
+            )
+        ) {
             return await makeAwaitable(this.dialog, ProductConfiguratorPopup, {
                 productTemplate: pTemplate,
                 hideAlwaysVariants: opts.hideAlwaysVariants,
@@ -1240,6 +1247,20 @@ export class PosStore extends WithLazyGetterTrap {
                     ])
                 );
             }
+
+            const singleValuesAttributes = productTemplate.attribute_line_ids.filter(
+                (l) =>
+                    l.product_template_value_ids.length == 1 &&
+                    l.attribute_id.display_type != "multi" &&
+                    !l.product_template_value_ids.some((v) => v.is_custom)
+            );
+            if (singleValuesAttributes.length > 0) {
+                values.attribute_value_ids = (values.attribute_value_ids || []).concat(
+                    singleValuesAttributes.flatMap((l) =>
+                        l.product_template_value_ids.map((v) => ["link", v])
+                    )
+                );
+            }
         }
     };
 
@@ -1608,15 +1629,13 @@ export class PosStore extends WithLazyGetterTrap {
     }
     async getServerOrders() {
         await this.syncAllOrders();
-        const config_domain = new Domain([
-            ["config_id", "in", [...this.config.raw.trusted_config_ids, this.config.id]],
-        ]);
-        return await this.data.loadServerOrders(
-            Domain.and([config_domain, this.getServerOrdersDomain()]).toList()
-        );
+        return await this.data.loadServerOrders(this.getServerOrdersDomain().toList());
     }
     getServerOrdersDomain() {
-        return new Domain([["state", "=", "draft"]]);
+        return new Domain([
+            ["config_id", "in", [...this.config.raw.trusted_config_ids, this.config.id]],
+            ["state", "=", "draft"],
+        ]);
     }
     async getProductInfo(productTemplate, quantity, priceExtra = 0, productProduct = false) {
         const order = this.getOrder();
