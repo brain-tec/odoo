@@ -146,12 +146,14 @@ class ThreadController(StoreController):
             ).ids,
         }
 
-    def _prepare_message_data(self, post_data, *, thread, **kwargs):
+    def _prepare_message_data(self, post_data, *, thread, from_create=True, **kwargs):
         res = {
             key: value
             for key, value in post_data.items()
             if key in thread._get_allowed_message_params()
         }
+        if from_create:
+            res.setdefault("message_type", "comment")
         if (attachment_ids := post_data.get("attachment_ids")) is not None:
             attachments = request.env["ir.attachment"].browse(map(int, attachment_ids))
             if not attachments._has_attachments_ownership(post_data.get("attachment_tokens")):
@@ -200,7 +202,6 @@ class ThreadController(StoreController):
                         )
                     ),
                 ).ids
-        res.setdefault("message_type", "comment")
         return res
 
     @mail_route("/mail/message/post", methods=["POST"], type="jsonrpc", auth="public")
@@ -229,7 +230,7 @@ class ThreadController(StoreController):
         if not self._get_thread_with_access(thread_model, thread_id, mode="write"):
             thread = thread.with_context(mail_post_autofollow_author_skip=True, mail_post_autofollow=False)
         # sudo: mail.thread - users can post on accessible threads
-        message = thread.sudo().with_context(mail_post_check_concurrency=True).message_post(
+        message = thread.sudo().message_post(
             **self._prepare_message_data(post_data, thread=thread, from_create=True, **kwargs),
         )
         store.add(message, "_store_message_fields", fields_params={"chatter_fields": True})
