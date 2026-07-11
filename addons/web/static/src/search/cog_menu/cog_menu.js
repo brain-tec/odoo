@@ -1,8 +1,9 @@
-import { registry } from "@web/core/registry";
-import { Dropdown } from "@web/core/dropdown/dropdown";
-import { ActionMenus, actionMenusProps } from "@web/search/action_menus/action_menus";
-import { _t } from "@web/core/l10n/translation";
 import { onWillStart, onWillUpdateProps, t } from "@odoo/owl";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { _t } from "@web/core/l10n/translation";
+import { registry } from "@web/core/registry";
+import { useService } from "@web/core/utils/hooks";
+import { ActionMenus, actionMenusProps } from "@web/search/action_menus/action_menus";
 
 const cogMenuRegistry = registry.category("cogMenu");
 
@@ -41,6 +42,7 @@ export class CogMenu extends ActionMenus {
 
     setup() {
         super.setup();
+        this.uiService = useService("ui");
         onWillStart(async () => {
             this.registryItems = await this._registryItems();
         });
@@ -76,6 +78,10 @@ export class CogMenu extends ActionMenus {
         return [...this.registryItems, ...this.actionItems].sort(
             (item1, item2) => (item1.groupNumber || 0) - (item2.groupNumber || 0)
         );
+    }
+
+    hasGroupIcons(groupNumber) {
+        return this.cogItems.some((item) => item.groupNumber === groupNumber && item.icon);
     }
 
     getPrintItemAriaLabel(item) {
