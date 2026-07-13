@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:37+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-18 17:51+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Ukrainian <https://translate.odoo.com/projects/odoo-master/"
@@ -733,11 +733,6 @@ msgstr ""
 "кількості та додайте інші."
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "Attached To"
-msgstr "Прикріплено до"
-
-#. module: product
 #: model:ir.model,name:product.model_ir_attachment
 msgid "Attachment"
 msgstr "Прикріплення"
@@ -985,6 +980,12 @@ msgstr "Чи можна збільшити зображення варіанту
 #. module: product
 #: model:product.attribute.value,name:product.pav_brand_canon
 msgid "Canon"
+msgstr ""
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid "Catalog missing the child field to update."
 msgstr ""
 
 #. module: product
@@ -1316,11 +1317,6 @@ msgid "Created on"
 msgstr "Створено"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "Creation"
-msgstr "Створення"
-
-#. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_volume_volume_in_cubic_feet__1
 msgid "Cubic Feet (ft³)"
 msgstr ""
@@ -1566,6 +1562,7 @@ msgstr "Дисплей застосовано"
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__display_name
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__display_name
 #: model:ir.model.fields,field_description:product.field_product_base_unit__display_name
+#: model:ir.model.fields,field_description:product.field_product_catalog_line_mixin__display_name
 #: model:ir.model.fields,field_description:product.field_product_catalog_mixin__display_name
 #: model:ir.model.fields,field_description:product.field_product_category__display_name
 #: model:ir.model.fields,field_description:product.field_product_combo__display_name
@@ -1622,11 +1619,6 @@ msgid ""
 msgstr ""
 "Відображає користувацьку одиницю для товарів, якщо вона визначена, або "
 "вибрану одиницю вимірювання в іншому випадку."
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-msgid "Document"
-msgstr "Документ"
 
 #. module: product
 #. odoo-python
@@ -1815,6 +1807,11 @@ msgstr "Закладка"
 #: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Favorites"
 msgstr "Закладки"
+
+#. module: product
+#: model_terms:ir.ui.view,arch_db:product.product_document_form
+msgid "File"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__raw
@@ -2070,11 +2067,6 @@ msgid "High-back office chair with great support"
 msgstr ""
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "History"
-msgstr "Історія"
-
-#. module: product
 #: model:product.category,name:product.product_category_construction
 #, fuzzy
 msgid "Home Construction"
@@ -2091,6 +2083,7 @@ msgstr "Проживання в готелі"
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__id
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__id
 #: model:ir.model.fields,field_description:product.field_product_base_unit__id
+#: model:ir.model.fields,field_description:product.field_product_catalog_line_mixin__id
 #: model:ir.model.fields,field_description:product.field_product_catalog_mixin__id
 #: model:ir.model.fields,field_description:product.field_product_category__id
 #: model:ir.model.fields,field_description:product.field_product_combo__id
@@ -2232,11 +2225,6 @@ msgstr "Шлях до зображення"
 #: model:ir.model.fields,field_description:product.field_product_document__image_width
 msgid "Image Width"
 msgstr "Ширина зображення"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-msgid "Image is a link"
-msgstr "Зображення є посиланням"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_attribute_search
@@ -3308,6 +3296,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/controllers/pricelist_report.py:0
 #: model:ir.model,name:product.model_product_template
+#: model:ir.model.fields,field_description:product.field_product_catalog_line_mixin__product_id
 #: model:ir.model.fields,field_description:product.field_product_label_layout__product_ids
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_tmpl_id
 #: model:ir.model.fields,field_description:product.field_product_product__product_variant_id
@@ -3358,6 +3347,11 @@ msgstr "Атрибут товару та значення"
 #: model:ir.model.fields,field_description:product.field_product_template__attribute_line_ids
 msgid "Product Attributes"
 msgstr "Атрибути товару"
+
+#. module: product
+#: model:ir.model,name:product.model_product_catalog_line_mixin
+msgid "Product Catalog Line Mixin"
+msgstr ""
 
 #. module: product
 #: model:ir.model,name:product.model_product_catalog_mixin
@@ -4379,6 +4373,14 @@ msgstr ""
 
 #. module: product
 #. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid ""
+"There are multiple lines with the same product, please update those one by "
+"one and not through the catalog."
+msgstr ""
+
+#. module: product
+#. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "There are no possible combination."
 msgstr "Немає можливої комбінації."
@@ -4765,11 +4767,15 @@ msgstr "Значення"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_id
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_view_search
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Variant"
 msgstr "Варіант"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_document__variant_attribute_value_ids
+msgid "Variant Attribute Value"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__product_variant_count
@@ -4852,6 +4858,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__partner_id
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_search_view
+#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Vendor"
 msgstr "Постачальник"
 
@@ -5001,6 +5008,12 @@ msgid "Write Date"
 msgstr "Напишіть дату"
 
 #. module: product
+#. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid "Wrong catalog child field!"
+msgstr ""
+
+#. module: product
 #: model:product.attribute.value,name:product.pav_size_xl
 msgid "XL"
 msgstr "XL"
@@ -5089,6 +5102,12 @@ msgstr ""
 #, fuzzy
 msgid "You can't edit this product in the catalog."
 msgstr "Ви не можете редагувати цей товар в каталозі."
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid "You cannot add or remove products from this record."
+msgstr ""
 
 #. module: product
 #. odoo-python
@@ -5466,11 +5485,6 @@ msgid "markup"
 msgstr "розмітка"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "on"
-msgstr "на"
-
-#. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "pdf"
@@ -5521,6 +5535,24 @@ msgstr "до"
 #, fuzzy
 msgid "xlsx"
 msgstr "xlsx"
+
+#~ msgid "Attached To"
+#~ msgstr "Прикріплено до"
+
+#~ msgid "Creation"
+#~ msgstr "Створення"
+
+#~ msgid "Document"
+#~ msgstr "Документ"
+
+#~ msgid "History"
+#~ msgstr "Історія"
+
+#~ msgid "Image is a link"
+#~ msgstr "Зображення є посиланням"
+
+#~ msgid "on"
+#~ msgstr "на"
 
 #~ msgid "<strong>Qty: </strong>"
 #~ msgstr "<strong>К-сть: </strong>"

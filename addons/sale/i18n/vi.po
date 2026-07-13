@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 06:12+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-master/"
@@ -916,6 +916,11 @@ msgstr ""
 "</span>"
 
 #. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.product_document_kanban
+msgid "<span>Accessible</span>"
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "<span>Amount</span>"
@@ -926,11 +931,6 @@ msgstr "<span>Số tiền</span>"
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "<span>Disc.%</span>"
 msgstr "<span>% chiết khấu</span>"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.product_document_kanban
-msgid "<span>Sales visibility</span>"
-msgstr "<span>Chế độ hiển thị bán hàng</span>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -1071,6 +1071,11 @@ msgstr "Chấp nhận &amp; ký"
 #: model:ir.model.fields,field_description:sale.field_sale_order__access_warning
 msgid "Access warning"
 msgstr "Cảnh báo truy cập"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_product_document__attached_on_sale
+msgid "Accessible"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order_line__qty_delivered_method
@@ -1224,29 +1229,17 @@ msgstr ""
 #: model:ir.model.fields,help:sale.field_product_document__attached_on_sale
 msgid ""
 "Allows you to share the document with your customers within a sale.\n"
-"Leave it empty if you don't want to share this document with sales "
-"customer.\n"
-"On quote: the document will be sent to and accessible by customers at any "
-"time.\n"
+"From Quotation: the document will be sent to and accessible by customers at "
+"any time.\n"
 "e.g. this option can be useful to share Product description files.\n"
-"On order confirmation: the document will be sent to and accessible by "
+"On Order Confirmation: the document will be sent to and accessible by "
 "customers.\n"
 "e.g. this option can be useful to share User Manual or digital content "
 "bought on ecommerce. \n"
-"Inside quote: The document will be included in the pdf of the quotation and "
-"sale order between the header pages and the quote table. "
+"On Product Page: the document will be accessible by customers on the product "
+"page.\n"
+"e.g. this option can be useful to share Product description files."
 msgstr ""
-"Cho phép bạn chia sẻ tài liệu với khách hàng của mình trong quá trình bán "
-"hàng.\n"
-"Để trống nếu bạn không muốn chia sẻ tài liệu này với khách hàng.\n"
-"Khi báo giá: tài liệu sẽ được gửi và khách hàng có thể truy cập bất cứ lúc "
-"nào.\n"
-"VD: tùy chọn này có thể hữu ích khi chia sẻ tệp mô tả Sản phẩm.\n"
-"Khi xác nhận đơn hàng: tài liệu sẽ được gửi và khách hàng có thể truy cập.\n"
-"VD: tùy chọn này có thể hữu ích khi chia sẻ Hướng dẫn sử dụng hoặc nội dung "
-"kỹ thuật số được mua trên sàn thương mại điện tử.\n"
-"Bên trong báo giá: Tài liệu sẽ có trong tệp pdf của báo giá và đơn bán hàng, "
-"nằm giữa trang header và bảng báo giá. "
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_payment_link_wizard__amount_paid
@@ -2612,6 +2605,11 @@ msgid "Forecasted Stock"
 msgstr ""
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__quotation
+msgid "From Quotation"
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.actions.act_window,help:sale.action_account_invoice_report_salesteam
 msgid ""
 "From this report, you can have an overview of the amount invoiced to your "
@@ -2733,19 +2731,9 @@ msgid "Has Overages"
 msgstr ""
 
 #. module: sale
-#: model:ir.model.fields,field_description:sale.field_sale_order__show_update_pricelist
-msgid "Has Pricelist Changed"
-msgstr "Bảng giá đã thay đổi"
-
-#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__has_down_payments
 msgid "Has down payments"
 msgstr "Có khoản trả trước"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__hidden
-msgid "Hidden"
-msgstr "Ẩn"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_account_analytic_applicability__id
@@ -2824,9 +2812,10 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__pricelist_id
-msgid "If you change the pricelist, only newly added lines will be affected."
+msgid ""
+"If you change the pricelist, the prices of all order lines will be updated "
+"accordingly."
 msgstr ""
-"Nếu bạn thay đổi bảng giá, chỉ những dòng mới được thêm vào mới bị ảnh hưởng."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -3434,6 +3423,11 @@ msgid "My Sales Order Lines"
 msgstr "Chi tiết đơn bán hàng của tôi"
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__hidden
+msgid "Never"
+msgstr ""
+
+#. module: sale
 #. odoo-python
 #: code:addons/sale/models/sale_order.py:0
 msgid "New"
@@ -3579,13 +3573,8 @@ msgstr "Trên tất cả dòng đơn bán hàng"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__sale_order
-msgid "On confirmed order"
-msgstr "Khi đã xác nhận đơn hàng"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__quotation
-msgid "On quote"
-msgstr "Khi báo giá"
+msgid "On Order Confirmation"
+msgstr ""
 
 #. module: sale
 #. odoo-python
@@ -4097,18 +4086,6 @@ msgid "Product Variant"
 msgstr "Biến thể sản phẩm"
 
 #. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-msgid "Product prices have been recomputed according to pricelist %s."
-msgstr "Giá sản phẩm đã được tính lại dựa theo bảng giá %s."
-
-#. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-msgid "Product prices have been recomputed."
-msgstr "Giá sản phẩm đã được tính lại."
-
-#. module: sale
 #: model:ir.actions.act_window,name:sale.product_template_action
 #: model:ir.ui.menu,name:sale.menu_product_template_action
 #: model:ir.ui.menu,name:sale.menu_reporting_product
@@ -4328,11 +4305,6 @@ msgid "Recommend when 'Adding to Cart' or quotation"
 msgstr "Đề xuất khi 'Thêm vào giỏ hàng' hoặc báo giá"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Recompute all prices based on this pricelist"
-msgstr "Tính lại toàn bộ giá cả dựa vào bảng giá này"
-
-#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.account_invoice_form
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Reference"
@@ -4452,11 +4424,6 @@ msgstr "SO0000"
 #: code:addons/sale/static/src/js/sale_action_helper/sale_action_helper_dialog.xml:0
 msgid "Sale"
 msgstr "Bán hàng"
-
-#. module: sale
-#: model:ir.model.fields,field_description:sale.field_product_document__attached_on_sale
-msgid "Sale : Visible at"
-msgstr "Bán hàng: Hiển thị ở"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
@@ -5559,13 +5526,6 @@ msgstr ""
 "nên sử dụng báo cáo Phân tích hoá đơn trong ứng dụng Kế toán."
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid ""
-"This will update the unit price of all products based on the new pricelist."
-msgstr ""
-"Việc này sẽ cập nhật đơn giá của tất cả sản phẩm dựa trên bảng giá mới."
-
-#. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__invoice_status__to_invoice
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_line__invoice_status__to_invoice
 #: model:ir.model.fields.selection,name:sale.selection__sale_report__invoice_status__to_invoice
@@ -5770,11 +5730,6 @@ msgstr "Số tiền đã xuất hóa đơn trước thuế"
 #: model:ir.model.fields,field_description:sale.field_sale_report__price_subtotal
 msgid "Untaxed Total"
 msgstr "Tổng trước thuế"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Update Prices"
-msgstr "Cập nhật giá"
 
 #. module: sale
 #. odoo-javascript
@@ -6219,6 +6174,75 @@ msgid ""
 "'Quotation' or 'Order' }} {{ object.name or 'n/a' }} "
 "{{ object.client_order_ref and ('(' + object.client_order_ref + ')') or '' }}"
 msgstr ""
+
+#~ msgid "<span>Sales visibility</span>"
+#~ msgstr "<span>Chế độ hiển thị bán hàng</span>"
+
+#~ msgid ""
+#~ "Allows you to share the document with your customers within a sale.\n"
+#~ "Leave it empty if you don't want to share this document with sales "
+#~ "customer.\n"
+#~ "On quote: the document will be sent to and accessible by customers at any "
+#~ "time.\n"
+#~ "e.g. this option can be useful to share Product description files.\n"
+#~ "On order confirmation: the document will be sent to and accessible by "
+#~ "customers.\n"
+#~ "e.g. this option can be useful to share User Manual or digital content "
+#~ "bought on ecommerce. \n"
+#~ "Inside quote: The document will be included in the pdf of the quotation "
+#~ "and sale order between the header pages and the quote table. "
+#~ msgstr ""
+#~ "Cho phép bạn chia sẻ tài liệu với khách hàng của mình trong quá trình bán "
+#~ "hàng.\n"
+#~ "Để trống nếu bạn không muốn chia sẻ tài liệu này với khách hàng.\n"
+#~ "Khi báo giá: tài liệu sẽ được gửi và khách hàng có thể truy cập bất cứ "
+#~ "lúc nào.\n"
+#~ "VD: tùy chọn này có thể hữu ích khi chia sẻ tệp mô tả Sản phẩm.\n"
+#~ "Khi xác nhận đơn hàng: tài liệu sẽ được gửi và khách hàng có thể truy "
+#~ "cập.\n"
+#~ "VD: tùy chọn này có thể hữu ích khi chia sẻ Hướng dẫn sử dụng hoặc nội "
+#~ "dung kỹ thuật số được mua trên sàn thương mại điện tử.\n"
+#~ "Bên trong báo giá: Tài liệu sẽ có trong tệp pdf của báo giá và đơn bán "
+#~ "hàng, nằm giữa trang header và bảng báo giá. "
+
+#~ msgid "Has Pricelist Changed"
+#~ msgstr "Bảng giá đã thay đổi"
+
+#~ msgid "Hidden"
+#~ msgstr "Ẩn"
+
+#~ msgid ""
+#~ "If you change the pricelist, only newly added lines will be affected."
+#~ msgstr ""
+#~ "Nếu bạn thay đổi bảng giá, chỉ những dòng mới được thêm vào mới bị ảnh "
+#~ "hưởng."
+
+#~ msgid "On confirmed order"
+#~ msgstr "Khi đã xác nhận đơn hàng"
+
+#~ msgid "On quote"
+#~ msgstr "Khi báo giá"
+
+#~ msgid "Product prices have been recomputed according to pricelist %s."
+#~ msgstr "Giá sản phẩm đã được tính lại dựa theo bảng giá %s."
+
+#~ msgid "Product prices have been recomputed."
+#~ msgstr "Giá sản phẩm đã được tính lại."
+
+#~ msgid "Recompute all prices based on this pricelist"
+#~ msgstr "Tính lại toàn bộ giá cả dựa vào bảng giá này"
+
+#~ msgid "Sale : Visible at"
+#~ msgstr "Bán hàng: Hiển thị ở"
+
+#~ msgid ""
+#~ "This will update the unit price of all products based on the new "
+#~ "pricelist."
+#~ msgstr ""
+#~ "Việc này sẽ cập nhật đơn giá của tất cả sản phẩm dựa trên bảng giá mới."
+
+#~ msgid "Update Prices"
+#~ msgstr "Cập nhật giá"
 
 #~ msgid ""
 #~ "<div style=\"margin: 0px; padding: 0px;\">\n"

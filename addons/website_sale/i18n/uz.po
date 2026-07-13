@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-21 17:25+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
@@ -881,16 +881,15 @@ msgstr ""
 "yakunladingiz.</span>"
 
 #. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.documents
+msgid "<span>Documents</span>"
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 #, fuzzy
 msgid "<span>Order</span>"
 msgstr "<span>Buyurtma</span>"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.product_document_kanban
-#, fuzzy
-msgid "<span>Publish on website</span>"
-msgstr "<span>Veb-saytda e'lon qilish</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.view_product_image_form
@@ -909,12 +908,6 @@ msgstr "<span>nashr qilinganidan keyin kun.</span>"
 #, fuzzy
 msgid "<span>for</span>"
 msgstr "<span>uchun</span>"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.product
-#, fuzzy
-msgid "<strong>Documents</strong>"
-msgstr "<strong>Hujjatlar</strong>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.delivery_form
@@ -1452,6 +1445,11 @@ msgid "Access Token"
 msgstr "Kirish tokeni"
 
 #. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_document__attached_on_sale
+msgid "Accessible"
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.template_footer_website_sale
 #, fuzzy
 msgid "Accessories"
@@ -1730,6 +1728,22 @@ msgstr ""
 #, fuzzy
 msgid "Allow the end user to choose this price list"
 msgstr "Foydalanuvchiga ushbu narxlar ro‘yxatini tanlash imkonini berish"
+
+#. module: website_sale
+#: model:ir.model.fields,help:website_sale.field_product_document__attached_on_sale
+msgid ""
+"Allows you to share the document with your customers within a sale.\n"
+"From Quotation: the document will be sent to and accessible by customers at "
+"any time.\n"
+"e.g. this option can be useful to share Product description files.\n"
+"On Order Confirmation: the document will be sent to and accessible by "
+"customers.\n"
+"e.g. this option can be useful to share User Manual or digital content "
+"bought on ecommerce. \n"
+"On Product Page: the document will be accessible by customers on the product "
+"page.\n"
+"e.g. this option can be useful to share Product description files."
+msgstr ""
 
 #. module: website_sale
 #: model:ir.actions.server,name:website_sale.dynamic_snippet_alternative_products
@@ -2421,11 +2435,6 @@ msgstr "Ushbu toifa uchun qidiruvni tozalash"
 #, fuzzy
 msgid "Click & Collect"
 msgstr "Bosing va olib keting"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.cart
-msgid "Click here"
-msgstr ""
 
 #. module: website_sale
 #. odoo-javascript
@@ -3364,16 +3373,6 @@ msgid "Displayed only in the Category List Snippet."
 msgstr "Faqat Turkumlar ro‘yxati qismida ko‘rsatiladi."
 
 #. module: website_sale
-#. odoo-python
-#: code:addons/website_sale/models/product_document.py:0
-#, fuzzy
-msgid ""
-"Documents shown on product page cannot be restricted to a specific variant"
-msgstr ""
-"Mahsulot sahifasida ko‘rsatiladigan hujjatlarni muayyan variantga cheklab "
-"bo‘lmaydi"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_donation_form
 #: model_terms:ir.ui.view,arch_db:website_sale.s_donation_inline
 msgid "Donate"
@@ -3500,12 +3499,6 @@ msgstr "Elektron tijorat qo‘shimcha maydonlari"
 msgid "E-Commerce Extra Info Shown on product page"
 msgstr ""
 "Mahsulot sahifasida ko‘rsatiladigan elektron tijorat qo‘shimcha ma'lumotlari"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.product_document_form
-#, fuzzy
-msgid "E-commerce"
-msgstr "Elektron tijorat"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_pricelist__code
@@ -5239,6 +5232,11 @@ msgid "On Product Cards"
 msgstr "Mahsulot kartochkalarida"
 
 #. module: website_sale
+#: model:ir.model.fields.selection,name:website_sale.selection__product_document__attached_on_sale__shown_on_product_page
+msgid "On Product Page"
+msgstr ""
+
+#. module: website_sale
 #: model:ir.model.fields.selection,name:website_sale.selection__product_ribbon__assign__sale
 #, fuzzy
 msgid "On Sale"
@@ -6191,12 +6189,6 @@ msgstr "Nashr sanasi"
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
 msgid "Publish on"
 msgstr ""
-
-#. module: website_sale
-#: model:ir.model.fields,field_description:website_sale.field_product_document__shown_on_product_page
-#, fuzzy
-msgid "Publish on website"
-msgstr "Veb-saytda e'lon qilish"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
@@ -7786,12 +7778,6 @@ msgid "This content will be shared across all product pages."
 msgstr "Ushbu mazmun barcha mahsulot sahifalarida ko‘rsatiladi"
 
 #. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.cart
-#, fuzzy
-msgid "This is your current cart."
-msgstr "Bu sizning joriy savatingiz"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
 msgid ""
 "This note is added to sales orders, invoices, eCommerce listing and SEO "
@@ -8310,7 +8296,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_sale.field_product_tag__website_id
 #: model:ir.model.fields,field_description:website_sale.field_product_template__website_id
 #: model:ir.model.fields,field_description:website_sale.field_product_wishlist__website_id
-#: model:ir.model.fields,field_description:website_sale.field_sale_order__website_id
+#: model:ir.model.fields,field_description:website_sale.field_sale_order__assigned_website_id
 #: model:ir.model.fields,field_description:website_sale.field_sale_report__website_id
 #: model:ir.model.fields,field_description:website_sale.field_website_checkout_step__website_id
 #: model:ir.model.fields,field_description:website_sale.field_website_sale_extra_field__website_id
@@ -8799,6 +8785,11 @@ msgid "eCommerce Sales"
 msgstr "Elektron tijorat savdosi"
 
 #. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_sale_order__website_id
+msgid "eCommerce Website"
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.header_cart_link
 #, fuzzy
 msgid "eCommerce cart"
@@ -8826,18 +8817,6 @@ msgstr ""
 #, fuzzy
 msgid "hours."
 msgstr "soat."
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.cart
-msgid "if you want to merge your previous cart into current cart."
-msgstr ""
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.cart
-msgid ""
-"if you want to restore your previous cart. Your current cart will be "
-"replaced with your previous cart."
-msgstr ""
 
 #. module: website_sale
 #. odoo-javascript
@@ -8982,6 +8961,33 @@ msgstr ""
 #: model:mail.template,subject:website_sale.email_template_back_in_stock
 msgid "{{ object.name or 'Product' }} is back in stock"
 msgstr ""
+
+#, fuzzy
+#~ msgid "<span>Publish on website</span>"
+#~ msgstr "<span>Veb-saytda e'lon qilish</span>"
+
+#, fuzzy
+#~ msgid "<strong>Documents</strong>"
+#~ msgstr "<strong>Hujjatlar</strong>"
+
+#, fuzzy
+#~ msgid ""
+#~ "Documents shown on product page cannot be restricted to a specific variant"
+#~ msgstr ""
+#~ "Mahsulot sahifasida ko‘rsatiladigan hujjatlarni muayyan variantga cheklab "
+#~ "bo‘lmaydi"
+
+#, fuzzy
+#~ msgid "E-commerce"
+#~ msgstr "Elektron tijorat"
+
+#, fuzzy
+#~ msgid "Publish on website"
+#~ msgstr "Veb-saytda e'lon qilish"
+
+#, fuzzy
+#~ msgid "This is your current cart."
+#~ msgstr "Bu sizning joriy savatingiz"
 
 #, fuzzy
 #~ msgid "<strong>Warning!</strong>"

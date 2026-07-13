@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 14:53+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/sale/"
@@ -889,6 +889,11 @@ msgstr ""
 "uchun elektron pochtangizni tekshiring.         </span>"
 
 #. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.product_document_kanban
+msgid "<span>Accessible</span>"
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 #, fuzzy
@@ -901,12 +906,6 @@ msgstr "<span>Summa</span>"
 #, fuzzy
 msgid "<span>Disc.%</span>"
 msgstr "<span>Chegirma %</span>"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.product_document_kanban
-#, fuzzy
-msgid "<span>Sales visibility</span>"
-msgstr "<span>Sotuvlar ko‘rinishi</span>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -1074,6 +1073,11 @@ msgid "Access warning"
 msgstr "Kirish ogohlantiruvi"
 
 #. module: sale
+#: model:ir.model.fields,field_description:sale.field_product_document__attached_on_sale
+msgid "Accessible"
+msgstr ""
+
+#. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order_line__qty_delivered_method
 msgid ""
 "According to product configuration, the delivered quantity can be "
@@ -1239,31 +1243,19 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_product_document__attached_on_sale
-#, fuzzy
 msgid ""
 "Allows you to share the document with your customers within a sale.\n"
-"Leave it empty if you don't want to share this document with sales "
-"customer.\n"
-"On quote: the document will be sent to and accessible by customers at any "
-"time.\n"
+"From Quotation: the document will be sent to and accessible by customers at "
+"any time.\n"
 "e.g. this option can be useful to share Product description files.\n"
-"On order confirmation: the document will be sent to and accessible by "
+"On Order Confirmation: the document will be sent to and accessible by "
 "customers.\n"
 "e.g. this option can be useful to share User Manual or digital content "
 "bought on ecommerce. \n"
-"Inside quote: The document will be included in the pdf of the quotation and "
-"sale order between the header pages and the quote table. "
+"On Product Page: the document will be accessible by customers on the product "
+"page.\n"
+"e.g. this option can be useful to share Product description files."
 msgstr ""
-"Hujjatni sotish doirasida mijozlaringiz bilan ulashish imkonini beradi. Agar "
-"bu hujjatni sotish mijozi bilan ulashishni istamasangiz, uni bo‘sh "
-"qoldiring. Taklif haqida: hujjat istalgan vaqtda mijozlarga yuboriladi va "
-"ularga kirish mumkin bo‘ladi. Masalan, bu parametr mahsulot tavsifi "
-"fayllarini ulashish uchun foydali bo‘lishi mumkin.  Buyurtmani tasdiqlashda: "
-"hujjat mijozlarga yuboriladi va ularga kirish mumkin bo‘ladi. Masalan, bu "
-"parametr foydalanuvchi qo‘llanmasi yoki elektron tijoratda sotib olingan "
-"raqamli tarkibni ulashish uchun foydali bo‘lishi mumkin. Taklif ichida: "
-"Hujjat taklif va sotish buyurtmasining PDF faylida sarlavha sahifalari va "
-"taklif jadvali orasiga kiritiladi."
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_payment_link_wizard__amount_paid
@@ -2811,6 +2803,11 @@ msgid "Forecasted Stock"
 msgstr ""
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__quotation
+msgid "From Quotation"
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.actions.act_window,help:sale.action_account_invoice_report_salesteam
 #, fuzzy
 msgid ""
@@ -2952,22 +2949,10 @@ msgid "Has Overages"
 msgstr ""
 
 #. module: sale
-#: model:ir.model.fields,field_description:sale.field_sale_order__show_update_pricelist
-#, fuzzy
-msgid "Has Pricelist Changed"
-msgstr "Narxlar ro‘yxati o‘zgardimi"
-
-#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__has_down_payments
 #, fuzzy
 msgid "Has down payments"
 msgstr "Boshlang‘ich to‘lovlar mavjud"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__hidden
-#, fuzzy
-msgid "Hidden"
-msgstr "Yashirin"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_account_analytic_applicability__id
@@ -3053,11 +3038,10 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__pricelist_id
-#, fuzzy
-msgid "If you change the pricelist, only newly added lines will be affected."
+msgid ""
+"If you change the pricelist, the prices of all order lines will be updated "
+"accordingly."
 msgstr ""
-"Agar narxlar ro‘yxatini o‘zgartirsangiz, faqat yangi qo‘shilgan qatorlarga "
-"ta'sir qiladi."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -3754,6 +3738,11 @@ msgid "My Sales Order Lines"
 msgstr "Mening savdo buyurtmasi qatorlarim"
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__hidden
+msgid "Never"
+msgstr ""
+
+#. module: sale
 #. odoo-python
 #: code:addons/sale/models/sale_order.py:0
 #, fuzzy
@@ -3922,15 +3911,8 @@ msgstr "Barcha buyurtma qatorlarida"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__sale_order
-#, fuzzy
-msgid "On confirmed order"
-msgstr "Tasdiqlangan buyurtmada"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__quotation
-#, fuzzy
-msgid "On quote"
-msgstr "Narx taklifida"
+msgid "On Order Confirmation"
+msgstr ""
 
 #. module: sale
 #. odoo-python
@@ -4517,20 +4499,6 @@ msgid "Product Variant"
 msgstr "Mahsulot varianti"
 
 #. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-#, fuzzy
-msgid "Product prices have been recomputed according to pricelist %s."
-msgstr "Mahsulot narxlari %s narxlar ro‘yxatiga muvofiq qayta hisoblandi."
-
-#. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-#, fuzzy
-msgid "Product prices have been recomputed."
-msgstr "Mahsulot narxlari qayta hisoblandi."
-
-#. module: sale
 #: model:ir.actions.act_window,name:sale.product_template_action
 #: model:ir.ui.menu,name:sale.menu_product_template_action
 #: model:ir.ui.menu,name:sale.menu_reporting_product
@@ -4784,12 +4752,6 @@ msgid "Recommend when 'Adding to Cart' or quotation"
 msgstr "\"Savatga qo‘shish\" yoki narxnoma tayyorlashda tavsiya eting"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-#, fuzzy
-msgid "Recompute all prices based on this pricelist"
-msgstr "Ushbu narxlar ro‘yxati asosida barcha narxlarni qayta hisoblang"
-
-#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.account_invoice_form
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Reference"
@@ -4926,12 +4888,6 @@ msgstr "SO0000"
 #, fuzzy
 msgid "Sale"
 msgstr "Sotish"
-
-#. module: sale
-#: model:ir.model.fields,field_description:sale.field_product_document__attached_on_sale
-#, fuzzy
-msgid "Sale : Visible at"
-msgstr "Sotish: ko‘rinadi"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
@@ -6196,15 +6152,6 @@ msgstr ""
 "foydalanishingiz kerak."
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-#, fuzzy
-msgid ""
-"This will update the unit price of all products based on the new pricelist."
-msgstr ""
-"Bu yangi narxlar ro‘yxati asosida barcha mahsulotlarning birlik narxini "
-"yangilaydi."
-
-#. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__invoice_status__to_invoice
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_line__invoice_status__to_invoice
 #: model:ir.model.fields.selection,name:sale.selection__sale_report__invoice_status__to_invoice
@@ -6438,12 +6385,6 @@ msgstr "Hisob-faktura qilingan soliqsiz summa"
 #, fuzzy
 msgid "Untaxed Total"
 msgstr "Soliqsiz umumiy summa"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-#, fuzzy
-msgid "Update Prices"
-msgstr "Narxlarni yangilash"
 
 #. module: sale
 #. odoo-javascript
@@ -6951,6 +6892,87 @@ msgid ""
 "'Quotation' or 'Order' }} {{ object.name or 'n/a' }} "
 "{{ object.client_order_ref and ('(' + object.client_order_ref + ')') or '' }}"
 msgstr ""
+
+#, fuzzy
+#~ msgid "<span>Sales visibility</span>"
+#~ msgstr "<span>Sotuvlar ko‘rinishi</span>"
+
+#, fuzzy
+#~ msgid ""
+#~ "Allows you to share the document with your customers within a sale.\n"
+#~ "Leave it empty if you don't want to share this document with sales "
+#~ "customer.\n"
+#~ "On quote: the document will be sent to and accessible by customers at any "
+#~ "time.\n"
+#~ "e.g. this option can be useful to share Product description files.\n"
+#~ "On order confirmation: the document will be sent to and accessible by "
+#~ "customers.\n"
+#~ "e.g. this option can be useful to share User Manual or digital content "
+#~ "bought on ecommerce. \n"
+#~ "Inside quote: The document will be included in the pdf of the quotation "
+#~ "and sale order between the header pages and the quote table. "
+#~ msgstr ""
+#~ "Hujjatni sotish doirasida mijozlaringiz bilan ulashish imkonini beradi. "
+#~ "Agar bu hujjatni sotish mijozi bilan ulashishni istamasangiz, uni bo‘sh "
+#~ "qoldiring. Taklif haqida: hujjat istalgan vaqtda mijozlarga yuboriladi va "
+#~ "ularga kirish mumkin bo‘ladi. Masalan, bu parametr mahsulot tavsifi "
+#~ "fayllarini ulashish uchun foydali bo‘lishi mumkin.  Buyurtmani "
+#~ "tasdiqlashda: hujjat mijozlarga yuboriladi va ularga kirish mumkin "
+#~ "bo‘ladi. Masalan, bu parametr foydalanuvchi qo‘llanmasi yoki elektron "
+#~ "tijoratda sotib olingan raqamli tarkibni ulashish uchun foydali bo‘lishi "
+#~ "mumkin. Taklif ichida: Hujjat taklif va sotish buyurtmasining PDF faylida "
+#~ "sarlavha sahifalari va taklif jadvali orasiga kiritiladi."
+
+#, fuzzy
+#~ msgid "Has Pricelist Changed"
+#~ msgstr "Narxlar ro‘yxati o‘zgardimi"
+
+#, fuzzy
+#~ msgid "Hidden"
+#~ msgstr "Yashirin"
+
+#, fuzzy
+#~ msgid ""
+#~ "If you change the pricelist, only newly added lines will be affected."
+#~ msgstr ""
+#~ "Agar narxlar ro‘yxatini o‘zgartirsangiz, faqat yangi qo‘shilgan "
+#~ "qatorlarga ta'sir qiladi."
+
+#, fuzzy
+#~ msgid "On confirmed order"
+#~ msgstr "Tasdiqlangan buyurtmada"
+
+#, fuzzy
+#~ msgid "On quote"
+#~ msgstr "Narx taklifida"
+
+#, fuzzy
+#~ msgid "Product prices have been recomputed according to pricelist %s."
+#~ msgstr "Mahsulot narxlari %s narxlar ro‘yxatiga muvofiq qayta hisoblandi."
+
+#, fuzzy
+#~ msgid "Product prices have been recomputed."
+#~ msgstr "Mahsulot narxlari qayta hisoblandi."
+
+#, fuzzy
+#~ msgid "Recompute all prices based on this pricelist"
+#~ msgstr "Ushbu narxlar ro‘yxati asosida barcha narxlarni qayta hisoblang"
+
+#, fuzzy
+#~ msgid "Sale : Visible at"
+#~ msgstr "Sotish: ko‘rinadi"
+
+#, fuzzy
+#~ msgid ""
+#~ "This will update the unit price of all products based on the new "
+#~ "pricelist."
+#~ msgstr ""
+#~ "Bu yangi narxlar ro‘yxati asosida barcha mahsulotlarning birlik narxini "
+#~ "yangilaydi."
+
+#, fuzzy
+#~ msgid "Update Prices"
+#~ msgstr "Narxlarni yangilash"
 
 #, fuzzy
 #~ msgid "Online payment"

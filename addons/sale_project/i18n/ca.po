@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 19:17+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Catalan <https://translate.odoo.com/projects/odoo-master/"
@@ -242,12 +242,6 @@ msgstr ""
 
 #. module: sale_project
 #. odoo-python
-#: code:addons/sale_project/models/project_project.py:0
-msgid "Create a customer invoice"
-msgstr "Crear una factura de client"
-
-#. module: sale_project
-#. odoo-python
 #: code:addons/sale_project/models/product_template.py:0
 msgid ""
 "Create a project for the order with a task for each sales order line to "
@@ -263,37 +257,11 @@ msgstr ""
 
 #. module: sale_project
 #. odoo-python
-#: code:addons/sale_project/models/project_project.py:0
-msgid "Create a vendor bill"
-msgstr "Crear una factura de proveïdor"
-
-#. module: sale_project
-#. odoo-python
 #: code:addons/sale_project/models/product_template.py:0
 msgid "Create an empty project for the order to track the time spent."
 msgstr ""
 "Creeu un projecte buit per a la comanda per poder fer un seguiment del temps "
 "dedicat."
-
-#. module: sale_project
-#. odoo-python
-#: code:addons/sale_project/models/project_project.py:0
-msgid ""
-"Create invoices, register payments and keep track of the discussions with "
-"your customers."
-msgstr ""
-"Creeu factures, registreu pagaments i feu un seguiment de les discussions "
-"amb els vostres clients."
-
-#. module: sale_project
-#. odoo-python
-#: code:addons/sale_project/models/project_project.py:0
-msgid ""
-"Create invoices, register payments and keep track of the discussions with "
-"your vendors."
-msgstr ""
-"Creeu factures, registreu pagaments i feu un seguiment de les discussions "
-"amb els vostres proveïdors."
 
 #. module: sale_project
 #: model:ir.model.fields,field_description:sale_project.field_product_product__service_tracking
@@ -406,8 +374,6 @@ msgid "Invoice your time and material to customers"
 msgstr "Factura el teu temps i material als clients"
 
 #. module: sale_project
-#. odoo-python
-#: code:addons/sale_project/models/project_project.py:0
 #: model:ir.embedded.actions,name:sale_project.project_embedded_action_invoices
 #: model:ir.embedded.actions,name:sale_project.project_embedded_action_invoices_dashboard
 #: model_terms:ir.ui.view,arch_db:sale_project.view_edit_project_inherit_form
@@ -983,3 +949,23 @@ msgstr ""
 #: code:addons/sale_project/models/sale_order.py:0
 msgid "sale_line_id"
 msgstr ""
+
+#~ msgid "Create a customer invoice"
+#~ msgstr "Crear una factura de client"
+
+#~ msgid "Create a vendor bill"
+#~ msgstr "Crear una factura de proveïdor"
+
+#~ msgid ""
+#~ "Create invoices, register payments and keep track of the discussions with "
+#~ "your customers."
+#~ msgstr ""
+#~ "Creeu factures, registreu pagaments i feu un seguiment de les discussions "
+#~ "amb els vostres clients."
+
+#~ msgid ""
+#~ "Create invoices, register payments and keep track of the discussions with "
+#~ "your vendors."
+#~ msgstr ""
+#~ "Creeu factures, registreu pagaments i feu un seguiment de les discussions "
+#~ "amb els vostres proveïdors."

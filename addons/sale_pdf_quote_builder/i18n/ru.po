@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:37+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 11:09+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Russian <https://translate.odoo.com/projects/odoo-master/"
@@ -89,34 +89,6 @@ msgid "All files uploaded"
 msgstr "Все загруженные файлы"
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields,help:sale_pdf_quote_builder.field_product_document__attached_on_sale
-msgid ""
-"Allows you to share the document with your customers within a sale.\n"
-"Leave it empty if you don't want to share this document with sales "
-"customer.\n"
-"On quote: the document will be sent to and accessible by customers at any "
-"time.\n"
-"e.g. this option can be useful to share Product description files.\n"
-"On order confirmation: the document will be sent to and accessible by "
-"customers.\n"
-"e.g. this option can be useful to share User Manual or digital content "
-"bought on ecommerce. \n"
-"Inside quote: The document will be included in the pdf of the quotation and "
-"sale order between the header pages and the quote table. "
-msgstr ""
-"Позволяет делиться документом с клиентами в рамках продажи.\n"
-"Оставьте это поле пустым, если не хотите предоставлять документ "
-"покупателям.\n"
-"Коммерческое предложение: документ будет отправлен клиентам и доступен им в "
-"любое время.\n"
-"Например, эта настройка полезна для передачи файлов с описанием товара.\n"
-"Подтвержденный заказ: документ будет отправлен клиентам и доступен для "
-"просмотра. Например, это удобно для передачи руководств пользователя или "
-"цифрового контента, приобретенного через интернет-магазин.\n"
-"В составе КП: документ будет включен в PDF коммерческого предложения между "
-"заголовком и таблицей. "
-
-#. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
 msgid "Archived"
@@ -160,6 +132,10 @@ msgstr "Компания"
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.product_document_form
+msgid "Configure"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
 msgid "Configure dynamic fields"
 msgstr "Настроить динамические поля"
@@ -244,6 +220,11 @@ msgid "Edit"
 msgstr "Редактировать"
 
 #. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__form_field_ids
+msgid "Fields"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__raw
 msgid "File Content (raw)"
 msgstr "Содержимое файла (необработанное)"
@@ -273,7 +254,6 @@ msgid "Form Fields"
 msgstr "Поля формы"
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__form_field_ids
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__form_field_ids
 msgid "Form Fields Included"
 msgstr "Включенные поля формы"
@@ -370,11 +350,6 @@ msgid "Indexed Content"
 msgstr "Индексированное содержимое"
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields.selection,name:sale_pdf_quote_builder.selection__product_document__attached_on_sale__inside
-msgid "Inside quote pdf"
-msgstr "Внутри PDF-предложения"
-
-#. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_pdf_form_field.py:0
 msgid ""
@@ -462,12 +437,6 @@ msgstr "Имя"
 #: code:addons/sale_pdf_quote_builder/models/ir_actions_report.py:0
 msgid "No"
 msgstr "Нет"
-
-#. module: sale_pdf_quote_builder
-#. odoo-python
-#: code:addons/sale_pdf_quote_builder/models/product_document.py:0
-msgid "Only PDF documents can be attached inside a quote."
-msgstr "В цитату можно вложить только документы в формате PDF."
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
@@ -605,11 +574,6 @@ msgid "Resource Name"
 msgstr "Название Ресурса"
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__attached_on_sale
-msgid "Sale : Visible at"
-msgstr "Продажа : отображается в"
-
-#. module: sale_pdf_quote_builder
 #: model:ir.actions.server,name:sale_pdf_quote_builder.cron_post_upgrade_assign_missing_form_fields_ir_actions_server
 msgid "Sale Pdf Quote Builder: assign form fields to documents post upgrade"
 msgstr ""
@@ -713,13 +677,6 @@ msgstr "Сайт"
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
-#: code:addons/sale_pdf_quote_builder/models/product_document.py:0
-msgid "When attached inside a quote, the document must be a file, not a URL."
-msgstr ""
-"Если документ прикреплён к предложению, он должен быть файлом, а не ссылкой."
-
-#. module: sale_pdf_quote_builder
-#. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/ir_actions_report.py:0
 msgid "Yes"
 msgstr "Да"
@@ -737,3 +694,44 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
 msgid "on"
 msgstr "вкл"
+
+#~ msgid ""
+#~ "Allows you to share the document with your customers within a sale.\n"
+#~ "Leave it empty if you don't want to share this document with sales "
+#~ "customer.\n"
+#~ "On quote: the document will be sent to and accessible by customers at any "
+#~ "time.\n"
+#~ "e.g. this option can be useful to share Product description files.\n"
+#~ "On order confirmation: the document will be sent to and accessible by "
+#~ "customers.\n"
+#~ "e.g. this option can be useful to share User Manual or digital content "
+#~ "bought on ecommerce. \n"
+#~ "Inside quote: The document will be included in the pdf of the quotation "
+#~ "and sale order between the header pages and the quote table. "
+#~ msgstr ""
+#~ "Позволяет делиться документом с клиентами в рамках продажи.\n"
+#~ "Оставьте это поле пустым, если не хотите предоставлять документ "
+#~ "покупателям.\n"
+#~ "Коммерческое предложение: документ будет отправлен клиентам и доступен им "
+#~ "в любое время.\n"
+#~ "Например, эта настройка полезна для передачи файлов с описанием товара.\n"
+#~ "Подтвержденный заказ: документ будет отправлен клиентам и доступен для "
+#~ "просмотра. Например, это удобно для передачи руководств пользователя или "
+#~ "цифрового контента, приобретенного через интернет-магазин.\n"
+#~ "В составе КП: документ будет включен в PDF коммерческого предложения "
+#~ "между заголовком и таблицей. "
+
+#~ msgid "Inside quote pdf"
+#~ msgstr "Внутри PDF-предложения"
+
+#~ msgid "Only PDF documents can be attached inside a quote."
+#~ msgstr "В цитату можно вложить только документы в формате PDF."
+
+#~ msgid "Sale : Visible at"
+#~ msgstr "Продажа : отображается в"
+
+#~ msgid ""
+#~ "When attached inside a quote, the document must be a file, not a URL."
+#~ msgstr ""
+#~ "Если документ прикреплён к предложению, он должен быть файлом, а не "
+#~ "ссылкой."

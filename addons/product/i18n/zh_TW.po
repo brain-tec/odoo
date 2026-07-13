@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:37+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 02:21+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
@@ -697,11 +697,6 @@ msgid ""
 msgstr "最多可同時顯示 %s 個數量。請移除某個選定數量，以加入其他數量。"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "Attached To"
-msgstr "附加於"
-
-#. module: product
 #: model:ir.model,name:product.model_ir_attachment
 msgid "Attachment"
 msgstr "附件"
@@ -954,6 +949,12 @@ msgstr "產品款式圖像 1024 可放大"
 #: model:product.attribute.value,name:product.pav_brand_canon
 msgid "Canon"
 msgstr "Canon 佳能"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid "Catalog missing the child field to update."
+msgstr ""
 
 #. module: product
 #: model:ir.actions.act_window,name:product.product_category_action_form
@@ -1280,11 +1281,6 @@ msgid "Created on"
 msgstr "建立於"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "Creation"
-msgstr "建立"
-
-#. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_volume_volume_in_cubic_feet__1
 msgid "Cubic Feet (ft³)"
 msgstr "立方英尺（ft³）"
@@ -1521,6 +1517,7 @@ msgstr "顯示已套用對象"
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__display_name
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__display_name
 #: model:ir.model.fields,field_description:product.field_product_base_unit__display_name
+#: model:ir.model.fields,field_description:product.field_product_catalog_line_mixin__display_name
 #: model:ir.model.fields,field_description:product.field_product_catalog_mixin__display_name
 #: model:ir.model.fields,field_description:product.field_product_category__display_name
 #: model:ir.model.fields,field_description:product.field_product_combo__display_name
@@ -1575,11 +1572,6 @@ msgid ""
 "Displays the custom unit for the products if defined or the selected unit of "
 "measure otherwise."
 msgstr "如果已定義，則顯示產品的自訂單位，否則顯示選定的計量單位。"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-msgid "Document"
-msgstr "文件"
 
 #. module: product
 #. odoo-python
@@ -1765,6 +1757,11 @@ msgstr "喜好的"
 #: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Favorites"
 msgstr "最愛"
+
+#. module: product
+#: model_terms:ir.ui.view,arch_db:product.product_document_form
+msgid "File"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__raw
@@ -2020,11 +2017,6 @@ msgid "High-back office chair with great support"
 msgstr ""
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "History"
-msgstr "歷史"
-
-#. module: product
 #: model:product.category,name:product.product_category_construction
 #, fuzzy
 msgid "Home Construction"
@@ -2041,6 +2033,7 @@ msgstr "酒店住宿"
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__id
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__id
 #: model:ir.model.fields,field_description:product.field_product_base_unit__id
+#: model:ir.model.fields,field_description:product.field_product_catalog_line_mixin__id
 #: model:ir.model.fields,field_description:product.field_product_catalog_mixin__id
 #: model:ir.model.fields,field_description:product.field_product_category__id
 #: model:ir.model.fields,field_description:product.field_product_combo__id
@@ -2177,11 +2170,6 @@ msgstr "圖片來源"
 #: model:ir.model.fields,field_description:product.field_product_document__image_width
 msgid "Image Width"
 msgstr "圖片寬度"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-msgid "Image is a link"
-msgstr "圖像是一個連結"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_attribute_search
@@ -3233,6 +3221,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/controllers/pricelist_report.py:0
 #: model:ir.model,name:product.model_product_template
+#: model:ir.model.fields,field_description:product.field_product_catalog_line_mixin__product_id
 #: model:ir.model.fields,field_description:product.field_product_label_layout__product_ids
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_tmpl_id
 #: model:ir.model.fields,field_description:product.field_product_product__product_variant_id
@@ -3283,6 +3272,11 @@ msgstr "產品屬性以及值"
 #: model:ir.model.fields,field_description:product.field_product_template__attribute_line_ids
 msgid "Product Attributes"
 msgstr "產品屬性"
+
+#. module: product
+#: model:ir.model,name:product.model_product_catalog_line_mixin
+msgid "Product Catalog Line Mixin"
+msgstr ""
 
 #. module: product
 #: model:ir.model,name:product.model_product_catalog_mixin
@@ -4269,6 +4263,14 @@ msgstr "基礎單位數目的值必須大於零。使用 0（零）可隱藏此�
 
 #. module: product
 #. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid ""
+"There are multiple lines with the same product, please update those one by "
+"one and not through the catalog."
+msgstr ""
+
+#. module: product
+#. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "There are no possible combination."
 msgstr "沒有可能的組合."
@@ -4638,11 +4640,15 @@ msgstr "選項"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_id
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_view_search
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Variant"
 msgstr "變體"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_document__variant_attribute_value_ids
+msgid "Variant Attribute Value"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__product_variant_count
@@ -4723,6 +4729,7 @@ msgstr "絲絨"
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__partner_id
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_search_view
+#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Vendor"
 msgstr "供應商"
 
@@ -4870,6 +4877,12 @@ msgid "Write Date"
 msgstr "寫入日期"
 
 #. module: product
+#. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid "Wrong catalog child field!"
+msgstr ""
+
+#. module: product
 #: model:product.attribute.value,name:product.pav_size_xl
 msgid "XL"
 msgstr "XL"
@@ -4945,6 +4958,12 @@ msgstr "你可上載一張圖片，作為屬性值的顏色。"
 #, fuzzy
 msgid "You can't edit this product in the catalog."
 msgstr "不可在目錄中編輯此產品。"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid "You cannot add or remove products from this record."
+msgstr ""
 
 #. module: product
 #. odoo-python
@@ -5322,11 +5341,6 @@ msgid "markup"
 msgstr "加價"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "on"
-msgstr "於"
-
-#. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "pdf"
@@ -5373,6 +5387,24 @@ msgstr "到"
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "xlsx"
 msgstr "xlsx"
+
+#~ msgid "Attached To"
+#~ msgstr "附加於"
+
+#~ msgid "Creation"
+#~ msgstr "建立"
+
+#~ msgid "Document"
+#~ msgstr "文件"
+
+#~ msgid "History"
+#~ msgstr "歷史"
+
+#~ msgid "Image is a link"
+#~ msgstr "圖像是一個連結"
+
+#~ msgid "on"
+#~ msgstr "於"
 
 #~ msgid "<strong>Qty: </strong>"
 #~ msgstr "<strong>數量: </strong>"

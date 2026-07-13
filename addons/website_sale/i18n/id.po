@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-20 04:53+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/"
@@ -818,14 +818,14 @@ msgid "<span><b>Good job!</b> You went through all steps of this tour.</span>"
 msgstr "<span><b>Good job!</b> Anda melewati semua langkah di tur ini.</span>"
 
 #. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.documents
+msgid "<span>Documents</span>"
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 msgid "<span>Order</span>"
 msgstr "<span>Pesan</span>"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.product_document_kanban
-msgid "<span>Publish on website</span>"
-msgstr "<span>Publikasikan pada website</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.view_product_image_form
@@ -840,11 +840,6 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_ribbon_form_view
 msgid "<span>for</span>"
-msgstr ""
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.product
-msgid "<strong>Documents</strong>"
 msgstr ""
 
 #. module: website_sale
@@ -1369,6 +1364,11 @@ msgid "Access Token"
 msgstr "Token Akses"
 
 #. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_document__attached_on_sale
+msgid "Accessible"
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.template_footer_website_sale
 msgid "Accessories"
 msgstr "Aksesori"
@@ -1619,6 +1619,22 @@ msgstr ""
 #: model:ir.model.fields,help:website_sale.field_product_pricelist__selectable
 msgid "Allow the end user to choose this price list"
 msgstr "Izinkan end user untuk memilih daftar harga ini"
+
+#. module: website_sale
+#: model:ir.model.fields,help:website_sale.field_product_document__attached_on_sale
+msgid ""
+"Allows you to share the document with your customers within a sale.\n"
+"From Quotation: the document will be sent to and accessible by customers at "
+"any time.\n"
+"e.g. this option can be useful to share Product description files.\n"
+"On Order Confirmation: the document will be sent to and accessible by "
+"customers.\n"
+"e.g. this option can be useful to share User Manual or digital content "
+"bought on ecommerce. \n"
+"On Product Page: the document will be accessible by customers on the product "
+"page.\n"
+"e.g. this option can be useful to share Product description files."
+msgstr ""
 
 #. module: website_sale
 #: model:ir.actions.server,name:website_sale.dynamic_snippet_alternative_products
@@ -2227,11 +2243,6 @@ msgstr "Hapus pencarian untuk kategori ini"
 #: model:ir.model.fields,field_description:website_sale.field_res_config_settings__module_website_sale_collect
 msgid "Click & Collect"
 msgstr "Klik & Kumpulkan"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.cart
-msgid "Click here"
-msgstr ""
 
 #. module: website_sale
 #. odoo-javascript
@@ -3070,15 +3081,6 @@ msgid "Displayed only in the Category List Snippet."
 msgstr "Ditampilkan hanya di Category List Snippet."
 
 #. module: website_sale
-#. odoo-python
-#: code:addons/website_sale/models/product_document.py:0
-msgid ""
-"Documents shown on product page cannot be restricted to a specific variant"
-msgstr ""
-"Dokumen ditunjukkan pada halaman produk tidak dapat dibatasi pada varian  "
-"spesifik"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_donation_form
 #: model_terms:ir.ui.view,arch_db:website_sale.s_donation_inline
 msgid "Donate"
@@ -3197,11 +3199,6 @@ msgstr "Field Tambahan E-Commerce"
 #: model:ir.model,name:website_sale.model_website_sale_extra_field
 msgid "E-Commerce Extra Info Shown on product page"
 msgstr "Informasi Tambahan E-Commerce Ditampilkan pada halaman produk"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.product_document_form
-msgid "E-commerce"
-msgstr "E-niaga"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_pricelist__code
@@ -4745,6 +4742,11 @@ msgid "On Product Cards"
 msgstr "Pada Kartu Produk"
 
 #. module: website_sale
+#: model:ir.model.fields.selection,name:website_sale.selection__product_document__attached_on_sale__shown_on_product_page
+msgid "On Product Page"
+msgstr ""
+
+#. module: website_sale
 #: model:ir.model.fields.selection,name:website_sale.selection__product_ribbon__assign__sale
 msgid "On Sale"
 msgstr "Sedang Diskon"
@@ -5582,11 +5584,6 @@ msgstr "Tanggal Posting"
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
 msgid "Publish on"
 msgstr ""
-
-#. module: website_sale
-#: model:ir.model.fields,field_description:website_sale.field_product_document__shown_on_product_page
-msgid "Publish on website"
-msgstr "Publikasikan pada website"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
@@ -7000,11 +6997,6 @@ msgid "This content will be shared across all product pages."
 msgstr "Konten ini akan dibagikan di semua halaman produk."
 
 #. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.cart
-msgid "This is your current cart."
-msgstr "Ini adalah keranjang Anda saat ini."
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
 msgid ""
 "This note is added to sales orders, invoices, eCommerce listing and SEO "
@@ -7465,7 +7457,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_sale.field_product_tag__website_id
 #: model:ir.model.fields,field_description:website_sale.field_product_template__website_id
 #: model:ir.model.fields,field_description:website_sale.field_product_wishlist__website_id
-#: model:ir.model.fields,field_description:website_sale.field_sale_order__website_id
+#: model:ir.model.fields,field_description:website_sale.field_sale_order__assigned_website_id
 #: model:ir.model.fields,field_description:website_sale.field_sale_report__website_id
 #: model:ir.model.fields,field_description:website_sale.field_website_checkout_step__website_id
 #: model:ir.model.fields,field_description:website_sale.field_website_sale_extra_field__website_id
@@ -7909,6 +7901,11 @@ msgid "eCommerce Sales"
 msgstr "Sales eCommerce"
 
 #. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_sale_order__website_id
+msgid "eCommerce Website"
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.header_cart_link
 msgid "eCommerce cart"
 msgstr "keranjang eCommerce"
@@ -7932,18 +7929,6 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "hours."
-msgstr ""
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.cart
-msgid "if you want to merge your previous cart into current cart."
-msgstr ""
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.cart
-msgid ""
-"if you want to restore your previous cart. Your current cart will be "
-"replaced with your previous cart."
 msgstr ""
 
 #. module: website_sale
@@ -8085,6 +8070,24 @@ msgstr ""
 #: model:mail.template,subject:website_sale.email_template_back_in_stock
 msgid "{{ object.name or 'Product' }} is back in stock"
 msgstr ""
+
+#~ msgid "<span>Publish on website</span>"
+#~ msgstr "<span>Publikasikan pada website</span>"
+
+#~ msgid ""
+#~ "Documents shown on product page cannot be restricted to a specific variant"
+#~ msgstr ""
+#~ "Dokumen ditunjukkan pada halaman produk tidak dapat dibatasi pada varian  "
+#~ "spesifik"
+
+#~ msgid "E-commerce"
+#~ msgstr "E-niaga"
+
+#~ msgid "Publish on website"
+#~ msgstr "Publikasikan pada website"
+
+#~ msgid "This is your current cart."
+#~ msgstr "Ini adalah keranjang Anda saat ini."
 
 #~ msgid "<strong>Warning!</strong>"
 #~ msgstr "<strong>Peringatan!</strong>"

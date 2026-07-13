@@ -15,7 +15,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 20:05+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/"
@@ -919,6 +919,11 @@ msgstr ""
 "        </span>"
 
 #. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.product_document_kanban
+msgid "<span>Accessible</span>"
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "<span>Amount</span>"
@@ -929,11 +934,6 @@ msgstr "<span>Nominal</span>"
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "<span>Disc.%</span>"
 msgstr "<span>Disc.%</span>"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.product_document_kanban
-msgid "<span>Sales visibility</span>"
-msgstr "<span>Visibilitas sales</span>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -1073,6 +1073,11 @@ msgstr "Setuju &amp; Tandatangani"
 #: model:ir.model.fields,field_description:sale.field_sale_order__access_warning
 msgid "Access warning"
 msgstr "Peringatan akses"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_product_document__attached_on_sale
+msgid "Accessible"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order_line__qty_delivered_method
@@ -1226,30 +1231,17 @@ msgstr "Memungkinkan Anda untuk mengirim faktur proforma."
 #: model:ir.model.fields,help:sale.field_product_document__attached_on_sale
 msgid ""
 "Allows you to share the document with your customers within a sale.\n"
-"Leave it empty if you don't want to share this document with sales "
-"customer.\n"
-"On quote: the document will be sent to and accessible by customers at any "
-"time.\n"
+"From Quotation: the document will be sent to and accessible by customers at "
+"any time.\n"
 "e.g. this option can be useful to share Product description files.\n"
-"On order confirmation: the document will be sent to and accessible by "
+"On Order Confirmation: the document will be sent to and accessible by "
 "customers.\n"
 "e.g. this option can be useful to share User Manual or digital content "
 "bought on ecommerce. \n"
-"Inside quote: The document will be included in the pdf of the quotation and "
-"sale order between the header pages and the quote table. "
+"On Product Page: the document will be accessible by customers on the product "
+"page.\n"
+"e.g. this option can be useful to share Product description files."
 msgstr ""
-"Memungkinkan Anda untuk membagikan dokumen dengan pelanggan Anda dalam "
-"sale.\n"
-"Biarkan kosong bila Anda tidak ingin membagikan dokumen ini dengan pelanggan "
-"sales.\n"
-"Pada quote: dokumen akan dikirim ke dan dapat diakses oleh pelanggan "
-"kapanpun juga.\n"
-"Pada konfirmasi pesanan: dokumen akan dikirim ke dan dapat diakses oleh "
-"pelanggan.\n"
-"contoh opsi ini dapat berguna untuk membagikan User Manual atau konten "
-"digital yang dibeli pada ecommerce.\n"
-"Di dalam quote: Dokumen akan dimasukkan dalam pdf quotation \n"
-"dan sales order di antara halaman header dan table quotation. "
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_payment_link_wizard__amount_paid
@@ -2624,6 +2616,11 @@ msgid "Forecasted Stock"
 msgstr "Stok yang Diforecast"
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__quotation
+msgid "From Quotation"
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.actions.act_window,help:sale.action_account_invoice_report_salesteam
 msgid ""
 "From this report, you can have an overview of the amount invoiced to your "
@@ -2745,19 +2742,9 @@ msgid "Has Overages"
 msgstr ""
 
 #. module: sale
-#: model:ir.model.fields,field_description:sale.field_sale_order__show_update_pricelist
-msgid "Has Pricelist Changed"
-msgstr "Apakah Daftar Harga Berubah"
-
-#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__has_down_payments
 msgid "Has down payments"
 msgstr "Memiliki down payment"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__hidden
-msgid "Hidden"
-msgstr "Tersembunyi"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_account_analytic_applicability__id
@@ -2837,10 +2824,10 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__pricelist_id
-msgid "If you change the pricelist, only newly added lines will be affected."
+msgid ""
+"If you change the pricelist, the prices of all order lines will be updated "
+"accordingly."
 msgstr ""
-"Bila Anda mengganti daftar harga, hanya baris yang baru ditambahkan akan "
-"terpengaruh."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -3450,6 +3437,11 @@ msgid "My Sales Order Lines"
 msgstr "Detail Order Penjualanku"
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__hidden
+msgid "Never"
+msgstr ""
+
+#. module: sale
 #. odoo-python
 #: code:addons/sale/models/sale_order.py:0
 msgid "New"
@@ -3595,13 +3587,8 @@ msgstr "Pada Semua Baris Order"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__sale_order
-msgid "On confirmed order"
-msgstr "Pada pesanan yang dikonfirmasi"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__quotation
-msgid "On quote"
-msgstr "Pada quote"
+msgid "On Order Confirmation"
+msgstr ""
 
 #. module: sale
 #. odoo-python
@@ -4114,18 +4101,6 @@ msgid "Product Variant"
 msgstr "Varian Produk"
 
 #. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-msgid "Product prices have been recomputed according to pricelist %s."
-msgstr "Harga produk hanya dapat dihitung ulang berdasarkan daftar harga %s."
-
-#. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-msgid "Product prices have been recomputed."
-msgstr "Harga produk telah dihitung ulang."
-
-#. module: sale
 #: model:ir.actions.act_window,name:sale.product_template_action
 #: model:ir.ui.menu,name:sale.menu_product_template_action
 #: model:ir.ui.menu,name:sale.menu_reporting_product
@@ -4346,11 +4321,6 @@ msgid "Recommend when 'Adding to Cart' or quotation"
 msgstr "Rekomendasikan saat 'Menambahkan ke Keranjang' atau quotation"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Recompute all prices based on this pricelist"
-msgstr "Hitung ulang semua harga berdasarkan daftar harga ini"
-
-#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.account_invoice_form
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Reference"
@@ -4471,11 +4441,6 @@ msgstr "SO0000"
 #: code:addons/sale/static/src/js/sale_action_helper/sale_action_helper_dialog.xml:0
 msgid "Sale"
 msgstr "Sale"
-
-#. module: sale
-#: model:ir.model.fields,field_description:sale.field_product_document__attached_on_sale
-msgid "Sale : Visible at"
-msgstr "Sale : Tampak pada"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
@@ -5587,13 +5552,6 @@ msgstr ""
 "Akuntansi."
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid ""
-"This will update the unit price of all products based on the new pricelist."
-msgstr ""
-"Ini akan mengupdate harga unit semua produk berdasarkan daftar harga baru."
-
-#. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__invoice_status__to_invoice
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_line__invoice_status__to_invoice
 #: model:ir.model.fields.selection,name:sale.selection__sale_report__invoice_status__to_invoice
@@ -5798,11 +5756,6 @@ msgstr "Jumlah Faktur Sebelum Pajak"
 #: model:ir.model.fields,field_description:sale.field_sale_report__price_subtotal
 msgid "Untaxed Total"
 msgstr "Total Sebelum Pajak"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Update Prices"
-msgstr "Update Harga"
 
 #. module: sale
 #. odoo-javascript
@@ -6250,6 +6203,76 @@ msgid ""
 "'Quotation' or 'Order' }} {{ object.name or 'n/a' }} "
 "{{ object.client_order_ref and ('(' + object.client_order_ref + ')') or '' }}"
 msgstr ""
+
+#~ msgid "<span>Sales visibility</span>"
+#~ msgstr "<span>Visibilitas sales</span>"
+
+#~ msgid ""
+#~ "Allows you to share the document with your customers within a sale.\n"
+#~ "Leave it empty if you don't want to share this document with sales "
+#~ "customer.\n"
+#~ "On quote: the document will be sent to and accessible by customers at any "
+#~ "time.\n"
+#~ "e.g. this option can be useful to share Product description files.\n"
+#~ "On order confirmation: the document will be sent to and accessible by "
+#~ "customers.\n"
+#~ "e.g. this option can be useful to share User Manual or digital content "
+#~ "bought on ecommerce. \n"
+#~ "Inside quote: The document will be included in the pdf of the quotation "
+#~ "and sale order between the header pages and the quote table. "
+#~ msgstr ""
+#~ "Memungkinkan Anda untuk membagikan dokumen dengan pelanggan Anda dalam "
+#~ "sale.\n"
+#~ "Biarkan kosong bila Anda tidak ingin membagikan dokumen ini dengan "
+#~ "pelanggan sales.\n"
+#~ "Pada quote: dokumen akan dikirim ke dan dapat diakses oleh pelanggan "
+#~ "kapanpun juga.\n"
+#~ "Pada konfirmasi pesanan: dokumen akan dikirim ke dan dapat diakses oleh "
+#~ "pelanggan.\n"
+#~ "contoh opsi ini dapat berguna untuk membagikan User Manual atau konten "
+#~ "digital yang dibeli pada ecommerce.\n"
+#~ "Di dalam quote: Dokumen akan dimasukkan dalam pdf quotation \n"
+#~ "dan sales order di antara halaman header dan table quotation. "
+
+#~ msgid "Has Pricelist Changed"
+#~ msgstr "Apakah Daftar Harga Berubah"
+
+#~ msgid "Hidden"
+#~ msgstr "Tersembunyi"
+
+#~ msgid ""
+#~ "If you change the pricelist, only newly added lines will be affected."
+#~ msgstr ""
+#~ "Bila Anda mengganti daftar harga, hanya baris yang baru ditambahkan akan "
+#~ "terpengaruh."
+
+#~ msgid "On confirmed order"
+#~ msgstr "Pada pesanan yang dikonfirmasi"
+
+#~ msgid "On quote"
+#~ msgstr "Pada quote"
+
+#~ msgid "Product prices have been recomputed according to pricelist %s."
+#~ msgstr ""
+#~ "Harga produk hanya dapat dihitung ulang berdasarkan daftar harga %s."
+
+#~ msgid "Product prices have been recomputed."
+#~ msgstr "Harga produk telah dihitung ulang."
+
+#~ msgid "Recompute all prices based on this pricelist"
+#~ msgstr "Hitung ulang semua harga berdasarkan daftar harga ini"
+
+#~ msgid "Sale : Visible at"
+#~ msgstr "Sale : Tampak pada"
+
+#~ msgid ""
+#~ "This will update the unit price of all products based on the new "
+#~ "pricelist."
+#~ msgstr ""
+#~ "Ini akan mengupdate harga unit semua produk berdasarkan daftar harga baru."
+
+#~ msgid "Update Prices"
+#~ msgstr "Update Harga"
 
 #~ msgid ""
 #~ "<div style=\"margin: 0px; padding: 0px;\">\n"

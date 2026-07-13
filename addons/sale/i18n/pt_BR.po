@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 14:52+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/odoo-"
@@ -904,6 +904,11 @@ msgstr ""
 "        </span>"
 
 #. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.product_document_kanban
+msgid "<span>Accessible</span>"
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "<span>Amount</span>"
@@ -914,11 +919,6 @@ msgstr "<span>Valor</span>"
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "<span>Disc.%</span>"
 msgstr "<span>% desc.</span>"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.product_document_kanban
-msgid "<span>Sales visibility</span>"
-msgstr "<span>Visibilidade em Vendas</span>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -1059,6 +1059,11 @@ msgstr "Aceitar e assinar"
 #: model:ir.model.fields,field_description:sale.field_sale_order__access_warning
 msgid "Access warning"
 msgstr "Aviso de acesso"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_product_document__attached_on_sale
+msgid "Accessible"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order_line__qty_delivered_method
@@ -1219,32 +1224,17 @@ msgstr "Permite enviar uma fatura pro forma."
 #: model:ir.model.fields,help:sale.field_product_document__attached_on_sale
 msgid ""
 "Allows you to share the document with your customers within a sale.\n"
-"Leave it empty if you don't want to share this document with sales "
-"customer.\n"
-"On quote: the document will be sent to and accessible by customers at any "
-"time.\n"
+"From Quotation: the document will be sent to and accessible by customers at "
+"any time.\n"
 "e.g. this option can be useful to share Product description files.\n"
-"On order confirmation: the document will be sent to and accessible by "
+"On Order Confirmation: the document will be sent to and accessible by "
 "customers.\n"
 "e.g. this option can be useful to share User Manual or digital content "
 "bought on ecommerce. \n"
-"Inside quote: The document will be included in the pdf of the quotation and "
-"sale order between the header pages and the quote table. "
+"On Product Page: the document will be accessible by customers on the product "
+"page.\n"
+"e.g. this option can be useful to share Product description files."
 msgstr ""
-"Permite que você compartilhe o documento com seus clientes dentro de uma "
-"venda.\n"
-"Deixe em branco se não quiser compartilhar esse documento com o cliente da "
-"venda.\n"
-"Na cotação: o documento será enviado e poderá ser acessado pelos clientes a "
-"qualquer momento.\n"
-"por exemplo, essa opção pode ser útil para compartilhar arquivos de "
-"descrição do produto.\n"
-"Na confirmação do pedido: o documento será enviado e poderá ser acessado "
-"pelos clientes.\n"
-"por exemplo, essa opção pode ser útil para compartilhar o Manual do Usuário "
-"ou o conteúdo digital comprado no e-Commerce. \n"
-"Dentro da cotação: O documento será incluído no PDF da cotação e do pedido "
-"de venda entre as páginas de cabeçalho e a tabela de cotação. "
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_payment_link_wizard__amount_paid
@@ -2621,6 +2611,11 @@ msgid "Forecasted Stock"
 msgstr "Estoque Previsto"
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__quotation
+msgid "From Quotation"
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.actions.act_window,help:sale.action_account_invoice_report_salesteam
 msgid ""
 "From this report, you can have an overview of the amount invoiced to your "
@@ -2743,19 +2738,9 @@ msgid "Has Overages"
 msgstr ""
 
 #. module: sale
-#: model:ir.model.fields,field_description:sale.field_sale_order__show_update_pricelist
-msgid "Has Pricelist Changed"
-msgstr "Houve mudança na lista de preços"
-
-#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__has_down_payments
 msgid "Has down payments"
 msgstr "Tem pagamento de entrada"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__hidden
-msgid "Hidden"
-msgstr "Oculto"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_account_analytic_applicability__id
@@ -2836,10 +2821,10 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__pricelist_id
-msgid "If you change the pricelist, only newly added lines will be affected."
+msgid ""
+"If you change the pricelist, the prices of all order lines will be updated "
+"accordingly."
 msgstr ""
-"Se você alterar a lista de preço, apenas novas linhas adicionadas serão "
-"afetadas."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -3452,6 +3437,11 @@ msgid "My Sales Order Lines"
 msgstr "Minhas linhas de pedido de venda"
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__hidden
+msgid "Never"
+msgstr ""
+
+#. module: sale
 #. odoo-python
 #: code:addons/sale/models/sale_order.py:0
 msgid "New"
@@ -3597,13 +3587,8 @@ msgstr "Em todas linhas do pedido de venda"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__sale_order
-msgid "On confirmed order"
-msgstr "Na confirmação do pedido"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__quotation
-msgid "On quote"
-msgstr "Na cotação"
+msgid "On Order Confirmation"
+msgstr ""
 
 #. module: sale
 #. odoo-python
@@ -4117,19 +4102,6 @@ msgid "Product Variant"
 msgstr "Variante do produto"
 
 #. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-msgid "Product prices have been recomputed according to pricelist %s."
-msgstr ""
-"Os preços dos produtos foram recalculados de acordo com a lista de preços %s."
-
-#. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-msgid "Product prices have been recomputed."
-msgstr "Os preços dos produtos foram recalculados."
-
-#. module: sale
 #: model:ir.actions.act_window,name:sale.product_template_action
 #: model:ir.ui.menu,name:sale.menu_product_template_action
 #: model:ir.ui.menu,name:sale.menu_reporting_product
@@ -4349,11 +4321,6 @@ msgid "Recommend when 'Adding to Cart' or quotation"
 msgstr "Recomendar ao \"Adicionar ao carrinho\" ou à cotação"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Recompute all prices based on this pricelist"
-msgstr "Recalcular todos os preços com base nesta lista de preços"
-
-#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.account_invoice_form
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Reference"
@@ -4472,11 +4439,6 @@ msgstr "PV0000"
 #: code:addons/sale/static/src/js/sale_action_helper/sale_action_helper_dialog.xml:0
 msgid "Sale"
 msgstr "Venda"
-
-#. module: sale
-#: model:ir.model.fields,field_description:sale.field_product_document__attached_on_sale
-msgid "Sale : Visible at"
-msgstr "Venda: Visível em"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
@@ -5582,14 +5544,6 @@ msgstr ""
 "bruta, use o relatório de análise de faturamento no módulo Financeiro."
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid ""
-"This will update the unit price of all products based on the new pricelist."
-msgstr ""
-"Isso atualizará o preço unitário de todos os produtos com base na nova lista "
-"de preço."
-
-#. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__invoice_status__to_invoice
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_line__invoice_status__to_invoice
 #: model:ir.model.fields.selection,name:sale.selection__sale_report__invoice_status__to_invoice
@@ -5793,11 +5747,6 @@ msgstr "Total faturado sem impostos"
 #: model:ir.model.fields,field_description:sale.field_sale_report__price_subtotal
 msgid "Untaxed Total"
 msgstr "Total sem impostos"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Update Prices"
-msgstr "Atualizar preços"
 
 #. module: sale
 #. odoo-javascript
@@ -6244,6 +6193,80 @@ msgid ""
 "'Quotation' or 'Order' }} {{ object.name or 'n/a' }} "
 "{{ object.client_order_ref and ('(' + object.client_order_ref + ')') or '' }}"
 msgstr ""
+
+#~ msgid "<span>Sales visibility</span>"
+#~ msgstr "<span>Visibilidade em Vendas</span>"
+
+#~ msgid ""
+#~ "Allows you to share the document with your customers within a sale.\n"
+#~ "Leave it empty if you don't want to share this document with sales "
+#~ "customer.\n"
+#~ "On quote: the document will be sent to and accessible by customers at any "
+#~ "time.\n"
+#~ "e.g. this option can be useful to share Product description files.\n"
+#~ "On order confirmation: the document will be sent to and accessible by "
+#~ "customers.\n"
+#~ "e.g. this option can be useful to share User Manual or digital content "
+#~ "bought on ecommerce. \n"
+#~ "Inside quote: The document will be included in the pdf of the quotation "
+#~ "and sale order between the header pages and the quote table. "
+#~ msgstr ""
+#~ "Permite que você compartilhe o documento com seus clientes dentro de uma "
+#~ "venda.\n"
+#~ "Deixe em branco se não quiser compartilhar esse documento com o cliente "
+#~ "da venda.\n"
+#~ "Na cotação: o documento será enviado e poderá ser acessado pelos clientes "
+#~ "a qualquer momento.\n"
+#~ "por exemplo, essa opção pode ser útil para compartilhar arquivos de "
+#~ "descrição do produto.\n"
+#~ "Na confirmação do pedido: o documento será enviado e poderá ser acessado "
+#~ "pelos clientes.\n"
+#~ "por exemplo, essa opção pode ser útil para compartilhar o Manual do "
+#~ "Usuário ou o conteúdo digital comprado no e-Commerce. \n"
+#~ "Dentro da cotação: O documento será incluído no PDF da cotação e do "
+#~ "pedido de venda entre as páginas de cabeçalho e a tabela de cotação. "
+
+#~ msgid "Has Pricelist Changed"
+#~ msgstr "Houve mudança na lista de preços"
+
+#~ msgid "Hidden"
+#~ msgstr "Oculto"
+
+#~ msgid ""
+#~ "If you change the pricelist, only newly added lines will be affected."
+#~ msgstr ""
+#~ "Se você alterar a lista de preço, apenas novas linhas adicionadas serão "
+#~ "afetadas."
+
+#~ msgid "On confirmed order"
+#~ msgstr "Na confirmação do pedido"
+
+#~ msgid "On quote"
+#~ msgstr "Na cotação"
+
+#~ msgid "Product prices have been recomputed according to pricelist %s."
+#~ msgstr ""
+#~ "Os preços dos produtos foram recalculados de acordo com a lista de preços "
+#~ "%s."
+
+#~ msgid "Product prices have been recomputed."
+#~ msgstr "Os preços dos produtos foram recalculados."
+
+#~ msgid "Recompute all prices based on this pricelist"
+#~ msgstr "Recalcular todos os preços com base nesta lista de preços"
+
+#~ msgid "Sale : Visible at"
+#~ msgstr "Venda: Visível em"
+
+#~ msgid ""
+#~ "This will update the unit price of all products based on the new "
+#~ "pricelist."
+#~ msgstr ""
+#~ "Isso atualizará o preço unitário de todos os produtos com base na nova "
+#~ "lista de preço."
+
+#~ msgid "Update Prices"
+#~ msgstr "Atualizar preços"
 
 #~ msgid ""
 #~ "<div style=\"margin: 0px; padding: 0px;\">\n"

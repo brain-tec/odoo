@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-20 00:19+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Kabyle <https://translate.odoo.com/projects/odoo-master/stock/"
@@ -1864,7 +1864,6 @@ msgid "Choose Type of Labels To Print"
 msgstr ""
 
 #. module: stock
-#: model:ir.model.fields,help:stock.field_stock_quantity_history__inventory_datetime
 #: model:ir.model.fields,help:stock.field_stock_request_count__inventory_date
 msgid "Choose a date to get the inventory at that date"
 msgstr ""
@@ -1888,11 +1887,6 @@ msgstr ""
 #. module: stock
 #: model:ir.model,name:stock.model_picking_label_type
 msgid "Choose whether to print product or lot/sn labels"
-msgstr ""
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.view_stock_quantity_history
-msgid "Choose your date"
 msgstr ""
 
 #. module: stock
@@ -2000,7 +1994,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock.stock_warn_insufficient_qty_form_view
 #: model_terms:ir.ui.view,arch_db:stock.view_product_replenish
 #: model_terms:ir.ui.view,arch_db:stock.view_scrap_move_form
-#: model_terms:ir.ui.view,arch_db:stock.view_stock_quantity_history
 msgid "Confirm"
 msgstr ""
 
@@ -2256,7 +2249,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__create_uid
 #: model:ir.model.fields,field_description:stock.field_stock_quant__create_uid
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__create_uid
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__create_uid
 #: model:ir.model.fields,field_description:stock.field_stock_reference__create_uid
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__create_uid
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_option__create_uid
@@ -2300,7 +2292,6 @@ msgstr "Yerna-t"
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__create_date
 #: model:ir.model.fields,field_description:stock.field_stock_quant__create_date
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__create_date
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__create_date
 #: model:ir.model.fields,field_description:stock.field_stock_reference__create_date
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__create_date
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_option__create_date
@@ -3030,7 +3021,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock.field_ir_actions_report__display_name
 #: model:ir.model.fields,field_description:stock.field_lot_label_layout__display_name
 #: model:ir.model.fields,field_description:stock.field_picking_label_type__display_name
-#: model:ir.model.fields,field_description:stock.field_product_catalog_mixin__display_name
 #: model:ir.model.fields,field_description:stock.field_product_category__display_name
 #: model:ir.model.fields,field_description:stock.field_product_label_layout__display_name
 #: model:ir.model.fields,field_description:stock.field_product_product__display_name
@@ -3068,7 +3058,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__display_name
 #: model:ir.model.fields,field_description:stock.field_stock_quant__display_name
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__display_name
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__display_name
 #: model:ir.model.fields,field_description:stock.field_stock_reference__display_name
 #: model:ir.model.fields,field_description:stock.field_stock_replenish_mixin__display_name
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__display_name
@@ -3751,7 +3740,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock.field_ir_actions_report__id
 #: model:ir.model.fields,field_description:stock.field_lot_label_layout__id
 #: model:ir.model.fields,field_description:stock.field_picking_label_type__id
-#: model:ir.model.fields,field_description:stock.field_product_catalog_mixin__id
 #: model:ir.model.fields,field_description:stock.field_product_category__id
 #: model:ir.model.fields,field_description:stock.field_product_label_layout__id
 #: model:ir.model.fields,field_description:stock.field_product_product__id
@@ -3789,7 +3777,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__id
 #: model:ir.model.fields,field_description:stock.field_stock_quant__id
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__id
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__id
 #: model:ir.model.fields,field_description:stock.field_stock_reference__id
 #: model:ir.model.fields,field_description:stock.field_stock_replenish_mixin__id
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__id
@@ -4374,7 +4361,6 @@ msgstr ""
 #. module: stock
 #. odoo-javascript
 #: code:addons/stock/static/src/views/search/stock_report_search_panel.xml:0
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__inventory_datetime
 msgid "Inventory at Date"
 msgstr ""
 
@@ -4661,7 +4647,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__write_uid
 #: model:ir.model.fields,field_description:stock.field_stock_quant__write_uid
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__write_uid
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__write_uid
 #: model:ir.model.fields,field_description:stock.field_stock_reference__write_uid
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__write_uid
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_option__write_uid
@@ -4705,7 +4690,6 @@ msgstr "Aleqqem aneggaru sɣuṛ"
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__write_date
 #: model:ir.model.fields,field_description:stock.field_stock_quant__write_date
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__write_date
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__write_date
 #: model:ir.model.fields,field_description:stock.field_stock_reference__write_date
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__write_date
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_option__write_date
@@ -4883,7 +4867,12 @@ msgstr "Adeg"
 
 #. module: stock
 #: model:ir.actions.report,name:stock.action_report_location_barcode
-msgid "Location Barcode"
+msgid "Location Barcode (PDF)"
+msgstr ""
+
+#. module: stock
+#: model:ir.actions.report,name:stock.action_label_location_template
+msgid "Location Barcode (ZPL)"
 msgstr ""
 
 #. module: stock
@@ -6736,11 +6725,6 @@ msgid "Product Capacity"
 msgstr ""
 
 #. module: stock
-#: model:ir.model,name:stock.model_product_catalog_mixin
-msgid "Product Catalog Mixin"
-msgstr ""
-
-#. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_route__categ_ids
 #: model_terms:ir.ui.view,arch_db:stock.stock_location_route_form_view
 msgid "Product Categories"
@@ -6880,8 +6864,6 @@ msgid "Production Locations"
 msgstr ""
 
 #. module: stock
-#. odoo-python
-#: code:addons/stock/wizard/stock_quantity_history.py:0
 #: model:ir.actions.act_window,name:stock.act_product_location_open
 #: model:ir.actions.act_window,name:stock.product_template_action_product
 #: model:ir.model.fields,field_description:stock.field_stock_route__product_ids
@@ -8704,11 +8686,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock.field_product_product__stock_quant_ids
 #: model_terms:ir.ui.view,arch_db:stock.stock_quant_view_graph
 msgid "Stock Quant"
-msgstr ""
-
-#. module: stock
-#: model:ir.model,name:stock.model_stock_quantity_history
-msgid "Stock Quantity History"
 msgstr ""
 
 #. module: stock

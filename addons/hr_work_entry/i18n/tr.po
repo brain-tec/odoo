@@ -18,7 +18,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 00:37+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Turkish <https://translate.odoo.com/projects/odoo-master/"
@@ -245,6 +245,7 @@ msgid "Ancillary and Defence Leave"
 msgstr "Yardımcı ve Savunma İzni"
 
 #. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_annual_leave
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_kw_work_entry_type_annual_leave
 msgid "Annual Leave"
 msgstr ""
@@ -486,11 +487,6 @@ msgid "Caring Leave"
 msgstr ""
 
 #. module: hr_work_entry
-#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_cash_out
-msgid "Cash Out of Leave in Service"
-msgstr "Hizmet İzninin Nakde Çevrilmesi"
-
-#. module: hr_work_entry
 #: model:ir.model.fields,help:hr_work_entry.field_hr_work_entry_type__is_extra_hours
 msgid ""
 "Check this setting if you want the hours to be considered as extra time and "
@@ -548,6 +544,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_work_entry.field_resource_calendar_attendance__color
 msgid "Color"
 msgstr "Renk"
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_community_service_leave
+msgid "Community Service Leave"
+msgstr ""
 
 #. module: hr_work_entry
 #. odoo-python
@@ -1010,6 +1011,11 @@ msgstr ""
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_lu_work_entry_type_family_reason_leave
 msgid "Family Reason Time Off"
+msgstr ""
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_family_domestic_violence_leave
+msgid "Family and Domestic Violence Leave"
 msgstr ""
 
 #. module: hr_work_entry
@@ -1951,11 +1957,6 @@ msgid "OoC"
 msgstr "OoC (Sözleşme Dışında)"
 
 #. module: hr_work_entry
-#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_other
-msgid "Other Paid Leave"
-msgstr "Diğer Ücretli İzinler"
-
-#. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_be_work_entry_type_other_presence
 msgid "Other services not declared under another code"
 msgstr ""
@@ -2142,13 +2143,8 @@ msgstr ""
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_pto
-msgid "Overtime: Public Time Off"
-msgstr "Fazla Mesai: Kamu İzni"
-
-#. module: hr_work_entry
-#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_regular
-msgid "Overtime: Regular"
-msgstr "Fazla mesai: Düzenli"
+msgid "Overtime: Public Holiday"
+msgstr ""
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_saturday
@@ -2157,8 +2153,8 @@ msgstr "Fazla mesai: Cumartesi"
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_saturday_pto
-msgid "Overtime: Saturday & Public Time Off"
-msgstr "Fazla Mesai: Cumartesi ve Resmi Tatil"
+msgid "Overtime: Saturday & Public Holiday"
+msgstr ""
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_sunday
@@ -2167,8 +2163,13 @@ msgstr "Fazla mesai: Pazar"
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_sunday_pto
-msgid "Overtime: Sunday & Public Time Off"
-msgstr "Fazla Mesai: Pazar ve Resmi Tatil"
+msgid "Overtime: Sunday & Public Holiday"
+msgstr ""
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_regular
+msgid "Overtime: Week Day"
+msgstr ""
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,display_code:hr_work_entry.l10n_be_work_entry_type_parental_time_off
@@ -2321,7 +2322,6 @@ msgstr "Ücretli Hastalık İzni"
 #: model:hr.work.entry.type,name:hr_work_entry.it_work_entry_type_legal_leave
 #: model:hr.work.entry.type,name:hr_work_entry.jo_work_entry_type_legal_leave
 #: model:hr.work.entry.type,name:hr_work_entry.ke_work_entry_type_legal_leave
-#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_paid_time_off
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_hk_work_entry_type_annual_leave
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_id_work_entry_type_annual_leave
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_kw_work_entry_type_paid_time_off
@@ -2451,6 +2451,21 @@ msgid "Public Holiday Compensation"
 msgstr "Resmi Tatil Tazminatı"
 
 #. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_public_holiday_saturday
+msgid "Public Holiday Shift - Saturday"
+msgstr ""
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_public_holiday_sunday
+msgid "Public Holiday Shift - Sunday"
+msgstr ""
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_public_holiday_week_day
+msgid "Public Holiday Shift - Week Day"
+msgstr ""
+
+#. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_jo_work_entry_type_public_holidays_overtime
 msgid "Public Holidays Overtime"
 msgstr ""
@@ -2543,6 +2558,11 @@ msgstr ""
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_om_work_entry_type_overtime_special_rest_days
 msgid "Restday(s) & public holidays Special Overtime"
+msgstr ""
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_rostered_days_off
+msgid "Rostered Days Off"
 msgstr ""
 
 #. module: hr_work_entry
@@ -2655,6 +2675,11 @@ msgstr "Annelik / Babalık İzni Durumunda Maaş"
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_ch_swissdec_military_wt
 msgid "Salary in case of Military Leave"
 msgstr "Askeri İzin Durumunda Maaş"
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_saturday_shift
+msgid "Saturday Shift"
+msgstr ""
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_be_work_entry_type_schooldays
@@ -2867,6 +2892,11 @@ msgid "Study Leave"
 msgstr ""
 
 #. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_sunday_shift
+msgid "Sunday Shift"
+msgstr ""
+
+#. module: hr_work_entry
 #: model:hr.work.entry.type,display_code:hr_work_entry.l10n_be_work_entry_type_environmental_protection
 msgid "TME"
 msgstr ""
@@ -3041,6 +3071,11 @@ msgid "Time Types"
 msgstr ""
 
 #. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_time_off_in_lieu
+msgid "Time off in Lieu"
+msgstr ""
+
+#. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.iq_work_entry_type_trade_union_duty
 msgid "Trade union duty"
 msgstr ""
@@ -3192,11 +3227,6 @@ msgid ""
 "Unpaid compensatory rest at the time of recovery following hours worked at "
 "another time"
 msgstr ""
-
-#. module: hr_work_entry
-#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_termination
-msgid "Unused Leave on Termination"
-msgstr "Fesih Halinde Kullanılmayan İzin"
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_be_work_entry_type_upcomming_public_holiday
@@ -3470,6 +3500,27 @@ msgstr ""
 #: code:addons/hr_work_entry/wizard/hr_export_work_entries.py:0
 msgid "workentries_"
 msgstr ""
+
+#~ msgid "Cash Out of Leave in Service"
+#~ msgstr "Hizmet İzninin Nakde Çevrilmesi"
+
+#~ msgid "Other Paid Leave"
+#~ msgstr "Diğer Ücretli İzinler"
+
+#~ msgid "Overtime: Public Time Off"
+#~ msgstr "Fazla Mesai: Kamu İzni"
+
+#~ msgid "Overtime: Regular"
+#~ msgstr "Fazla mesai: Düzenli"
+
+#~ msgid "Overtime: Saturday & Public Time Off"
+#~ msgstr "Fazla Mesai: Cumartesi ve Resmi Tatil"
+
+#~ msgid "Overtime: Sunday & Public Time Off"
+#~ msgstr "Fazla Mesai: Pazar ve Resmi Tatil"
+
+#~ msgid "Unused Leave on Termination"
+#~ msgstr "Fesih Halinde Kullanılmayan İzin"
 
 #~ msgid "Brief Holiday (Birth)"
 #~ msgstr "Kısa Tatil (Doğum)"

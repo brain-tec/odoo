@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 05:29+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/web/uz/"
@@ -2602,6 +2602,12 @@ msgstr "Kamayuvchi"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/webclient/switch_company_menu/switch_company_menu.js:0
+msgid "Deselect all"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_dev_tool.xml:0
 #, fuzzy
 msgid "Developer Tools"
@@ -2756,6 +2762,12 @@ msgstr ""
 #, fuzzy
 msgid "Display presets"
 msgstr "Oldindan belgilangan sozlamalarni ko‘rsatish"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/search/search_bar/search_bar_toggler.xml:0
+msgid "Display search bar"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -3168,7 +3180,7 @@ msgstr "Kirish soni"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/offline/offline_service.js:0
+#: code:addons/web/static/src/core/offline/offline_plugin.js:0
 msgid "Error"
 msgstr ""
 
@@ -3760,6 +3772,12 @@ msgstr ""
 #, fuzzy
 msgid "Help"
 msgstr "Yordam"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/switch_company_menu/switch_company_item.js:0
+msgid "Hide %s content."
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -4995,15 +5013,8 @@ msgstr "Uchrashuv mavzusi"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
-#, fuzzy
-msgid "Memory limit (in bytes)"
-msgstr "Xotira chegarasi (baytlarda)"
-
-#. module: web
-#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
-#, fuzzy
-msgid "Memory profile"
-msgstr "Xotira profili"
+msgid "Memory (heuristic)"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -5880,7 +5891,7 @@ msgstr "Oflayn"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/offline/offline_service.js:0
+#: code:addons/web/static/src/core/offline/offline_plugin.js:0
 msgid "Offline features not available in a non-secure context"
 msgstr ""
 
@@ -7295,6 +7306,7 @@ msgstr "Ko‘rinishni tanlang"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/view_components/selection_box.xml:0
+#: code:addons/web/static/src/webclient/switch_company_menu/switch_company_menu.js:0
 msgid "Select all"
 msgstr ""
 
@@ -7395,6 +7407,12 @@ msgstr ""
 #, fuzzy
 msgid "Separator"
 msgstr "Ajratuvchi"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/priority/priority_field.js:0
+msgid "Set %(tooltipLabel)s: %(label)s"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -7521,6 +7539,12 @@ msgstr "Shinkansen"
 #, fuzzy
 msgid "Shinto"
 msgstr "Sinto"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/switch_company_menu/switch_company_item.js:0
+msgid "Show %s content."
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -7795,6 +7819,12 @@ msgstr "Kompaniyani almashtirish"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/search/control_panel/control_panel.xml:0
+msgid "Switch view"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, fuzzy
 msgid "Symbols"
@@ -7968,18 +7998,6 @@ msgstr "Matn"
 #, fuzzy
 msgid "Text file"
 msgstr "Matn fayli"
-
-#. module: web
-#: model:ir.model.fields,help:web.field_base_document_layout__vat
-#, fuzzy
-msgid ""
-"The Tax Identification Number. Values here will be validated based on the "
-"country format. You can use '/' to indicate that the partner is not subject "
-"to tax."
-msgstr ""
-"Soliq identifikatsiya raqami. Bu yerdagi qiymatlar mamlakat formati asosida "
-"tekshiriladi. Hamkorning soliqqa tortilmasligini ko‘rsatish uchun '/' "
-"belgisidan foydalanishingiz mumkin."
 
 #. module: web
 #. odoo-python
@@ -9287,6 +9305,11 @@ msgstr "Ilovani brauzer menyusidan o‘rnatishingiz mumkin"
 #, fuzzy
 msgid "You can not read that field definition."
 msgstr "Bu maydon ta'rifini o‘qiy olmaysiz."
+
+#. module: web
+#: model:ir.model.fields,help:web.field_base_document_layout__vat
+msgid "You can use '/' to indicate that the customer has no Tax ID."
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -22415,7 +22438,6 @@ msgstr "voy"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
 #, fuzzy
 msgid "open"
 msgstr "ochiq"
@@ -31532,6 +31554,24 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "空"
 msgstr ""
+
+#, fuzzy
+#~ msgid "Memory limit (in bytes)"
+#~ msgstr "Xotira chegarasi (baytlarda)"
+
+#, fuzzy
+#~ msgid "Memory profile"
+#~ msgstr "Xotira profili"
+
+#, fuzzy
+#~ msgid ""
+#~ "The Tax Identification Number. Values here will be validated based on the "
+#~ "country format. You can use '/' to indicate that the partner is not "
+#~ "subject to tax."
+#~ msgstr ""
+#~ "Soliq identifikatsiya raqami. Bu yerdagi qiymatlar mamlakat formati "
+#~ "asosida tekshiriladi. Hamkorning soliqqa tortilmasligini ko‘rsatish uchun "
+#~ "'/' belgisidan foydalanishingiz mumkin."
 
 #, fuzzy
 #~ msgid "Custom"

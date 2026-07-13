@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 21:05+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
@@ -245,6 +245,7 @@ msgid "Ancillary and Defence Leave"
 msgstr "Yordamchi va mudofaa ta'tili"
 
 #. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_annual_leave
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_kw_work_entry_type_annual_leave
 msgid "Annual Leave"
 msgstr ""
@@ -491,12 +492,6 @@ msgid "Caring Leave"
 msgstr ""
 
 #. module: hr_work_entry
-#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_cash_out
-#, fuzzy
-msgid "Cash Out of Leave in Service"
-msgstr "Xizmat davridagi ta'tilni naqd pulga almashtirish"
-
-#. module: hr_work_entry
 #: model:ir.model.fields,help:hr_work_entry.field_hr_work_entry_type__is_extra_hours
 #, fuzzy
 msgid ""
@@ -556,6 +551,11 @@ msgstr ""
 #, fuzzy
 msgid "Color"
 msgstr "Rang"
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_community_service_leave
+msgid "Community Service Leave"
+msgstr ""
 
 #. module: hr_work_entry
 #. odoo-python
@@ -1040,6 +1040,11 @@ msgstr ""
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_lu_work_entry_type_family_reason_leave
 msgid "Family Reason Time Off"
+msgstr ""
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_family_domestic_violence_leave
+msgid "Family and Domestic Violence Leave"
 msgstr ""
 
 #. module: hr_work_entry
@@ -2018,12 +2023,6 @@ msgid "OoC"
 msgstr "Shartnomadan tashqari"
 
 #. module: hr_work_entry
-#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_other
-#, fuzzy
-msgid "Other Paid Leave"
-msgstr "Boshqa haq to‘lanadigan ta'til"
-
-#. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_be_work_entry_type_other_presence
 msgid "Other services not declared under another code"
 msgstr ""
@@ -2214,15 +2213,8 @@ msgstr ""
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_pto
-#, fuzzy
-msgid "Overtime: Public Time Off"
-msgstr "Qo‘shimcha ish vaqti: Dam olish kuni"
-
-#. module: hr_work_entry
-#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_regular
-#, fuzzy
-msgid "Overtime: Regular"
-msgstr "Qo‘shimcha ish vaqti: Oddiy"
+msgid "Overtime: Public Holiday"
+msgstr ""
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_saturday
@@ -2232,9 +2224,8 @@ msgstr "Qo‘shimcha ish vaqti: Shanba"
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_saturday_pto
-#, fuzzy
-msgid "Overtime: Saturday & Public Time Off"
-msgstr "Qo‘shimcha ish vaqti: Shanba va dam olish kuni"
+msgid "Overtime: Saturday & Public Holiday"
+msgstr ""
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_sunday
@@ -2244,9 +2235,13 @@ msgstr "Qo‘shimcha ish vaqti: Yakshanba"
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_sunday_pto
-#, fuzzy
-msgid "Overtime: Sunday & Public Time Off"
-msgstr "Qo‘shimcha ish vaqti: Yakshanba va dam olish kuni"
+msgid "Overtime: Sunday & Public Holiday"
+msgstr ""
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_regular
+msgid "Overtime: Week Day"
+msgstr ""
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,display_code:hr_work_entry.l10n_be_work_entry_type_parental_time_off
@@ -2402,7 +2397,6 @@ msgstr "Haq to‘lanadigan kasallik ta'tili"
 #: model:hr.work.entry.type,name:hr_work_entry.it_work_entry_type_legal_leave
 #: model:hr.work.entry.type,name:hr_work_entry.jo_work_entry_type_legal_leave
 #: model:hr.work.entry.type,name:hr_work_entry.ke_work_entry_type_legal_leave
-#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_paid_time_off
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_hk_work_entry_type_annual_leave
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_id_work_entry_type_annual_leave
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_kw_work_entry_type_paid_time_off
@@ -2542,6 +2536,21 @@ msgid "Public Holiday Compensation"
 msgstr "Bayram kunlari uchun kompensatsiya"
 
 #. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_public_holiday_saturday
+msgid "Public Holiday Shift - Saturday"
+msgstr ""
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_public_holiday_sunday
+msgid "Public Holiday Shift - Sunday"
+msgstr ""
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_public_holiday_week_day
+msgid "Public Holiday Shift - Week Day"
+msgstr ""
+
+#. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_jo_work_entry_type_public_holidays_overtime
 msgid "Public Holidays Overtime"
 msgstr ""
@@ -2639,6 +2648,11 @@ msgstr ""
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_om_work_entry_type_overtime_special_rest_days
 msgid "Restday(s) & public holidays Special Overtime"
+msgstr ""
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_rostered_days_off
+msgid "Rostered Days Off"
 msgstr ""
 
 #. module: hr_work_entry
@@ -2756,6 +2770,11 @@ msgstr "Homiladorlik va tug‘ish ta'tilidagi ish haqi"
 #, fuzzy
 msgid "Salary in case of Military Leave"
 msgstr "Harbiy xizmat ta'tilidagi ish haqi"
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_saturday_shift
+msgid "Saturday Shift"
+msgstr ""
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_be_work_entry_type_schooldays
@@ -2982,6 +3001,11 @@ msgid "Study Leave"
 msgstr ""
 
 #. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_sunday_shift
+msgid "Sunday Shift"
+msgstr ""
+
+#. module: hr_work_entry
 #: model:hr.work.entry.type,display_code:hr_work_entry.l10n_be_work_entry_type_environmental_protection
 msgid "TME"
 msgstr ""
@@ -3158,6 +3182,11 @@ msgid "Time Types"
 msgstr ""
 
 #. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_time_off_in_lieu
+msgid "Time off in Lieu"
+msgstr ""
+
+#. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.iq_work_entry_type_trade_union_duty
 msgid "Trade union duty"
 msgstr ""
@@ -3314,12 +3343,6 @@ msgid ""
 "Unpaid compensatory rest at the time of recovery following hours worked at "
 "another time"
 msgstr ""
-
-#. module: hr_work_entry
-#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_termination
-#, fuzzy
-msgid "Unused Leave on Termination"
-msgstr "Ishdan bo‘shaganda foydalanilmagan ta'til"
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_be_work_entry_type_upcomming_public_holiday
@@ -3602,6 +3625,34 @@ msgstr ""
 #: code:addons/hr_work_entry/wizard/hr_export_work_entries.py:0
 msgid "workentries_"
 msgstr ""
+
+#, fuzzy
+#~ msgid "Cash Out of Leave in Service"
+#~ msgstr "Xizmat davridagi ta'tilni naqd pulga almashtirish"
+
+#, fuzzy
+#~ msgid "Other Paid Leave"
+#~ msgstr "Boshqa haq to‘lanadigan ta'til"
+
+#, fuzzy
+#~ msgid "Overtime: Public Time Off"
+#~ msgstr "Qo‘shimcha ish vaqti: Dam olish kuni"
+
+#, fuzzy
+#~ msgid "Overtime: Regular"
+#~ msgstr "Qo‘shimcha ish vaqti: Oddiy"
+
+#, fuzzy
+#~ msgid "Overtime: Saturday & Public Time Off"
+#~ msgstr "Qo‘shimcha ish vaqti: Shanba va dam olish kuni"
+
+#, fuzzy
+#~ msgid "Overtime: Sunday & Public Time Off"
+#~ msgstr "Qo‘shimcha ish vaqti: Yakshanba va dam olish kuni"
+
+#, fuzzy
+#~ msgid "Unused Leave on Termination"
+#~ msgstr "Ishdan bo‘shaganda foydalanilmagan ta'til"
 
 #, fuzzy
 #~ msgid "Brief Holiday (Birth)"

@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:37+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 06:01+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
@@ -706,11 +706,6 @@ msgstr ""
 "seleccionada para agregar otras."
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "Attached To"
-msgstr "Adjunto a"
-
-#. module: product
 #: model:ir.model,name:product.model_ir_attachment
 msgid "Attachment"
 msgstr "Archivo adjunto"
@@ -963,6 +958,12 @@ msgstr "¿Se puede ampliar la imagen 1024 de la variante?"
 #: model:product.attribute.value,name:product.pav_brand_canon
 msgid "Canon"
 msgstr "Canon"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid "Catalog missing the child field to update."
+msgstr ""
 
 #. module: product
 #: model:ir.actions.act_window,name:product.product_category_action_form
@@ -1290,11 +1291,6 @@ msgid "Created on"
 msgstr "Creado el"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "Creation"
-msgstr "Creación"
-
-#. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_volume_volume_in_cubic_feet__1
 msgid "Cubic Feet (ft³)"
 msgstr "Pies cúbicos (ft³)"
@@ -1536,6 +1532,7 @@ msgstr "Mostrar aplicado en"
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__display_name
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__display_name
 #: model:ir.model.fields,field_description:product.field_product_base_unit__display_name
+#: model:ir.model.fields,field_description:product.field_product_catalog_line_mixin__display_name
 #: model:ir.model.fields,field_description:product.field_product_catalog_mixin__display_name
 #: model:ir.model.fields,field_description:product.field_product_category__display_name
 #: model:ir.model.fields,field_description:product.field_product_combo__display_name
@@ -1593,11 +1590,6 @@ msgid ""
 msgstr ""
 "Muestra la unidad personalizada para los productos si está definida o, de no "
 "ser así, la unidad de medida seleccionada."
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-msgid "Document"
-msgstr "Documento"
 
 #. module: product
 #. odoo-python
@@ -1785,6 +1777,11 @@ msgstr "Favorito"
 #: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Favorites"
 msgstr "Favoritos"
+
+#. module: product
+#: model_terms:ir.ui.view,arch_db:product.product_document_form
+msgid "File"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__raw
@@ -2042,11 +2039,6 @@ msgid "High-back office chair with great support"
 msgstr "Silla de oficina de respaldo alto con gran soporte"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "History"
-msgstr "Historial"
-
-#. module: product
 #: model:product.category,name:product.product_category_construction
 msgid "Home Construction"
 msgstr "Construcción de casas"
@@ -2062,6 +2054,7 @@ msgstr "Alojamiento en hotel"
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__id
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__id
 #: model:ir.model.fields,field_description:product.field_product_base_unit__id
+#: model:ir.model.fields,field_description:product.field_product_catalog_line_mixin__id
 #: model:ir.model.fields,field_description:product.field_product_catalog_mixin__id
 #: model:ir.model.fields,field_description:product.field_product_category__id
 #: model:ir.model.fields,field_description:product.field_product_combo__id
@@ -2201,11 +2194,6 @@ msgstr "Fuente de la imagen"
 #: model:ir.model.fields,field_description:product.field_product_document__image_width
 msgid "Image Width"
 msgstr "Ancho de la imagen"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-msgid "Image is a link"
-msgstr "La imagen es un enlace"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_attribute_search
@@ -3265,6 +3253,7 @@ msgstr "Espacio privado con escritorio y silla"
 #. odoo-python
 #: code:addons/product/controllers/pricelist_report.py:0
 #: model:ir.model,name:product.model_product_template
+#: model:ir.model.fields,field_description:product.field_product_catalog_line_mixin__product_id
 #: model:ir.model.fields,field_description:product.field_product_label_layout__product_ids
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_tmpl_id
 #: model:ir.model.fields,field_description:product.field_product_product__product_variant_id
@@ -3315,6 +3304,11 @@ msgstr "Atributos y valores del producto"
 #: model:ir.model.fields,field_description:product.field_product_template__attribute_line_ids
 msgid "Product Attributes"
 msgstr "Atributos del producto"
+
+#. module: product
+#: model:ir.model,name:product.model_product_catalog_line_mixin
+msgid "Product Catalog Line Mixin"
+msgstr ""
 
 #. module: product
 #: model:ir.model,name:product.model_product_catalog_mixin
@@ -4329,6 +4323,14 @@ msgstr ""
 
 #. module: product
 #. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid ""
+"There are multiple lines with the same product, please update those one by "
+"one and not through the catalog."
+msgstr ""
+
+#. module: product
+#. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "There are no possible combination."
 msgstr "No hay combinación posible."
@@ -4710,11 +4712,15 @@ msgstr "Valores"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_id
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_view_search
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Variant"
 msgstr "Variante"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_document__variant_attribute_value_ids
+msgid "Variant Attribute Value"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__product_variant_count
@@ -4797,6 +4803,7 @@ msgstr "Terciopelo"
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__partner_id
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_search_view
+#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Vendor"
 msgstr "Proveedor"
 
@@ -4946,6 +4953,12 @@ msgid "Write Date"
 msgstr "Escribir la fecha"
 
 #. module: product
+#. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid "Wrong catalog child field!"
+msgstr ""
+
+#. module: product
 #: model:product.attribute.value,name:product.pav_size_xl
 msgid "XL"
 msgstr "XG"
@@ -5030,6 +5043,12 @@ msgstr "Puede subir una imagen que se use como color del valor del atributo."
 #, fuzzy
 msgid "You can't edit this product in the catalog."
 msgstr "No puede editar este producto en el catálogo."
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid "You cannot add or remove products from this record."
+msgstr ""
 
 #. module: product
 #. odoo-python
@@ -5407,11 +5426,6 @@ msgid "markup"
 msgstr "utilidad sobre el costo (%)"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "on"
-msgstr "en"
-
-#. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "pdf"
@@ -5458,6 +5472,24 @@ msgstr "para"
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "xlsx"
 msgstr "xlsx"
+
+#~ msgid "Attached To"
+#~ msgstr "Adjunto a"
+
+#~ msgid "Creation"
+#~ msgstr "Creación"
+
+#~ msgid "Document"
+#~ msgstr "Documento"
+
+#~ msgid "History"
+#~ msgstr "Historial"
+
+#~ msgid "Image is a link"
+#~ msgstr "La imagen es un enlace"
+
+#~ msgid "on"
+#~ msgstr "en"
 
 #~ msgid "<strong>Qty: </strong>"
 #~ msgstr "<strong>Cant.: </strong>"

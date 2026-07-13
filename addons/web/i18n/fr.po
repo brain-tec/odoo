@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 18:26+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: French <https://translate.odoo.com/projects/odoo-master/web/"
@@ -2360,6 +2360,12 @@ msgstr "Descendant"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/webclient/switch_company_menu/switch_company_menu.js:0
+msgid "Deselect all"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_dev_tool.xml:0
 msgid "Developer Tools"
 msgstr "Outils développeur"
@@ -2501,6 +2507,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
 msgid "Display presets"
 msgstr "Préréglages d'affichage"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/search/search_bar/search_bar_toggler.xml:0
+msgid "Display search bar"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -2870,7 +2882,7 @@ msgstr "Nombre d'entrées"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/offline/offline_service.js:0
+#: code:addons/web/static/src/core/offline/offline_plugin.js:0
 msgid "Error"
 msgstr ""
 
@@ -3392,6 +3404,12 @@ msgstr ""
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
 msgid "Help"
 msgstr "Aide"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/switch_company_menu/switch_company_item.js:0
+msgid "Hide %s content."
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -4485,13 +4503,8 @@ msgstr "Sujet de la réunion"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
-msgid "Memory limit (in bytes)"
-msgstr "Limite mémoire (en bytes)"
-
-#. module: web
-#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
-msgid "Memory profile"
-msgstr "Profil mémoire"
+msgid "Memory (heuristic)"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -5264,7 +5277,7 @@ msgstr "Hors ligne"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/offline/offline_service.js:0
+#: code:addons/web/static/src/core/offline/offline_plugin.js:0
 msgid "Offline features not available in a non-secure context"
 msgstr ""
 
@@ -6526,6 +6539,7 @@ msgstr "Sélectionner une vue"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/view_components/selection_box.xml:0
+#: code:addons/web/static/src/webclient/switch_company_menu/switch_company_menu.js:0
 msgid "Select all"
 msgstr ""
 
@@ -6613,6 +6627,12 @@ msgstr "Séparé (un par onglet)"
 #: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 msgid "Separator"
 msgstr "Séparateur"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/priority/priority_field.js:0
+msgid "Set %(tooltipLabel)s: %(label)s"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -6728,6 +6748,12 @@ msgstr "shinkansen"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Shinto"
 msgstr "shinto"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/switch_company_menu/switch_company_item.js:0
+msgid "Show %s content."
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -6969,6 +6995,12 @@ msgstr "Changer de société"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/search/control_panel/control_panel.xml:0
+msgid "Switch view"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Symbols"
 msgstr "symboles"
@@ -7123,17 +7155,6 @@ msgstr "Texte"
 #: code:addons/web/static/src/core/file_viewer/file_viewer.xml:0
 msgid "Text file"
 msgstr "Fichier texte"
-
-#. module: web
-#: model:ir.model.fields,help:web.field_base_document_layout__vat
-msgid ""
-"The Tax Identification Number. Values here will be validated based on the "
-"country format. You can use '/' to indicate that the partner is not subject "
-"to tax."
-msgstr ""
-"Le numéro d'identification fiscale. Les valeurs ici seront validées en "
-"fonction du format du pays. Vous pouvez utiliser '/' pour indiquer que le "
-"partenaire n'est pas sujet à la taxe."
 
 #. module: web
 #. odoo-python
@@ -8308,6 +8329,11 @@ msgstr "Vous pouvez installer l'application depuis le menu du navigateur"
 #: code:addons/web/models/properties_base_definition.py:0
 msgid "You can not read that field definition."
 msgstr "Vous ne pouvez pas lire cette définition de champ."
+
+#. module: web
+#: model:ir.model.fields,help:web.field_base_document_layout__vat
+msgid "You can use '/' to indicate that the customer has no Tax ID."
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -19588,7 +19614,6 @@ msgstr "oops"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-#: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
 msgid "open"
 msgstr "ouvrir"
 
@@ -27440,6 +27465,21 @@ msgstr "秘"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "空"
 msgstr "空"
+
+#~ msgid "Memory limit (in bytes)"
+#~ msgstr "Limite mémoire (en bytes)"
+
+#~ msgid "Memory profile"
+#~ msgstr "Profil mémoire"
+
+#~ msgid ""
+#~ "The Tax Identification Number. Values here will be validated based on the "
+#~ "country format. You can use '/' to indicate that the partner is not "
+#~ "subject to tax."
+#~ msgstr ""
+#~ "Le numéro d'identification fiscale. Les valeurs ici seront validées en "
+#~ "fonction du format du pays. Vous pouvez utiliser '/' pour indiquer que le "
+#~ "partenaire n'est pas sujet à la taxe."
 
 #~ msgid "Custom"
 #~ msgstr "Personnalisé"

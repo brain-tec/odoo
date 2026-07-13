@@ -21,7 +21,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:37+0000\n"
 "PO-Revision-Date: 2026-06-18 17:31+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/"
@@ -251,6 +251,7 @@ msgid "Ancillary and Defence Leave"
 msgstr "Urlop dodatkowy i obronny"
 
 #. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_annual_leave
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_kw_work_entry_type_annual_leave
 msgid "Annual Leave"
 msgstr ""
@@ -492,11 +493,6 @@ msgid "Caring Leave"
 msgstr "Urlop opiekuńczy"
 
 #. module: hr_work_entry
-#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_cash_out
-msgid "Cash Out of Leave in Service"
-msgstr "Wypłata gotówki z tytułu urlopu w służbie"
-
-#. module: hr_work_entry
 #: model:ir.model.fields,help:hr_work_entry.field_hr_work_entry_type__is_extra_hours
 msgid ""
 "Check this setting if you want the hours to be considered as extra time and "
@@ -554,6 +550,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_work_entry.field_resource_calendar_attendance__color
 msgid "Color"
 msgstr "Kolor"
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_community_service_leave
+msgid "Community Service Leave"
+msgstr ""
 
 #. module: hr_work_entry
 #. odoo-python
@@ -1025,6 +1026,11 @@ msgstr "FSJ"
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_lu_work_entry_type_family_reason_leave
 msgid "Family Reason Time Off"
 msgstr "Urlop z powodów rodzinnych"
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_family_domestic_violence_leave
+msgid "Family and Domestic Violence Leave"
+msgstr ""
 
 #. module: hr_work_entry
 #: model:ir.model.fields.selection,name:hr_work_entry.selection__hr_export_work_entries__reference_month__2
@@ -1982,11 +1988,6 @@ msgid "OoC"
 msgstr "PU"
 
 #. module: hr_work_entry
-#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_other
-msgid "Other Paid Leave"
-msgstr "Inny płatny urlop"
-
-#. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_be_work_entry_type_other_presence
 msgid "Other services not declared under another code"
 msgstr "Inne usługi nieujęte pod innym kodem"
@@ -2175,13 +2176,8 @@ msgstr ""
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_pto
-msgid "Overtime: Public Time Off"
-msgstr "Nadgodziny: Święto państwowe"
-
-#. module: hr_work_entry
-#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_regular
-msgid "Overtime: Regular"
-msgstr "Nadgodziny: standardowe"
+msgid "Overtime: Public Holiday"
+msgstr ""
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_saturday
@@ -2190,8 +2186,8 @@ msgstr "Nadgodziny: sobota"
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_saturday_pto
-msgid "Overtime: Saturday & Public Time Off"
-msgstr "Nadgodziny: Sobota i święto państwowe"
+msgid "Overtime: Saturday & Public Holiday"
+msgstr ""
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_sunday
@@ -2200,8 +2196,13 @@ msgstr "Nadgodziny: niedziela"
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_sunday_pto
-msgid "Overtime: Sunday & Public Time Off"
-msgstr "Nadgodziny: Niedziela i święto państwowe"
+msgid "Overtime: Sunday & Public Holiday"
+msgstr ""
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_overtime_regular
+msgid "Overtime: Week Day"
+msgstr ""
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,display_code:hr_work_entry.l10n_be_work_entry_type_parental_time_off
@@ -2354,7 +2355,6 @@ msgstr "Płatny urlop chorobowy"
 #: model:hr.work.entry.type,name:hr_work_entry.it_work_entry_type_legal_leave
 #: model:hr.work.entry.type,name:hr_work_entry.jo_work_entry_type_legal_leave
 #: model:hr.work.entry.type,name:hr_work_entry.ke_work_entry_type_legal_leave
-#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_paid_time_off
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_hk_work_entry_type_annual_leave
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_id_work_entry_type_annual_leave
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_kw_work_entry_type_paid_time_off
@@ -2484,6 +2484,21 @@ msgid "Public Holiday Compensation"
 msgstr "Rekompensata za święto państwowe"
 
 #. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_public_holiday_saturday
+msgid "Public Holiday Shift - Saturday"
+msgstr ""
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_public_holiday_sunday
+msgid "Public Holiday Shift - Sunday"
+msgstr ""
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_public_holiday_week_day
+msgid "Public Holiday Shift - Week Day"
+msgstr ""
+
+#. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_jo_work_entry_type_public_holidays_overtime
 msgid "Public Holidays Overtime"
 msgstr ""
@@ -2576,6 +2591,11 @@ msgstr ""
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_om_work_entry_type_overtime_special_rest_days
 msgid "Restday(s) & public holidays Special Overtime"
+msgstr ""
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_rostered_days_off
+msgid "Rostered Days Off"
 msgstr ""
 
 #. module: hr_work_entry
@@ -2688,6 +2708,11 @@ msgstr "Wynagrodzenie w przypadku urlopu macierzyńskiego / ojcowskiego"
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_ch_swissdec_military_wt
 msgid "Salary in case of Military Leave"
 msgstr "Wynagrodzenie w przypadku urlopu wojskowego"
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_saturday_shift
+msgid "Saturday Shift"
+msgstr ""
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_be_work_entry_type_schooldays
@@ -2902,6 +2927,11 @@ msgid "Study Leave"
 msgstr ""
 
 #. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_sunday_shift
+msgid "Sunday Shift"
+msgstr ""
+
+#. module: hr_work_entry
 #: model:hr.work.entry.type,display_code:hr_work_entry.l10n_be_work_entry_type_environmental_protection
 msgid "TME"
 msgstr "TME"
@@ -3088,6 +3118,11 @@ msgid "Time Types"
 msgstr ""
 
 #. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_time_off_in_lieu
+msgid "Time off in Lieu"
+msgstr ""
+
+#. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.iq_work_entry_type_trade_union_duty
 msgid "Trade union duty"
 msgstr ""
@@ -3241,11 +3276,6 @@ msgid ""
 msgstr ""
 "Niewypłacony odpoczynek wyrównawczy w czasie regeneracji po godzinach "
 "przepracowanych w innym czasie"
-
-#. module: hr_work_entry
-#: model:hr.work.entry.type,name:hr_work_entry.l10n_au_work_entry_type_termination
-msgid "Unused Leave on Termination"
-msgstr "Niewykorzystany urlop po rozwiązaniu umowy"
 
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.l10n_be_work_entry_type_upcomming_public_holiday
@@ -3525,6 +3555,27 @@ msgstr "np. WORK100, LEAVE210, OUT, ..."
 #: code:addons/hr_work_entry/wizard/hr_export_work_entries.py:0
 msgid "workentries_"
 msgstr ""
+
+#~ msgid "Cash Out of Leave in Service"
+#~ msgstr "Wypłata gotówki z tytułu urlopu w służbie"
+
+#~ msgid "Other Paid Leave"
+#~ msgstr "Inny płatny urlop"
+
+#~ msgid "Overtime: Public Time Off"
+#~ msgstr "Nadgodziny: Święto państwowe"
+
+#~ msgid "Overtime: Regular"
+#~ msgstr "Nadgodziny: standardowe"
+
+#~ msgid "Overtime: Saturday & Public Time Off"
+#~ msgstr "Nadgodziny: Sobota i święto państwowe"
+
+#~ msgid "Overtime: Sunday & Public Time Off"
+#~ msgstr "Nadgodziny: Niedziela i święto państwowe"
+
+#~ msgid "Unused Leave on Termination"
+#~ msgstr "Niewykorzystany urlop po rozwiązaniu umowy"
 
 #~ msgid "Brief Holiday (Birth)"
 #~ msgstr "Krótki urlop (poród)"

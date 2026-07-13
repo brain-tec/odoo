@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 02:14+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/"
@@ -922,6 +922,11 @@ msgstr ""
 "        </span>"
 
 #. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.product_document_kanban
+msgid "<span>Accessible</span>"
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "<span>Amount</span>"
@@ -932,11 +937,6 @@ msgstr "<span>金額</span>"
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "<span>Disc.%</span>"
 msgstr "<span>値引率</span>"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.product_document_kanban
-msgid "<span>Sales visibility</span>"
-msgstr "<span>販売可視性</span>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -1077,6 +1077,11 @@ msgstr "承認して署名"
 #: model:ir.model.fields,field_description:sale.field_sale_order__access_warning
 msgid "Access warning"
 msgstr "アクセス警告"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_product_document__attached_on_sale
+msgid "Accessible"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order_line__qty_delivered_method
@@ -1235,27 +1240,17 @@ msgstr "仮請求書を送ることができます。"
 #: model:ir.model.fields,help:sale.field_product_document__attached_on_sale
 msgid ""
 "Allows you to share the document with your customers within a sale.\n"
-"Leave it empty if you don't want to share this document with sales "
-"customer.\n"
-"On quote: the document will be sent to and accessible by customers at any "
-"time.\n"
+"From Quotation: the document will be sent to and accessible by customers at "
+"any time.\n"
 "e.g. this option can be useful to share Product description files.\n"
-"On order confirmation: the document will be sent to and accessible by "
+"On Order Confirmation: the document will be sent to and accessible by "
 "customers.\n"
 "e.g. this option can be useful to share User Manual or digital content "
 "bought on ecommerce. \n"
-"Inside quote: The document will be included in the pdf of the quotation and "
-"sale order between the header pages and the quote table. "
+"On Product Page: the document will be accessible by customers on the product "
+"page.\n"
+"e.g. this option can be useful to share Product description files."
 msgstr ""
-"販売内で顧客とドキュメントを共有できます。\n"
-"このドキュメントを販売顧客と共有したくない場合は、空のままにして下さい。\n"
-"見積時:ドキュメントは顧客に送信され、顧客はいつでもアクセスできます。\n"
-"例: このオプションは製品説明書などを共有するのに便利です。\n"
-"注文確定時: ドキュメントは顧客に送信され、アクセス可能になります。\n"
-"例: このオプションはユーザマニュアルやeコマースで購入したデジタルコンテンツを"
-"共有するのに適しています。\n"
-"見積書内:ドキュメントは、見積書および販売注文書のPDFにおいて、ヘッダーページ"
-"と見積テーブルの間に挿入されます。 "
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_payment_link_wizard__amount_paid
@@ -2625,6 +2620,11 @@ msgid "Forecasted Stock"
 msgstr "予測在庫"
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__quotation
+msgid "From Quotation"
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.actions.act_window,help:sale.action_account_invoice_report_salesteam
 msgid ""
 "From this report, you can have an overview of the amount invoiced to your "
@@ -2746,19 +2746,9 @@ msgid "Has Overages"
 msgstr ""
 
 #. module: sale
-#: model:ir.model.fields,field_description:sale.field_sale_order__show_update_pricelist
-msgid "Has Pricelist Changed"
-msgstr "価格表が変更されました"
-
-#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__has_down_payments
 msgid "Has down payments"
 msgstr "前受金あり"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__hidden
-msgid "Hidden"
-msgstr "非表示"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_account_analytic_applicability__id
@@ -2837,8 +2827,10 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__pricelist_id
-msgid "If you change the pricelist, only newly added lines will be affected."
-msgstr "価格表を変更すると、新しく追加された行のみが影響を受けます。"
+msgid ""
+"If you change the pricelist, the prices of all order lines will be updated "
+"accordingly."
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -3444,6 +3436,11 @@ msgid "My Sales Order Lines"
 msgstr "自分の販売オーダ明細"
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__hidden
+msgid "Never"
+msgstr ""
+
+#. module: sale
 #. odoo-python
 #: code:addons/sale/models/sale_order.py:0
 msgid "New"
@@ -3589,13 +3586,8 @@ msgstr "すべてのオーダ明細上で"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__sale_order
-msgid "On confirmed order"
-msgstr "確定済オーダ内"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__quotation
-msgid "On quote"
-msgstr "見積書で"
+msgid "On Order Confirmation"
+msgstr ""
 
 #. module: sale
 #. odoo-python
@@ -4105,18 +4097,6 @@ msgid "Product Variant"
 msgstr "プロダクトバリアント"
 
 #. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-msgid "Product prices have been recomputed according to pricelist %s."
-msgstr "プロダクト価格は価格表 %s に従って再計算されました。"
-
-#. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-msgid "Product prices have been recomputed."
-msgstr "プロダクト価格が再計算されました。"
-
-#. module: sale
 #: model:ir.actions.act_window,name:sale.product_template_action
 #: model:ir.ui.menu,name:sale.menu_product_template_action
 #: model:ir.ui.menu,name:sale.menu_reporting_product
@@ -4336,11 +4316,6 @@ msgid "Recommend when 'Adding to Cart' or quotation"
 msgstr "「カートに入れる」、又は見積の際に推奨"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Recompute all prices based on this pricelist"
-msgstr "この価格表に基づいてすべての価格を再計算します"
-
-#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.account_invoice_form
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Reference"
@@ -4458,11 +4433,6 @@ msgstr "SO0000"
 #: code:addons/sale/static/src/js/sale_action_helper/sale_action_helper_dialog.xml:0
 msgid "Sale"
 msgstr "販売"
-
-#. module: sale
-#: model:ir.model.fields,field_description:sale.field_product_document__attached_on_sale
-msgid "Sale : Visible at"
-msgstr "販売 : 以下で表示"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
@@ -5560,13 +5530,6 @@ msgstr ""
 "ます。"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid ""
-"This will update the unit price of all products based on the new pricelist."
-msgstr ""
-"これにより、すべてのプロダクトの単価が新しい価格表に基づいて更新されます。"
-
-#. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__invoice_status__to_invoice
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_line__invoice_status__to_invoice
 #: model:ir.model.fields.selection,name:sale.selection__sale_report__invoice_status__to_invoice
@@ -5771,11 +5734,6 @@ msgstr "請求済金額(税抜)"
 #: model:ir.model.fields,field_description:sale.field_sale_report__price_subtotal
 msgid "Untaxed Total"
 msgstr "税抜合計"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Update Prices"
-msgstr "価格の更新"
 
 #. module: sale
 #. odoo-javascript
@@ -6220,6 +6178,70 @@ msgid ""
 "'Quotation' or 'Order' }} {{ object.name or 'n/a' }} "
 "{{ object.client_order_ref and ('(' + object.client_order_ref + ')') or '' }}"
 msgstr ""
+
+#~ msgid "<span>Sales visibility</span>"
+#~ msgstr "<span>販売可視性</span>"
+
+#~ msgid ""
+#~ "Allows you to share the document with your customers within a sale.\n"
+#~ "Leave it empty if you don't want to share this document with sales "
+#~ "customer.\n"
+#~ "On quote: the document will be sent to and accessible by customers at any "
+#~ "time.\n"
+#~ "e.g. this option can be useful to share Product description files.\n"
+#~ "On order confirmation: the document will be sent to and accessible by "
+#~ "customers.\n"
+#~ "e.g. this option can be useful to share User Manual or digital content "
+#~ "bought on ecommerce. \n"
+#~ "Inside quote: The document will be included in the pdf of the quotation "
+#~ "and sale order between the header pages and the quote table. "
+#~ msgstr ""
+#~ "販売内で顧客とドキュメントを共有できます。\n"
+#~ "このドキュメントを販売顧客と共有したくない場合は、空のままにして下さい。\n"
+#~ "見積時:ドキュメントは顧客に送信され、顧客はいつでもアクセスできます。\n"
+#~ "例: このオプションは製品説明書などを共有するのに便利です。\n"
+#~ "注文確定時: ドキュメントは顧客に送信され、アクセス可能になります。\n"
+#~ "例: このオプションはユーザマニュアルやeコマースで購入したデジタルコンテン"
+#~ "ツを共有するのに適しています。\n"
+#~ "見積書内:ドキュメントは、見積書および販売注文書のPDFにおいて、ヘッダーペー"
+#~ "ジと見積テーブルの間に挿入されます。 "
+
+#~ msgid "Has Pricelist Changed"
+#~ msgstr "価格表が変更されました"
+
+#~ msgid "Hidden"
+#~ msgstr "非表示"
+
+#~ msgid ""
+#~ "If you change the pricelist, only newly added lines will be affected."
+#~ msgstr "価格表を変更すると、新しく追加された行のみが影響を受けます。"
+
+#~ msgid "On confirmed order"
+#~ msgstr "確定済オーダ内"
+
+#~ msgid "On quote"
+#~ msgstr "見積書で"
+
+#~ msgid "Product prices have been recomputed according to pricelist %s."
+#~ msgstr "プロダクト価格は価格表 %s に従って再計算されました。"
+
+#~ msgid "Product prices have been recomputed."
+#~ msgstr "プロダクト価格が再計算されました。"
+
+#~ msgid "Recompute all prices based on this pricelist"
+#~ msgstr "この価格表に基づいてすべての価格を再計算します"
+
+#~ msgid "Sale : Visible at"
+#~ msgstr "販売 : 以下で表示"
+
+#~ msgid ""
+#~ "This will update the unit price of all products based on the new "
+#~ "pricelist."
+#~ msgstr ""
+#~ "これにより、すべてのプロダクトの単価が新しい価格表に基づいて更新されます。"
+
+#~ msgid "Update Prices"
+#~ msgstr "価格の更新"
 
 #~ msgid ""
 #~ "<div style=\"margin: 0px; padding: 0px;\">\n"

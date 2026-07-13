@@ -20,7 +20,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-19 17:02+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
@@ -1959,7 +1959,6 @@ msgid "Choose Type of Labels To Print"
 msgstr "请选择要打印的标签类型"
 
 #. module: stock
-#: model:ir.model.fields,help:stock.field_stock_quantity_history__inventory_datetime
 #: model:ir.model.fields,help:stock.field_stock_request_count__inventory_date
 msgid "Choose a date to get the inventory at that date"
 msgstr "选择一个日期以获得该日期的库存"
@@ -1984,11 +1983,6 @@ msgstr "选择表格布局来打印标签"
 #: model:ir.model,name:stock.model_picking_label_type
 msgid "Choose whether to print product or lot/sn labels"
 msgstr "清选择【打印产品标签】/【批次标签】"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.view_stock_quantity_history
-msgid "Choose your date"
-msgstr "选择您的日期"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
@@ -2100,7 +2094,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock.stock_warn_insufficient_qty_form_view
 #: model_terms:ir.ui.view,arch_db:stock.view_product_replenish
 #: model_terms:ir.ui.view,arch_db:stock.view_scrap_move_form
-#: model_terms:ir.ui.view,arch_db:stock.view_stock_quantity_history
 msgid "Confirm"
 msgstr "确认"
 
@@ -2358,7 +2351,6 @@ msgstr "在此视图可查看产品类型为【可库存】的产品的库存信
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__create_uid
 #: model:ir.model.fields,field_description:stock.field_stock_quant__create_uid
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__create_uid
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__create_uid
 #: model:ir.model.fields,field_description:stock.field_stock_reference__create_uid
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__create_uid
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_option__create_uid
@@ -2402,7 +2394,6 @@ msgstr "创建人"
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__create_date
 #: model:ir.model.fields,field_description:stock.field_stock_quant__create_date
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__create_date
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__create_date
 #: model:ir.model.fields,field_description:stock.field_stock_reference__create_date
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__create_date
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_option__create_date
@@ -3167,7 +3158,6 @@ msgstr "在送货单上显示批次和序列号"
 #: model:ir.model.fields,field_description:stock.field_ir_actions_report__display_name
 #: model:ir.model.fields,field_description:stock.field_lot_label_layout__display_name
 #: model:ir.model.fields,field_description:stock.field_picking_label_type__display_name
-#: model:ir.model.fields,field_description:stock.field_product_catalog_mixin__display_name
 #: model:ir.model.fields,field_description:stock.field_product_category__display_name
 #: model:ir.model.fields,field_description:stock.field_product_label_layout__display_name
 #: model:ir.model.fields,field_description:stock.field_product_product__display_name
@@ -3205,7 +3195,6 @@ msgstr "在送货单上显示批次和序列号"
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__display_name
 #: model:ir.model.fields,field_description:stock.field_stock_quant__display_name
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__display_name
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__display_name
 #: model:ir.model.fields,field_description:stock.field_stock_reference__display_name
 #: model:ir.model.fields,field_description:stock.field_stock_replenish_mixin__display_name
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__display_name
@@ -3899,7 +3888,6 @@ msgstr "该作业类型的调拨中的产品应如何预留。"
 #: model:ir.model.fields,field_description:stock.field_ir_actions_report__id
 #: model:ir.model.fields,field_description:stock.field_lot_label_layout__id
 #: model:ir.model.fields,field_description:stock.field_picking_label_type__id
-#: model:ir.model.fields,field_description:stock.field_product_catalog_mixin__id
 #: model:ir.model.fields,field_description:stock.field_product_category__id
 #: model:ir.model.fields,field_description:stock.field_product_label_layout__id
 #: model:ir.model.fields,field_description:stock.field_product_product__id
@@ -3937,7 +3925,6 @@ msgstr "该作业类型的调拨中的产品应如何预留。"
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__id
 #: model:ir.model.fields,field_description:stock.field_stock_quant__id
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__id
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__id
 #: model:ir.model.fields,field_description:stock.field_stock_reference__id
 #: model:ir.model.fields,field_description:stock.field_stock_replenish_mixin__id
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__id
@@ -4538,7 +4525,6 @@ msgstr "库存估值"
 #. module: stock
 #. odoo-javascript
 #: code:addons/stock/static/src/views/search/stock_report_search_panel.xml:0
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__inventory_datetime
 msgid "Inventory at Date"
 msgstr "某日库存"
 
@@ -4824,7 +4810,6 @@ msgstr "最后库存"
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__write_uid
 #: model:ir.model.fields,field_description:stock.field_stock_quant__write_uid
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__write_uid
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__write_uid
 #: model:ir.model.fields,field_description:stock.field_stock_reference__write_uid
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__write_uid
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_option__write_uid
@@ -4868,7 +4853,6 @@ msgstr "最后更新人"
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__write_date
 #: model:ir.model.fields,field_description:stock.field_stock_quant__write_date
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__write_date
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__write_date
 #: model:ir.model.fields,field_description:stock.field_stock_reference__write_date
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__write_date
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_option__write_date
@@ -5046,8 +5030,13 @@ msgstr "位置"
 
 #. module: stock
 #: model:ir.actions.report,name:stock.action_report_location_barcode
-msgid "Location Barcode"
-msgstr "位置条码"
+msgid "Location Barcode (PDF)"
+msgstr ""
+
+#. module: stock
+#: model:ir.actions.report,name:stock.action_label_location_template
+msgid "Location Barcode (ZPL)"
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_location__name
@@ -6912,11 +6901,6 @@ msgid "Product Capacity"
 msgstr "产品能力"
 
 #. module: stock
-#: model:ir.model,name:stock.model_product_catalog_mixin
-msgid "Product Catalog Mixin"
-msgstr "产品目录混合素"
-
-#. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_route__categ_ids
 #: model_terms:ir.ui.view,arch_db:stock.stock_location_route_form_view
 msgid "Product Categories"
@@ -7056,8 +7040,6 @@ msgid "Production Locations"
 msgstr "生产位置"
 
 #. module: stock
-#. odoo-python
-#: code:addons/stock/wizard/stock_quantity_history.py:0
 #: model:ir.actions.act_window,name:stock.act_product_location_open
 #: model:ir.actions.act_window,name:stock.product_template_action_product
 #: model:ir.model.fields,field_description:stock.field_stock_route__product_ids
@@ -8925,11 +8907,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock.stock_quant_view_graph
 msgid "Stock Quant"
 msgstr "库存量"
-
-#. module: stock
-#: model:ir.model,name:stock.model_stock_quantity_history
-msgid "Stock Quantity History"
-msgstr "库存数量历史"
 
 #. module: stock
 #: model:ir.model,name:stock.model_stock_quant_relocate
@@ -11409,6 +11386,18 @@ msgstr ""
 msgid ""
 "{{ object.company_id.name }} Delivery Order (Ref {{ object.name or 'n/a' }})"
 msgstr "${object.company_id.name} 交货单 (Ref ${object.name or 'n/a' })"
+
+#~ msgid "Choose your date"
+#~ msgstr "选择您的日期"
+
+#~ msgid "Location Barcode"
+#~ msgstr "位置条码"
+
+#~ msgid "Product Catalog Mixin"
+#~ msgstr "产品目录混合素"
+
+#~ msgid "Stock Quantity History"
+#~ msgstr "库存数量历史"
 
 #~ msgid "Andrwep"
 #~ msgstr "Andrwep"

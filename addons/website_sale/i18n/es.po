@@ -18,7 +18,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-19 04:05+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Spanish <https://translate.odoo.com/projects/odoo-master/"
@@ -962,14 +962,14 @@ msgstr ""
 "span>"
 
 #. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.documents
+msgid "<span>Documents</span>"
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 msgid "<span>Order</span>"
 msgstr "<span>Pedido</span>"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.product_document_kanban
-msgid "<span>Publish on website</span>"
-msgstr "<span>Publicar en el sitio web</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.view_product_image_form
@@ -985,11 +985,6 @@ msgstr "<span>días después de la publicación.</span>"
 #: model_terms:ir.ui.view,arch_db:website_sale.product_ribbon_form_view
 msgid "<span>for</span>"
 msgstr "<span>para</span>"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.product
-msgid "<strong>Documents</strong>"
-msgstr "<strong>Documentos</strong>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.delivery_form
@@ -1514,6 +1509,11 @@ msgid "Access Token"
 msgstr "Token de acceso"
 
 #. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_document__attached_on_sale
+msgid "Accessible"
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.template_footer_website_sale
 msgid "Accessories"
 msgstr "Accesorios"
@@ -1764,6 +1764,22 @@ msgstr ""
 #: model:ir.model.fields,help:website_sale.field_product_pricelist__selectable
 msgid "Allow the end user to choose this price list"
 msgstr "Permitir al usuario escoger esta lista de precios"
+
+#. module: website_sale
+#: model:ir.model.fields,help:website_sale.field_product_document__attached_on_sale
+msgid ""
+"Allows you to share the document with your customers within a sale.\n"
+"From Quotation: the document will be sent to and accessible by customers at "
+"any time.\n"
+"e.g. this option can be useful to share Product description files.\n"
+"On Order Confirmation: the document will be sent to and accessible by "
+"customers.\n"
+"e.g. this option can be useful to share User Manual or digital content "
+"bought on ecommerce. \n"
+"On Product Page: the document will be accessible by customers on the product "
+"page.\n"
+"e.g. this option can be useful to share Product description files."
+msgstr ""
 
 #. module: website_sale
 #: model:ir.actions.server,name:website_sale.dynamic_snippet_alternative_products
@@ -2378,11 +2394,6 @@ msgstr "Borrar la búsqueda de esta categoría"
 #: model:ir.model.fields,field_description:website_sale.field_res_config_settings__module_website_sale_collect
 msgid "Click & Collect"
 msgstr "Clic y recoger"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.cart
-msgid "Click here"
-msgstr "Haga clic aquí"
 
 #. module: website_sale
 #. odoo-javascript
@@ -3226,15 +3237,6 @@ msgid "Displayed only in the Category List Snippet."
 msgstr "Se muestra solo en el bloque de lista de categorías."
 
 #. module: website_sale
-#. odoo-python
-#: code:addons/website_sale/models/product_document.py:0
-msgid ""
-"Documents shown on product page cannot be restricted to a specific variant"
-msgstr ""
-"Los documentos mostrados en la página de productos no se pueden restringir a "
-"una variante específica"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_donation_form
 #: model_terms:ir.ui.view,arch_db:website_sale.s_donation_inline
 msgid "Donate"
@@ -3355,11 +3357,6 @@ msgid "E-Commerce Extra Info Shown on product page"
 msgstr ""
 "Información adicional de comercio electrónico que se muestra en la página "
 "del producto"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.product_document_form
-msgid "E-commerce"
-msgstr "Comercio electrónico"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_pricelist__code
@@ -4903,6 +4900,11 @@ msgid "On Product Cards"
 msgstr "En tarjetas de producto"
 
 #. module: website_sale
+#: model:ir.model.fields.selection,name:website_sale.selection__product_document__attached_on_sale__shown_on_product_page
+msgid "On Product Page"
+msgstr ""
+
+#. module: website_sale
 #: model:ir.model.fields.selection,name:website_sale.selection__product_ribbon__assign__sale
 msgid "On Sale"
 msgstr "En oferta"
@@ -5743,11 +5745,6 @@ msgstr "Fecha de publicación"
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
 msgid "Publish on"
 msgstr "Publicar el"
-
-#. module: website_sale
-#: model:ir.model.fields,field_description:website_sale.field_product_document__shown_on_product_page
-msgid "Publish on website"
-msgstr "Publicar en el sitio web"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
@@ -7169,11 +7166,6 @@ msgstr ""
 "Este contenido se compartirá a través de todas las páginas de productos."
 
 #. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.cart
-msgid "This is your current cart."
-msgstr "Este es su cesta actual."
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
 msgid ""
 "This note is added to sales orders, invoices, eCommerce listing and SEO "
@@ -7642,7 +7634,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_sale.field_product_tag__website_id
 #: model:ir.model.fields,field_description:website_sale.field_product_template__website_id
 #: model:ir.model.fields,field_description:website_sale.field_product_wishlist__website_id
-#: model:ir.model.fields,field_description:website_sale.field_sale_order__website_id
+#: model:ir.model.fields,field_description:website_sale.field_sale_order__assigned_website_id
 #: model:ir.model.fields,field_description:website_sale.field_sale_report__website_id
 #: model:ir.model.fields,field_description:website_sale.field_website_checkout_step__website_id
 #: model:ir.model.fields,field_description:website_sale.field_website_sale_extra_field__website_id
@@ -8089,6 +8081,11 @@ msgid "eCommerce Sales"
 msgstr "Ventas de comercio electrónico"
 
 #. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_sale_order__website_id
+msgid "eCommerce Website"
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.header_cart_link
 msgid "eCommerce cart"
 msgstr "Cesta del comercio electrónico"
@@ -8114,20 +8111,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "hours."
 msgstr "horas."
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.cart
-msgid "if you want to merge your previous cart into current cart."
-msgstr "si desea combinar su carro anterior con el actual."
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.cart
-msgid ""
-"if you want to restore your previous cart. Your current cart will be "
-"replaced with your previous cart."
-msgstr ""
-"si desea recuperar su carro anterior. Su carro actual será sustituido por el "
-"anterior."
 
 #. module: website_sale
 #. odoo-javascript
@@ -8290,6 +8273,40 @@ msgstr ""
 #: model:mail.template,subject:website_sale.email_template_back_in_stock
 msgid "{{ object.name or 'Product' }} is back in stock"
 msgstr ""
+
+#~ msgid "<span>Publish on website</span>"
+#~ msgstr "<span>Publicar en el sitio web</span>"
+
+#~ msgid "<strong>Documents</strong>"
+#~ msgstr "<strong>Documentos</strong>"
+
+#~ msgid "Click here"
+#~ msgstr "Haga clic aquí"
+
+#~ msgid ""
+#~ "Documents shown on product page cannot be restricted to a specific variant"
+#~ msgstr ""
+#~ "Los documentos mostrados en la página de productos no se pueden "
+#~ "restringir a una variante específica"
+
+#~ msgid "E-commerce"
+#~ msgstr "Comercio electrónico"
+
+#~ msgid "Publish on website"
+#~ msgstr "Publicar en el sitio web"
+
+#~ msgid "This is your current cart."
+#~ msgstr "Este es su cesta actual."
+
+#~ msgid "if you want to merge your previous cart into current cart."
+#~ msgstr "si desea combinar su carro anterior con el actual."
+
+#~ msgid ""
+#~ "if you want to restore your previous cart. Your current cart will be "
+#~ "replaced with your previous cart."
+#~ msgstr ""
+#~ "si desea recuperar su carro anterior. Su carro actual será sustituido por "
+#~ "el anterior."
 
 #~ msgid "<strong>Warning!</strong>"
 #~ msgstr "<strong>¡Advertencia!</strong>"

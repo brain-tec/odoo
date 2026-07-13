@@ -19,7 +19,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-21 19:35+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/"
@@ -318,18 +318,6 @@ msgstr "%s 税"
 
 #. module: account
 #. odoo-python
-#: code:addons/account/models/company.py:0
-msgid "%s, or / if not applicable"
-msgstr "%s, または / 該当しない場合"
-
-#. module: account
-#. odoo-python
-#: code:addons/account/models/partner.py:0
-msgid "%s, or not applicable"
-msgstr "%sまたは該当しない"
-
-#. module: account
-#. odoo-python
 #: code:addons/account/models/account_document_import_mixin.py:0
 msgid "'%(filename)s' (extracted from '%(root_filename)s', type=%(type)s)"
 msgstr "'%(filename)s' ('%(root_filename)s' から抽出、タイプ=%(type)s)"
@@ -444,12 +432,6 @@ msgstr "... (%(nb_of_values)s その他)"
 #: code:addons/account/static/src/components/x2many_buttons/x2many_buttons.xml:0
 msgid "... (View all)"
 msgstr "... (全てを表示)"
-
-#. module: account
-#. odoo-python
-#: code:addons/account/models/company.py:0
-msgid "/ if not applicable"
-msgstr "/ 該当しない場合"
 
 #. module: account
 #: model:account.tax,name:account.21_sale_export_tax_template
@@ -6169,6 +6151,16 @@ msgid "Couldn't reload data."
 msgstr ""
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_move_line__count_reconciled_lines
+msgid "Count Reconciled Lines"
+msgstr ""
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_move_line__count_reconciled_lines_excluding_exchange_diff
+msgid "Count Reconciled Lines Excluding Exchange Diff"
+msgstr ""
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_form
 msgid "Counterpart Items"
 msgstr "相手方項目"
@@ -7815,6 +7807,7 @@ msgstr "マッピングタブを表示"
 #: model:ir.model.fields,field_description:account.field_mail_message__display_name
 #: model:ir.model.fields,field_description:account.field_mail_template__display_name
 #: model:ir.model.fields,field_description:account.field_onboarding_onboarding_step__display_name
+#: model:ir.model.fields,field_description:account.field_product_catalog_line_mixin__display_name
 #: model:ir.model.fields,field_description:account.field_product_catalog_mixin__display_name
 #: model:ir.model.fields,field_description:account.field_product_category__display_name
 #: model:ir.model.fields,field_description:account.field_product_product__display_name
@@ -7888,8 +7881,8 @@ msgstr "プレビューボタンを表示"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
-msgid "Display the total amount of an invoice in letters"
-msgstr "請求書総額を文字で表示"
+msgid "Display the total amount of an invoice in words"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_disposal_fees
@@ -8701,6 +8694,7 @@ msgid "Exchange Loss"
 msgstr "為替差損"
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_move_line__exchange_move_ids
 #: model:ir.model.fields,field_description:account.field_account_partial_reconcile__exchange_move_id
 msgid "Exchange Move"
 msgstr "為替の動き"
@@ -9006,6 +9000,16 @@ msgstr "1行目インデックス"
 #: model:ir.model.fields,field_description:account.field_account_resequence_wizard__first_name
 msgid "First New Sequence"
 msgstr "最初の新しいシーケンス番号"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_move_line__first_reconciled_lines_id
+msgid "First Reconciled Lines"
+msgstr ""
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_move_line__first_reconciled_lines_excluding_exchange_diff_id
+msgid "First Reconciled Lines Excluding Exchange Diff"
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__auto_post_origin_id
@@ -9980,6 +9984,7 @@ msgstr "ICE:"
 #: model:ir.model.fields,field_description:account.field_mail_message__id
 #: model:ir.model.fields,field_description:account.field_mail_template__id
 #: model:ir.model.fields,field_description:account.field_onboarding_onboarding_step__id
+#: model:ir.model.fields,field_description:account.field_product_catalog_line_mixin__id
 #: model:ir.model.fields,field_description:account.field_product_catalog_mixin__id
 #: model:ir.model.fields,field_description:account.field_product_category__id
 #: model:ir.model.fields,field_description:account.field_product_product__id
@@ -12095,6 +12100,7 @@ msgid "Looks great!"
 msgstr "素晴らしい!"
 
 #. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_analytic_line__analytic_profitability__loss
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Loss"
 msgstr "損失"
@@ -13850,6 +13856,7 @@ msgid "Owner's Current Account"
 msgstr "オーナー当座勘定"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_account_analytic_line_filter_inherit_account
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
 msgid "P&L Accounts"
 msgstr "損益計算書勘定科目"
@@ -14883,6 +14890,11 @@ msgid "Product Accounts:"
 msgstr "プロダクト勘定科目:"
 
 #. module: account
+#: model:ir.model,name:account.model_product_catalog_line_mixin
+msgid "Product Catalog Line Mixin"
+msgstr ""
+
+#. module: account
 #: model:ir.model,name:account.model_product_catalog_mixin
 msgid "Product Catalog Mixin"
 msgstr "プロダクトカタログミックスイン"
@@ -14991,6 +15003,11 @@ msgstr "利益勘定が有効"
 #: model:account.account,name:account.22_account_account_us_profit_or_loss_appropriation
 msgid "Profit or Loss Appropriation"
 msgstr "損益処分"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_analytic_line__analytic_profitability
+msgid "Profitability"
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -15726,6 +15743,7 @@ msgstr "退職金制度の費用(401Kマッチング拠出)"
 #. odoo-python
 #: code:addons/account/wizard/accrued_orders.py:0
 #: model:ir.model.fields,field_description:account.field_digest_digest__kpi_account_total_revenue
+#: model:ir.model.fields.selection,name:account.selection__account_analytic_line__analytic_profitability__revenue
 #: model:ir.model.fields.selection,name:account.selection__account_automatic_entry_wizard__account_type__income
 msgid "Revenue"
 msgstr "収益"
@@ -18196,16 +18214,6 @@ msgstr ""
 "ります。"
 
 #. module: account
-#: model:ir.model.fields,help:account.field_base_document_layout__vat
-msgid ""
-"The Tax Identification Number. Values here will be validated based on the "
-"country format. You can use '/' to indicate that the partner is not subject "
-"to tax."
-msgstr ""
-"登録番号。ここの値は国の形式に基づいて検証されます。仕入先が課税対象でないこ"
-"とを示すには '/'を使用できます。"
-
-#. module: account
 #. odoo-python
 #: code:addons/account/models/account_move_line.py:0
 msgid "The account %(name)s (%(code)s) is archived."
@@ -19461,6 +19469,18 @@ msgstr "この仕訳は%sより複製されました"
 
 #. module: account
 #. odoo-python
+#: code:addons/account/wizard/account_move_reversal.py:0
+msgid "This entry has been reversed by %s"
+msgstr ""
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+msgid "This entry has been reversed from %s"
+msgstr "この仕訳は%sから逆仕訳されました"
+
+#. module: account
+#. odoo-python
 #: code:addons/account/models/account_move.py:0
 #, fuzzy
 msgid ""
@@ -19547,6 +19567,12 @@ msgstr ""
 msgid ""
 "This line and its children will be hidden when all of their columns are 0."
 msgstr "この行とその子は、全てのカラムが0になると非表示になります。"
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/product_catalog_mixin.py:0
+msgid "This model does not support (sub)sections"
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -19895,8 +19921,8 @@ msgstr "合計金額の文字表記： <br/>"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__display_invoice_amount_total_words
 #: model:ir.model.fields,field_description:account.field_res_config_settings__display_invoice_amount_total_words
-msgid "Total amount of invoice in letters"
-msgstr "請求書総額の文字表記"
+msgid "Total amount of invoice in words"
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_partner__credit
@@ -20116,6 +20142,11 @@ msgid ""
 msgstr ""
 "取引が見つからないため、計算書を作成できません。処理を続行する前に取引を再度"
 "依頼して下さい。"
+
+#. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_analytic_line__analytic_profitability__uncategorized
+msgid "Uncategorized"
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -20660,7 +20691,6 @@ msgstr "車両"
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment__partner_type__supplier
 #: model:ir.model.fields.selection,name:account.selection__account_payment_register__partner_type__supplier
-#: model_terms:ir.ui.view,arch_db:account.product_view_search_catalog
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
 #: model_terms:ir.ui.view,arch_db:account.view_account_supplier_payment_tree
 #: model_terms:ir.ui.view,arch_db:account.view_invoice_tree
@@ -21096,6 +21126,11 @@ msgid ""
 msgstr "請求書送付時および受領時に受信するメールの配信停止はこちらで行えます。"
 
 #. module: account
+#: model:ir.model.fields,help:account.field_base_document_layout__vat
+msgid "You can use '/' to indicate that the customer has no Tax ID."
+msgstr ""
+
+#. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "You can't block a paid invoice."
@@ -21525,6 +21560,13 @@ msgid ""
 msgstr ""
 "会計入力にすでに使用されている通貨の小数点以下の桁数を減らすことはできませ"
 "ん。"
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+#: code:addons/account/wizard/account_payment_register.py:0
+msgid "You cannot register payments for blocked invoices."
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -22164,12 +22206,6 @@ msgstr ""
 "郵便で登録事務所に送付された書簡により通知されなければならない。"
 
 #. module: account
-#. odoo-python
-#: code:addons/account/models/partner.py:0
-msgid "not applicable"
-msgstr "適用不可"
-
-#. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_tax_repartition_line__repartition_type__tax
 msgid "of tax"
 msgstr "税額"
@@ -22414,6 +22450,32 @@ msgid ""
 msgstr ""
 "{{ object.company_id.name }} Self-billing請求書 (参照番号 {{ object.name or "
 "'n/a' }})"
+
+#~ msgid "%s, or / if not applicable"
+#~ msgstr "%s, または / 該当しない場合"
+
+#~ msgid "%s, or not applicable"
+#~ msgstr "%sまたは該当しない"
+
+#~ msgid "/ if not applicable"
+#~ msgstr "/ 該当しない場合"
+
+#~ msgid "Display the total amount of an invoice in letters"
+#~ msgstr "請求書総額を文字で表示"
+
+#~ msgid ""
+#~ "The Tax Identification Number. Values here will be validated based on the "
+#~ "country format. You can use '/' to indicate that the partner is not "
+#~ "subject to tax."
+#~ msgstr ""
+#~ "登録番号。ここの値は国の形式に基づいて検証されます。仕入先が課税対象でない"
+#~ "ことを示すには '/'を使用できます。"
+
+#~ msgid "Total amount of invoice in letters"
+#~ msgstr "請求書総額の文字表記"
+
+#~ msgid "not applicable"
+#~ msgstr "適用不可"
 
 #~ msgid "Account Reconcile"
 #~ msgstr "消込勘定"
@@ -22996,9 +23058,6 @@ msgstr ""
 
 #~ msgid "Swiss company identification number (UIDB)."
 #~ msgstr "スイス企業識別番号 (UIDB)。"
-
-#~ msgid "This entry has been reversed from %s"
-#~ msgstr "この仕訳は%sから逆仕訳されました"
 
 #~ msgid "UEN"
 #~ msgstr "UEN"

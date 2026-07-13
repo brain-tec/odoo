@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:37+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 04:24+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
@@ -103,34 +103,6 @@ msgid "All files uploaded"
 msgstr "Barcha fayllar yuklandi"
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields,help:sale_pdf_quote_builder.field_product_document__attached_on_sale
-#, fuzzy
-msgid ""
-"Allows you to share the document with your customers within a sale.\n"
-"Leave it empty if you don't want to share this document with sales "
-"customer.\n"
-"On quote: the document will be sent to and accessible by customers at any "
-"time.\n"
-"e.g. this option can be useful to share Product description files.\n"
-"On order confirmation: the document will be sent to and accessible by "
-"customers.\n"
-"e.g. this option can be useful to share User Manual or digital content "
-"bought on ecommerce. \n"
-"Inside quote: The document will be included in the pdf of the quotation and "
-"sale order between the header pages and the quote table. "
-msgstr ""
-"Sotuvda mijozlaringiz bilan hujjatni ulashish imkonini beradi. Agar bu "
-"hujjatni sotish mijozi bilan ulashishni istamasangiz, bo‘sh qoldiring. "
-"Taklif haqida: hujjat istalgan vaqtda mijozlarga yuboriladi va ular "
-"foydalanishi mumkin. Masalan, bu variant Mahsulot tavsifi fayllarini "
-"ulashish uchun foydali bo‘lishi mumkin.  Buyurtmani tasdiqlash haqida: "
-"hujjat mijozlarga yuboriladi va ular foydalanishi mumkin bo‘ladi. Masalan, "
-"bu variant foydalanuvchi qo‘llanmasi yoki elektron tijoratda sotib olingan "
-"raqamli tarkibni ulashish uchun foydali bo‘lishi mumkin. Taklif ichida: "
-"Hujjat taklif va sotish buyurtmasining PDF formatida sarlavha sahifalari va "
-"taklif jadvali orasiga kiritiladi."
-
-#. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
 #, fuzzy
@@ -182,6 +154,10 @@ msgstr "Kompaniya"
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.product_document_form
+msgid "Configure"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
 #, fuzzy
 msgid "Configure dynamic fields"
@@ -281,6 +257,11 @@ msgid "Edit"
 msgstr "Tahrirlash"
 
 #. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__form_field_ids
+msgid "Fields"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__raw
 #, fuzzy
 msgid "File Content (raw)"
@@ -315,7 +296,6 @@ msgid "Form Fields"
 msgstr "Shakl maydonlari"
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__form_field_ids
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__form_field_ids
 #, fuzzy
 msgid "Form Fields Included"
@@ -430,12 +410,6 @@ msgid "Indexed Content"
 msgstr "Indekslangan mazmun"
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields.selection,name:sale_pdf_quote_builder.selection__product_document__attached_on_sale__inside
-#, fuzzy
-msgid "Inside quote pdf"
-msgstr "Iqtibos ichidagi PDF"
-
-#. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_pdf_form_field.py:0
 #, fuzzy
@@ -535,13 +509,6 @@ msgstr "Nomi"
 #, fuzzy
 msgid "No"
 msgstr "Yo‘q"
-
-#. module: sale_pdf_quote_builder
-#. odoo-python
-#: code:addons/sale_pdf_quote_builder/models/product_document.py:0
-#, fuzzy
-msgid "Only PDF documents can be attached inside a quote."
-msgstr "Iqtibos ichiga faqat PDF hujjatlarni biriktirish mumkin."
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
@@ -697,12 +664,6 @@ msgid "Resource Name"
 msgstr "Resurs nomi"
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__attached_on_sale
-#, fuzzy
-msgid "Sale : Visible at"
-msgstr "Sotish: Ko‘rinadi"
-
-#. module: sale_pdf_quote_builder
 #: model:ir.actions.server,name:sale_pdf_quote_builder.cron_post_upgrade_assign_missing_form_fields_ir_actions_server
 #, fuzzy
 msgid "Sale Pdf Quote Builder: assign form fields to documents post upgrade"
@@ -823,14 +784,6 @@ msgstr "Veb-sayt"
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
-#: code:addons/sale_pdf_quote_builder/models/product_document.py:0
-#, fuzzy
-msgid "When attached inside a quote, the document must be a file, not a URL."
-msgstr ""
-"Taklif ichiga biriktirilganda, hujjat URL emas, balki fayl bo‘lishi kerak"
-
-#. module: sale_pdf_quote_builder
-#. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/ir_actions_report.py:0
 #, fuzzy
 msgid "Yes"
@@ -851,3 +804,47 @@ msgstr ""
 #, fuzzy
 msgid "on"
 msgstr "ustida"
+
+#, fuzzy
+#~ msgid ""
+#~ "Allows you to share the document with your customers within a sale.\n"
+#~ "Leave it empty if you don't want to share this document with sales "
+#~ "customer.\n"
+#~ "On quote: the document will be sent to and accessible by customers at any "
+#~ "time.\n"
+#~ "e.g. this option can be useful to share Product description files.\n"
+#~ "On order confirmation: the document will be sent to and accessible by "
+#~ "customers.\n"
+#~ "e.g. this option can be useful to share User Manual or digital content "
+#~ "bought on ecommerce. \n"
+#~ "Inside quote: The document will be included in the pdf of the quotation "
+#~ "and sale order between the header pages and the quote table. "
+#~ msgstr ""
+#~ "Sotuvda mijozlaringiz bilan hujjatni ulashish imkonini beradi. Agar bu "
+#~ "hujjatni sotish mijozi bilan ulashishni istamasangiz, bo‘sh qoldiring. "
+#~ "Taklif haqida: hujjat istalgan vaqtda mijozlarga yuboriladi va ular "
+#~ "foydalanishi mumkin. Masalan, bu variant Mahsulot tavsifi fayllarini "
+#~ "ulashish uchun foydali bo‘lishi mumkin.  Buyurtmani tasdiqlash haqida: "
+#~ "hujjat mijozlarga yuboriladi va ular foydalanishi mumkin bo‘ladi. "
+#~ "Masalan, bu variant foydalanuvchi qo‘llanmasi yoki elektron tijoratda "
+#~ "sotib olingan raqamli tarkibni ulashish uchun foydali bo‘lishi mumkin. "
+#~ "Taklif ichida: Hujjat taklif va sotish buyurtmasining PDF formatida "
+#~ "sarlavha sahifalari va taklif jadvali orasiga kiritiladi."
+
+#, fuzzy
+#~ msgid "Inside quote pdf"
+#~ msgstr "Iqtibos ichidagi PDF"
+
+#, fuzzy
+#~ msgid "Only PDF documents can be attached inside a quote."
+#~ msgstr "Iqtibos ichiga faqat PDF hujjatlarni biriktirish mumkin."
+
+#, fuzzy
+#~ msgid "Sale : Visible at"
+#~ msgstr "Sotish: Ko‘rinadi"
+
+#, fuzzy
+#~ msgid ""
+#~ "When attached inside a quote, the document must be a file, not a URL."
+#~ msgstr ""
+#~ "Taklif ichiga biriktirilganda, hujjat URL emas, balki fayl bo‘lishi kerak"

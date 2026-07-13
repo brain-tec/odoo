@@ -19,7 +19,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-19 10:13+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/"
@@ -3102,6 +3102,7 @@ msgstr "このタイプの関連活動の背景色を変更します。"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_discuss_call_history__channel_id
+#: model:ir.model.fields,field_description:mail.field_discuss_channel_last_interest_update__channel_id
 #: model:ir.model.fields,field_description:mail.field_discuss_channel_member__channel_id
 #: model:ir.model.fields,field_description:mail.field_discuss_channel_rtc_session__channel_id
 #: model:ir.model.fields,field_description:mail.field_mail_mail__channel_id
@@ -4492,6 +4493,11 @@ msgid "Discuss: channel member unmute"
 msgstr "ディスカス: チャネルメンバミュート解除"
 
 #. module: mail
+#: model:ir.actions.server,name:mail.ir_cron_discuss_channel_sync_last_interest_dt_ir_actions_server
+msgid "Discuss: sync channel last interest"
+msgstr ""
+
+#. module: mail
 #: model:ir.model,name:mail.model_discuss_category
 msgid "Discussion Category"
 msgstr "ディスカッションカテゴリ"
@@ -4523,6 +4529,7 @@ msgstr "警告を閉じる"
 #: model:ir.model.fields,field_description:mail.field_discuss_call_history__display_name
 #: model:ir.model.fields,field_description:mail.field_discuss_category__display_name
 #: model:ir.model.fields,field_description:mail.field_discuss_channel__display_name
+#: model:ir.model.fields,field_description:mail.field_discuss_channel_last_interest_update__display_name
 #: model:ir.model.fields,field_description:mail.field_discuss_channel_member__display_name
 #: model:ir.model.fields,field_description:mail.field_discuss_channel_rtc_session__display_name
 #: model:ir.model.fields,field_description:mail.field_discuss_gif_favorite__display_name
@@ -6272,6 +6279,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_discuss_call_history__id
 #: model:ir.model.fields,field_description:mail.field_discuss_category__id
 #: model:ir.model.fields,field_description:mail.field_discuss_channel__id
+#: model:ir.model.fields,field_description:mail.field_discuss_channel_last_interest_update__id
 #: model:ir.model.fields,field_description:mail.field_discuss_channel_member__id
 #: model:ir.model.fields,field_description:mail.field_discuss_channel_rtc_session__id
 #: model:ir.model.fields,field_description:mail.field_discuss_gif_favorite__id
@@ -7342,6 +7350,11 @@ msgstr "最終エラーメッセージ"
 #: model:ir.model.fields,field_description:mail.field_fetchmail_server__date
 msgid "Last Fetch Date"
 msgstr "前回の読取日"
+
+#. module: mail
+#: model:ir.model.fields,field_description:mail.field_discuss_channel_last_interest_update__last_interest_dt
+msgid "Last Interest Dt"
+msgstr ""
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_presence__last_poll
@@ -9937,6 +9950,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_push__payload
 msgid "Payload"
 msgstr "ペイロード"
+
+#. module: mail
+#: model:ir.model,name:mail.model_discuss_channel_last_interest_update
+msgid "Pending Channel Last Interest Update"
+msgstr ""
 
 #. module: mail
 #. odoo-javascript
@@ -12705,17 +12723,6 @@ msgstr ""
 "するために使用されます。そのため、アーカイブや削除はできません。"
 
 #. module: mail
-#: model:ir.model.fields,help:mail.field_res_partner__vat
-#: model:ir.model.fields,help:mail.field_res_users__vat
-msgid ""
-"The Tax Identification Number. Values here will be validated based on the "
-"country format. You can use '/' to indicate that the partner is not subject "
-"to tax."
-msgstr ""
-"Tax Identification Number (納税者番号)。ここでの値は、国の形式に基づいて検証"
-"されます。取引先に税金がかからないことを示すには、'/' を使用してください。"
-
-#. module: mail
 #. odoo-python
 #: code:addons/mail/wizard/mail_activity_schedule.py:0
 msgid "The activity can be launched, with these additional effects:"
@@ -14956,6 +14963,12 @@ msgid "You can still turn off your %s anytime."
 msgstr ""
 
 #. module: mail
+#: model:ir.model.fields,help:mail.field_res_partner__vat
+#: model:ir.model.fields,help:mail.field_res_users__vat
+msgid "You can use '/' to indicate that the customer has no Tax ID."
+msgstr ""
+
+#. module: mail
 #. odoo-python
 #: code:addons/mail/models/mail_alias_domain.py:0
 msgid "You cannot assign an empty domain name."
@@ -15909,6 +15922,15 @@ msgstr "“%(member_name)s” 、 “%(channel_name)s内”"
 #: code:addons/mail/models/mail_canned_response.py:0
 msgid "🔒 Private"
 msgstr ""
+
+#~ msgid ""
+#~ "The Tax Identification Number. Values here will be validated based on the "
+#~ "country format. You can use '/' to indicate that the partner is not "
+#~ "subject to tax."
+#~ msgstr ""
+#~ "Tax Identification Number (納税者番号)。ここでの値は、国の形式に基づいて検"
+#~ "証されます。取引先に税金がかからないことを示すには、'/' を使用してくださ"
+#~ "い。"
 
 #~ msgid "Create a poll"
 #~ msgstr "投票を作成"

@@ -32,7 +32,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 14:55+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Estonian <https://translate.odoo.com/projects/odoo-master/"
@@ -872,6 +872,11 @@ msgstr ""
 "        </span>"
 
 #. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.product_document_kanban
+msgid "<span>Accessible</span>"
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "<span>Amount</span>"
@@ -882,11 +887,6 @@ msgstr "<span>Summa</span>"
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "<span>Disc.%</span>"
 msgstr "<span>Allah.%</span>"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.product_document_kanban
-msgid "<span>Sales visibility</span>"
-msgstr "<span>Müügi nähtavus</span>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -1028,6 +1028,11 @@ msgstr "Kinnita &amp; allkirjasta"
 #: model:ir.model.fields,field_description:sale.field_sale_order__access_warning
 msgid "Access warning"
 msgstr "Ligipääsuhoiatus"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_product_document__attached_on_sale
+msgid "Accessible"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order_line__qty_delivered_method
@@ -1179,27 +1184,17 @@ msgstr ""
 #: model:ir.model.fields,help:sale.field_product_document__attached_on_sale
 msgid ""
 "Allows you to share the document with your customers within a sale.\n"
-"Leave it empty if you don't want to share this document with sales "
-"customer.\n"
-"On quote: the document will be sent to and accessible by customers at any "
-"time.\n"
+"From Quotation: the document will be sent to and accessible by customers at "
+"any time.\n"
 "e.g. this option can be useful to share Product description files.\n"
-"On order confirmation: the document will be sent to and accessible by "
+"On Order Confirmation: the document will be sent to and accessible by "
 "customers.\n"
 "e.g. this option can be useful to share User Manual or digital content "
 "bought on ecommerce. \n"
-"Inside quote: The document will be included in the pdf of the quotation and "
-"sale order between the header pages and the quote table. "
+"On Product Page: the document will be accessible by customers on the product "
+"page.\n"
+"e.g. this option can be useful to share Product description files."
 msgstr ""
-"Võimaldab teil jagada dokumenti selle müügiga seotud klientidega.\n"
-"Jäta tühjaks, kui sa ei soovi seda dokumenti kliendiga jagada.\n"
-"Pakkumine: dokument saadetakse ja on klientidele igal hetkel kättesaadav .\n"
-"nt. see valik on kasulik, kui soovid tooteinfo faile kliendiga jagada.\n"
-"Kinnitatud tellimus: dokument saadetakse ja on klientidele vaatamiseks "
-"kättesaadav.\n"
-"nt. see valik on kasulik, kui soovid kasutusjuhendit kliendiga jagada.\n"
-"Pakkumise sees: dokument lisatakse pakkumise PDF faili päise ja pakkumise "
-"osa vahele. "
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_payment_link_wizard__amount_paid
@@ -2564,6 +2559,11 @@ msgid "Forecasted Stock"
 msgstr ""
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__quotation
+msgid "From Quotation"
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.actions.act_window,help:sale.action_account_invoice_report_salesteam
 msgid ""
 "From this report, you can have an overview of the amount invoiced to your "
@@ -2685,19 +2685,9 @@ msgid "Has Overages"
 msgstr ""
 
 #. module: sale
-#: model:ir.model.fields,field_description:sale.field_sale_order__show_update_pricelist
-msgid "Has Pricelist Changed"
-msgstr "Hinnakiri on muutunud"
-
-#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__has_down_payments
 msgid "Has down payments"
 msgstr "Omab ettemakse"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__hidden
-msgid "Hidden"
-msgstr "Peidetud"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_account_analytic_applicability__id
@@ -2776,8 +2766,10 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__pricelist_id
-msgid "If you change the pricelist, only newly added lines will be affected."
-msgstr "Kui muudate hinnakirja, mõjutab see ainult äsja lisatud ridu."
+msgid ""
+"If you change the pricelist, the prices of all order lines will be updated "
+"accordingly."
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -3383,6 +3375,11 @@ msgid "My Sales Order Lines"
 msgstr "Minu müügitellimuse read"
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__hidden
+msgid "Never"
+msgstr ""
+
+#. module: sale
 #. odoo-python
 #: code:addons/sale/models/sale_order.py:0
 msgid "New"
@@ -3528,13 +3525,8 @@ msgstr "Kõigil müügitellimusridadel"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__sale_order
-msgid "On confirmed order"
-msgstr "Kinnitatud tellimusel"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__quotation
-msgid "On quote"
-msgstr "Pakkumisel"
+msgid "On Order Confirmation"
+msgstr ""
 
 #. module: sale
 #. odoo-python
@@ -4046,18 +4038,6 @@ msgid "Product Variant"
 msgstr "Toote variatsioon"
 
 #. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-msgid "Product prices have been recomputed according to pricelist %s."
-msgstr "Tootemaksud on ümber arvutatud vastavalt hinnakirjale %s."
-
-#. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-msgid "Product prices have been recomputed."
-msgstr "Tootehinnad on ümberarvutatud."
-
-#. module: sale
 #: model:ir.actions.act_window,name:sale.product_template_action
 #: model:ir.ui.menu,name:sale.menu_product_template_action
 #: model:ir.ui.menu,name:sale.menu_reporting_product
@@ -4277,11 +4257,6 @@ msgid "Recommend when 'Adding to Cart' or quotation"
 msgstr "Soovitage ostukorvi lisamisel või hinnapakkumisel"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Recompute all prices based on this pricelist"
-msgstr "Arvuta kõik maksud selle hinnakirja põhjal"
-
-#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.account_invoice_form
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Reference"
@@ -4399,11 +4374,6 @@ msgstr "SO0000"
 #: code:addons/sale/static/src/js/sale_action_helper/sale_action_helper_dialog.xml:0
 msgid "Sale"
 msgstr "Müük"
-
-#. module: sale
-#: model:ir.model.fields,field_description:sale.field_product_document__attached_on_sale
-msgid "Sale : Visible at"
-msgstr "Müük: nähtav"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
@@ -5500,12 +5470,6 @@ msgstr ""
 "analüüsi“ aruannet Raamatupidamise moodulis."
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid ""
-"This will update the unit price of all products based on the new pricelist."
-msgstr "See uuendab kõiki toodete ühikuhindu uue määratud hinnakirja alusel."
-
-#. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__invoice_status__to_invoice
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_line__invoice_status__to_invoice
 #: model:ir.model.fields.selection,name:sale.selection__sale_report__invoice_status__to_invoice
@@ -5710,11 +5674,6 @@ msgstr "Arveldatud summa maksudeta"
 #: model:ir.model.fields,field_description:sale.field_sale_report__price_subtotal
 msgid "Untaxed Total"
 msgstr "Ilma maksudeta kokku"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Update Prices"
-msgstr "Uuenda hindasid"
 
 #. module: sale
 #. odoo-javascript
@@ -6159,6 +6118,71 @@ msgid ""
 "'Quotation' or 'Order' }} {{ object.name or 'n/a' }} "
 "{{ object.client_order_ref and ('(' + object.client_order_ref + ')') or '' }}"
 msgstr ""
+
+#~ msgid "<span>Sales visibility</span>"
+#~ msgstr "<span>Müügi nähtavus</span>"
+
+#~ msgid ""
+#~ "Allows you to share the document with your customers within a sale.\n"
+#~ "Leave it empty if you don't want to share this document with sales "
+#~ "customer.\n"
+#~ "On quote: the document will be sent to and accessible by customers at any "
+#~ "time.\n"
+#~ "e.g. this option can be useful to share Product description files.\n"
+#~ "On order confirmation: the document will be sent to and accessible by "
+#~ "customers.\n"
+#~ "e.g. this option can be useful to share User Manual or digital content "
+#~ "bought on ecommerce. \n"
+#~ "Inside quote: The document will be included in the pdf of the quotation "
+#~ "and sale order between the header pages and the quote table. "
+#~ msgstr ""
+#~ "Võimaldab teil jagada dokumenti selle müügiga seotud klientidega.\n"
+#~ "Jäta tühjaks, kui sa ei soovi seda dokumenti kliendiga jagada.\n"
+#~ "Pakkumine: dokument saadetakse ja on klientidele igal hetkel "
+#~ "kättesaadav .\n"
+#~ "nt. see valik on kasulik, kui soovid tooteinfo faile kliendiga jagada.\n"
+#~ "Kinnitatud tellimus: dokument saadetakse ja on klientidele vaatamiseks "
+#~ "kättesaadav.\n"
+#~ "nt. see valik on kasulik, kui soovid kasutusjuhendit kliendiga jagada.\n"
+#~ "Pakkumise sees: dokument lisatakse pakkumise PDF faili päise ja pakkumise "
+#~ "osa vahele. "
+
+#~ msgid "Has Pricelist Changed"
+#~ msgstr "Hinnakiri on muutunud"
+
+#~ msgid "Hidden"
+#~ msgstr "Peidetud"
+
+#~ msgid ""
+#~ "If you change the pricelist, only newly added lines will be affected."
+#~ msgstr "Kui muudate hinnakirja, mõjutab see ainult äsja lisatud ridu."
+
+#~ msgid "On confirmed order"
+#~ msgstr "Kinnitatud tellimusel"
+
+#~ msgid "On quote"
+#~ msgstr "Pakkumisel"
+
+#~ msgid "Product prices have been recomputed according to pricelist %s."
+#~ msgstr "Tootemaksud on ümber arvutatud vastavalt hinnakirjale %s."
+
+#~ msgid "Product prices have been recomputed."
+#~ msgstr "Tootehinnad on ümberarvutatud."
+
+#~ msgid "Recompute all prices based on this pricelist"
+#~ msgstr "Arvuta kõik maksud selle hinnakirja põhjal"
+
+#~ msgid "Sale : Visible at"
+#~ msgstr "Müük: nähtav"
+
+#~ msgid ""
+#~ "This will update the unit price of all products based on the new "
+#~ "pricelist."
+#~ msgstr ""
+#~ "See uuendab kõiki toodete ühikuhindu uue määratud hinnakirja alusel."
+
+#~ msgid "Update Prices"
+#~ msgstr "Uuenda hindasid"
 
 #~ msgid "Online payment"
 #~ msgstr "Internetipõhine makse"

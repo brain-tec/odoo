@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:37+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 00:03+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
@@ -47,20 +47,6 @@ msgid "ID"
 msgstr "識別號"
 
 #. module: project_purchase
-#. odoo-python
-#: code:addons/project_purchase/models/project_project.py:0
-msgid "No purchase order found. Let's create one."
-msgstr "找不到採購單。讓我們建立一個吧！"
-
-#. module: project_purchase
-#. odoo-python
-#: code:addons/project_purchase/models/project_project.py:0
-msgid ""
-"Once you ordered your products from your supplier, confirm your request for "
-"quotation and it will turn into a purchase order."
-msgstr "若已決定要向供應商訂購產品，請確認你的報價請求，它將會轉換為採購單。"
-
-#. module: project_purchase
 #: model:ir.model,name:project_purchase.model_project_project
 #: model:ir.model.fields,field_description:project_purchase.field_purchase_order__project_id
 msgid "Project"
@@ -77,8 +63,6 @@ msgid "Purchase Order Line"
 msgstr "採購訂單資料行"
 
 #. module: project_purchase
-#. odoo-python
-#: code:addons/project_purchase/models/project_project.py:0
 #: model:ir.embedded.actions,name:project_purchase.project_embedded_action_purchase_orders
 #: model:ir.embedded.actions,name:project_purchase.project_embedded_action_purchase_orders_dashboard
 #: model_terms:ir.ui.view,arch_db:project_purchase.project_view_form_inherit_project_purchase
@@ -89,3 +73,12 @@ msgstr "採購訂單"
 #: model:product.template,name:project_purchase.product_product_sand_product_template
 msgid "Sand"
 msgstr "沙粒"
+
+#~ msgid "No purchase order found. Let's create one."
+#~ msgstr "找不到採購單。讓我們建立一個吧！"
+
+#~ msgid ""
+#~ "Once you ordered your products from your supplier, confirm your request "
+#~ "for quotation and it will turn into a purchase order."
+#~ msgstr ""
+#~ "若已決定要向供應商訂購產品，請確認你的報價請求，它將會轉換為採購單。"

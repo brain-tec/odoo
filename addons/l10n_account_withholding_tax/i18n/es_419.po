@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 18:11+0000\n"
+"POT-Creation-Date: 2026-07-10 17:55+0000\n"
 "PO-Revision-Date: 2026-04-09 17:12+0000\n"
 "Last-Translator: \"Fernanda Alvarez (mfar)\" <mfar@odoo.com>\n"
 "Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
@@ -370,12 +370,6 @@ msgid "Placeholder Value"
 msgstr ""
 
 #. module: l10n_account_withholding_tax
-#. odoo-python
-#: code:addons/l10n_account_withholding_tax/models/account_withholding_line.py:0
-msgid "Please enter the sequence number for the tax %(tax_name)s"
-msgstr ""
-
-#. module: l10n_account_withholding_tax
 #: model:ir.model.fields,help:l10n_account_withholding_tax.field_account_payment_register_withholding_line__placeholder_value
 #: model:ir.model.fields,help:l10n_account_withholding_tax.field_account_payment_withholding_line__placeholder_value
 #: model:ir.model.fields,help:l10n_account_withholding_tax.field_account_withholding_line__placeholder_value
@@ -554,6 +548,18 @@ msgstr ""
 #. module: l10n_account_withholding_tax
 #. odoo-python
 #: code:addons/l10n_account_withholding_tax/models/account_withholding_line.py:0
+msgid "WH Base"
+msgstr ""
+
+#. module: l10n_account_withholding_tax
+#. odoo-python
+#: code:addons/l10n_account_withholding_tax/models/account_withholding_line.py:0
+msgid "WH Base Counterpart"
+msgstr ""
+
+#. module: l10n_account_withholding_tax
+#. odoo-python
+#: code:addons/l10n_account_withholding_tax/models/account_withholding_line.py:0
 msgid "WH Base Counterpart: %(names)s"
 msgstr ""
 
@@ -561,6 +567,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_account_withholding_tax/models/account_withholding_line.py:0
 msgid "WH Base: %(names)s"
+msgstr ""
+
+#. module: l10n_account_withholding_tax
+#. odoo-python
+#: code:addons/l10n_account_withholding_tax/models/account_withholding_line.py:0
+msgid "WH Tax"
 msgstr ""
 
 #. module: l10n_account_withholding_tax
@@ -614,6 +626,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_account_withholding_tax.field_account_bank_statement_line__withholding_deducted_amount_currency
 #: model:ir.model.fields,field_description:l10n_account_withholding_tax.field_account_move__withholding_deducted_amount_currency
 msgid "Withholding Deducted Amount Currency"
+msgstr ""
+
+#. module: l10n_account_withholding_tax
+#: model:ir.model.fields,field_description:l10n_account_withholding_tax.field_account_payment__withholding_hide_name
+#: model:ir.model.fields,field_description:l10n_account_withholding_tax.field_account_payment_register__withholding_hide_name
+msgid "Withholding Hide Name"
 msgstr ""
 
 #. module: l10n_account_withholding_tax

@@ -1639,7 +1639,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
             return [
                 BusResult(
                     self.user_emp_inbox,
-                    "mail.message/inbox",
+                    "mail.message/notification",
                     {
                         "message_id": message.id,
                         "store_data": {
@@ -1670,6 +1670,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "message_type": "comment",
                                     "model": "mail.test.simple",
                                     "needaction": True,
+                                    "needaction_done": False,
                                     "notification_ids": [notif_1.id, notif_2.id],
                                     "partner_cc_ids": [],
                                     "partner_ids": [],
@@ -1757,7 +1758,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                 ),
                 BusResult(
                     self.user_follower_emp_inbox,
-                    "mail.message/inbox",
+                    "mail.message/notification",
                     {
                         "message_id": message.id,
                         "store_data": {
@@ -1788,6 +1789,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "message_type": "comment",
                                     "model": "mail.test.simple",
                                     "needaction": True,
+                                    "needaction_done": False,
                                     "notification_ids": [notif_1.id, notif_2.id],
                                     "partner_cc_ids": [],
                                     "partner_ids": [],

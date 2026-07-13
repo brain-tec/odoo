@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:37+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-19 05:03+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Catalan <https://translate.odoo.com/projects/odoo-master/"
@@ -31,25 +31,11 @@ msgid "Bill of Material"
 msgstr "Llista de material"
 
 #. module: project_mrp
-#. odoo-python
-#: code:addons/project_mrp/models/project_project.py:0
 #: model:ir.embedded.actions,name:project_mrp.project_embedded_action_bills_of_materials
 #: model:ir.embedded.actions,name:project_mrp.project_embedded_action_bills_of_materials_dashboard
 #: model_terms:ir.ui.view,arch_db:project_mrp.project_view_form_inherit_project_mrp
 msgid "Bills of Materials"
 msgstr "Llistes de materials"
-
-#. module: project_mrp
-#. odoo-python
-#: code:addons/project_mrp/models/project_project.py:0
-msgid ""
-"Bills of materials allow you to define the list of required raw materials "
-"used to make a finished product; through a manufacturing order or a pack of "
-"products."
-msgstr ""
-"Les llistes de materials permeten definir la llista de matèries primeres "
-"necessàries per a la fabricació del producte final, a través d'una ordre de "
-"fabricació o un paquet de productes."
 
 #. module: project_mrp
 #: model:ir.model.fields,field_description:project_mrp.field_mrp_bom__display_name
@@ -84,13 +70,6 @@ msgid "Manufacturing Orders"
 msgstr "Ordres de producció"
 
 #. module: project_mrp
-#. odoo-python
-#: code:addons/project_mrp/models/project_project.py:0
-#, fuzzy
-msgid "No bill of materials found. Let's create one."
-msgstr "No s'ha trobat cap llista de materials. Creem-ne una."
-
-#. module: project_mrp
 #: model:ir.model,name:project_mrp.model_project_project
 #: model:ir.model.fields,field_description:project_mrp.field_mrp_bom__project_id
 #: model:ir.model.fields,field_description:project_mrp.field_mrp_production__project_id
@@ -106,3 +85,16 @@ msgstr "Moviment d'estoc"
 #: model:ir.model,name:project_mrp.model_stock_rule
 msgid "Stock Rule"
 msgstr "Regla d'estoc"
+
+#~ msgid ""
+#~ "Bills of materials allow you to define the list of required raw materials "
+#~ "used to make a finished product; through a manufacturing order or a pack "
+#~ "of products."
+#~ msgstr ""
+#~ "Les llistes de materials permeten definir la llista de matèries primeres "
+#~ "necessàries per a la fabricació del producte final, a través d'una ordre "
+#~ "de fabricació o un paquet de productes."
+
+#, fuzzy
+#~ msgid "No bill of materials found. Let's create one."
+#~ msgstr "No s'ha trobat cap llista de materials. Creem-ne una."

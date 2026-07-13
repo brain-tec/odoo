@@ -15,7 +15,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-21 21:14+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Dutch <https://translate.odoo.com/projects/odoo-master/"
@@ -1063,14 +1063,14 @@ msgstr ""
 "span>"
 
 #. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.documents
+msgid "<span>Documents</span>"
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 msgid "<span>Order</span>"
 msgstr "<span>Order</span>"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.product_document_kanban
-msgid "<span>Publish on website</span>"
-msgstr "<span>Op de website publiceren</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.view_product_image_form
@@ -1086,11 +1086,6 @@ msgstr "<span>dagen na publicatie.</span>"
 #: model_terms:ir.ui.view,arch_db:website_sale.product_ribbon_form_view
 msgid "<span>for</span>"
 msgstr "<span>voor</span>"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.product
-msgid "<strong>Documents</strong>"
-msgstr "<strong>Documenten</strong>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.delivery_form
@@ -1945,6 +1940,11 @@ msgid "Access Token"
 msgstr "Toegangstoken"
 
 #. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_product_document__attached_on_sale
+msgid "Accessible"
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.template_footer_website_sale
 msgid "Accessories"
 msgstr "Accessoires"
@@ -2198,6 +2198,22 @@ msgstr "Selectie toestaan tot maximaal"
 #: model:ir.model.fields,help:website_sale.field_product_pricelist__selectable
 msgid "Allow the end user to choose this price list"
 msgstr "Sta de eindgebruiker toe om deze prijslijst te kiezen"
+
+#. module: website_sale
+#: model:ir.model.fields,help:website_sale.field_product_document__attached_on_sale
+msgid ""
+"Allows you to share the document with your customers within a sale.\n"
+"From Quotation: the document will be sent to and accessible by customers at "
+"any time.\n"
+"e.g. this option can be useful to share Product description files.\n"
+"On Order Confirmation: the document will be sent to and accessible by "
+"customers.\n"
+"e.g. this option can be useful to share User Manual or digital content "
+"bought on ecommerce. \n"
+"On Product Page: the document will be accessible by customers on the product "
+"page.\n"
+"e.g. this option can be useful to share Product description files."
+msgstr ""
 
 #. module: website_sale
 #: model:ir.actions.server,name:website_sale.dynamic_snippet_alternative_products
@@ -2813,11 +2829,6 @@ msgstr "Zoekopdracht wissen voor deze categorie"
 #: model:ir.model.fields,field_description:website_sale.field_res_config_settings__module_website_sale_collect
 msgid "Click & Collect"
 msgstr "Click & Collect"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.cart
-msgid "Click here"
-msgstr "Klik hier"
 
 #. module: website_sale
 #. odoo-javascript
@@ -3663,15 +3674,6 @@ msgid "Displayed only in the Category List Snippet."
 msgstr "Enkel weergegeven in de Categorielijst-snippet."
 
 #. module: website_sale
-#. odoo-python
-#: code:addons/website_sale/models/product_document.py:0
-msgid ""
-"Documents shown on product page cannot be restricted to a specific variant"
-msgstr ""
-"De op de productpagina weergegeven documenten kunnen niet worden beperkt tot "
-"een specifieke variant"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_donation_form
 #: model_terms:ir.ui.view,arch_db:website_sale.s_donation_inline
 msgid "Donate"
@@ -3791,11 +3793,6 @@ msgstr "Extra velden voor e-commerce"
 #: model:ir.model,name:website_sale.model_website_sale_extra_field
 msgid "E-Commerce Extra Info Shown on product page"
 msgstr "Extra informatie voor e-commerce getoond op de productpagina"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.product_document_form
-msgid "E-commerce"
-msgstr "E-commerce"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_pricelist__code
@@ -5348,6 +5345,11 @@ msgid "On Product Cards"
 msgstr "Op Product Cards"
 
 #. module: website_sale
+#: model:ir.model.fields.selection,name:website_sale.selection__product_document__attached_on_sale__shown_on_product_page
+msgid "On Product Page"
+msgstr ""
+
+#. module: website_sale
 #: model:ir.model.fields.selection,name:website_sale.selection__product_ribbon__assign__sale
 msgid "On Sale"
 msgstr "Afgeprijsd"
@@ -6184,11 +6186,6 @@ msgstr "Publicatiedatum"
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
 msgid "Publish on"
 msgstr "Publiceren op"
-
-#. module: website_sale
-#: model:ir.model.fields,field_description:website_sale.field_product_document__shown_on_product_page
-msgid "Publish on website"
-msgstr "Op de website publiceren"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
@@ -7620,11 +7617,6 @@ msgid "This content will be shared across all product pages."
 msgstr "Deze inhoud wordt gedeeld op alle productpagina's."
 
 #. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.cart
-msgid "This is your current cart."
-msgstr "Dit is je huidige winkelmandje."
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
 msgid ""
 "This note is added to sales orders, invoices, eCommerce listing and SEO "
@@ -8095,7 +8087,7 @@ msgstr "We informeren je zodra het product weer op voorraad is"
 #: model:ir.model.fields,field_description:website_sale.field_product_tag__website_id
 #: model:ir.model.fields,field_description:website_sale.field_product_template__website_id
 #: model:ir.model.fields,field_description:website_sale.field_product_wishlist__website_id
-#: model:ir.model.fields,field_description:website_sale.field_sale_order__website_id
+#: model:ir.model.fields,field_description:website_sale.field_sale_order__assigned_website_id
 #: model:ir.model.fields,field_description:website_sale.field_sale_report__website_id
 #: model:ir.model.fields,field_description:website_sale.field_website_checkout_step__website_id
 #: model:ir.model.fields,field_description:website_sale.field_website_sale_extra_field__website_id
@@ -8538,6 +8530,11 @@ msgid "eCommerce Sales"
 msgstr "E-commerce verkopen"
 
 #. module: website_sale
+#: model:ir.model.fields,field_description:website_sale.field_sale_order__website_id
+msgid "eCommerce Website"
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.header_cart_link
 msgid "eCommerce cart"
 msgstr "E-commerce winkelmandje"
@@ -8564,21 +8561,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "hours."
 msgstr "uur."
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.cart
-msgid "if you want to merge your previous cart into current cart."
-msgstr ""
-"als je je oude winkelmandje wilt samenvoegen met het nieuwe winkelmandje."
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.cart
-msgid ""
-"if you want to restore your previous cart. Your current cart will be "
-"replaced with your previous cart."
-msgstr ""
-"als je je vorige winkelmandje wilt herstellen. Je huidige winkelmandje wordt "
-"vervangen door je vorige winkelmandje."
 
 #. module: website_sale
 #. odoo-javascript
@@ -8748,6 +8730,41 @@ msgstr "youremail@gmail.com"
 #: model:mail.template,subject:website_sale.email_template_back_in_stock
 msgid "{{ object.name or 'Product' }} is back in stock"
 msgstr ""
+
+#~ msgid "<span>Publish on website</span>"
+#~ msgstr "<span>Op de website publiceren</span>"
+
+#~ msgid "<strong>Documents</strong>"
+#~ msgstr "<strong>Documenten</strong>"
+
+#~ msgid "Click here"
+#~ msgstr "Klik hier"
+
+#~ msgid ""
+#~ "Documents shown on product page cannot be restricted to a specific variant"
+#~ msgstr ""
+#~ "De op de productpagina weergegeven documenten kunnen niet worden beperkt "
+#~ "tot een specifieke variant"
+
+#~ msgid "E-commerce"
+#~ msgstr "E-commerce"
+
+#~ msgid "Publish on website"
+#~ msgstr "Op de website publiceren"
+
+#~ msgid "This is your current cart."
+#~ msgstr "Dit is je huidige winkelmandje."
+
+#~ msgid "if you want to merge your previous cart into current cart."
+#~ msgstr ""
+#~ "als je je oude winkelmandje wilt samenvoegen met het nieuwe winkelmandje."
+
+#~ msgid ""
+#~ "if you want to restore your previous cart. Your current cart will be "
+#~ "replaced with your previous cart."
+#~ msgstr ""
+#~ "als je je vorige winkelmandje wilt herstellen. Je huidige winkelmandje "
+#~ "wordt vervangen door je vorige winkelmandje."
 
 #~ msgid ""
 #~ "%(product_name)s has not been added to your cart since it is not "

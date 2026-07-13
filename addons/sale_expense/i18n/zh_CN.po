@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:37+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-19 01:06+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
@@ -30,6 +30,35 @@ msgid "# of Expenses"
 msgstr "# 费用"
 
 #. module: sale_expense
+#. odoo-python
+#: code:addons/sale_expense/models/account_move.py:0
+msgid "%(count)s expense receipts attached from reinvoiced expenses."
+msgstr ""
+
+#. module: sale_expense
+#. odoo-python
+#: code:addons/sale_expense/models/account_move.py:0
+msgid "1 expense receipt attached from reinvoiced expenses."
+msgstr ""
+
+#. module: sale_expense
+#: model:ir.model.fields,field_description:sale_expense.field_hr_expense__attach_receipts_to_invoice
+msgid "Attach receipts to future customer invoices"
+msgstr ""
+
+#. module: sale_expense
+#: model:ir.model.fields,field_description:sale_expense.field_hr_expense_post_wizard__attach_receipts_to_invoice
+msgid "Attach receipts to future related invoices"
+msgstr ""
+
+#. module: sale_expense
+#: model:ir.model.fields,help:sale_expense.field_hr_expense__attach_receipts_to_invoice
+msgid ""
+"Attach the expense receipts to customer invoices generated later from the "
+"related sales order"
+msgstr ""
+
+#. module: sale_expense
 #: model:ir.model.fields,field_description:sale_expense.field_hr_expense__can_be_reinvoiced
 #: model:ir.model.fields,field_description:sale_expense.field_hr_expense_split__can_be_reinvoiced
 msgid "Can be reinvoiced"
@@ -39,6 +68,7 @@ msgstr "可重开结算单"
 #: model:ir.model.fields,field_description:sale_expense.field_account_move__display_name
 #: model:ir.model.fields,field_description:sale_expense.field_account_move_line__display_name
 #: model:ir.model.fields,field_description:sale_expense.field_hr_expense__display_name
+#: model:ir.model.fields,field_description:sale_expense.field_hr_expense_post_wizard__display_name
 #: model:ir.model.fields,field_description:sale_expense.field_hr_expense_split__display_name
 #: model:ir.model.fields,field_description:sale_expense.field_product_template__display_name
 #: model:ir.model.fields,field_description:sale_expense.field_sale_order__display_name
@@ -56,6 +86,11 @@ msgstr "费用"
 #: model:ir.model.fields,field_description:sale_expense.field_product_template__expense_policy_tooltip
 msgid "Expense Policy Tooltip"
 msgstr "费用政策提示"
+
+#. module: sale_expense
+#: model:ir.model,name:sale_expense.model_hr_expense_post_wizard
+msgid "Expense Posting Wizard"
+msgstr ""
 
 #. module: sale_expense
 #: model:ir.model,name:sale_expense.model_hr_expense_split
@@ -96,6 +131,7 @@ msgstr "费用将在发布时以其销售价格（产品价格、价格表等）
 #: model:ir.model.fields,field_description:sale_expense.field_account_move__id
 #: model:ir.model.fields,field_description:sale_expense.field_account_move_line__id
 #: model:ir.model.fields,field_description:sale_expense.field_hr_expense__id
+#: model:ir.model.fields,field_description:sale_expense.field_hr_expense_post_wizard__id
 #: model:ir.model.fields,field_description:sale_expense.field_hr_expense_split__id
 #: model:ir.model.fields,field_description:sale_expense.field_product_template__id
 #: model:ir.model.fields,field_description:sale_expense.field_sale_order__id
@@ -151,3 +187,8 @@ msgstr "销售订单"
 #: model:ir.model,name:sale_expense.model_sale_order_line
 msgid "Sales Order Line"
 msgstr "销售订单明细"
+
+#. module: sale_expense
+#: model:ir.model.fields,field_description:sale_expense.field_hr_expense_post_wizard__show_attach_receipts_to_invoice
+msgid "Show Attach Receipts To Invoice"
+msgstr ""

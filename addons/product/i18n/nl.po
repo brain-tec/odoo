@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:37+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 17:19+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Dutch <https://translate.odoo.com/projects/odoo-master/"
@@ -702,11 +702,6 @@ msgstr ""
 "geselecteerd aantal om andere toe te voegen."
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "Attached To"
-msgstr "Gekoppeld aan"
-
-#. module: product
 #: model:ir.model,name:product.model_ir_attachment
 msgid "Attachment"
 msgstr "Bijlage"
@@ -960,6 +955,12 @@ msgstr "Kan variant afbeelding 1024 ingezoomed worden"
 #: model:product.attribute.value,name:product.pav_brand_canon
 msgid "Canon"
 msgstr "Canon"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid "Catalog missing the child field to update."
+msgstr ""
 
 #. module: product
 #: model:ir.actions.act_window,name:product.product_category_action_form
@@ -1287,11 +1288,6 @@ msgid "Created on"
 msgstr "Aangemaakt op"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "Creation"
-msgstr "Aangemaakt"
-
-#. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_volume_volume_in_cubic_feet__1
 msgid "Cubic Feet (ft³)"
 msgstr "Kubieke Voeten (ft³)"
@@ -1533,6 +1529,7 @@ msgstr "Weergave toegepast op"
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__display_name
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__display_name
 #: model:ir.model.fields,field_description:product.field_product_base_unit__display_name
+#: model:ir.model.fields,field_description:product.field_product_catalog_line_mixin__display_name
 #: model:ir.model.fields,field_description:product.field_product_catalog_mixin__display_name
 #: model:ir.model.fields,field_description:product.field_product_category__display_name
 #: model:ir.model.fields,field_description:product.field_product_combo__display_name
@@ -1590,11 +1587,6 @@ msgid ""
 msgstr ""
 "Geeft de aangepaste eenheid voor de producten weer, indien gedefinieerd, of "
 "de geselecteerde maateenheid anders."
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-msgid "Document"
-msgstr "Document"
 
 #. module: product
 #. odoo-python
@@ -1781,6 +1773,11 @@ msgstr "Favoriet"
 #: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Favorites"
 msgstr "Favorieten"
+
+#. module: product
+#: model_terms:ir.ui.view,arch_db:product.product_document_form
+msgid "File"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__raw
@@ -2037,11 +2034,6 @@ msgid "High-back office chair with great support"
 msgstr "Bureaustoel met hoge rug en goede ondersteuning"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "History"
-msgstr "Geschiedenis"
-
-#. module: product
 #: model:product.category,name:product.product_category_construction
 msgid "Home Construction"
 msgstr "Woningbouw"
@@ -2057,6 +2049,7 @@ msgstr "Hotel accommodatie"
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__id
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__id
 #: model:ir.model.fields,field_description:product.field_product_base_unit__id
+#: model:ir.model.fields,field_description:product.field_product_catalog_line_mixin__id
 #: model:ir.model.fields,field_description:product.field_product_catalog_mixin__id
 #: model:ir.model.fields,field_description:product.field_product_category__id
 #: model:ir.model.fields,field_description:product.field_product_combo__id
@@ -2201,11 +2194,6 @@ msgstr "Afbeelding bron"
 #: model:ir.model.fields,field_description:product.field_product_document__image_width
 msgid "Image Width"
 msgstr "Breedte afbeelding"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-msgid "Image is a link"
-msgstr "Afbeelding is een link"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_attribute_search
@@ -3263,6 +3251,7 @@ msgstr "Afgescheiden werkpod met bureau en stoel"
 #. odoo-python
 #: code:addons/product/controllers/pricelist_report.py:0
 #: model:ir.model,name:product.model_product_template
+#: model:ir.model.fields,field_description:product.field_product_catalog_line_mixin__product_id
 #: model:ir.model.fields,field_description:product.field_product_label_layout__product_ids
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_tmpl_id
 #: model:ir.model.fields,field_description:product.field_product_product__product_variant_id
@@ -3313,6 +3302,11 @@ msgstr "Productkenmerk en waardes"
 #: model:ir.model.fields,field_description:product.field_product_template__attribute_line_ids
 msgid "Product Attributes"
 msgstr "Productkenmerken"
+
+#. module: product
+#: model:ir.model,name:product.model_product_catalog_line_mixin
+msgid "Product Catalog Line Mixin"
+msgstr ""
 
 #. module: product
 #: model:ir.model,name:product.model_product_catalog_mixin
@@ -4327,6 +4321,14 @@ msgstr ""
 
 #. module: product
 #. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid ""
+"There are multiple lines with the same product, please update those one by "
+"one and not through the catalog."
+msgstr ""
+
+#. module: product
+#. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "There are no possible combination."
 msgstr "Er zijn geen mogelijke combinaties."
@@ -4706,11 +4708,15 @@ msgstr "Waarden"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_id
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_view_search
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Variant"
 msgstr "Variant"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_document__variant_attribute_value_ids
+msgid "Variant Attribute Value"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__product_variant_count
@@ -4793,6 +4799,7 @@ msgstr "Fluweel"
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__partner_id
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_search_view
+#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Vendor"
 msgstr "Leverancier"
 
@@ -4942,6 +4949,12 @@ msgid "Write Date"
 msgstr "Schrijfdatum"
 
 #. module: product
+#. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid "Wrong catalog child field!"
+msgstr ""
+
+#. module: product
 #: model:product.attribute.value,name:product.pav_size_xl
 msgid "XL"
 msgstr "XL"
@@ -5026,6 +5039,12 @@ msgstr ""
 #: code:addons/product/static/src/product_catalog/order_line/order_line.xml:0
 msgid "You can't edit this product in the catalog."
 msgstr "Je kunt dit product niet in de catalogus bijwerken."
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid "You cannot add or remove products from this record."
+msgstr ""
 
 #. module: product
 #. odoo-python
@@ -5400,11 +5419,6 @@ msgid "markup"
 msgstr "opslag"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "on"
-msgstr "met"
-
-#. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "pdf"
@@ -5451,6 +5465,24 @@ msgstr "aan"
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "xlsx"
 msgstr "xlsx"
+
+#~ msgid "Attached To"
+#~ msgstr "Gekoppeld aan"
+
+#~ msgid "Creation"
+#~ msgstr "Aangemaakt"
+
+#~ msgid "Document"
+#~ msgstr "Document"
+
+#~ msgid "History"
+#~ msgstr "Geschiedenis"
+
+#~ msgid "Image is a link"
+#~ msgstr "Afbeelding is een link"
+
+#~ msgid "on"
+#~ msgstr "met"
 
 #~ msgid "<strong>Qty: </strong>"
 #~ msgstr "<strong>Aantal: </strong>"

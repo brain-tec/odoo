@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 20:15+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
@@ -240,12 +240,6 @@ msgstr ""
 
 #. module: sale_project
 #. odoo-python
-#: code:addons/sale_project/models/project_project.py:0
-msgid "Create a customer invoice"
-msgstr "创建客户发票"
-
-#. module: sale_project
-#. odoo-python
 #: code:addons/sale_project/models/product_template.py:0
 msgid ""
 "Create a project for the order with a task for each sales order line to "
@@ -261,31 +255,9 @@ msgstr "在现有项目中创建一个任务，追踪所花费的时间。"
 
 #. module: sale_project
 #. odoo-python
-#: code:addons/sale_project/models/project_project.py:0
-msgid "Create a vendor bill"
-msgstr "创建供应商账单"
-
-#. module: sale_project
-#. odoo-python
 #: code:addons/sale_project/models/product_template.py:0
 msgid "Create an empty project for the order to track the time spent."
 msgstr "为订单创建一个空项目，以追踪所花费的时间。"
-
-#. module: sale_project
-#. odoo-python
-#: code:addons/sale_project/models/project_project.py:0
-msgid ""
-"Create invoices, register payments and keep track of the discussions with "
-"your customers."
-msgstr "创建发票，登记付款，追踪与客户的沟通。"
-
-#. module: sale_project
-#. odoo-python
-#: code:addons/sale_project/models/project_project.py:0
-msgid ""
-"Create invoices, register payments and keep track of the discussions with "
-"your vendors."
-msgstr "创建发票，登记付款，并追踪与供应商的沟通。"
 
 #. module: sale_project
 #: model:ir.model.fields,field_description:sale_project.field_product_product__service_tracking
@@ -396,8 +368,6 @@ msgid "Invoice your time and material to customers"
 msgstr "向客户开具您的时间和材料的结算单"
 
 #. module: sale_project
-#. odoo-python
-#: code:addons/sale_project/models/project_project.py:0
 #: model:ir.embedded.actions,name:sale_project.project_embedded_action_invoices
 #: model:ir.embedded.actions,name:sale_project.project_embedded_action_invoices_dashboard
 #: model_terms:ir.ui.view,arch_db:sale_project.view_edit_project_inherit_form
@@ -955,3 +925,19 @@ msgstr ""
 #: code:addons/sale_project/models/sale_order.py:0
 msgid "sale_line_id"
 msgstr ""
+
+#~ msgid "Create a customer invoice"
+#~ msgstr "创建客户发票"
+
+#~ msgid "Create a vendor bill"
+#~ msgstr "创建供应商账单"
+
+#~ msgid ""
+#~ "Create invoices, register payments and keep track of the discussions with "
+#~ "your customers."
+#~ msgstr "创建发票，登记付款，追踪与客户的沟通。"
+
+#~ msgid ""
+#~ "Create invoices, register payments and keep track of the discussions with "
+#~ "your vendors."
+#~ msgstr "创建发票，登记付款，并追踪与供应商的沟通。"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-22 17:46+0000\n"
+"POT-Creation-Date: 2026-07-10 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 17:29+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
@@ -159,6 +159,14 @@ msgid ""
 msgstr ""
 
 #. module: pos_viva_com
+#. odoo-javascript
+#: code:addons/pos_viva_com/static/src/app/hooks/use_viva_app.js:0
+msgid ""
+"Please note that your order has not been finalized, try again or choose "
+"another payment method. (%s)"
+msgstr ""
+
+#. module: pos_viva_com
 #: model:ir.model,name:pos_viva_com.model_pos_payment
 msgid "Point of Sale Payment"
 msgstr ""
@@ -220,7 +228,8 @@ msgstr "我们与 Viva.com 之间的通讯出现了一些问题，请稍后再�
 msgid ""
 "Unable to retrieve Viva.com Bearer Token: Please verify that the Client ID "
 "and Client Secret are correct"
-msgstr "未能取得 Viva.com 持有人权杖。 请检查客户端识别码、客户端秘密密钥是否正确。"
+msgstr ""
+"未能取得 Viva.com 持有人权杖。 请检查客户端识别码、客户端秘密密钥是否正确。"
 
 #. module: pos_viva_com
 #: model_terms:ir.ui.view,arch_db:pos_viva_com.pos_payment_method_view_form_inherit_pos_viva_com

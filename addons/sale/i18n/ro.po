@@ -18,7 +18,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 20:23+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/"
@@ -867,6 +867,11 @@ msgstr ""
 "        </span>"
 
 #. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.product_document_kanban
+msgid "<span>Accessible</span>"
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "<span>Amount</span>"
@@ -877,11 +882,6 @@ msgstr "<span>Suma</span>"
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "<span>Disc.%</span>"
 msgstr "<span>Disc.%</span>"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.product_document_kanban
-msgid "<span>Sales visibility</span>"
-msgstr "<span>Vizibilitate vânzări</span>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -1024,6 +1024,11 @@ msgstr "Acceptați și semnați"
 #: model:ir.model.fields,field_description:sale.field_sale_order__access_warning
 msgid "Access warning"
 msgstr "Avertizare acces"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_product_document__attached_on_sale
+msgid "Accessible"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order_line__qty_delivered_method
@@ -1176,29 +1181,17 @@ msgstr ""
 #: model:ir.model.fields,help:sale.field_product_document__attached_on_sale
 msgid ""
 "Allows you to share the document with your customers within a sale.\n"
-"Leave it empty if you don't want to share this document with sales "
-"customer.\n"
-"On quote: the document will be sent to and accessible by customers at any "
-"time.\n"
+"From Quotation: the document will be sent to and accessible by customers at "
+"any time.\n"
 "e.g. this option can be useful to share Product description files.\n"
-"On order confirmation: the document will be sent to and accessible by "
+"On Order Confirmation: the document will be sent to and accessible by "
 "customers.\n"
 "e.g. this option can be useful to share User Manual or digital content "
 "bought on ecommerce. \n"
-"Inside quote: The document will be included in the pdf of the quotation and "
-"sale order between the header pages and the quote table. "
+"On Product Page: the document will be accessible by customers on the product "
+"page.\n"
+"e.g. this option can be useful to share Product description files."
 msgstr ""
-"Vă permite să partajați documentul cu clienții dvs. în cadrul unei vânzări.\n"
-"Lăsați gol dacă nu doriți să partajați acest document cu clientul de "
-"vânzări.\n"
-"La ofertă: documentul va fi trimis și accesibil clienților oricând.\n"
-"Ex: această opțiune poate fi utilă pentru a partaja fișiere de descriere a "
-"produsului.\n"
-"La confirmarea comenzii: documentul va fi trimis și accesibil clienților.\n"
-"Ex: această opțiune poate fi utilă pentru a partaja manualul de utilizare "
-"sau conținut digital cumpărat pe ecommerce.\n"
-"În interiorul ofertei: documentul va fi inclus în pdf-ul ofertei și comenzii "
-"de vânzare între paginile de antet și tabelul ofertei. "
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_payment_link_wizard__amount_paid
@@ -2564,6 +2557,11 @@ msgid "Forecasted Stock"
 msgstr ""
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__quotation
+msgid "From Quotation"
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.actions.act_window,help:sale.action_account_invoice_report_salesteam
 msgid ""
 "From this report, you can have an overview of the amount invoiced to your "
@@ -2686,19 +2684,9 @@ msgid "Has Overages"
 msgstr ""
 
 #. module: sale
-#: model:ir.model.fields,field_description:sale.field_sale_order__show_update_pricelist
-msgid "Has Pricelist Changed"
-msgstr "Are lista de prețuri modificată"
-
-#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__has_down_payments
 msgid "Has down payments"
 msgstr "Are avansuri"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__hidden
-msgid "Hidden"
-msgstr "Ascuns"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_account_analytic_applicability__id
@@ -2777,10 +2765,10 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__pricelist_id
-msgid "If you change the pricelist, only newly added lines will be affected."
+msgid ""
+"If you change the pricelist, the prices of all order lines will be updated "
+"accordingly."
 msgstr ""
-"Dacă modificați lista de prețuri, vor fi afectate doar liniile recent "
-"adăugate."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -3392,6 +3380,11 @@ msgid "My Sales Order Lines"
 msgstr "Liniile comenzii mele de vânzare"
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__hidden
+msgid "Never"
+msgstr ""
+
+#. module: sale
 #. odoo-python
 #: code:addons/sale/models/sale_order.py:0
 msgid "New"
@@ -3537,13 +3530,8 @@ msgstr "Pe toate liniile de comandă"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__sale_order
-msgid "On confirmed order"
-msgstr "La comandă confirmată"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__quotation
-msgid "On quote"
-msgstr "La ofertă"
+msgid "On Order Confirmation"
+msgstr ""
 
 #. module: sale
 #. odoo-python
@@ -4057,20 +4045,6 @@ msgid "Product Variant"
 msgstr "Variantă produs"
 
 #. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-msgid "Product prices have been recomputed according to pricelist %s."
-msgstr ""
-"Prețurile produselor au fost recalculat în conformitate cu lista de prețuri "
-"%s."
-
-#. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-msgid "Product prices have been recomputed."
-msgstr "Prețurile produselor au fost recalculate."
-
-#. module: sale
 #: model:ir.actions.act_window,name:sale.product_template_action
 #: model:ir.ui.menu,name:sale.menu_product_template_action
 #: model:ir.ui.menu,name:sale.menu_reporting_product
@@ -4292,11 +4266,6 @@ msgid "Recommend when 'Adding to Cart' or quotation"
 msgstr "Recomandați la \"Adăugarea în coș\" sau la ofertă de preț"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Recompute all prices based on this pricelist"
-msgstr "Recomputați toate prețurile pe baza acestei liste de prețuri"
-
-#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.account_invoice_form
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Reference"
@@ -4417,11 +4386,6 @@ msgstr "SO0000"
 #: code:addons/sale/static/src/js/sale_action_helper/sale_action_helper_dialog.xml:0
 msgid "Sale"
 msgstr "Vânzare"
-
-#. module: sale
-#: model:ir.model.fields,field_description:sale.field_product_document__attached_on_sale
-msgid "Sale : Visible at"
-msgstr "Vânzare : Vizibil la"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
@@ -5531,14 +5495,6 @@ msgstr ""
 "raportul de analiză facturi din rapoarte contabilitate."
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid ""
-"This will update the unit price of all products based on the new pricelist."
-msgstr ""
-"Se va actualiza prețul unitar al tuturor produselor pe baza noii liste de "
-"prețuri."
-
-#. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__invoice_status__to_invoice
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_line__invoice_status__to_invoice
 #: model:ir.model.fields.selection,name:sale.selection__sale_report__invoice_status__to_invoice
@@ -5743,11 +5699,6 @@ msgstr "Valoare facturată fără taxe"
 #: model:ir.model.fields,field_description:sale.field_sale_report__price_subtotal
 msgid "Untaxed Total"
 msgstr "Total fără taxe"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Update Prices"
-msgstr "Actualizare Prețuri"
 
 #. module: sale
 #. odoo-javascript
@@ -6192,6 +6143,79 @@ msgid ""
 "'Quotation' or 'Order' }} {{ object.name or 'n/a' }} "
 "{{ object.client_order_ref and ('(' + object.client_order_ref + ')') or '' }}"
 msgstr ""
+
+#~ msgid "<span>Sales visibility</span>"
+#~ msgstr "<span>Vizibilitate vânzări</span>"
+
+#~ msgid ""
+#~ "Allows you to share the document with your customers within a sale.\n"
+#~ "Leave it empty if you don't want to share this document with sales "
+#~ "customer.\n"
+#~ "On quote: the document will be sent to and accessible by customers at any "
+#~ "time.\n"
+#~ "e.g. this option can be useful to share Product description files.\n"
+#~ "On order confirmation: the document will be sent to and accessible by "
+#~ "customers.\n"
+#~ "e.g. this option can be useful to share User Manual or digital content "
+#~ "bought on ecommerce. \n"
+#~ "Inside quote: The document will be included in the pdf of the quotation "
+#~ "and sale order between the header pages and the quote table. "
+#~ msgstr ""
+#~ "Vă permite să partajați documentul cu clienții dvs. în cadrul unei "
+#~ "vânzări.\n"
+#~ "Lăsați gol dacă nu doriți să partajați acest document cu clientul de "
+#~ "vânzări.\n"
+#~ "La ofertă: documentul va fi trimis și accesibil clienților oricând.\n"
+#~ "Ex: această opțiune poate fi utilă pentru a partaja fișiere de descriere "
+#~ "a produsului.\n"
+#~ "La confirmarea comenzii: documentul va fi trimis și accesibil "
+#~ "clienților.\n"
+#~ "Ex: această opțiune poate fi utilă pentru a partaja manualul de utilizare "
+#~ "sau conținut digital cumpărat pe ecommerce.\n"
+#~ "În interiorul ofertei: documentul va fi inclus în pdf-ul ofertei și "
+#~ "comenzii de vânzare între paginile de antet și tabelul ofertei. "
+
+#~ msgid "Has Pricelist Changed"
+#~ msgstr "Are lista de prețuri modificată"
+
+#~ msgid "Hidden"
+#~ msgstr "Ascuns"
+
+#~ msgid ""
+#~ "If you change the pricelist, only newly added lines will be affected."
+#~ msgstr ""
+#~ "Dacă modificați lista de prețuri, vor fi afectate doar liniile recent "
+#~ "adăugate."
+
+#~ msgid "On confirmed order"
+#~ msgstr "La comandă confirmată"
+
+#~ msgid "On quote"
+#~ msgstr "La ofertă"
+
+#~ msgid "Product prices have been recomputed according to pricelist %s."
+#~ msgstr ""
+#~ "Prețurile produselor au fost recalculat în conformitate cu lista de "
+#~ "prețuri %s."
+
+#~ msgid "Product prices have been recomputed."
+#~ msgstr "Prețurile produselor au fost recalculate."
+
+#~ msgid "Recompute all prices based on this pricelist"
+#~ msgstr "Recomputați toate prețurile pe baza acestei liste de prețuri"
+
+#~ msgid "Sale : Visible at"
+#~ msgstr "Vânzare : Vizibil la"
+
+#~ msgid ""
+#~ "This will update the unit price of all products based on the new "
+#~ "pricelist."
+#~ msgstr ""
+#~ "Se va actualiza prețul unitar al tuturor produselor pe baza noii liste de "
+#~ "prețuri."
+
+#~ msgid "Update Prices"
+#~ msgstr "Actualizare Prețuri"
 
 #~ msgid "Online payment"
 #~ msgstr "Plată online"

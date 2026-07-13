@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:37+0000\n"
 "PO-Revision-Date: 2026-06-18 21:31+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: French <https://translate.odoo.com/projects/odoo-master/"
@@ -83,6 +83,24 @@ msgstr "%(project_name)s (%(sign)s%(hours)s h)"
 
 #. module: hr_timesheet
 #. odoo-python
+#: code:addons/hr_timesheet/models/project_task.py:0
+msgid "%(sign)s%(hours)sh"
+msgstr ""
+
+#. module: hr_timesheet
+#. odoo-python
+#: code:addons/hr_timesheet/models/project_task.py:0
+msgid "%(sign)s%(hours)sh %(minutes)sm"
+msgstr ""
+
+#. module: hr_timesheet
+#. odoo-python
+#: code:addons/hr_timesheet/models/project_task.py:0
+msgid "%(sign)s%(minutes)sm"
+msgstr ""
+
+#. module: hr_timesheet
+#. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid ""
 "'%(missing_plan_names)s' analytic plan(s) required on the project '%"
@@ -90,12 +108,6 @@ msgid ""
 msgstr ""
 "'%(missing_plan_names)s' plan(s) analytique(s) requis pour le projet '%"
 "(project_name)s' lié à la feuille de temps."
-
-#. module: hr_timesheet
-#. odoo-python
-#: code:addons/hr_timesheet/models/project_task.py:0
-msgid "(%(sign)s%(hours)s:%(minutes)s remaining)"
-msgstr "(%(sign)s%(hours)s:%(minutes)s restants)"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1502,6 +1514,9 @@ msgid ""
 "on\n"
 "                        <span class=\"fw-bold ms-1\">Sub-tasks</span>"
 msgstr ""
+
+#~ msgid "(%(sign)s%(hours)s:%(minutes)s remaining)"
+#~ msgstr "(%(sign)s%(hours)s:%(minutes)s restants)"
 
 #~ msgid "<span style=\"margin-right: 15px;\">Total (Days)</span>"
 #~ msgstr "<span style=\"margin-right: 15px;\">Total (Jours)</span>"

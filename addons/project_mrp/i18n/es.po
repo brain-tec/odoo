@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:37+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-19 05:36+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Spanish <https://translate.odoo.com/projects/odoo-master/"
@@ -34,25 +34,11 @@ msgid "Bill of Material"
 msgstr "Lista de materiales"
 
 #. module: project_mrp
-#. odoo-python
-#: code:addons/project_mrp/models/project_project.py:0
 #: model:ir.embedded.actions,name:project_mrp.project_embedded_action_bills_of_materials
 #: model:ir.embedded.actions,name:project_mrp.project_embedded_action_bills_of_materials_dashboard
 #: model_terms:ir.ui.view,arch_db:project_mrp.project_view_form_inherit_project_mrp
 msgid "Bills of Materials"
 msgstr "Lista de materiales"
-
-#. module: project_mrp
-#. odoo-python
-#: code:addons/project_mrp/models/project_project.py:0
-msgid ""
-"Bills of materials allow you to define the list of required raw materials "
-"used to make a finished product; through a manufacturing order or a pack of "
-"products."
-msgstr ""
-"Las listas de materiales le permiten definir la lista de materias primas "
-"necesarias para fabricar el producto terminado, mediante una orden de "
-"fabricación o un paquete de productos."
 
 #. module: project_mrp
 #: model:ir.model.fields,field_description:project_mrp.field_mrp_bom__display_name
@@ -85,12 +71,6 @@ msgid "Manufacturing Orders"
 msgstr "Órdenes de fabricación"
 
 #. module: project_mrp
-#. odoo-python
-#: code:addons/project_mrp/models/project_project.py:0
-msgid "No bill of materials found. Let's create one."
-msgstr "No se ha encontrado ninguna lista de materiales. ¡Creemos una!"
-
-#. module: project_mrp
 #: model:ir.model,name:project_mrp.model_project_project
 #: model:ir.model.fields,field_description:project_mrp.field_mrp_bom__project_id
 #: model:ir.model.fields,field_description:project_mrp.field_mrp_production__project_id
@@ -106,3 +86,15 @@ msgstr "Movimiento de stock"
 #: model:ir.model,name:project_mrp.model_stock_rule
 msgid "Stock Rule"
 msgstr "Regla de stock"
+
+#~ msgid ""
+#~ "Bills of materials allow you to define the list of required raw materials "
+#~ "used to make a finished product; through a manufacturing order or a pack "
+#~ "of products."
+#~ msgstr ""
+#~ "Las listas de materiales le permiten definir la lista de materias primas "
+#~ "necesarias para fabricar el producto terminado, mediante una orden de "
+#~ "fabricación o un paquete de productos."
+
+#~ msgid "No bill of materials found. Let's create one."
+#~ msgstr "No se ha encontrado ninguna lista de materiales. ¡Creemos una!"

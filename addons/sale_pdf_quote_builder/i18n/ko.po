@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:37+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 07:30+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Korean <https://translate.odoo.com/projects/odoo-master/"
@@ -26,8 +26,8 @@ msgid ""
 "(object.state in ('draft', 'sent') and 'Quotation - %s' % (object.name)) or "
 "'Order - %s' % (object.name)"
 msgstr ""
-"(object.state in ('draft', 'sent') and '견적 - %s' % (object.name)) or "
-"'주문 - %s' % (object.name)"
+"(object.state in ('draft', 'sent') and '견적 - %s' % (object.name)) or '주문 "
+"- %s' % (object.name)"
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
@@ -45,7 +45,8 @@ msgstr "<span>문서 유형:</span>"
 msgid ""
 "A form field set as used in product documents can't be linked to a quotation "
 "document."
-msgstr "제품 문서에 사용하도록 지정된 양식 필드는 견적 문서에 연결할 수 없습니다."
+msgstr ""
+"제품 문서에 사용하도록 지정된 양식 필드는 견적 문서에 연결할 수 없습니다."
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
@@ -53,7 +54,8 @@ msgstr "제품 문서에 사용하도록 지정된 양식 필드는 견적 문�
 msgid ""
 "A form field set as used in quotation documents can't be linked to a product "
 "document."
-msgstr "견적 문서에 사용하도록 지정된 양식 필드는 제품 문서에 연결할 수 없습니다."
+msgstr ""
+"견적 문서에 사용하도록 지정된 양식 필드는 제품 문서에 연결할 수 없습니다."
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__access_token
@@ -81,32 +83,6 @@ msgstr "전체"
 #: code:addons/sale_pdf_quote_builder/controllers/quotation_document.py:0
 msgid "All files uploaded"
 msgstr "모든 파일을 업로드 했습니다"
-
-#. module: sale_pdf_quote_builder
-#: model:ir.model.fields,help:sale_pdf_quote_builder.field_product_document__attached_on_sale
-msgid ""
-"Allows you to share the document with your customers within a sale.\n"
-"Leave it empty if you don't want to share this document with sales "
-"customer.\n"
-"On quote: the document will be sent to and accessible by customers at any "
-"time.\n"
-"e.g. this option can be useful to share Product description files.\n"
-"On order confirmation: the document will be sent to and accessible by "
-"customers.\n"
-"e.g. this option can be useful to share User Manual or digital content "
-"bought on ecommerce. \n"
-"Inside quote: The document will be included in the pdf of the quotation and "
-"sale order between the header pages and the quote table. "
-msgstr ""
-"판매 앱에서 고객과 문서를 공유할 수 있습니다.\n"
-"고객과 해당 문서를 공유하지 않으려면 비워두세요.\n"
-"견적서: 언제든지 고객에게 문서를 전송하거나 고객이 액세스할 수 있습니다.\n"
-"예: 해당 옵션을 통해 품목에 대한 설명 파일을 편리하게 공유할 수 있습니다\n"
-"주문 확정: 고객에게 문서를 전송하거나 고객이 액세스할 수 있습니다.\n"
-"예: 해당 옵션을 통해 사용자 매뉴얼이나 이커머스에서 구매한 디지털 콘텐츠를 "
-"편리하게 공유할 수 있습니다.\n"
-"내부 견적서 PDF: 문서가 머릿말 페이지 및 견적표 사이의 견적서 PDF 안에 "
-"포함됩니다. "
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
@@ -152,6 +128,10 @@ msgstr "회사"
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.product_document_form
+msgid "Configure"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
 msgid "Configure dynamic fields"
 msgstr "동적 필드 구성"
@@ -236,6 +216,11 @@ msgid "Edit"
 msgstr "편집"
 
 #. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__form_field_ids
+msgid "Fields"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__raw
 msgid "File Content (raw)"
 msgstr "파일 컨텐츠(raw)"
@@ -265,7 +250,6 @@ msgid "Form Fields"
 msgstr "양식 필드"
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__form_field_ids
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__form_field_ids
 msgid "Form Fields Included"
 msgstr "포함된 양식 필드"
@@ -337,7 +321,8 @@ msgstr ""
 msgid ""
 "If unchecked, it will allow you to hide the header or footer without "
 "removing it."
-msgstr "이 옵션을 선택하지 않으면 머리글이나 바닥글을 제거하지 않고 숨길 수 있습니다."
+msgstr ""
+"이 옵션을 선택하지 않으면 머리글이나 바닥글을 제거하지 않고 숨길 수 있습니다."
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__image_height
@@ -360,19 +345,14 @@ msgid "Indexed Content"
 msgstr "색인화된 콘텐츠"
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields.selection,name:sale_pdf_quote_builder.selection__product_document__attached_on_sale__inside
-msgid "Inside quote pdf"
-msgstr "내부 견적서 PDF"
-
-#. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_pdf_form_field.py:0
 msgid ""
 "Invalid form field name %(field_name)s. A form field name in a header or a "
 "footer can not start with \"sol_id_\"."
 msgstr ""
-"잘못된 양식 필드 이름 %(field_name)s입니다. 머리글 또는 바닥글의 양식 필드 "
-"이름은 “sol_id_”로 시작할 수 없습니다."
+"잘못된 양식 필드 이름 %(field_name)s입니다. 머리글 또는 바닥글의 양식 필드 이"
+"름은 “sol_id_”로 시작할 수 없습니다."
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
@@ -409,8 +389,8 @@ msgid ""
 "It seems that we're not able to process this pdf inside a quotation. It is "
 "either encrypted, or encoded in a format we do not support."
 msgstr ""
-"견적서 내에서 이 PDF를 처리할 수 없습니다. 암호화되었거나 지원되지 않는 "
-"형식으로 인코딩되어 있을 수 있습니다."
+"견적서 내에서 이 PDF를 처리할 수 없습니다. 암호화되었거나 지원되지 않는 형식"
+"으로 인코딩되어 있을 수 있습니다."
 
 #. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__key
@@ -449,12 +429,6 @@ msgstr "이름"
 #: code:addons/sale_pdf_quote_builder/models/ir_actions_report.py:0
 msgid "No"
 msgstr "아니오"
-
-#. module: sale_pdf_quote_builder
-#. odoo-python
-#: code:addons/sale_pdf_quote_builder/models/product_document.py:0
-msgid "Only PDF documents can be attached inside a quote."
-msgstr "견적서 내부에는 PDF 문서만 첨부할 수 있습니다."
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
@@ -589,11 +563,6 @@ msgid "Resource Name"
 msgstr "리소스명"
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__attached_on_sale
-msgid "Sale : Visible at"
-msgstr "판매 : 다음에서 확인 가능"
-
-#. module: sale_pdf_quote_builder
 #: model:ir.actions.server,name:sale_pdf_quote_builder.cron_post_upgrade_assign_missing_form_fields_ir_actions_server
 msgid "Sale Pdf Quote Builder: assign form fields to documents post upgrade"
 msgstr "판매 PDF 견적서 작성기: 업그레이드 후 문서에 양식 필드를 할당합니다."
@@ -692,12 +661,6 @@ msgstr "웹사이트"
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
-#: code:addons/sale_pdf_quote_builder/models/product_document.py:0
-msgid "When attached inside a quote, the document must be a file, not a URL."
-msgstr "견적서 안에 문서를 첨부하려면 URL이 아닌 파일을 사용해야 합니다."
-
-#. module: sale_pdf_quote_builder
-#. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/ir_actions_report.py:0
 msgid "Yes"
 msgstr "예"
@@ -715,3 +678,40 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
 msgid "on"
 msgstr "있음"
+
+#~ msgid ""
+#~ "Allows you to share the document with your customers within a sale.\n"
+#~ "Leave it empty if you don't want to share this document with sales "
+#~ "customer.\n"
+#~ "On quote: the document will be sent to and accessible by customers at any "
+#~ "time.\n"
+#~ "e.g. this option can be useful to share Product description files.\n"
+#~ "On order confirmation: the document will be sent to and accessible by "
+#~ "customers.\n"
+#~ "e.g. this option can be useful to share User Manual or digital content "
+#~ "bought on ecommerce. \n"
+#~ "Inside quote: The document will be included in the pdf of the quotation "
+#~ "and sale order between the header pages and the quote table. "
+#~ msgstr ""
+#~ "판매 앱에서 고객과 문서를 공유할 수 있습니다.\n"
+#~ "고객과 해당 문서를 공유하지 않으려면 비워두세요.\n"
+#~ "견적서: 언제든지 고객에게 문서를 전송하거나 고객이 액세스할 수 있습니다.\n"
+#~ "예: 해당 옵션을 통해 품목에 대한 설명 파일을 편리하게 공유할 수 있습니다\n"
+#~ "주문 확정: 고객에게 문서를 전송하거나 고객이 액세스할 수 있습니다.\n"
+#~ "예: 해당 옵션을 통해 사용자 매뉴얼이나 이커머스에서 구매한 디지털 콘텐츠"
+#~ "를 편리하게 공유할 수 있습니다.\n"
+#~ "내부 견적서 PDF: 문서가 머릿말 페이지 및 견적표 사이의 견적서 PDF 안에 포"
+#~ "함됩니다. "
+
+#~ msgid "Inside quote pdf"
+#~ msgstr "내부 견적서 PDF"
+
+#~ msgid "Only PDF documents can be attached inside a quote."
+#~ msgstr "견적서 내부에는 PDF 문서만 첨부할 수 있습니다."
+
+#~ msgid "Sale : Visible at"
+#~ msgstr "판매 : 다음에서 확인 가능"
+
+#~ msgid ""
+#~ "When attached inside a quote, the document must be a file, not a URL."
+#~ msgstr "견적서 안에 문서를 첨부하려면 URL이 아닌 파일을 사용해야 합니다."

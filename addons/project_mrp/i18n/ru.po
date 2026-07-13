@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:37+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 06:40+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Russian <https://translate.odoo.com/projects/odoo-master/"
@@ -35,25 +35,11 @@ msgid "Bill of Material"
 msgstr "Ведомость материалов"
 
 #. module: project_mrp
-#. odoo-python
-#: code:addons/project_mrp/models/project_project.py:0
 #: model:ir.embedded.actions,name:project_mrp.project_embedded_action_bills_of_materials
 #: model:ir.embedded.actions,name:project_mrp.project_embedded_action_bills_of_materials_dashboard
 #: model_terms:ir.ui.view,arch_db:project_mrp.project_view_form_inherit_project_mrp
 msgid "Bills of Materials"
 msgstr "Спецификация"
-
-#. module: project_mrp
-#. odoo-python
-#: code:addons/project_mrp/models/project_project.py:0
-msgid ""
-"Bills of materials allow you to define the list of required raw materials "
-"used to make a finished product; through a manufacturing order or a pack of "
-"products."
-msgstr ""
-"Спецификации материалов позволяют определить список необходимого сырья для "
-"производства готовой продукции – через производственный заказ или упаковку "
-"товаров."
 
 #. module: project_mrp
 #: model:ir.model.fields,field_description:project_mrp.field_mrp_bom__display_name
@@ -87,12 +73,6 @@ msgid "Manufacturing Orders"
 msgstr "Заказы на производство"
 
 #. module: project_mrp
-#. odoo-python
-#: code:addons/project_mrp/models/project_project.py:0
-msgid "No bill of materials found. Let's create one."
-msgstr "Не найдена ни одна спецификация. Давайте создадим первую!"
-
-#. module: project_mrp
 #: model:ir.model,name:project_mrp.model_project_project
 #: model:ir.model.fields,field_description:project_mrp.field_mrp_bom__project_id
 #: model:ir.model.fields,field_description:project_mrp.field_mrp_production__project_id
@@ -108,3 +88,15 @@ msgstr "Движение запасов"
 #: model:ir.model,name:project_mrp.model_stock_rule
 msgid "Stock Rule"
 msgstr "Правило запаса"
+
+#~ msgid ""
+#~ "Bills of materials allow you to define the list of required raw materials "
+#~ "used to make a finished product; through a manufacturing order or a pack "
+#~ "of products."
+#~ msgstr ""
+#~ "Спецификации материалов позволяют определить список необходимого сырья "
+#~ "для производства готовой продукции – через производственный заказ или "
+#~ "упаковку товаров."
+
+#~ msgid "No bill of materials found. Let's create one."
+#~ msgstr "Не найдена ни одна спецификация. Давайте создадим первую!"

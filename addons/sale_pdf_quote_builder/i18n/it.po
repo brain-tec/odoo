@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-03 17:37+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 19:19+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Italian <https://translate.odoo.com/projects/odoo-master/"
@@ -87,37 +87,6 @@ msgid "All files uploaded"
 msgstr "Tutti i file sono stati caricati"
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields,help:sale_pdf_quote_builder.field_product_document__attached_on_sale
-msgid ""
-"Allows you to share the document with your customers within a sale.\n"
-"Leave it empty if you don't want to share this document with sales "
-"customer.\n"
-"On quote: the document will be sent to and accessible by customers at any "
-"time.\n"
-"e.g. this option can be useful to share Product description files.\n"
-"On order confirmation: the document will be sent to and accessible by "
-"customers.\n"
-"e.g. this option can be useful to share User Manual or digital content "
-"bought on ecommerce. \n"
-"Inside quote: The document will be included in the pdf of the quotation and "
-"sale order between the header pages and the quote table. "
-msgstr ""
-"Consente di condividere il documento con i tuoi clienti al momento di una "
-"vendita.\n"
-"Lascia il campo vuoto se non vuoi condividere il documento con i clienti.\n"
-"Su preventivo: il documento verrà inviato e sarà accessibile ai clienti in "
-"qualsiasi momento.\n"
-"ad es. quest'opzione può essere utile per condividere file relativi alla "
-"descrizione del prodotto.\n"
-"Su ordine confermato: il documento verrà inviato e sarà accessibile ai "
-"clienti.\n"
-"ad es. quest'opzione può essere utile per condividere manuali utente o "
-"contenuti digitali acquistati sull'e-commerce. \n"
-"All'interno del preventivo: il documento verrà incluso nel pdf del "
-"preventivo e dell'ordine di vendita tra la pagina d'intestazione e la "
-"tabella del preventivo. "
-
-#. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_search_view
 msgid "Archived"
@@ -161,6 +130,10 @@ msgstr "Azienda"
 
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.product_document_form
+msgid "Configure"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
 msgid "Configure dynamic fields"
 msgstr "Configura campi dinamici"
@@ -245,6 +218,11 @@ msgid "Edit"
 msgstr "Modifica"
 
 #. module: sale_pdf_quote_builder
+#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__form_field_ids
+msgid "Fields"
+msgstr ""
+
+#. module: sale_pdf_quote_builder
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__raw
 msgid "File Content (raw)"
 msgstr "Contenuto del file (grezzo)"
@@ -274,7 +252,6 @@ msgid "Form Fields"
 msgstr "Campi modulo"
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__form_field_ids
 #: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__form_field_ids
 msgid "Form Fields Included"
 msgstr "Campi modulo inclusi"
@@ -375,11 +352,6 @@ msgid "Indexed Content"
 msgstr "Contenuto indicizzato"
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields.selection,name:sale_pdf_quote_builder.selection__product_document__attached_on_sale__inside
-msgid "Inside quote pdf"
-msgstr "All'interno del preventivo in PDF"
-
-#. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_pdf_form_field.py:0
 msgid ""
@@ -466,12 +438,6 @@ msgstr "Nome"
 #: code:addons/sale_pdf_quote_builder/models/ir_actions_report.py:0
 msgid "No"
 msgstr "No"
-
-#. module: sale_pdf_quote_builder
-#. odoo-python
-#: code:addons/sale_pdf_quote_builder/models/product_document.py:0
-msgid "Only PDF documents can be attached inside a quote."
-msgstr "È possibile allegare solo documenti in PDF ad un preventivo."
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
@@ -608,11 +574,6 @@ msgid "Resource Name"
 msgstr "Nome risorsa"
 
 #. module: sale_pdf_quote_builder
-#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_product_document__attached_on_sale
-msgid "Sale : Visible at"
-msgstr "Vendite: visibile a"
-
-#. module: sale_pdf_quote_builder
 #: model:ir.actions.server,name:sale_pdf_quote_builder.cron_post_upgrade_assign_missing_form_fields_ir_actions_server
 msgid "Sale Pdf Quote Builder: assign form fields to documents post upgrade"
 msgstr ""
@@ -715,13 +676,6 @@ msgstr "Sito web"
 
 #. module: sale_pdf_quote_builder
 #. odoo-python
-#: code:addons/sale_pdf_quote_builder/models/product_document.py:0
-msgid "When attached inside a quote, the document must be a file, not a URL."
-msgstr ""
-"Se allegato ad un preventivo, il documento deve essere un file non un URL."
-
-#. module: sale_pdf_quote_builder
-#. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/ir_actions_report.py:0
 msgid "Yes"
 msgstr "Sì"
@@ -739,3 +693,47 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_form
 msgid "on"
 msgstr "-"
+
+#~ msgid ""
+#~ "Allows you to share the document with your customers within a sale.\n"
+#~ "Leave it empty if you don't want to share this document with sales "
+#~ "customer.\n"
+#~ "On quote: the document will be sent to and accessible by customers at any "
+#~ "time.\n"
+#~ "e.g. this option can be useful to share Product description files.\n"
+#~ "On order confirmation: the document will be sent to and accessible by "
+#~ "customers.\n"
+#~ "e.g. this option can be useful to share User Manual or digital content "
+#~ "bought on ecommerce. \n"
+#~ "Inside quote: The document will be included in the pdf of the quotation "
+#~ "and sale order between the header pages and the quote table. "
+#~ msgstr ""
+#~ "Consente di condividere il documento con i tuoi clienti al momento di una "
+#~ "vendita.\n"
+#~ "Lascia il campo vuoto se non vuoi condividere il documento con i "
+#~ "clienti.\n"
+#~ "Su preventivo: il documento verrà inviato e sarà accessibile ai clienti "
+#~ "in qualsiasi momento.\n"
+#~ "ad es. quest'opzione può essere utile per condividere file relativi alla "
+#~ "descrizione del prodotto.\n"
+#~ "Su ordine confermato: il documento verrà inviato e sarà accessibile ai "
+#~ "clienti.\n"
+#~ "ad es. quest'opzione può essere utile per condividere manuali utente o "
+#~ "contenuti digitali acquistati sull'e-commerce. \n"
+#~ "All'interno del preventivo: il documento verrà incluso nel pdf del "
+#~ "preventivo e dell'ordine di vendita tra la pagina d'intestazione e la "
+#~ "tabella del preventivo. "
+
+#~ msgid "Inside quote pdf"
+#~ msgstr "All'interno del preventivo in PDF"
+
+#~ msgid "Only PDF documents can be attached inside a quote."
+#~ msgstr "È possibile allegare solo documenti in PDF ad un preventivo."
+
+#~ msgid "Sale : Visible at"
+#~ msgstr "Vendite: visibile a"
+
+#~ msgid ""
+#~ "When attached inside a quote, the document must be a file, not a URL."
+#~ msgstr ""
+#~ "Se allegato ad un preventivo, il documento deve essere un file non un URL."

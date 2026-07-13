@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:39+0000\n"
+"POT-Creation-Date: 2026-07-10 17:39+0000\n"
 "PO-Revision-Date: 2026-06-20 07:25+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
@@ -1370,7 +1370,7 @@ msgstr "寫訊息..."
 
 #. module: portal
 #. odoo-javascript
-#: code:addons/portal/static/src/chatter/portal_project/composer_patch.js:0
+#: code:addons/portal/static/src/chatter/portal/composer_patch.js:0
 msgid "Write a message…"
 msgstr "寫下訊息⋯"
 

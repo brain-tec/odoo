@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:39+0000\n"
 "PO-Revision-Date: 2026-06-19 01:30+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
@@ -161,11 +161,6 @@ msgstr "No se encontró al proveedor de Mercado Pago %s"
 #: model_terms:ir.ui.view,arch_db:payment_mercado_pago.payment_provider_form
 msgid "Disconnect"
 msgstr ""
-
-#. module: payment_mercado_pago
-#: model_terms:ir.ui.view,arch_db:payment_mercado_pago.payment_provider_form
-msgid "Disconnect Your Mercado Pago Account"
-msgstr "Desconectar tu cuenta de Mercado Pago"
 
 #. module: payment_mercado_pago
 #: model:ir.model.fields,field_description:payment_mercado_pago.field_payment_provider__display_name
@@ -483,3 +478,6 @@ msgid ""
 msgstr ""
 "Se realizó el cargo a su tarjeta. En su resumen verá el cargo como una "
 "descripción."
+
+#~ msgid "Disconnect Your Mercado Pago Account"
+#~ msgstr "Desconectar tu cuenta de Mercado Pago"

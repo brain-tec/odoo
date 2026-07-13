@@ -29,7 +29,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:37+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 07:13+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Catalan <https://translate.odoo.com/projects/odoo-master/"
@@ -716,11 +716,6 @@ msgstr ""
 "una quantitat seleccionada per afegir altres."
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "Attached To"
-msgstr "Adjuntat a"
-
-#. module: product
 #: model:ir.model,name:product.model_ir_attachment
 msgid "Attachment"
 msgstr "Adjunt"
@@ -963,6 +958,12 @@ msgstr "Imatge Canàriant 1024 s' ha fet zoom"
 #. module: product
 #: model:product.attribute.value,name:product.pav_brand_canon
 msgid "Canon"
+msgstr ""
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid "Catalog missing the child field to update."
 msgstr ""
 
 #. module: product
@@ -1288,11 +1289,6 @@ msgid "Created on"
 msgstr "Creat el"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "Creation"
-msgstr "Creació"
-
-#. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_volume_volume_in_cubic_feet__1
 msgid "Cubic Feet (ft³)"
 msgstr ""
@@ -1535,6 +1531,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__display_name
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__display_name
 #: model:ir.model.fields,field_description:product.field_product_base_unit__display_name
+#: model:ir.model.fields,field_description:product.field_product_catalog_line_mixin__display_name
 #: model:ir.model.fields,field_description:product.field_product_catalog_mixin__display_name
 #: model:ir.model.fields,field_description:product.field_product_category__display_name
 #: model:ir.model.fields,field_description:product.field_product_combo__display_name
@@ -1591,11 +1588,6 @@ msgid ""
 msgstr ""
 "Mostra la unitat personalitzada per als productes si està definida o la "
 "unitat de mesura seleccionada en cas contrari."
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-msgid "Document"
-msgstr "Document"
 
 #. module: product
 #. odoo-python
@@ -1782,6 +1774,11 @@ msgstr "Favorit"
 #: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Favorites"
 msgstr "Favorits"
+
+#. module: product
+#: model_terms:ir.ui.view,arch_db:product.product_document_form
+msgid "File"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__raw
@@ -2033,11 +2030,6 @@ msgid "High-back office chair with great support"
 msgstr ""
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "History"
-msgstr "Historial"
-
-#. module: product
 #: model:product.category,name:product.product_category_construction
 msgid "Home Construction"
 msgstr ""
@@ -2053,6 +2045,7 @@ msgstr "Allotjament hotel"
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__id
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__id
 #: model:ir.model.fields,field_description:product.field_product_base_unit__id
+#: model:ir.model.fields,field_description:product.field_product_catalog_line_mixin__id
 #: model:ir.model.fields,field_description:product.field_product_catalog_mixin__id
 #: model:ir.model.fields,field_description:product.field_product_category__id
 #: model:ir.model.fields,field_description:product.field_product_combo__id
@@ -2192,11 +2185,6 @@ msgstr "Font de la imatge"
 #: model:ir.model.fields,field_description:product.field_product_document__image_width
 msgid "Image Width"
 msgstr "Amplada de la imatge"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-msgid "Image is a link"
-msgstr "La imatge és un enllaç"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_attribute_search
@@ -3261,6 +3249,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/controllers/pricelist_report.py:0
 #: model:ir.model,name:product.model_product_template
+#: model:ir.model.fields,field_description:product.field_product_catalog_line_mixin__product_id
 #: model:ir.model.fields,field_description:product.field_product_label_layout__product_ids
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_tmpl_id
 #: model:ir.model.fields,field_description:product.field_product_product__product_variant_id
@@ -3311,6 +3300,11 @@ msgstr "Atributs i valors del producte"
 #: model:ir.model.fields,field_description:product.field_product_template__attribute_line_ids
 msgid "Product Attributes"
 msgstr "Atributs del producte"
+
+#. module: product
+#: model:ir.model,name:product.model_product_catalog_line_mixin
+msgid "Product Catalog Line Mixin"
+msgstr ""
 
 #. module: product
 #: model:ir.model,name:product.model_product_catalog_mixin
@@ -4319,6 +4313,14 @@ msgstr ""
 
 #. module: product
 #. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid ""
+"There are multiple lines with the same product, please update those one by "
+"one and not through the catalog."
+msgstr ""
+
+#. module: product
+#. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "There are no possible combination."
 msgstr "No hi ha cap combinació possible."
@@ -4697,11 +4699,15 @@ msgstr "Valors"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_id
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_view_search
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Variant"
 msgstr "Variant"
+
+#. module: product
+#: model:ir.model.fields,field_description:product.field_product_document__variant_attribute_value_ids
+msgid "Variant Attribute Value"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__product_variant_count
@@ -4782,6 +4788,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__partner_id
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_search_view
+#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Vendor"
 msgstr "Proveïdor"
 
@@ -4931,6 +4938,12 @@ msgid "Write Date"
 msgstr "Escriure la data"
 
 #. module: product
+#. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid "Wrong catalog child field!"
+msgstr ""
+
+#. module: product
 #: model:product.attribute.value,name:product.pav_size_xl
 msgid "XL"
 msgstr "XL"
@@ -5015,6 +5028,12 @@ msgstr ""
 #, fuzzy
 msgid "You can't edit this product in the catalog."
 msgstr "No és possible editar aquest producte des del catàleg."
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_catalog_mixin.py:0
+msgid "You cannot add or remove products from this record."
+msgstr ""
 
 #. module: product
 #. odoo-python
@@ -5390,11 +5409,6 @@ msgid "markup"
 msgstr ""
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "on"
-msgstr "en"
-
-#. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "pdf"
@@ -5441,6 +5455,24 @@ msgstr "fins"
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "xlsx"
 msgstr ".xlsx"
+
+#~ msgid "Attached To"
+#~ msgstr "Adjuntat a"
+
+#~ msgid "Creation"
+#~ msgstr "Creació"
+
+#~ msgid "Document"
+#~ msgstr "Document"
+
+#~ msgid "History"
+#~ msgstr "Historial"
+
+#~ msgid "Image is a link"
+#~ msgstr "La imatge és un enllaç"
+
+#~ msgid "on"
+#~ msgstr "en"
 
 #~ msgid "<strong>Qty: </strong>"
 #~ msgstr "<strong>Quantitat: </strong>"

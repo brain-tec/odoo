@@ -30,7 +30,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-21 21:28+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Czech <https://translate.odoo.com/projects/odoo-master/"
@@ -335,18 +335,6 @@ msgstr "%s daně"
 
 #. module: account
 #. odoo-python
-#: code:addons/account/models/company.py:0
-msgid "%s, or / if not applicable"
-msgstr "%s, nebo / pokud není relevantní"
-
-#. module: account
-#. odoo-python
-#: code:addons/account/models/partner.py:0
-msgid "%s, or not applicable"
-msgstr "%s, nebo se nevztahuje"
-
-#. module: account
-#. odoo-python
 #: code:addons/account/models/account_document_import_mixin.py:0
 msgid "'%(filename)s' (extracted from '%(root_filename)s', type=%(type)s)"
 msgstr "'%(filename)s' (extrahováno z '%(root_filename)s', typ=%(type)s)"
@@ -456,12 +444,6 @@ msgstr "... (%(nb_of_values)s další)"
 #: code:addons/account/static/src/components/x2many_buttons/x2many_buttons.xml:0
 msgid "... (View all)"
 msgstr "... (Zobrazit vše)"
-
-#. module: account
-#. odoo-python
-#: code:addons/account/models/company.py:0
-msgid "/ if not applicable"
-msgstr "/ pokud není relevantní"
 
 #. module: account
 #: model:account.tax,name:account.21_sale_export_tax_template
@@ -6153,6 +6135,16 @@ msgid "Couldn't reload data."
 msgstr ""
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_move_line__count_reconciled_lines
+msgid "Count Reconciled Lines"
+msgstr ""
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_move_line__count_reconciled_lines_excluding_exchange_diff
+msgid "Count Reconciled Lines Excluding Exchange Diff"
+msgstr ""
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_form
 #, fuzzy
 msgid "Counterpart Items"
@@ -7826,6 +7818,7 @@ msgstr "Zobrazit záložku mapování"
 #: model:ir.model.fields,field_description:account.field_mail_message__display_name
 #: model:ir.model.fields,field_description:account.field_mail_template__display_name
 #: model:ir.model.fields,field_description:account.field_onboarding_onboarding_step__display_name
+#: model:ir.model.fields,field_description:account.field_product_catalog_line_mixin__display_name
 #: model:ir.model.fields,field_description:account.field_product_catalog_mixin__display_name
 #: model:ir.model.fields,field_description:account.field_product_category__display_name
 #: model:ir.model.fields,field_description:account.field_product_product__display_name
@@ -7900,8 +7893,8 @@ msgstr "Zobrazit tlačítko náhledu"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
-msgid "Display the total amount of an invoice in letters"
-msgstr "Zobrazit celkovou hodnotu faktury slovy"
+msgid "Display the total amount of an invoice in words"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_disposal_fees
@@ -8746,6 +8739,7 @@ msgid "Exchange Loss"
 msgstr ""
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_move_line__exchange_move_ids
 #: model:ir.model.fields,field_description:account.field_account_partial_reconcile__exchange_move_id
 msgid "Exchange Move"
 msgstr "Záznam kurzovního rozdílu"
@@ -9063,6 +9057,16 @@ msgstr "Index první položky"
 #: model:ir.model.fields,field_description:account.field_account_resequence_wizard__first_name
 msgid "First New Sequence"
 msgstr "První číslo v nové sekvenci"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_move_line__first_reconciled_lines_id
+msgid "First Reconciled Lines"
+msgstr ""
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_move_line__first_reconciled_lines_excluding_exchange_diff_id
+msgid "First Reconciled Lines Excluding Exchange Diff"
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__auto_post_origin_id
@@ -10080,6 +10084,7 @@ msgstr "ICE:"
 #: model:ir.model.fields,field_description:account.field_mail_message__id
 #: model:ir.model.fields,field_description:account.field_mail_template__id
 #: model:ir.model.fields,field_description:account.field_onboarding_onboarding_step__id
+#: model:ir.model.fields,field_description:account.field_product_catalog_line_mixin__id
 #: model:ir.model.fields,field_description:account.field_product_catalog_mixin__id
 #: model:ir.model.fields,field_description:account.field_product_category__id
 #: model:ir.model.fields,field_description:account.field_product_product__id
@@ -12275,6 +12280,7 @@ msgid "Looks great!"
 msgstr "To vypadá skvěle!"
 
 #. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_analytic_line__analytic_profitability__loss
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Loss"
 msgstr "Ztráta"
@@ -14094,6 +14100,7 @@ msgid "Owner's Current Account"
 msgstr "Běžný účet majitele"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_account_analytic_line_filter_inherit_account
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
 msgid "P&L Accounts"
 msgstr "Účty zisků a ztrát"
@@ -15161,6 +15168,11 @@ msgid "Product Accounts:"
 msgstr "Účty produktů:"
 
 #. module: account
+#: model:ir.model,name:account.model_product_catalog_line_mixin
+msgid "Product Catalog Line Mixin"
+msgstr ""
+
+#. module: account
 #: model:ir.model,name:account.model_product_catalog_mixin
 #, fuzzy
 msgid "Product Catalog Mixin"
@@ -15277,6 +15289,11 @@ msgstr ""
 #, fuzzy
 msgid "Profit or Loss Appropriation"
 msgstr "Rozdělení zisku nebo ztráty"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_analytic_line__analytic_profitability
+msgid "Profitability"
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -16055,6 +16072,7 @@ msgstr "Náklady na penzijní plány (shoda s 401K)"
 #. odoo-python
 #: code:addons/account/wizard/accrued_orders.py:0
 #: model:ir.model.fields,field_description:account.field_digest_digest__kpi_account_total_revenue
+#: model:ir.model.fields.selection,name:account.selection__account_analytic_line__analytic_profitability__revenue
 #: model:ir.model.fields.selection,name:account.selection__account_automatic_entry_wizard__account_type__income
 msgid "Revenue"
 msgstr "Výnos"
@@ -18667,16 +18685,6 @@ msgstr ""
 "procent musí být 100%."
 
 #. module: account
-#: model:ir.model.fields,help:account.field_base_document_layout__vat
-msgid ""
-"The Tax Identification Number. Values here will be validated based on the "
-"country format. You can use '/' to indicate that the partner is not subject "
-"to tax."
-msgstr ""
-"Daňové identifikační číslo. Hodnoty zde budou ověřeny na základě formátu "
-"země. Pomocí '/' můžete označit, že partner nepodléhá dani."
-
-#. module: account
 #. odoo-python
 #: code:addons/account/models/account_move_line.py:0
 #, fuzzy
@@ -19975,6 +19983,18 @@ msgstr "Tento záznam byl zduplikován z %s"
 
 #. module: account
 #. odoo-python
+#: code:addons/account/wizard/account_move_reversal.py:0
+msgid "This entry has been reversed by %s"
+msgstr ""
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+msgid "This entry has been reversed from %s"
+msgstr "Tento záznam je opravným dokladem z %s"
+
+#. module: account
+#. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid ""
 "This entry has been reviewed, You need the bookkeeper role to change it."
@@ -20068,6 +20088,12 @@ msgid ""
 msgstr ""
 "Tento řádek a jeho podřádky budou schovány, pokud se všechny jejich sloupce "
 "rovnají 0."
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/product_catalog_mixin.py:0
+msgid "This model does not support (sub)sections"
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -20432,8 +20458,8 @@ msgstr "Celková částka slovy: <br/>"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__display_invoice_amount_total_words
 #: model:ir.model.fields,field_description:account.field_res_config_settings__display_invoice_amount_total_words
-msgid "Total amount of invoice in letters"
-msgstr "Celková částka faktury slovy"
+msgid "Total amount of invoice in words"
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_partner__credit
@@ -20663,6 +20689,11 @@ msgid ""
 msgstr ""
 "Nelze vytvořit výpis kvůli chybějícím transakcím. Než budete pokračovat, "
 "možná budete chtít změnit pořadí transakcí."
+
+#. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_analytic_line__analytic_profitability__uncategorized
+msgid "Uncategorized"
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -21239,7 +21270,6 @@ msgstr "Vozidla"
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment__partner_type__supplier
 #: model:ir.model.fields.selection,name:account.selection__account_payment_register__partner_type__supplier
-#: model_terms:ir.ui.view,arch_db:account.product_view_search_catalog
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
 #: model_terms:ir.ui.view,arch_db:account.view_account_supplier_payment_tree
 #: model_terms:ir.ui.view,arch_db:account.view_invoice_tree
@@ -21696,6 +21726,11 @@ msgstr ""
 "faktury."
 
 #. module: account
+#: model:ir.model.fields,help:account.field_base_document_layout__vat
+msgid "You can use '/' to indicate that the customer has no Tax ID."
+msgstr ""
+
+#. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "You can't block a paid invoice."
@@ -22118,6 +22153,13 @@ msgid ""
 msgstr ""
 "Nemůžete snížit počet desetinných míst u měny, která již byla použita v "
 "účetních záznamech."
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+#: code:addons/account/wizard/account_payment_register.py:0
+msgid "You cannot register payments for blocked invoices."
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -22788,13 +22830,6 @@ msgstr ""
 "sídla společnosti do 8 dnů od doručení zboží nebo poskytnutí služby."
 
 #. module: account
-#. odoo-python
-#: code:addons/account/models/partner.py:0
-#, fuzzy
-msgid "not applicable"
-msgstr "neplatí"
-
-#. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_tax_repartition_line__repartition_type__tax
 msgid "of tax"
 msgstr "z daně"
@@ -23053,6 +23088,33 @@ msgstr ""
 "{{ object.company_id.name }} Samofakturační faktura (Ref. {{ object.name or "
 "'n/a' }})"
 
+#~ msgid "%s, or / if not applicable"
+#~ msgstr "%s, nebo / pokud není relevantní"
+
+#~ msgid "%s, or not applicable"
+#~ msgstr "%s, nebo se nevztahuje"
+
+#~ msgid "/ if not applicable"
+#~ msgstr "/ pokud není relevantní"
+
+#~ msgid "Display the total amount of an invoice in letters"
+#~ msgstr "Zobrazit celkovou hodnotu faktury slovy"
+
+#~ msgid ""
+#~ "The Tax Identification Number. Values here will be validated based on the "
+#~ "country format. You can use '/' to indicate that the partner is not "
+#~ "subject to tax."
+#~ msgstr ""
+#~ "Daňové identifikační číslo. Hodnoty zde budou ověřeny na základě formátu "
+#~ "země. Pomocí '/' můžete označit, že partner nepodléhá dani."
+
+#~ msgid "Total amount of invoice in letters"
+#~ msgstr "Celková částka faktury slovy"
+
+#, fuzzy
+#~ msgid "not applicable"
+#~ msgstr "neplatí"
+
 #~ msgid "Account Reconcile"
 #~ msgstr "Umožňuje párování s platbami"
 
@@ -23112,9 +23174,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "Stock Variation"
 #~ msgstr "Variace zásob"
-
-#~ msgid "This entry has been reversed from %s"
-#~ msgstr "Tento záznam je opravným dokladem z %s"
 
 #~ msgid "Website Messages"
 #~ msgstr "Webové zprávy"

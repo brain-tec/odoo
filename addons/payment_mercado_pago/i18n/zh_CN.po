@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:39+0000\n"
 "PO-Revision-Date: 2026-06-21 12:42+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
@@ -159,11 +159,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:payment_mercado_pago.payment_provider_form
 msgid "Disconnect"
 msgstr ""
-
-#. module: payment_mercado_pago
-#: model_terms:ir.ui.view,arch_db:payment_mercado_pago.payment_provider_form
-msgid "Disconnect Your Mercado Pago Account"
-msgstr "解除 Mercado Pago 账户绑定"
 
 #. module: payment_mercado_pago
 #: model:ir.model.fields,field_description:payment_mercado_pago.field_payment_provider__display_name
@@ -466,3 +461,6 @@ msgid ""
 "Your payment has been credited. In your summary you will see the charge as a "
 "statement descriptor."
 msgstr "您的付款已到账。在您的摘要中，您将看到该费用作为结单描述。"
+
+#~ msgid "Disconnect Your Mercado Pago Account"
+#~ msgstr "解除 Mercado Pago 账户绑定"

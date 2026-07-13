@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-19 06:32+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Swedish <https://translate.odoo.com/projects/odoo-master/"
@@ -245,12 +245,6 @@ msgstr ""
 
 #. module: sale_project
 #. odoo-python
-#: code:addons/sale_project/models/project_project.py:0
-msgid "Create a customer invoice"
-msgstr "Skapa en kundfaktura"
-
-#. module: sale_project
-#. odoo-python
 #: code:addons/sale_project/models/product_template.py:0
 msgid ""
 "Create a project for the order with a task for each sales order line to "
@@ -267,35 +261,9 @@ msgstr "Skapa en uppgift i ett befintligt projekt för att spåra tidsåtgången
 
 #. module: sale_project
 #. odoo-python
-#: code:addons/sale_project/models/project_project.py:0
-msgid "Create a vendor bill"
-msgstr "Skapa en leverantörsfaktura"
-
-#. module: sale_project
-#. odoo-python
 #: code:addons/sale_project/models/product_template.py:0
 msgid "Create an empty project for the order to track the time spent."
 msgstr "Skapa ett tomt projekt för ordern för att följa upp tidsåtgången."
-
-#. module: sale_project
-#. odoo-python
-#: code:addons/sale_project/models/project_project.py:0
-msgid ""
-"Create invoices, register payments and keep track of the discussions with "
-"your customers."
-msgstr ""
-"Skapa fakturor, registrera betalningar och håll koll på diskussionerna med "
-"dina kunder."
-
-#. module: sale_project
-#. odoo-python
-#: code:addons/sale_project/models/project_project.py:0
-msgid ""
-"Create invoices, register payments and keep track of the discussions with "
-"your vendors."
-msgstr ""
-"Skapa fakturor, registrera betalningar och håll koll på diskussionerna med "
-"dina leverantörer."
 
 #. module: sale_project
 #: model:ir.model.fields,field_description:sale_project.field_product_product__service_tracking
@@ -408,8 +376,6 @@ msgid "Invoice your time and material to customers"
 msgstr "Fakturera er tid och material till kunder"
 
 #. module: sale_project
-#. odoo-python
-#: code:addons/sale_project/models/project_project.py:0
 #: model:ir.embedded.actions,name:sale_project.project_embedded_action_invoices
 #: model:ir.embedded.actions,name:sale_project.project_embedded_action_invoices_dashboard
 #: model_terms:ir.ui.view,arch_db:sale_project.view_edit_project_inherit_form
@@ -986,3 +952,23 @@ msgstr ""
 #: code:addons/sale_project/models/sale_order.py:0
 msgid "sale_line_id"
 msgstr ""
+
+#~ msgid "Create a customer invoice"
+#~ msgstr "Skapa en kundfaktura"
+
+#~ msgid "Create a vendor bill"
+#~ msgstr "Skapa en leverantörsfaktura"
+
+#~ msgid ""
+#~ "Create invoices, register payments and keep track of the discussions with "
+#~ "your customers."
+#~ msgstr ""
+#~ "Skapa fakturor, registrera betalningar och håll koll på diskussionerna "
+#~ "med dina kunder."
+
+#~ msgid ""
+#~ "Create invoices, register payments and keep track of the discussions with "
+#~ "your vendors."
+#~ msgstr ""
+#~ "Skapa fakturor, registrera betalningar och håll koll på diskussionerna "
+#~ "med dina leverantörer."

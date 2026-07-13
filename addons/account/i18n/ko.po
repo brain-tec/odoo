@@ -15,7 +15,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-20 07:29+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Korean <https://translate.odoo.com/projects/odoo-master/"
@@ -311,18 +311,6 @@ msgstr "%s 세금"
 
 #. module: account
 #. odoo-python
-#: code:addons/account/models/company.py:0
-msgid "%s, or / if not applicable"
-msgstr "%s, 또는 / 해당되지 않는 경우"
-
-#. module: account
-#. odoo-python
-#: code:addons/account/models/partner.py:0
-msgid "%s, or not applicable"
-msgstr "%s 또는 해당 없음"
-
-#. module: account
-#. odoo-python
 #: code:addons/account/models/account_document_import_mixin.py:0
 msgid "'%(filename)s' (extracted from '%(root_filename)s', type=%(type)s)"
 msgstr "'%(filename)s' ('%(root_filename)s' 파일에서 추출, 유형=%(type)s)"
@@ -432,12 +420,6 @@ msgstr "... (%(nb_of_values)s 기타)"
 #: code:addons/account/static/src/components/x2many_buttons/x2many_buttons.xml:0
 msgid "... (View all)"
 msgstr "... (전체 보기)"
-
-#. module: account
-#. odoo-python
-#: code:addons/account/models/company.py:0
-msgid "/ if not applicable"
-msgstr "/ 해당되지 않는 경우"
 
 #. module: account
 #: model:account.tax,name:account.21_sale_export_tax_template
@@ -6114,6 +6096,16 @@ msgid "Couldn't reload data."
 msgstr ""
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_move_line__count_reconciled_lines
+msgid "Count Reconciled Lines"
+msgstr ""
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_move_line__count_reconciled_lines_excluding_exchange_diff
+msgid "Count Reconciled Lines Excluding Exchange Diff"
+msgstr ""
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_form
 msgid "Counterpart Items"
 msgstr "대응 품목"
@@ -7765,6 +7757,7 @@ msgstr "매핑 탭 표시"
 #: model:ir.model.fields,field_description:account.field_mail_message__display_name
 #: model:ir.model.fields,field_description:account.field_mail_template__display_name
 #: model:ir.model.fields,field_description:account.field_onboarding_onboarding_step__display_name
+#: model:ir.model.fields,field_description:account.field_product_catalog_line_mixin__display_name
 #: model:ir.model.fields,field_description:account.field_product_catalog_mixin__display_name
 #: model:ir.model.fields,field_description:account.field_product_category__display_name
 #: model:ir.model.fields,field_description:account.field_product_product__display_name
@@ -7838,8 +7831,8 @@ msgstr "미리보기 표시 버튼"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
-msgid "Display the total amount of an invoice in letters"
-msgstr "청구서 상의 총 금액을 문자로 표시합니다."
+msgid "Display the total amount of an invoice in words"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_disposal_fees
@@ -8645,6 +8638,7 @@ msgid "Exchange Loss"
 msgstr ""
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_move_line__exchange_move_ids
 #: model:ir.model.fields,field_description:account.field_account_partial_reconcile__exchange_move_id
 msgid "Exchange Move"
 msgstr "환율 이동"
@@ -8949,6 +8943,16 @@ msgstr "첫 번째 내역 색인"
 #: model:ir.model.fields,field_description:account.field_account_resequence_wizard__first_name
 msgid "First New Sequence"
 msgstr "첫 번째 신규 연번"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_move_line__first_reconciled_lines_id
+msgid "First Reconciled Lines"
+msgstr ""
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_move_line__first_reconciled_lines_excluding_exchange_diff_id
+msgid "First Reconciled Lines Excluding Exchange Diff"
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__auto_post_origin_id
@@ -9923,6 +9927,7 @@ msgstr "ICE:"
 #: model:ir.model.fields,field_description:account.field_mail_message__id
 #: model:ir.model.fields,field_description:account.field_mail_template__id
 #: model:ir.model.fields,field_description:account.field_onboarding_onboarding_step__id
+#: model:ir.model.fields,field_description:account.field_product_catalog_line_mixin__id
 #: model:ir.model.fields,field_description:account.field_product_catalog_mixin__id
 #: model:ir.model.fields,field_description:account.field_product_category__id
 #: model:ir.model.fields,field_description:account.field_product_product__id
@@ -12019,6 +12024,7 @@ msgid "Looks great!"
 msgstr "입력 성공!"
 
 #. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_analytic_line__analytic_profitability__loss
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Loss"
 msgstr "손실"
@@ -13778,6 +13784,7 @@ msgid "Owner's Current Account"
 msgstr "소유자 현재 계정"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_account_analytic_line_filter_inherit_account
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
 msgid "P&L Accounts"
 msgstr "손익 계정"
@@ -14805,6 +14812,11 @@ msgid "Product Accounts:"
 msgstr "품목 계정:"
 
 #. module: account
+#: model:ir.model,name:account.model_product_catalog_line_mixin
+msgid "Product Catalog Line Mixin"
+msgstr ""
+
+#. module: account
 #: model:ir.model,name:account.model_product_catalog_mixin
 msgid "Product Catalog Mixin"
 msgstr "품목 카탈로그 믹스인"
@@ -14912,6 +14924,11 @@ msgstr ""
 #: model:account.account,name:account.21_profit_or_loss
 #: model:account.account,name:account.22_account_account_us_profit_or_loss_appropriation
 msgid "Profit or Loss Appropriation"
+msgstr ""
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_analytic_line__analytic_profitability
+msgid "Profitability"
 msgstr ""
 
 #. module: account
@@ -15649,6 +15666,7 @@ msgstr "퇴직 연금 비용 (401K 매칭)"
 #. odoo-python
 #: code:addons/account/wizard/accrued_orders.py:0
 #: model:ir.model.fields,field_description:account.field_digest_digest__kpi_account_total_revenue
+#: model:ir.model.fields.selection,name:account.selection__account_analytic_line__analytic_profitability__revenue
 #: model:ir.model.fields.selection,name:account.selection__account_automatic_entry_wizard__account_type__income
 msgid "Revenue"
 msgstr "매출액"
@@ -18120,16 +18138,6 @@ msgstr ""
 "지급 조건에는 백분율 항목이 있어야 하며 백분율 합계는 100% 이어야 합니다."
 
 #. module: account
-#: model:ir.model.fields,help:account.field_base_document_layout__vat
-msgid ""
-"The Tax Identification Number. Values here will be validated based on the "
-"country format. You can use '/' to indicate that the partner is not subject "
-"to tax."
-msgstr ""
-"세무 신고용 등록 번호입니다. 여기에 있는 값을 국가 형식을 기준으로 승인합니"
-"다. 협력사가 과세 대상이 아닌 경우에는 '/' 를 입력하세요."
-
-#. module: account
 #. odoo-python
 #: code:addons/account/models/account_move_line.py:0
 msgid "The account %(name)s (%(code)s) is archived."
@@ -19363,6 +19371,18 @@ msgstr "%s에서 항목 복사"
 
 #. module: account
 #. odoo-python
+#: code:addons/account/wizard/account_move_reversal.py:0
+msgid "This entry has been reversed by %s"
+msgstr ""
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+msgid "This entry has been reversed from %s"
+msgstr "이 항목은 %s에서 변경되었습니다."
+
+#. module: account
+#. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid ""
 "This entry has been reviewed, You need the bookkeeper role to change it."
@@ -19446,6 +19466,12 @@ msgstr ""
 msgid ""
 "This line and its children will be hidden when all of their columns are 0."
 msgstr "모든 열이 0인 경우에는 이 항목과 하위 항목이 숨겨집니다."
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/product_catalog_mixin.py:0
+msgid "This model does not support (sub)sections"
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -19790,8 +19816,8 @@ msgstr "총 금액의 문자 표시액: <br/>"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__display_invoice_amount_total_words
 #: model:ir.model.fields,field_description:account.field_res_config_settings__display_invoice_amount_total_words
-msgid "Total amount of invoice in letters"
-msgstr "청구서 총액 문자 표시"
+msgid "Total amount of invoice in words"
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_partner__credit
@@ -20012,6 +20038,11 @@ msgid ""
 msgstr ""
 "거래 내역 중 누락된 항목이 있어서 명세서를 생성할 수 없습니다. 계속하려면 거"
 "래 순서를 다시 조정하십시오."
+
+#. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_analytic_line__analytic_profitability__uncategorized
+msgid "Uncategorized"
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -20560,7 +20591,6 @@ msgstr "차량"
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment__partner_type__supplier
 #: model:ir.model.fields.selection,name:account.selection__account_payment_register__partner_type__supplier
-#: model_terms:ir.ui.view,arch_db:account.product_view_search_catalog
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
 #: model_terms:ir.ui.view,arch_db:account.view_account_supplier_payment_tree
 #: model_terms:ir.ui.view,arch_db:account.view_invoice_tree
@@ -20986,6 +21016,11 @@ msgid ""
 msgstr ""
 
 #. module: account
+#: model:ir.model.fields,help:account.field_base_document_layout__vat
+msgid "You can use '/' to indicate that the customer has no Tax ID."
+msgstr ""
+
+#. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "You can't block a paid invoice."
@@ -21393,6 +21428,13 @@ msgid ""
 "already been used to make accounting entries."
 msgstr ""
 "통화의 소수점 자릿수를 줄일 수 없습니다. 이미 회계 입력에 사용된 통화입니다."
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+#: code:addons/account/wizard/account_payment_register.py:0
+msgid "You cannot register payments for blocked invoices."
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -22032,12 +22074,6 @@ msgstr ""
 "통해 클레임하고자 하는 전체 내용을 반드시 통보하여야 합니다."
 
 #. module: account
-#. odoo-python
-#: code:addons/account/models/partner.py:0
-msgid "not applicable"
-msgstr "해당 없음"
-
-#. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_tax_repartition_line__repartition_type__tax
 msgid "of tax"
 msgstr "세금"
@@ -22274,6 +22310,32 @@ msgid ""
 msgstr ""
 "{{ object.company_id.name }} 내부 발행 청구서 (Ref {{ object.name or 'n/"
 "a' }})"
+
+#~ msgid "%s, or / if not applicable"
+#~ msgstr "%s, 또는 / 해당되지 않는 경우"
+
+#~ msgid "%s, or not applicable"
+#~ msgstr "%s 또는 해당 없음"
+
+#~ msgid "/ if not applicable"
+#~ msgstr "/ 해당되지 않는 경우"
+
+#~ msgid "Display the total amount of an invoice in letters"
+#~ msgstr "청구서 상의 총 금액을 문자로 표시합니다."
+
+#~ msgid ""
+#~ "The Tax Identification Number. Values here will be validated based on the "
+#~ "country format. You can use '/' to indicate that the partner is not "
+#~ "subject to tax."
+#~ msgstr ""
+#~ "세무 신고용 등록 번호입니다. 여기에 있는 값을 국가 형식을 기준으로 승인합"
+#~ "니다. 협력사가 과세 대상이 아닌 경우에는 '/' 를 입력하세요."
+
+#~ msgid "Total amount of invoice in letters"
+#~ msgstr "청구서 총액 문자 표시"
+
+#~ msgid "not applicable"
+#~ msgstr "해당 없음"
 
 #~ msgid "Account Reconcile"
 #~ msgstr "계정 조정"
@@ -22652,9 +22714,6 @@ msgstr ""
 
 #~ msgid "Stock Variation"
 #~ msgstr "재고 세부 옵션"
-
-#~ msgid "This entry has been reversed from %s"
-#~ msgstr "이 항목은 %s에서 변경되었습니다."
 
 #~ msgid "Website Messages"
 #~ msgstr "웹사이트 메시지"

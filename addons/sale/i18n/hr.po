@@ -34,7 +34,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 02:23+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Croatian <https://translate.odoo.com/projects/odoo-master/"
@@ -883,6 +883,11 @@ msgstr ""
 "        </span>"
 
 #. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.product_document_kanban
+msgid "<span>Accessible</span>"
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "<span>Amount</span>"
@@ -893,11 +898,6 @@ msgstr "<span>Iznos</span>"
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "<span>Disc.%</span>"
 msgstr "<span>Pop.%</span>"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.product_document_kanban
-msgid "<span>Sales visibility</span>"
-msgstr "<span>Vidljivost prodaje</span>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -1039,6 +1039,11 @@ msgstr "Prihvati &amp; Potpiši"
 #: model:ir.model.fields,field_description:sale.field_sale_order__access_warning
 msgid "Access warning"
 msgstr "Upozorenje pristupa"
+
+#. module: sale
+#: model:ir.model.fields,field_description:sale.field_product_document__attached_on_sale
+msgid "Accessible"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order_line__qty_delivered_method
@@ -1192,29 +1197,17 @@ msgstr ""
 #: model:ir.model.fields,help:sale.field_product_document__attached_on_sale
 msgid ""
 "Allows you to share the document with your customers within a sale.\n"
-"Leave it empty if you don't want to share this document with sales "
-"customer.\n"
-"On quote: the document will be sent to and accessible by customers at any "
-"time.\n"
+"From Quotation: the document will be sent to and accessible by customers at "
+"any time.\n"
 "e.g. this option can be useful to share Product description files.\n"
-"On order confirmation: the document will be sent to and accessible by "
+"On Order Confirmation: the document will be sent to and accessible by "
 "customers.\n"
 "e.g. this option can be useful to share User Manual or digital content "
 "bought on ecommerce. \n"
-"Inside quote: The document will be included in the pdf of the quotation and "
-"sale order between the header pages and the quote table. "
+"On Product Page: the document will be accessible by customers on the product "
+"page.\n"
+"e.g. this option can be useful to share Product description files."
 msgstr ""
-"Omogućuje vam dijeljenje dokumenta s vašim kupcima unutar prodaje.\n"
-"Ostavite prazno ako ne želite dijeliti ovaj dokument s prodajnim kupcem.\n"
-"Na ponudu: dokument će biti poslan kupcima i bit će im dostupan u bilo kojem "
-"trenutku.\n"
-"npr. ova opcija može biti korisna za dijeljenje datoteka s opisom "
-"proizvoda.\n"
-"Na potvrdi narudžbe: dokument će biti poslan kupcima i bit će im dostupan.\n"
-"npr. ova opcija može biti korisna za dijeljenje korisničkog priručnika ili "
-"digitalnog sadržaja kupljenog u e-trgovini.\n"
-"Unutar ponude: Dokument će biti uključen u PDF ponude i narudžbenice između "
-"zaglavlja stranica i tablice ponude. "
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_payment_link_wizard__amount_paid
@@ -2578,6 +2571,11 @@ msgid "Forecasted Stock"
 msgstr ""
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__quotation
+msgid "From Quotation"
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.actions.act_window,help:sale.action_account_invoice_report_salesteam
 msgid ""
 "From this report, you can have an overview of the amount invoiced to your "
@@ -2699,19 +2697,9 @@ msgid "Has Overages"
 msgstr ""
 
 #. module: sale
-#: model:ir.model.fields,field_description:sale.field_sale_order__show_update_pricelist
-msgid "Has Pricelist Changed"
-msgstr "Je li promijenjen cjenik"
-
-#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__has_down_payments
 msgid "Has down payments"
 msgstr "Ima polog"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__hidden
-msgid "Hidden"
-msgstr "Skriveno"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_account_analytic_applicability__id
@@ -2790,8 +2778,10 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__pricelist_id
-msgid "If you change the pricelist, only newly added lines will be affected."
-msgstr "Ako promijenite cjenik, to će utjecati samo na novo dodane stavke."
+msgid ""
+"If you change the pricelist, the prices of all order lines will be updated "
+"accordingly."
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -3399,6 +3389,11 @@ msgid "My Sales Order Lines"
 msgstr "Moje stavke prodajnog naloga"
 
 #. module: sale
+#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__hidden
+msgid "Never"
+msgstr ""
+
+#. module: sale
 #. odoo-python
 #: code:addons/sale/models/sale_order.py:0
 msgid "New"
@@ -3545,13 +3540,8 @@ msgstr "Na svim stavkama narudžbe"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__sale_order
-msgid "On confirmed order"
-msgstr "Na potvrđivanje narudžbe"
-
-#. module: sale
-#: model:ir.model.fields.selection,name:sale.selection__product_document__attached_on_sale__quotation
-msgid "On quote"
-msgstr "Na ponudu"
+msgid "On Order Confirmation"
+msgstr ""
 
 #. module: sale
 #. odoo-python
@@ -4063,18 +4053,6 @@ msgid "Product Variant"
 msgstr "Varijanta proizvoda"
 
 #. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-msgid "Product prices have been recomputed according to pricelist %s."
-msgstr "Cijene proizvoda su preračunate prema cjeniku %s."
-
-#. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-msgid "Product prices have been recomputed."
-msgstr "Cijene proizvoda su ponovno izračunate."
-
-#. module: sale
 #: model:ir.actions.act_window,name:sale.product_template_action
 #: model:ir.ui.menu,name:sale.menu_product_template_action
 #: model:ir.ui.menu,name:sale.menu_reporting_product
@@ -4294,11 +4272,6 @@ msgid "Recommend when 'Adding to Cart' or quotation"
 msgstr "Preporučeno prilikom 'Dodavanja u košaricu' ili ponude"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Recompute all prices based on this pricelist"
-msgstr "Preračunaj sve cjene bazirano na ovom cjeniku"
-
-#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.account_invoice_form
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Reference"
@@ -4418,11 +4391,6 @@ msgstr "SO0000"
 #: code:addons/sale/static/src/js/sale_action_helper/sale_action_helper_dialog.xml:0
 msgid "Sale"
 msgstr "Prodaja"
-
-#. module: sale
-#: model:ir.model.fields,field_description:sale.field_product_document__attached_on_sale
-msgid "Sale : Visible at"
-msgstr "Prodaja: Vidljivo na"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
@@ -5526,14 +5494,6 @@ msgstr ""
 "aplikaciji."
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid ""
-"This will update the unit price of all products based on the new pricelist."
-msgstr ""
-"Ovim će se ažurirati jedinična cijena svih proizvoda na temelju novog "
-"cjenika."
-
-#. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order__invoice_status__to_invoice
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_line__invoice_status__to_invoice
 #: model:ir.model.fields.selection,name:sale.selection__sale_report__invoice_status__to_invoice
@@ -5738,11 +5698,6 @@ msgstr "Obračun osnovice"
 #: model:ir.model.fields,field_description:sale.field_sale_report__price_subtotal
 msgid "Untaxed Total"
 msgstr "Ukupno bez poreza"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid "Update Prices"
-msgstr "Ažurirajte cijene"
 
 #. module: sale
 #. odoo-javascript
@@ -6185,6 +6140,74 @@ msgid ""
 "'Quotation' or 'Order' }} {{ object.name or 'n/a' }} "
 "{{ object.client_order_ref and ('(' + object.client_order_ref + ')') or '' }}"
 msgstr ""
+
+#~ msgid "<span>Sales visibility</span>"
+#~ msgstr "<span>Vidljivost prodaje</span>"
+
+#~ msgid ""
+#~ "Allows you to share the document with your customers within a sale.\n"
+#~ "Leave it empty if you don't want to share this document with sales "
+#~ "customer.\n"
+#~ "On quote: the document will be sent to and accessible by customers at any "
+#~ "time.\n"
+#~ "e.g. this option can be useful to share Product description files.\n"
+#~ "On order confirmation: the document will be sent to and accessible by "
+#~ "customers.\n"
+#~ "e.g. this option can be useful to share User Manual or digital content "
+#~ "bought on ecommerce. \n"
+#~ "Inside quote: The document will be included in the pdf of the quotation "
+#~ "and sale order between the header pages and the quote table. "
+#~ msgstr ""
+#~ "Omogućuje vam dijeljenje dokumenta s vašim kupcima unutar prodaje.\n"
+#~ "Ostavite prazno ako ne želite dijeliti ovaj dokument s prodajnim kupcem.\n"
+#~ "Na ponudu: dokument će biti poslan kupcima i bit će im dostupan u bilo "
+#~ "kojem trenutku.\n"
+#~ "npr. ova opcija može biti korisna za dijeljenje datoteka s opisom "
+#~ "proizvoda.\n"
+#~ "Na potvrdi narudžbe: dokument će biti poslan kupcima i bit će im "
+#~ "dostupan.\n"
+#~ "npr. ova opcija može biti korisna za dijeljenje korisničkog priručnika "
+#~ "ili digitalnog sadržaja kupljenog u e-trgovini.\n"
+#~ "Unutar ponude: Dokument će biti uključen u PDF ponude i narudžbenice "
+#~ "između zaglavlja stranica i tablice ponude. "
+
+#~ msgid "Has Pricelist Changed"
+#~ msgstr "Je li promijenjen cjenik"
+
+#~ msgid "Hidden"
+#~ msgstr "Skriveno"
+
+#~ msgid ""
+#~ "If you change the pricelist, only newly added lines will be affected."
+#~ msgstr "Ako promijenite cjenik, to će utjecati samo na novo dodane stavke."
+
+#~ msgid "On confirmed order"
+#~ msgstr "Na potvrđivanje narudžbe"
+
+#~ msgid "On quote"
+#~ msgstr "Na ponudu"
+
+#~ msgid "Product prices have been recomputed according to pricelist %s."
+#~ msgstr "Cijene proizvoda su preračunate prema cjeniku %s."
+
+#~ msgid "Product prices have been recomputed."
+#~ msgstr "Cijene proizvoda su ponovno izračunate."
+
+#~ msgid "Recompute all prices based on this pricelist"
+#~ msgstr "Preračunaj sve cjene bazirano na ovom cjeniku"
+
+#~ msgid "Sale : Visible at"
+#~ msgstr "Prodaja: Vidljivo na"
+
+#~ msgid ""
+#~ "This will update the unit price of all products based on the new "
+#~ "pricelist."
+#~ msgstr ""
+#~ "Ovim će se ažurirati jedinična cijena svih proizvoda na temelju novog "
+#~ "cjenika."
+
+#~ msgid "Update Prices"
+#~ msgstr "Ažurirajte cijene"
 
 #~ msgid "Online payment"
 #~ msgstr "Online plaćanje"

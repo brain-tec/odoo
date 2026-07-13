@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-19 04:52+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-master/"
@@ -2024,7 +2024,6 @@ msgid "Choose Type of Labels To Print"
 msgstr "Chọn loại nhãn để in"
 
 #. module: stock
-#: model:ir.model.fields,help:stock.field_stock_quantity_history__inventory_datetime
 #: model:ir.model.fields,help:stock.field_stock_request_count__inventory_date
 msgid "Choose a date to get the inventory at that date"
 msgstr "Chọn ngày để lấy tồn kho vào ngày đó"
@@ -2049,11 +2048,6 @@ msgstr "Chọn bố cục trang tính để in nhãn"
 #: model:ir.model,name:stock.model_picking_label_type
 msgid "Choose whether to print product or lot/sn labels"
 msgstr "Chọn in nhãn sản phẩm hay số lô/sê-ri"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.view_stock_quantity_history
-msgid "Choose your date"
-msgstr "Chọn ngày"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
@@ -2167,7 +2161,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock.stock_warn_insufficient_qty_form_view
 #: model_terms:ir.ui.view,arch_db:stock.view_product_replenish
 #: model_terms:ir.ui.view,arch_db:stock.view_scrap_move_form
-#: model_terms:ir.ui.view,arch_db:stock.view_stock_quantity_history
 msgid "Confirm"
 msgstr "Xác nhận"
 
@@ -2431,7 +2424,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__create_uid
 #: model:ir.model.fields,field_description:stock.field_stock_quant__create_uid
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__create_uid
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__create_uid
 #: model:ir.model.fields,field_description:stock.field_stock_reference__create_uid
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__create_uid
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_option__create_uid
@@ -2475,7 +2467,6 @@ msgstr "Được tạo bởi"
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__create_date
 #: model:ir.model.fields,field_description:stock.field_stock_quant__create_date
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__create_date
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__create_date
 #: model:ir.model.fields,field_description:stock.field_stock_reference__create_date
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__create_date
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_option__create_date
@@ -3255,7 +3246,6 @@ msgstr "Hiển thị số lô & sê-ri trên phiếu giao hàng"
 #: model:ir.model.fields,field_description:stock.field_ir_actions_report__display_name
 #: model:ir.model.fields,field_description:stock.field_lot_label_layout__display_name
 #: model:ir.model.fields,field_description:stock.field_picking_label_type__display_name
-#: model:ir.model.fields,field_description:stock.field_product_catalog_mixin__display_name
 #: model:ir.model.fields,field_description:stock.field_product_category__display_name
 #: model:ir.model.fields,field_description:stock.field_product_label_layout__display_name
 #: model:ir.model.fields,field_description:stock.field_product_product__display_name
@@ -3293,7 +3283,6 @@ msgstr "Hiển thị số lô & sê-ri trên phiếu giao hàng"
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__display_name
 #: model:ir.model.fields,field_description:stock.field_stock_quant__display_name
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__display_name
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__display_name
 #: model:ir.model.fields,field_description:stock.field_stock_reference__display_name
 #: model:ir.model.fields,field_description:stock.field_stock_replenish_mixin__display_name
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__display_name
@@ -4008,7 +3997,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock.field_ir_actions_report__id
 #: model:ir.model.fields,field_description:stock.field_lot_label_layout__id
 #: model:ir.model.fields,field_description:stock.field_picking_label_type__id
-#: model:ir.model.fields,field_description:stock.field_product_catalog_mixin__id
 #: model:ir.model.fields,field_description:stock.field_product_category__id
 #: model:ir.model.fields,field_description:stock.field_product_label_layout__id
 #: model:ir.model.fields,field_description:stock.field_product_product__id
@@ -4046,7 +4034,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__id
 #: model:ir.model.fields,field_description:stock.field_stock_quant__id
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__id
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__id
 #: model:ir.model.fields,field_description:stock.field_stock_reference__id
 #: model:ir.model.fields,field_description:stock.field_stock_replenish_mixin__id
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__id
@@ -4687,7 +4674,6 @@ msgstr "Định giá tồn kho"
 #. module: stock
 #. odoo-javascript
 #: code:addons/stock/static/src/views/search/stock_report_search_panel.xml:0
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__inventory_datetime
 msgid "Inventory at Date"
 msgstr "Tồn kho tại ngày"
 
@@ -4974,7 +4960,6 @@ msgstr "Lần kiểm kho gần nhất"
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__write_uid
 #: model:ir.model.fields,field_description:stock.field_stock_quant__write_uid
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__write_uid
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__write_uid
 #: model:ir.model.fields,field_description:stock.field_stock_reference__write_uid
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__write_uid
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_option__write_uid
@@ -5018,7 +5003,6 @@ msgstr "Cập nhật lần cuối bởi"
 #: model:ir.model.fields,field_description:stock.field_stock_putaway_rule__write_date
 #: model:ir.model.fields,field_description:stock.field_stock_quant__write_date
 #: model:ir.model.fields,field_description:stock.field_stock_quant_relocate__write_date
-#: model:ir.model.fields,field_description:stock.field_stock_quantity_history__write_date
 #: model:ir.model.fields,field_description:stock.field_stock_reference__write_date
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__write_date
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_option__write_date
@@ -5198,8 +5182,13 @@ msgstr "Vị trí"
 
 #. module: stock
 #: model:ir.actions.report,name:stock.action_report_location_barcode
-msgid "Location Barcode"
-msgstr "Mã vạch vị trí"
+msgid "Location Barcode (PDF)"
+msgstr ""
+
+#. module: stock
+#: model:ir.actions.report,name:stock.action_label_location_template
+msgid "Location Barcode (ZPL)"
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_location__name
@@ -7089,11 +7078,6 @@ msgid "Product Capacity"
 msgstr "Sức chứa sản phẩm"
 
 #. module: stock
-#: model:ir.model,name:stock.model_product_catalog_mixin
-msgid "Product Catalog Mixin"
-msgstr "Mixin danh mục sản phẩm"
-
-#. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_route__categ_ids
 #: model_terms:ir.ui.view,arch_db:stock.stock_location_route_form_view
 msgid "Product Categories"
@@ -7235,8 +7219,6 @@ msgid "Production Locations"
 msgstr "Vị trí sản xuất"
 
 #. module: stock
-#. odoo-python
-#: code:addons/stock/wizard/stock_quantity_history.py:0
 #: model:ir.actions.act_window,name:stock.act_product_location_open
 #: model:ir.actions.act_window,name:stock.product_template_action_product
 #: model:ir.model.fields,field_description:stock.field_stock_route__product_ids
@@ -9143,11 +9125,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock.stock_quant_view_graph
 msgid "Stock Quant"
 msgstr "Số lượng tồn kho"
-
-#. module: stock
-#: model:ir.model,name:stock.model_stock_quantity_history
-msgid "Stock Quantity History"
-msgstr "Lịch sử số lượng tồn kho"
 
 #. module: stock
 #: model:ir.model,name:stock.model_stock_quant_relocate
@@ -11780,6 +11757,18 @@ msgid ""
 msgstr ""
 "{{ object.company_id.name }} Lệnh giao hàng (Mã {{ object.name or 'không "
 "có' }})"
+
+#~ msgid "Choose your date"
+#~ msgstr "Chọn ngày"
+
+#~ msgid "Location Barcode"
+#~ msgstr "Mã vạch vị trí"
+
+#~ msgid "Product Catalog Mixin"
+#~ msgstr "Mixin danh mục sản phẩm"
+
+#~ msgid "Stock Quantity History"
+#~ msgstr "Lịch sử số lượng tồn kho"
 
 #~ msgid "Andrwep"
 #~ msgstr "Andrwep"

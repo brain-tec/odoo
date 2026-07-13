@@ -15,7 +15,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"POT-Creation-Date: 2026-07-10 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 19:47+0000\n"
 "Last-Translator: Nusara Boonma <nuboo@odoo.com>\n"
 "Language-Team: Thai <https://translate.odoo.com/projects/odoo-master/"
@@ -83,6 +83,24 @@ msgstr ""
 
 #. module: hr_timesheet
 #. odoo-python
+#: code:addons/hr_timesheet/models/project_task.py:0
+msgid "%(sign)s%(hours)sh"
+msgstr ""
+
+#. module: hr_timesheet
+#. odoo-python
+#: code:addons/hr_timesheet/models/project_task.py:0
+msgid "%(sign)s%(hours)sh %(minutes)sm"
+msgstr ""
+
+#. module: hr_timesheet
+#. odoo-python
+#: code:addons/hr_timesheet/models/project_task.py:0
+msgid "%(sign)s%(minutes)sm"
+msgstr ""
+
+#. module: hr_timesheet
+#. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid ""
 "'%(missing_plan_names)s' analytic plan(s) required on the project '%"
@@ -90,12 +108,6 @@ msgid ""
 msgstr ""
 "จำเป็นต้องมีแผนวิเคราะห์ '%(missing_plan_names)s' สำหรับโปรเจ็กต์ '%(project_name)s' "
 "ที่เชื่อมโยงกับตารางเวลา"
-
-#. module: hr_timesheet
-#. odoo-python
-#: code:addons/hr_timesheet/models/project_task.py:0
-msgid "(%(sign)s%(hours)s:%(minutes)s remaining)"
-msgstr "(%(sign)s%(hours)s:%(minutes)s คงเหลืออยู่)"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1452,6 +1464,9 @@ msgid ""
 "on\n"
 "                        <span class=\"fw-bold ms-1\">Sub-tasks</span>"
 msgstr ""
+
+#~ msgid "(%(sign)s%(hours)s:%(minutes)s remaining)"
+#~ msgstr "(%(sign)s%(hours)s:%(minutes)s คงเหลืออยู่)"
 
 #~ msgid "<span style=\"margin-right: 15px;\">Total (Days)</span>"
 #~ msgstr "<span style=\"margin-right: 15px;\">รวม (วัน)</span>"

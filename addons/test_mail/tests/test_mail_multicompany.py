@@ -253,7 +253,7 @@ class TestMultiCompanySetup(TestMailMCCommon, HttpCase):
     def test_recipients_multi_company(self):
         """Test mentioning a partner with no common company."""
         test_records_mc_c2 = self.test_records_mc[1]
-        with self.assertBus(BusResult(self.user_employee_c3, "mail.message/inbox")):
+        with self.assertBus(BusResult(self.user_employee_c3, "mail.message/notification")):
             test_records_mc_c2.with_user(self.user_employee_c2).with_context(
                 allowed_company_ids=self.company_2.ids
             ).message_post(
@@ -342,7 +342,7 @@ class TestMultiCompanyControllers(TestMailMCCommon, HttpCase):
             partner_ids=[self.partner_employee_c2.id, customer_c3.id],
         )
         self.authenticate(self.user_employee_c2.login, self.user_employee_c2.login)
-        messages = self.make_jsonrpc_request("/mail/store", {"fetch_params": ["/mail/inbox/messages"]})
+        messages = self.make_jsonrpc_request("/mail/store", {"fetch_params": [["/mail/messaging_menu/mail.message/load_more", {"tab_id": "notification", "filter_id": "notification_unread", "limit": 20}]]})
         self.assertEqual(len(messages["mail.message"]), 1)
 
     def test_redirect_to_records(self):
