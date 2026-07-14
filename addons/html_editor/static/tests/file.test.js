@@ -207,6 +207,23 @@ describe("file command", () => {
             // ArrowRight at end should do nothing.
             await press("ArrowRight");
             expect(getContent(fileNameEl)).toBe("file.txt[]");
+
+            // Delete all content to make the file name empty.
+            editor.shared.selection.setSelection({
+                anchorNode: fileNameEl,
+                anchorOffset: 0,
+                focusNode: fileNameEl,
+                focusOffset: nodeSize(fileNameEl),
+            });
+            await animationFrame();
+            await press("Backspace");
+            await animationFrame();
+
+            // ArrowLeft and ArrowRight should do nothing in an empty file name.
+            await press("ArrowLeft");
+            expect(getContent(fileNameEl)).toBe("[]<br>");
+            await press("ArrowRight");
+            expect(getContent(fileNameEl)).toBe("[]<br>");
         });
 
         test.tags("desktop");
@@ -255,6 +272,76 @@ describe("file command", () => {
             await click(fileImage);
             await expectElementCount(".o-FileViewer", 1);
         });
+    });
+
+    test.tags("desktop");
+    test("should not open powerbox inside a static file box", async () => {
+        const { editor } = await setupEditor("<p>[]<br></p>");
+        patchUpload(editor);
+        execCommand(editor, "uploadFile");
+        // Wait until the file name is rendered.
+        await waitFor('.o_file_box .o_file_name_container:contains("file.txt")');
+
+        // Enable editing on the file name.
+        const fileNameEl = queryOne(".o_file_box .o_file_name_container .o_link_readonly");
+        await click(fileNameEl);
+        await animationFrame();
+        expect(fileNameEl).toHaveAttribute("contenteditable", "true");
+
+        // Typing "/" inside the file name should NOT open the powerbox.
+        await insertText(editor, "/");
+        await animationFrame();
+        expect(".o-we-powerbox").toHaveCount(0);
+    });
+
+    test.tags("desktop");
+    test("should not trigger shorthands inside a static file box", async () => {
+        const { editor } = await setupEditor("<p>[]<br></p>");
+        patchUpload(editor);
+        execCommand(editor, "uploadFile");
+        // Wait until the file name is rendered.
+        await waitFor('.o_file_box .o_file_name_container:contains("file.txt")');
+
+        // Enable editing on the file name.
+        const fileNameEl = queryOne(".o_file_box .o_file_name_container .o_link_readonly");
+        await click(fileNameEl);
+        await animationFrame();
+        expect(fileNameEl).toHaveAttribute("contenteditable", "true");
+
+        // Place cursor at the start of the file name.
+        editor.shared.selection.setCursorStart(fileNameEl);
+        await animationFrame();
+
+        await insertText(editor, "## ");
+        await animationFrame();
+        expect(getContent(fileNameEl)).toBe("## []file.txt");
+    });
+
+    test.tags("desktop");
+    test("should paste only plain text inside a static file box", async () => {
+        const { editor } = await setupEditor("<p>[]<br></p>");
+        patchUpload(editor);
+        execCommand(editor, "uploadFile");
+        // Wait until the file name is rendered.
+        await waitFor('.o_file_box .o_file_name_container:contains("file.txt")');
+
+        // Enable editing on the file name.
+        const fileNameEl = queryOne(".o_file_box .o_file_name_container .o_link_readonly");
+        await click(fileNameEl);
+        await animationFrame();
+
+        editor.shared.selection.setCursorEnd(fileNameEl);
+        await animationFrame();
+
+        // Simulate a paste with both HTML and plain text data.
+        const clipboardData = new DataTransfer();
+        clipboardData.setData("text/html", "<h1><b>rich content</b></h1>");
+        clipboardData.setData("text/plain", "plain content");
+        await manuallyDispatchProgrammaticEvent(fileNameEl, "paste", { clipboardData });
+        await animationFrame();
+
+        // Only the plain text should be inserted; no HTML elements (e.g. <h1>, <b>).
+        expect(fileNameEl.innerHTML).toBe("file.txtplain content");
     });
 });
 
