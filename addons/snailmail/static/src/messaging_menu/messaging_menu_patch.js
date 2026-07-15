@@ -2,24 +2,28 @@ import { MessagingMenu } from "@mail/core/public_web/messaging_menu/messaging_me
 import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
 
-patch(MessagingMenu.prototype, {
-    openFailureView(failure) {
+/** @type {MessagingMenu} */
+const messagingMenuPatch = {
+    openFailureView(failure, options) {
         if (failure.type !== "snail") {
-            return super.openFailureView(failure);
+            return super.openFailureView(...arguments);
         }
-        this.env.services.action.doAction({
-            name: _t("Snailmail Failures"),
-            type: "ir.actions.act_window",
-            view_mode: "kanban,list,form",
-            views: [
-                [false, "kanban"],
-                [false, "list"],
-                [false, "form"],
-            ],
-            target: "current",
-            res_model: failure.resModel,
-            domain: [["message_ids.snailmail_error", "=", true]],
-        });
+        this.env.services.action.doAction(
+            {
+                name: _t("Snailmail Failures"),
+                type: "ir.actions.act_window",
+                view_mode: "kanban,list,form",
+                views: [
+                    [false, "kanban"],
+                    [false, "list"],
+                    [false, "form"],
+                ],
+                target: "current",
+                res_model: failure.resModel,
+                domain: [["message_ids.snailmail_error", "=", true]],
+            },
+            { newWindow: options.isMiddleClick }
+        );
         this.close?.();
     },
     getFailureNotificationName(failure) {
@@ -28,4 +32,5 @@ patch(MessagingMenu.prototype, {
         }
         return super.getFailureNotificationName(...arguments);
     },
-});
+};
+patch(MessagingMenu.prototype, messagingMenuPatch);

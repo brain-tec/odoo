@@ -330,7 +330,7 @@
                                     </group>
                                     <group string="Location" name="hr_location_group">
                                         <label for="private_street" string="Private Address"/>
-                                        <div class="o_address_format">
+                                        <div class="o_address_format o_hr_address">
                                             <field name="private_street" placeholder="Street..." class="o_address_street"/>
                                             <field name="private_street2" placeholder="Street 2..." class="o_address_street"/>
                                             <field name="private_city" placeholder="City" class="o_address_city"/>
@@ -376,8 +376,7 @@
                                                 nolabel="1"/>
                                             </div>
                                         <field name="employee_type_id" string="Employee Type" placeholder="Select employee type"
-                                                domain="[('country_id', 'in', [company_country_id, False]), '|', ('company_id', 'in', [company_id, False]), ('company_id', '=', parent_company_id)]"
-                                                required="contract_date_start"/>
+                                                domain="[('country_id', 'in', [company_country_id, False]), '|', ('company_id', 'in', [company_id, False]), ('company_id', '=', parent_company_id)]"/>
                                         <label for="contract_date_start" string="Contract"/>
                                         <div class="o_row" name="contract_dates">
                                             <field name="contract_date_start" string="Start Date" placeholder="Not Employed" class="o_hr_narrow_field me-3"/>

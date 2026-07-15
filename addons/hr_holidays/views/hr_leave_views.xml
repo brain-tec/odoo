@@ -24,6 +24,9 @@
                 <field name="name"/>
                 <field name="activity_user_id" string="Activities of"/>
                 <field name="activity_type_id" string="Activity type"/>
+                <filter string="Current Company" name="current_company"
+                        domain="[('company_id', '=', allowed_company_ids[0])]"
+                        groups="base.group_multi_company"/>
                 <filter domain="[
                         ('state','in',['confirm']),
                         '|',
@@ -111,6 +114,7 @@
                         name="%(hr_holidays.action_hr_leave_generate_multi_wizard)d"
                         string="New Group Time Off" class="btn btn-secondary"
                         groups="hr_holidays.group_hr_holidays_responsible" display="always"
+                        data-hotkey="v"
                     />
                 </header>
                 <field name="supported_attachment_ids_count"/>
@@ -349,11 +353,11 @@
             <field name="employee_id" invisible="1"/> <!-- for the employee's default value-->
             <field name="user_id" invisible="1"/> <!-- for conditional rendering of buttons on card -->
             <header>
-                <button string="Approve" name="action_approve" type="object" class="oe_highlight" invisible="not can_approve or not id" data-hotkey="q"/>
+                <button string="Approve" name="action_approve" type="object" class="oe_highlight" invisible="not can_approve or not id" data-hotkey="v"/>
                 <button string="Validate" name="action_approve" invisible="not can_validate or can_approve or not id" type="object" class="oe_highlight" data-hotkey="v"/>
-                <button string="Back to Approval" name="action_back_to_approval" type="object" invisible="not can_back_to_approve or not id"/>
+                <button string="Back to Approval" name="action_back_to_approval" type="object" invisible="not can_back_to_approve or not id" data-hotkey="z"/>
                 <button string="Refuse" name="action_refuse" type="object" invisible="not can_refuse or not id" data-hotkey="x"/>
-                <button string="Cancel" name="action_cancel" type="object" invisible="not can_cancel or not id" />
+                <button string="Cancel" name="action_cancel" type="object" invisible="not can_cancel or not id"  data-hotkey="n"/>
                 <field name="state" widget="statusbar" statusbar_visible="confirm,validate,validate1" invisible="validation_type != 'both'"/>
                 <field name="state" widget="statusbar" statusbar_visible="confirm,validate" invisible="validation_type == 'both'"/>
             </header>
@@ -423,7 +427,7 @@
                                                     ('virtual_remaining_leaves', '>', 0),
                                                     ('allows_negative', '=', False),
                                 ]"
-                                context="{'employee_id': employee_id, 'default_date_from': date_from, 'default_date_to': date_to}"
+                                context="{'employee_id': employee_id, 'default_date_from': date_from, 'default_date_to': date_to, 'leave_date_from': date_from}"
                                 options="{'no_create': True, 'request_type': 'leave'}"
                                 readonly="state in ['cancel', 'refuse', 'validate', 'validate1']"
                                 placeholder="eg. Sickness, Paid time off, Unpaid, ..."/>
@@ -624,18 +628,21 @@
                         string="New Group Time Off" class="btn btn-secondary"
                         invisible="context.get('default_employee_id', False)"
                         groups="hr_holidays.group_hr_holidays_responsible" display="always"
+                        data-hotkey="v"
                     />
                     <button type="object"
                         name="action_approve"
                         string="Approve"
                         icon="fa-thumbs-up"
                         class="btn btn-outline-success"
+                        data-hotkey="q"
                     />
                     <button type="object"
                         name="action_refuse"
                         string="Refuse"
                         icon="fa-times"
                         class="btn btn-outline-danger"
+                        data-hotkey="x"
                     />
                 </header>
                 <field name="employee_id" widget="many2one_avatar_employee" readonly="state in ['cancel', 'refuse', 'validate', 'validate1']" />
@@ -745,7 +752,7 @@
         <field name="res_model">hr.leave</field>
         <field name="view_mode">calendar,list,form,activity</field>
         <field name="domain">[('user_id', '=', uid), ('employee_id.company_id', 'in', allowed_company_ids)]</field>
-        <field name="context">{'short_name': 1, 'search_default_year': 1}</field>
+        <field name="context">{'short_name': 1, 'search_default_year': 1, 'search_default_current_company': 1}</field>
         <field name="search_view_id" ref="hr_holidays.hr_leave_view_search_my"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

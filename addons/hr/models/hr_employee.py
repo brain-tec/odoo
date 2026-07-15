@@ -102,7 +102,12 @@ class HrEmployee(models.Model):
     name = fields.Char(string="Employee Name", related='resource_id.name', store=True, readonly=False, tracking=True)
     resource_id = fields.Many2one('resource.resource', required=True)
     # required because the mixin already creates it so it is not related to the version_id
-    resource_calendar_id = fields.Many2one(related='version_id.resource_calendar_id', inherited=True, index=False, store=False, check_company=True)
+    resource_calendar_id = fields.Many2one(
+        related='version_id.resource_calendar_id',
+        inherited=True,
+        index=False,
+        store=False,
+        domain="['|', ('company_id', '=', False), ('company_id.id', 'parent_of', company_id)]")
     user_id = fields.Many2one(
         'res.users', 'User',
         related='resource_id.user_id',
@@ -1345,6 +1350,13 @@ class HrEmployee(models.Model):
             employee_private.display_name = employee_public.display_name
 
     @api.model
+    def _search_display_name(self, operator, value):
+        domain = super()._search_display_name(operator, value)
+        if self.env.context.get('import_file'):
+            domain &= Domain('company_id', 'in', self.env.companies.ids)
+        return domain
+
+    @api.model
     def search_fetch(self, domain, field_names=None, offset=0, limit=None, order=None):
         if self.has_access('read'):
             return super().search_fetch(domain, field_names, offset, limit, order)
@@ -2058,7 +2070,7 @@ class HrEmployee(models.Model):
             return (self.resource_calendar_id or self.env.company.resource_calendar_id)._get_unusual_days(
                 datetime.combine(fields.Date.from_string(date_from), time.min, tzinfo=UTC),
                 datetime.combine(fields.Date.from_string(date_to), time.max, tzinfo=UTC),
-                self.company_id,
+                self.company_id or self.env.company,
             )
         unusual_days = {}
         for version in employee_versions:

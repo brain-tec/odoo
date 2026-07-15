@@ -186,7 +186,7 @@ export class IconPlugin extends Plugin {
         if (!selectedIcon) {
             return;
         }
-        selectedIcon.classList.toggle("fa-spin");
+        selectedIcon.classList.toggle("oi-spin");
         this.dependencies.history.commit();
     }
 
@@ -209,7 +209,9 @@ export class IconPlugin extends Plugin {
         if (!selectedIcon) {
             return;
         }
-        return selectedIcon.classList.contains("fa-spin");
+        return (
+            selectedIcon.classList.contains("oi-spin") || selectedIcon.classList.contains("fa-spin")
+        );
     }
 
     openIconDialog() {
@@ -235,7 +237,7 @@ export class IconPlugin extends Plugin {
     computeBackgroundColorForIcon() {
         const nodes = this.dependencies.selection
             .getTargetedNodes()
-            .filter((node) => node.classList?.contains("fa"));
+            .filter((node) => node.classList?.contains("oi"));
         if (nodes.length === 0) {
             return;
         }
