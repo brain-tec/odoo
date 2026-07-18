@@ -255,7 +255,7 @@ class ResPartner(models.Model):
         if not company:
             company = self.env.company
 
-        self.invalidate_recordset(['routing_identifier'])
+        self._origin.invalidate_recordset(['routing_identifier'])
         self_partner = self.with_company(company)
         if not self_partner.routing_identifier:
             return False
@@ -267,11 +267,15 @@ class ResPartner(models.Model):
         )
         if old_value != new_value:
             self_partner.peppol_verification_state = new_value
-            self._track_add(
-                initial_values={self.id: {'peppol_verification_state': old_value}},
-                end_values={self.id: {'peppol_verification_state': new_value}},
-            )
+            (self_partner._origin or self_partner)._log_verification_state_update(old_value, new_value)
         return False
+
+    def _log_verification_state_update(self, old_value, new_value):
+        self.ensure_one()
+        self._track_add(
+            initial_values={self.id: {'peppol_verification_state': old_value}},
+            end_values={self.id: {'peppol_verification_state': new_value}},
+        )
 
     @api.model
     @handle_demo
