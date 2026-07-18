@@ -3951,6 +3951,74 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_admin).open_ui()
         self.start_pos_tour('test_dynamic_barcode_extra', login="pos_admin")
 
+    def test_default_fiscal_position_allowed(self):
+        """
+        Tests that when a fiscal position is used through the detect automatically
+        setting, it will not be chosen if it's not allowed in the PoS settings.
+        """
+        _, fp_allowed = self.env['account.fiscal.position'].create([
+            {
+                'name': 'Not Good',
+                'auto_apply': True,
+                'sequence': 1,
+                'country_id': self.env.ref('base.us').id,
+            },
+            {
+                'name': 'Allowed',
+                'auto_apply': False,
+                'sequence': 2,
+            }
+        ])
+        self.partner_test_1.country_id = self.env.ref('base.us').id
+        self.main_pos_config.write({
+            'tax_regime_selection': True,
+            'default_fiscal_position_id': fp_allowed.id,
+            'fiscal_position_ids': [Command.set(fp_allowed.ids)],
+        })
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_pos_tour('test_default_fiscal_position_allowed', login="pos_user")
+
+    def test_barcode_scan_preselect_always_variant(self):
+        """
+        When scanning a barcode that matches a specific variant, the product configurator
+        should open with the 'always' variant attribute (Color) preselected and only the
+        'no_variant' attribute (Size) requiring user input.
+        """
+        color_attribute = self.env['product.attribute'].create({
+            'name': 'Color',
+            'create_variant': 'always',
+            'display_type': 'radio',
+            'value_ids': [(0, 0, {'name': 'Red', 'sequence': 1}), (0, 0, {'name': 'Blue', 'sequence': 2})],
+        })
+        size_attribute = self.env['product.attribute'].create({
+            'name': 'Size',
+            'create_variant': 'no_variant',
+            'display_type': 'radio',
+            'value_ids': [(0, 0, {'name': 'Small', 'sequence': 1}), (0, 0, {'name': 'Large', 'sequence': 2})],
+        })
+        product = self.env['product.template'].create({
+            'name': 'Variant Barcode Product',
+            'available_in_pos': True,
+            'list_price': 10,
+            'taxes_id': False,
+            'attribute_line_ids': [
+                (0, 0, {
+                    'attribute_id': color_attribute.id,
+                    'value_ids': [(6, 0, color_attribute.value_ids.ids)],
+                }),
+                (0, 0, {
+                    'attribute_id': size_attribute.id,
+                    'value_ids': [(6, 0, size_attribute.value_ids.ids)],
+                }),
+            ],
+        })
+        red_variant, blue_variant = product.product_variant_ids
+        red_variant.barcode = 'VAR_RED_001'
+        blue_variant.barcode = 'VAR_BLUE_001'
+
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_barcode_scan_preselect_always_variant', login="pos_user")
+
 
 # This class just runs the same tests as above but with mobile emulation
 class MobileTestUi(TestUi):

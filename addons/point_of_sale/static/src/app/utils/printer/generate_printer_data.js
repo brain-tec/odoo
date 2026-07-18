@@ -193,6 +193,7 @@ export class GeneratePrinterData {
                 unit_price: line.currencyDisplayPriceUnit,
                 product_unit_price: line.product_id.displayPriceUnit,
                 price_subtotal_incl: line.currencyDisplayPrice,
+                no_discount_price: formatCurrency(line.displayPriceNoDiscount, line.currency.id),
             };
         });
     }
@@ -376,6 +377,8 @@ export class GeneratePrinterData {
                     preset: order.preset_id ? order.preset_id.raw : false,
                     extra_data: {
                         ...this.commonExtraData,
+                        prefix: _t("Order"),
+                        order_label: order.floating_order_name || false,
                         reprint: Boolean(reprint),
                         time: DateTime.now().toFormat("HH:mm"),
                         internal_note: getStrNotes(change.internal_note) || false,

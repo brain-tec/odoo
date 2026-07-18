@@ -106,6 +106,7 @@ class PosOrderReceipt(models.AbstractModel):
             data['product_data'] = product_by_id[data['product_id']]
             data['product_uom_name'] = line.product_id.uom_id.name
             data['price_subtotal_incl'] = self._order_receipt_format_currency(data['price_subtotal_incl'])
+            data['no_discount_price'] = self._order_receipt_format_currency(line._get_price_no_discount(self.config_id))
 
             # Compute line unit price
             taxes = line._compute_amount_line_all(1)
@@ -404,6 +405,8 @@ class PosOrderReceipt(models.AbstractModel):
                 'time': format_datetime(self.env, self.date_order),
                 'employee_name': self.user_id.name if self.user_id else '',
                 'preset_time': format_datetime(self.env, preset_time) if preset_time else False,
+                'prefix': _("Order"),
+                'order_label': self.floating_order_name,
                 'reprint': False,
                 'internal_note': _get_str_notes(order_changes.get('internal_note', '')),
                 'general_customer_note': order_changes.get('general_customer_note', ''),
