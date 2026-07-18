@@ -373,12 +373,21 @@ class ProductProduct(models.Model):
     def _get_remaining_moves(self):
         moves_qty_by_product = {}
         for product in self:
-            moves, remaining_qty = product._run_fifo_get_stack()
-            moves = self.env['stock.move'].concat(*moves)
-            if not moves:
+            qty_by_move = defaultdict(float)
+            lots = [None]
+            if product.lot_valuated:
+                lots = product.stock_quant_ids.filtered(
+                    lambda q: q.lot_id and q.company_id == self.env.company and q.location_id.is_valued_internal and q.quantity > 0
+                ).lot_id or [None]
+            for lot in lots:
+                moves, remaining_qty = product._run_fifo_get_stack(lot=lot)
+                if not moves:
+                    continue
+                qty_by_move[moves[0]] += remaining_qty
+                for move in moves[1:]:
+                    qty_by_move[move] += move._get_valued_qty(lot)
+            if not qty_by_move:
                 continue
-            qty_by_move = {m: m.quantity for m in moves[1:]}
-            qty_by_move[moves[0]] = remaining_qty
             moves_qty_by_product[product] = qty_by_move
         return moves_qty_by_product
 
@@ -652,14 +661,14 @@ class ProductProduct(models.Model):
                 continue
             products_by_cost_method[product.cost_method].add(product.id)
         for cost_method, product_ids in products_by_cost_method.items():
-            products = self.env['product.product'].browse(product_ids)
+            products = self.env['product.product'].sudo().browse(product_ids)
             if cost_method == 'standard':
                 continue
 
             if extra_value is not None and extra_quantity is not None:
                 products_with_incremental_recompute = (
                     self.env['product.product'].concat(*extra_value.keys()) & products
-                ).with_context(
+                ).sudo().with_context(
                     allowed_company_ids=self.env.company.ids
                 )._with_valuation_context()
                 products_with_incremental_recompute.fetch(['qty_available'])
