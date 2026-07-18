@@ -110,14 +110,12 @@ export function useAutofocus({ refName, ref, selectAll, mobile } = {}) {
  */
 export function useBus(bus, eventName, callback) {
     const { component } = useScope();
-    useLayoutEffect(
-        () => {
-            const listener = callback.bind(component);
-            bus.addEventListener(eventName, listener);
-            return () => bus.removeEventListener(eventName, listener);
-        },
-        () => []
-    );
+    let listener;
+    onMounted(() => {
+        listener = callback.bind(component);
+        bus.addEventListener(eventName, listener);
+    });
+    onWillUnmount(() => bus.removeEventListener(eventName, listener));
 }
 
 // -----------------------------------------------------------------------------
@@ -143,7 +141,7 @@ function handleAbortError(reason) {
  */
 function protectMethod(scope, fn) {
     return function protectedMethod(...args) {
-        if (scope.status === 3) {
+        if (scope.status >= 2) {
             return useService.handleCallWhenDestroyed();
         }
         const promise = fn.call(this, ...args);

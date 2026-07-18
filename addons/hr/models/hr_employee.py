@@ -47,6 +47,7 @@ class HrEmployee(models.Model):
     _mailing_enabled = True
     _primary_email = 'work_email'
     _inherits = {'hr.version': 'version_id'}
+    _check_inherits_access = False
 
     # versions
     version_id = fields.Many2one(
@@ -1421,7 +1422,7 @@ class HrEmployee(models.Model):
         if operation == 'read' and self.env.context.get('_allow_read_hr_employee') is _ALLOW_READ_HR_EMPLOYEE:
             return Domain.TRUE
 
-        return self.env['ir.access']._get_domain_for(self._name, operation, include_inherits=False)
+        return super()._access_domain(operation)
 
     def _check_private_fields(self, field_names):
         """ Check whether ``field_names`` contain private fields. """
@@ -1805,6 +1806,9 @@ class HrEmployee(models.Model):
             self._remove_work_contact_id(user, vals.get('company_id'))
         if 'work_permit_expiration_date' in vals:
             vals['work_permit_scheduled_activity'] = False
+        if 'current_version_id' in vals:
+            new_version = self.env['hr.version'].browse(vals.get('current_version_id'))
+            self.resource_id.calendar_id = new_version.resource_calendar_id
         if vals.get('tz'):
             users_to_update = self.env['res.users']
             for employee in self:

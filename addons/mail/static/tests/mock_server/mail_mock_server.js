@@ -484,10 +484,12 @@ async function mail_link_preview(request) {
     const { message_id } = await parseRequestParams(request);
     const [message] = MailMessage.search_read([["id", "=", message_id]]);
     const link = createDocumentFragmentFromContent(markup(message.body)).querySelector(
-        "a[href^='https://tenor.com'], a[href^='https://make-link-preview.com']"
+        "a[href^='https://tenor.com'], a[href^='https://make-link-preview.com'], a[href^='https://media.tenor.com']"
     );
     if (link) {
-        const isGifPreview = link.href.startsWith("https://tenor.com");
+        const isGifPreview =
+            link.href.startsWith("https://tenor.com") ||
+            link.href.startsWith("https://media.tenor.com");
         const linkPreviewId = MailLinkPreview.create({
             og_description: isGifPreview ? "Click to view the GIF" : "test description",
             og_image: isGifPreview ? link.href : undefined,
@@ -663,10 +665,18 @@ async function mail_message_update_content(request) {
             }
         }
     }
-    if (update_data.attachment_ids.length === 0) {
-        IrAttachment.unlink(message.attachment_ids);
-    } else {
-        const attachments = IrAttachment.browse(update_data.attachment_ids).filter(
+    const target_attachments = update_data.attachment_ids;
+    const attachments_to_remove = message.attachment_ids.filter(
+        (id) => !target_attachments.includes(id)
+    );
+    const attachments_to_add = target_attachments.filter(
+        (id) => !message.attachment_ids.includes(id)
+    );
+    if (attachments_to_remove.length) {
+        IrAttachment.unlink(attachments_to_remove);
+    }
+    if (attachments_to_add.length) {
+        const attachments = IrAttachment.browse(attachments_to_add).filter(
             (attachment) =>
                 attachment.res_model === "mail.compose.message" &&
                 attachment.create_uid === this.env.user?.id
@@ -678,8 +688,8 @@ async function mail_message_update_content(request) {
                 res_id: message.res_id,
             }
         );
-        msg_values.attachment_ids = update_data.attachment_ids;
     }
+    msg_values.attachment_ids = target_attachments;
     if (update_data.body === "") {
         MailMessageLinkPreview.unlink(message.message_link_preview_ids);
     }
