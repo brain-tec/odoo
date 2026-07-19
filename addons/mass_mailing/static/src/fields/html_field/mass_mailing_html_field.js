@@ -29,6 +29,10 @@ export class MassMailingHtmlField extends HtmlField {
         filterTemplates: t.boolean().optional(),
     });
 
+    get classList() {
+        return this.withBuilder ? [] : ["o-html-field"];
+    }
+
     setup() {
         // Keep track of the next props before other `onWillUpdateProps`
         // callbacks in super can be executed, to be able to compute the next
@@ -217,6 +221,7 @@ export class MassMailingHtmlField extends HtmlField {
     async toggleCodeView() {
         await this.commitChanges();
         this.state.showCodeView = !this.state.showCodeView;
+        this.state.isNewlySelectedTheme = false;
         this.state.key++;
     }
 
@@ -252,6 +257,7 @@ export class MassMailingHtmlField extends HtmlField {
         return {
             ...config,
             allowChecklist: false,
+            allowTextColumnResize: false,
             record: this.props.record,
             mobileBreakpoint: "md",
             defaultImageMimetype: "image/png",

@@ -46,6 +46,7 @@ import { Domain } from "@web/core/domain";
 import { PosOrderAccounting } from "@point_of_sale/app/models/accounting/pos_order_accounting";
 import { PosOrderlineAccounting } from "@point_of_sale/app/models/accounting/pos_order_line_accounting";
 import { ComboSuggestion } from "../models/utils/combo_suggestion";
+import { SIZES } from "@web/core/ui/ui_service";
 
 const { DateTime } = luxon;
 export const CONSOLE_COLOR = "#F5B427";
@@ -1353,7 +1354,7 @@ export class PosStore extends WithLazyGetterTrap {
             if (values.product_id.product_template_variant_value_ids.length > 0) {
                 // Verify price extra of variant products
                 const priceExtra = values.product_id.product_template_variant_value_ids
-                    .filter((attr) => attr.attribute_id.create_variant !== "always")
+                    .filter((attr) => attr.attribute_id.create_variant !== "always" && !opts.code)
                     .reduce((acc, attr) => acc + attr.price_extra, 0);
 
                 values.price_extra += priceExtra;
@@ -1611,7 +1612,7 @@ export class PosStore extends WithLazyGetterTrap {
         }
     }
 
-    postSyncAllOrders(orders) {}
+    async postSyncAllOrders(orders) {}
     async syncAllOrders(options = {}) {
         if (this.data.network.offline) {
             if (options.throw) {
@@ -2744,6 +2745,10 @@ export class PosStore extends WithLazyGetterTrap {
         this.notification.add(_t("Order saved for later"), { type: "success" });
         this.setOrder(this.getEmptyOrder());
         this.mobile_pane = "right";
+    }
+
+    get isSmallProductScreen() {
+        return this.ui.size < SIZES.MD;
     }
 
     get isSelectedLineCombo() {

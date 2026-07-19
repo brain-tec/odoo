@@ -148,6 +148,7 @@ export default class OrderPaymentValidation {
 
         this.pos.addPendingOrder([this.order.id]);
         this.order.state = "paid";
+        this.pos.data.localUnsyncedPaidOrderUuids.add(this.order.uuid);
 
         this.order.processingValidation = true;
         try {
@@ -226,6 +227,9 @@ export default class OrderPaymentValidation {
 
     handleValidationError(error) {
         if (error instanceof ConnectionLostError) {
+            // Bypass the 300ms debounce to immediately persist the paid order to IndexedDB.
+            // Without this, a page reload within the debounce window permanently loses the order.
+            this.pos.data.synchronizeLocalDataInIndexedDB();
             this.afterOrderValidation();
             Promise.reject(error);
         } else if (error instanceof RPCError) {
@@ -247,7 +251,7 @@ export default class OrderPaymentValidation {
         const order = this.pos.getOrder();
         const currency = this.pos.currency;
         for (const payment of order.payment_ids) {
-            if (!payment.payment_method_id.is_cash_count) {
+            if (payment.payment_method_id.type !== "cash") {
                 continue;
             }
 
@@ -333,7 +337,7 @@ export default class OrderPaymentValidation {
             Math.abs(this.order.priceIncl - this.order.amountPaid + this.order.appliedRounding) >
             0.00001
         ) {
-            if (!this.pos.models["pos.payment.method"].some((pm) => pm.is_cash_count)) {
+            if (!this.pos.models["pos.payment.method"].some((pm) => pm.type === "cash")) {
                 this.pos.dialog.add(AlertDialog, {
                     title: _t("Cannot return change without a cash payment method"),
                     body: _t(
@@ -380,7 +384,7 @@ export default class OrderPaymentValidation {
 
     async _askForCustomerIfRequired() {
         const splitPayments = this.order.payment_ids.filter(
-            (payment) => payment.payment_method_id.split_transactions
+            (payment) => payment.payment_method_id.type == "pay_later"
         );
         if (splitPayments.length && !this.order.getPartner()) {
             const paymentMethod = splitPayments[0].payment_method_id;

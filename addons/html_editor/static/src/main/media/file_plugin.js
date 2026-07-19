@@ -3,6 +3,7 @@ import {
     renderStaticFileBox,
 } from "@html_editor/main/media/media_dialog/document_selector";
 import { Plugin } from "@html_editor/plugin";
+import { isEmpty } from "@html_editor/utils/dom_info";
 import { closestElement, firstLeaf, lastLeaf } from "@html_editor/utils/dom_traversal";
 import { nodeSize } from "@html_editor/utils/position";
 import { withSequence } from "@html_editor/utils/resource";
@@ -69,6 +70,23 @@ export class FilePlugin extends Plugin {
                 return false;
             }
         },
+        is_powerbox_available_predicates: (node) => {
+            if (closestElement(node, ".o_file_box")) {
+                return false;
+            }
+        },
+        are_shorthands_available_predicates: (node) => {
+            if (closestElement(node, ".o_file_box")) {
+                return false;
+            }
+        },
+
+        /** Predicates */
+        should_paste_as_text_predicates: (selection) => {
+            if (closestElement(selection.anchorNode, ".o_file_box")) {
+                return true;
+            }
+        },
     };
 
     setup() {
@@ -129,8 +147,8 @@ export class FilePlugin extends Plugin {
             case "ArrowLeft":
                 if (
                     selection.isCollapsed &&
-                    selection.anchorNode === firstLeafNode &&
-                    selection.anchorOffset === 0
+                    (isEmpty(fileNameEl) ||
+                        (selection.anchorNode === firstLeafNode && selection.anchorOffset === 0))
                 ) {
                     ev.preventDefault();
                 }
@@ -138,8 +156,9 @@ export class FilePlugin extends Plugin {
             case "ArrowRight":
                 if (
                     selection.isCollapsed &&
-                    selection.anchorNode === lastLeafNode &&
-                    selection.anchorOffset === nodeSize(lastLeafNode)
+                    (isEmpty(fileNameEl) ||
+                        (selection.anchorNode === lastLeafNode &&
+                            selection.anchorOffset === nodeSize(lastLeafNode)))
                 ) {
                     ev.preventDefault();
                 }

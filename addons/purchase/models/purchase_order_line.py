@@ -345,7 +345,9 @@ class PurchaseOrderLine(models.Model):
         for line in lines:
             if line.qty_received_method == 'manual' and line.product_id.is_storable:
                 qty_received = line.uom_id._compute_quantity(line.qty_received, line.product_id.uom_id)
-                line.product_id.with_context(skip_qty_available_update=True).qty_available += qty_received
+                line.product_id.sudo().with_company(line.company_id).with_context(
+                    skip_qty_available_update=True
+                ).qty_available += qty_received
             if line.product_id and line.order_id.state == 'purchase':
                 msg = _("Extra line with %s ", line.product_id.display_name)
                 line.order_id.message_post(body=msg)
@@ -384,7 +386,9 @@ class PurchaseOrderLine(models.Model):
                 if line.qty_received_method == 'manual' and line.product_id.is_storable:
                     delta_qty_received = values['qty_received'] - line.qty_received
                     delta_qty_received = line.uom_id._compute_quantity(delta_qty_received, line.product_id.uom_id)
-                    line.product_id.with_context(skip_qty_available_update=True).qty_available += delta_qty_received
+                    line.product_id.sudo().with_company(line.company_id).with_context(
+                        skip_qty_available_update=True
+                    ).qty_available += delta_qty_received
                 line._track_qty_received(values['qty_received'])
         return super().write(values)
 
@@ -523,12 +527,12 @@ class PurchaseOrderLine(models.Model):
                     line.date_order or fields.Date.context_today(line),
                     False
                 )
-                price_unit = float_round(price_unit, precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
-                line.price_unit = line.technical_price_unit = line.product_id._adapt_price_unit_to_document_tax_mode(
+                line._reset_price_unit(line.product_id._adapt_price_unit_to_document_tax_mode(
                     price_unit,
                     line.product_id.supplier_taxes_id,
                     line.uom_id,
                     line.document_tax_mode,
+                    ),
                 )
 
             elif line.selected_seller_id:
@@ -541,6 +545,13 @@ class PurchaseOrderLine(models.Model):
                     line.document_tax_mode,
                 )
                 line.discount = line.selected_seller_id.discount or 0.0
+
+    def _reset_price_unit(self, price_unit):
+        self.ensure_one()
+        self.update({
+            'price_unit': price_unit,
+            'technical_price_unit': price_unit,
+        })
 
     @api.depends('product_id')
     def _compute_translated_product_name(self):
