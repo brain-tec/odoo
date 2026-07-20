@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 18:10+0000\n"
+"POT-Creation-Date: 2026-07-17 18:01+0000\n"
 "PO-Revision-Date: 2025-11-17 03:12+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Hindi <https://translate.odoo.com/projects/odoo-19-l10n/"
@@ -191,6 +191,7 @@ msgid "Data Entry Mistake"
 msgstr ""
 
 #. module: l10n_in_edi
+#: model:ir.model.fields,field_description:l10n_in_edi.field_account_journal__display_name
 #: model:ir.model.fields,field_description:l10n_in_edi.field_account_move__display_name
 #: model:ir.model.fields,field_description:l10n_in_edi.field_account_move_line__display_name
 #: model:ir.model.fields,field_description:l10n_in_edi.field_account_move_send__display_name
@@ -337,6 +338,7 @@ msgid "Force cancelled %(invoice)s by %(username)s"
 msgstr ""
 
 #. module: l10n_in_edi
+#: model:ir.model.fields,field_description:l10n_in_edi.field_account_journal__id
 #: model:ir.model.fields,field_description:l10n_in_edi.field_account_move__id
 #: model:ir.model.fields,field_description:l10n_in_edi.field_account_move_line__id
 #: model:ir.model.fields,field_description:l10n_in_edi.field_account_move_send__id
@@ -401,6 +403,17 @@ msgstr "बीजक"
 #. odoo-python
 #: code:addons/l10n_in_edi/models/account_move.py:0
 msgid "Invoice number should not be more than 16 characters"
+msgstr ""
+
+#. module: l10n_in_edi
+#. odoo-python
+#: code:addons/l10n_in_edi/models/account_journal.py:0
+msgid "Invoices to send for E-Invoicing"
+msgstr ""
+
+#. module: l10n_in_edi
+#: model:ir.model,name:l10n_in_edi.model_account_journal
+msgid "Journal"
 msgstr ""
 
 #. module: l10n_in_edi
@@ -544,6 +557,11 @@ msgid "To Send"
 msgstr "भेजने के लिए"
 
 #. module: l10n_in_edi
+#: model_terms:ir.ui.view,arch_db:l10n_in_edi.account_journal_dashboard_kanban_view_in
+msgid "To Send For E-Invoicing"
+msgstr ""
+
+#. module: l10n_in_edi
 #. odoo-python
 #: code:addons/l10n_in_edi/models/res_company.py:0
 msgid ""
@@ -611,6 +629,12 @@ msgstr ""
 #: code:addons/l10n_in_edi/models/account_move.py:0
 msgid "here"
 msgstr "क्लिक करें"
+
+#. module: l10n_in_edi
+#. odoo-python
+#: code:addons/l10n_in_edi/models/account_journal.py:0
+msgid "journal_id"
+msgstr ""
 
 #. module: l10n_in_edi
 #. odoo-python

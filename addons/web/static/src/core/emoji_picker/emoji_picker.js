@@ -1,5 +1,4 @@
 import { markEventHandled } from "@web/core/utils/misc";
-import { useRef } from "@web/owl2/utils";
 import {
     Component,
     computed,
@@ -20,6 +19,7 @@ import {
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
 import { range } from "@web/core/utils/numbers";
 import { fuzzyLookup } from "@web/core/utils/search";
@@ -86,6 +86,8 @@ export class EmojiPicker extends Component {
     activeEmojiIndex = signal(0, { type: t.number() });
 
     gridRef = signal(null, { type: t.ref() });
+    navbarRef = signal(null, { type: t.ref() });
+    autofocusRef = signal(null, { type: t.ref() });
     emojiNavbarRepr = signal(null, { type: t.or([t.array(), t.literal(null)]) });
 
     recentEmojis = computed(() => {
@@ -108,12 +110,11 @@ export class EmojiPicker extends Component {
     });
 
     setup() {
-        this.navbarRef = useRef("navbar");
         this.ui = useService("ui");
         this.isMobileOS = isMobileOS();
         this.frequentEmojiService = useService("frequent_emoji");
         const loadEmoji = useLoadEmoji();
-        useAutofocus();
+        useAutofocus({ ref: this.autofocusRef });
         onWillStart(async () => {
             await loadEmoji();
             this.recentCategory = {
@@ -133,7 +134,7 @@ export class EmojiPicker extends Component {
                 return;
             }
             this.navbarResizeObserver = new ResizeObserver(() => this.adaptNavbar());
-            this.navbarResizeObserver.observe(this.navbarRef.el);
+            this.navbarResizeObserver.observe(this.navbarRef());
             this.adaptNavbar();
             this.highlightActiveCategory();
             if (this.props.storeScroll) {
@@ -195,17 +196,17 @@ export class EmojiPicker extends Component {
     }
 
     adaptNavbar() {
-        if (!this.navbarRef.el) {
+        if (!this.navbarRef()) {
             return;
         }
-        const computedStyle = getComputedStyle(this.navbarRef.el);
+        const computedStyle = getComputedStyle(this.navbarRef());
         const availableWidth =
-            this.navbarRef.el.getBoundingClientRect().width -
+            this.navbarRef().getBoundingClientRect().width -
             parseInt(computedStyle.paddingLeft) -
             parseInt(computedStyle.marginLeft) -
             parseInt(computedStyle.paddingLeft) -
             parseInt(computedStyle.marginLeft);
-        const itemWidth = this.navbarRef.el.querySelector(".o-Emoji").getBoundingClientRect().width;
+        const itemWidth = this.navbarRef().querySelector(".o-Emoji").getBoundingClientRect().width;
         const gapWidth = parseInt(computedStyle.gap);
         const maxAvailableNavbarItemAmountAtOnce = Math.floor(
             availableWidth / (itemWidth + gapWidth)
@@ -483,18 +484,20 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
     function add(ref, onSelect, { show = false } = {}) {
         const toggler = () => toggle(isMobileOS() ? undefined : ref, onSelect);
         targets.push([ref, toggler]);
-        if (!ref.el) {
+        const el = resolveRefEl(ref);
+        if (!el) {
             return;
         }
-        ref.el.addEventListener("click", toggler);
-        ref.el.addEventListener("mouseenter", loadEmoji);
+        el.addEventListener("click", toggler);
+        el.addEventListener("mouseenter", loadEmoji);
         if (show) {
-            ref.el.click();
+            el.click();
         }
     }
 
     function open(ref, openProps) {
         state.isOpen = true;
+        const refEl = resolveRefEl(ref);
         if (ui.isSmall || isMobileOS()) {
             const { promise, resolve } = Promise.withResolvers();
             const pickerMobileProps = {
@@ -506,7 +509,7 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
                     return res;
                 },
             };
-            if (ref?.el) {
+            if (refEl) {
                 pickerMobileProps.close = () => remove();
                 const root = app.createRoot(PickerMobile, {
                     props: pickerMobileProps,
@@ -516,7 +519,7 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
                     props.onClose?.();
                     root.destroy();
                 };
-                root.mount(ref.el);
+                root.mount(refEl);
             } else {
                 remove = dialog.add(PickerMobileInDialog, pickerMobileProps, {
                     onClose: () => {
@@ -528,7 +531,7 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
             }
             return promise;
         }
-        return popover.open(ref.el, { ...props, ...openProps });
+        return popover.open(refEl, { ...props, ...openProps });
     }
 
     function close() {
@@ -549,29 +552,32 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
     }
     onMounted(() => {
         for (const [ref, toggle] of targets) {
-            if (!ref.el) {
+            const el = resolveRefEl(ref);
+            if (!el) {
                 continue;
             }
-            ref.el.addEventListener("click", toggle);
-            ref.el.addEventListener("mouseenter", loadEmoji);
+            el.addEventListener("click", toggle);
+            el.addEventListener("mouseenter", loadEmoji);
         }
     });
     onWillPatch(() => {
         for (const [ref, toggle] of targets) {
-            if (!ref.el) {
+            const el = resolveRefEl(ref);
+            if (!el) {
                 continue;
             }
-            ref.el.removeEventListener("click", toggle);
-            ref.el.removeEventListener("mouseenter", loadEmoji);
+            el.removeEventListener("click", toggle);
+            el.removeEventListener("mouseenter", loadEmoji);
         }
     });
     onPatched(() => {
         for (const [ref, toggle] of targets) {
-            if (!ref.el) {
+            const el = resolveRefEl(ref);
+            if (!el) {
                 continue;
             }
-            ref.el.addEventListener("click", toggle);
-            ref.el.addEventListener("mouseenter", loadEmoji);
+            el.addEventListener("click", toggle);
+            el.addEventListener("mouseenter", loadEmoji);
         }
     });
     Object.assign(state, { open, close, toggle });
@@ -598,20 +604,21 @@ class PickerMobileInDialog extends PickerMobile {
     static props = [...PICKER_PROPS, "onClose?"];
     static template = xml`
         <Dialog size="'lg'" header="false" footer="false" contentClass="'o-discuss-mobileContextMenu d-flex position-absolute bottom-0 rounded-0 h-50 bg-100'" bodyClass="'p-1'">
-            <div class="h-100" t-custom-ref="root">
+            <div class="h-100" t-ref="this.root">
                 <t t-component="this.props.PickerComponent" t-props="this.pickerProps"/>
             </div>
         </Dialog>
     `;
 
+    root = signal(null);
+
     setup() {
         super.setup();
-        this.root = useRef("root");
         useListener(
             window,
             "click",
             (ev) => {
-                if (ev.target !== this.root.el && !this.root.el.contains(ev.target)) {
+                if (ev.target !== this.root() && !this.root().contains(ev.target)) {
                     this.props.close?.();
                 }
             },

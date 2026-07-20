@@ -1,15 +1,15 @@
-import { Component, onWillDestroy, props, proxy, t, xml } from "@odoo/owl";
+import { useExternalListener, useLayoutEffect, useSubEnv } from "@web/owl2/utils";
+import { useCrossDocumentListener } from "../utils/hooks";
+import { Component, onWillDestroy, props, proxy, signal, t, xml } from "@odoo/owl";
 import { OVERLAY_SYMBOL } from "@web/core/overlay/overlay_container";
 import { usePosition } from "@web/core/position/position_hook";
 import { getIFrame } from "@web/core/position/utils";
 import { useActiveElement } from "@web/core/ui/ui_service";
 import { useService } from "@web/core/utils/hooks";
-import { useExternalListener, useLayoutEffect, useRef, useSubEnv } from "@web/owl2/utils";
-import { useCrossDocumentListener } from "../utils/hooks";
 
 export class EditorOverlay extends Component {
     static template = xml`
-        <div t-custom-ref="root" class="overlay" t-att-class="this.props.className" t-on-pointerdown.stop="() => {}">
+        <div t-ref="this.rootRef" class="overlay" t-att-class="this.props.className" t-on-pointerdown.stop="() => {}">
             <t t-component="this.props.Component" t-props="this.props.props"/>
         </div>`;
 
@@ -32,6 +32,8 @@ export class EditorOverlay extends Component {
         hasAutofocus: t.boolean().optional(false),
     });
 
+    rootRef = signal(null);
+
     setup() {
         this.uiService = useService("ui");
         this.lastSelection = this.props.initialSelection;
@@ -53,8 +55,6 @@ export class EditorOverlay extends Component {
             position.unlock();
         });
 
-        const rootRef = useRef("root");
-
         if (this.props.positionOptions?.updatePositionOnResize ?? true) {
             const resizeObserver = new ResizeObserver(() => {
                 position.unlock();
@@ -66,7 +66,7 @@ export class EditorOverlay extends Component {
                         resizeObserver.unobserve(root);
                     };
                 },
-                () => [rootRef.el]
+                () => [this.rootRef()]
             );
         }
 
@@ -80,7 +80,7 @@ export class EditorOverlay extends Component {
         }
 
         if (this.props.hasAutofocus) {
-            useActiveElement("root");
+            useActiveElement(this.rootRef);
         }
         const topDocument = editable.ownerDocument.defaultView.top.document;
         const scrollContainer = getScrollContainer(editable);
@@ -103,7 +103,7 @@ export class EditorOverlay extends Component {
                 this.updateVisibility(el, solution, scrollContainer);
             },
         };
-        position = usePosition("root", getTarget, positionOptions);
+        position = usePosition(this.rootRef, getTarget, positionOptions);
 
         this.overlayState = proxy({ isOverlayVisible: true });
         useSubEnv({ overlayState: this.overlayState });

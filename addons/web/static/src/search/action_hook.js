@@ -1,6 +1,7 @@
 import { useComponent } from "@web/owl2/utils";
 import { onMounted, onWillUnmount, useListener } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 
 export const scrollSymbol = Symbol("scroll");
 
@@ -89,16 +90,16 @@ export function useSetupAction(params = {}) {
         });
     }
 
-    // Transitional check: Owl 3 native refs are signals (element obtained by
-    // calling the ref), while legacy refs expose `.el`. Resolve the element
-    // lazily at read time, mirroring the timing of the legacy `.el` getter.
-    const getRootEl = () => (typeof rootRef === "function" ? rootRef() : rootRef?.el);
+    const getRootEl = () => resolveRefEl(rootRef);
 
     function setScrollFromState() {
         const { state } = component.props;
         const scrolling = state && state[scrollSymbol];
         if (scrolling) {
             const rootEl = getRootEl();
+            if (!rootEl) {
+                return;
+            }
             if (ui.isSmall) {
                 rootEl.scrollTop = (scrolling.root && scrolling.root.top) || 0;
                 rootEl.scrollLeft = (scrolling.root && scrolling.root.left) || 0;
@@ -121,6 +122,9 @@ export function useSetupAction(params = {}) {
             }
             if (rootRef) {
                 const rootEl = getRootEl();
+                if (!rootEl) {
+                    return state;
+                }
                 if (ui.isSmall) {
                     state[scrollSymbol] = {
                         root: { left: rootEl.scrollLeft, top: rootEl.scrollTop },

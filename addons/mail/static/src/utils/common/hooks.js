@@ -21,6 +21,7 @@ import { browser } from "@web/core/browser/browser";
 import { OVERLAY_SYMBOL } from "@web/core/overlay/overlay_container";
 import { makeDraggableHook } from "@web/core/utils/draggable_hook_builder_owl";
 import { useService } from "@web/core/utils/hooks";
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 
 /**
  * @param {() => HTMLElement} target
@@ -62,7 +63,8 @@ export function onExternalClick(refOrName, cb) {
     const ref = typeof refOrName === "string" ? useRef(refOrName) : refOrName;
     let targetDocument = document;
     function onClick(ev) {
-        if (ref.el && !ref.el.contains(ev.composedPath()[0])) {
+        const el = resolveRefEl(ref);
+        if (el && !el.contains(ev.composedPath()[0])) {
             cb(ev, { downTarget, upTarget });
             upTarget = downTarget = null;
         }
@@ -74,7 +76,7 @@ export function onExternalClick(refOrName, cb) {
         upTarget = ev.target;
     }
     onMounted(() => {
-        targetDocument = ref.el?.ownerDocument || document;
+        targetDocument = resolveRefEl(ref)?.ownerDocument || document;
         targetDocument.body.addEventListener("mousedown", onMousedown, true);
         targetDocument.body.addEventListener("mouseup", onMouseup, true);
         targetDocument.body.addEventListener("click", onClick, true);
@@ -137,11 +139,13 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
             state._targets.push(target);
             const handleMouseenter = (ev) => onmouseenter(ev);
             const handleMouseleave = (ev) => onmouseleave(ev);
-            target.ref.el.addEventListener("mouseenter", handleMouseenter, true);
-            target.ref.el.addEventListener("mouseleave", handleMouseleave, true);
+            const el = resolveRefEl(target.ref);
+            el.addEventListener("mouseenter", handleMouseenter, true);
+            el.addEventListener("mouseleave", handleMouseleave, true);
             return () => {
-                target.ref.el.removeEventListener("mouseenter", handleMouseenter, true);
-                target.ref.el.removeEventListener("mouseleave", handleMouseleave, true);
+                const el = resolveRefEl(target.ref);
+                el?.removeEventListener("mouseenter", handleMouseenter, true);
+                el?.removeEventListener("mouseleave", handleMouseleave, true);
                 const idx = state._targets.findIndex((t) => t === target);
                 if (idx !== -1) {
                     state._targets.splice(idx, 1);
@@ -180,10 +184,11 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
             return;
         }
         for (const target of state._targets) {
-            if (!target.ref.el) {
+            const el = resolveRefEl(target.ref);
+            if (!el) {
                 continue;
             }
-            if (target.ref.el.contains(ev.target)) {
+            if (el.contains(ev.target)) {
                 setHover(true);
                 lastHoveredTarget = target;
                 return;
@@ -201,10 +206,11 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
             return;
         }
         for (const target of state._targets) {
-            if (!target.ref.el) {
+            const el = resolveRefEl(target.ref);
+            if (!el) {
                 continue;
             }
-            if (target.ref.el.contains(ev.relatedTarget)) {
+            if (el.contains(ev.relatedTarget)) {
                 return;
             }
         }
@@ -219,13 +225,13 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
 
     for (const target of targets) {
         useLazyExternalListener(
-            () => target.ref.el,
+            () => resolveRefEl(target.ref),
             "mouseenter",
             (ev) => onmouseenter(ev),
             true
         );
         useLazyExternalListener(
-            () => target.ref.el,
+            () => resolveRefEl(target.ref),
             "mouseleave",
             (ev) => onmouseleave(ev),
             true
@@ -237,7 +243,7 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
             // Note: stateObserver is essentially used with useDropdownState()?.isOpen.
             // While isOpen can become false, the ref.el can still be there for a short period of time.
             // Relying on isOpen becoming false forces good syncing of isHover state on dropdown close.
-            if ((lastHoveredTarget && !lastHoveredTarget.ref.el) || !open) {
+            if ((lastHoveredTarget && !resolveRefEl(lastHoveredTarget.ref)) || !open) {
                 setHover(false);
                 lastHoveredTarget = null;
             }
@@ -327,7 +333,7 @@ export function useScrollState(ref) {
                 resizeObserver.disconnect();
             };
         },
-        () => [ref()]
+        () => [resolveRefEl(ref)]
     );
     return state;
 }
@@ -336,22 +342,23 @@ export function useScrollState(ref) {
  * Hook that execute the callback function each time the scrollable element hit
  * the bottom minus the threshold.
  *
- * @param {string} refName scrollable t-ref name to observe
+ * @param {string|import("@odoo/owl").Signal<HTMLElement|null>} refOrName scrollable t-ref name or signal ref to observe
  * @param {function} callback function to execute when scroll hit the bottom minus the threshold
  * @param {number} threshold number of threshold pixel to trigger the callback
  */
-export function useOnBottomScrolled(refName, callback, threshold = 1) {
-    const ref = useRef(refName);
+export function useOnBottomScrolled(refOrName, callback, threshold = 1) {
+    const ref = typeof refOrName === "string" ? useRef(refOrName) : refOrName;
     function onScroll() {
-        if (Math.abs(ref.el.scrollTop + ref.el.clientHeight - ref.el.scrollHeight) < threshold) {
+        const el = resolveRefEl(ref);
+        if (el && Math.abs(el.scrollTop + el.clientHeight - el.scrollHeight) < threshold) {
             callback();
         }
     }
     onMounted(() => {
-        ref.el?.addEventListener("scroll", onScroll);
+        resolveRefEl(ref)?.addEventListener("scroll", onScroll);
     });
     onWillUnmount(() => {
-        ref.el?.removeEventListener("scroll", onScroll);
+        resolveRefEl(ref)?.removeEventListener("scroll", onScroll);
     });
 }
 
@@ -361,7 +368,7 @@ export function useOnBottomScrolled(refName, callback, threshold = 1) {
  */
 export function useVisible(refOrName, cb, { ready = true } = {}) {
     const ref = typeof refOrName === "string" ? useRef(refOrName) : refOrName;
-    const getEl = () => ("el" in ref ? ref.el : ref());
+    const getEl = () => resolveRefEl(ref);
     const state = proxy({
         isVisible: undefined,
         ready,
@@ -581,30 +588,33 @@ export function useMicrophoneVolume() {
     return state;
 }
 
-export function useSelection({ refName, model, preserveOnClickAwayPredicate = () => false }) {
+export function useSelection({ refName, ref, model, preserveOnClickAwayPredicate = () => false }) {
     const ui = useService("ui");
-    const ref = useRef(refName);
+    const elRef = ref ?? useRef(refName);
+    const getEl = () => resolveRefEl(elRef);
     function onSelectionChange() {
-        const activeElement = ref.el?.getRootNode().activeElement;
-        if (activeElement && activeElement === ref.el) {
+        const el = getEl();
+        const activeElement = el?.getRootNode().activeElement;
+        if (activeElement && activeElement === el) {
             Object.assign(model, {
-                start: ref.el.selectionStart,
-                end: ref.el.selectionEnd,
-                direction: ref.el.selectionDirection,
+                start: el.selectionStart,
+                end: el.selectionEnd,
+                direction: el.selectionDirection,
             });
         }
     }
-    onExternalClick(refName, async (ev) => {
+    onExternalClick(elRef, async (ev) => {
         if (await preserveOnClickAwayPredicate(ev)) {
             return;
         }
-        if (!ref.el) {
+        const el = getEl();
+        if (!el) {
             return;
         }
         Object.assign(model, {
-            start: ref.el.value.length,
-            end: ref.el.value.length,
-            direction: ref.el.selectionDirection,
+            start: el.value.length,
+            end: el.value.length,
+            direction: el.selectionDirection,
         });
     });
     onMounted(() => {
@@ -617,14 +627,15 @@ export function useSelection({ refName, model, preserveOnClickAwayPredicate = ()
     });
     return {
         restore() {
-            ref.el?.setSelectionRange(model.start, model.end, model.direction);
+            getEl()?.setSelectionRange(model.start, model.end, model.direction);
         },
         moveCursor(position) {
             model.start = model.end = position;
-            if (ref.el && !ui.isSmall) {
+            const el = getEl();
+            if (el && !ui.isSmall) {
                 // In mobile, selection seems to adjust correctly.
                 // Don't programmatically adjust, otherwise it shows soft keyboard!
-                ref.el.selectionStart = ref.el.selectionEnd = position;
+                el.selectionStart = el.selectionEnd = position;
             }
         },
     };
