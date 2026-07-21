@@ -17,8 +17,8 @@ class SmsTracker(models.Model):
 
     mailing_trace_id = fields.Many2one('mailing.trace', ondelete='cascade', index='btree_not_null')
 
-    def _action_update_from_provider_error(self, provider_error):
-        error_status, failure_type, failure_reason = super()._action_update_from_provider_error(provider_error)
+    def _action_update_from_provider_error(self, provider_error, failure_reason=False):
+        error_status, failure_type, failure_reason = super()._action_update_from_provider_error(provider_error, failure_reason=failure_reason)
         self._update_sms_traces(error_status or 'error', failure_type=failure_type, failure_reason=failure_reason)
         return error_status, failure_type, failure_reason
 
@@ -44,12 +44,17 @@ class SmsTracker(models.Model):
         traces = self.mailing_trace_id.filtered(lambda t: t.trace_status not in statuses_to_ignore)
         if traces:
             # TDE note: check to use set_sent / ... tools updating marketing automation bits
-            traces_values = {
-                'trace_status': trace_status,
-                'failure_type': failure_type,
-                'failure_reason': failure_reason,
-            }
-            traces.write(traces_values)
+            if trace_status == 'bounce':
+                traces.set_bounced(failure_reason=failure_reason, failure_type=failure_type)
+            elif trace_status == 'error':
+                traces.set_failed(failure_reason=failure_reason, failure_type=failure_type)
+            else:
+                traces_values = {
+                    'trace_status': trace_status,
+                    'failure_type': failure_type,
+                    'failure_reason': failure_reason,
+                }
+                traces.write(traces_values)
             traces.filtered(
                 lambda t: t.trace_status not in ['outgoing', 'process', 'error', 'cancel'] and not t.sent_datetime
             ).sent_datetime = self.env.cr.now()
