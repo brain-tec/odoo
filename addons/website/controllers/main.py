@@ -32,6 +32,8 @@ from odoo.tools import OrderedSet, py_to_js_locale
 from odoo.tools import html_escape as escape
 from odoo.tools.image import hex_to_rgb
 from odoo.tools.json import scriptsafe as json
+from odoo.tools.mimetypes import guess_mimetype
+from odoo.tools.misc import file_open
 from odoo.tools.sql import escape_like_value
 from odoo.tools.translate import LazyTranslate, TRANSLATED_ELEMENTS
 
@@ -40,6 +42,8 @@ from odoo.addons.portal.controllers.portal import pager as portal_pager
 from odoo.addons.portal.controllers.web import Home
 from odoo.addons.web.controllers.binary import Binary
 from odoo.addons.web.controllers.session import Session
+from odoo.addons.html_editor.controllers.svg_utils import get_shape_svg, make_shaped_image
+from odoo.addons.html_editor.models.ir_attachment import SUPPORTED_IMAGE_MIMETYPES
 from odoo.addons.website.tools import get_base_domain
 
 _lt = LazyTranslate(__name__)
@@ -530,10 +534,9 @@ class Website(Home):
                         continue
         return None
 
-    def _get_configurator_preview_image_url(self, theme_name, images_map, image_name):
-        """Return the replacement URL for a preview image.
+    def _get_configurator_industry_image_url(self, images_map, image_name):
+        """Return the IAP industry image replacing a preview image, if any.
 
-        :param str theme_name: name of the previewed theme
         :param dict images_map: industry image replacement mapping
         :param str image_name: original image name or URL segment
         :return: replacement image URL, if any
@@ -545,6 +548,22 @@ class Website(Home):
         image_url = images_map.get(image_name)
         if image_url:
             return image_url.replace('/small/', '/')
+        return None
+
+    def _get_configurator_preview_image_url(self, theme_name, images_map, image_name):
+        """Return the replacement URL for a preview image.
+
+        :param str theme_name: name of the previewed theme
+        :param dict images_map: industry image replacement mapping
+        :param str image_name: original image name or URL segment
+        :return: replacement image URL, if any
+        :rtype: str | None
+        """
+        image_url = self._get_configurator_industry_image_url(images_map, image_name)
+        if image_url:
+            return image_url
+        image_name = urllib.parse.unquote(image_name).split('?', 1)[0]
+        image_name = CONFIGURATOR_PREVIEW_FALLBACK_IMAGES.get(image_name, image_name)
         return self._get_theme_static_preview_image_url(theme_name, image_name)
 
     def _apply_configurator_preview_images(self, final_html, theme_name, images_map):
@@ -556,15 +575,6 @@ class Website(Home):
         :return: preview HTML with updated image URLs
         :rtype: str
         """
-        for image_url in set(re.findall(r'/web/image/[^"\'\s,)]+', final_html)):
-            mapped_image_url = self._get_configurator_preview_image_url(
-                theme_name,
-                images_map,
-                image_url.replace('/web/image/', '', 1),
-            )
-            if mapped_image_url:
-                final_html = final_html.replace(image_url, mapped_image_url)
-
         shape_urls = set(re.findall(r'/html_editor/image_shape/([^/"\']+)/([^"\'\s)]+)', final_html))
         for image_name, shape_path in shape_urls:
             mapped_image_url = self._get_configurator_preview_image_url(theme_name, images_map, image_name)
@@ -580,15 +590,54 @@ class Website(Home):
             module, _, shape_filename = shape_file_path.partition('/')
             if not shape_filename:
                 continue
+            if not mapped_image_url.startswith(API_WEBSITE_IMAGES_URL):
+                try:
+                    with file_open(
+                        urllib.parse.unquote(mapped_image_url).lstrip('/'),
+                        'rb',
+                        filter_ext=tuple(SUPPORTED_IMAGE_MIMETYPES.values()),
+                    ) as file:
+                        image = file.read()
+                except (FileNotFoundError, ValueError):
+                    continue
+                mimetype = guess_mimetype(image)
+                if mimetype not in SUPPORTED_IMAGE_MIMETYPES:
+                    continue
+                shape_svg = get_shape_svg(module, 'image_shapes', shape_filename)
+                shape_options = dict(urllib.parse.parse_qsl(shape_query.replace('&amp;', '&'), keep_blank_values=True))
+                shape_svg = make_shaped_image(request.env, shape_svg, image, mimetype, shape_options)
+                shape_data_uri = 'data:image/svg+xml;base64,%s' % base64.b64encode(shape_svg.encode()).decode()
+                final_html = final_html.replace(shape_src, shape_data_uri)
+                continue
             shaped_url = f'/html_editor/image_shape_url/{module}/{shape_filename}'
-            image_url = (
-                f"{request.httprequest.host_url.rstrip('/')}{mapped_image_url}"
-                if mapped_image_url.startswith('/')
-                else mapped_image_url
-            )
-            image_query = werkzeug.urls.url_encode({'image_url': image_url})
+            image_query = werkzeug.urls.url_encode({'image_url': mapped_image_url})
             shaped_url = f'{shaped_url}?{shape_query}&{image_query}' if shape_query else f'{shaped_url}?{image_query}'
             final_html = final_html.replace(shape_src, shaped_url)
+
+        # The preview generator keeps theme images local (in src or in a
+        # style url()) and stores their attachment key in the
+        # industry_image_key attribute: replace the local image when an IAP
+        # industry image matches the key.
+        def replace_keyed_image(match):
+            el = match.group(0)
+            image_url = self._get_configurator_industry_image_url(images_map, match.group(1))
+            if not image_url:
+                return el
+            el = re.sub(r'src="[^"]*"', lambda _m: f'src="{image_url}"', el)
+            return re.sub(r'url\((["\']?)[^)]*?\1\)', lambda m: f'url({m.group(1)}{image_url}{m.group(1)})', el)
+
+        final_html = re.sub(r'<[^>]*\bindustry_image_key="([^"]*)"[^>]*>', replace_keyed_image, final_html)
+
+        def replace_image_url(match):
+            image_url = match.group(0)
+            mapped_image_url = self._get_configurator_preview_image_url(
+                theme_name,
+                images_map,
+                image_url.replace('/web/image/', '', 1),
+            )
+            return mapped_image_url or image_url
+
+        final_html = re.sub(r'/web/image/[^"\'\s,)]+', replace_image_url, final_html)
         return final_html
 
     def _get_configurator_preview_shape_url(self, shape_url, palette_map):
@@ -633,7 +682,7 @@ class Website(Home):
         :return: preview HTML with updated shape URLs
         :rtype: str
         """
-        for shape_url in set(re.findall(r'/(?:html_editor|web_editor)/shape/[^"\'\s)]+', final_html)):
+        for shape_url in set(re.findall(r'/(?:html_editor|web_editor)/(?:image_)?shape/[^"\'\s)]+', final_html)):
             updated_shape_url = self._get_configurator_preview_shape_url(shape_url, palette_map)
             if updated_shape_url != shape_url:
                 final_html = final_html.replace(shape_url, updated_shape_url)
@@ -765,8 +814,8 @@ class Website(Home):
         images_map = self._get_configurator_preview_images_map(theme_name, industry_id)
 
         final_html = self._load_configurator_preview_html(preview_url)
-        final_html = self._apply_configurator_preview_images(final_html, theme_name, images_map)
         final_html = self._apply_configurator_preview_shape_colors(final_html, palette_map)
+        final_html = self._apply_configurator_preview_images(final_html, theme_name, images_map)
         # Add palette variables to make static previews reflect the current configurator selection.
         preview_overrides = self._get_configurator_preview_overrides(palette, final_html)
         final_html = self._inject_configurator_preview_overrides(
