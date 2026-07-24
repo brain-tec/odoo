@@ -4,11 +4,11 @@ import { registry } from "@web/core/registry";
 
 /**
  * @typedef {{
- *   env?: object;
+ *   scope?: object;
  *   onClose?: () => void;
  *   class?: string;
  *   role?: string;
- *   ref?: Function;
+ *   ref?: import("@odoo/owl").Signal; // signal ref filled with the sheet body element
  *   useBottomSheet?: Boolean;
  * }} PopoverServiceAddOptions
  *
@@ -49,7 +49,7 @@ export const popoverService = {
                     role: options.role,
                 },
                 {
-                    env: options.env,
+                    scope: options.scope,
                     onRemove: options.onClose,
                     rootId: target.getRootNode()?.host?.id,
                 }

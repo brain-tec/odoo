@@ -85,6 +85,17 @@ export const CUSTOM_BG_COLOR_ATTRS = ["menu", "footer"];
 
 const MAX_NBR_DISPLAY_MAIN_THEMES = 6;
 const DESKTOP_PREVIEW_WIDTH = 1440;
+const PREVIEW_IMAGE_LIST = [
+    "landscape_md_2",
+    "landscape_md_6",
+    "landscape_md_8",
+    "portrait_lg_1",
+    "ultrawide_lg_4",
+    "ultrawide_lg_3",
+    "set_2_square_md_1",
+    "set_2_square_md_3",
+    "set_2_square_md_5",
+];
 
 function getUserLanguageName() {
     const locale = user.lang || "en-US";
@@ -233,6 +244,7 @@ export class DescriptionScreen extends Component {
     autofocusRef = signal(null);
     scratchTypeRef = signal(null);
     scratchPositioningRef = signal(null);
+    positioningDropdownRef = signal(null);
     setup() {
         this.state = useStore();
         this.orm = useService("orm");
@@ -259,6 +271,9 @@ export class DescriptionScreen extends Component {
                     this.industrySelection()?.querySelector("input").focus();
                 }
                 if (selectedIndustry) {
+                    if (this.positioningDropdownRef()) {
+                        window.Dropdown.getOrCreateInstance(this.positioningDropdownRef()).show();
+                    }
                     this.purposeSelectionRef()?.focus();
                 }
             },
@@ -333,9 +348,33 @@ export class DescriptionScreen extends Component {
     }
 
     get previewImages() {
-        return Object.values(this.state.images || {})
-            .slice(0, 10)
-            .map((url, slot) => ({ url, slot }));
+        const images = this.state.images || {};
+        const fallbackImageUrls = [];
+        const previewImageUrls = [];
+        const websitePrefix = "website.";
+        let fallbackImageIndex = 0;
+
+        for (const [imageKey, imageUrl] of Object.entries(images)) {
+            const imageName = imageKey.startsWith(websitePrefix)
+                ? imageKey.slice(websitePrefix.length)
+                : imageKey;
+            if (!PREVIEW_IMAGE_LIST.includes(imageName)) {
+                fallbackImageUrls.push(imageUrl);
+            }
+        }
+
+        for (const imageName of PREVIEW_IMAGE_LIST) {
+            let imageUrl = images[`${websitePrefix}${imageName}`] || images[imageName];
+            if (!imageUrl) {
+                imageUrl = fallbackImageUrls[fallbackImageIndex];
+                fallbackImageIndex++;
+            }
+            if (imageUrl) {
+                previewImageUrls.push(imageUrl);
+            }
+        }
+
+        return previewImageUrls.map((url, slot) => ({ url, slot }));
     }
 
     _splitToSet(string) {
@@ -366,6 +405,7 @@ export class DescriptionScreen extends Component {
         }
         this.setImages({});
         const termsSet = this._splitToSet(term);
+        const rawTerms = Array.from(termsSet);
 
         //-------words correction--------
         // Check and correct all the terms
@@ -397,18 +437,33 @@ export class DescriptionScreen extends Component {
                 .slice(0, limit)
                 .sort((x, y) => x.hitCountOrder - y.hitCountOrder);
         } else {
-            let synonymMatches = this.state.industries.filter((val, index) => {
-                // To match, every term should be contained in the synonym
-                for (const candidate of [...(val.synonyms || "").split(/[|,]/)]) {
-                    // Check if industry label has already matched
-                    if (
-                        terms.every((term) => candidate.toLowerCase().includes(term)) &&
-                        !matches.includes(val)
-                    ) {
-                        return true;
-                    }
+            const displayedLabels = new Set(matches.map((match) => match.label.toLowerCase()));
+            const normalizedTerm = term.trim().toLowerCase();
+            let synonymMatches = this.state.industries.flatMap((val) => {
+                if (matches.includes(val)) {
+                    return [];
                 }
-                return false;
+                let label;
+                for (const synonym of (val.synonyms || "").split(/[|,]/)) {
+                    const synonymLabel = synonym.trim();
+                    const normalizedSynonym = synonymLabel.toLowerCase();
+                    // To match, every term should be contained in the synonym
+                    if (!synonymLabel || !terms.every((term) => normalizedSynonym.includes(term))) {
+                        continue;
+                    }
+                    // Display the synonym only when it is exactly the user
+                    // input, otherwise display the industry label.
+                    if (normalizedSynonym === normalizedTerm) {
+                        label = synonymLabel;
+                        break;
+                    }
+                    label = label || val.label;
+                }
+                if (!label || displayedLabels.has(label.toLowerCase())) {
+                    return [];
+                }
+                displayedLabels.add(label.toLowerCase());
+                return [{ ...val, label }];
             });
             synonymMatches = synonymMatches.sort((x, y) => x.hitCountOrder - y.hitCountOrder);
             matches = matches.concat(synonymMatches);
@@ -421,7 +476,11 @@ export class DescriptionScreen extends Component {
         }
         return matches.map((match) => ({
             label: match.label,
-            labelTermOrder: this._getMatchTermOrder(match.label, terms),
+            cssClass: "text-capitalize",
+            labelTermOrder: this._getMatchTermOrder(
+                match.label,
+                match.id === -1 ? rawTerms : terms
+            ),
             onSelect: () => this._setSelectedIndustry(match.label, match.id),
         }));
     }
@@ -783,7 +842,35 @@ export class ApplyConfiguratorScreen extends Component {
         };
 
         if (themeName !== undefined) {
-            const loadingSteps = [
+            const selectedTypeName = WEBSITE_TYPES[this.state.selectedType]?.name;
+            const typeModules = {
+                ecommerce: "website_sale",
+                blog: "website_blog",
+                event: "website_event",
+                elearning: "website_slides",
+            };
+            const installStepDescriptions = {
+                ecommerce: _t("Installing eCommerce..."),
+                blog: _t("Installing Blog..."),
+                event: _t("Installing Events..."),
+                elearning: _t("Installing eLearning..."),
+            };
+            const moduleName = typeModules[selectedTypeName];
+            const needsInstall =
+                moduleName &&
+                (await this.orm.silent.searchCount("ir.module.module", [
+                    ["name", "=", moduleName],
+                    ["state", "!=", "installed"],
+                ])) > 0;
+
+            const loadingSteps = [];
+            if (needsInstall) {
+                loadingSteps.push({
+                    description: installStepDescriptions[selectedTypeName],
+                    flag: "generic",
+                });
+            }
+            loadingSteps.push(
                 {
                     description: _t("Applying your colors and design..."),
                     flag: "colors",
@@ -800,8 +887,8 @@ export class ApplyConfiguratorScreen extends Component {
                     title: _t("Finalizing."),
                     description: _t("Activating your website."),
                     flag: "generic",
-                },
-            ];
+                }
+            );
 
             // The apply call is long-running, so real-time progress can't be
             // fetched. We simulate it instead.
@@ -835,10 +922,11 @@ export class ApplyConfiguratorScreen extends Component {
                     // used because the web client needs to be reloaded after
                     // the configurator has updated the website.
                     window.sessionStorage.setItem("website.first_configurator_edit", "1");
+                    const defaultLanguagePath = encodeURIComponent("/website/lang/default?r=/");
                     redirect(
                         `/odoo/action-website.website_preview?website_id=${encodeURIComponent(
                             resp.website_id
-                        )}&enable_editor=1`
+                        )}&path=${defaultLanguagePath}&enable_editor=1`
                     );
                 },
             });
@@ -1038,7 +1126,34 @@ export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
         }
         const heading = previewDocument.querySelector("h1, .h1");
         if (heading) {
-            heading.textContent = previewHeader;
+            const hasOwnText = [...heading.childNodes].some(
+                (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+            );
+            const headingContent =
+                heading.children.length === 1 && !hasOwnText ? heading.firstElementChild : heading;
+            const lineBreakCount = headingContent.querySelectorAll("br").length;
+            if (!lineBreakCount) {
+                headingContent.textContent = previewHeader;
+                return;
+            }
+
+            const words = previewHeader.split(/\s+/);
+            const wordsPerLine = Math.ceil(words.length / (lineBreakCount + 1));
+            const lines = [];
+            for (let i = 0; i <= lineBreakCount; i++) {
+                const line = words.slice(i * wordsPerLine, (i + 1) * wordsPerLine).join(" ");
+                if (line) {
+                    lines.push(line);
+                }
+            }
+
+            headingContent.replaceChildren();
+            for (const [index, line] of lines.entries()) {
+                if (index) {
+                    headingContent.append(previewDocument.createElement("br"));
+                }
+                headingContent.append(line);
+            }
         }
     }
 
@@ -1106,6 +1221,12 @@ export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
         }
 
         iframe.style.setProperty("width", `${DESKTOP_PREVIEW_WIDTH}px`, "important");
+        // Reset to the natural viewport height before measuring
+        const naturalViewportHeight = Math.ceil(
+            availableHeight / Math.min(1, availableWidth / DESKTOP_PREVIEW_WIDTH)
+        );
+        iframe.style.setProperty("height", `${naturalViewportHeight}px`, "important");
+
         const contentSize = this.getPreviewIframeContentSize(iframe);
         const iframeWidth = contentSize?.width || DESKTOP_PREVIEW_WIDTH;
         const scale = Math.min(1, availableWidth / iframeWidth);
@@ -1126,11 +1247,35 @@ export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
         iframe.style.setProperty("flex", "0 0 auto", "important");
     }
 
-    onPreviewIframeLoad(ev) {
+    async onPreviewIframeLoad(ev) {
         const iframe = ev.currentTarget;
         this.replacePreviewIframeHeading(iframe);
         this.replacePreviewIframeLogo(iframe);
         iframe.parentElement.classList.add("o_preview_loaded");
+        this.scalePreviewIframe(iframe);
+        // The ImageLazyLoading interaction gives lazy images min-height: 1px
+        // until they load, so the initial measurement underestimates the page height.
+        const iframeDoc = this.getPreviewIframeDocument(iframe);
+        if (!iframeDoc) {
+            return;
+        }
+        const lazyImgs = [...iframeDoc.querySelectorAll('img[loading="lazy"]')];
+        for (const img of lazyImgs) {
+            img.loading = "eager";
+        }
+        const pending = lazyImgs.filter((img) => !img.complete);
+        if (!pending.length) {
+            return;
+        }
+        await Promise.all(
+            pending.map(
+                (img) =>
+                    new Promise((resolve) => {
+                        img.addEventListener("load", resolve, { once: true });
+                        img.addEventListener("error", resolve, { once: true });
+                    })
+            )
+        );
         this.scalePreviewIframe(iframe);
     }
 
@@ -1462,6 +1607,8 @@ export class Configurator extends Component {
         });
         const redirectUrl = await this.orm.call("website", "configurator_skip");
         this.clearStorage();
+        redirectUrl.params.path = "/website/lang/default?r=/";
+        redirectUrl.params.enable_editor = true;
         // Here the website service goToWebsite method is not used because
         // the web client needs to be reloaded after the configurator has
         // updated the website.

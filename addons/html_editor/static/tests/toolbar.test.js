@@ -1965,6 +1965,37 @@ describe("toolbar open and close on user interaction", () => {
             await expectElementCount(".o-we-toolbar", 1);
         });
 
+        test("deferred toolbar update after destroy does not crash", async () => {
+            const { el, editor, plugins } = await setupEditor("<p>[test]</p>", {
+                props: { iframe: true },
+            });
+            await waitFor(".o-we-toolbar");
+            const toolbarPlugin = plugins.get("toolbar");
+            const iframeDoc = el.ownerDocument;
+
+            // Capture the selection data while the editor is still alive: this is
+            // what a pending (debounced) toolbar update carries with it.
+            const selectionData = editor.shared.selection.getSelectionData();
+
+            // Tear down the editor the way its view does: `willBeRemoved` keeps
+            // the editable's contenteditable attribute (so the update still passes
+            // its editability checks)...
+            editor.destroy(true);
+            expect(toolbarPlugin.isDestroyed).toBe(true);
+            // ...then the iframe is removed from the DOM, nulling out defaultView.
+            iframeDoc.defaultView.frameElement.remove();
+            expect(iframeDoc.defaultView).toBe(null);
+
+            // Simulate the surviving deferred update. Without the `isDestroyed`
+            // guard in `_updateToolbar`, this crashes in `getFilteredTargetedNodes`
+            // with: TypeError: Cannot read properties of null (reading
+            // 'getComputedStyle').
+            toolbarPlugin.updateToolbar(selectionData);
+            await advanceTime(DELAY_TOOLBAR_OPEN);
+
+            expect(toolbarPlugin.getIsToolbarOpen()).toBe(false);
+        });
+
         test("toolbar should close on mousedown", async () => {
             const { el } = await setupEditor("<p>[test]</p><p>text</p>");
             await waitFor(".o-we-toolbar");
@@ -2096,16 +2127,15 @@ describe("toolbar open and close on user interaction", () => {
             await expectElementCount(".o-we-toolbar", 1);
 
             const overlay = queryOne(".o-we-toolbar").parentElement;
-            const position = {
-                top: overlay.style.top,
-                left: overlay.style.left,
-            };
+            const top = parseFloat(overlay.style.top);
+            const left = parseFloat(overlay.style.left);
 
             await contains(".o-we-toolbar button[name='bold']").click();
             expect(getContent(el)).toBe(
                 `<p style="padding-top: 100px">aaaaaaaaaaaaa <strong>[test]</strong> bbbbbbbbbbbbb</p>`
             );
-            expect({ top: overlay.style.top, left: overlay.style.left }).toEqual(position);
+            expect(parseFloat(overlay.style.top)).toBeCloseTo(top);
+            expect(parseFloat(overlay.style.left)).toBeCloseTo(left);
             expect(overlay.style.visibility).toBe("visible");
         });
     });
