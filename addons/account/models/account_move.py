@@ -2158,7 +2158,7 @@ class AccountMove(models.Model):
                 move_type_sql_condition=move_type_sql_condition,
             )))
         return {
-            self.env['account.move'].browse(move_id): self.env['account.move'].browse(duplicate_ids)
+            self.env['account.move'].browse(move_id): self.env['account.move'].browse(duplicate_ids)._filtered_access('read')
             for move_id, duplicate_ids in result
         }
 
@@ -6460,6 +6460,7 @@ class AccountMove(models.Model):
         self.sending_data = False
 
         self._detach_attachments()
+        return True
 
     def _get_fields_to_detach(self):
         """"
