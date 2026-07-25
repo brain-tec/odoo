@@ -605,7 +605,7 @@ class PosConfig(models.Model):
     def _check_payment_method_ids_journal(self):
         for config in self:
             for cash_method in config.payment_method_ids.filtered(lambda m: m.journal_id.type == 'cash'):
-                if self.env['pos.config'].search_count([('id', '!=', config.id), ('payment_method_ids', 'in', cash_method.ids)], limit=1):
+                if not config._can_use_cash_payment_method(cash_method):
                     raise ValidationError(_("This cash payment method is already used in another Point of Sale.\n"
                                             "A new cash payment method should be created for this Point of Sale."))
                 if len(cash_method.journal_id.pos_payment_method_ids) > 1:
@@ -719,7 +719,11 @@ class PosConfig(models.Model):
         if prepa_printers_menuitem:
             prepa_printers_menuitem.active = self.sudo().env['pos.config'].search_count([('use_order_printer', '=', True)], limit=1) > 0
 
-    @api.depends('use_pricelist', 'pricelist_id', 'available_pricelist_ids', 'payment_method_ids', 'limit_categories', 'use_download_invoice',
+    def _can_use_cash_payment_method(self, cash_method):
+        self.ensure_one()
+        return not cash_method.config_ids.filtered(lambda config: config != self)
+
+    @api.depends('use_pricelist', 'pricelist_id', 'available_pricelist_ids', 'payment_method_ids', 'limit_categories',
         'iface_available_categ_ids', 'module_pos_hr', 'module_pos_discount', 'iface_tipproduct', 'default_preset_id', 'module_pos_appointment', 'set_tip_after_payment')
     def _compute_local_data_integrity(self):
         self.last_data_change = self.env.cr.now()
@@ -728,9 +732,10 @@ class PosConfig(models.Model):
         if 'iface_tipproduct' in vals and not vals['iface_tipproduct']:
             vals['tip_product_id'] = False
             vals['set_tip_after_payment'] = False
-        else:
-            if 'tip_product_id' not in vals and (default_tip := self._get_default_tip_product()):
-                vals['tip_product_id'] = default_tip.id
+        elif vals.get('iface_tipproduct') and 'tip_product_id' not in vals \
+                and not all(config.tip_product_id for config in self) \
+                and (default_tip := self._get_default_tip_product()):
+            vals['tip_product_id'] = default_tip.id
 
         self._check_header_footer(vals)
         self._reset_default_on_vals(vals)
@@ -1206,6 +1211,14 @@ class PosConfig(models.Model):
         # filters out unavailable external id
         return [self.env.ref(record).id for record in recordRefs if self.env.ref(record, raise_if_not_found=False)]
 
+    def _load_product_demo_data(self, files):
+        """Load the given (file, check_xmlid) product demo data pairs, skipping
+        any file whose check record already exists (loaded by product's own demo
+        data, or by a previous onboarding scenario)."""
+        for file, check_xmlid in files:
+            if not self.env.ref(check_xmlid, raise_if_not_found=False):
+                convert.convert_file(self._env_with_clean_context(), 'product', file, idref=None, mode='init', noupdate=True)
+
     def load_demo_data(self):
         self_ctx = self.with_context(bypass_categories_forbidden_change=True)
         xml_id = self_ctx.get_external_id().get(self_ctx.id) or self_ctx._get_default_demo_data_xml_id()
@@ -1247,9 +1260,7 @@ class PosConfig(models.Model):
         self.ensure_one()
         convert.convert_file(self._env_with_clean_context(), 'point_of_sale', 'data/scenarios/clothes_category_data.xml', idref=None, mode='init', noupdate=True)
         if with_demo_data:
-            product_module = self.env['ir.module.module'].search([('name', '=', 'product')])
-            if not product_module.demo:
-                convert.convert_file(self._env_with_clean_context(), 'product', 'data/product_attribute_demo.xml', idref=None, mode='init', noupdate=True)
+            self._load_product_demo_data([('data/product_attribute_demo.xml', 'product.pa_sides')])
             convert.convert_file(self._env_with_clean_context(), 'point_of_sale', 'data/scenarios/clothes_data.xml', idref=None, mode='init', noupdate=True)
         clothes_categories = self.get_record_by_ref([
             'point_of_sale.pos_category_upper',
@@ -1319,11 +1330,11 @@ class PosConfig(models.Model):
         self.ensure_one()
         convert.convert_file(self._env_with_clean_context(), 'point_of_sale', 'data/scenarios/furniture_category_data.xml', idref=None, mode='init', noupdate=True)
         if with_demo_data:
-            product_module = self.env['ir.module.module'].search([('name', '=', 'product')])
-            if not product_module.demo:
-                convert.convert_file(self._env_with_clean_context(), 'product', 'data/product_category_demo.xml', idref=None, mode='init', noupdate=True)
-                convert.convert_file(self._env_with_clean_context(), 'product', 'data/product_attribute_demo.xml', idref=None, mode='init', noupdate=True)
-                convert.convert_file(self._env_with_clean_context(), 'product', 'data/product_demo.xml', idref=None, mode='init', noupdate=True)
+            self._load_product_demo_data([
+                ('data/product_category_demo.xml', 'product.product_category_furniture'),
+                ('data/product_attribute_demo.xml', 'product.pa_sides'),
+                ('data/product_demo.xml', 'product.desk_organizer'),
+            ])
             convert.convert_file(self._env_with_clean_context(), 'point_of_sale', 'data/scenarios/furniture_data.xml', idref=None, mode='init', noupdate=True)
 
         furniture_categories = self.get_record_by_ref([
