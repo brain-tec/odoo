@@ -28,7 +28,6 @@ import {
     patchWithCleanup,
     webModels,
 } from "@web/../tests/web_test_helpers";
-import { registry } from "@web/core/registry";
 import { patch } from "@web/core/utils/patch";
 import {
     defineWebsiteModels,
@@ -83,22 +82,23 @@ defineWebsiteModels();
 
 test("change action of form changes available options", async () => {
     // reduced version of form_editor_actions
-    registry
-        .category("website.form_editor_actions")
-        .add("apply_job", {
-            formFields: [
-                { type: "char", name: "partner_name", fillWith: "name", string: "Your Name" },
-            ],
-            fields: [
-                { name: "job_id", type: "many2one", relation: "hr.job", string: "Applied Job" },
-            ],
-            successPage: "/job-thank-you",
-        })
-        .add("create_customer", {
-            formFields: [{ type: "char", name: "name", fillWith: "name", string: "Your Name" }],
-        });
-
-    await setupWebsiteBuilderWithSnippet("s_website_form");
+    function withIframeRegistry(registry) {
+        registry
+            .category("website.form_editor_actions")
+            .add("apply_job", {
+                formFields: [
+                    { type: "char", name: "partner_name", fillWith: "name", string: "Your Name" },
+                ],
+                fields: [
+                    { name: "job_id", type: "many2one", relation: "hr.job", string: "Applied Job" },
+                ],
+                successPage: "/job-thank-you",
+            })
+            .add("create_customer", {
+                formFields: [{ type: "char", name: "name", fillWith: "name", string: "Your Name" }],
+            });
+    }
+    await setupWebsiteBuilderWithSnippet("s_website_form", { withIframeRegistry });
 
     await contains(":iframe section").click();
     await contains(".hb-row[data-label='Action'] button").click();
@@ -1373,4 +1373,44 @@ test("default for label when user deletes its content, and use it on save", asyn
     });
     await contains(".o-snippets-top-actions button:contains(Save)").click();
     expect.verifySteps(["save"]);
+});
+
+test("Changing field type removes data-fill-with attribute", async () => {
+    onRpc("get_authorized_fields", () => ({
+        cc: {
+            name: "cc",
+            relation: "res.partner",
+            string: "CC",
+            type: "char",
+        },
+    }));
+
+    await setupWebsiteBuilder(`
+        <form data-model_name="mail.mail">
+            <div class="s_website_form_field" data-type="char">
+                <label class="s_website_form_label" for="field">
+                    <span class="s_website_form_label_content">Company</span>
+                </label>
+                <input id="field" class="s_website_form_input" type="text" data-fill-with="commercial_company_name"/>
+            </div>
+            <div class="s_website_form_field" data-type="char">
+                <label class="s_website_form_label" for="field1">
+                    <span class="s_website_form_label_content">Phone Number</span>
+                </label>
+                <input id="field1" class="s_website_form_input" type="tel" data-fill-with="phone"/>
+            </div>
+        </form>
+    `);
+
+    // Change the field type to custom field.
+    await contains(":iframe input[type='text'][data-fill-with='commercial_company_name']").click();
+    await contains(".hb-row[data-label='Type'] button.o-hb-select-toggle").click();
+    await contains(".o_popover [data-action-value='email']").click();
+    expect(":iframe input[type='email']").not.toHaveAttribute("data-fill-with");
+
+    // Change the field type to existing field.
+    await contains(":iframe input[type='tel'][data-fill-with='phone']").click();
+    await contains(".hb-row[data-label='Type'] button.o-hb-select-toggle").click();
+    await contains(".o_popover [data-action-value='cc']").click();
+    expect(":iframe input[name='cc']").not.toHaveAttribute("data-fill-with");
 });

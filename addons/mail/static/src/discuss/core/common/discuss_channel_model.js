@@ -102,9 +102,6 @@ export class DiscussChannel extends Record {
     get allowEditDescription() {
         return this.thread.is_editable;
     }
-    get showFavoriteActionsInHeader() {
-        return false;
-    }
     get allowedToLeaveChannelTypes() {
         return ["channel", "group"];
     }
@@ -130,7 +127,10 @@ export class DiscussChannel extends Record {
     /** @type {string} */
     avatar_cache_key;
     get avatarUrl() {
-        if (["channel", "group"].includes(this.channel_type)) {
+        const hasOwnAvatar =
+            ["channel", "group"].includes(this.channel_type) ||
+            (this.avatar_cache_key && this.avatar_cache_key !== "no-avatar");
+        if (hasOwnAvatar) {
             const accessTokenParam = {};
             if (this.store.self_user?.share !== false) {
                 accessTokenParam.access_token = this.avatar_128_access_token;
@@ -455,12 +455,27 @@ export class DiscussChannel extends Record {
     member_count;
     /** @type {string} */
     name;
+    threadCreationMessages = fields.Many("mail.message", {
+        inverse: "channelAsThreadCreationNotification",
+    });
+    hasThreadCreationNotification = fields.Attr(false, {
+        /** @this {import("models").DiscussChannel} */
+        compute() {
+            return this.threadCreationMessages.length;
+        },
+    });
     /** ⚠️ {@link AwaitChatHubInit} */
     get shouldSubscribeToBusChannel() {
-        return this.chatWindow?.isOpen;
+        return (
+            this.chatWindow?.isOpen ||
+            (this.hasThreadCreationNotification && this.parent_channel_id)
+        );
     }
     get isChatChannel() {
         return this.chatChannelTypes.includes(this.channel_type);
+    }
+    get isUnread() {
+        return Boolean(this.self_member_id?.message_unread_counter_ui || this.markedAsUnread);
     }
     otherTypingMembers = fields.Many("discuss.channel.member", {
         /** @this {import("models").DiscussChannel} */

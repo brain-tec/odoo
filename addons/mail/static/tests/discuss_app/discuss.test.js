@@ -229,7 +229,7 @@ test("Posting message should transform links.", async () => {
     await openDiscuss(channelId);
     await insertText(".o-mail-Composer-input", "test https://www.odoo.com/");
     await press("Enter");
-    await contains("a[href='https://www.odoo.com/']");
+    await contains(".o-mail-Message a[href='https://www.odoo.com/']");
 });
 
 test("[text composer] Posting message should transform relevant data to emoji.", async () => {
@@ -891,12 +891,12 @@ test("messages marked as read leave the unread filter but remain in the full inb
     await start();
     await openDiscuss(MENU_ACTIVE_IDS.NOTIFICATION);
     await contains("button.active:has(:text('Notifications'))");
-    await contains("button.active:text('Unread')");
+    await contains("button.o-active:text('Unread')");
     await contains(".o-mail-MessagingMenuItem", { count: 2 });
     await click("button:text('Mark all read')");
     await contains("button.active:has(:text('Notifications'))");
     await contains(".o-mail-MessagingMenuEmpty:has(:text('You\\'re all caught up!'))");
-    await click("button:text('Unread')");
+    await click("button:text('All')");
     await contains(".o-mail-MessagingMenuItem", { count: 2 });
 });
 
@@ -935,7 +935,7 @@ test("mark a single message as read removes it from the unread filter but keeps 
     await click("button:text('Mark as Read')");
     await contains(".o-mail-MessagingMenuItem", { count: 1 });
     await contains(".o-mail-MessagingMenuItem:has(:text('You: not empty 2'))");
-    await click("button:text('Unread')");
+    await click("button:text('All')");
     await contains(".o-mail-MessagingMenuItem", { count: 2 });
     await contains(".o-mail-MessagingMenuItem:has(:text('You: not empty 1'))");
     await contains(".o-mail-MessagingMenuItem:has(:text('You: not empty 2'))");
@@ -960,7 +960,7 @@ test("full inbox shows all messages after marking all as read and clearing the u
     await contains(".o-mail-MessagingMenuItem", { count: 20 });
     await click("button:text('Mark all read')");
     await contains(".o-mail-MessagingMenuEmpty:has(:text('You\\'re all caught up!'))");
-    await click("button:text('Unread')");
+    await click("button:text('All')");
     await scroll(".o-mail-MessagingMenu-tabContent", "bottom");
     await contains(".o-mail-MessagingMenuItem", { count: 40 });
 });
