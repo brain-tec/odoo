@@ -578,7 +578,8 @@ class ProductProduct(models.Model):
                 in_qty = move._get_valued_qty(lot=lot)
                 in_value = move_value
                 if lot:
-                    in_value = in_value * in_qty / move._get_valued_qty()
+                    valued_qty = move._get_valued_qty()
+                    in_value = in_value * in_qty / valued_qty if valued_qty else 0
             if in_qty > quantity:
                 in_value = in_value * quantity / in_qty
                 in_qty = quantity
@@ -679,8 +680,10 @@ class ProductProduct(models.Model):
                             and product.uom_id.compare(product.qty_available, 0) > 0
                     ):
                         new_avg_cost = (previous_qty * product.standard_price + added_value) / product.qty_available
-                    else:
+                    elif not product.uom_id.is_zero(added_qty):
                         new_avg_cost = added_value / added_qty
+                    else:
+                        continue
                     product.with_context(disable_auto_revaluation=True).sudo().standard_price = new_avg_cost
                 products = products - products_with_incremental_recompute
 
