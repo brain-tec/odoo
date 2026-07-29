@@ -45,6 +45,7 @@ import { selectElements } from "@html_editor/utils/dom_traversal";
 import { BuilderAction } from "@html_builder/core/builder_action";
 import { isSmallInteger } from "@html_builder/utils/utils";
 import { getParsedDataFor } from "@website/js/utils";
+import { RANGE_COMPARATORS } from "./form_field_option";
 import { isTargetVisible } from "@html_builder/core/visibility_plugin";
 import { nodeSize } from "@html_editor/utils/position";
 import { applyFunDependOnSelectorAndExclude } from "@html_builder/plugins/utils";
@@ -186,6 +187,7 @@ export class FormOptionPlugin extends Plugin {
             SetDependencyValueListAction,
             SetCustomErrorMessageAction,
             SetRequirementComparatorAction,
+            SetDateRequirementComparatorAction,
             SetMultipleFilesAction,
             ToggleAllowEmptyAction,
             SetEmptyPlaceholderAction,
@@ -204,6 +206,7 @@ export class FormOptionPlugin extends Plugin {
         ].map((selector) => `.s_website_form form ${selector}`),
         clean_for_save_processors: [
             this.removeSuccessMessagePreviews.bind(this),
+            this.removeIncompleteRequirements.bind(this),
             // Early in sequence to run before the plugin removing empty nodes
             withSequence(5, this.writeDefaultLabels.bind(this)),
         ],
@@ -991,6 +994,34 @@ export class FormOptionPlugin extends Plugin {
     }
 
     /**
+     * Drops requirement comparators left without their value(s): a comparator
+     * with no condition (nor end value for ranges) is a no-op requirement.
+     * Also drops ranges whose start is after their end, as they can never be
+     * satisfied and would make the field impossible to fill.
+     *
+     * @param {HTMLElement} rootEl
+     */
+    removeIncompleteRequirements(rootEl) {
+        for (const fieldEl of rootEl.querySelectorAll(
+            ".s_website_form_field[data-requirement-comparator]"
+        )) {
+            const {
+                requirementComparator: comparator,
+                requirementCondition: condition,
+                requirementBetween: between,
+            } = fieldEl.dataset;
+            const isRange = RANGE_COMPARATORS.includes(comparator);
+            const missingEnd = isRange && !between;
+            const invalidRange = isRange && parseInt(condition) > parseInt(between);
+            if (!condition || condition === "[]" || missingEnd || invalidRange) {
+                delete fieldEl.dataset.requirementComparator;
+                this.clearValidationDataset(fieldEl);
+            }
+        }
+        return rootEl;
+    }
+
+    /**
      * If the element is positioned inside a website form, wraps it in a `div`
      * having classes `s_website_form_inner_content` and `o_no_direct_child_drop`
      * and `col-12`.
@@ -1643,6 +1674,22 @@ export class SetRequirementComparatorAction extends BuilderAction {
         }
     }
 }
+
+export class SetDateRequirementComparatorAction extends SetRequirementComparatorAction {
+    static id = "setDateRequirementComparator";
+    apply(context) {
+        super.apply(context);
+        const fieldEl = context.editingElement;
+        if (RANGE_COMPARATORS.includes(fieldEl.dataset.requirementComparator)) {
+            if (fieldEl.dataset.requirementCondition === "today") {
+                delete fieldEl.dataset.requirementCondition;
+            }
+        } else {
+            delete fieldEl.dataset.requirementBetween;
+        }
+    }
+}
+
 /**
  * Sets the dataset value of custom-error attribute which is further used to
  * determine if the input for custom error message should be visible or not.

@@ -201,7 +201,7 @@
     <BuilderRow label.translate="Default Value" t-if="!this.isOtherOptionSupported">
         <BuilderTextInput action="'selectTextareaValue'" applyTo="'textarea'"/>
         <BuilderCheckbox attributeAction="'checked'" attributeActionValue="'checked'"
-            applyTo="`.col-sm > * > input[type='checkbox']`" preview="false"
+            applyTo="`[data-type='boolean'] input[type='checkbox']`" preview="false"
         />
         <BuilderTextInput attributeAction="'value'" action="'property'" actionParam="{ property: 'value' }"
             applyTo="`input[type='text']:not(.datetimepicker-input), input[type='email'], input[type='tel'], input[type='url']`"
@@ -347,7 +347,7 @@
                 t-elif="this.domStateCurrentFieldInput.hasDateTimePicker"
                 preview="false"
                 dataAttributeAction="'requirementComparator'"
-                action="'setRequirementComparator'">
+                action="'setDateRequirementComparator'">
             <BuilderSelectItem id="'no_requirement_opt'" dataAttributeActionValue="''">None</BuilderSelectItem>
             <BuilderSelectItem dataAttributeActionValue="'after'">Is date after</BuilderSelectItem>
             <BuilderSelectItem dataAttributeActionValue="'before'">Is date before</BuilderSelectItem>
@@ -368,28 +368,32 @@
             placeholder.translate="Enter requirement conditions"
             dataAttributeAction="'requirementCondition'"/>
     </BuilderRow>
-    <BuilderRow label.translate="Conditions" level="1" t-elif="this.domStateCurrentFieldInput.isFormDateTime and this.domState.elDataset.requirementComparator">
+    <BuilderRow label="this.dateRequirementConditionLabel" level="1" t-elif="this.domStateCurrentFieldInput.isFormDateTime and this.domState.elDataset.requirementComparator">
         <BuilderDateTimePicker id="'require_condition_additional_datetime_1'"
             placeholder.translate="Enter requirement conditions"
             dataAttributeAction="'requirementCondition'"
+            allowRelativeDate="!this.isRangeComparator"
             type="'datetime'"/>
     </BuilderRow>
-    <BuilderRow label.translate="Conditions" level="1" t-elif="this.domStateCurrentFieldInput.isFormDate and this.domState.elDataset.requirementComparator">
+    <BuilderRow label="this.dateRequirementConditionLabel" level="1" t-elif="this.domStateCurrentFieldInput.isFormDate and this.domState.elDataset.requirementComparator">
         <BuilderDateTimePicker id="'require_condition_additional_date'"
             placeholder.translate="Enter requirement conditions"
             dataAttributeAction="'requirementCondition'"
+            allowRelativeDate="!this.isRangeComparator"
             type="'date'"/>
     </BuilderRow>
-    <BuilderRow label.translate="Conditions" level="1" t-if="this.domStateCurrentFieldInput.isFormDateTime and ['between', '!between'].includes(this.domState.elDataset.requirementComparator)">
+    <BuilderRow label.translate="End date" level="1" t-if="this.domStateCurrentFieldInput.isFormDateTime and this.isRangeComparator">
         <BuilderDateTimePicker id="'require_condition_additional_datetime_2'"
             placeholder.translate="Enter requirement conditions"
             dataAttributeAction="'requirementBetween'"
+            minDate="this.requirementStartDate"
             type="'datetime'"/>
     </BuilderRow>
-    <BuilderRow label.translate="Conditions" level="1" t-elif="this.domStateCurrentFieldInput.isFormDate and ['between', '!between'].includes(this.domState.elDataset.requirementComparator)">
+    <BuilderRow label.translate="End date" level="1" t-elif="this.domStateCurrentFieldInput.isFormDate and this.isRangeComparator">
         <BuilderDateTimePicker id="'require_condition_additional_date_end'"
             placeholder.translate="Enter requirement conditions"
             dataAttributeAction="'requirementBetween'"
+            minDate="this.requirementStartDate"
             type="'date'"/>
     </BuilderRow>
     <BuilderRow t-if="this.isMultipleTextConditionForRequirementOptionVisible">

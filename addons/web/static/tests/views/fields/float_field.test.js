@@ -243,7 +243,7 @@ test("use incorrect formula", async () => {
     });
     expect(".o_form_editable").toHaveCount(1, { message: "form view should still be editable" });
 
-    await contains(".o_field_widget[name=float_field] input").edit("=3:2?+4", { confirm: false });
+    await contains(".o_field_widget[name=float_field] input").edit("=3*abc", { confirm: false });
     await clickSave();
 
     expect(".o_form_editable").toHaveCount(1, { message: "form view should still be editable" });

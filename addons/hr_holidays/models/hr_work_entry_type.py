@@ -90,14 +90,14 @@ class HrWorkEntryType(models.Model):
         ('hour', 'Custom Hours')], default='day', string='Duration Type', required=True,
         tracking=True,
         help="""Define the minimum time off duration in which an employee can take when requesting a leave""")
-    unit_of_measure = fields.Selection([('hour', 'Hours'), ('day', 'Days')], default="hour", string="Unit of measure", required=True,
+    unit_of_measure = fields.Selection([('hour', 'Hours'), ('day', 'Days')], default="hour", string="Unit of Measure", required=True,
                                        tracking=True,
                                        help="Define if the time type will be allocated/accrued in hours or days")
     unpaid = fields.Boolean('Is Unpaid', default=False, tracking=True)
     include_public_holidays_in_duration = fields.Boolean('Ignore Public Holidays', default=False, tracking=True, help="Public holidays should be counted in the leave duration when applying for leaves")
     leave_notif_subtype_id = fields.Many2one('mail.message.subtype', string='Time Off Notification Subtype', tracking=True, default=lambda self: self.env.ref('hr_holidays.mt_leave', raise_if_not_found=False))
     allocation_notif_subtype_id = fields.Many2one('mail.message.subtype', string='Allocation Notification Subtype', tracking=True, default=lambda self: self.env.ref('hr_holidays.mt_leave_allocation', raise_if_not_found=False))
-    support_document = fields.Boolean(string='Supporting Document', tracking=True)
+    support_document = fields.Boolean(string='Supporting Document Expected', tracking=True, help="When enabled, employees will see a notice that this leave type requires a supporting document.")
     allow_request_on_top = fields.Boolean(string='Allow Request on Top', default=False,
         tracking=True,
         help="If checked, users can request another leave on top of the ones of this type.")
@@ -198,7 +198,7 @@ class HrWorkEntryType(models.Model):
                 public_holiday_to_date = public_holiday.date_to.date()
 
                 if leave_from_date <= public_holiday_to_date and leave_to_date >= public_holiday_from_date:
-                    raise ValidationError(_("You cannot modify the 'Public Holiday Included' setting since one or more leaves for that \
+                    raise ValidationError(self.env._("You cannot modify the 'Public Holiday Included' setting since one or more leaves for that \
 time type are overlapping with public holidays, meaning that the balance of those employees would be affected by this change."))
 
     @api.constrains('count_days_as')
@@ -542,6 +542,7 @@ been taken for this time off type. Changing it now would affect existing employe
                         'max_allowed_negative': work_entry_type.max_allowed_negative,
                         'employee_company': employee.company_id.id,
                         'employee_country': employee.company_id.country_id.id,
+                        'color': work_entry_type.color,
                     },
                     work_entry_type.requires_allocation,
                     work_entry_type.id)

@@ -7005,7 +7005,7 @@ test(`onchanges are not sent for invalid values`, async () => {
 
     // enter an invalid value in a float, and check that no onchange has
     // been applied
-    await contains(`.o_field_widget[name="int_field"] input`).edit("123a");
+    await contains(`.o_field_widget[name="int_field"] input`).edit("abc");
     expect(`.o_field_widget[name="foo"] input`).toHaveValue("123");
     expect.verifySteps(["onchange"]);
 

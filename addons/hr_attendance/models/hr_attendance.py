@@ -48,11 +48,11 @@ class HrAttendance(models.Model):
     date = fields.Date(string="Date", compute='_compute_date', store=True, index=True, precompute=True, required=True)
     worked_hours = fields.Float(string='Worked Hours', compute='_compute_worked_hours', store=True, readonly=True)
     color = fields.Integer(compute='_compute_color')
-    overtime_hours = fields.Float(string="Over Time", compute='_compute_overtime_hours', store=True)
+    overtime_hours = fields.Float(string="Worked Extra Hours", compute='_compute_overtime_hours', store=True)
     overtime_status = fields.Selection(selection=[('to_approve', "To Approve"),
                                                   ('approved', "Approved"),
                                                   ('refused', "Refused")], compute="_compute_overtime_status", store=True, tracking=True, readonly=False)
-    validated_overtime_hours = fields.Float(string="Extra Hours", compute='_compute_validated_overtime_hours', tracking=True, store=True, readonly=True)
+    validated_overtime_hours = fields.Float(string="Validated Extra Hours", compute='_compute_validated_overtime_hours', tracking=True, store=True, readonly=True)
     in_latitude = fields.Float(string="Latitude", digits=(10, 7), readonly=True, aggregator=None)
     in_longitude = fields.Float(string="Longitude", digits=(10, 7), readonly=True, aggregator=None)
     in_location = fields.Char(help="Based on GPS-Coordinates if available or on IP Address")
@@ -191,28 +191,9 @@ class HrAttendance(models.Model):
             between check_in and check_out, without taking into account the lunch_interval"""
         for attendance in self:
             if attendance.check_out and attendance.check_in and attendance.employee_id:
-                attendance.worked_hours = attendance._get_worked_hours_in_range(attendance.check_in, attendance.check_out)
+                attendance.worked_hours = (attendance.check_out - attendance.check_in).total_seconds() / 3600
             else:
                 attendance.worked_hours = False
-
-    def _get_worked_hours_in_range(self, start_dt, end_dt):
-        """Returns the amount of hours worked because of this attendance during the
-        interval defined by [start_dt, end_dt]
-
-        :param start_dt: datetime starting the interval.
-        :param end_dt: datetime ending the interval.
-        :returns: float, hours worked
-        """
-        self.ensure_one()
-        tz = ZoneInfo(self.employee_id._get_tz(self.check_in))
-        start_dt_tz = max(self.check_in, start_dt).replace(tzinfo=UTC).astimezone(tz)
-        end_dt_tz = min(self.check_out, end_dt).replace(tzinfo=UTC).astimezone(tz)
-
-        if end_dt_tz < start_dt_tz:
-            return 0.0
-
-        attendance_intervals = Intervals([(start_dt_tz, end_dt_tz, self)])
-        return sum_intervals(attendance_intervals)
 
     @api.constrains('check_in', 'check_out')
     def _check_validity_check_in_check_out(self):

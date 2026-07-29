@@ -12563,7 +12563,7 @@ test(`multi edit list view: mousedown on "Discard" with invalid field`, async ()
 
     // edit again with an invalid value
     await contains(`.o_data_row:eq(0) .o_data_cell`).click();
-    await contains(`.o_data_row:eq(0) .o_data_cell input`).edit("oof2", { confirm: false });
+    await contains(`.o_data_row:eq(0) .o_data_cell input`).edit("abc", { confirm: false });
 
     // mousedown on Discard (simulate a mousemove) and mouseup somewhere else
     await pointerDown(".o_list_button_discard");

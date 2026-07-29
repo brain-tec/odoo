@@ -53,7 +53,10 @@ class ProjectProject(models.Model):
     def _compute_open_task_count(self):
         self.__compute_task_count(
             count_field='open_task_count',
-            additional_domain=[('state', 'in', self.env['project.task'].OPEN_STATES)],
+            additional_domain=Domain.AND([
+                [('state', 'in', self.env['project.task'].OPEN_STATES)],
+                ['|', ('parent_id.is_template', '=', False), ('parent_id', '=', False)],
+            ]),
         )
 
     def _compute_closed_task_count(self):
@@ -126,7 +129,7 @@ class ProjectProject(models.Model):
             ('followers', 'Invited internal users'),
             ('invited_users', 'Invited internal and portal users'),
             ('employees', 'All internal users'),
-            ('portal', ' All internal users and invited portal users'),
+            ('portal', 'All internal users and invited portal users'),
         ],
         string='Visibility', required=True,
         default='portal',
