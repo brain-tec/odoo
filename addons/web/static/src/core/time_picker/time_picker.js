@@ -5,7 +5,7 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { Time, parseTime } from "@web/core/l10n/time";
 import { mergeClasses } from "@web/core/utils/classname";
-import { useChildRef, useService } from "@web/core/utils/hooks";
+import { useService } from "@web/core/utils/hooks";
 import { range } from "@web/core/utils/numbers";
 
 /**
@@ -18,29 +18,30 @@ import { range } from "@web/core/utils/numbers";
  * @property {number} [minutesRounding=5]
  */
 
+export const timePickerProps = {
+    cssClass: t.or([t.string(), t.array(), t.object()]).optional({}),
+    inputCssClass: t.or([t.string(), t.array(), t.object()]).optional({}),
+    value: t
+        .or([t.string(), t.instanceOf(Time), t.literal(false), t.literal(null)])
+        .optional("00:00"),
+    onChange: t.function().optional(() => () => {}),
+    onInvalid: t.function().optional(() => () => {}),
+    showSeconds: t.boolean().optional(false),
+    minutesRounding: t.number().optional(5),
+    placeholder: t.string().optional(),
+};
+
 export class TimePicker extends Component {
     static template = "web.TimePicker";
     static components = {
         Dropdown,
         DropdownItem,
     };
-    props = useProps({
-        cssClass: t.or([t.string(), t.array(), t.object()]).optional({}),
-        inputCssClass: t.or([t.string(), t.array(), t.object()]).optional({}),
-        value: t
-            .or([t.string(), t.instanceOf(Time), t.literal(false), t.literal(null)])
-            .optional("00:00"),
-        onChange: t.function().optional(() => () => {}),
-        onInvalid: t.function().optional(() => () => {}),
-        showSeconds: t.boolean().optional(false),
-        minutesRounding: t.number().optional(5),
-        placeholder: t.string().optional(),
-    });
+    props = useProps(timePickerProps);
 
     inputRef = signal.ref();
 
     setup() {
-        this.menuRef = useChildRef();
         this.dropdownState = useDropdownState();
         this.uiService = useService("ui");
 

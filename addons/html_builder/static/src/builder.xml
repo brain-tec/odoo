@@ -23,23 +23,23 @@
             />
             <ul class="nav nav-underline" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button id="blocks-tab" data-name="blocks" data-hotkey="1" class="o-hb-tab nav-link position-relative w-100 px-1 text-truncate" t-att-class="{'active cursor-default': this.state.activeTab === 'blocks'}" t-on-click="() => this.onTabClick('blocks')" t-att-disabled="this.props.onlyCustomizeTab" role="tab" t-att-aria-selected="this.state.activeTab === 'blocks' ? 'true' : 'false'">
+                    <button id="blocks-tab" data-name="blocks" data-hotkey="1" class="o-hb-tab nav-link position-relative w-100 px-1" t-att-class="{'active cursor-default': this.state.activeTab === 'blocks'}" t-on-click="() => this.onTabClick('blocks')" t-att-disabled="this.props.onlyCustomizeTab" role="tab" t-att-aria-selected="this.state.activeTab === 'blocks' ? 'true' : 'false'" data-text-truncate-tooltip="">
                         <i class="oi me-2" data-icon="add" role="none"/>Blocks
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button id="customize-tab" data-name="customize" class="o-hb-tab nav-link position-relative w-100 px-1 text-truncate" t-att-class="{'active cursor-default': this.state.activeTab === 'customize'}" t-on-click="() => this.onTabClick('customize')" role="tab" t-att-aria-selected="this.state.activeTab === 'customize' ? 'true' : 'false'">
+                    <button id="customize-tab" data-name="customize" class="o-hb-tab nav-link position-relative w-100 px-1" t-att-class="{'active cursor-default': this.state.activeTab === 'customize'}" t-on-click="() => this.onTabClick('customize')" role="tab" t-att-aria-selected="this.state.activeTab === 'customize' ? 'true' : 'false'" data-text-truncate-tooltip="">
                         <i class="oi oi-filled me-2" data-icon="edit" role="none"/>Style
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button id="theme-tab" data-name="theme" data-hotkey="2" t-if="this.ThemeTab" class="o-hb-tab nav-link position-relative w-100 px-1 text-truncate" t-att-class="{'active cursor-default': this.state.activeTab === 'theme'}" t-on-click="() => this.onTabClick('theme')" t-att-disabled="this.props.onlyCustomizeTab" role="tab" t-att-aria-selected="this.state.activeTab === 'theme' ? 'true' : 'false'">
+                    <button id="theme-tab" data-name="theme" data-hotkey="2" t-if="this.ThemeTab" class="o-hb-tab nav-link position-relative w-100 px-1" t-att-class="{'active cursor-default': this.state.activeTab === 'theme'}" t-on-click="() => this.onTabClick('theme')" t-att-disabled="this.props.onlyCustomizeTab" role="tab" t-att-aria-selected="this.state.activeTab === 'theme' ? 'true' : 'false'" data-text-truncate-tooltip="">
                         <i class="oi oi-filled me-2" data-icon="settings" role="none"/><t t-out="this.props.themeTabDisplayName"/>
                     </button>
                 </li>
             </ul>
         </div>
-        <div class="o-tab-content overflow-y-auto overflow-x-hidden flex-grow-1">
+        <div class="o-tab-content overflow-y-auto overflow-x-hidden flex-grow-1" t-att-class="{ 'o-faded-tab-content': !!this.state.pendingTab }" t-on-transitionend="this.onTabTransitionEnd">
             <t t-if="this.state.activeTab === 'blocks'">
                 <BlockTab snippetsName="this.props.snippetsName" newInstalledModule="this.props.newInstalledModule"/>
             </t>
@@ -47,7 +47,7 @@
                 <CustomizeTab currentOptionsContainers="this.state.currentOptionsContainers"/>
             </t>
             <t t-if="this.state.activeTab === 'theme'">
-                <t t-component="this.ThemeTab" colorPresetToShow="this.colorPresetToShow" shadowSizeToShow="this.shadowSizeToShow"/>
+                <t t-component="this.ThemeTab" t-props="this.themeTabProps"/>
             </t>
         </div>
         <div class="o_we_lower_panel mt-auto flex-grow-0 flex-shrink-0">

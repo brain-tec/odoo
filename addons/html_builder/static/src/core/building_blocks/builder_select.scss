@@ -40,6 +40,8 @@
             @include o-position-absolute(50%, map-get($spacers, 1));
             transform: translate(10%, -50%);
             font-size: 1.2em;
+            // Keep truncated-text tooltips anchored on the button.
+            pointer-events: none;
         }
     }
 
@@ -137,4 +139,12 @@
             --o-hb-select-item-active-color: #{$o-we-color-global};
         }
     }
+}
+
+.o-hb-select-toggle .o-hb-theme-tab-link {
+    display: none;
+}
+
+.o-hb-select-dropdown-item:has(.o-hb-theme-tab-link) {
+    padding-right: 0;
 }

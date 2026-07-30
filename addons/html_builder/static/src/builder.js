@@ -7,6 +7,7 @@ import {
     onWillDestroy,
     onWillStart,
     onWillUnmount,
+    providePlugins,
     signal,
     status,
     proxy,
@@ -23,6 +24,7 @@ import { BlockTab } from "@html_builder/sidebar/block_tab";
 import { CustomizeTab } from "@html_builder/sidebar/customize_tab";
 import { useSnippets } from "@html_builder/snippets/snippet_service";
 import { setBuilderCSSVariables } from "@html_builder/utils/utils_css";
+import { TextTruncateTooltipPlugin } from "@web/core/tooltip/text_truncate_tooltip_plugin";
 import { withSequence } from "@html_editor/utils/resource";
 import { getHtmlStyle } from "@html_editor/utils/formatting";
 import { isVisible } from "@html_builder/utils/utils";
@@ -34,6 +36,7 @@ const ONLY_ALLOW_INLINE_TAGS = new Set([
     ...["a", "em", "strong", "small", "s", "cite", "q", "abbr", "data", "time", "code"],
     ...["samp", "sub", "sup", "i", "b", "u", "mark", "bdi", "span", "label", "button"],
 ]);
+const TAB_TRANSITION_FALLBACK_DELAY = 400;
 
 /**
  * @typedef {((args: {isMobileView: boolean}) => ())[]} on_mobile_view_switched_handlers
@@ -53,7 +56,6 @@ export class Builder extends Component {
         installSnippetModule: t.function().optional(),
         snippetsName: t.string(),
         toggleMobile: t.function(),
-        overlayRef: t.function(),
         iframeLoaded: t.object(),
         isMobile: t.boolean(),
         Plugins: t.array().optional(),
@@ -66,17 +68,26 @@ export class Builder extends Component {
         slots: t.object().optional(),
         initialTab: t.string().optional("blocks"),
         onlyCustomizeTab: t.boolean().optional(false),
+        animateThemeTabSwitch: t.boolean().optional(false),
     });
+
+    // Ref on the local overlay container element, owned by the parent.
+    overlayRef = props.static("overlayRef", t.signal(t.ref()));
 
     builderSidebarRef = signal.ref();
 
     setup() {
         this.ThemeTab = this.props.getThemeTab?.();
+        providePlugins([TextTruncateTooltipPlugin], { rootRef: this.builderSidebarRef });
         this.state = proxy({
             canUndo: false,
             canRedo: false,
             activeTab: this.props.onlyCustomizeTab ? "customize" : this.props.initialTab,
+            pendingTab: undefined,
             currentOptionsContainers: undefined,
+            themeColorPresetToShow: null,
+            themeTargetRowId: null,
+            themeTargetContainerId: null,
         });
         this.invisibleElementsPanelState = proxy({
             invisibleEls: [],
@@ -93,8 +104,6 @@ export class Builder extends Component {
 
         this.lastTrigerUpdateId = 0;
         this.editorBus = new EventBus();
-        this.colorPresetToShow = null;
-        this.shadowSizeToShow = null;
         this.activeTargetEl = null;
         const mobileBreakpoint = this.props.config.mobileBreakpoint ?? "lg";
 
@@ -194,7 +203,7 @@ export class Builder extends Component {
                 },
                 localOverlayContainers: {
                     key: this.env.localOverlayContainerKey,
-                    ref: this.props.overlayRef,
+                    ref: this.overlayRef,
                 },
                 saveSnippet: (snippetEl, cleanForSaveProcessors, wrapWithSaveSnippetHandlers) =>
                     this.snippetModel.saveSnippet(
@@ -268,9 +277,10 @@ export class Builder extends Component {
             editorBus: this.editorBus,
             triggerDomUpdated: this.triggerDomUpdated.bind(this),
             editColorCombination: this.editColorCombination.bind(this),
-            editShadow: this.editShadow.bind(this),
+            editThemeOption: this.editThemeOption.bind(this),
         });
         onWillDestroy(() => {
+            clearTimeout(this.tabTransitionFallbackTimeout);
             this.resizeObserver?.disconnect();
             this.editor.destroy();
         });
@@ -301,19 +311,27 @@ export class Builder extends Component {
      * Called when clicking on a tab. Sets the active tab to the given tab.
      *
      * @param {String} tab the tab to set
-     * @param {Number | null} presetId the color preset expanding on "theme" tab
-     * open.
      */
-    onTabClick(tab, { presetId = null, shadowSize = null } = {}) {
+    onTabClick(tab) {
         if (this.state.activeTab === tab) {
             // If the tab is already active, do nothing.
             return;
         }
-        this.setTab(tab);
+        if (tab === "theme") {
+            this.setThemeReveal();
+        }
+        this.switchTab(tab, { animated: false });
+    }
+
+    setThemeReveal({ presetId = null, targetRowId = null, targetContainerId = null } = {}) {
+        this.state.themeColorPresetToShow = presetId;
+        this.state.themeTargetRowId = targetRowId;
+        this.state.themeTargetContainerId = targetContainerId;
+    }
+
+    updateOptionsForTab(tab) {
         // Deactivate the options when clicking on the "BLOCKS" or "THEME" tabs.
         if (tab === "theme" || tab === "blocks") {
-            this.colorPresetToShow = presetId;
-            this.shadowSizeToShow = shadowSize;
             this.activeTargetEl = this.activeTargetEl || this.getActiveTarget();
             this.editor.shared.builderOptions.deactivateContainers();
         } else if (this.activeTargetEl) {
@@ -327,6 +345,52 @@ export class Builder extends Component {
 
     setTab(tab) {
         this.state.activeTab = tab;
+    }
+
+    switchTab(tab, { animated = false } = {}) {
+        if (this.state.activeTab === tab) {
+            return;
+        }
+
+        if (!animated) {
+            clearTimeout(this.tabTransitionFallbackTimeout);
+            this.setTab(tab);
+            this.updateOptionsForTab(tab);
+            this.state.pendingTab = undefined;
+        } else {
+            this.state.pendingTab = tab;
+            clearTimeout(this.tabTransitionFallbackTimeout);
+            // Set a timeout to ensure the tab switch even when transitions
+            // are disabled on .o-tab-content
+            this.tabTransitionFallbackTimeout = setTimeout(
+                () => this.completeTabSwitch(),
+                TAB_TRANSITION_FALLBACK_DELAY
+            );
+        }
+    }
+
+    onTabTransitionEnd(ev) {
+        if (ev.target === ev.currentTarget && ev.propertyName === "opacity") {
+            this.completeTabSwitch();
+        }
+    }
+
+    completeTabSwitch() {
+        if (!this.state.pendingTab) {
+            return;
+        }
+        clearTimeout(this.tabTransitionFallbackTimeout);
+        this.setTab(this.state.pendingTab);
+        this.updateOptionsForTab(this.state.pendingTab);
+        this.state.pendingTab = undefined;
+    }
+
+    get themeTabProps() {
+        return {
+            colorPresetToShow: this.state.themeColorPresetToShow,
+            targetRowId: this.state.themeTargetRowId,
+            targetContainerId: this.state.themeTargetContainerId,
+        };
     }
 
     undo() {
@@ -357,11 +421,20 @@ export class Builder extends Component {
     }
 
     editColorCombination(presetId) {
-        this.onTabClick("theme", { presetId });
+        this.openThemeOption({ presetId });
     }
 
-    editShadow(shadowSize) {
-        this.onTabClick("theme", { shadowSize });
+    editThemeOption(targetRowId, targetContainerId) {
+        this.openThemeOption({ targetRowId, targetContainerId });
+    }
+
+    openThemeOption({ presetId = null, targetRowId = null, targetContainerId = null } = {}) {
+        this.setThemeReveal({
+            presetId,
+            targetRowId,
+            targetContainerId,
+        });
+        this.switchTab("theme", { animated: this.props.animateThemeTabSwitch });
     }
 
     getActiveTarget() {
