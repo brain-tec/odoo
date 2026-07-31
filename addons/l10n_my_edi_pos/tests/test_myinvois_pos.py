@@ -90,7 +90,7 @@ class TestMyInvoisPoS(TestPoSCommon, HttpCase):
         pos_journal = cls.env['account.journal'].create({
             "name": "Point of Sale",
             "code": "POSUSD",
-            "type": "general",
+            "type": "sale",
             "company_id": cls.env.company.id,
             "currency_id": cls.foreign_currency.id,
         })
@@ -673,7 +673,7 @@ class TestMyInvoisPoS(TestPoSCommon, HttpCase):
                         ],
                     })
                 # If it is, it will work
-                self.invoicing_customer.vat = 'EI00000000010'
+                self.invoicing_customer.write({'vat': 'EI00000000010', 'l10n_my_identification_number': 'NA'})
                 self._create_order({
                     'pos_order_ui_args': {
                         'is_refund': True,
