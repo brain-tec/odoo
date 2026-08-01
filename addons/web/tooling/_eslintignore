@@ -476,8 +476,6 @@ voip/static/lib/**/*
 !pos_avatax/**/*
 !pos_barcodelookup
 !pos_barcodelookup/**/*
-!pos_blackbox_be
-!pos_blackbox_be/**/*
 !pos_enterprise
 !pos_enterprise/**/*
 !pos_enterprise_sms_whatsapp
@@ -563,6 +561,9 @@ voip/static/lib/**/*
 
 !ai_livechat
 !ai_livechat/**
+
+!ai_website
+!ai_website/**
 
 !ai_website_livechat
 !ai_website_livechat/**

@@ -42,7 +42,7 @@ imStatusDataRegistry.add(
     {
         condition: ({ persona }) => persona?.isBot,
         icon: "favorite",
-        icon_class: "oi-filled o-xsmaller o-pt-0_5",
+        icon_class: "oi-filled o-pt-0_5",
         title: _t("User is a bot"),
     },
     { sequence: 90 }
@@ -58,24 +58,21 @@ export class ImStatus extends Component {
         this.className = propComputed("className", t.string().optional(""));
         this.member = propComputed(
             "member",
-            t.instanceOf(this.store["discuss.channel.member"].Class).optional()
+            t.instanceOf(this.store["discuss.channel.member"]).optional()
         );
         this.personaProp = propComputed(
             "persona",
             t
                 .or([
-                    t.instanceOf(this.store["res.partner"].Class),
-                    t.instanceOf(this.store["mail.guest"].Class),
+                    t.instanceOf(this.store["res.partner"]),
+                    t.instanceOf(this.store["mail.guest"]),
                 ])
                 .optional()
         );
         this.size = propComputed("size", t.string().optional("lg"));
         this.style = propComputed("style", t.string().optional(""));
         this.typing = propComputed("typing", t.boolean().optional(true));
-        this.userProp = propComputed(
-            "user",
-            t.instanceOf(this.store["res.users"].Class).optional()
-        );
+        this.userProp = propComputed("user", t.instanceOf(this.store["res.users"]).optional());
         this.attClassObjectToString = attClassObjectToString;
     }
 
@@ -90,7 +87,6 @@ export class ImStatus extends Component {
     get class() {
         return attClassObjectToString({
             [`o-mail-ImStatus d-flex ${this.colorClass} ${this.className()}`]: true,
-            "o-fs-small": !this.persona?.isBot,
             [`rounded-circle bg-transparent ${this.iconClass}`]: !this.showTypingIndicator,
             "rounded-pill": this.showTypingIndicator,
         });
