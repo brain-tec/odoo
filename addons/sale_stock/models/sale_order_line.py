@@ -207,7 +207,13 @@ class SaleOrderLine(models.Model):
                         continue
                     qty += move.product_uom._compute_quantity(move.quantity, line.product_uom_id, rounding_method='HALF-UP')
                 for move in incoming_moves:
-                    if move.state != 'done' or (not move.origin_returned_move_id and line.product_uom_qty > 0 and not move.picking_id.return_id):
+                    # An unlinked move coming from a customer is still a real return, only skip unlinked non-returns (dropship receipts).
+                    if move.state != 'done' or (
+                        not move.origin_returned_move_id
+                        and not move.location_id._is_outgoing()
+                        and line.product_uom_qty > 0
+                        and not move.picking_id.return_id
+                    ):
                         continue
                     qty -= move.product_uom._compute_quantity(move.quantity, line.product_uom_id, rounding_method='HALF-UP')
                 delivered_qties[line] = qty
@@ -329,7 +335,7 @@ class SaleOrderLine(models.Model):
         outgoing_moves_ids = set()
         incoming_moves_ids = set()
 
-        moves = self.move_ids.filtered(lambda r: r.state != 'cancel' and r.location_dest_usage != 'inventory' and self.product_id == r.product_id)
+        moves = self.move_ids.filtered(lambda r: r.state != 'cancel' and r.location_dest_usage != 'inventory' and self.product_id == r.product_id and r.company_id == self.company_id)
         if moves and not strict:
             # The first move created was the one created from the intial rule that started it all.
             sorted_moves = moves.sorted('id')
