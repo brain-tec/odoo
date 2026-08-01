@@ -262,7 +262,7 @@ class AccountMove(models.Model):
         # EXTENDS 'account'
         super()._compute_show_reset_to_draft_button()
         for move in self:
-            move.show_reset_to_draft_button = not (move.is_sale_document() and move.l10n_it_edi_transaction) and move.show_reset_to_draft_button
+            move.show_reset_to_draft_button = not (move.l10n_it_edi_state not in (False, 'rejected') and move.l10n_it_edi_transaction) and move.show_reset_to_draft_button
 
     def _parse_xml_with_recovery(self, content, name=None):
         def parse_xml(parser, content):
@@ -1349,7 +1349,7 @@ class AccountMove(models.Model):
         files_data = self._to_files_data(attachments)
         files_data.extend(self._unwrap_attachments(files_data))
 
-        moves = self.with_company(company_id).create([{}] * len(files_data))
+        moves = self.with_company(company_id).create([{'move_type': 'in_invoice'}] * len(files_data))
 
         for move, file_data in zip(moves, files_data):
             # TODO: write to l10n_it_edi_attachment_file directly
