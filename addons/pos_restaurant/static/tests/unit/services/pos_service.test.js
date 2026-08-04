@@ -871,7 +871,6 @@ describe("restaurant pos_store.js", () => {
         order.preset_time = DateTime.fromSQL("2025-02-13 15:00:00");
 
         await store.syncAllOrders({ orders: [order] });
-        order.last_order_preparation_change = { lines: { test: {} } };
 
         let sentPreparationCancelled = 0;
         store.sendOrderInPreparation = async () => {
@@ -973,7 +972,7 @@ describe("restaurant pos_store.js", () => {
         const order = store.addNewOrder({ table_id: table });
         const product = store.models["product.template"].get(11);
         await store.addLineToOrder({ product_tmpl_id: product, qty: 1 }, order);
-        store.router.state.current = "ProductScreen";
+        store.router.currentScreen.set("ProductScreen");
         let destination = null;
 
         store.navigate = (page) => {

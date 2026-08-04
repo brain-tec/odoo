@@ -24,6 +24,7 @@ test("_getConnectedCashier", async () => {
 });
 test("shouldShowOpeningControl", async () => {
     const store = await setupPosEnv();
+    store.models["pos.session"].getFirst().state = "opening_control";
     const emp = store.models["hr.employee"].get(2);
     store.setCashier(emp);
     store.hasLoggedIn = true;
@@ -58,8 +59,8 @@ test("handleUrlParams prevents unauthorized access when POS is locked with pos_h
     store.resetCashier();
     expect(store.cashier).toBe(false);
     expect(store.config.module_pos_hr).toBe(true);
-    store.router.state.current = "ProductScreen";
-    store.router.state.params = {};
+    store.router.currentScreen.set("ProductScreen");
+    store.router.currentScreenParams.set({});
 
     let navigateCalledWithLoginScreen = false;
     patchWithCleanup(store.router, {
