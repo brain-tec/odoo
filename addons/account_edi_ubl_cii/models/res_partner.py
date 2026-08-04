@@ -1,9 +1,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import models, fields, api
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
+from odoo.tools.partner_identifiers import validation_error_message
 
 from odoo.addons.account.models.company import PEPPOL_DEFAULT_COUNTRIES
-from odoo.addons.account_edi_ubl_cii.tools.partner_identifiers import CORNER_CASE_IDENTIFIERS_METADATA
+from odoo.addons.account_edi_ubl_cii.tools.partner_identifiers import (
+    CORNER_CASE_IDENTIFIERS_METADATA,
+    ELECTRONIC_ADDRESS_SCHEMES_CODELIST,
+    ELECTRONIC_ADDRESS_SCHEME_INVALID_CHARS_RE,
+)
 
 
 class ResPartner(models.Model):
@@ -198,10 +203,25 @@ class ResPartner(models.Model):
             result = self.env['res.partner']._validate_identifier_by_scheme(scheme, endpoint, validation='error')
             vals['routing_endpoint'] = result['value']
 
+    def _validate_identifier_by_scheme(self, scheme, value, validation=False):
+        # EXTENDS 'base' - add basic Peppol validation for EAS schemes
+        validation_vals = super()._validate_identifier_by_scheme(scheme, value, validation=validation)
+        if validation_vals['value'] and scheme in ELECTRONIC_ADDRESS_SCHEMES_CODELIST:
+            value = ELECTRONIC_ADDRESS_SCHEME_INVALID_CHARS_RE.sub('', validation_vals['value'])
+            validation_vals['value'] = value
+            if ELECTRONIC_ADDRESS_SCHEME_INVALID_CHARS_RE.search(value) or not 1 <= len(value) <= 50:
+                if validation == 'error':
+                    identifier_label = self.env['res.partner']._get_identifier_label(validation_vals['key'])
+                    raise ValidationError(validation_error_message(self.env, identifier_label, validation_vals['value'], example=validation_vals['example']))
+                if validation == 'setnull':
+                    validation_vals['value'] = None
+                validation_vals['valid'] = False
+        return validation_vals
+
     def _get_all_identifiers(self, enrich=False):
         # EXTENDS 'account'
         all_identifiers = super()._get_all_identifiers(enrich)
-        metadata = self.routing_identifier and self._get_all_identifiers_metadata_by_scheme().get(self.routing_scheme)
+        metadata = self.routing_scheme and self.routing_endpoint and self._get_all_identifiers_metadata_by_scheme().get(self.routing_scheme)
         if enrich and metadata and metadata['key'] not in all_identifiers:
             all_identifiers[metadata['key']] = self.routing_endpoint
         return all_identifiers

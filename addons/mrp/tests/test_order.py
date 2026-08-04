@@ -3571,6 +3571,42 @@ class TestMrpOrder(TestMrpCommon, MailCase):
             ('state', '=', 'draft'),
         ]))
 
+    def test_component_addition_to_finished_mo(self):
+        """Test that adding a new component move to a finished MO works as intended,
+           where the newly added component move's picked/state values are consistent
+           with the other component moves that are already consumed."""
+        with Form(self.env['mrp.production']) as mo_form:
+            mo_form.product_id = self.productA
+            with mo_form.move_raw_ids.new() as component:
+                component.product_id = self.productB
+                component.product_uom_qty = 1
+            mo = mo_form.save()
+
+        mo.button_mark_done()
+        mo.action_toggle_is_locked()
+
+        with Form(mo) as mo_form:
+            with mo_form.move_raw_ids.edit(0) as line:
+                line.quantity = 1
+            with mo_form.move_raw_ids.new() as component:
+                component.product_id = self.productC
+                component.quantity = 1
+            mo = mo_form.save()
+
+            self.assertRecordValues(mo.move_raw_ids, [{
+                'picked': True,
+                'state': 'done',
+                'quantity': 1,
+                'raw_material_production_id': mo.id,
+            } for move in mo.move_raw_ids])
+
+            self.assertRecordValues(mo.move_raw_ids.move_line_ids, [{
+                'picked': True,
+                'state': 'done',
+                'quantity': 1,
+                'production_id': mo.id,
+            } for move in mo.move_raw_ids])
+
     def test_compute_picking_type_id(self):
         """
         Test that the operation type set on the bom is set in the manufacturing order
@@ -5479,6 +5515,24 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         mo_2.action_confirm()
         action = mo_2.button_mark_done()
         self.assertEqual(action['res_model'], 'mrp.consumption.warning', "A consumption issue must be triggered when a component is missing.")
+
+    def test_mo_planning_after_toggling_bom_dependencies(self):
+        """
+        When a BOM's 'allow_operation_dependencies' field is toggled after an MO is created,
+        the old sequence needs to be cleared and replaced when planning the order
+        """
+        test_bom = self.bom_3.copy()
+        test_bom.allow_operation_dependencies = True
+        mo_form = Form(self.env['mrp.production'])
+        mo_form.bom_id = test_bom
+        mo = mo_form.save()
+        op_1, op_2, op_3, = mo.workorder_ids[:3]
+        op_1.blocked_by_workorder_ids = [Command.link(op_2.id)]
+        op_2.blocked_by_workorder_ids = [Command.link(op_3.id)]
+        mo.action_confirm()
+        test_bom.allow_operation_dependencies = False
+        mo.button_plan()
+        self.assertTrue(mo.is_planned)
 
 
 class TestMrpOrderPostInstall(TestMrpCommon):

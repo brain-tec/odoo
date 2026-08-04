@@ -47,17 +47,8 @@ export class FloatTimeSelectionField extends FloatTimeField {
     }
 
     get formattedValue() {
-        const unitAmount = super.formattedValue;
-        let hours = 0;
-        let minutes = 0;
-
-        unitAmount.split(" ").forEach((data) => {
-            if (data.endsWith("h")) {
-                hours = parseInt(data);
-            } else if (data.endsWith("m")) {
-                minutes = parseInt(data);
-            }
-        });
+        const floatValue = this.props.record.data[this.props.name];
+        const { hours, minutes } = floatToHoursMinutes(floatValue);
 
         return DateTime.fromObject(
             { hour: hours, minute: minutes },
@@ -72,7 +63,7 @@ export class FloatTimeSelectionField extends FloatTimeField {
             onTimeChange: this.onTimeChange.bind(this),
         });
         setTimeout(() => {
-            this.inputFloatTimeRef.el.focus(); // focus on the input rather than the popover
+            this.inputFloatTimeRef.el?.focus(); // focus on the input rather than the popover
         }, 0);
     }
 

@@ -70,6 +70,9 @@ class ResCompany(models.Model):
         aml_vals_list = self.with_context(allowed_company_ids=self.ids)._action_close_stock_valuation(at_date=at_date)
 
         if not aml_vals_list:
+            # if we come from cron there might be no move to create for this company, but some for other companies
+            if self.env.context.get('closing_cron'):
+                return
             # No account moves to create, so nothing to display.
             raise UserError(_("Everything is correctly closed"))
         if not self.account_stock_journal_id:
@@ -153,11 +156,13 @@ class ResCompany(models.Model):
             periods.append('monthly')
         domain = Domain([
             ('inventory_period', 'in', periods),
-            ('inventory_valuation', '!=', 'real_time'),
         ])
         companies = self.env['res.company'].search(domain)
         for company in companies:
-            company.action_close_stock_valuation(auto_post=True)
+            try:
+                company.with_context(closing_cron=True).action_close_stock_valuation(auto_post=True)
+            except UserError:
+                continue
 
     def _get_valuation_product_domain(self):
         return [('is_storable', '=', True)]
