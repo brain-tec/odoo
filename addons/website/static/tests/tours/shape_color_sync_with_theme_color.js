@@ -69,7 +69,7 @@ registerWebsitePreviewTour(
         ),
         {
             content: "Wait for no loading",
-            trigger: "body:not(:has(.o_we_ui_loading))",
+            trigger: ":iframe body:not(:has(.o_loading_screen))",
         },
         verifyShapeColorsUpdated(":iframe .s_company_team", TEST_COLOR_HEX_2),
         goBackToBlocks(),
@@ -81,11 +81,7 @@ registerWebsitePreviewTour(
             ":iframe .o_snippets_preview_row .s_company_team",
             TEST_COLOR_HEX_2
         ),
-        {
-            content: "Press ESC to close the 'Insert snippet' dialog",
-            trigger: ":iframe",
-            run: "press Escape",
-        },
+        clickOnElement("X to close the 'Insert snippet' dialog", ".modal .btn-close"),
         ...goToTheme(),
         clickOnElement(
             "color picker of theme preset 1",
