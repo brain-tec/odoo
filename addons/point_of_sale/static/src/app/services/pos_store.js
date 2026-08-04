@@ -179,7 +179,7 @@ export class PosStore extends WithLazyGetterTrap {
         });
 
         this.handleQRPaymentLines();
-        await this.checkAccessRight();
+        this.checkAccessRight();
     }
 
     handleQRPaymentLines() {
@@ -803,7 +803,14 @@ export class PosStore extends WithLazyGetterTrap {
                     : values.filter((value) => attrValueIds.has(value.id))
             );
         }
-        if (attributeLinesValues.some((values) => values.length > 1 || values[0].is_custom)) {
+        if (
+            attributeLinesValues.some(
+                (values) =>
+                    values.length > 1 ||
+                    values[0].is_custom ||
+                    values[0].attribute_id.display_type === "multi"
+            )
+        ) {
             const forceVariantValue =
                 (opts.forceVariantValue
                     ? Object.fromEntries(opts.forceVariantValue.map((value) => [value.id, value]))
@@ -2232,9 +2239,9 @@ export class PosStore extends WithLazyGetterTrap {
             {
                 props: {
                     resId: product?.id,
-                    onSave: (record) => {
-                        this.data.read("product.template", [record.evalContext.id]);
-                        this.data.searchRead("product.product", [
+                    onSave: async (record) => {
+                        await this.data.read("product.template", [record.evalContext.id]);
+                        await this.data.searchRead("product.product", [
                             ["product_tmpl_id", "=", record.evalContext.id],
                         ]);
                         this.action.doAction({
@@ -2270,11 +2277,7 @@ export class PosStore extends WithLazyGetterTrap {
     }
 
     async checkAccessRight() {
-        try {
-            this.canUserCreateProduct = await user.checkAccessRight("product.product", "create");
-        } catch {
-            this.canUserCreateProduct = false;
-        }
+        this.canUserCreateProduct = await user.checkAccessRight("product.product", "create");
     }
 
     get hasProductCreationAccess() {
