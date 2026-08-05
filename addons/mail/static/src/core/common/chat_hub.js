@@ -1,7 +1,7 @@
 import { ActionList } from "@mail/core/common/action_list";
 import { ChatWindow } from "@mail/core/common/chat_window";
 import { useHover, useMovable } from "@mail/utils/common/hooks";
-import { Component, proxy, signal, useListener } from "@odoo/owl";
+import { Component, computed, proxy, signal, useListener } from "@odoo/owl";
 
 import { Action } from "@mail/core/common/action";
 import { browser } from "@web/core/browser/browser";
@@ -17,10 +17,10 @@ export class ChatHub extends Component {
     static components = { ActionList, ChatBubble, ChatWindow, Dropdown };
     static template = "mail.ChatHub";
 
-    ref = signal.ref();
+    bubblesRef = signal.ref();
+    hiddenMenuRef = signal.ref();
     root = signal.ref();
     moreButtonRef = signal.ref();
-    moreMenuRef = signal.ref();
 
     get chatHub() {
         return this.store.chatHub;
@@ -31,8 +31,8 @@ export class ChatHub extends Component {
         this.store = useService("mail.store");
         this.ui = useService("ui");
         this.busMonitoring = useService("bus.monitoring_service");
-        this.bubblesHover = useHover(this.ref);
-        this.moreHover = useHover([this.moreButtonRef, this.moreMenuRef], {
+        this.bubblesHover = useHover(this.bubblesRef);
+        this.moreHover = useHover([this.moreButtonRef, this.hiddenMenuRef], {
             onHover: () => (this.more.isOpen = true),
             onAway: () => (this.more.isOpen = false),
         });
@@ -51,7 +51,7 @@ export class ChatHub extends Component {
         useMovable({
             enable: () => this.chatHub.compact || !this.chatHub.opened.length,
             cursor: "grabbing",
-            ref: this.ref,
+            ref: this.bubblesRef,
             elements: ".o-mail-ChatHub-bubbles",
             onDragStart: () => {
                 this.more.close();
@@ -67,7 +67,7 @@ export class ChatHub extends Component {
         });
     }
 
-    get optionActions() {
+    optionActions = computed(() => {
         const actions = [];
         if (this.chatHub.showConversations && !this.chatHub.compact) {
             if (this.store.self_user?.share === false) {
@@ -110,7 +110,7 @@ export class ChatHub extends Component {
             );
         }
         return actions;
-    }
+    });
 
     get isMobileOS() {
         return isMobileOS();

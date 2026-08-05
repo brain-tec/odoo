@@ -684,9 +684,12 @@ export class ProductPage extends Interaction {
         if ('product_tracking_info' in combination) {
             const product = document.querySelector('#product_detail');
             // Trigger an event to track variant changes in Google Analytics.
-            product.dispatchEvent(new CustomEvent(
-                'view_item_event', { 'detail': combination['product_tracking_info'] }
-            ));
+            product.dataset.productTrackingInfo = JSON.stringify(combination["product_tracking_info"]);
+            product.dataset.productGaCurrency = combination["currency_name"];
+            wSaleUtils.dispatchTrackingEvent("view_item_event", {
+                trackingInfo: combination["product_tracking_info"],
+                currency: combination["currency_name"],
+            });
         }
         const addToCart = parent.querySelector('#add_to_cart_wrap');
         const contactUsButton = parent.closest('#product_details')
@@ -785,7 +788,6 @@ export class ProductPage extends Interaction {
 
         const has_max_combo_quantity = 'max_combo_quantity' in combination
         if (!combination.is_storable && !has_max_combo_quantity) return;
-        if (!combination.product_id) return; // If the product is dynamic.
 
         const addQtyInput = parent.querySelector('input[name="add_qty"]');
         const qty = parseFloat(addQtyInput?.value) || 1;

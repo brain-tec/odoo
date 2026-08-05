@@ -87,7 +87,8 @@ export class Store extends BaseStore {
             return f2.lastMessage?.id - f1.lastMessage?.id || f2.id - f1.id;
         },
     });
-    settings = fields.One("Settings");
+    /** local settings of the current device (not stored server side) */
+    settings = fields.One("Settings", { compute: () => ({}) });
 
     /** @type {[[string, any, import("models").DataResponse]]} */
     fetchParams = [];
@@ -325,6 +326,25 @@ export class Store extends BaseStore {
             { fetch_params: fetchParams, context: user.context },
             { silent: this.fetchSilent }
         );
+    }
+
+    async requestStartMeeting() {
+        const rtc = this.env.services["discuss.rtc"];
+        if (rtc.channel) {
+            const hasConfirmed = await rtc.askCallSwitchConfirmation({
+                confirmIcon: "fa fa-video-camera fa-fw",
+                confirmLabel: _t("Start Meeting"),
+                description: _t(
+                    "You will leave the ongoing call and automatically join the new meeting."
+                ),
+                message: _t("Start a new Meeting?"),
+                title: _t("New Meeting Confirmation"),
+            });
+            if (!hasConfirmed) {
+                return;
+            }
+        }
+        await this.startMeeting();
     }
 
     async startMeeting() {
@@ -723,13 +743,12 @@ export const storeService = {
         const store = makeStore(env);
         store.insert(session.storeData);
         /**
-         * Add defaults for `self` and `settings` because in livechat there could be no user and no
-         * guest yet (both undefined at init), but some parts of the code that loosely depend on
-         * these values will still be executed immediately. Providing a dummy default is enough to
-         * avoid crashes, the actual values being filled at livechat init when they are necessary.
+         * Add a default for `self` because in livechat there could be no user and no guest yet
+         * (both undefined at init), but some parts of the code that loosely depend on this value
+         * will still be executed immediately. Providing a dummy default is enough to avoid
+         * crashes, the actual value being filled at livechat init when it is necessary.
          */
         store.self_guest ??= { id: -1 };
-        store.settings ??= {};
         store.onStarted();
         return store;
     },

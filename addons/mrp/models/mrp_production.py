@@ -1750,17 +1750,18 @@ class MrpProduction(models.Model):
 
         if self.allow_workorder_dependencies:
             for workorder in self.workorder_ids.sorted(workorder_order):
-                workorder.blocked_by_workorder_ids = [Command.link(workorder_per_operation[operation_id].id)
+                commands = [Command.link(workorder_per_operation[operation_id].id)
                                                       for operation_id in
                                                       workorder.operation_id.blocked_by_operation_ids
                                                       if operation_id in workorder_per_operation]
+                workorder.blocked_by_workorder_ids = [Command.clear()] + commands
                 if not workorder.needed_by_workorder_ids:
                     last_workorder_per_bom[workorder.operation_id.bom_id] = workorder
         else:
             previous_workorder = False
             for workorder in self.workorder_ids.sorted(workorder_order):
                 if previous_workorder:
-                    workorder.blocked_by_workorder_ids = [Command.link(previous_workorder.id)]
+                    workorder.blocked_by_workorder_ids = [Command.clear(), Command.link(previous_workorder.id)]
                 previous_workorder = workorder
                 last_workorder_per_bom[workorder.operation_id.bom_id] = workorder
         for move in (self.move_raw_ids | self.move_finished_ids):
@@ -2335,13 +2336,15 @@ class MrpProduction(models.Model):
         # Moves without quantity done are not posted => set them as done instead of canceling. In
         # case the user edits the MO later on and sets some consumed quantity on those, we do not
         # want the move lines to be canceled.
+        now = fields.Datetime.now()
         (productions_not_to_backorder.move_raw_ids | productions_not_to_backorder.move_finished_ids).filtered(lambda x: x.state not in ('done', 'cancel')).write({
+            'date': now,
             'state': 'done',
             'product_uom_qty': 0.0,
         })
         for production in self:
             production.write({
-                'date_finished': fields.Datetime.now(),
+                'date_finished': now,
                 'priority': '0',
                 'is_locked': True,
                 'state': 'done',

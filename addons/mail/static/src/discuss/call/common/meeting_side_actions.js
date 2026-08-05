@@ -2,10 +2,9 @@ import { ActionList } from "@mail/core/common/action_list";
 import { UseThreadActions } from "@mail/core/common/thread_actions";
 import { attClassObjectToString } from "@mail/utils/common/format";
 
-import { Component, types, useProps } from "@odoo/owl";
+import { Component, computed, types, useProps } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
-import { useSubEnv } from "@web/owl2/utils";
 
 /** @typedef {"chat"|"invite"} MeetingPanel */
 
@@ -19,20 +18,19 @@ export class MeetingSideActions extends Component {
             threadActions: types.instanceOf(UseThreadActions),
         });
         this.ui = useService("ui");
-        useSubEnv({ inMeetingSideActions: true });
     }
 
     get callActionsParams() {
         return { channel: () => this.store.rtc.channel };
     }
 
-    computeActions() {
+    actions = computed(() => {
         const threadActions = this.props.threadActions;
-        if (this.store.rtc.channel.default_display_mode === "video_full_screen") {
-            this.actions = threadActions.actions.filter((action) =>
+        // the channel can already be gone while the meeting view tears down
+        if (this.store.rtc.channel?.default_display_mode === "video_full_screen") {
+            return threadActions.actions.filter((action) =>
                 ["member-list", "meeting-chat"].includes(action.id)
             );
-            return;
         }
         const quickThreadActionIds = this.ui.isSmall ? [] : ["member-list", "meeting-chat"];
         const hiddenActionIds = ["advanced-settings", "leave"];
@@ -59,6 +57,6 @@ export class MeetingSideActions extends Component {
                 }),
             })
         );
-        this.actions = actions;
-    }
+        return actions;
+    });
 }
