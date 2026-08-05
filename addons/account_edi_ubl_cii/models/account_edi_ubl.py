@@ -291,6 +291,12 @@ class AccountEdiUBL(models.AbstractModel):
 
         new_base_lines = AccountTax._dispatch_taxes_into_new_base_lines(base_lines, company, exclude_function)
 
+        # fixed tax are not affected by discount, so the removed_tax_data_base_lines should get their discount remove
+        # to have the total equal to the fixed tax
+        for new_base_line in new_base_lines:
+            for removed_taxes_data_base_line in new_base_line['removed_taxes_data_base_lines']:
+                removed_taxes_data_base_line['discount'] = 0
+
         def aggregate_function(target_base_line, base_line):
             target_base_line.setdefault('_aggregated_quantity', 0.0)
             target_base_line['_aggregated_quantity'] += base_line['quantity']
@@ -2738,11 +2744,18 @@ class AccountEdiUBL(models.AbstractModel):
         line_tree = collected_values['line_tree']
         partner = collected_values.get('customer_values', {}).get('customer')
         name = collected_values['to_write'].get('name')
+        sellers_item_id = line_tree.findtext('.//{*}Item/{*}SellersItemIdentification/{*}ID')
+        buyers_item_id = line_tree.findtext('.//{*}Item/{*}BuyersItemIdentification/{*}ID')
+        standard_item_id = line_tree.findtext('.//{*}Item/{*}StandardItemIdentification/{*}ID[@schemeID="0160"]')
 
         product_values = collected_values['product_values'] = {
-            'default_code': line_tree.findtext('.//{*}Item/{*}SellersItemIdentification/{*}ID'),
+            'barcode': standard_item_id,
+            'default_code': sellers_item_id or buyers_item_id,
             'name': line_tree.findtext('.//{*}Item/{*}Name'),
-            'barcode': line_tree.findtext('.//{*}Item/{*}StandardItemIdentification/{*}ID[@schemeID="0160"]'),
+            'sellers_item_id': sellers_item_id,
+            'buyers_item_id': buyers_item_id,
+            'standard_item_id': standard_item_id,
+            'vendor_partner_id': partner.commercial_partner_id.id if partner else None,
             'invoice_predictive': {
                 'invoice': collected_values['invoice'],
                 'name': name,

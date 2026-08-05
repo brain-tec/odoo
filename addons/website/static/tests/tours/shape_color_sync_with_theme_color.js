@@ -60,17 +60,14 @@ registerWebsitePreviewTour(
         ),
         ...goToTheme(),
         clickOnElement("color option", "[data-label='Colors'] button"),
-        clickOnElement(
-            "Click color palette",
-            "div[data-container-title='Colors'] .o-hb-select-wrapper svg"
-        ),
+        clickOnElement("Click color palette", ".o_theme_tab .hb-sliding-panel .o-dropdown-caret"),
         clickOnElement(
             "Change color palette",
             `.o-color-palette-dropdown [data-action-value="'default-light-1'"]`
         ),
         {
             content: "Wait for no loading",
-            trigger: "body:not(:has(.o_we_ui_loading))",
+            trigger: ":iframe body:not(:has(.o_loading_screen))",
         },
         verifyShapeColorsUpdated(":iframe .s_company_team", TEST_COLOR_HEX_2),
         goBackToBlocks(),
@@ -82,12 +79,9 @@ registerWebsitePreviewTour(
             ":iframe .o_snippets_preview_row .s_company_team",
             TEST_COLOR_HEX_2
         ),
-        {
-            content: "Press ESC to close the 'Insert snippet' dialog",
-            trigger: ":iframe",
-            run: "press Escape",
-        },
+        clickOnElement("X to close the 'Insert snippet' dialog", ".modal .btn-close"),
         ...goToTheme(),
+        clickOnElement("color option", "[data-label='Colors'] button"),
         clickOnElement(
             "color picker of theme preset 1",
             ".hb-sliding-panel-content .o_we_color_preview"
