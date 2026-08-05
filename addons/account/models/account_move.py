@@ -1341,9 +1341,10 @@ class AccountMove(models.Model):
     @api.depends_context('lang')
     @api.depends('adjusting_entry_origin_move_ids')
     def _compute_adjusting_entry_origin_label(self):
+        move_type2string = dict(self._fields['move_type']._description_selection(self.env))
         for move in self:
             if len(move.adjusting_entry_origin_move_ids) == 1:
-                move.adjusting_entry_origin_label = dict(self._fields['move_type'].selection)[move.adjusting_entry_origin_move_ids.move_type]
+                move.adjusting_entry_origin_label = move_type2string[move.adjusting_entry_origin_move_ids.move_type]
             else:
                 move.adjusting_entry_origin_label = False
 
@@ -1443,7 +1444,7 @@ class AccountMove(models.Model):
             domain = [
                 ('account_id', 'in', pay_term_lines.account_id.ids),
                 ('parent_state', '=', 'posted'),
-                *move._check_company_domain(move.company_id),
+                '|', *move._check_company_domain(move.company_id), ('company_id', 'child_of', move.company_id.id),
                 ('partner_id', '=', move.commercial_partner_id.id),
                 ('reconciled', '=', False),
                 ('balance', '<' if move.is_inbound() else '>', 0.0),
