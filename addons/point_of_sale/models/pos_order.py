@@ -8,7 +8,7 @@ from pprint import pformat
 from markupsafe import Markup
 
 from odoo import api, fields, models, _
-from odoo.tools import float_is_zero, float_round, float_repr, float_compare, formatLang
+from odoo.tools import SQL, float_is_zero, float_round, float_repr, float_compare, formatLang
 from odoo.exceptions import ValidationError, UserError
 from odoo.fields import Command, Domain
 
@@ -1018,6 +1018,8 @@ class PosOrder(models.Model):
                     if biggest_tax_aml_vals:
                         biggest_tax_aml_vals['amount_currency'] += amount_currency
                         biggest_tax_aml_vals['balance'] += balance
+                        total_amount_currency += amount_currency
+                        total_balance += balance
                 elif cash_rounding.strategy == 'add_invoice_line':
                     if -sign * amount_currency > 0.0 and cash_rounding.loss_account_id:
                         account_id = cash_rounding.loss_account_id.id
@@ -1032,6 +1034,8 @@ class PosOrder(models.Model):
                         'balance': balance,
                         'display_type': 'rounding',
                     })
+                    total_amount_currency += amount_currency
+                    total_balance += balance
 
         # sort self.payment_ids by is_split_transaction:
         for payment_id in self.payment_ids:
@@ -1046,8 +1050,8 @@ class PosOrder(models.Model):
                                     and not aml_entry['partner_id']]
 
             if aml_vals_entry_found and not is_split_transaction:
-                aml_vals_entry_found[0]['amount_currency'] += self.session_id._amount_converter(payment_id.amount, self.date_order, False)
-                aml_vals_entry_found[0]['balance'] += payment_id.amount
+                aml_vals_entry_found[0]['amount_currency'] += payment_id.amount
+                aml_vals_entry_found[0]['balance'] += self.session_id._amount_converter(payment_id.amount, self.date_order, True)
             else:
                 aml_vals_list_per_nature['payment_terms'].append({
                     'partner_id': commercial_partner.id if is_split_transaction else False,
@@ -1055,9 +1059,18 @@ class PosOrder(models.Model):
                     'account_id': reversed_move_receivable_account_id.id,
                     'currency_id': self.currency_id.id,
                     'amount_currency': payment_id.amount,
-                    'balance': self.session_id._amount_converter(payment_id.amount, self.date_order, False),
+                    'balance': self.session_id._amount_converter(payment_id.amount, self.date_order, True),
                     'display_type': 'payment_term',
                 })
+
+        # The other balances are converted and rounded per line, so the converted payment amounts
+        # can drift by a few cents in foreign currency. Put the residual on the last payment term
+        # line to keep the entry balanced.
+        payment_term_amls = aml_vals_list_per_nature['payment_terms']
+        if payment_term_amls and self.currency_id.is_zero(total_amount_currency + sum(aml['amount_currency'] for aml in payment_term_amls)):
+            residual_balance = company_currency.round(-total_balance - sum(aml['balance'] for aml in payment_term_amls))
+            if not company_currency.is_zero(residual_balance):
+                payment_term_amls[-1]['balance'] += residual_balance
 
         return aml_vals_list_per_nature
 
@@ -1509,15 +1522,22 @@ class PosOrder(models.Model):
         if state_filter == 'cancelled':
             state_domain = Domain('state', '=', 'cancel')
         else:
-            state_domain = Domain('state', '!=', 'draft') & Domain('state', '!=', 'cancel')
-        default_domain = state_domain & Domain('config_id', 'in', [config_id] + pos_config.trusted_config_ids.ids)
-        real_domain = Domain(domain) & default_domain
-        orders = self.search(real_domain, limit=limit, offset=offset, order='create_date desc')
-        # We clean here the orders that does not have the same currency.
-        # As we cannot use currency_id in the domain (because it is not a stored field),
-        # we must do it after the search.
-        orders = orders.filtered(lambda order: order.currency_id == pos_config.currency_id)
-        orderlines = self.env['pos.order.line'].search(['|', ('refunded_orderline_id.order_id', 'in', orders.ids), ('order_id', 'in', orders.ids)])
+            state_domain = Domain('state', 'not in', ['cancel', 'draft'])
+        order_domain = state_domain & Domain(domain) & Domain([
+            ('config_id', 'in', [config_id] + pos_config.trusted_config_ids.ids),
+            ('config_id.currency_id', '=', pos_config.currency_id.id)
+        ])
+        orders = self.search(order_domain, limit=limit, offset=offset, order='create_date desc')
+        PosOrderLineModel = self.env['pos.order.line']
+        line_queries = [
+            PosOrderLineModel._search([('order_id', 'in', orders.ids)]),
+            PosOrderLineModel._search([('refunded_orderline_id.order_id', 'in', orders.ids)]),
+        ]
+        orderlines = PosOrderLineModel.browse(
+            row[0] for row in self.env.execute_query(
+                SQL(' UNION ').join(line_query.subselect() for line_query in line_queries)
+            )
+        )
 
         # We will return to the frontend the ids and the date of their last modification
         # so that it can compare to the last time it fetched the orders and can ask to fetch
@@ -1525,13 +1545,20 @@ class PosOrder(models.Model):
         # The date of their last modification is either the last time one of its orderline has changed,
         # or the last time a refunded orderline related to it has changed.
         orders_info = {order.id: order.write_date for order in orders}
-        for orderline in orderlines:
-            key_order = orderline.order_id.id if orderline.order_id in orders \
-                            else orderline.refunded_orderline_id.order_id.id
-            if orders_info[key_order] < orderline.write_date:
-                orders_info[key_order] = orderline.write_date
-        totalCount = self.search_count(real_domain)
-        return {'ordersInfo': list(orders_info.items())[::-1], 'totalCount': totalCount}
+        for line in orderlines:
+            affected_order_id = line.order_id.id
+            if affected_order_id not in orders_info:
+                affected_order_id = line.refunded_orderline_id.order_id.id
+
+            orders_info[affected_order_id] = max(
+                orders_info[affected_order_id],
+                line.write_date,
+            )
+
+        return {
+            'ordersInfo': list(orders_info.items()),
+            'totalCount': self.search_count(order_domain),
+        }
 
     def _should_send_to_preparation(self):
         """
