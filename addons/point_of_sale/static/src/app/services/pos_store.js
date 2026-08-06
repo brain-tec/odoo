@@ -46,7 +46,7 @@ import { Domain } from "@web/core/domain";
 import { PosOrderAccounting } from "@point_of_sale/app/models/accounting/pos_order_accounting";
 import { PosOrderlineAccounting } from "@point_of_sale/app/models/accounting/pos_order_line_accounting";
 import { ComboSuggestion } from "../models/utils/combo_suggestion";
-import { PosRouter } from "@point_of_sale/app/plugins/pos_router_plugin";
+import { PosRouterPlugin } from "@point_of_sale/app/plugins/pos_router_plugin";
 import { SIZES } from "@web/core/ui/ui_service";
 import { SnoozeDialog } from "@point_of_sale/app/components/popups/product_info_popup/snooze_dialog/snooze_dialog";
 
@@ -57,7 +57,7 @@ export class PosStore extends WithLazyGetterTrap {
     loadingSkipButtonIsShown = false;
     mainScreen = { name: null, component: null };
     feedbackScreenAutoSkipDelay = 1000;
-    router = usePlugin(PosRouter);
+    router = usePlugin(PosRouterPlugin);
 
     static excludedLazyGetters = [
         "defaultPage",
@@ -226,7 +226,7 @@ export class PosStore extends WithLazyGetterTrap {
                 }
             }
         });
-        await this.checkAccessRight();
+        this.checkAccessRight();
     }
 
     handleQRPaymentLines() {
@@ -1393,7 +1393,10 @@ export class PosStore extends WithLazyGetterTrap {
 
     setSelectedCategory(categoryId) {
         if (categoryId === this.selectedCategory?.id) {
-            if (this.selectedCategory.parent_id) {
+            const isParentAvailable = this.rootCategories.some(
+                (c) => c.id === this.selectedCategory.id
+            );
+            if (this.selectedCategory.parent_id && !isParentAvailable) {
                 this.selectedCategory = this.selectedCategory.parent_id;
             } else {
                 this.selectedCategory = this.models["pos.category"].get(0);
@@ -2115,21 +2118,13 @@ export class PosStore extends WithLazyGetterTrap {
     }
 
     async checkAccessRight() {
-        try {
-            this.canUserCreateProduct = await user.checkAccessRight("product.product", "create");
-        } catch {
-            this.canUserCreateProduct = false;
-        }
+        this.canUserCreateProduct = await user.checkAccessRight("product.product", "create");
     }
 
     get hasProductCreationAccess() {
         return this.canUserCreateProduct;
     }
 
-    // TODO: Remove in master. Use `hasProductCreationAccess` instead.
-    async allowProductCreation() {
-        return this.hasProductCreationAccess;
-    }
     editPayment(order) {
         this.setOrder(order);
         this.navigate("PaymentScreen", {
@@ -2768,6 +2763,21 @@ export class PosStore extends WithLazyGetterTrap {
 
     get isSmallProductScreen() {
         return this.ui.size < SIZES.MD;
+    }
+
+    getAvailableCategories() {
+        const { limit_categories, iface_available_categ_ids } = this.config;
+        let availableCategories = this.models["pos.category"].getAll();
+        if (limit_categories && iface_available_categ_ids.length > 0) {
+            availableCategories = iface_available_categ_ids;
+        }
+        return availableCategories;
+    }
+
+    get rootCategories() {
+        const available = this.getAvailableCategories();
+        const availableIds = new Set(available.map((c) => c.id));
+        return available.filter((c) => !c.parent_id || !availableIds.has(c.parent_id.id));
     }
 
     get isSelectedLineCombo() {

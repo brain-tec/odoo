@@ -5,7 +5,7 @@ declare module "services" {
     import { commandService } from "@web/core/commands/command_service";
     import { datetimePickerService } from "@web/core/datetime/datetimepicker_service";
     import { dialogService } from "@web/core/dialog/dialog_service";
-    import { effectService } from "@web/core/effects/effect_service";
+    import { effectService } from "@web/core/effects/effect_plugin";
     import { frequentEmojiService } from "@web/core/emoji_picker/frequent_emoji_service";
     import { fieldService } from "@web/core/field_service";
     import { fileUploadService } from "@web/core/file_upload/file_upload_service";
@@ -16,7 +16,7 @@ declare module "services" {
     import { notificationService } from "@web/core/notifications/notification_plugin";
     import { offlineService } from "@web/core/offline/offline_plugin";
     import { ormService } from "@web/core/orm_plugin";
-    import { overlayService } from "@web/core/overlay/overlay_service";
+    import { overlayService } from "@web/core/overlay/overlay_plugin";
     import { popoverService } from "@web/core/popover/popover_service";
     import { tooltipService } from "@web/core/tooltip/tooltip_service";
     import { uiService } from "@web/core/ui/ui_service";
