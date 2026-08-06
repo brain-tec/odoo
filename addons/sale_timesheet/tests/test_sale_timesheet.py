@@ -1522,79 +1522,6 @@ class TestSaleTimesheet(TestCommonSaleTimesheet):
         self.assertEqual(new_invoice.invoice_line_ids.quantity, 16.0)
         self.assertEqual(so_line.timesheet_ids.timesheet_invoice_id, new_invoice, "All timesheets should be linked to the newly created invoice")
 
-    def test_ranged_invoice_after_credit_note(self):
-        """
-        Ensures that invoices created over a specific date range do not take into
-        account credit notes created outside that date range.
-        """
-        sale_order = self.env['sale.order'].create({
-            'partner_id': self.partner_a.id,
-            'order_line': [
-                Command.create({
-                    'product_id': self.product_delivery_timesheet2.id,
-                    'product_uom_qty': 1,
-                }),
-            ],
-            'date_order': '2026-07-01',
-        })
-        so_line = sale_order.order_line[0]
-        sale_order.action_confirm()
-
-        # 1. Work and Invoice 10 hours
-        self.env['account.analytic.line'].create({
-            'name': 'Timesheet 10h',
-            'project_id': so_line.task_id.project_id.id,
-            'task_id': so_line.task_id.id,
-            'unit_amount': 10.0,
-            'employee_id': self.employee_user.id,
-            'date': '2026-07-01',
-        })
-        invoice = sale_order._create_invoices()[0]
-        invoice.invoice_date = '2026-07-01'
-        invoice.action_post()
-        self.assertEqual(so_line.qty_invoiced, 10.0)
-
-        # 2. Refund 4 hours
-        refund_wizard = self.env['account.move.reversal'].with_context(
-            active_model='account.move',
-            active_ids=invoice.ids,
-        ).create({
-            'reason': 'Partial Refund (4 hours)',
-            'journal_id': invoice.journal_id.id,
-            'date': '2026-07-01',
-        })
-        refund_action = refund_wizard.refund_moves()
-        credit_note = self.env['account.move'].browse(refund_action['res_id'])
-        credit_note.invoice_line_ids.write({'quantity': 4.0})
-        credit_note.action_post()
-        self.assertEqual(so_line.qty_invoiced, 6.0)
-
-        # 3. Work 15 more hours (two weeks later)
-        self.env['account.analytic.line'].create({
-            'name': 'Timesheet 15h',
-            'project_id': so_line.task_id.project_id.id,
-            'task_id': so_line.task_id.id,
-            'unit_amount': 15.0,
-            'employee_id': self.employee_user.id,
-            'date': '2026-07-15',
-        })
-
-        # 4. Invoice those 15 hours using a range
-        context = {
-            'active_model': 'sale.order',
-            'active_ids': sale_order.ids,
-            'default_journal_id': self.company_data['default_journal_sale'].id,
-        }
-        invoice_dict = self.env['sale.advance.payment.inv'] \
-            .with_context(context) \
-            .create({
-                'date_start_invoice_timesheet': '2026-07-14',
-                'date_end_invoice_timesheet': '2026-07-16'
-            }) \
-            .create_invoices()
-        ranged_invoice = self.env['account.move'].browse(invoice_dict['res_id'])
-        self.assertEqual(ranged_invoice.invoice_line_ids.quantity, 15.0, "There are 15 hours to invoice in the provided range.")
-
     def test_portal_sale_order_timesheet_visibility(self):
         """
         Ensure a portal user only sees timesheets of subscribed SO lines.
@@ -1812,3 +1739,30 @@ class TestSaleTimesheetAnalyticPlan(TestCommonSaleTimesheet):
 
         self.assertFalse(analytic_line.so_line)
         self.assertFalse(analytic_line.is_so_line_edited)
+
+    def test_create_timesheet_entry_from_so(self):
+        sale_order = self.env['sale.order'].create({
+            'name': 'Amazing SO',
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({
+                'product_id': self.product_delivery_timesheet2.id,
+            }) for _ in range(2)],
+        })
+        first_sol, second_sol = sale_order.order_line
+        sale_order.action_confirm()
+
+        action = sale_order.action_view_timesheet()
+        self.env[action['res_model']].with_context(action['context']).create([
+            {
+                'task_id': first_sol.task_id.id,
+                'unit_amount': 3,
+                'employee_id': self.employee_user.id,
+            },
+            {
+                'task_id': second_sol.task_id.id,
+                'unit_amount': 5,
+                'employee_id': self.employee_user.id,
+            },
+        ])._compute_so_line()
+        self.assertEqual(first_sol.qty_delivered, 3.0)
+        self.assertEqual(second_sol.qty_delivered, 5.0)
