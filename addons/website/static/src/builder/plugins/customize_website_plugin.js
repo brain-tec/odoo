@@ -38,6 +38,10 @@ import { loadImage } from "@html_editor/utils/image_processing";
  * @property { CustomizeWebsitePlugin['setViewsOnSave'] } setViewsOnSave
  */
 
+/**
+ * @typedef {((colors: string[]) => void)[]} on_website_color_updated_handlers
+ */
+
 export const NO_IMAGE_SELECTION = Symbol.for("NoImageSelection");
 
 export class CustomizeWebsitePlugin extends Plugin {
@@ -1079,6 +1083,9 @@ export class CustomizeWebsiteColorAction extends BuilderAction {
             );
         }
         setBuilderCSSVariables(getHtmlStyle(this.document));
+        await Promise.allSettled(
+            this.getResource("on_website_color_updated_handlers").map((handler) => handler([color]))
+        );
     }
 }
 
