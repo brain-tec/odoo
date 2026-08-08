@@ -154,13 +154,13 @@ class PdpRegistration(models.TransientModel):
                 and participant_info.get('platform_id')
                 and not participant_info.get('receiver_on_odoo')
                ):
-                platform_name = participant_info.get("platform_name")
+                platform_name = f" '{name}'" if (name := participant_info.get("platform_name")) else ""
                 warnings["company_pdp_annuaire_warning"] = {
                     "level": "warning",
                     "message": _(
                         "Another platform is already assigned to this identifier in the annuaire (Platform%(platform_name)s with ID %(platform_id)s). "
-                        "If you previously registered with an Approved Platform, please unregister.",
-                        platform_name=f" '{platform_name}'" if platform_name else "",
+                        "By registering, you confirm that you want to migrate to Odoo.",
+                        platform_name=platform_name,
                         platform_id=participant_info.get("platform_id"),
                     ),
                 }
@@ -261,11 +261,14 @@ class PdpRegistration(models.TransientModel):
     def _get_status_notification_data(self):
         self.ensure_one()
         if self.pdp_kyc_status == 'success':
+            # An annuaire conflict means registering will migrate the identifier away from another
+            # access point. That needs an explicit authorisation from user, so "Migrate to Odoo" click here,
+            # so don't auto-register here, reopen the form and let the user confirm
             return {
                 'message': _("Identity verified."),
                 'type': 'success',
                 'sticky': True,
-                'next': self.button_register_pdp_participant(),
+                'next': self._action_open_pdp_form() if 'company_pdp_annuaire_warning' in (self.warnings or {}) else self.button_register_pdp_participant(),
             }
         elif self.pdp_kyc_status == 'fail':
             return {
