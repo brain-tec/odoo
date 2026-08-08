@@ -1,29 +1,17 @@
-import contextlib
 import datetime
-import json
 import logging
 import math
 import os
-import selectors
-import threading
-import time
-from collections import defaultdict
-
-from psycopg2 import InterfaceError
-from psycopg2.pool import PoolError
 
 import odoo
 from odoo import api, fields, models
-from odoo.service.server import CommonServer
-from odoo.tools import config, json_default, SQL
+from odoo.tools import SQL, config
 from odoo.tools.misc import OrderedSet
 
-from ..tools import orjson
+from ..tools.notifications import fetch_bus_notifications, json_dump
 
 _logger = logging.getLogger(__name__)
 
-# longpolling timeout connection
-TIMEOUT = 50
 DEFAULT_GC_RETENTION_SECONDS = 60 * 60 * 24  # 24 hours
 
 # custom function to call instead of default PostgreSQL's `pg_notify`
@@ -47,44 +35,9 @@ NOTIFY_PAYLOAD_MAX_LENGTH = get_notify_payload_max_length()
 SKIP_NOTIFICATION = object()
 
 
-def fetch_bus_notifications(cr, min_id_by_channel, ignore_ids=None):
-    """Fetch notifications from the bus table.
-
-    :param cr: Database cursor.
-    :param min_id_by_channel: Dictionary mapping channels to the ID of the last fully
-        processed id. See `Websocket._notif_history`.
-    :param ignore_ids: IDs to exclude.
-    :return: List of notifications.
-
-    """
-    threshold = fields.Datetime.now() - datetime.timedelta(seconds=TIMEOUT)
-    channels_by_id = defaultdict(list)
-    for channel, min_id in min_id_by_channel.items():
-        channels_by_id[min_id].append(json_dump(channel))
-    channel_conditions = []
-    for min_id, channels in channels_by_id.items():
-        since = SQL("create_date > %s", threshold) if min_id == 0 else SQL("id > %s", min_id)
-        channel_conditions.append(SQL("(channel IN %s AND %s)", tuple(channels), since))
-    where = SQL(" OR ").join(channel_conditions)
-    if ignore_ids:
-        where = SQL("(%s) AND id NOT IN %s", where, tuple(ignore_ids))
-    cr.execute(SQL("SELECT id, message FROM bus_bus WHERE %s ORDER BY id", where))
-    return [{"id": r[0], "message": orjson.loads(r[1])} for r in cr.fetchall()]
-
-
 # ---------------------------------------------------------
 # Bus
 # ---------------------------------------------------------
-def json_dump(v):
-    return json.dumps(v, separators=(',', ':'), default=json_default)
-
-
-def hashable(key):
-    if isinstance(key, list):
-        key = tuple(key)
-    return key
-
-
 def channel_with_db(dbname, channel):
     if isinstance(channel, models.Model):
         return (dbname, channel._name, channel.id)
@@ -218,87 +171,14 @@ class BusBus(models.Model):
 
     @api.model
     def _poll(self, channels, last=0, ignore_ids=None):
-        return fetch_bus_notifications(self.env.cr, {c: last for c in channels}, ignore_ids)
+        notifications_by_channel = fetch_bus_notifications(
+            self.env.cr, {last: list(channels)}, ignore_ids
+        )
+        return sorted(
+            (notif for notifs in notifications_by_channel.values() for notif in notifs),
+            key=lambda notif: notif["id"],
+        )
 
     def _bus_last_id(self):
         last = self.env['bus.bus'].search([], order='id desc', limit=1)
         return last.id if last else 0
-
-
-# ---------------------------------------------------------
-# Dispatcher
-# ---------------------------------------------------------
-
-class ImDispatch(threading.Thread):
-    def __init__(self):
-        super().__init__(daemon=True, name=f'{__name__}.Bus')
-        self._channels_to_ws = {}
-        self._start_lock = threading.Lock()
-
-    def subscribe(self, channels, last, websocket):
-        """
-        Subcribe to bus notifications. Every notification related to the
-        given channels will be sent through the websocket. If a subscription
-        is already present, overwrite it.
-        """
-        for channel in channels:
-            self._channels_to_ws.setdefault(channel, set()).add(websocket)
-        outdated_channels = websocket._min_id_by_channel.keys() - channels
-        self._clear_outdated_channels(websocket, outdated_channels)
-        websocket.subscribe(channels, last)
-        with contextlib.suppress(RuntimeError):
-            if not self.is_alive():
-                with self._start_lock:
-                    if not self.is_alive():
-                        self.start()
-
-    def unsubscribe(self, websocket):
-        self._clear_outdated_channels(websocket, websocket._min_id_by_channel.keys())
-
-    def _clear_outdated_channels(self, websocket, outdated_channels):
-        """ Remove channels from channel to websocket map. """
-        for channel in outdated_channels:
-            self._channels_to_ws[channel].remove(websocket)
-            if not self._channels_to_ws[channel]:
-                self._channels_to_ws.pop(channel)
-
-    def loop(self):
-        """ Dispatch postgres notifications to the relevant websockets """
-        db_system = config['db_system']
-        _logger.info("Bus.loop listen imbus on db %s", db_system)
-        with odoo.sql_db.db_connect(db_system).cursor() as cr, \
-             selectors.DefaultSelector() as sel:
-            cr.execute("listen imbus")
-            cr.commit()
-            conn = cr._cnx
-            sel.register(conn, selectors.EVENT_READ)
-            while not stop_event.is_set():
-                if sel.select(TIMEOUT):
-                    conn.poll()
-                    channels = []
-                    while conn.notifies:
-                        channels.extend(orjson.loads(conn.notifies.pop().payload))
-                    # relay notifications to websockets that have
-                    # subscribed to the corresponding channels.
-                    websockets = set()
-                    for channel in channels:
-                        websockets.update(self._channels_to_ws.get(hashable(channel), []))
-                    for websocket in websockets:
-                        websocket.trigger_notification_dispatching()
-
-    def run(self):
-        while not stop_event.is_set():
-            try:
-                self.loop()
-            except Exception as exc:
-                if isinstance(exc, (InterfaceError, PoolError)) and stop_event.is_set():
-                    continue
-                _logger.exception("Bus.loop error, sleep and retry")
-                time.sleep(TIMEOUT)
-
-# Partially undo a2ed3d3d5bdb6025a1ba14ad557a115a86413e65
-# IMDispatch has a lazy start, so we could initialize it anyway
-# And this avoids the Bus unavailable error messages
-dispatch = ImDispatch()
-stop_event = threading.Event()
-CommonServer.on_stop(stop_event.set)

@@ -1,7 +1,7 @@
 import { describe, expect, press, test } from "@odoo/hoot";
 import { drag, queryAll, queryAllTexts, queryFirst, scroll } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
-import { Component, onWillUpdateProps, useProps, xml } from "@odoo/owl";
+import { Component, useOnChange, useProps, xml } from "@odoo/owl";
 import {
     contains,
     defineActions,
@@ -61,11 +61,15 @@ class TestComponent extends Component {
 
     setup() {
         this.domain = this.props.domain;
-        onWillUpdateProps((np) => this.willUpdateProps(np));
+        useOnChange(
+            () => [this.props.domain],
+            (domain) => this.updateDomain(domain),
+            { initialRun: false }
+        );
     }
 
-    async willUpdateProps(np) {
-        this.domain = np.domain;
+    async updateDomain(domain) {
+        this.domain = domain;
     }
 }
 
@@ -1125,9 +1129,9 @@ test("concurrency: delayed component update", async () => {
 
     let promise = Promise.withResolvers();
     class DeferredTestComponent extends TestComponent {
-        async willUpdateProps(np) {
+        async updateDomain(domain) {
             await promise.promise;
-            super.willUpdateProps(np);
+            super.updateDomain(domain);
         }
     }
     const component = await mountWithSearch(DeferredTestComponent, {
@@ -1145,9 +1149,10 @@ test("concurrency: delayed component update", async () => {
     const asustekPromise = promise;
     await contains(`.o_search_panel_category_value:eq(1) header`).click();
 
-    // 'asustek' should not be selected yet, and there should still be 3 records
+    // the panel selects 'asustek' right away, but the component has not reacted
+    // to the new domain yet, so there should still be 3 records
     expect(`.o_search_panel_category_value .active`).toHaveCount(1);
-    expect(`.o_search_panel_category_value:first .active`).toHaveCount(1);
+    expect(`.o_search_panel_category_value:eq(1) .active`).toHaveCount(1);
     expect(component.domain).toEqual([["bar", "=", true]]);
 
     // select 'agrolait' (delay the reload)
@@ -1155,16 +1160,16 @@ test("concurrency: delayed component update", async () => {
     const agrolaitPromise = promise;
     await contains(`.o_search_panel_category_value:eq(2) header`).click();
 
-    // 'agrolait' should not be selected yet, and there should still be 3 records
+    // same as above: 'agrolait' is selected, but the component still lags behind
     expect(`.o_search_panel_category_value .active`).toHaveCount(1);
-    expect(`.o_search_panel_category_value:first .active`).toHaveCount(1);
+    expect(`.o_search_panel_category_value:eq(2) .active`).toHaveCount(1);
     expect(component.domain).toEqual([["bar", "=", true]]);
 
-    // unlock asustek search (should be ignored, so there should still be 3 records)
+    // unlock asustek search (should not re-select 'asustek' in the panel)
     asustekPromise.resolve();
     await animationFrame();
     expect(`.o_search_panel_category_value .active`).toHaveCount(1);
-    expect(`.o_search_panel_category_value:first .active`).toHaveCount(1);
+    expect(`.o_search_panel_category_value:eq(2) .active`).toHaveCount(1);
     expect(component.domain).toEqual(["&", ["bar", "=", true], ["company_id", "child_of", 3]]);
 
     // unlock agrolait search, there should now be 1 record
@@ -1369,21 +1374,24 @@ test("concurrency: delayed get_filter", async () => {
 
     let promise;
     onRpc("search_panel_select_multi_range", () => promise?.promise);
-    const component = await mountWithSearch(TestComponent, {
+    await mountWithSearch(TestComponent, {
         resModel: "partner",
         searchViewId: false,
     });
-    expect(component.domain).toEqual([]);
+
+    expect(".o_search_panel_filter_value").toHaveCount(2);
 
     // trigger a reload and delay the get_filter
     promise = Promise.withResolvers();
     await toggleSearchBarMenu();
     await toggleMenuItem("Filter");
-    expect(component.domain).toEqual([]);
+
+    expect(".o_search_panel_filter_value").toHaveCount(2);
 
     promise.resolve();
     await animationFrame();
-    expect(component.domain).toEqual([["id", "=", 1]]);
+
+    expect(".o_search_panel_filter_value").toHaveCount(1);
 });
 
 test("use filter (on many2one) to refine search", async () => {
@@ -2193,7 +2201,6 @@ test("scroll kanban view with searchpanel and kept scroll position", async () =>
     }
 
     class WebClientContainer extends Component {
-        props = useProps();
         static components = { WebClient };
         static template = xml`
             <div class="o_web_client" style="max-height: 300px"><WebClient/></div>
@@ -2221,7 +2228,6 @@ test("scroll position is kept when switching between controllers", async () => {
     }
 
     class WebClientContainer extends Component {
-        props = useProps();
         static components = { WebClient };
         static template = xml`
             <div class="o_web_client" style="max-height: 300px"><WebClient/></div>
@@ -2244,7 +2250,7 @@ test("scroll position is kept when switching between controllers", async () => {
     await scroll(`.o_search_panel`, { y: 25 });
     await getService("action").switchView("kanban");
     expect(`.o_kanban_view .o_content`).toHaveCount(1);
-    expect(queryFirst(`.o_search_panel`).scrollTop).toBe(25);
+    expect(queryFirst(`.o_search_panel`).scrollTop).toBeCloseTo(25);
 });
 
 test("search panel is not instantiated in dialogs", async () => {

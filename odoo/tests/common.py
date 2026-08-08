@@ -55,7 +55,7 @@ from werkzeug.exceptions import BadRequest
 import odoo.cli
 import odoo.models
 import odoo.orm.registry
-from odoo import api
+from odoo import api, fields
 from odoo.exceptions import AccessError
 from odoo.fields import Command
 from odoo.http import request, request_var
@@ -1099,11 +1099,11 @@ class BaseCase(case.TestCase):
             )
 
         try:
-            from odoo.addons.bus import websocket as bus_websocket  # noqa: PLC0415
+            from odoo.addons.bus.tools import misc as bus_misc  # noqa: PLC0415
         except ImportError:
             additional_patches = ()
         else:
-            og_db_connect = bus_websocket.db_connect
+            og_db_connect = bus_misc.db_connect
 
             def _patched_ws_db_connect(to, allow_uri=False, readonly=False):
                 # acquire_cursor() opens a cursor via db_connect(db_name) directly instead
@@ -1119,7 +1119,7 @@ class BaseCase(case.TestCase):
                 return og_db_connect(to, allow_uri=allow_uri, readonly=readonly)
 
             additional_patches = (
-                patch.object(bus_websocket, 'db_connect', _patched_ws_db_connect),
+                patch.object(bus_misc, 'db_connect', _patched_ws_db_connect),
             )
 
         def get_sequences(cr):
@@ -1457,6 +1457,16 @@ class TransactionCase(BaseCase):
         transaction = self.env.transaction
         for name, layer in transaction.ormcaches__.items():
             transaction.ormcaches__[name] = CacheLayer(layer)
+
+    @classmethod
+    @contextmanager
+    def mock_datetime_and_now(cls, mock_dt):
+        """ Used when synchronization date (using env.cr.now()) is important
+        in addition to standard datetime mocks. Used mainly to detect sync
+        issues. """
+        mock_dt = fields.Datetime.to_datetime(mock_dt)
+        with freeze_time(mock_dt), patch.object(cls.env.cr, 'now', lambda: mock_dt):
+            yield
 
     @classmethod
     @contextmanager
