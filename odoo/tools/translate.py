@@ -1531,7 +1531,27 @@ def extract_spreadsheet_terms(fileobj, keywords, comment_tags, options):
                     terms.add(baselineDescr['text'])
                 if 'text' in (keyDescr := figure['data'].get('keyDescr', {})):
                     terms.add(keyDescr['text'])
+            if figure['tag'] == 'carousel':
+                title = figure['data'].get('title', {})
+                if 'text' in title:
+                    terms.add(title['text'])
+                items = figure['data'].get('items', [])
+                for item in items:
+                    if 'title' in item:
+                        terms.add(item['title'])
+                chartDefinitions = figure['data'].get('chartDefinitions', {}).values()
+                for chartDefinition in chartDefinitions:
+                    if 'title' in chartDefinition and isinstance(chartDefinition['title'], dict) and 'text' in chartDefinition['title']:
+                        terms.add(chartDefinition['title']['text'])
+
     terms.update(global_filter['label'] for global_filter in data.get('globalFilters', []))
+    for odoo_list in data.get('lists', {}).values():
+        if not odoo_list.get('translateHeaders', False):
+            continue
+        columns = odoo_list.get('columns', [])
+        for column in columns:
+            if isinstance(column, dict) and 'string' in column:
+                terms.add(column['string'])
     return (
         (0, None, term, [])
         for term in terms
