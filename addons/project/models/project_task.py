@@ -902,7 +902,7 @@ class ProjectTask(models.Model):
                             for role in task.role_ids:
                                 if (
                                     role.user_ids
-                                    and (candidat_ids := list(set(role.user_ids.ids) - user_ids))
+                                    and (candidat_ids := list(set(role.user_ids.filtered('active').ids) - user_ids))
                                 ):
                                     shuffle(candidat_ids)
                                     user_ids.add(candidat_ids[0])
@@ -1149,7 +1149,7 @@ class ProjectTask(models.Model):
             if not vals.get('name') and vals.get('display_name'):
                 vals['name'] = vals['display_name']
 
-            if is_portal_user or not self.env.su:
+            if is_portal_user and not self.env.su:
                 self_with_restrict_context._ensure_fields_write(vals, defaults=True)
 
             if project_id and not "company_id" in vals:
