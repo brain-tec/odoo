@@ -25,6 +25,7 @@ export class FieldChangeReplicationPlugin extends Plugin {
      */
     handleMutations(mutations) {
         mutations
+            .filter((m) => !m.isAutomatic)
             .filter(
                 (m) =>
                     !(
@@ -125,7 +126,7 @@ export class FieldChangeReplicationPlugin extends Plugin {
             }
         }
         for (const touchedEl of touchedEls) {
-            this.processThrough("normalize_processors", touchedEl);
+            this.dependencies.dom.normalize(touchedEl);
         }
     }
 }
