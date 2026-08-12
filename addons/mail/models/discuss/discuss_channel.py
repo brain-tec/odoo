@@ -394,11 +394,11 @@ class DiscussChannel(models.Model):
             channel.self_member_id = member_by_channel.get(channel)
 
     def _search_self_member_id(self, operator, operand):
-        if operator == "in":
-            return [("channel_member_ids", "any", [("is_self", "=", True), ("id", "in", operand)])]
-        if operator in ('any', 'any!'):
-            return Domain('channel_member_ids', operator, Domain('is_self', '=', True) & operand)
-        return NotImplemented
+        if operator not in ('in', 'any', 'any!'):
+            return NotImplemented
+        if operator != 'any!':
+            operator = 'any'
+        return Domain("channel_member_ids", operator, [("is_self", "=", True), ("id", "in", operand)])
 
     @api.depends_context("uid", "guest")
     @api.depends("is_readonly", "self_member_id.channel_role")
@@ -917,6 +917,14 @@ class DiscussChannel(models.Model):
             email: f"{self.invitation_url}?email_token={hash_sign(self.env(su=True), "mail.invite_email", email)}"
             for email in emails
         }
+
+    @api.readonly
+    def get_invite_partner_domain(self):
+        """Returns the domain of the partners that may still be invited to this channel."""
+        self.ensure_one()
+        if not self.env.user._is_internal() or not self.has_access("read"):
+            raise AccessError(self.env._("You don't have access to invite users to this channel."))
+        return list(self.env["res.partner"]._get_channel_invite_domain(self))
 
     def invite_by_email(self, emails):
         """

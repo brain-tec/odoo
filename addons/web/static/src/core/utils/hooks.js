@@ -1,7 +1,7 @@
 import { onMounted, onPatched, onWillUnmount, proxy, t, toRaw, untrack, useScope } from "@odoo/owl";
 import { hasTouch, isMobileOS } from "@web/core/browser/feature_detection";
 import { router } from "@web/core/browser/router";
-import { useChildEnv, useLayoutEffect } from "@web/owl2/utils";
+import { useEnv, useLayoutEffect } from "@web/owl2/utils";
 
 /**
  * This file contains various custom hooks.
@@ -149,7 +149,7 @@ export const SERVICES_METADATA = {};
  * @returns {import("services").ServiceFactories[K]}
  */
 export function useService(serviceName) {
-    const { services } = useChildEnv();
+    const { services } = useEnv();
     if (!(serviceName in services)) {
         throw new Error(`Service ${serviceName} is not available`);
     }
@@ -240,24 +240,6 @@ export function useOwnedDialogs(options = {}) {
         return close;
     };
     return addDialog;
-}
-/**
- * Manages an event listener on a ref. Useful for hooks that want to manage
- * event listeners, especially more than one. Prefer using t-on directly in
- * components. If your hook only needs a single event listener, consider simply
- * returning it from the hook and letting the user attach it with t-on.
- *
- * @param {Ref} ref
- * @param {Parameters<typeof EventTarget.prototype.addEventListener>} listener
- */
-export function useRefListener(ref, ...listener) {
-    useLayoutEffect(
-        (el) => {
-            el?.addEventListener(...listener);
-            return () => el?.removeEventListener(...listener);
-        },
-        () => [untrack(ref)]
-    );
 }
 
 /**

@@ -265,7 +265,7 @@ class Field[T]:
     # Used in _fields_update_order__ to order field updates and inverses.
     write_sequence: int = 0
     # Database column type (ident, spec) for non-company-dependent fields.
-    # Company-dependent fields are stored as jsonb (see column_type).
+    # Company-dependent fields are stored as jsonb (see column_type_ident).
     _column_type: tuple[str, str] | None = None
 
     _args__: dict[str, typing.Any] | None = None  # the parameters given to __init__()
@@ -887,10 +887,17 @@ class Field[T]:
         """ Return the actual column type for this field, if stored as a column. """
         return ('jsonb', 'jsonb') if self.company_dependent or self.translate else self._column_type
 
-    @property
-    def sql_column_type(self):
-        assert self._column_type
-        return SQL(self._column_type[1])
+    @functools.cached_property
+    def stored_sql_column_type(self) -> SQL:
+        """ Column type as stored in the database column. """
+        _ident, spec = self.column_type
+        return SQL(spec)  # pylint: disable=sql-injection
+
+    @functools.cached_property
+    def sql_column_type(self) -> SQL:
+        """ Column type used for casting into the field's type. """
+        ident, _spec = self._column_type
+        return SQL.identifier(ident)
 
     @property
     def base_field(self) -> Self:
@@ -1267,7 +1274,7 @@ class Field[T]:
         """
         if not column:
             # the column does not exist, create it
-            sql.create_column(model.env.cr, model._table, self.name, self.column_type[1], self.string)
+            sql.create_column(model.env.cr, model._table, self.name, self.stored_sql_column_type, self.string)
             return
         if column['udt_name'] == self.column_type[0]:
             return
@@ -1275,7 +1282,7 @@ class Field[T]:
 
     def _convert_db_column(self, model: BaseModel, column: dict[str, typing.Any]):
         """ Convert the given database column to the type of the field. """
-        sql.convert_column(model.env.cr, model._table, self.name, self.column_type[1])
+        sql.convert_column(model.env.cr, model._table, self.name, self.stored_sql_column_type)
 
     def _init_column_data(self, model: BaseModel) -> None:
         """ Initialize null values in the column. """
@@ -1359,7 +1366,7 @@ class Field[T]:
                     ('user_id', 'in', (False, SUPERUSER_ID)),
                     Domain.custom(to_sql=lambda table: SQL("(%s IS NULL OR %s = %s)", table.company_id, table.company_id, company_id)),
                     ('condition', '=', False),
-                ], order="user_id.id, company_id.id, id", limit=1).subselect('json_value')
+                ], order="user_id.id, company_id.id, id", limit=1).subselect(SQL('json_value'))
             else:
                 company_id = str(model.env.company.id)
                 fallback = self.get_company_dependent_fallback(model)
@@ -1368,7 +1375,7 @@ class Field[T]:
             # e.g SQL('COALESCE(%s->%s') and SQL('to_jsonb(%s))::boolean') as 2 orderby values
             # and concatenated by SQL(',') in the final result, which works in an unexpected way
             sql_field = SQL(
-                "COALESCE(%(column)s->(%(company_id)s::VARCHAR),to_jsonb(%(fallback)s::%(column_type)s))",
+                'COALESCE(%(column)s->(%(company_id)s::"varchar"),to_jsonb(%(fallback)s::%(column_type)s))',
                 column=sql_field,
                 company_id=company_id,
                 fallback=fallback,

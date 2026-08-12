@@ -11,8 +11,10 @@ from binascii import crc32
 from collections import defaultdict
 
 if typing.TYPE_CHECKING:
-    from odoo.fields import Field
     from collections.abc import Iterable
+
+    from odoo.fields import Field
+    from odoo.sql_db import Cursor
 
 import psycopg2
 from psycopg2.extensions import quote_ident
@@ -192,7 +194,7 @@ class LiteralSQL(SQL):
         return SQL("%s" * len(items), *items)
 
 
-def existing_tables(cr, tablenames):
+def existing_tables(cr: Cursor, tablenames: Iterable[str]) -> list[str]:
     """ Return the names of existing tables among ``tablenames``. """
     cr.execute(SQL("""
         SELECT c.relname
@@ -204,7 +206,7 @@ def existing_tables(cr, tablenames):
     return [row[0] for row in cr.fetchall()]
 
 
-def table_exists(cr, tablename):
+def table_exists(cr: Cursor, tablename: str) -> bool:
     """ Return whether the given table exists. """
     return len(existing_tables(cr, {tablename})) == 1
 
@@ -218,7 +220,7 @@ class TableKind(enum.Enum):
     Other = None
 
 
-def table_kind(cr, tablename: str) -> TableKind | None:
+def table_kind(cr: Cursor, tablename: str) -> TableKind | None:
     """ Return the kind of a table, if ``tablename`` is a regular or foreign
     table, or a view (ignores indexes, sequences, toast tables, and partitioned
     tables; unlogged tables are considered regular)
@@ -262,11 +264,11 @@ SQL_ORDER_BY_TYPE = defaultdict(lambda: 16, {
 })
 
 
-def create_model_table(cr, tablename, comment=None, columns=()):
+def create_model_table(cr: Cursor, tablename: str, comment: str | None = None, columns: Iterable[tuple[str, SQL, str | None]] = ()):
     """ Create the table for a model. """
     colspecs = [
         SQL('id SERIAL NOT NULL'),
-        *(SQL("%s %s", SQL.identifier(colname), SQL(coltype)) for colname, coltype, _ in columns),
+        *(SQL("%s %s", SQL.identifier(colname), coldef) for colname, coldef, _ in columns),
         SQL('PRIMARY KEY(id)'),
     ]
     queries = [
@@ -287,7 +289,7 @@ def create_model_table(cr, tablename, comment=None, columns=()):
     _schema.debug("Table %r: created", tablename)
 
 
-def table_columns(cr, tablename):
+def table_columns(cr: Cursor, tablename: str) -> dict[str, tuple[str, str, int, str]]:
     """ Return a dict mapping column names to their configuration. The latter is
         a dict with the data from the table ``information_schema.columns``.
     """
@@ -303,7 +305,7 @@ def table_columns(cr, tablename):
     return {row['column_name']: row for row in cr.dictfetchall()}
 
 
-def column_exists(cr, tablename, columnname):
+def column_exists(cr: Cursor, tablename: str, columnname: str) -> bool:
     """ Return whether the given column exists. """
     cr.execute(SQL(
         """ SELECT 1 FROM information_schema.columns
@@ -311,16 +313,16 @@ def column_exists(cr, tablename, columnname):
             AND table_schema = current_schema """,
         tablename, columnname,
     ))
-    return cr.rowcount
+    return bool(cr.rowcount)
 
 
-def create_column(cr, tablename, columnname, columntype, comment=None):
+def create_column(cr: Cursor, tablename: str, columnname: str, columntype: str | SQL, comment: str | None = None):
     """ Create a column with the given type. """
     sql = SQL(
         "ALTER TABLE %s ADD COLUMN %s %s",
         SQL.identifier(tablename),
         SQL.identifier(columnname),
-        SQL(columntype),
+        columntype if isinstance(columntype, SQL) else SQL.identifier(columntype),
     )
     if comment:
         sql = SQL("%s; %s", sql, SQL(
@@ -331,7 +333,7 @@ def create_column(cr, tablename, columnname, columntype, comment=None):
     _schema.debug("Table %r: added column %r of type %s", tablename, columnname, columntype)
 
 
-def rename_column(cr, tablename, columnname1, columnname2):
+def rename_column(cr: Cursor, tablename: str, columnname1: str, columnname2: str):
     """ Rename the given column. """
     cr.execute(SQL(
         "ALTER TABLE %s RENAME COLUMN %s TO %s",
@@ -342,16 +344,18 @@ def rename_column(cr, tablename, columnname1, columnname2):
     _schema.debug("Table %r: renamed column %r to %r", tablename, columnname1, columnname2)
 
 
-def convert_column(cr, tablename, columnname, columntype):
+def convert_column(cr: Cursor, tablename: str, columnname: str, columntype: str | SQL):
     """ Convert the column to the given type. """
-    using = SQL("%s::%s", SQL.identifier(columnname), SQL(columntype))
+    if not isinstance(columntype, SQL):
+        columntype = SQL.identifier(columntype)
+    using = SQL("%s::%s", SQL.identifier(columnname), columntype)
     _convert_column(cr, tablename, columnname, columntype, using)
 
 
-def convert_column_translatable(cr, tablename, columnname, columntype):
+def convert_column_translatable(cr: Cursor, tablename: str, columnname: str, columntype: str | SQL):
     """ Convert the column from/to a 'jsonb' translated field column. """
     drop_index(cr, make_index_name(tablename, columnname), tablename)
-    if columntype == "jsonb":
+    if columntype == "jsonb" or columntype == SQL("jsonb"):
         using = SQL(
             "CASE WHEN %s IS NOT NULL THEN jsonb_build_object('en_US', %s::varchar) END",
             SQL.identifier(columnname), SQL.identifier(columnname),
@@ -361,11 +365,13 @@ def convert_column_translatable(cr, tablename, columnname, columntype):
     _convert_column(cr, tablename, columnname, columntype, using)
 
 
-def _convert_column(cr, tablename, columnname, columntype, using: SQL):
+def _convert_column(cr: Cursor, tablename: str, columnname: str, columntype: str | SQL, using: SQL):
+    if not isinstance(columntype, SQL):
+        columntype = SQL.identifier(columntype)
     query = SQL(
         "ALTER TABLE %s ALTER COLUMN %s DROP DEFAULT, ALTER COLUMN %s TYPE %s USING %s",
         SQL.identifier(tablename), SQL.identifier(columnname),
-        SQL.identifier(columnname), SQL(columntype), using,
+        SQL.identifier(columnname), columntype, using,
     )
     try:
         with cr.savepoint(flush=False):
@@ -376,7 +382,7 @@ def _convert_column(cr, tablename, columnname, columntype, using: SQL):
     _schema.debug("Table %r: column %r changed to type %s", tablename, columnname, columntype)
 
 
-def drop_depending_views(cr, table, column):
+def drop_depending_views(cr: Cursor, table: str, column: str):
     """drop views depending on a field to allow the ORM to resize it in-place"""
     for v, k in get_depending_views(cr, table, column):
         cr.execute(SQL(
@@ -387,7 +393,7 @@ def drop_depending_views(cr, table, column):
         _schema.debug("Drop view %r", v)
 
 
-def get_depending_views(cr, table, column):
+def get_depending_views(cr: Cursor, table: str, column: str) -> list[tuple[str, str]]:
     # http://stackoverflow.com/a/11773226/75349
     cr.execute(SQL("""
         SELECT distinct quote_ident(dependee.relname), dependee.relkind
@@ -406,7 +412,7 @@ def get_depending_views(cr, table, column):
     return cr.fetchall()
 
 
-def set_not_null(cr, tablename, columnname):
+def set_not_null(cr: Cursor, tablename: str, columnname: str):
     """ Add a NOT NULL constraint on the given column. """
     query = SQL(
         "ALTER TABLE %s ALTER COLUMN %s SET NOT NULL",
@@ -416,7 +422,7 @@ def set_not_null(cr, tablename, columnname):
     _schema.debug("Table %r: column %r: added constraint NOT NULL", tablename, columnname)
 
 
-def drop_not_null(cr, tablename, columnname):
+def drop_not_null(cr: str, tablename: str, columnname: str):
     """ Drop the NOT NULL constraint on the given column. """
     cr.execute(SQL(
         "ALTER TABLE %s ALTER COLUMN %s DROP NOT NULL",
@@ -425,7 +431,7 @@ def drop_not_null(cr, tablename, columnname):
     _schema.debug("Table %r: column %r: dropped constraint NOT NULL", tablename, columnname)
 
 
-def constraint_definition(cr, tablename, constraintname):
+def constraint_definition(cr: str, tablename: str, constraintname: str) -> str | None:
     """ Return the given constraint's definition. """
     cr.execute(SQL("""
         SELECT COALESCE(d.description, pg_get_constraintdef(c.oid))
@@ -438,7 +444,7 @@ def constraint_definition(cr, tablename, constraintname):
     return cr.fetchone()[0] if cr.rowcount else None
 
 
-def add_constraint(cr, tablename, constraintname, definition):
+def add_constraint(cr: Cursor, tablename: str, constraintname: str, definition: str):
     """ Add a constraint on the given table. """
     query1 = SQL(
         "ALTER TABLE %s ADD CONSTRAINT %s %s",
@@ -453,7 +459,7 @@ def add_constraint(cr, tablename, constraintname, definition):
     _schema.debug("Table %r: added constraint %r as %s", tablename, constraintname, definition)
 
 
-def drop_constraint(cr, tablename, constraintname):
+def drop_constraint(cr: Cursor, tablename: str, constraintname: str):
     """ Drop the given constraint. """
     cr.execute(SQL(
         "ALTER TABLE %s DROP CONSTRAINT %s",
@@ -462,7 +468,7 @@ def drop_constraint(cr, tablename, constraintname):
     _schema.debug("Table %r: dropped constraint %r", tablename, constraintname)
 
 
-def add_foreign_key(cr, tablename1, columnname1, tablename2, columnname2, ondelete):
+def add_foreign_key(cr: Cursor, tablename1: str, columnname1: str, tablename2: str, columnname2: str, ondelete: str):
     """ Create the given foreign key, and return ``True``. """
     cr.execute(SQL(
         "ALTER TABLE %s ADD FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE %s",
@@ -474,7 +480,7 @@ def add_foreign_key(cr, tablename1, columnname1, tablename2, columnname2, ondele
                   tablename1, columnname1, tablename2, columnname2, ondelete)
 
 
-def get_foreign_keys(cr, tablename1, columnname1, tablename2, columnname2, ondelete):
+def get_foreign_keys(cr: Cursor, tablename1: str, columnname1: str, tablename2: str, columnname2: str, ondelete: str) -> list[str]:
     deltype = _CONFDELTYPES[ondelete.upper()]
     cr.execute(SQL(
         """
@@ -528,11 +534,11 @@ def fix_foreign_key(cr, tablename1, columnname1, tablename2, columnname2, ondele
     return True
 
 
-def index_exists(cr, indexname):
+def index_exists(cr: Cursor, indexname: str) -> bool:
     """ Return whether the given index exists. """
     cr.execute(SQL("SELECT 1 FROM pg_indexes WHERE indexname=%s"
                    " AND schemaname = current_schema", indexname))
-    return cr.rowcount
+    return bool(cr.rowcount)
 
 
 @deprecated("Removed after 20.0")
@@ -540,7 +546,7 @@ def check_index_exist(cr, indexname):
     assert index_exists(cr, indexname), f"{indexname} does not exist"
 
 
-def index_definition(cr, indexname):
+def index_definition(cr: Cursor, indexname: str) -> tuple[str, str | None] | tuple[None, None]:
     """ Read the index definition from the database """
     cr.execute(SQL("""
         SELECT idx.indexdef, d.description
@@ -554,15 +560,15 @@ def index_definition(cr, indexname):
 
 
 def create_index(
-    cr,
-    indexname,
-    tablename,
-    expressions,
-    method='btree',
+    cr: Cursor,
+    indexname: str,
+    tablename: str,
+    expressions: Iterable,
+    method: str = 'btree',
     where='',
     *,
-    comment=None,
-    unique=False
+    comment: str | None = None,
+    unique: bool = False,
 ):
     """ Create the given index unless it exists.
 
@@ -586,7 +592,7 @@ def create_index(
     add_index(cr, indexname, tablename, definition, unique=unique, comment=comment)
 
 
-def add_index(cr, indexname, tablename, definition, *, unique: bool, comment=''):
+def add_index(cr: Cursor, indexname: str, tablename: str, definition: str, *, unique: bool, comment: str | None = ''):
     """ Create an index. """
     if isinstance(definition, str):
         definition = SQL(definition.replace('%', '%%'))
@@ -602,20 +608,20 @@ def add_index(cr, indexname, tablename, definition, *, unique: bool, comment='')
     query_comment = SQL(
         "COMMENT ON INDEX %s IS %s",
         SQL.identifier(indexname), comment,
-    ) if comment else None
+    ) if comment else SQL()
     cr.execute(query, log_exceptions=False)
     if query_comment:
         cr.execute(query_comment, log_exceptions=False)
     _schema.debug("Table %r: created index %r (%s)", tablename, indexname, definition)
 
 
-def drop_index(cr, indexname, tablename):
+def drop_index(cr: Cursor, indexname: str, tablename: str):
     """ Drop the given index if it exists. """
     cr.execute(SQL("DROP INDEX IF EXISTS %s", SQL.identifier(indexname)))
     _schema.debug("Table %r: dropped index %r", tablename, indexname)
 
 
-def drop_view_if_exists(cr, viewname):
+def drop_view_if_exists(cr: Cursor, viewname: str):
     kind = table_kind(cr, viewname)
     if kind == TableKind.View:
         cr.execute(SQL("DROP VIEW %s CASCADE", SQL.identifier(viewname)))
@@ -631,23 +637,6 @@ def escape_psql(to_escape: str) -> str:
 def escape_like_value(to_escape: str) -> str:
     """ Escapes a string for injection into a LIKE statement. """
     return to_escape.replace('\\', r'\\').replace('%', r'\%').replace('_', r'\_')
-
-
-def pg_varchar(size: int = 0) -> str:
-    """ Returns the VARCHAR declaration for the provided size:
-
-    * If no size (or an empty or negative size is provided) return an
-      'infinite' VARCHAR
-    * Otherwise return a VARCHAR(n)
-
-    :param size: varchar size, optional
-    """
-    if size:
-        if not isinstance(size, int):
-            raise ValueError("VARCHAR parameter should be an int, got %s" % type(size))
-        if size > 0:
-            return 'VARCHAR(%d)' % size
-    return 'VARCHAR'
 
 
 @deprecated("Removed after 20.0")
@@ -698,14 +687,14 @@ def increment_fields_skiplock(records, *fields):
     return bool(cr.rowcount)
 
 
-def value_to_translated_trigram_pattern(value):
+def value_to_translated_trigram_pattern(value: str) -> str:
     """ Escape value to match a translated field's trigram index content
 
     The trigram index function jsonb_path_query_array("column_name", '$.*')::text
     uses all translations' representations to build the indexed text. So the
     original text needs to be JSON-escaped correctly to match it.
 
-    :param str value: value provided in domain
+    :param value: value provided in domain
     :return: a pattern to match the indexed text
     """
     if len(value) < 3:
@@ -724,7 +713,7 @@ def value_to_translated_trigram_pattern(value):
     return f"%{wildcard_escaped}%"
 
 
-def pattern_to_translated_trigram_pattern(pattern):
+def pattern_to_translated_trigram_pattern(pattern: str) -> str:
     """ Escape pattern to match a translated field's trigram index content
 
     The trigram index function jsonb_path_query_array("column_name", '$.*')::text
@@ -780,4 +769,4 @@ def quoted_identifier(cr, name: str) -> SQL:
     Use instead of `SQL.identifier` to accept all kinds of identifiers.
     """
     name = quote_ident(name, cr._cnx)
-    return SQL(name)
+    return SQL(name)  # pylint: disable=sql-injection

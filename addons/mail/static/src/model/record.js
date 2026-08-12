@@ -199,6 +199,10 @@ export class Record {
             }
             Model._rawStore.recordByLocalId.set(record.localId, recordProxy);
             for (const fieldName of record.Model._.fields.keys()) {
+                if (record.Model._.fieldsComputable.get(fieldName)) {
+                    // the owl computed() runs on the first read, nothing to request
+                    continue;
+                }
                 record._.requestCompute?.(record, fieldName);
             }
             record._.isConstructing.set(false);
@@ -387,7 +391,9 @@ export class Record {
             // the dummy record collecting the field declarations has no internals
             return;
         }
-        const deps = computed(dependencies.bind(record), { equals: shallowEqual });
+        const deps = record._.ensureScope(record).run(() =>
+            computed(dependencies.bind(record), { equals: shallowEqual })
+        );
         const boundCallback = callback.bind(record);
         let firstRun = true;
         let cleanup;
@@ -469,6 +475,8 @@ export class Record {
         for (const f of this._.disposeFns) {
             this._runDisposeFn(f);
         }
+        // after the effects, so that none of them recomputes a disposed computed
+        this._.scope?.destroy();
     }
 
     /**

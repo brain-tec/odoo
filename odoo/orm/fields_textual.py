@@ -17,7 +17,7 @@ from odoo.logging import COLOR_PATTERN, DEFAULT, GREEN, RED
 from odoo.tools import SQL, config, html_normalize, html_sanitize, html2plaintext, is_html_empty, plaintext2html, sql
 from odoo.tools.constants import PREFETCH_MAX
 from odoo.tools.misc import SENTINEL, Sentinel
-from odoo.tools.sql import pattern_to_translated_trigram_pattern, pg_varchar, value_to_translated_trigram_pattern
+from odoo.tools.sql import pattern_to_translated_trigram_pattern, value_to_translated_trigram_pattern
 from odoo.tools.translate import StoredTranslations, ParsedTranslation, html_translate
 
 from .fields import Field, _logger
@@ -62,9 +62,9 @@ class BaseString(Field[str | typing.Literal[False]]):
     def _convert_db_column(self, model, column):
         # specialized implementation for converting from/to translated fields
         if self.translate or column['udt_name'] == 'jsonb':
-            sql.convert_column_translatable(model.env.cr, model._table, self.name, self.column_type[1])
+            sql.convert_column_translatable(model.env.cr, model._table, self.name, self.stored_sql_column_type)
         else:
-            sql.convert_column(model.env.cr, model._table, self.name, self.column_type[1])
+            sql.convert_column(model.env.cr, model._table, self.name, self.stored_sql_column_type)
 
     def get_trans_terms(self, value) -> list[str]:
         """ Return the sequence of terms to translate found in `value`"""
@@ -528,7 +528,9 @@ class Char(BaseString):
 
     @property
     def _column_type(self):
-        return ('varchar', pg_varchar(self.size))
+        size = self.size
+        assert size is None or type(size) is int, "size must be an integer"
+        return ('varchar', f'varchar({size})' if size and size > 0 else 'varchar')
 
     def update_db_column(self, model, column):
         if (
@@ -537,7 +539,7 @@ class Char(BaseString):
             (self.size is None or column['character_maximum_length'] < self.size)
         ):
             # the column's varchar size does not match self.size; convert it
-            sql.convert_column(model.env.cr, model._table, self.name, self.column_type[1])
+            sql.convert_column(model.env.cr, model._table, self.name, self.stored_sql_column_type)
         super().update_db_column(model, column)
 
     _related_size = property(attrgetter('size'))
