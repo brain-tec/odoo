@@ -72,6 +72,7 @@ class ResConfigSettings(models.TransientModel):
         readonly=False
     )
     l10n_in_gst_efiling_feature = fields.Boolean(string="GST Reports & E-Filing")
+    l10n_in_disable_b2c_hsn_reporting = fields.Boolean(related='company_id.l10n_in_disable_b2c_hsn_reporting', readonly=False)
     l10n_in_fetch_vendor_edi_feature = fields.Boolean(string="Fetch Vendor E-Invoiced Document")
     l10n_in_enet_vendor_batch_payment_feature = fields.Boolean(string="ENet Vendor Batch Payment")
 
@@ -106,7 +107,7 @@ class ResConfigSettings(models.TransientModel):
     def _update_l10n_in_feature(self, column):
         """ This way, after installing the module, the field will already be set for the active company. """
         if not column_exists(self.env.cr, "res_company", column):
-            create_column(self.env.cr, "res_company", column, "boolean")
+            create_column(self.env.cr, "res_company", column, "bool")
             self.env.cr.execute(SQL(
                 f"""
                     UPDATE res_company
