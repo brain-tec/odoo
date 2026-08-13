@@ -15,13 +15,21 @@ class PosOrder(models.Model):
         for pos_order in self:
             pos_order.l10n_vn_has_sinvoice_pdf = bool(pos_order.account_move.l10n_vn_edi_sinvoice_pdf_file)
 
+    def _generate_pos_order_invoice(self):
+        # EXTENDS 'point_of_sale'
+        if self.company_id.country_id.code == 'VN' and self.config_id.l10n_vn_auto_send_to_sinvoice:
+            return super(PosOrder, self.with_context(generate_pdf=True))._generate_pos_order_invoice()
+        return super()._generate_pos_order_invoice()
+
     def _prepare_invoice_vals(self):
         vals = super()._prepare_invoice_vals()
 
         if self.company_id.country_id.code != 'VN' or not self.config_id.l10n_vn_auto_send_to_sinvoice:
             return vals
 
-        sinvoice_symbol = self.config_id.l10n_vn_pos_symbol or self.config_id.company_id.l10n_vn_pos_default_symbol
+        # Get the symbol as sudo() as pos users are not allowed to access the field due to the groups setting
+        config_sudo = self.config_id.sudo()
+        sinvoice_symbol = config_sudo.l10n_vn_pos_symbol or config_sudo.company_id.l10n_vn_pos_default_symbol
         if sinvoice_symbol:
             vals['l10n_vn_edi_invoice_symbol'] = sinvoice_symbol.id
 
