@@ -57,73 +57,112 @@ code will be imported, allowing for custom generators, if needed.
 
 ### XML Structure
 
-A blueprint definition is a list of `<model>` blocks, each containing
-`<field>` declarations:
+A blueprint definition is an ordered list of operation blocks. Use
+`<create>` to create records, `<write>` to update records, and
+`<function>` to call a method on targeted records.
+`<field>` declarations are persisted through ORM `create`/`write`;
+`<value>` declarations are generated local variables available to later
+fields, values, and function arguments in the same block. Function
+blocks use `<arg>` declarations for generated method arguments.
 
 ```xml
-<model name="res.partner" count="500" id="my_partners">
+<create model="res.partner" count="500" id="my_partners">
+    <value name="email_domain" eval="'example.com'"/>
     <field name="name" generator="fake.company" null_ratio="0"/>
-    <field name="email" generator="fake.company_email"/>
+    <field name="email" eval="name.lower().replace(' ', '-') + '@' + email_domain"/>
     <field name="active" eval="True"/>
-</model>
+</create>
+
+<write model="res.partner" ref="my_partners" batched="True">
+    <value name="suffix" eval="'imported by populate'"/>
+    <field name="comment" eval="suffix"/>
+</write>
+
+<function model="res.partner" name="message_subscribe" ref="my_partners" batched="True">
+    <value name="current_partner" eval="env.user.partner_id.id"/>
+    <arg eval="[current_partner]"/>
+</function>
 ```
 
 ### JSON Structure
 
 Blueprints can also be defined in JSON via the `definition_json` field
 on `populate.blueprint`. The JSON format mirrors the XML structure 
-directly:
+directly. The mandatory `operation` key corresponds to the XML operation
+element name (`create`, `write`, or `function`):
 
 ```json
 [
     {
-        "name": "res.partner",
+        "operation": "create",
+        "model": "res.partner",
         "count": 500,
-        "ref": "my_partners",
+        "id": "my_partners",
+        "values": {
+            "email_domain": { "eval": "'example.com'" }
+        },
         "fields": {
             "name":   { "generator": "fake.company", "null_ratio": "0" },
-            "email":  { "generator": "fake.company_email" },
+            "email":  { "eval": "name.lower().replace(' ', '-') + '@' + email_domain" },
             "active": { "eval": "True" }
         }
     },
     {
-        "name": "res.partner",
-        "type": "write",
+        "operation": "write",
+        "model": "res.partner",
         "ref": "my_partners",
+        "batched": true,
+        "values": {
+            "suffix": { "eval": "'imported by populate'" }
+        },
         "fields": {
-            "phone": { "generator": "fake.phone_number" }
+            "comment": { "eval": "suffix" }
+        }
+    },
+    {
+        "operation": "function",
+        "model": "res.partner",
+        "name": "message_subscribe",
+        "ref": "my_partners",
+        "batched": true,
+        "values": {
+            "current_partner": { "eval": "env.user.partner_id.id" }
+        },
+        "args": {
+            "0": { "eval": "[current_partner]" }
         }
     }
 ]
 ```
 
-The top-level array maps to the ordered list of `<model>` blocks. Each
-object's `"fields"` key maps field names to their attribute
-dictionaries – the same keys you would write as XML attributes 
-(`generator`, `eval`, `null_ratio`, `domain`, `ref`, `virtual`, etc.).
+The top-level array maps to the ordered list of operation blocks. Each
+object's optional `"fields"`, `"values"` and `"args"` keys map names to their
+attribute dictionaries – the same keys you would write as XML attributes
+(`generator`, `eval`, `null_ratio`, `domain`, `ref`, etc.).
 
 > **Note:** If both `definition_xml` and `definition_json` are set on
 > the same record, the XML definition takes precedence.
 
-#### `<model>` Attributes
+#### Operation Attributes
 
-| Attribute  | Required     | Description                                                          |
-|------------|--------------|----------------------------------------------------------------------|
-| `name`     | yes          | Odoo model technical name (e.g. `res.partner`)                       |
-| `count`    | for `create` | Number of records to create                                          |
-| `id`       |              | Reference tag - lets later blocks target these records               |
-| `type`     |              | `create` (default) or `write`                                        |
-| `ref`      | for `write`  | Reference to a previously created batch (its `id`)                   |
-| `domain`   |              | ORM domain selecting target records; not allowed on create blocks    |
-| `scale`    |              | `True` (default) / `False` - whether `--scale` applies to this block |
-| `parallel` |              | `True` (default) / `False` - whether the job can run in parallel     |
-| `context`  |              | Python dict literal merged into the ORM context                      |
+| Attribute  | Required                | Description                                                                                                |
+|------------|-------------------------|------------------------------------------------------------------------------------------------------------|
+| `model`    | yes                     | Odoo model technical name (e.g. `res.partner`)                                                             |
+| `name`     | for `function`          | Method name to call                                                                                        |
+| `count`    | for `create`            | Number of records to create                                                                                |
+| `id`       |                         | Reference tag - lets later blocks target these records                                                     |
+| `ref`      |                         | Reference to a previously created batch (its `id`) for `write` and `function` blocks                       |
+| `domain`   |                         | ORM domain selecting target records; not allowed on create blocks; defaults to all records                 |
+| `scale`    |                         | `True` (default) / `False` - whether `--scale` applies to this block                                       |
+| `parallel` |                         | `True` (default) / `False` - whether the job can run in parallel                                           |
+| `batched`  | for write/function only | `True` / `False` (default) - generate one value set and perform one write/function call per executable job |
+| `context`  |                         | Python dict literal merged into the ORM context                                                            |
 
 #### `<field>` Attributes
 
 | Attribute      | Required | Description                                                                             |
 |----------------|----------|-----------------------------------------------------------------------------------------|
-| `name`         | yes      | Field name on the model                                                                 |
+| `name`         | yes      | Field or value name                                                                     |
 | `generator`    | (1)      | Generator to use (see table in 'Generators' section)                                    |
 | `eval`         | (1)      | A Python expression - static value or dynamic expression referencing other fields       |
 | `null_ratio`   |          | Probability of generating `False` (0-1, default `0`; forced to `0` for required fields) |
@@ -132,7 +171,9 @@ dictionaries – the same keys you would write as XML attributes
 | `distribution` |          | Statistical distribution, e.g. `"normal(mean=50, std=10)"`                              |
 | `domain`       |          | ORM domain to filter related records (for relational/reference generators)              |
 | `ref`          |          | Restrict relational picks to records created under this reference                       |
-| `virtual`      |          | `True` to mark as a virtual (non-persisted) intermediate field                          |
+
+`<value>` supports the same generation attributes as `<field>`, but it
+is not an ORM field and is not persisted.
 
 > (1) Either `generator` or `eval` can be provided. If neither
 > is set, a default generator is automatically selected based on the
@@ -212,12 +253,12 @@ provided, an error is raised.
 
 ### Relational
 
-| Generator       | Field Types                        | Key Params                                                               |
-|-----------------|------------------------------------|--------------------------------------------------------------------------|
-| `relation.one`  | `many2one`, `virtual`              | `domain`, `ref`, `comodel_name*`, `partition`                            |
-| `relation.many` | `one2many`, `many2many`, `virtual` | `domain`, `ref`, `comodel_name*`, `count`, `std`, `groupby`, `partition` |
+| Generator       | Targets                          | Key Params                                                               |
+|-----------------|----------------------------------|--------------------------------------------------------------------------|
+| `relation.one`  | `many2one`, `value`              | `domain`, `ref`, `comodel_name*`, `partition`                            |
+| `relation.many` | `one2many`, `many2many`, `value` | `domain`, `ref`, `comodel_name*`, `count`, `std`, `groupby`, `partition` |
 
->\* required only for 'virtual' fields
+>\* required only for generated values
 
 #### Dynamic Domains
 
@@ -244,17 +285,17 @@ records of a previously created batch:
 
 ```xml
 <!-- Create projects and their tasks -->
-<model name="project.project" count="10" id="my_projects">
+<create model="project.project" count="10" id="my_projects">
     <field name="name" generator="fake.bs"/>
-</model>
-<model name="project.task" count="100" id="my_tasks">
+</create>
+<create model="project.task" count="100" id="my_tasks">
     <field name="project_id" generator="relation.one" ref="my_projects"/>
-</model>
+</create>
 
 <!-- Assign timesheets only to tasks that belong to our projects -->
-<model name="account.analytic.line" count="200">
+<create model="account.analytic.line" count="200">
     <field name="task_id" generator="relation.one" ref="my_projects.task_ids"/>
-</model>
+</create>
 ```
 
 `ref="my_projects.task_ids"` resolves by fetching the populated
@@ -324,22 +365,22 @@ generators:
 
 ### Misc
 
-| Generator      | Field Types                   | Description                                                          | Key Params             |
-|----------------|-------------------------------|----------------------------------------------------------------------|------------------------|
-| `misc.counter` | 'integer', 'float', 'virtual' | Generates an arithmetic sequence; wraps around if `end` is specified | `start`, `step`, `end` |
-| `misc.cycle`   | most scalar types             | Cycles through <br/>`values` in order, deterministically             | `values`               |
-| `misc.eval`    | any                           | Evaluates a Python expression*; can reference other fields by name   | N/A                    |
+| Generator      | Targets                     | Description                                                          | Key Params             |
+|----------------|-----------------------------|----------------------------------------------------------------------|------------------------|
+| `misc.counter` | `integer`, `float`, `value` | Generates an arithmetic sequence; wraps around if `end` is specified | `start`, `step`, `end` |
+| `misc.cycle`   | most scalar types           | Cycles through <br/>`values` in order, deterministically             | `values`               |
+| `misc.eval`    | any                         | Evaluates a Python expression*; can reference other fields by name   | N/A                    |
 
 > \* `misc.eval` uses `safe_eval` with a small evaluation context. 
 > Only `env`, `model` & `Command` are provided.
 
 ### Properties
 
-| Generator               | Field Types             | Description                                        |
-|-------------------------|-------------------------|----------------------------------------------------|
-| `properties.definition` | `properties_definition` | Generates a property schema                        |
-| `properties.prop`       | `virtual`               | Helper - defines a single property entry           |
-| `properties.value`      | `properties`            | Generates values matching the parent's definition  |
+| Generator               | Targets                 | Description                                       |
+|-------------------------|-------------------------|---------------------------------------------------|
+| `properties.definition` | `properties_definition` | Generates a property schema                       |
+| `properties.prop`       | `value`                 | Helper - defines a single property entry          |
+| `properties.value`      | `properties`            | Generates values matching the parent's definition |
 
 ## Distributions
 
@@ -461,65 +502,63 @@ projections.
 | A count of "how many times"               | `poisson`                               |
 | Three-point estimate (min / likely / max) | `triangular`                            |
 
-## Virtual Fields
+## Values
 
-Virtual fields are intermediate computation steps that are **not
-persisted** to the database.
-They let you build values that multiple real fields depend on, avoiding
-duplication:
+Fields are persisted values passed to ORM `create` or `write`.
+Values are generated local variables available to later fields and
+values in the same block. Values are not ORM fields and are not
+persisted.
+
+They let you build intermediate values that multiple persisted fields
+depend on, avoiding duplication:
 
 ```xml
-<model name="account.move.line" count="1000">
+<create model="account.move.line" count="1000">
     <field name="quantity" generator="scalar.integer" start="1" end="100"/>
     <field name="price_unit" generator="scalar.float" start="5" end="500"/>
-    <field name="v_subtotal" virtual="True" eval="quantity * price_unit"/>
-    <field name="discount" eval="v_subtotal * 0.1 if v_subtotal > 200 else 0"/>
-    <field name="price_total" eval="v_subtotal - discount"/>
-</model>
+    <value name="subtotal" eval="quantity * price_unit"/>
+    <field name="discount" eval="subtotal * 0.1 if subtotal > 200 else 0"/>
+    <field name="price_total" eval="subtotal - discount"/>
+</create>
 ```
 
-Here `v_subtotal` is computed but never written to the database.
+Here `subtotal` is computed but never written to the database.
 Both `discount` and `price_total` reference it, so the
 `quantity * price_unit` logic lives in one place instead of being
 duplicated across every field that needs it.
 
-Virtual fields are also handy for **correlating** persisted fields.
+Values are also handy for **correlating** persisted fields.
 For instance, generating an email address that matches a contact's
 name:
 
 ```xml
-<model name="res.partner" count="200">
-    <field name="v_first" virtual="True" generator="fake.first_name"/>
-    <field name="v_last" virtual="True" generator="fake.last_name"/>
-    <field name="name" eval="v_first + ' ' + v_last"/>
-    <field name="email" eval="v_first.lower() + '.' + v_last.lower() + '@example.com'"/>
-</model>
+<create model="res.partner" count="200">
+    <value name="first_name" generator="fake.first_name"/>
+    <value name="last_name" generator="fake.last_name"/>
+    <field name="name" eval="first_name + ' ' + last_name"/>
+    <field name="email" eval="first_name.lower() + '.' + last_name.lower() + '@example.com'"/>
+</create>
 ```
 
-Here `v_first` and `v_last` are generated once and reused, so every
+Here `first_name` and `last_name` are generated once and reused, so every
 record's `name` and `email` stay consistent with each other — without
 either value being stored on its own.
 
-> **Note:** The `v_` prefix is purely a naming convention. A virtual field
-> can have any name (valid python identifier), as long as it doesn't 
-> conflict with another field name in the same model block in the 
-> blueprint.
-
 ## Write Jobs
 
-Use `type="write"` to update records that were created earlier in the
+Use `<write>` to update records that were created earlier in the
 same blueprint, referenced by their `id`/`ref`:
 
 ```xml
 <!-- Create partners -->
-<model name="res.partner" count="500" id="customers">
+<create model="res.partner" count="500" id="customers">
     <field name="name" generator="fake.company"/>
-</model>
-    
+</create>
+
 <!-- Update those same partners -->
-<model name="res.partner" type="write" ref="customers">
+<write model="res.partner" ref="customers">
     <field name="phone" generator="fake.phone_number"/>
-</model>
+</write>
 ```
 
 A `write` block can also use a top-level `domain` to select target
@@ -527,10 +566,10 @@ records:
 
 ```xml
 <!-- Update all active customers -->
-<model name="res.partner" type="write"
+<write model="res.partner"
        domain="[('customer_rank', '>', 0), ('active', '=', True)]">
     <field name="phone" generator="fake.phone_number"/>
-</model>
+</write>
 ```
 
 Targeting rules:
@@ -540,11 +579,75 @@ Targeting rules:
 | `ref` only       | Records created under that populate reference               |
 | `domain` only    | Records of the job model matching the domain                |
 | `ref` + `domain` | Intersection: referenced records that also match the domain |
-| neither          | All existing records of the job model                       |
+| neither          | All records of the job model                                |
 
 Domains on `write` jobs are evaluated once to select the target
-records. They are not dynamic per generated record. Create jobs cannot
-define a top-level `domain`, they don't target records.
+records. They are not dynamic per generated record. If neither `ref`
+nor `domain` is provided, the write job targets all records of the job
+model. Create jobs cannot define a top-level `domain`; they don't
+target existing records.
+
+By default, generated values are produced once per target record and
+written record by record. With `batched="True"`, values are generated
+once for the whole executable job or subjob, and a single ORM `write`
+is performed on that recordset:
+
+```xml
+<write model="res.partner" ref="customers" batched="True">
+    <field name="active" eval="True"/>
+</write>
+```
+
+`batched` is only valid on write and function jobs. Create jobs do not
+accept it, because ORM `create` already receives a list of generated
+values. Large jobs may still be split according to
+`MAX_RECORD_COMMIT_SIZE`.
+
+## Function Jobs
+
+Use `<function>` to call a model method after records have been 
+created. This is useful for models that cannot be created directly
+in their final business state and must go through a transition method.
+For example, `account.move` invoices are created as drafts and posted
+by calling `_post`:
+
+```xml
+<function model="account.move" name="_post" ref="moves" batched="True">
+    <arg name="soft" eval="False"/>
+</function>
+```
+
+Function jobs use the same targeting rules as write jobs:
+
+| Attributes       | Target records                                              |
+|------------------|-------------------------------------------------------------|
+| `ref` only       | Records created under that populate reference               |
+| `domain` only    | Records of the job model matching the domain                |
+| `ref` + `domain` | Intersection: referenced records that also match the domain |
+| neither          | All records of the job model                                |
+
+The `name` attribute is the method name. The method is resolved like
+XML data loading function calls: `@api.model` methods are called on the
+empty model recordset, while regular record methods are called on the
+target records.
+
+Function arguments are declared with `<arg>` and support the same
+generation attributes as `<value>`. Named args are passed as keyword
+arguments. Unnamed XML args are passed as positional arguments in XML
+order and appear as `"0"`, `"1"`, ... in JSON:
+
+```xml
+<function model="x.model" name="action" ref="records">
+    <arg eval="'first positional'"/>
+    <arg eval="42"/>
+    <arg name="flag" eval="True"/>
+</function>
+```
+
+With `batched="False"` (the default), arguments are generated and the
+method is called once per target record. With `batched="True"`, one
+argument set is generated and the method is called once on the target
+recordset of each executable job or subjob.
 
 ## Blueprint Inheritance
 
@@ -558,20 +661,20 @@ to its parent's XML definition:
     <field name="inherit_id" ref="base_module.parent_blueprint"/>
     <field name="definition_xml" type="xml">
         <!-- Change record count -->
-        <model name="res.partner" position="attributes">
+        <create model="res.partner" position="attributes">
             <attribute name="count">2000</attribute>
-        </model>
+        </create>
         <!-- Add a new field to an existing model -->
-        <model name="res.partner" position="inside">
+        <create model="res.partner" position="inside">
             <field name="website" generator="fake.url"/>
-        </model>
+        </create>
         <!-- Add a new model after an existing one -->
-        <model name="res.partner" position="after">
-            <model name="res.users" count="50" id="new_users">
+        <create model="res.partner" position="after">
+            <create model="res.users" count="50" id="new_users">
                 <field name="name" generator="fake.name"/>
                 <field name="login" generator="fake.user_name" unique="True"/>
-            </model>
-        </model>
+            </create>
+        </create>
     </field>
 </record>
 ```
@@ -601,7 +704,7 @@ Pass `-j <N>` (or `-j auto`) to split large jobs across multiple worker
 processes. Each job that exceeds the internal batch size is 
 automatically divided into sub-jobs distributed to the pool.
 
-Parallelism can be disabled per model block with `parallel="False"` when
+Parallelism can be disabled per operation block with `parallel="False"` when
 the model's constraints require sequential writes.
 
 Platform controlled by the environment variable

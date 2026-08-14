@@ -166,44 +166,54 @@ class Session(models.Model):
 
         scaling_factor = self.scaling_factor or 1
         vals_list = []
-        write_target_counts = defaultdict(lambda: defaultdict(int))  # {ref | None: {model_name: count}}
-        for index, model in enumerate(self.blueprint_id.definition):
-            model_name = model['name']
-            ref, _, ref_relation = (part or None for part in model.get('ref', '').partition('.'))
+        created_counts_by_ref = defaultdict(lambda: defaultdict(int))  # {ref | None: {model_name: count}}
+        for index, block in enumerate(self.blueprint_id.definition):
+            model_name = block['model']
+            operation = block['operation']
+            source_ref = block.get('id') if operation == 'create' else block.get('ref')
+            ref, _, ref_relation = (part or None for part in (source_ref or '').partition('.'))
             vals = {
                 'model_name': model_name,
-                'instructions': model['fields'],
+                'operation': operation,
+                'instructions': {
+                    'fields': block.get('fields', {}),
+                    'values': block.get('values', {}),
+                    'args': block.get('args', {}),
+                },
                 'session_id': self.id,
                 'seed': derive_seed_from(self.seed, index),
             }
-            if 'count' in model:
-                factor = scaling_factor if model.get('scale', True) else 1
-                vals['record_count'] = math.floor(model['count'] * factor)
+            if operation == 'function':
+                vals['method_name'] = block['name']
+            if source_ref:
+                vals['ref'] = source_ref
+            if 'count' in block:
+                factor = scaling_factor if block.get('scale', True) else 1
+                vals['record_count'] = math.floor(block['count'] * factor)
 
-            vals.update(**{k: v for k, v in model.items() if k in ('type', 'ref', 'parallel', 'context', 'domain')})
+            vals.update(**{k: v for k, v in block.items() if k in ('parallel', 'context', 'domain', 'batched')})
 
-            defaults = self.env['populate.job'].default_get(['type', 'record_count'])
-            is_create = vals.get('type', defaults['type']) == 'create'
+            defaults = self.env['populate.job'].default_get(['operation', 'record_count'])
 
-            if is_create:
-                write_target_counts[ref][model_name] += vals.get('record_count', defaults['record_count'])
+            if operation == 'create':
+                created_counts_by_ref[ref][model_name] += vals.get('record_count', defaults['record_count'])
             else:
-                # Compute write job record_count:
+                # Compute target job record_count for write/function blocks:
                 # - with 'ref': count from the matching 'create' job
                 # - without 'ref': existing DB records + all preceding 'create' jobs for this model
                 if ref:
-                    assert ref in write_target_counts, f"Create 'refs' should be present before its' writes, missing: {ref}"
+                    assert ref in created_counts_by_ref, f"Create 'refs' should be present before targeted jobs, missing: {ref}"
                     if ref_relation:
                         # The count of the corecords is unknown at creation time.
                         vals['record_count'] = None
                     else:
-                        vals['record_count'] = write_target_counts[ref][model_name]
+                        vals['record_count'] = created_counts_by_ref[ref][model_name]
                 else:
                     domain = Domain(literal_eval(vals['domain'])) if vals.get('domain') else Domain.TRUE
                     existing = self.env[model_name].with_context(active_test=False).search_count(domain)
                     from_creates = sum(
                         counts_by_model.get(model_name, 0)
-                        for counts_by_model in write_target_counts.values()
+                        for counts_by_model in created_counts_by_ref.values()
                     )
                     total = existing + from_creates
                     if total > 0:

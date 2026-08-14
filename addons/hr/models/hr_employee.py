@@ -268,7 +268,7 @@ class HrEmployee(models.Model):
     # Direct subordinates
     parent_id = fields.Many2one('hr.employee', 'Manager', tracking=True, index=True,
                                 domain="['|', ('company_id', '=', False), ('company_id', 'in', allowed_company_ids)]")
-    child_ids = fields.One2many('hr.employee', 'parent_id', string='Direct subordinates')
+    child_ids = fields.One2many('hr.employee', 'parent_id', string='Direct subordinates', domain=[('active', '=', True)])
     child_count = fields.Integer('Direct Subordinates Count', compute='_compute_child_count',
         recursive=True, compute_sudo=True)
 
@@ -729,7 +729,7 @@ class HrEmployee(models.Model):
             current_location = employee.exceptional_location_id or employee[dayfield]
             employee.work_location_type = current_location.location_type
 
-    @api.depends('version_ids.date_version', 'version_ids.active', 'active')
+    @api.depends('version_ids.date_version', 'version_ids.active')
     def _compute_current_version_id(self):
         today = fields.Date.context_today(self)
         for employee in self:

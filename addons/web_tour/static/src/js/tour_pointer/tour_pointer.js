@@ -1,5 +1,5 @@
 import { useLayoutEffect } from "@web/owl2/utils";
-import { Component, props, proxy, signal, t } from "@odoo/owl";
+import { Component, useProps, proxy, signal, t } from "@odoo/owl";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
 import { usePosition } from "@web/core/position/position_hook";
@@ -57,7 +57,7 @@ class TourPointerPopover extends Component {
 
 /** @extends {Component<TourPointerProps, any>} */
 export class TourPointer extends Component {
-    props = props({
+    props = useProps({
         pointerState: t.object({
             trigger: t.instanceOf(HTMLElement).optional(),
             content: t.string().optional(),
@@ -157,7 +157,11 @@ export class TourPointer extends Component {
             const activeEl = uiService.activeElement;
             const pointerAnchor = this.trigger;
             if (pointerAnchor) {
-                this.state.triggerBelow = !activeEl.contains(pointerAnchor);
+                const frameEl =
+                    pointerAnchor.ownerDocument !== document
+                        ? pointerAnchor.ownerDocument.defaultView?.frameElement
+                        : pointerAnchor;
+                this.state.triggerBelow = frameEl ? !activeEl.contains(frameEl) : true;
             }
         };
         useBus(uiService.bus, "active-element-changed", onActiveElementChanged);
@@ -288,6 +292,9 @@ export class TourPointer extends Component {
 
     openContent() {
         clearTimeout(this.closeTimeout);
+        if (!this.trigger) {
+            return;
+        }
         this.state.showContent = true;
         if (this.popover.isOpen) {
             return;

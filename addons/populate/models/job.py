@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import itertools
 import logging
 import math
 import time
@@ -11,10 +12,16 @@ from typing import TYPE_CHECKING, Self
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.fields import Domain
-from odoo.tools import str2bool
+from odoo.tools import SQL
 
-from ..generators import DEFAULT_GENERATORS, Generator, get_fields_vals
-from ..utils.orm import VirtualField, drop_pending_update, get_ref_domain
+from ..generators import DEFAULT_GENERATORS, Generator, generate_values
+from ..utils.expression import check_eval_args
+from ..utils.orm import (
+    ValueTarget,
+    drop_pending_update,
+    get_model_method,
+    get_ref_domain,
+)
 from ..utils.profiling import profiled_execution_scope
 from ..utils.seed import derive_seed_from
 
@@ -58,35 +65,39 @@ class Job(models.Model):
     is_done = fields.Boolean()
 
     ref = fields.Char(help="""Reference the batch of records used by the job.
-    If the job type is 'create' -> Annotates the records for referencing.
-    If the job type is 'write' -> Refers to records with said reference.
+    If the job operation is 'create' -> Annotates the records for referencing.
+    If the job operation is 'write' or 'function' -> Refers to records with said reference.
     """)
     domain = fields.Char(help="Domain selecting target records for jobs that update existing records.")
     model_name = fields.Char(required=True)
+    method_name = fields.Char(help="Method called by function jobs.")
     record_count = fields.Integer(default=1)  # Semantics: 0 <-> None
-    type = fields.Selection([
+    operation = fields.Selection([
         ('create', "Create"),
         ('write', "Write"),
+        ('function', "Function"),
     ], default='create', required=True)
     parallel = fields.Boolean(help="Can the job be executed in parallel?", default=True)
+    batched = fields.Boolean(help="For write/function jobs: generate one value set and perform one call per executable job.")
     context = fields.Json()
     instructions = fields.Json()
 
     _record_count_invariant = models.Constraint(
-        "CHECK (record_count > 0 OR (type = 'write' AND record_count = 0))",
+        "CHECK (record_count > 0 OR (operation IN ('write', 'function') AND record_count = 0))",
         "A job's record_count needs to be a non-zero positive integer. "
-        "Only write jobs are allowed to have no record_count, whose cardinality is unknown at creation time.",
+        "Only write and function jobs are allowed to have no record_count, "
+        "whose cardinality is unknown at creation time.",
     )
     _create_job_without_domain = models.Constraint(
-        "CHECK (type != 'create' OR domain IS NULL OR domain = '')",
+        "CHECK (operation != 'create' OR domain IS NULL OR domain = '')",
         "Create jobs cannot define a domain.",
     )
     # partial unique constraint, subjobs copy the info from parents,
     # and you can have multiple write jobs refer the same created records' ref.
     _unique_ref_per_session = models.UniqueIndex(
-        "(ref, session_id) WHERE parent_id IS NULL AND type = 'create'",
+        "(ref, session_id) WHERE parent_id IS NULL AND operation = 'create'",
         "A job with this reference already exists in this session. "
-        "References must be unique for create-type jobs within a session.",
+        "References must be unique for create operations within a session.",
     )
     _records_idx = models.Index('(model_name, ref, session_id, blueprint_id)')
 
@@ -204,11 +215,13 @@ class Job(models.Model):
                 generators = self.__create_generators(seed or self.seed)
 
             if self.is_executable:
-                match self.type:
+                match self.operation:
                     case 'create':
                         self._execute_create(generators)
                     case 'write':
                         self._execute_write(generators)
+                    case 'function':
+                        self._execute_function(generators)
             else:
                 for subjob in self.pending_subjobs:
                     subjob._execute(generators, seed=seed)
@@ -216,17 +229,20 @@ class Job(models.Model):
     def _execute_create(self, generators: Mapping[str, Generator]):
         """Create records for this job and register their populate references.
 
-        :param generators: Field generators keyed by field name.
+        :param generators: Generators keyed by target name.
         """
         self.ensure_one()
-        assert self.type == 'create'
+        assert self.operation == 'create'
 
         model = self.env[self.model_name]
         records_vals = []
 
         for _ in range(self.record_count):
-            vals = get_fields_vals(generators)
-            records_vals.append(vals)
+            generated = generate_values(generators)
+            records_vals.append({
+                name: generated[name]
+                for name in self.instructions['fields']
+            })
 
         if context := self.context:
             model = model.with_context(**context)
@@ -241,24 +257,109 @@ class Job(models.Model):
     def _execute_write(self, generators: Mapping[str, Generator]):
         """Write generated values on the records targeted by this job.
 
-        :param generators: Field generators keyed by field name.
+        :param generators: Generators keyed by target name.
         """
         self.ensure_one()
-        assert self.type == 'write'
+        assert self.operation == 'write'
+
+        records = self._get_target_records()
+        if not records:
+            return
+
+        def write_vals():
+            generated = generate_values(generators)
+            return {
+                name: generated[name]
+                for name in self.instructions['fields']
+            }
+
+        if self.batched:
+            records.write(write_vals())
+        else:
+            for record in records:
+                record.write(write_vals())
+
+    def _execute_function(self, generators: Mapping[str, Generator]):
+        """Call a method on the records targeted by this job.
+
+        If the method is decorated with @api.model, it's called on an empty recordset.
+
+        :param generators: Generators are keyed by the target name.
+        """
+        self.ensure_one()
+        assert self.operation == 'function'
+
+        model = self.env[self.model_name].with_context(active_test=False)
+        if context := self.context:
+            model = model.with_context(**context)
+
+        def get_method(target):
+            method = get_model_method(target, self.method_name)
+            if method is None:
+                raise ValueError(self.env._(
+                    "Unknown or non-callable method '%(method)s' on '%(model)s'.",
+                    method=self.method_name,
+                    model=self.model_name,
+                ))
+            return method
+
+        def call(target):
+            generated = generate_values(generators)
+            positional = []
+            kwargs = {}
+            for name in self.instructions.get('args', {}):
+                if name.isdecimal():
+                    positional.append((int(name), generated[name]))
+                else:
+                    kwargs[name] = generated[name]
+
+            args = [value for _, value in sorted(positional)]
+            check_eval_args(*args, **kwargs)
+            get_method(target)(*args, **kwargs)
+
+        method = get_method(model)
+        if getattr(method, '_api_model', False):
+            call(model)
+            return
+
+        records = self._get_target_records()
+        if not records:
+            return
+
+        if self.batched:
+            call(records)
+        else:
+            for record in records:
+                call(record)
+
+    def _get_target_records(self) -> Self:
+        """Return the target records selected by this write/function job."""
+        self.ensure_one()
 
         domain = self._get_target_domain()
 
-        slice_kwargs = {}
         if self.parent_id:
             preceding_siblings = self.parent_id.child_ids.filtered(lambda job: job.id < self.id)
-            slice_kwargs['offset'] = sum(job.record_count for job in preceding_siblings)
-            slice_kwargs['limit'] = self.record_count
+            start = sum(job.record_count for job in preceding_siblings)
+            # A subjob may make its records leave the domain, shifting later OFFSET slices:
+            #   OFFSET: [A B | C D] -> remove A,B -> [C D | ]  (C,D skipped)
+            # Hashing IDs keeps every record assigned to the same subjob:
+            #   HASH:   {A B} {C D} -> remove A,B -> {   } {C D}
+            domain &= Domain.custom(to_sql=lambda table: SQL(
+                'MOD(ABS(hashint8(%s)::bigint), %s) BETWEEN %s AND %s',
+                table.id,
+                self.parent_id.record_count,
+                start,
+                start + self.record_count - 1,
+            ))
 
-        records = self.env[self.model_name].with_context(active_test=False).search(domain, **slice_kwargs)
+        model = self.env[self.model_name].with_context(active_test=False)
+        if context := self.context:
+            model = model.with_context(**context)
 
-        for record in records:
-            vals = get_fields_vals(generators)
-            record.write(vals)
+        # Order needs to be stable regardless of mutations to the record fields,
+        # which might be part of the model's default order.
+        return model.search(domain, order='id')
 
     def _get_target_domain(self) -> Domain:
         """Build the ORM domain matching records selected by this job's ``domain`` (+ optional ``ref``)."""
@@ -271,51 +372,63 @@ class Job(models.Model):
         return domain
 
     def __create_generators(self, seed: int) -> Mapping[str, Generator]:
-        """Instantiate field generators from the job instructions.
+        """Instantiate generators from the job instructions.
 
         :param seed: Seed shared by all generators in this job, so generated
-            fields remain deterministic relative to each other.
-        :return: Generator instances keyed by field name.
+            fields and values remain deterministic relative to each other.
+        :return: Generator instances keyed by target name.
         """
         self.ensure_one()
         generators = {}
         model = self.env[self.model_name]
-        valid_fields = self.instructions.keys()
+        field_instructions = self.instructions.get('fields', {})
+        value_instructions = self.instructions.get('values', {})
+        arg_instructions = self.instructions.get('args', {})
+        valid_targets = field_instructions.keys() | value_instructions.keys() | arg_instructions.keys()
         random = Random(seed)
-        for field_name, attrs in self.instructions.items():
-            if str2bool(attrs.get('virtual', False)):
-                field = VirtualField(self.model_name, field_name)
-            else:
-                field = model._fields[field_name]
-
+        target_instructions = itertools.chain(
+            (
+                (model._fields[field_name], attrs)
+                for field_name, attrs in field_instructions.items()
+            ),
+            (
+                (ValueTarget(self.model_name, value_name), attrs)
+                for value_name, attrs in value_instructions.items()
+            ),
+            (
+                (ValueTarget(self.model_name, arg_name), attrs)
+                for arg_name, attrs in arg_instructions.items()
+            ),
+        )
+        for target, attrs in target_instructions:
             if 'generator' in attrs:
                 generator_name = attrs['generator']
             elif 'eval' in attrs:
                 generator_name = 'misc.eval'
-            elif field.type in DEFAULT_GENERATORS:
-                generator_name = DEFAULT_GENERATORS[field.type]
+            elif target.type in DEFAULT_GENERATORS:
+                generator_name = DEFAULT_GENERATORS[target.type]
             else:
                 raise ValueError(self.env._(
-                    "No generator specified for field '%(field)s' of type '%(type)s', "
-                    "and no default generator is registered for that field type.",
-                    field=field_name,
-                    type=field.type,
+                    "No generator specified for target '%(target)s' of type '%(type)s', "
+                    "and no default generator is registered for that target type.",
+                    target=target.name,
+                    type=target.type,
                 ))
 
             generator = Generator.by_name(generator_name)
             kwargs = {
-                'field': field,
+                'target': target,
                 'env': self.env,
                 'random': random,
                 'job': self,
-                'valid_fields': valid_fields,
+                'valid_targets': valid_targets,
                 **generator.convert_to_kwargs(attrs),
             }
             try:
-                generators[field_name] = generator(**kwargs)
+                generators[target.name] = generator(**kwargs)
             except Exception as exc:
                 exc.add_note(self.env._("Generator: '%s'", generator_name))
-                exc.add_note(self.env._("Field: '%s'", field))
+                exc.add_note(self.env._("Target: '%s'", target))
                 if self.ref:
                     exc.add_note(self.env._("Ref: '%s'", self.ref))
                 raise
@@ -328,7 +441,11 @@ class Job(models.Model):
         ref_info = f' [{self.ref}]' if self.ref else ''
 
         if self.is_executable:
-            action = 'Creating' if self.type == 'create' else 'Writing on'
+            action = {
+                'create': 'Creating',
+                'write': 'Writing on',
+                'function': f'Calling {self.method_name} on',
+            }[self.operation]
             count = f' {self.record_count}' if self.record_count else ''
 
             if self.parent_id:
