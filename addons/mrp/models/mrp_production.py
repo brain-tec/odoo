@@ -1747,7 +1747,7 @@ class MrpProduction(models.Model):
         self._unplan_workorders()
         for order in self:
             previous_date_start = None
-            for message in order.message_ids:
+            for message in order.sudo().message_ids:
                 if message.tracking_value_ids.field_id.mapped('name') == ['date_start']:
                     previous_date_start = message.tracking_value_ids.old_value_datetime
                     break
@@ -1799,6 +1799,7 @@ class MrpProduction(models.Model):
                         all_lines |= bom.bom_line_ids.filtered(lambda line:
                             line.child_bom_id.type != 'phantom'
                             and not line._skip_bom_line(order.product_id)
+                            and line.product_id.type == "consu"
                         )
                 missing_lines = all_lines - order.move_raw_ids.bom_line_id
             for move in order.move_raw_ids:
