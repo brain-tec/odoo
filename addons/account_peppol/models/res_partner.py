@@ -278,18 +278,9 @@ class ResPartner(models.Model):
 
     def _get_frontend_writable_fields(self):
         frontend_writable_fields = super()._get_frontend_writable_fields()
-        frontend_writable_fields.update({'routing_identifier'})
+        frontend_writable_fields.update({'routing_scheme', 'routing_endpoint'})
 
         return frontend_writable_fields
-
-    def _get_mandatory_billing_address_fields(self, country_sudo, **kwargs):
-        mandatory_fields = super()._get_mandatory_billing_address_fields(country_sudo, **kwargs)
-
-        sending_method = kwargs.get('invoice_sending_method')
-        if sending_method == 'peppol':
-            mandatory_fields.update({'routing_scheme', 'routing_endpoint', 'invoice_edi_format'})
-
-        return mandatory_fields
 
     @api.model
     def _domain_peppol_do_not_modify_routing_identifier(self):
