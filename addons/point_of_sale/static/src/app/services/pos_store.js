@@ -56,7 +56,7 @@ export const CONSOLE_COLOR = "#F5B427";
 export class PosStore extends WithLazyGetterTrap {
     loadingSkipButtonIsShown = false;
     mainScreen = { name: null, component: null };
-    feedbackScreenAutoSkipDelay = 1000;
+    feedbackScreenAutoSkipDelay = 1500;
     router = usePlugin(PosRouterPlugin);
 
     static excludedLazyGetters = [
@@ -357,9 +357,11 @@ export class PosStore extends WithLazyGetterTrap {
     get idleTimeout() {
         return [
             {
-                timeout: 300000, // 5 minutes
+                timeout: 180000, // 3 minutes
                 action: () =>
-                    this.router.currentScreen() !== "PaymentScreen" && this.navigate("SaverScreen"),
+                    this.router.currentScreen() !== "PaymentScreen" &&
+                    this.saveIfOrder() &&
+                    this.navigate("SaverScreen"),
             },
             {
                 timeout: 120000, // 2 minutes
@@ -367,6 +369,10 @@ export class PosStore extends WithLazyGetterTrap {
                     this.router.currentScreen() === "LoginScreen" && this.navigate("SaverScreen"),
             },
         ];
+    }
+
+    saveIfOrder() {
+        return true;
     }
 
     get customerDisplayUrl() {
