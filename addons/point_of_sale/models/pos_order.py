@@ -956,9 +956,13 @@ class PosOrder(models.Model):
 
         fiscal_position = self.fiscal_position_id
         pos_config = self.config_id
-        move_type = 'out_invoice' if not any(
-            order.is_refund or order.amount_total < 0.0 for order in self
-        ) else 'out_refund'
+        # A document whose total is negative for its type cannot be posted, so the move type
+        # follows the sign of the net amount of the whole group.
+        amount_total = sum(self.mapped('amount_total'))
+        if self.currency_id.is_zero(amount_total):
+            move_type = 'out_refund' if all(order.is_refund for order in self) else 'out_invoice'
+        else:
+            move_type = 'out_invoice' if amount_total > 0.0 else 'out_refund'
         invoice_payment_term_id = (
             self.partner_id.property_payment_term_id.id
             if self.partner_id.property_payment_term_id and any(p.payment_method_id.type == 'pay_later' for p in self.payment_ids)
@@ -1407,27 +1411,34 @@ class PosOrder(models.Model):
         return not self.session_id.update_stock_at_closing or self._force_create_picking_real_time()
 
     def _force_create_picking_real_time(self):
-        return self.company_id.anglo_saxon_accounting and self.to_invoice
+        return (self.company_id.anglo_saxon_accounting and self.to_invoice) or bool(self.refunded_order_id.shipping_date)
 
     def _create_order_picking(self):
         self.ensure_one()
+
+        def _create_pickings_from_order_lines():
+            picking_type = self.config_id.picking_type_id
+            destination_id = picking_type.default_location_dest_id.id
+            if self.partner_id.property_stock_customer:
+                destination_id = self.partner_id.property_stock_customer.id
+            pickings = self.env['stock.picking']._create_picking_from_pos_order_lines(
+                destination_id, self.lines, picking_type, self.partner_id)
+            pickings.write({'pos_session_id': self.session_id.id, 'pos_order_id': self.id, 'origin': self.name})
+            return pickings
+
         if self.picking_ids:
             return
         if self.shipping_date:
-            self.sudo().lines._launch_stock_rule_from_pos_order_lines()
+            if self.is_refund and self.refunded_order_id:
+                # For refunds of ship-later orders, use the picking-based flow
+                # which handles cancellation/reduction of original picking moves
+                _create_pickings_from_order_lines()
+            else:
+                self.sudo().lines._launch_stock_rule_from_pos_order_lines()
         else:
             if self._should_create_picking_real_time():
-                picking_type = self.config_id.picking_type_id
-                if self.partner_id.property_stock_customer:
-                    destination_id = self.partner_id.property_stock_customer.id
-                elif not picking_type or not picking_type.default_location_dest_id:
-                    destination_id = self.env['stock.warehouse']._get_partner_locations()[0].id
-                else:
-                    destination_id = picking_type.default_location_dest_id.id
-
-                pickings = self.env['stock.picking']._create_picking_from_pos_order_lines(destination_id, self.lines, picking_type, self.partner_id)
-                all_pickings = pickings | pickings.backorder_ids
-                all_pickings.write({'pos_session_id': self.session_id.id, 'pos_order_id': self.id, 'origin': self.name})
+                pickings = _create_pickings_from_order_lines()
+                pickings.backorder_ids.write({'pos_session_id': self.session_id.id, 'pos_order_id': self.id, 'origin': self.name})
 
     def add_payment(self, data):
         """Create a new payment for the order"""
