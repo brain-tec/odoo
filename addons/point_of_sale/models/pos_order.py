@@ -911,9 +911,13 @@ class PosOrder(models.Model):
 
         fiscal_position = self.fiscal_position_id
         pos_config = self.config_id
-        move_type = 'out_invoice' if not any(
-            order.is_refund or order.amount_total < 0.0 for order in self
-        ) else 'out_refund'
+        # A document whose total is negative for its type cannot be posted, so the move type
+        # follows the sign of the net amount of the whole group.
+        amount_total = sum(self.mapped('amount_total'))
+        if self.currency_id.is_zero(amount_total):
+            move_type = 'out_refund' if all(order.is_refund for order in self) else 'out_invoice'
+        else:
+            move_type = 'out_invoice' if amount_total > 0.0 else 'out_refund'
         invoice_payment_term_id = (
             self.partner_id.property_payment_term_id.id
             if self.partner_id.property_payment_term_id and any(p.payment_method_id.type == 'pay_later' for p in self.payment_ids)
@@ -1203,10 +1207,13 @@ class PosOrder(models.Model):
         return invoice
 
     def _reconcile_invoice_payments(self, invoice, payment_moves):
+        # Gather the lines with the same rights that reconcile them: a salesperson cannot read the payment moves.
+        invoice = invoice.sudo()
+        payment_moves = payment_moves.sudo()
         receivable_account = self.env["res.partner"]._find_accounting_partner(invoice.partner_id).with_company(self.company_id).property_account_receivable_id
         payment_receivable_lines = payment_moves.pos_payment_ids._get_receivable_lines_for_invoice_reconciliation(receivable_account)
         invoice_receivable_lines = invoice.line_ids.filtered(lambda line: line.account_id == receivable_account and not line.reconciled)
-        (payment_receivable_lines | invoice_receivable_lines).sudo().with_company(invoice.company_id).reconcile()
+        (payment_receivable_lines | invoice_receivable_lines).with_company(invoice.company_id).reconcile()
 
     def cancel_order_from_pos(self):
         draft_orders = self.filtered(lambda o: o.state == 'draft')
