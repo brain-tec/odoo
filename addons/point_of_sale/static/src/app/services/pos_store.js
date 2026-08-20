@@ -185,7 +185,7 @@ export class PosStore extends WithLazyGetterTrap {
         }
         order.payment_ids?.forEach((payment) => {
             if (
-                payment.payment_method_id.payment_method_type === "qr_code" &&
+                payment.payment_method_id.useBankQrCode &&
                 payment.getPaymentStatus() === "waiting"
             ) {
                 payment.setPaymentStatus("retry");
@@ -927,6 +927,13 @@ export class PosStore extends WithLazyGetterTrap {
         order.selectOrderline(line);
         this.numpadMode = "quantity";
     }
+
+    autoCourseAllocation(product) {
+        return null;
+    }
+
+    cleanAutoCourseAllocation(result, allocation) {}
+
     // This method should be called every time a product is added to an order.
     // The configure parameter is available if the orderline already contains all
     // the information without having to be calculated. For example, importing a SO.
