@@ -9,7 +9,7 @@ from odoo import SUPERUSER_ID, api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Command, Domain
 from odoo.http import request
-from odoo.tools import SQL, OrderedSet, float_is_zero, format_amount, is_html_empty
+from odoo.tools import SQL, OrderedSet, float_is_zero, float_round, format_amount, is_html_empty
 from odoo.tools.mail import html_keep_url
 from odoo.tools.urls import urljoin
 
@@ -456,6 +456,9 @@ class SaleOrder(models.Model):
     extra_total_fields = fields.Json(compute="_compute_extra_total_fields")
     is_expired = fields.Boolean(
         string="Is Expired", compute="_compute_is_expired", search="_search_is_expired"
+    )
+    is_unfulfilled = fields.Boolean(
+        string="Unfulfilled Orders", search="_search_is_unfulfilled", store=False
     )
     partner_credit_warning = fields.Text(compute="_compute_partner_credit_warning")
     show_ship_button = fields.Boolean(compute="_compute_show_ship_button")
@@ -1083,6 +1086,20 @@ class SaleOrder(models.Model):
         if operator == "in":
             return expired_domain
         return ["!", "&"] + expired_domain
+
+    def _search_is_unfulfilled(self, operator, value):  # noqa: PLR6301
+        if operator not in {"=", "!="}:
+            return NotImplemented
+
+        if (operator == "=" and value) or (operator == "!=" and not value):
+            effective_operator = "any"
+        else:
+            effective_operator = "not any"
+
+        line_domain = Domain.custom(
+            to_sql=lambda table: SQL("%s < %s", table.qty_delivered, table.product_uom_qty)
+        ) & Domain([("product_id.product_tmpl_id.type", "!=", "service")])
+        return Domain("state", "=", "sale") & Domain("order_line", effective_operator, line_domain)
 
     def _compute_show_ship_button(self):
         self.show_ship_button = False
@@ -1784,10 +1801,10 @@ class SaleOrder(models.Model):
 
         txs_to_be_linked = self.sudo().transaction_ids.filtered(
             lambda tx: (
-                tx.state in ('pending', 'authorized')
+                tx.state in ("pending", "authorized")
                 or (
-                    tx.state == 'done'
-                    and tx.payment_id.move_id.state == 'posted'
+                    tx.state == "done"
+                    and tx.payment_id.move_id.state == "posted"
                     and not tx.payment_id.is_reconciled
                 )
             )
@@ -1958,24 +1975,26 @@ class SaleOrder(models.Model):
         # Manage the creation of invoices in sudo because a salesperson must be able to generate an
         # invoice from a sale order without "billing" access rights. However, he should not be able
         # to create an invoice from scratch.
-        return (
-            self
-            .env["account.move"]
-            .sudo()
-            .with_context(default_move_type="out_invoice")
-            .create(invoice_vals_list)
+        AccountMoveSudo = (
+            self.env["account.move"].sudo().with_context(default_move_type="out_invoice")
         )
+        moves = AccountMoveSudo.browse()
+        for company_id, vals_list_for_company in groupby(
+            invoice_vals_list, lambda vals: vals.get("company_id")
+        ):
+            moves |= AccountMoveSudo.with_company(company_id).create(list(vals_list_for_company))
 
-    # TODO VFE drop unused date param
-    def _create_invoices(self, grouped=False, final=False, date=None):  # noqa: ARG002
+        return moves
+
+    def _create_invoices(self, final=False, grouped=False):
         """Create invoice(s) for the given Sales Order(s).
 
+        :param bool final: if True, refunds will be generated if necessary
         :param bool grouped: if True, invoices are grouped by SO id.
             If False, invoices are grouped by keys returned by :meth:`_get_invoice_grouping_keys`
-        :param bool final: if True, refunds will be generated if necessary
-        :param date: unused parameter
         :returns: created invoices
         :rtype: `account.move` recordset
+
         :raises: UserError if one of the orders has no invoiceable lines.
         """
         if not self.env["account.move"].has_access("create"):
@@ -2737,3 +2756,97 @@ class SaleOrder(models.Model):
     def _can_be_edited_on_portal(self):
         self.ensure_one()
         return self.state in ("draft", "sent")
+
+    # === DASHBOARD METHODS ===#
+
+    @api.model
+    def retrieve_sale_dashboard(self, period_days):
+        """Retrieve statistics for the Sales dashboard for a given period (number of days).
+
+        :param int period_days: The number of days used to filter orders.
+        :return: A dictionary containing all computed dashboard statistics.
+        :rtype: dict
+        """
+        dashboard_data = {
+            "sales_amount": {"total": 0, "gain": None},
+            "orders": {"total": 0, "gain": None},
+            "to_upsell": 0,
+            "to_fulfill": 0,
+            "to_confirm": 0,
+            "to_invoice": 0,
+            "currency_id": self.env.company.currency_id.id,
+        }
+
+        confirmed_domain = Domain("state", "=", "sale")
+
+        current_totals = self._get_sale_period_totals(period_days, confirmed_domain)
+        previous_totals = self._get_sale_period_totals(period_days, confirmed_domain, previous=True)
+
+        self._fill_dashboard_gains(dashboard_data, current_totals, previous_totals)
+
+        dashboard_data.update({
+            "to_upsell": self.search_count(
+                Domain("invoice_status", "=", "upselling") & confirmed_domain
+            ),
+            "to_fulfill": self.search_count(Domain("is_unfulfilled", "=", True) & confirmed_domain),
+            "to_confirm": self.search_count(Domain("state", "in", ["sent"])),
+            "to_invoice": self.search_count(
+                Domain("invoice_status", "=", "to invoice") & confirmed_domain
+            ),
+        })
+
+        return dashboard_data
+
+    def _fill_dashboard_gains(self, dashboard_data, current_totals, previous_totals):
+        """Fill dashboard_data period entries with totals and gain percentages.
+
+        :param dict dashboard_data: The dashboard dict to update in place.
+        :param dict current_totals: Totals for the current period, keyed by metric name.
+        :param dict previous_totals: Totals for the previous period, keyed by metric name.
+        """
+        for key, current_total in current_totals.items():
+            previous_total = previous_totals[key]
+            dashboard_data[key]["total"] = current_total
+            dashboard_data[key]["gain"] = (
+                float_round(
+                    ((current_total - previous_total) / previous_total) * 100,
+                    precision_rounding=0.01,
+                )
+                if previous_total
+                else None
+            )
+
+    def _get_period_domain(self, field, period_days, previous=False):  # noqa: PLR6301
+        """Build a domain to filter records for a given time period.
+
+        :param str field: The datetime field used for date filtering.
+        :param int period_days: Number of days representing the target period.
+        :param bool previous: When True, returns a domain for the previous equivalent period.
+        :return: Domain used to filter records by date range.
+        """
+        if not previous:
+            return Domain(field, ">", f"today -{period_days}d +1d")
+        return Domain(field, ">", f"today -{period_days * 2}d +1d") & Domain(
+            field, "<", f"today -{period_days}d +1d"
+        )
+
+    def _get_sale_period_totals(self, period_days, extra_domain, previous=False):
+        """Calculate aggregated order and sales statistics for a given period.
+
+        :param int period_days: Number of days for the period.
+        :param Domain extra_domain: Additional domain criteria.
+        :param bool previous: When True, computes totals for the previous equivalent period.
+        :return: A dictionary containing total orders and total sales for the given period.
+        :rtype: dict
+        """
+        # sale.report exposes date_order as 'date'
+        period_domain = self._get_period_domain("date", period_days, previous=previous)
+        aggregated_data = self.env["sale.report"]._read_group(
+            domain=period_domain & extra_domain,
+            aggregates=["price_total:sum", "order_reference:count_distinct"],
+        )
+        total_sales, total_orders = aggregated_data[0]
+        return {
+            "orders": total_orders,
+            "sales_amount": float_round(total_sales or 0.0, precision_rounding=0.01),
+        }

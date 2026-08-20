@@ -15,7 +15,7 @@ MODEL_FIELDS_TO_VEHICLE = {
     'transmission': 'transmission', 'model_year': 'model_year', 'electric_assistance': 'electric_assistance',
     'seats': 'seats', 'doors': 'doors', 'default_co2': 'co2',
     'co2_standard': 'co2_standard', 'default_fuel_type': 'fuel_type', 'power': 'power', 'horsepower': 'horsepower',
-    'horsepower_tax': 'horsepower_tax', 'category_id': 'category_id', 'vehicle_range': 'vehicle_range',
+    'category_id': 'category_id', 'vehicle_range': 'vehicle_range',
     'power_unit': 'power_unit', 'range_unit': 'range_unit',
 }
 
@@ -112,7 +112,6 @@ class FleetVehicle(models.Model):
         ('horsepower', 'Horsepower')
         ], 'Power Unit', default='power', required=True)
     horsepower = fields.Float(compute='_compute_horsepower', store=True, readonly=False)
-    horsepower_tax = fields.Float('Horsepower Taxation', compute='_compute_horsepower_tax', store=True, readonly=False)
     power = fields.Float('Power', help='Power in kW of the vehicle',
         compute='_compute_power', store=True, readonly=False)
     co2 = fields.Float('CO₂ Emissions', help='CO2 emissions of the vehicle', compute='_compute_co2',
@@ -133,6 +132,7 @@ class FleetVehicle(models.Model):
         [('futur', 'Incoming'),
          ('open', 'In Progress'),
          ('expired', 'Expired'),
+         ('done', 'Done'),
          ('closed', 'Closed')
         ], string='Last Contract State', compute='_compute_contract_reminder', required=False)
     car_value = fields.Float(string="Catalog Value (Tax Incl.)", tracking=True)
@@ -215,10 +215,6 @@ class FleetVehicle(models.Model):
     @api.depends('model_id')
     def _compute_horsepower(self):
         self._load_fields_from_model(['horsepower'])
-
-    @api.depends('model_id')
-    def _compute_horsepower_tax(self):
-        self._load_fields_from_model(['horsepower_tax'])
 
     @api.depends('model_id')
     def _compute_fuel_type(self):
@@ -334,8 +330,11 @@ class FleetVehicle(models.Model):
             vehicle_data = prepared_data.get(record.id)
             if vehicle_data:
                 diff_time = (vehicle_data['expiration_date'] - current_date).days
-                record.contract_renewal_overdue = diff_time < 0
-                record.contract_renewal_due_soon = not record.contract_renewal_overdue and (diff_time < delay_alert_contract)
+                # A done contract is already taken care of, so it should not warn us anymore.
+                is_done = vehicle_data['state'] == 'done'
+                record.contract_renewal_overdue = not is_done and diff_time < 0
+                record.contract_renewal_due_soon = not is_done and not record.contract_renewal_overdue and (diff_time < delay_alert_contract)
+                # We still show the state so the user knows the contract was handled.
                 record.contract_state = vehicle_data['state']
             else:
                 record.contract_renewal_overdue = False
