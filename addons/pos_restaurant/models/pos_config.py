@@ -10,6 +10,7 @@ class PosConfig(models.Model):
     floor_ids = fields.Many2many('restaurant.floor', string='Restaurant Floors', help='The restaurant floors served by this point of sale.', copy=False)
     default_screen = fields.Selection([('tables', 'Tables'), ('register', 'Register')], string='Default Screen', default='tables')
     use_course_allocation = fields.Boolean(string="Enable Course Allocation")
+    use_show_items_on_course_ticket = fields.Boolean(string="Show Items on Fired Course Ticket", help="Show items again on the fired course ticket in preparation printer")
     floor_plan_settings = fields.Json(string='Floor Plan Settings')
     floor_plan = fields.Json(string='Floor Plan', compute="_compute_floor_plan")
 
@@ -25,10 +26,6 @@ class PosConfig(models.Model):
             if is_restaurant:
                 if 'iface_printbill' not in vals:
                     vals['iface_printbill'] = True
-                if 'show_product_images' not in vals:
-                    vals['show_product_images'] = False
-                if 'show_category_images' not in vals:
-                    vals['show_category_images'] = False
         pos_configs = super().create(vals_list)
         for config in pos_configs:
             if config.module_pos_restaurant:
@@ -147,6 +144,10 @@ class PosConfig(models.Model):
         if with_demo_data:
             self._load_product_demo_data([('data/product_attribute_demo.xml', 'product.pa_sides')])
             convert.convert_file(self._env_with_clean_context(), 'pos_restaurant', 'data/scenarios/restaurant_demo_data.xml', idref=None, mode='init', noupdate=True)
+            self.write({
+                'show_product_images': False,
+                'show_category_images': False,
+            })
         restaurant_categories = self.get_record_by_ref([
             'pos_restaurant.food',
             'pos_restaurant.drinks',

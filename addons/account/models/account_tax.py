@@ -217,6 +217,10 @@ class AccountTax(models.Model):
         help="The country for which this tax is applicable.",
     )
     country_code = fields.Char(related='country_id.code', readonly=True)
+    company_country_code = fields.Char(
+        related='company_id.account_fiscal_country_id.code',
+        string="Fiscal Country Code of the Company",
+    )
     is_used = fields.Boolean(string="Tax used", compute='_compute_is_used')
     repartition_lines_str = fields.Char(string="Repartition Lines", tracking=True, compute='_compute_repartition_lines_str')
     invoice_legal_notes = fields.Html(string="Legal Notes", translate=True, help="Legal mentions that have to be printed on the invoices.")
@@ -1935,9 +1939,13 @@ class AccountTax(models.Model):
 
         # Distribute using the factor first.
         normalize_results = self._normalize_target_factors(target_factors, allow_negative_factors=allow_negative_factors)
+        sum_of_factors = normalize_results['sum_of_factors']
+        plus_delta_factor = normalize_results['plus_sum_of_factors'] / sum_of_factors if sum_of_factors else 0.0
+        neg_delta_factor = normalize_results['neg_sum_of_factors'] / sum_of_factors if sum_of_factors else 0.0
+
         for sign_factor, signed_factors, delta_factor in (
-            (1, normalize_results['plus_factors'], normalize_results['plus_sum_of_factors'] / normalize_results['sum_of_factors']),
-            (-1, normalize_results['neg_factors'], normalize_results['neg_sum_of_factors'] / normalize_results['sum_of_factors']),
+            (1, normalize_results['plus_factors'], plus_delta_factor),
+            (-1, normalize_results['neg_factors'], neg_delta_factor),
         ):
             nb_of_errors = round(abs(delta_amount * delta_factor / precision_rounding))
             remaining_errors = nb_of_errors
@@ -5042,6 +5050,30 @@ class AccountTax(models.Model):
     def unlink_except_tax_used(self):
         if any(self.mapped('is_used')):
             raise ValidationError(self.env._("You cannot delete taxes that are currently in use. Consider archiving them instead."))
+
+    @api.model
+    def _import_retrieve_tax_from_account_default_tax(self, tax_values):
+        account = tax_values.get('account')
+        if not account or not account.tax_ids:
+            return
+
+        return {
+            'criteria': [{
+                'domain': [('id', 'in', account.tax_ids.ids)],
+            }],
+        }
+
+    @api.model
+    def _import_retrieve_tax_from_predicted_tax(self, tax_values):
+        predicted_tax_ids = tax_values.get('predicted_tax_ids')
+        if not predicted_tax_ids:
+            return
+
+        return {
+            'criteria': [{
+                'domain': [('id', 'in', predicted_tax_ids.ids)],
+            }],
+        }
 
     @api.model
     def _import_retrieve_tax_from_price_include_exclude(self, tax_values):
