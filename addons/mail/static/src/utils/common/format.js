@@ -274,22 +274,25 @@ function generateMentionsLinks(
 ) {
     const mentions = [];
     for (const partner of partners) {
-        const placeholder = `@-mention-partner-${partner.id}`;
+        const placeholder = `@-mention-partner-${partner.id}!`;
         const text = `@${thread?.getPersonaName(partner) ?? partner.name}`;
         mentions.push({
             link: generatePartnerMentionElement(partner, thread),
             placeholder,
+            text,
         });
-        body = htmlReplace(body, text, placeholder);
     }
     for (const channel of channels) {
-        const placeholder = `#-mention-channel-${channel.id}`;
+        const placeholder = `#-mention-channel-${channel.id}!`;
         const text = `#${channel.fullNameWithParent}`;
         mentions.push({
             link: generateChannelMentionElement(channel),
             placeholder,
+            text,
         });
-        body = htmlReplace(body, text, placeholder);
+    }
+    for (const mention of mentions.sort((m1, m2) => m2.text.length - m1.text.length)) {
+        body = htmlReplace(body, mention.text, mention.placeholder);
     }
     for (const special of specialMentions) {
         const text = `@${special}`;
