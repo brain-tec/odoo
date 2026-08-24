@@ -130,7 +130,7 @@ class ResCompany(models.Model):
             return
         account_ids = self.env['account.account'].search([
             ('account_type', 'in', ['asset_receivable', 'liability_payable']),
-            ('company_ids', 'in', companies.ids),
+            ('company_ids', 'parent_of', companies.ids),
         ]).ids
         date_company_conditions = SQL(
             '(%s)',
@@ -175,7 +175,7 @@ class ResCompany(models.Model):
     def _check_pdp_identifier(self, pdp_identifier, warning=False):
         return pdp_identifier and PDP_identifier_re.match(pdp_identifier)
 
-    def _reset_peppol_configuration(self):
+    def _reset_peppol_configuration(self, soft=False):
         # Extend `account_peppol` to reset PDP specific fields
         self.write({
             'l10n_fr_pdp_send_to_ppf': True,

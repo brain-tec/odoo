@@ -21,6 +21,18 @@ test("_getProductByBarcode", async () => {
     expect(productByBarcode.id).toEqual(5);
 });
 
+test("_barcodeProductAction", async () => {
+    const store = await setupPosEnv();
+    store.addNewOrder();
+    const order = store.getOrder();
+    const comp = await mountWithCleanup(ProductScreen, { props: { orderUuid: order.uuid } });
+
+    await comp._barcodeProductAction({ base_code: "test_test" });
+
+    expect(order.lines).toHaveLength(1);
+    expect(order.lines[0].product_id.id).toBe(5);
+});
+
 test("fastValidate", async () => {
     const store = await setupPosEnv();
     store.addNewOrder();
@@ -40,4 +52,38 @@ test("fastValidate", async () => {
     expect(order.payment_ids[0].payment_method_id).toEqual(fastPaymentMethod);
     expect(order.state).toBe("paid");
     expect(order.amount_paid).toBe(3.45);
+});
+
+test("addProductToOrder presets the variant matched by default_code search", async () => {
+    const store = await setupPosEnv();
+    store.addNewOrder();
+    const order = store.getOrder();
+    const productTemplate = store.models["product.template"].get(60);
+    store.models["product.product"].get(61).default_code = "BELT-M-REF";
+
+    store.session.state = "opened";
+    const comp = await mountWithCleanup(ProductScreen, { props: { orderUuid: order.uuid } });
+    store.searchProductWord = "BELT-M-REF";
+
+    await comp.addProductToOrder(productTemplate);
+
+    expect(order.lines[0].product_id.id).toBe(61);
+});
+
+test("discarding the product configurator does not open the optional products popup", async () => {
+    const store = await setupPosEnv();
+    store.addNewOrder();
+    const order = store.getOrder();
+    const productTemplate = store.models["product.template"].get(60);
+    productTemplate.update({
+        pos_optional_product_ids: [store.models["product.template"].get(5)],
+    });
+
+    store.session.state = "opened";
+    const comp = await mountWithCleanup(ProductScreen, { props: { orderUuid: order.uuid } });
+
+    comp.addProductToOrder(productTemplate);
+
+    expect(order.lines.length).toBe(0);
+    expect(document.querySelectorAll(".modal").length).toBe(0);
 });
