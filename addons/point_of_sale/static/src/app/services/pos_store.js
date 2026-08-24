@@ -274,6 +274,8 @@ export class PosStore extends WithLazyGetterTrap {
         const orders = this.models["pos.order"].getAll();
         this.device.saveUnusedNumber(orders);
         await this.data.resetIndexedDB();
+        sessionStorage.clear();
+        localStorage.clear();
         const url = new URL(window.location.href);
 
         if (fullReload) {
@@ -904,6 +906,11 @@ export class PosStore extends WithLazyGetterTrap {
         order.selectOrderline(line);
         this.numpadMode = "quantity";
     }
+    // Courses only exist in pos_restaurant, which overrides both hooks.
+    autoCourseAllocation(product) {
+        return null;
+    }
+    cleanAutoCourseAllocation(result, allocation) {}
     // This method should be called every time a product is added to an order.
     // The configure parameter is available if the orderline already contains all
     // the information without having to be calculated. For example, importing a SO.
@@ -1467,6 +1474,7 @@ export class PosStore extends WithLazyGetterTrap {
             (order) =>
                 order.isEmpty() &&
                 !order.finalized &&
+                !order.isSynced &&
                 order.payment_ids.length === 0 &&
                 (!order.partner_id || order.partner_id.id === defaultPartnerId) &&
                 order.pricelist_id?.id === this.config.pricelist_id?.id &&
@@ -2013,8 +2021,7 @@ export class PosStore extends WithLazyGetterTrap {
             this.syncingOrders.add(order.uuid);
             if (this.config.printerCategories.size && !opts.byPassPrint) {
                 try {
-                    let reprint = false;
-                    let orderChange = changesToOrder(
+                    const orderChange = changesToOrder(
                         order,
                         this.config.printerCategories,
                         opts.cancelled
@@ -2026,26 +2033,11 @@ export class PosStore extends WithLazyGetterTrap {
                         orderChange.noteUpdate.length ||
                         orderChange.internal_note ||
                         orderChange.general_customer_note;
-
-                    let shouldPrint = true;
-                    if (!hasChanges) {
-                        if (opts.explicitReprint && order.lastPrints.length) {
-                            orderChange = [order.lastPrints.at(-1)];
-                            reprint = true;
-                        } else {
-                            shouldPrint = false;
-                        }
-                    } else {
+                    if (!order.uiState.isReprinting) {
                         order.pushLastPrints(orderChange);
-                        orderChange = [orderChange];
                     }
-
-                    if (reprint && opts.orderDone) {
-                        shouldPrint = false;
-                    }
-
-                    if (shouldPrint) {
-                        isPrinted = await this.printChanges(order, orderChange, reprint);
+                    if (hasChanges) {
+                        isPrinted = await this.printChanges(order, [orderChange]);
                     }
                 } catch (e) {
                     logPosMessage(

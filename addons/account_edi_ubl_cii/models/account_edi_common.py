@@ -48,6 +48,7 @@ UOM_TO_UNECE_CODE = {
 # -------------------------------------------------------------------------
 # ELECTRONIC ADDRESS SCHEME (EAS), see https://docs.peppol.eu/poacc/billing/3.0/codelist/eas/
 # -------------------------------------------------------------------------
+DEPRECATED_PEPPOL_EAS = {'0037', '0213', '9955', '0193'}
 EAS_MAPPING = {
     'AD': {'9922': 'vat'},
     'AE': {'0235': 'vat'},
@@ -103,13 +104,13 @@ EAS_MAPPING = {
     # DOM-TOM
     'BL': {'0009': 'siret', '9957': 'vat', '0002': None},  # Saint Barthélemy
     'GF': {'0009': 'siret', '9957': 'vat', '0002': None},  # French Guiana
-    'GP': {'0009': 'siret', '9957': 'vat', '0002': None},  # Guadeloupe
+    'GP': {'0225': 'peppol_endpoint', '0009': 'siret', '9957': 'vat', '0002': None},  # Guadeloupe
     'MF': {'0009': 'siret', '9957': 'vat', '0002': None},  # Saint Martin
-    'MQ': {'0009': 'siret', '9957': 'vat', '0002': None},  # Martinique
+    'MQ': {'0225': 'peppol_endpoint', '0009': 'siret', '9957': 'vat', '0002': None},  # Martinique
     'NC': {'0009': 'siret', '9957': 'vat', '0002': None},  # New Caledonia
     'PF': {'0009': 'siret', '9957': 'vat', '0002': None},  # French Polynesia
     'PM': {'0009': 'siret', '9957': 'vat', '0002': None},  # Saint Pierre and Miquelon
-    'RE': {'0009': 'siret', '9957': 'vat', '0002': None},  # Réunion
+    'RE': {'0225': 'peppol_endpoint', '0009': 'siret', '9957': 'vat', '0002': None},  # Réunion
     'TF': {'0009': 'siret', '9957': 'vat', '0002': None},  # French Southern and Antarctic Lands
     'WF': {'0009': 'siret', '9957': 'vat', '0002': None},  # Wallis and Futuna
     'YT': {'0009': 'siret', '9957': 'vat', '0002': None},  # Mayotte
@@ -226,7 +227,7 @@ GST_COUNTRY_CODES = {
 EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES = {
     # EU Member States
     'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE',
-    'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'CH',
+    'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE',
 
     # EFTA Countries in the EEA
     'IS', 'LI', 'NO',
@@ -420,16 +421,18 @@ class AccountEdiCommon(models.AbstractModel):
             else:
                 return 'S'  # standard VAT
 
-        if supplier.country_id.code in EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES and supplier.vat:
+        supplier_in_eea = supplier.country_id.code in EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES
+        customer_in_eea = customer.country_id.code in EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES
+
+        if (supplier_in_eea or customer_in_eea) and supplier.vat:
             if tax.amount != 0 and not tax.has_negative_factor:
                 # Special case: Purchase reverse-charge taxes for self-billed invoices.
                 # See explanation above.
                 # In the XML we put the zero-percent tax with code 'G' or 'K' that the buyer would have used.
                 return 'S'
-            if customer.country_id.code not in EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES:
-                return 'G'
-            if customer.country_id.code in EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES:
+            if supplier_in_eea and customer_in_eea:
                 return 'K'
+            return 'G'
 
         if tax.amount != 0:
             return 'S'

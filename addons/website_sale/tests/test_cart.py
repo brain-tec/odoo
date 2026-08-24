@@ -134,6 +134,32 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon):
                     quantity=1,
                 )
 
+    def test_add_to_cart_zero_price_product_with_no_variant_extra(self):
+        """Ensure that a zero-priced product with a no-variant attribute
+        extra price can be added to cart.
+        """
+        self.website.prevent_zero_price_sale = True
+        self.product.list_price = 0
+        self.product.product_tmpl_id.attribute_line_ids = [
+            Command.create({
+                'attribute_id': self.no_variant_attribute.id,
+                'value_ids': [Command.set(self.no_variant_attribute.value_ids.ids)],
+            })
+        ]
+        ptav = self.product.product_tmpl_id.attribute_line_ids.product_template_value_ids[0]
+        ptav.price_extra = 100
+        website = self.website.with_user(self.public_user)
+
+        with MockRequest(website.env, website=website) as request:
+            self.WebsiteSaleCartController.add_to_cart(
+                product_template_id=self.product.product_tmpl_id.id,
+                product_id=self.product.id,
+                no_variant_attribute_value_ids=ptav.ids,
+                quantity=1,
+            )
+
+        self.assertEqual(request.cart.order_line.product_no_variant_attribute_value_ids, ptav)
+
     def test_update_cart_before_payment(self):
         website = self.website.with_user(self.public_user)
         with MockRequest(website.env, website=website) as request:
@@ -582,3 +608,26 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon):
             # We shouldn't find any abandonned cart if the customer isn't allowed to
             # buy from this website (because their contact belongs to another company)
             self.assertFalse(request.cart)
+
+    def test_shop_payment_validate_does_not_confirm_empty_order(self):
+        """Test that an order with no order lines is not confirmed by shop_payment_validate."""
+        website = self.env.ref("website.default_website")
+        order = self.env["sale.order"].create(
+            {
+                "partner_id": self.env.ref("base.public_partner").id,
+                "website_id": website.id,
+            }
+        )
+        with MockRequest(self.env, website=website) as request:
+            request.session["sale_order_id"] = order.id
+            request.session["sale_last_order_id"] = order.id
+            try:
+                WebsiteSale().shop_payment_validate()
+            except ValidationError:
+                pass
+
+        self.assertNotEqual(
+            order.state,
+            "sale",
+            "An empty cart should never be confirmed as a sale order.",
+        )
