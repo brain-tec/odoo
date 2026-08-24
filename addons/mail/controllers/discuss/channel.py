@@ -106,6 +106,17 @@ class DiscussChannelWebclientController(WebclientController):
         ):
             member.is_favorite = is_favorite
 
+    @store_handler(
+        "/discuss/channel/meeting_to_group_chat", audience="everyone", readonly=True,
+    )
+    def store_convert_meeting_to_group_chat(self, store: Store, channel_id):
+        if channel := request.env["discuss.channel"].search([("id", "=", channel_id)]):
+            channel.default_display_mode = False
+            notification = Markup(
+                '<div class="o_mail_notification" data-oe-type="meeting_to_group_chat">%s</div>',
+            ) % self.env._("%(user)s converted this meeting into a group chat") % {"user": self.env.user.name}
+            channel.message_post(body=notification, subtype_xmlid="mail.mt_important_notification")
+
     @store_handler("/discuss/channel/messages", audience="everyone", readonly=False)
     def store_get_discuss_channel_messages(self, store: Store, channel_id, fetch_params=None):
         channel = request.env["discuss.channel"].search([("id", "=", channel_id)])
@@ -336,6 +347,16 @@ class ChannelController(http.Controller):
         if not channel_member:
             raise NotFound()
         channel_member.unlink()
+
+    @mail_route("/discuss/channel/member/resend_invitation", methods=["POST"], type="jsonrpc", auth="user")
+    def discuss_channel_member_resend_invitation(self, member_id):
+        channel_member = request.env["discuss.channel.member"].search([("id", "=", member_id)])
+        if not channel_member or not channel_member.invitation_sent_dt:
+            raise NotFound()
+        channel = channel_member.channel_id
+        if not channel.self_member_id:
+            raise AccessError(self.env._("Only members can send the invitation link again."))
+        channel.invite_by_email([channel_member.guest_id.email or channel_member.partner_id.email])
 
     @mail_route("/discuss/channel/member/set_role", methods=["POST"], type="jsonrpc", auth="public")
     def discuss_channel_set_channel_member_role(self, member_id, channel_role):
