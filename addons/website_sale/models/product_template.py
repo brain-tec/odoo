@@ -5,6 +5,8 @@ import random
 from collections import defaultdict
 from urllib.parse import urlencode, urlparse
 
+from psycopg2 import sql
+
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Domain
@@ -79,6 +81,12 @@ class ProductTemplate(models.Model):
         sanitize_attributes=False,
         sanitize_form=False,
     )
+    dropzone_above_price = fields.Html(
+        string="Drop Zone Above Price", translate=html_translate, sanitize_overridable=True
+    )
+    dropzone_above_specification = fields.Html(
+        string="Drop Zone Above Specification", translate=html_translate, sanitize_overridable=True
+    )
 
     alternative_product_ids = fields.Many2many(
         string="Alternative Products",
@@ -127,6 +135,7 @@ class ProductTemplate(models.Model):
     website_size_x = fields.Integer(string="Size X", default=1)
     website_size_y = fields.Integer(string="Size Y", default=1)
     website_ribbon_id = fields.Many2one(string="Ribbon", comodel_name="product.ribbon")
+    minimum_quantity = fields.Integer(string="Minimum Quantity")
     website_sequence = fields.Integer(
         string="Website Sequence",
         help="Determine the display order in the Website E-commerce",
@@ -222,6 +231,12 @@ class ProductTemplate(models.Model):
                 RARE_DELIMITER,
             )
         )
+
+    # === CONSTRAINTS === #
+
+    _minimum_quantity_non_negative = models.Constraint(
+        "CHECK(minimum_quantity >= 0)", "The minimum quantity must be greater than or equal to 0."
+    )
 
     # === COMPUTE METHODS ===#
 
@@ -958,6 +973,18 @@ class ProductTemplate(models.Model):
         if not self.env.context.get("website_sale_product_page"):
             return combination_info
 
+        if product_or_template.minimum_quantity and product_or_template.is_product_variant:
+            product_sudo = product_or_template.sudo()
+            minimum_quantity = request.cart._get_remaining_minimum_qty(product_sudo, uom=uom)
+            if minimum_quantity > 1:
+                combination_info.update({
+                    "minimum_qty": minimum_quantity,
+                    "minimum_qty_reached_message": self.env._(
+                        "The minimum quantity to purchase this product is %(min_qty)s.",
+                        min_qty=minimum_quantity,
+                    ),
+                })
+
         if product_or_template.type == "combo":
             # The max quantity of a combo product is the max quantity of its combo with the lowest
             # max quantity. If none of the combos has a max quantity, then the combo product also
@@ -1159,12 +1186,12 @@ class ProductTemplate(models.Model):
         )
         prod_tmpl_ids = self.env.cr.dictfetchall()
         max_seq = self._default_website_sequence()
-        query = f"""
-            UPDATE {self._table}
+        query = sql.SQL("""
+            UPDATE {}
             SET website_sequence = p.web_seq
             FROM (VALUES %s) AS p(p_id, web_seq)
             WHERE id = p.p_id
-        """
+        """).format(sql.Identifier(self._table))
         values_args = [
             (prod_tmpl["id"], max_seq + i * 5) for i, prod_tmpl in enumerate(prod_tmpl_ids)
         ]

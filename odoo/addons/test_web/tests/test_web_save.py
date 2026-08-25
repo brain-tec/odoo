@@ -1,5 +1,6 @@
 from odoo.addons.base.tests.files import JPG_B64, JPG_RAW, SVG_B64, SVG_RAW
 from odoo.tests.common import tagged, TransactionCase
+from odoo.tools import BinaryBytes
 
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
@@ -41,8 +42,9 @@ class TestWebSave(TransactionCase):
             {'name': 'test', 'image_wo_attachment': SVG_B64},
             {'image_wo_attachment': {}, 'image_wo_attachment_related': {}},
         )
-        self.assertEqual(result['image_wo_attachment'], '322.00 bytes')
-        self.assertEqual(result['image_wo_attachment_related'], '322.00 bytes')
+        expected = {'checksum': BinaryBytes(SVG_RAW).checksum, 'size': 322}
+        self.assertEqual(result['image_wo_attachment'], expected)
+        self.assertEqual(result['image_wo_attachment_related'], expected)
 
         # check cache values
         record = self.env['test_orm.binary_svg'].browse(result['id'])
@@ -60,8 +62,9 @@ class TestWebSave(TransactionCase):
             {'image_wo_attachment': JPG_B64},
             {'image_wo_attachment': {}, 'image_wo_attachment_related': {}},
         )
-        self.assertEqual(result['image_wo_attachment'], '29.47 Kb')
-        self.assertEqual(result['image_wo_attachment_related'], '29.47 Kb')
+        expected = {'checksum': record.image_wo_attachment.checksum, 'size': record.image_wo_attachment.size}
+        self.assertEqual(result['image_wo_attachment'], expected)
+        self.assertEqual(result['image_wo_attachment_related'], expected)
 
         # check cache values
         self.assertEqual(record.image_wo_attachment.content, JPG_RAW)

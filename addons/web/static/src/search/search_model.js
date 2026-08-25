@@ -1169,6 +1169,15 @@ export class SearchModel extends EventBus {
         });
     }
 
+    switchGroupBySort() {
+        if (this.orderByCount === "Desc") {
+            this.orderByCount = "Asc";
+        } else {
+            this.orderByCount = "Desc";
+        }
+        this._notify();
+    }
+
     /**
      * Generate the searchItems corresponding to the properties.
      * @param {Object} searchItem
@@ -2074,7 +2083,12 @@ export class SearchModel extends EventBus {
             if (type === "field") {
                 facet.title = title;
             } else {
-                facet.icon = FACET_ICONS[type];
+                if (type === "groupBy" && this.orderByCount) {
+                    facet.icon =
+                        FACET_ICONS[this.orderByCount === "Asc" ? "groupByAsc" : "groupByDesc"];
+                } else {
+                    facet.icon = FACET_ICONS[type];
+                }
                 facet.color = FACET_COLORS[type];
             }
             if (tooltip) {

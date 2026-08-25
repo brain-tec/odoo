@@ -70,8 +70,8 @@
                     </group>
                     <group style="justify-content: unset;">
                         <group name="configuration" id="configuration" string="Configuration">
-                            <label for="allows_negative" invisible="not requires_allocation"/>
-                            <div class="gap-2 d-flex align-items-center align-items-sm-start text-nowrap" invisible="not requires_allocation">
+                            <label name="label_negative_cap" for="allows_negative" invisible="not requires_allocation"/>
+                            <div name="div_negative_cap" class="gap-2 d-flex align-items-center align-items-sm-start text-nowrap" invisible="not requires_allocation">
                                 <field name="allows_negative" nolabel="1"/>
                                 <div invisible="not allows_negative" class="gap-2 d-flex">
                                     <span>up to</span>
@@ -86,6 +86,7 @@
                             <field name="support_document"/>
                             <field name="elligible_for_accrual_rate" readonly="count_as != 'absence'"/>
                             <field name="allow_request_on_top" invisible="count_as == 'absence'"/>
+                            <field name="create_calendar_meeting" invisible="count_as == 'absence'"/>
                         </group>
                     </group>
                 </page>

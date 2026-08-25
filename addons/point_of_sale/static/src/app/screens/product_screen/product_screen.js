@@ -368,16 +368,18 @@ export class ProductScreen extends Component {
             return;
         }
 
-        const allocation = this.autoCourseAllocation(product);
-        const result = await this.pos.addLineToCurrentOrder(
+        const allocation = this.pos.autoCourseAllocation(product);
+        const line = await this.pos.addLineToCurrentOrder(
             { product_id: product, product_tmpl_id: product.product_tmpl_id },
             { code },
             product.needToConfigure()
         );
-        this.cleanAutoCourseAllocation(result, allocation);
+        this.pos.cleanAutoCourseAllocation(line, allocation);
 
         this.numberBuffer.reset();
-        this.showOptionalProductPopupIfNeeded(product);
+        if (line) {
+            this.showOptionalProductPopupIfNeeded(product);
+        }
     }
     async _getPartnerByBarcode(code) {
         let partner = this.pos.models["res.partner"].getBy("barcode", code.code);
@@ -439,9 +441,15 @@ export class ProductScreen extends Component {
             vals.qty = qty.value;
         }
 
-        await this.pos.addLineToCurrentOrder(vals, { code: lotBarcode }, product.needToConfigure());
+        const line = await this.pos.addLineToCurrentOrder(
+            vals,
+            { code: lotBarcode },
+            product.needToConfigure()
+        );
         this.numberBuffer.reset();
-        this.showOptionalProductPopupIfNeeded(product);
+        if (line) {
+            this.showOptionalProductPopupIfNeeded(product);
+        }
     }
     displayAllControlPopup() {
         this.dialog.add(ControlButtonsPopup);
@@ -466,16 +474,21 @@ export class ProductScreen extends Component {
         }
         const options = {};
         if (this.searchWord && product.isConfigurable()) {
-            const barcode = this.searchWord;
+            const searchWord = this.searchWord;
             const searchedProduct = product.product_variant_ids.filter(
-                (p) => p.barcode && p.barcode.includes(barcode)
+                (p) =>
+                    (p.barcode && p.barcode.includes(searchWord)) ||
+                    (p.default_code &&
+                        p.default_code.toLowerCase().includes(searchWord.toLowerCase()))
             );
             if (searchedProduct.length === 1) {
                 options["presetVariant"] = searchedProduct[0];
             }
         }
         const line = await this.pos.addLineToCurrentOrder({ product_tmpl_id: product }, options);
-        this.showOptionalProductPopupIfNeeded(product);
+        if (line) {
+            this.showOptionalProductPopupIfNeeded(product);
+        }
 
         return line;
     }
@@ -493,45 +506,6 @@ export class ProductScreen extends Component {
             await this.pos.validateOrderFast(paymentMethod);
         } finally {
             this.isValidatingOrder = false;
-        }
-    }
-
-    autoCourseAllocation(product) {
-        const config = this.pos.config;
-        if (!config.module_pos_restaurant || !config.use_course_allocation) {
-            return null;
-        }
-
-        const order = this.pos.getOrder();
-
-        const categories = product.pos_categ_ids
-            .map((c) => c.id)
-            .includes(this.pos.selectedCategory?.id)
-            ? [this.pos.selectedCategory]
-            : product.pos_categ_ids;
-
-        const courseCandidate = categories
-            .map((c) => c.course_id)
-            .filter(Boolean)
-            .sort((a, b) => a.sequence - b.sequence);
-
-        if (courseCandidate.length === 0) {
-            return null;
-        }
-
-        let isNew = false;
-        let course = order.course_ids.find((c) => c.name === courseCandidate[0].name);
-        if (!course) {
-            isNew = true;
-            course = this.pos.addCourse({ backendCourse: courseCandidate[0] });
-        }
-
-        order.selectCourse(course);
-        return { course, isNew };
-    }
-    cleanAutoCourseAllocation(result, allocation) {
-        if (!result && allocation?.isNew) {
-            allocation.course.delete();
         }
     }
 }
