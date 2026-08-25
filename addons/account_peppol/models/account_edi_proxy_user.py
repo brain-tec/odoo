@@ -216,16 +216,7 @@ class Account_Edi_Proxy_ClientUser(models.Model):
         credit_note_type_code = xml_tree.findtext('.//{*}CreditNoteTypeCode')
         if invoice_type_code in ['389', '527'] or credit_note_type_code == '261':
             # 329/527: Self-billing invoice; 261: Self-billing credit note
-            sale_journal_domain = [
-                *self.env['account.journal']._check_company_domain(self.company_id),
-                ('type', '=', 'sale'),
-            ]
-            journal = self.env['account.journal'].search(
-                [*sale_journal_domain, ('is_self_billing', '=', True)],
-                limit=1,
-            )
-            if not journal:
-                journal = self.env['account.journal'].search(sale_journal_domain, limit=1)
+            journal = self._peppol_get_import_sale_journal(self.company_id)
             move_type = 'out_invoice' if invoice_type_code else 'out_refund'
         return journal, move_type
 
@@ -271,23 +262,31 @@ class Account_Edi_Proxy_ClientUser(models.Model):
                     'Error while receiving the document from Peppol Proxy: %s', e.message)
                 continue
 
-            message_uuids = [
-                message['uuid']
-                for message in messages.get('messages', [])
+            received_messages = messages.get('messages', [])
+            # Edge case: self-addressed messages (sender == receiver), i.e. a company genuinely
+            # invoicing itself. The outgoing invoice already carries the message UUID, so the
+            # duplicate check would wrongly discard the incoming document.
+            # Exclude those messages from the check so the vendor bill can still be created.
+            uuids_to_check = [
+                message['uuid'] for message in received_messages
+                if message.get('sender') and message['sender'] != message['receiver']
             ]
-            # remove the duplicates
-            if duplicate_message_uuids := list(edi_user._peppol_get_duplicate_message_uuids(message_uuids)):
-                message_uuids = list(set(message_uuids) - set(duplicate_message_uuids))
-                # acknowledge the duplicates on IAP side.
+            # Acknowledge the duplicates on IAP side.
+            if duplicate_message_uuids := edi_user._peppol_get_duplicate_message_uuids(uuids_to_check):
                 edi_user._call_peppol_proxy(
                     endpoint=edi_user._get_peppol_proxy_endpoint('1/ack'),
-                    params={'message_uuids': duplicate_message_uuids},
+                    params={'message_uuids': list(duplicate_message_uuids)},
                 )
                 _logger.info(
                     "Messages with UUID %s could not be imported because they are identified as duplicates",
                     ', '.join(duplicate_message_uuids)
                 )
 
+            # Remove the duplicates
+            message_uuids = [
+                message['uuid'] for message in received_messages
+                if message['uuid'] not in duplicate_message_uuids
+            ]
             if not message_uuids:
                 continue
 
@@ -321,6 +320,15 @@ class Account_Edi_Proxy_ClientUser(models.Model):
         enc_key = content["enc_key"]
         document_content = content["document"]
         return self._decrypt_data(document_content, enc_key)
+
+    def _peppol_get_import_sale_journal(self, company):
+        return self.env['account.journal'].search(
+            [
+                *self.env['account.journal']._check_company_domain(company),
+                ('type', '=', 'sale'),
+            ],
+            limit=1,
+        )
 
     def _peppol_process_new_messages(self, messages):
         self.ensure_one()
