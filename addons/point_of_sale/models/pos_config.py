@@ -10,10 +10,11 @@ from babel.dates import format_date
 import odoo.release
 from odoo import SUPERUSER_ID, Command, _, api, fields, models, tools
 from odoo.exceptions import AccessError, UserError, ValidationError
+from odoo.fields import Domain
 from odoo.http import request
 from odoo.tools import SQL, convert
-from odoo.fields import Domain
 from odoo.tools.misc import get_lang
+from odoo.tools.translate import mark_as_copy
 
 DEFAULT_LIMIT_LOAD_PRODUCT = 5000
 DEFAULT_LIMIT_LOAD_PARTNER = 100
@@ -67,7 +68,7 @@ class PosConfig(models.Model):
     def _default_partner(self):
         return self.sudo()._get_or_create_default_partner()
 
-    name = fields.Char(string='Point of Sale', required=True, translate=True, help="An internal identification of the point of sale.")
+    name = fields.Char(string='Point of Sale', required=True, translate=True, help="An internal identification of the point of sale.", copy=mark_as_copy('name'))
     preparation_printer_ids = fields.Many2many('pos.printer', 'pos_config_printer_rel', 'config_id', 'printer_id', string="Preparation Printers", domain="[('use_type', '=', 'preparation')]")
     receipt_printer_ids = fields.Many2many('pos.printer', 'pos_config_receipt_printer_rel', 'config_id', 'printer_id', string="Receipt Printers", domain="[('use_type', '=', 'receipt')]")
     use_order_printer = fields.Boolean('Order Printer')
@@ -87,6 +88,17 @@ class PosConfig(models.Model):
         required=True,
         default=_default_partner,
         check_company=True)
+    session_closing_mode = fields.Selection(
+        [('daily', 'Daily'), ('closing', 'At closing')],
+        string='Closing Mode',
+        default='daily',
+        readonly=True,
+    )
+    session_closing_daily_hour = fields.Float(
+        string='Daily Closing Hour',
+        default=4.0,
+        help="The hour at which the session will be automatically closed when the closing mode is set to 'Daily'.",
+    )
     currency_id = fields.Many2one('res.currency', compute='_compute_currency', store=True, compute_sudo=True, string="Currency")
     order_seq_id = fields.Many2one('ir.sequence', string='Order Sequence', readonly=True, copy=False)
     order_backend_seq_id = fields.Many2one('ir.sequence', string='Order Backend Sequence', readonly=True, copy=False)
@@ -185,7 +197,6 @@ class PosConfig(models.Model):
     use_closing_entry_by_product = fields.Boolean(
         string='Closing Entry by product',
         help="Display the breakdown of sales lines by product in the automatically generated closing entry.")
-    order_edit_tracking = fields.Boolean(string="Track orders edits", help="Store edited orders in the backend", default=False)
     last_data_change = fields.Datetime(string='Last Write Date', readonly=True, compute='_compute_local_data_integrity', store=True)
     fallback_nomenclature_id = fields.Many2one('barcode.nomenclature', string="Fallback Nomenclature")
     use_custom_receipt_info = fields.Boolean(string="Customise info", default=False, help="Fill in if your shop does not have the same info as your company")
@@ -787,14 +798,6 @@ class PosConfig(models.Model):
         if 'use_order_printer' in vals:
             self._update_preparation_printers_menuitem_visibility()
         return result
-
-    def copy_data(self, default=None):
-        default = dict(default or {})
-        vals_list = super().copy_data(default=default)
-        if 'name' not in default:
-            for config, vals in zip(self, vals_list):
-                vals['name'] = _("%s (copy)", config.name)
-        return vals_list
 
     def link_category_form_pos(self, category):
         self.ensure_one()

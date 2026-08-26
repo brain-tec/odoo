@@ -11,6 +11,7 @@ from odoo.fields import Domain
 from odoo.exceptions import UserError, ValidationError, RedirectWarning
 from odoo.models import Query, TableSQL
 from odoo.tools import SQL
+from odoo.tools.translate import mark_as_copy
 
 
 ACCOUNT_REGEX = re.compile(r'(?:(\S*\d+\S*))?(.*)')
@@ -37,7 +38,7 @@ class AccountAccount(models.Model):
             if account.account_type in ('asset_receivable', 'liability_payable') and not account.reconcile:
                 raise ValidationError(_('You cannot have a receivable/payable account that is not reconcilable. (account code: %s)', account.code))
 
-    name = fields.Char(string="Account Name", required=True, index='trigram', tracking=True, translate=True)
+    name = fields.Char(string="Account Name", required=True, index='trigram', tracking=True, translate=True, copy=mark_as_copy('name'))
     description = fields.Text(translate=True)
     currency_id = fields.Many2one('res.currency', string='Account Currency', tracking=True,
         help="Forces all journal items in this account to have a specific currency (i.e. bank journals). If no currency is set, entries can use any currency.")
@@ -927,7 +928,6 @@ class AccountAccount(models.Model):
         vals_list = super().copy_data(default)
         default = default or {}
         cache = defaultdict(set)
-
         for account, vals in zip(self, vals_list):
             company_ids = self._fields['company_ids'].convert_to_cache(vals['company_ids'], self.browse())
             companies = self.env['res.company'].browse(company_ids)
@@ -942,20 +942,7 @@ class AccountAccount(models.Model):
                     vals['code_mapping_ids'].append(Command.create({'company_id': company.id, 'code': new_code}))
                     cache[company.id].add(new_code)
 
-            if 'name' not in default:
-                vals['name'] = self.env._("%s (copy)", account.name or '')
-
         return vals_list
-
-    def copy_translations(self, new, excluded=()):
-        super().copy_translations(new, excluded=tuple(excluded)+('name',))
-        if new.name == self.env._('%s (copy)', self.name):
-            name_field = self._fields['name']
-            assert name_field.translate
-            name_field._update_cache(new.with_context(prefetch_langs=True), {
-                lang: self.env._('%s (copy)', tr)
-                for lang, tr in name_field._get_stored_translations(self).items()
-            }, dirty=True)
 
     @api.model
     def _load_precommit_update_opening_move(self):

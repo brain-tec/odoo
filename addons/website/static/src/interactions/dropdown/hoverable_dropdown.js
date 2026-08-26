@@ -1,7 +1,7 @@
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
-import { SIZES, utils as uiUtils } from "@web/core/ui/ui_service";
+import { SIZES, utils as uiUtils } from "@web/core/ui/ui_utils";
 
 export class HoverableDropdown extends Interaction {
     static selector = "header.o_hoverable_dropdown";
@@ -13,7 +13,6 @@ export class HoverableDropdown extends Interaction {
         ".nav:not(.o_mega_menu_is_offcanvas) .o_mega_menu": {
             "t-att-style": () => ({
                 "margin-top": this.isSmall() ? "" : "0 !important",
-                top: this.isSmall() ? "" : "unset",
             }),
         },
         _window: {

@@ -1,4 +1,5 @@
 import { Store as BaseStore, fields, makeStore } from "@mail/model/export";
+import { formatLocalDateTime, resolveTimeZoneName } from "@mail/utils/common/dates";
 import {
     attClassObjectToString,
     generateEmojisOnHtml,
@@ -89,6 +90,59 @@ export class Store extends BaseStore {
     });
     /** local settings of the current device (not stored server side) */
     settings = fields.One("Settings", { compute: () => ({}) });
+
+    /**
+     * @param {import("luxon").DateTime<true>} [datetime]
+     * @returns {number} days from the start of today, 1 being tomorrow
+     */
+    daysUntil(datetime) {
+        if (!datetime) {
+            return 0;
+        }
+        return datetime.diff(this.startOfToday, "days").days;
+    }
+
+    /**
+     * @param {string} [tz]
+     * @returns {string|null}
+     */
+    localTimeIn(tz) {
+        const partnerTz = resolveTimeZoneName(tz);
+        const selfTz = resolveTimeZoneName(this.self?.tz);
+        if (
+            !partnerTz ||
+            !selfTz ||
+            [partnerTz, selfTz].includes("local") ||
+            partnerTz === selfTz
+        ) {
+            return null;
+        }
+        return formatLocalDateTime(partnerTz, selfTz, this.startOfMinute);
+    }
+
+    /**
+     * Start of the current minute, made again when the minute changes:
+     * nothing observes the clock, so what shows a time reads this.
+     */
+    get startOfMinute() {
+        return this.computedUntilStale(
+            "startOfMinute",
+            () => DateTime.now().startOf("minute"),
+            (startOfMinute) => startOfMinute.plus({ minutes: 1 }).diffNow().toMillis()
+        )();
+    }
+
+    /**
+     * Start of the current day, made again when the day changes: nothing
+     * observes the clock, so what derives from today reads this.
+     */
+    get startOfToday() {
+        return this.computedUntilStale(
+            "startOfToday",
+            () => DateTime.now().startOf("day"),
+            (startOfToday) => startOfToday.plus({ days: 1 }).diffNow().toMillis()
+        )();
+    }
 
     /** @type {[[string, any, import("models").DataResponse]]} */
     fetchParams = fields.Attr([], { asProxy: true });

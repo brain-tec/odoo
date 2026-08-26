@@ -1119,6 +1119,7 @@ SERVICES_MAPPING = {
     "discuss.upgrade": ['DiscussUpgradePlugin', '@mail/core/common/upgrade/upgrade_plugin'],
     "effect": ['EffectPlugin', '@web/core/effects/effect_plugin'],
     "frequent_emoji": ['FrequentEmojiPlugin', '@web/core/emoji_picker/frequent_emoji_plugin'],
+    "hotkey": ['HotkeyPlugin', '@web/core/hotkeys/hotkey_plugin'],
     "notification": ['NotificationPlugin', '@web/core/notifications/notification_plugin'],
     "mobile": ['MobilePlugin', '@web_mobile/js/mobile_plugin'],
     "multi_tab": ['MultiTabPlugin', '@bus/multi_tab_plugin'],
@@ -1126,6 +1127,7 @@ SERVICES_MAPPING = {
     "presence": ['PresencePlugin', '@bus/services/presence_plugin'],
     "sortable": ['SortablePlugin', '@web/core/util/sortable_plugin'],
     "simple_notification": ['SimpleNotificationPlugin', '@bus/simple_notification_plugin'],
+    "ui": ['UIPlugin', '@web/core/ui/ui_plugin'],
     "worker_service": ['WorkerPlugin', '@bus/services/worker_plugin'],
 }
 

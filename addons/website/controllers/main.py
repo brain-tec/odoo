@@ -361,6 +361,16 @@ class Website(Home):
             'url_root': request.httprequest.url_root,
         }, mimetype='text/plain')
 
+    @http.route('/llms.txt', type='http', auth='public', website=True, multilang=False, sitemap=False)
+    def llms_txt(self):
+        website = request.env.website
+        llms_txt = website.llms_txt
+
+        if not llms_txt or not llms_txt.strip():
+            raise request.not_found()
+
+        return request.make_response(llms_txt, headers=[('Content-Type', 'text/plain; charset=utf-8')])
+
     @http.route('/sitemap.xml', type='http', auth="public", website=True, multilang=False, sitemap=False)
     def sitemap_xml_index(self, **kwargs):
         Attachment = request.env['ir.attachment'].sudo()
@@ -1665,7 +1675,8 @@ class Website(Home):
             field = record._fields.get(field_name)
             if not field.store:
                 return record[field_name] or ''
-            translations = field._get_stored_translations(record) or {}
+
+            translations = dict(record._get_stored_translations(field_name) or {})
             return translations.get(lang_code or request.lang.code, '')
 
         # Access checks

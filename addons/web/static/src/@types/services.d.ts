@@ -7,7 +7,7 @@ declare module "services" {
     import { effectService } from "@web/core/effects/effect_plugin";
     import { fieldService } from "@web/core/field_service";
     import { fileUploadService } from "@web/core/file_upload/file_upload_service";
-    import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
+    import { hotkeyService } from "@web/core/hotkeys/hotkey_plugin";
     import { nameService } from "@web/core/name_service";
     import { httpService } from "@web/core/network/http_service";
     import { notificationService } from "@web/core/notifications/notification_plugin";
@@ -15,7 +15,7 @@ declare module "services" {
     import { overlayService } from "@web/core/overlay/overlay_plugin";
     import { popoverService } from "@web/core/popover/popover_plugin";
     import { tooltipService } from "@web/core/tooltip/tooltip_service";
-    import { uiService } from "@web/core/ui/ui_service";
+    import { uiService } from "@web/core/ui/ui_plugin";
     import { sortableService } from "@web/core/utils/sortable_plugin";
     import { publicInteractionService } from "@web/public/interaction_service";
     import { viewService } from "@web/views/view_service";

@@ -6,7 +6,7 @@ import {
     toLocaleDateTimeString,
 } from "@web/core/l10n/dates";
 import { localization } from "@web/core/l10n/localization";
-import { utils } from "@web/core/ui/ui_service";
+import { utils } from "@web/core/ui/ui_utils";
 import { renderToElement } from "@web/core/utils/render";
 import { useDebounced } from "@web/core/utils/timing";
 
@@ -457,6 +457,9 @@ export function useMagicColumnWidths(tableRef, canUseMagicColumnWidths, getState
      * Unsets the widths. After next patch, ideal widths will be recomputed.
      */
     function unsetWidths() {
+        if (!tableRef()) {
+            return;
+        }
         columnWidths = null;
         // Unset widths that might have been set on the table by resizing a column
         tableRef().style.width = null;

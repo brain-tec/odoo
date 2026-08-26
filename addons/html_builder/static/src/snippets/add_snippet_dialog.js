@@ -3,10 +3,10 @@ import { Component, onMounted, onWillUnmount, useProps, proxy, signal, t, useApp
 import { loadBundle, loadCSS } from "@web/core/assets";
 import { isBrowserFirefox } from "@web/core/browser/feature_detection";
 import { Dialog } from "@web/core/dialog/dialog";
-import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
+import { getActiveHotkey } from "@web/core/hotkeys/hotkey_utils";
 import { localization } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
-import { getFirstAndLastTabableElements } from "@web/core/ui/ui_service";
+import { getFirstAndLastTabableElements } from "@web/core/ui/ui_utils";
 import { cookie } from "@web/core/browser/cookie";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
 import { SnippetViewer } from "./snippet_viewer";
