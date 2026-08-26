@@ -228,6 +228,22 @@ class AccountTax(models.Model):
     # Used for the taxes computation to manage the reverse charge taxes having a repartition +100 -100.
     has_negative_factor = fields.Boolean(compute='_compute_has_negative_factor')
     non_deductible_amount = fields.Float(compute='_compute_non_deductible_amount')
+    account_move_line_ids = fields.Many2many(
+        comodel_name='account.move.line',
+        relation='account_move_line_account_tax_rel',
+        column1='account_tax_id',
+        column2='account_move_line_id',
+        copy=False,
+        readonly=True,
+    )
+    account_reconcile_model_line_ids = fields.Many2many(
+        comodel_name='account.reconcile.model.line',
+        relation='account_reconcile_model_line_account_tax_rel',
+        column1='account_tax_id',
+        column2='account_reconcile_model_line_id',
+        copy=False,
+        readonly=True,
+    )
 
     @api.constrains('company_id', 'name', 'type_tax_use', 'tax_scope', 'country_id')
     def _constrains_name(self):
@@ -331,6 +347,8 @@ class AccountTax(models.Model):
 
     def _hook_compute_is_used(self, tax_to_compute):
         '''
+            -- TO BE REMOVED IN MASTER --
+
             Override to compute the ids of taxes used in other modules. It takes
             as parameter a set of tax ids. It should return a set containing the
             ids of the taxes from that input set that are used in transactions.
@@ -353,47 +371,23 @@ class AccountTax(models.Model):
                 )
             )
 
+    @api.depends('account_move_line_ids', 'account_reconcile_model_line_ids')
     def _compute_is_used(self):
-        used_taxes = set()
+        used_taxes = set(self.sudo().search([
+            '|',
+            ('account_move_line_ids', '!=', False),
+            ('account_reconcile_model_line_ids', '!=', False),
+        ]).ids)
+        taxes_to_compute = set(self.ids) - used_taxes
 
-        if self.ids:
-            # Fetch for taxes used in account moves
-            self.env['account.move.line'].flush_model(['tax_ids'])
-            used_taxes.update(id_ for [id_] in self.env.execute_query(SQL(
-                """ SELECT id
-                    FROM account_tax
-                    WHERE EXISTS(
-                        SELECT 1
-                        FROM account_move_line_account_tax_rel AS line
-                        WHERE account_tax.id = line.account_tax_id
-                    ) AND id IN %s
-                    """, tuple(self.ids),
-            )))
-            taxes_to_compute = set(self.ids) - used_taxes
-
-            # Fetch for taxes used in reconciliation
-            if taxes_to_compute:
-                self.env['account.reconcile.model.line'].flush_model(['tax_ids'])
-                used_taxes.update(id_ for [id_] in self.env.execute_query(SQL(
-                    """ SELECT id
-                        FROM account_tax
-                        WHERE EXISTS(
-                            SELECT 1
-                            FROM account_reconcile_model_line_account_tax_rel AS reco
-                            WHERE account_tax.id = reco.account_tax_id
-                        ) AND id IN %s
-                        """, tuple(taxes_to_compute)
-                )))
-                taxes_to_compute -= used_taxes
-
-            # Fetch for tax used in other modules
-            if taxes_to_compute:
-                used_taxes.update(self._hook_compute_is_used(taxes_to_compute))
+        # Fetch for tax used in custom modules. To be removed in master.
+        if taxes_to_compute:
+            used_taxes.update(self._hook_compute_is_used(taxes_to_compute))
 
         for tax in self:
             tax.is_used = tax._origin.id in used_taxes
 
-    @api.depends('repartition_line_ids.account_id', 'repartition_line_ids.sequence', 'repartition_line_ids.factor_percent', 'repartition_line_ids.use_in_tax_closing', 'repartition_line_ids.tag_ids')
+    @api.depends('is_used', 'repartition_line_ids.account_id', 'repartition_line_ids.sequence', 'repartition_line_ids.factor_percent', 'repartition_line_ids.use_in_tax_closing', 'repartition_line_ids.tag_ids')
     def _compute_repartition_lines_str(self):
         for tax in self:
             repartition_lines_str = tax.repartition_lines_str or ""
@@ -1363,7 +1357,6 @@ class AccountTax(models.Model):
                     'tax_amount': tax_data['tax_amount'],
                     'price_include': tax_data['price_include'],
                     'original_price_include': tax_data['original_price_include'],
-                    'raw_base': raw_base,
                     'base_amount': tax_data['base'],
                     'is_reverse_charge': tax_data.get('is_reverse_charge', False),
                 }
@@ -2645,6 +2638,7 @@ class AccountTax(models.Model):
         tax_details = base_line['tax_details']
         taxes_data = tax_details['taxes_data']
         manual_tax_amounts = base_line['manual_tax_amounts']
+        tax_amount_to_propagate = defaultdict(lambda: defaultdict(float))
 
         # If there are no taxes, we pass None to the grouping function.
         for tax_data in (taxes_data or [None]):
@@ -2668,6 +2662,9 @@ class AccountTax(models.Model):
                     excluded_manual_field = f'manual_{excluded_rounded_field}'
                     excluded_rounded_amount = tax_details[excluded_rounded_field] + tax_details[excluded_delta_field]
                     excluded_raw_amount = tax_details[excluded_raw_field]
+                    if tax_data:
+                        excluded_rounded_amount += tax_amount_to_propagate[tax_data['tax']][excluded_rounded_field]
+                        excluded_raw_amount += tax_amount_to_propagate[tax_data['tax']][excluded_raw_field]
                     values[excluded_rounded_field] = excluded_rounded_amount
                     values[excluded_raw_field] = excluded_raw_amount
                     if base_line[excluded_manual_field] is not None:
@@ -2704,6 +2701,13 @@ class AccountTax(models.Model):
 
             # Tax amount.
             if tax_data:
+                # Compute the amount that should be propagated by tax
+                for tax in tax_data['taxes']:
+                    tax_amount_to_propagate[tax]['raw_total_excluded'] += tax_data['raw_tax_amount']
+                    tax_amount_to_propagate[tax]['raw_total_excluded_currency'] += tax_data['raw_tax_amount_currency']
+                    tax_amount_to_propagate[tax]['total_excluded'] += tax_data['tax_amount']
+                    tax_amount_to_propagate[tax]['total_excluded_currency'] += tax_data['tax_amount_currency']
+
                 reverse_charge_sign = -1 if tax_data['is_reverse_charge'] else 1
                 values = values_per_grouping_key[grouping_key]
                 for suffix in ('_currency', ''):
