@@ -914,25 +914,21 @@ class TestUi(HttpCaseWithWebsiteUser):
 
     def test_seo_multilang_alt_check(self):
         self.add_fr_language_to_website()
-
-        # Leave a delayed translation on the footer
-        footer = self.env.ref('website.footer_custom')
-        footer.update_field_translations('arch_db', {'fr_FR': {'Useful Links': 'Liens utiles'}})
-        footer.with_context(delay_translations=True).arch = footer.arch.replace(
-            'Useful Links', 'Handy Links'
-        )
-        self.assertIn(
-            'o_delay_translation',
-            footer.with_context(lang='fr_FR', edit_translations=True).arch,
-            "the footer should hold a delayed translation before the tour",
-        )
-        self.start_tour(self.env['website'].get_client_action_url("/", True), "seo_multilang_alt_check", login="admin")
-        self.assertNotIn(
-            'o_delay_translation',
-            footer.with_context(lang='fr_FR', edit_translations=True).arch,
-            "saving the SEO dialog should confirm the delayed translations of the page",
-        )
-        self.assertIn('Handy Links', footer.with_context(lang='fr_FR').arch)
+        website = self.env.ref('base.default_website')
+        homepage = website.with_context(website_id=website.id).viewref('website.homepage')
+        homepage.arch = """
+            <t t-name="website.homepage">
+                <t t-call="website.layout">
+                    <div id="wrap" class="oe_structure">
+                        <section class="s_text_image">
+                            <p>a paragraph</p>
+                            <img src="/web/image/website.s_banner_default_image" alt="alt text in English"/>
+                        </section>
+                    </div>
+                </t>
+            </t>
+        """
+        self.start_tour(website.get_client_action_url("/fr"), "seo_multilang_alt_check", login="admin")
 
     def test_header_bg_blur_option(self):
         self.start_tour(self.env['website'].get_client_action_url('/', True), 'header_bg_blur_option', login='admin')

@@ -20,7 +20,7 @@ Outputs
 -------
 * ``static/src/libs/materialsymbols/material_symbols_{outlined,sharp}_subset.{woff2,woff}``
 * ``static/src/libs/materialsymbols/material_symbols_{outlined,sharp}.css``
-* ``html_editor/.../ms_icons.js`` — icon list with fill-variant flags
+* ``html_editor/controllers/icons.py`` — icon list with fill-variant flags and search tags
 * ``mail/static/src/fonts/material_symbols_outlined_pua_cmap.woff2`` — custom cmap font for PIL
 * ``mail/tools/material_symbols_pua_codepoints.py`` — custom mappings ligature -> codepoint for PIL
 
@@ -62,6 +62,8 @@ except ImportError as exc:
         "fontTools (with the pathops extra) is required.\n"
         "Install with:  pip install 'fonttools[pathops]' brotli",
     ) from exc
+
+from fontTools.misc import timeTools
 
 FILL_SUFFIX = "_f"
 
@@ -557,7 +559,7 @@ def build_optimized_subset(font: TTFont, icons: list[str]) -> TTFont:
         # `post` as format 3.0 — so the warning is pure noise here.
         logging.getLogger('fontTools.ttLib.tables._p_o_s_t').setLevel(logging.ERROR)
         # Read into memory so the font outlives the temporary directory.
-        return TTFont(BytesIO(output_path.read_bytes()))
+        return TTFont(BytesIO(output_path.read_bytes()), recalcTimestamp=False)
 
 
 def strip_font_metadata(font: TTFont, style: str) -> None:
@@ -600,6 +602,35 @@ def strip_font_metadata(font: TTFont, style: str) -> None:
         )
         new_records.append(record)
     name_table.names = new_records
+
+
+def compile_font(font: TTFont) -> bytes:
+    buffer = BytesIO()
+    font.save(buffer)
+    return buffer.getvalue()
+
+
+def save_font(font: TTFont, path) -> None:
+    """Write *font* to *path*, dating it only if its content actually changed.
+
+    fontext stamps the current time into ``head``, so an unchanged rebuild would
+    still write a different file and make the binary diff of the subsets say
+    nothing about the icons.  The existing file is therefore compared against the
+    new one with both dates equalized, and left untouched when they match --
+    ``created`` is kept for the lifetime of the file, only ``modified`` follows a
+    real change.
+    """
+    head = font['head']
+    head.created = head.modified = timeTools.timestampNow()
+
+    if path.is_file():
+        previous = TTFont(path, recalcTimestamp=False)
+        head.created = previous['head'].created
+        head.modified = previous['head'].modified
+        if compile_font(font) != compile_font(previous):
+            head.modified = timeTools.timestampNow()
+
+    font.save(path)
 
 
 def allocate_pua_codepoints(icon_names: list[str]) -> dict[str, int]:
@@ -768,7 +799,10 @@ def build_font(
     font_outline = vl_instancer.instantiateVariableFont(font, {'FILL': 0})
 
     icons_with_fill = detect_filled_variants(font_outline, font_fill, glyphs_map)
-    icons_suffixed = [i + FILL_SUFFIX for i in icons_with_fill]
+    # Sorted, not in set order: fontext numbers the glyphs it keeps in the order
+    # it is given them, so an unstable order would reshuffle the filled half of
+    # the glyf table on every run and make two identical builds differ.
+    icons_suffixed = sorted(i + FILL_SUFFIX for i in icons_with_fill)
     font_fill = add_suffix_to_symbols(font_fill, FILL_SUFFIX)
 
     print("  Optimizing font…")  # noqa: T201
@@ -844,18 +878,18 @@ def build_font(
 
     output_font_path = ms_dir / f'material_symbols_{style.lower()}_subset.woff2'
     merged.flavor = 'woff2'
-    merged.save(output_font_path)
+    save_font(merged, output_font_path)
     # Same font in WOFF1, as a fallback for wkhtmltopdf (see write_font_face_css).
     woff1_font_path = output_font_path.with_suffix('.woff')
     merged.flavor = 'woff'
-    merged.save(woff1_font_path)
+    save_font(merged, woff1_font_path)
     write_font_face_css(ms_dir, style.lower(), output_font_path.name, woff1_font_path.name)
 
     if pua_codepoints is not None:
         pua_ms_dir.mkdir(parents=True, exist_ok=True)
 
         pua_cmap_font_path = pua_ms_dir / f'material_symbols_{style.lower()}_pua_cmap.woff2'
-        pua_cmap_font.save(pua_cmap_font_path)
+        save_font(pua_cmap_font, pua_cmap_font_path)
         return icons, output_font_path, pua_cmap_font_path, pua_names
     return icons, output_font_path, None, None
 
@@ -878,7 +912,13 @@ def write_font_face_css(ms_dir, style_lower: str, font_file: str, font_file_woff
     (ms_dir / f'material_symbols_{style_lower}.css').write_text(css, encoding='utf-8')
 
 
-def write_js_icon_list(dst_path: Path, icons: dict[str, dict]) -> None:
+def write_python_icon_list(dst_path, icons: dict[str, dict]) -> None:
+    """Write the icon metadata (``has_fill`` flag and search ``tags``) as a Python dict.
+
+    The dict is imported server-side by the ``/html_editor/material_symbols_search``
+    controller, so the (large) search tags never ship to the browser, and no file
+    has to be read at runtime.
+    """
     url = "https://fonts.google.com/metadata/icons?key=material_symbols&incomplete=true"
     with urllib.request.urlopen(url, timeout=30) as response:
         response_text = response.read().decode("utf-8")
@@ -889,21 +929,24 @@ def write_js_icon_list(dst_path: Path, icons: dict[str, dict]) -> None:
         if icon_data['name'] in icons:
             icons[icon_data['name']]['tags'] = ' '.join(icon_data.get('tags', []))
 
-    entries = ',\n    '.join(
-        f'{icon_name}: {{\n'
-        f'        has_fill: {"true" if icon["has_fill"] else "false"},\n'
-        f'        tags: "{icon.get("tags", "")}",\n'
-        f'    }}'
+    entries = '\n'.join(
+        f"    {icon_name!r}: {{'has_fill': {icon['has_fill']}, 'tags': {icon.get('tags', '')!r}}},"
         for icon_name, icon in icons.items()
     )
     dst_path.write_text(
-        "/**\n"
-        " * Generated by `odoo/addons/web/tooling/icons/generate_icons.py` — do not edit\n"
-        " * manually.\n"
-        " * This object contains the Material Symbols icons that Odoo uses.\n"
-        " */\n"
-        f"const MS_ICONS = {{\n    {entries},\n}};\n\n"
-        "export default MS_ICONS;\n",
+        "# Part of Odoo. See LICENSE file for full copyright and licensing details.\n"
+        "\n"
+        '"""Material Symbols icon metadata used by the icon picker.\n'
+        "\n"
+        "Generated by ``odoo/addons/web/tooling/icons/generate_icons.py`` -- do not edit\n"
+        "manually.\n"
+        "\n"
+        "Maps each icon name to its ``has_fill`` flag and the space-separated ``tags``\n"
+        "used to search it. The tags are only ever matched server-side (see the\n"
+        "``/html_editor/material_symbols_search`` controller), so they never reach the browser.\n"
+        '"""\n'
+        "\n"
+        f"MS_ICONS = {{\n{entries}\n}}\n",
         encoding='utf-8',
     )
 
@@ -932,8 +975,8 @@ def main() -> None:
         pua_names,
     )
 
-    write_js_icon_list(
-        module_path.parent / 'html_editor' / 'static' / 'src' / 'main' / 'media' / 'media_dialog' / 'ms_icons.js',
+    write_python_icon_list(
+        module_path.parent / 'html_editor' / 'controllers' / 'icons.py',
         icons,
     )
 

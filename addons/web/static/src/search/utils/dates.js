@@ -85,6 +85,14 @@ export const BACKEND_INTERVAL_OPTIONS = {
 //-------------------------------------------------------------------------
 
 /**
+ * Joins a period description (Aug) and its year respecting localization.
+ */
+function joinWithYear(description, year) {
+    const isRTL = localization.direction === "rtl";
+    return isRTL ? `${year} ${description}` : `${description} ${year}`;
+}
+
+/**
  * Constructs the string representation of a domain and its description. The
  * domain is of the form:
  *      ['|', d_1 ,..., '|', d_n]
@@ -174,15 +182,13 @@ export function constructDateRange(params) {
     }
     const domain = new Domain(["&", [fieldName, ">=", leftBound], [fieldName, "<=", rightBound]]);
     // compute description
-    const descriptions = [date.toFormat("yyyy")];
-    const method = localization.direction === "rtl" ? "push" : "unshift";
+    const year = date.toFormat("yyyy");
+    let description = year;
     if (granularity === "month") {
-        descriptions[method](date.toFormat("MMMM"));
+        description = joinWithYear(date.toFormat("MMMM"), year);
     } else if (granularity === "quarter") {
-        const quarter = date.quarter;
-        descriptions[method](QUARTERS[quarter].description.toString());
+        description = joinWithYear(QUARTERS[date.quarter].description.toString(), year);
     }
-    const description = descriptions.join(" ");
     return { domain, description };
 }
 
@@ -351,14 +357,18 @@ export function yearSelected(selectedOptionIds) {
  * the syntax <filter ... date="invoice_date">, that can be toggled in the
  * search bar itself, changing their domain dynamically (eg. with filter
  * "Today", clicking `>` will change the domain to tomorrow)
+ *
+ * Their ids are part of the public arch API: they can be used in the
+ * `default_period` attribute of a date filter or as a `search_default_...`
+ * context value, just like the period option ids (`month`, `year-1`, ...).
  */
 
 export const RELATIVE_FILTER_OPTIONS = {
     today: { description: _t("Today"), granularity: "day" },
-    thisWeek: { description: _t("This Week"), granularity: "week" },
-    thisMonth: { description: _t("This Month"), granularity: "month" },
-    thisQuarter: { description: _t("This Quarter"), granularity: "quarter" },
-    thisYear: { description: _t("This Year"), granularity: "year" },
+    this_week: { description: _t("This Week"), granularity: "week" },
+    this_month: { description: _t("This Month"), granularity: "month" },
+    this_quarter: { description: _t("This Quarter"), granularity: "quarter" },
+    this_year: { description: _t("This Year"), granularity: "year" },
 };
 
 export function getRelativeFilterOptions() {
@@ -392,17 +402,14 @@ export function getRelativeDateLabel(referenceMoment, option, offset) {
                 isCurrentYear(date) ? { month: "long" } : { month: "long", year: "numeric" }
             );
         case "quarter": {
-            // Intl has no quarter, so the year is appended by hand (@see constructDateRange).
             const { description } = QUARTERS[date.quarter];
             if (isCurrentYear(date)) {
                 return description.toString();
             }
-            return localization.direction === "rtl"
-                ? `${date.year} ${description}`
-                : `${description} ${date.year}`;
+            return joinWithYear(description.toString(), date.toFormat("yyyy"));
         }
         case "year":
-            return String(date.year);
+            return date.toFormat("yyyy");
         case "day":
         default:
             return toLocaleDateString(date);

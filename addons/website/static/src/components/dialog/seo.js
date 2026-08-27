@@ -24,8 +24,6 @@ import {
     useEffect,
 } from "@odoo/owl";
 import wUtils from "@website/js/utils";
-import { saveDelayTranslations } from "@website/js/delayed_translation";
-import { getRecordKey } from "@html_builder/core/save_utils";
 
 // This replaces \b, because accents(e.g. à, é) are not seen as word boundaries.
 // Javascript \b is not unicode aware, and words beginning or ending by accents won't match \b
@@ -190,6 +188,29 @@ const getSeo = async (self, onlyKeywords = false) => {
         self.seoContext.description = extractDescription();
     }
 };
+
+/**
+ * Render the given page with `edit_translations`, which marks the terms whose
+ * translation is delayed, and tell whether it has any.
+ *
+ * @param {string} pageUrl
+ * @returns {Promise<boolean>}
+ */
+async function fetchDelayedTranslations(pageUrl) {
+    const url = new URL(pageUrl);
+    url.searchParams.set("edit_translations", "1");
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`${response.status} ${response.statusText}`);
+        }
+        const doc = new DOMParser().parseFromString(await response.text(), "text/html");
+        return !!doc.querySelector("#wrap .o_delay_translation");
+    } catch (error) {
+        console.warn(`Could not load delayed translations for ${url}`, error);
+        return true;
+    }
+}
 
 class MetaImage extends Component {
     static template = "website.MetaImage";
@@ -771,7 +792,7 @@ export class SeoChecks extends Component {
         this.website = useService("website");
         this.seoContext = proxy(seoContext);
         const {
-            metadata: { mainObject, seoObject },
+            metadata: { mainObject, seoObject, path },
         } = this.website.currentWebsite;
         this.object = seoObject || mainObject;
         this.state = proxy({
@@ -785,6 +806,9 @@ export class SeoChecks extends Component {
         onWillStart(async () => {
             this.state.altAttributes = await this.getAltAttributes();
             this.seoContext.updatedAlts = [];
+            if (!this.props.isDefaultLang) {
+                this.hasDelayedTranslation = await fetchDelayedTranslations(path);
+            }
         });
         onMounted(() => {
             if (this.props.isDefaultLang) {
@@ -1005,13 +1029,6 @@ export class OptimizeSEODialog extends Component {
                 ? this.data.website_meta_description
                 : "";
             this.isDefaultLang = this.data.lang?.code === this.data.default_lang_code;
-            // On translated pages, prefetch the page rendered with translation
-            // branding (un-awaited) so that, at save time, we can resolve every
-            // delayed translation on the page without blocking the dialog
-            // opening. Consumed only in save().
-            this.delayedTranslationsProm = this.isDefaultLang
-                ? null
-                : this.fetchDelayedTranslations();
             seoContext.description = storedDescription || this.getMeta({ name: "description" });
             this.previewDescription = _t(
                 "Your page description should be between 50 and 160 characters long."
@@ -1056,31 +1073,6 @@ export class OptimizeSEODialog extends Component {
 
     get pageDocumentElement() {
         return this.website.pageDocument.documentElement;
-    }
-
-    /**
-     * Fetch the current page rendered with `edit_translations` so its delayed
-     * translation markers (`.o_delay_translation`) can be read client-side.
-     *
-     * @returns {Promise<HTMLElement|null>}
-     */
-    async fetchDelayedTranslations() {
-        const url = new URL(this.website.pageDocument.location.href);
-        url.searchParams.set("edit_translations", "1");
-        try {
-            const response = await fetch(url, { credentials: "same-origin" });
-            if (!response.ok) {
-                throw new Error(`${response.status} ${response.statusText}`);
-            }
-            const html = await response.text();
-            // Restrict to the same root as the editable in translation mode, so
-            // that saving here confirms the delayed translations of exactly the
-            // records a save from that mode would confirm.
-            return new DOMParser().parseFromString(html, "text/html").querySelector("#wrapwrap");
-        } catch (error) {
-            console.warn(`Could not prefetch delayed translations for ${url}`, error);
-            return null;
-        }
     }
 
     async getImages() {
@@ -1176,7 +1168,7 @@ export class OptimizeSEODialog extends Component {
         if (!this.isDefaultLang) {
             const translationsByRecord = {};
             for (const img of seoContext.updatedAlts || []) {
-                const key = getRecordKey(img.res_model, img.res_id, img.field);
+                const key = `${img.res_model}::${img.res_id}::${img.field}`;
                 translationsByRecord[key] ??= {
                     model: img.res_model,
                     id: img.res_id,
@@ -1195,14 +1187,6 @@ export class OptimizeSEODialog extends Component {
                             [currentLang]: record.translations,
                         },
                     })
-                );
-            }
-            // The delayed translations are collected on the page prefetched
-            // with `edit_translations`.
-            const translationsRootEl = await this.delayedTranslationsProm;
-            if (translationsRootEl) {
-                rpcCalls.push(
-                    saveDelayTranslations(translationsRootEl, currentLang, translationsByRecord)
                 );
             }
         } else if (seoContext.updatedAlts?.length) {
