@@ -159,6 +159,9 @@ class Manager(Thread):
 
         certificate.ensure_validity()
 
+        for interface_class in interfaces.values():
+            interface_class().start()
+
         # We first add the IoT Box to the connected DB because IoT handlers cannot be downloaded if
         # the identifier of the Box is not found in the DB. So add the Box to the DB.
         self._send_all_devices()
@@ -182,7 +185,7 @@ class Manager(Thread):
 
         # Check every 3 seconds if the list of connected devices has changed and send the updated
         # list to the connected DB.
-        while 1:
+        while True:
             try:
                 if self._get_changes_to_send():
                     self._send_all_devices()
