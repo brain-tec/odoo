@@ -856,7 +856,7 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
         a dict for fields. Allows to hide a lot of assertEqual under a simple
         call with a dictionary of expected values. """
         for fname, fvalue in fields_values.items():
-            with self.subTest(fname=fname, fvalue=fvalue):
+            with self.subTest(fname=fname, fvalue=str(fvalue)):
                 # email_{cc, to} are lists, hence order is not important
                 if fname in {'incoming_email_cc', 'incoming_email_to'}:
                     self.assertEqual(
@@ -1106,7 +1106,8 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
         # previous without div / beginning string
         # track_re = re.compile(r'(?:^|<br>)(?P<pre>.*?)<b>(?P<post>.*?)</b><i>(?P<key>.*?)</i>')
         track_re = re.compile(
-            r'(?:<em>(?P<company>[^>]+)</em>)?(?P<pre>[^<>]+)<b>(?P<post>.*?)</b><i>(?P<key>.*?)</i><br>'
+            r'(?:<em>(?P<company>[^>]+)</em>)?(?P<pre>[^<>]+?) → '
+            r'<b>(?P<post>.*?)</b> <i>\((?P<key>.*?)\)</i>'
         )
         for match in track_re.finditer(body_html):
             _company, pre, post, key = match.group('company'), match.group('pre'), match.group('post'), match.group('key')

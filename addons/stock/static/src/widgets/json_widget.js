@@ -1,10 +1,7 @@
-import { useChart } from "@web/core/utils/chart_hook";
-import { cookie } from "@web/core/browser/cookie";
-import { getColor } from "@web/core/colors/colors";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
-import { user } from "@web/core/user";
-import { Component, onWillStart } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
+import { Component } from "@odoo/owl";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
 export class JsonPopOver extends Component {
@@ -36,120 +33,36 @@ export const popOverLeadDays = {
 registry.category("fields").add("lead_days_widget", popOverLeadDays);
 
 // --------------------------------------------------------------------------
-// Forecast Graph
+// Update Button
 // --------------------------------------------------------------------------
 
-export class ReplenishmentGraphWidget extends JsonPopOver {
-    static template = "stock.replenishmentGraph";
-    chart = useChart(() => this.getScatterGraphConfig());
+export class UpdateButton extends Component {
+    static template = "stock.updateButton";
+    static props = { ...standardFieldProps };
 
     setup() {
         super.setup();
-        onWillStart(async () => {
-            this.displayUOM = await user.hasGroup("uom.group_uom");
-        });
-    }
-    get productUomName() {
-        return this.jsonValue["product_uom_name"];
-    }
-    get qtyOnHand() {
-        return this.jsonValue["qty_on_hand"];
-    }
-    get productMaxQty() {
-        return this.jsonValue["product_max_qty"];
-    }
-    get productMinQty() {
-        return this.jsonValue["product_min_qty"];
-    }
-    get dailyDemand() {
-        return this.jsonValue["daily_demand"];
-    }
-    get averageStock() {
-        return this.jsonValue["average_stock"];
-    }
-    get orderingPeriod() {
-        return this.jsonValue["ordering_period"];
-    }
-    get qtiesAreTheSame() {
-        return this.productMinQty === this.productMaxQty;
-    }
-    get leadTime() {
-        return this.jsonValue["lead_time"];
+        this.orm = useService("orm");
     }
 
-    getScatterGraphConfig() {
-        const dashLine = (ctx, value) =>
-            ctx.p1.raw.x === this.jsonValue["x_axis_vals"].slice(-1)[0] ? value : undefined;
-        const pushYLabels = (ticks) =>
-            ticks.push({ value: this.productMinQty }, { value: this.productMaxQty });
-        const showYLabel = (tick) =>
-            tick === this.productMinQty || tick === this.productMaxQty ? tick : "";
-        const labels = this.jsonValue["x_axis_vals"];
-        const maxLineColor = getColor(1, cookie.get("color_scheme"), "odoo");
-        const minLineColor = getColor(2, cookie.get("color_scheme"), "odoo");
-        const curveLineColor = getColor(3, cookie.get("color_scheme"), "odoo");
-        return {
-            type: "scatter",
-            data: {
-                labels,
-                datasets: [
-                    {
-                        type: "line",
-                        data: this.jsonValue["max_line_vals"],
-                        fill: false,
-                        pointStyle: false,
-                        borderColor: maxLineColor,
-                    },
-                    {
-                        type: "line",
-                        data: this.jsonValue["min_line_vals"],
-                        fill: false,
-                        pointStyle: false,
-                        borderColor: minLineColor,
-                    },
-                    {
-                        type: "line",
-                        data: this.jsonValue["curve_line_vals"],
-                        fill: false,
-                        pointStyle: false,
-                        borderColor: curveLineColor,
-                        segment: {
-                            borderDash: (ctx) => dashLine(ctx, [6, 6]),
-                        },
-                    },
-                ],
-            },
-            options: {
-                maintainAspectRatio: false,
-                showLine: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: false },
-                },
-                scales: {
-                    y: {
-                        grid: { display: false },
-                        beforeTickToLabelConversion: (data) => pushYLabels(data.ticks),
-                        ticks: {
-                            autoSkip: false,
-                            callback: (tick) => showYLabel(tick),
-                        },
-                        suggestedMax: this.productMaxQty * 1.1,
-                        suggestedMin: this.productMinQty * 0.9,
-                    },
-                    x: {
-                        type: "category",
-                        grid: { display: false },
-                    },
-                },
-            },
-        };
+    async updateDailyDemand(ev) {
+        if (this.props.record.data.based_on != "custom") {
+            const daily = await this.orm.call("stock.replenishment.info", "get_daily_demand", [
+                this.props.record.resId,
+                this.props.record.data.based_on,
+                this.props.record.data.percent_factor
+            ]);
+            this.props.record.update({
+                'daily_demand': daily,
+            });
+            this.props.record.update({
+                'based_on': this.props.record.data.based_on,
+            });
+        }
     }
 }
 
-export const replenishmentGraphWidget = {
-    ...jsonPopOver,
-    component: ReplenishmentGraphWidget,
-};
-
-registry.category("fields").add("replenishment_graph_widget", replenishmentGraphWidget);
+export const updateButton = {
+    component: UpdateButton,
+}
+registry.category("fields").add("update_demand_button", updateButton);

@@ -1693,9 +1693,12 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     # === CHECKOUT FLOW - EXTRA STEP METHODS === #
     def system_page_extra_info(env):  # noqa: N805
-        if env.website.is_view_active("website_sale.extra_info"):
-            return _lt("Shop Checkout - Extra Information")
-        return False
+        if not env.website.is_view_active("website_sale.extra_info"):
+            return []
+        return [{
+                "route_title": _lt("Shop Checkout - Extra Information"),
+                "route_url": "/shop/extra_info",
+            }]
 
     @route(
         ["/shop/extra_info"],
@@ -1991,6 +1994,10 @@ class WebsiteSale(payment_portal.PaymentPortal):
             "product_page_cols_order",
             "product_page_image_roundness",
             "product_page_cta_design",
+            # category
+            "align_category_content",
+            "show_category_title",
+            "show_category_description",
             # wishlist
             "wishlist_opt_products_design_classes",
             "wishlist_grid_columns",
@@ -2018,24 +2025,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
         write_vals = {k: v for k, v in options.items() if k in writable_fields}
         if write_vals:
             self.env.website.write(write_vals)
-
-    @route(["/shop/config/category"], type="jsonrpc", auth="user")
-    def _change_category_config(self, category_id, **options):
-        category = self.env["product.public.category"].browse(int(category_id))
-        if not category.exists():
-            raise NotFound
-
-        # Restrict options we can write to.
-        targeted_options = {
-            "show_category_title",
-            "show_category_description",
-            "align_category_content",
-        }
-        modified_options = {
-            option: value for option, value in options.items() if option in targeted_options
-        }
-        if modified_options:
-            category.write(modified_options)
 
     @route(["/shop/config/tag"], type="jsonrpc", auth="user")
     def _change_tag_config(self, tag_id, **options):

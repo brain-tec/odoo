@@ -1,9 +1,20 @@
-import { Component, onMounted, onWillUpdateProps, proxy, signal, t, useProps } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    onWillUpdateProps,
+    proxy,
+    signal,
+    t,
+    usePlugin,
+    useProps,
+} from "@odoo/owl";
 import { CheckBox } from "@web/core/checkbox/checkbox";
+import { DebugModePlugin } from "@web/core/debug_mode_plugin";
 import { Domain } from "@web/core/domain";
 import { DomainSelector } from "@web/core/domain_selector/domain_selector";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { _t } from "@web/core/l10n/translation";
 import { ModelSelector } from "@web/core/model_selector/model_selector";
 import { SelectMenu } from "@web/core/select_menu/select_menu";
@@ -14,7 +25,6 @@ import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog
 import { PropertyDefinitionSelection } from "./property_definition_selection";
 import { PropertyTags } from "./property_tags";
 import { PropertyValue } from "./property_value";
-import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 
 export const PROPERTIES_INFO = {
     char: {
@@ -119,6 +129,8 @@ export class PropertyDefinition extends Component {
     props = useProps(propertyDefinitionProps);
 
     propertyDefinitionRef = signal.ref();
+
+    debugMode = usePlugin(DebugModePlugin);
 
     setup() {
         this.orm = useService("orm");
@@ -245,32 +257,15 @@ export class PropertyDefinition extends Component {
      * -------------------------------------------------------- */
 
     /**
-     * We changed the string of the property.
+     * Pressed enter on the property label close the definition.
      *
      * @param {event} event
      */
-    onPropertyLabelChange(event) {
-        const newString = event.target.value;
-        const propertyDefinition = {
-            ...this.state.propertyDefinition,
-            string: newString,
-        };
-        this.props.onChange(propertyDefinition);
-        this.state.propertyDefinition = propertyDefinition;
-    }
-
-    /**
-     * We changed the default value of the property.
-     *
-     * @param {object} newDefault
-     */
-    onDefaultChange(newDefault) {
-        const propertyDefinition = {
-            ...this.state.propertyDefinition,
-            default: newDefault,
-        };
-        this.props.onChange(propertyDefinition);
-        this.state.propertyDefinition = propertyDefinition;
+    onPropertyLabelKeypress(event) {
+        if (event.key !== "Enter") {
+            return;
+        }
+        this.props.close();
     }
 
     /**
@@ -374,77 +369,10 @@ export class PropertyDefinition extends Component {
         });
     }
 
-    /**
-     * We renamed / created / removed a selection option.
-     *
-     * @param {array} newOptions
-     */
-    onSelectionOptionChange(newOptions) {
+    onAttributeChange(name, newValue) {
         const propertyDefinition = {
             ...this.state.propertyDefinition,
-            selection: newOptions,
-        };
-        this.props.onChange(propertyDefinition);
-        this.state.propertyDefinition = propertyDefinition;
-    }
-
-    /**
-     * @param {Event & { target: HTMLInputElement }} ev
-     */
-    onSuffixChange(ev) {
-        const propertyDefinition = {
-            ...this.state.propertyDefinition,
-            suffix: ev.target.value,
-        };
-        this.props.onChange(propertyDefinition);
-        this.state.propertyDefinition = propertyDefinition;
-    }
-
-    /**
-     * We renamed / created / removed tags.
-     *
-     * @param {array} newTags
-     */
-    onTagsChange(newTags) {
-        const propertyDefinition = {
-            ...this.state.propertyDefinition,
-            tags: newTags,
-        };
-        this.props.onChange(propertyDefinition);
-        this.state.propertyDefinition = propertyDefinition;
-    }
-
-    /**
-     * We activate / deactivate the property in the kanban view.
-     *
-     * @param {boolean} newValue
-     */
-    onViewInKanbanChange(newValue) {
-        const propertyDefinition = {
-            ...this.state.propertyDefinition,
-            view_in_cards: newValue,
-        };
-        this.props.onChange(propertyDefinition);
-        this.state.propertyDefinition = propertyDefinition;
-    }
-
-    /**
-     * Ensure the section below the separator is folded/unfolded by default
-     * @param {boolean} checked
-     */
-    onFoldByDefaultChange(checked) {
-        const propertyDefinition = {
-            ...this.state.propertyDefinition,
-            fold_by_default: checked,
-        };
-        this.props.onChange(propertyDefinition);
-        this.state.propertyDefinition = propertyDefinition;
-    }
-
-    onCurrencyFieldUpdate(path) {
-        const propertyDefinition = {
-            ...this.state.propertyDefinition,
-            currency_field: path,
+            [name]: newValue,
         };
         this.props.onChange(propertyDefinition);
         this.state.propertyDefinition = propertyDefinition;

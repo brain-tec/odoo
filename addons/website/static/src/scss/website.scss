@@ -2,21 +2,6 @@
 /// This file regroups the website design rules.
 ///
 
-$-seen-urls: ();
-@each $alias, $key in $o-font-aliases-to-keys {
-    $-url: o-get-font-info($alias, 'url');
-    @if $-url and index($-seen-urls, $-url) == null {
-        $-seen-urls: append($-seen-urls, $-url);
-        @import url("https://fonts.googleapis.com/css?family=#{unquote($-url)}&display=swap");
-    } @else {
-        $-name: o-get-font-info($alias, 'name');
-        $-attachment: o-get-font-info($alias, 'attachment');
-        @if $-attachment {
-            @import url("/web/content/#{$-attachment}/google-font-#{unquote($-name)}");
-        }
-    }
-}
-
 :root {
     // Border color
     // Let borders color adapt according to body and CCs. Also, set a fallback
@@ -807,7 +792,7 @@ font[class*='bg-'] {
         height: $-size;
         line-height: $-size;
         @for $i from 2 through 5 {
-            &.fa-#{$i}x, &.oi-#{$i}x {
+            &.oi-#{$i}x {
                 width: $-size + $i;
                 height: $-size + $i;
                 line-height: $-size + $i;
@@ -2538,10 +2523,13 @@ span.list-inline-item.o_add_language:last-child {
     display: flex;
     // Need to update button size based on icon size.
     @for $i from 1 through 5 {
-        &:has(i.fa-#{$i}x, i.oi-#{$i}x) {
+        &:has(i.oi-#{$i}x) {
             width: #{$i}em;
             height: #{$i}em;
         }
+    }
+    & > .oi::before {
+        vertical-align: middle;
     }
 
     &, &:hover {
@@ -3669,7 +3657,7 @@ input[value*="data-oe-translation-source-sha"] {
         font-size: 0.875em;
     }
     a {
-        .fa-stack, .oi-stack {
+        .oi-stack {
             /*
             Ensures consistent size and padding around icons when the
             layout is set to "none" and the size is "huge" or "large".
@@ -3678,7 +3666,7 @@ input[value*="data-oe-translation-source-sha"] {
             s_social_media/000.scss and s_share/000.scss).
             */
             @for $i from 2 through 3 {
-                &.fa-#{$i}x, &.oi-#{$i}x {
+                &.oi-#{$i}x {
                     width: $-size + $i;
                     height: $-size + $i;
                     line-height: $-size + $i;

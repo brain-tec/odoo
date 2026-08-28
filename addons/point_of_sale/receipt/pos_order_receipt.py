@@ -38,26 +38,6 @@ class PosOrderReceipt(models.AbstractModel):
     _description = 'Point of Sale Order Receipt Generator'
 
     @api.model
-    def get_receipt_template_for_pos_frontend(self):
-        names = [
-            'point_of_sale.pos_order_receipt_header',
-            'point_of_sale.pos_order_receipt_style',
-            'point_of_sale.company_info_receipt',
-            'point_of_sale.pos_orderline_receipt_information',
-            'point_of_sale.pos_orderline_receipt',
-            'point_of_sale.pos_order_receipt_footer',
-            'point_of_sale.pos_order_receipt',
-            'point_of_sale.pos_order_change_receipt',
-            'point_of_sale.pos_order_change_receipt_zpl',
-            'point_of_sale.pos_order_change_receipt_line',
-            'point_of_sale.pos_cash_move_receipt',
-            'point_of_sale.pos_tip_receipt',
-            'point_of_sale.pos_sale_details_receipt',
-            'point_of_sale.pos_sale_details_receipt_product_line',
-        ]
-        return [[name, self.env['ir.qweb']._get_template(name)[1]] for name in names]
-
-    @api.model
     def _order_receipt_format_currency(self, amount, currency=None):
         if currency:
             return currency.format(amount).replace('\xa0', ' ')  # Wkhtmltoimage does not support non-breaking spaces
@@ -208,7 +188,7 @@ class PosOrderReceipt(models.AbstractModel):
     def order_receipt_generate_data(self, basic_receipt=False):
         self.ensure_one()
 
-        use_qr_code = self.company_id.point_of_sale_ticket_portal_url_display_mode != 'url'
+        use_qr_code = self.company_id.point_of_sale_ticket_portal_url_display_mode != 'url' and self.state != 'draft'
         config_logo = image_data_uri(self.config_id.logo) if self.config_id.logo else False
         qr_code_value = f"{self.env.company.get_base_url()}/pos/ticket?order_uuid={self.uuid}"
         tip_percentage = [self.config_id.tip_percentage_1, self.config_id.tip_percentage_2, self.config_id.tip_percentage_3] if self.config_id.set_tip_after_payment and self.amount_total > 0 else False

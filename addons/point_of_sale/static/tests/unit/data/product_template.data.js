@@ -43,6 +43,10 @@ export class ProductTemplate extends models.ServerModel {
         return true;
     }
 
+    _load_pos_data_dependencies() {
+        return ["product.combo", "pos.category", "account.tax"];
+    }
+
     _records = [
         {
             id: 1,
@@ -850,6 +854,38 @@ export class ProductTemplate extends models.ServerModel {
             active: true,
             image_128: false,
             product_variant_ids: [53],
+            public_description: false,
+            pos_optional_product_ids: [],
+            sequence: 1,
+            product_tag_ids: [],
+        },
+        {
+            id: 152,
+            display_name: "Single attribute",
+            standard_price: 0,
+            categ_id: false,
+            pos_categ_ids: [],
+            taxes_id: [],
+            barcode: false,
+            name: "Single attribute",
+            list_price: 5,
+            is_favorite: false,
+            default_code: false,
+            to_weight: false,
+            uom_id: 1,
+            description_sale: false,
+            description: false,
+            type: "consu",
+            service_tracking: "no",
+            is_storable: false,
+            write_date: "2025-07-03 13:04:14",
+            color: 0,
+            pos_sequence: 6,
+            available_in_pos: false,
+            attribute_line_ids: [108],
+            active: true,
+            image_128: false,
+            product_variant_ids: [153],
             public_description: false,
             pos_optional_product_ids: [],
             sequence: 1,

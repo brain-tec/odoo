@@ -420,7 +420,13 @@ class WebsitePage(models.Model):
         the cache serves the correct version of a page based on specific
         parameters like user language or currency.
         """
-        return (self.env.context.get('website_id'), self.env.context.get('lang'), request.httprequest.path, request.session.debug)
+        return (
+            self.env.context.get('website_id'),
+            self.env.context.get('lang'),
+            self.env.context.get('cookies_allowed'),
+            request.httprequest.path,
+            request.session.debug,
+        )
 
     def _get_response(self, request):
         """ Returns the response corresponding to the request.
@@ -464,7 +470,10 @@ class WebsitePage(models.Model):
             # The cached response is too old and considered out-of-date. Get it
             # from scratch and update the cache accordingly.
             response = self._get_response_raw(request)
-            self._get_response_cached.__cache__.add_value(self, request, cache_value=(response, cache_key))
+            if response:
+                response.flatten()
+                if self._allow_cache_insertion(response.response[-1]):
+                    self._get_response_cached.__cache__.add_value(self, request, cache_value=(response, cache_key))
             return response
 
         return self._get_response_raw(request)

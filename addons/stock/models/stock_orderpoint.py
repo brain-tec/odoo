@@ -5,7 +5,7 @@ from collections import defaultdict
 from datetime import datetime, time, UTC
 from zoneinfo import ZoneInfo
 
-from dateutil import relativedelta
+from dateutil.relativedelta import relativedelta
 from psycopg2 import OperationalError
 
 from odoo import SUPERUSER_ID, _, api, fields, models
@@ -56,11 +56,35 @@ class StockWarehouseOrderpoint(models.Model):
     product_uom_name = fields.Char(string='Product unit of measure label', related='uom_id.display_name', readonly=True)
     product_min_qty = fields.Float(
         'Min Quantity', digits='Product Unit', required=True, default=0.0,
-        help="The minimum Stock level that will trigger a replenishment.")
+        help="Minimum Forecasted stock level that will trigger a replenishment.\nA safety stock is included in the min "
+             "to cover unusual situations if days of demand covered by the Minimum Level is > Replenishment Lead Times "
+             "- Availability Time.")
     product_max_qty = fields.Float(
         'Max Quantity', digits='Product Unit', required=True, default=0.0,
         compute='_compute_product_max_qty', readonly=False, store=True,
-        help="Stock level to reach when replenishing.")
+        help="Forecasted stock level when replenishing.\nAutomatically calculated as = Min + Max (Order frequency x "
+             "Daily Demand x Growth factor, MoQ) with MoQ = Minimum quantity from vendor pricelist / BOM.\nWon't be "
+             "reached by on Hand stock if unforecasted demand is delivered while waiting for arrival.")
+    daily_demand = fields.Float(
+        "Daily Demand", digits='Product Unit', required=True, default=0.0, readonly=False, store=True)
+    min_max_based_on = fields.Selection(
+        selection=[
+            ('one_week', "Last 7 days"),
+            ('one_month', "Last 30 days"),
+            ('three_months', "Last 3 months"),
+            ('one_year', "Last 12 months"),
+            ('last_year', "Same month last year"),
+            ('last_year_2', "Next month last year"),
+            ('last_year_3', "After next month last year"),
+            ('last_year_quarter', "Last year quarter"),
+            ('custom', "Custom Demand"),
+        ],
+        default='one_month',
+        string='Based on',
+        help="Estimate the daily average future demand volume based on past period or choose Custom Demand to enter manually average daily demand.",
+        required=True
+    )
+    min_max_based_on_factor = fields.Integer(default=100, required=True)
     allowed_replenishment_uom_ids = fields.Many2many('uom.uom', compute='_compute_allowed_replenishment_uom_ids')
     replenishment_uom_id = fields.Many2one(
         'uom.uom', 'Multiple',
@@ -140,7 +164,7 @@ class StockWarehouseOrderpoint(models.Model):
         # We have to filter by company here in case of multi-company and because horizon_days is a company setting
         for company in orderpoints_to_compute.company_id:
             company_orderpoints = orderpoints_to_compute.filtered(lambda c: c.company_id == company)
-            horizon_date = fields.Date.today() + relativedelta.relativedelta(days=company_orderpoints.get_horizon_days())
+            horizon_date = fields.Date.today() + relativedelta(days=company_orderpoints.get_horizon_days())
             _, domain_move_in, domain_move_out, __, __ = company_orderpoints.product_id._get_domain_locations()
             domain_move_in = Domain.AND([
                 [('product_id', 'in', company_orderpoints.product_id.ids)],
@@ -175,7 +199,7 @@ class StockWarehouseOrderpoint(models.Model):
                 for move_date, move_qty in sorted(moves_by_product_dict.get((orderpoint.product_id.id, orderpoint.location_id.id), {}).items()):
                     qty_on_hand_at_date += move_qty
                     if qty_on_hand_at_date < orderpoint.product_min_qty:
-                        tentative_deadline = move_date - relativedelta.relativedelta(days=orderpoint.lead_days)
+                        tentative_deadline = move_date - relativedelta(days=orderpoint.lead_days)
                         break
                 orderpoint.deadline_date = tentative_deadline if tentative_deadline < horizon_date else False
 
@@ -185,7 +209,7 @@ class StockWarehouseOrderpoint(models.Model):
         for orderpoint in orderpoints_to_compute:
             values = orderpoint._get_lead_days_values()
             lead_days, _ = orderpoint.rule_ids._get_lead_days(orderpoint.product_id, bypass_delay_description=True, **values)
-            orderpoint.lead_horizon_date = fields.Date.today() + relativedelta.relativedelta(days=lead_days['total_delay'] + lead_days['horizon_time'])
+            orderpoint.lead_horizon_date = fields.Date.today() + relativedelta(days=lead_days['total_delay'] + lead_days['horizon_time'])
             orderpoint.lead_days = lead_days['total_delay']
         (self - orderpoints_to_compute).lead_horizon_date = False
         (self - orderpoints_to_compute).lead_days = 0
@@ -346,6 +370,8 @@ class StockWarehouseOrderpoint(models.Model):
         )
         res = self.env['stock.replenishment.info'].create({
             'orderpoint_id': self.id,
+            'based_on': self.min_max_based_on,
+            'percent_factor': self.min_max_based_on_factor,
         })
         action['res_id'] = res.id
         return action
@@ -579,7 +605,7 @@ class StockWarehouseOrderpoint(models.Model):
             products = self.env['product.product'].browse(prod_ids)
             qties = products.with_context(
                 location=loc.id,
-                to_date=today + relativedelta.relativedelta(days=days)
+                to_date=today + relativedelta(days=days)
             ).read(['virtual_available'])
             for (product, qty) in zip(products, qties):
                 if product.uom_id.compare(qty['virtual_available'], 0) < 0:
@@ -748,7 +774,7 @@ class StockWarehouseOrderpoint(models.Model):
                             date = orderpoint._get_orderpoint_procurement_date()
                             global_horizon_days = orderpoint.get_horizon_days()
                             if global_horizon_days:
-                                date -= relativedelta.relativedelta(days=int(global_horizon_days))
+                                date -= relativedelta(days=int(global_horizon_days))
                             values = orderpoint._prepare_procurement_values(date=date)
                             procurements.append(self.env['stock.rule'].Procurement(
                                 orderpoint.product_id, orderpoint.qty_to_order, orderpoint.uom_id,
@@ -830,3 +856,51 @@ class StockWarehouseOrderpoint(models.Model):
         - the value set on the company of the user if all else fail.
         """
         return self.env.context.get('global_horizon_days', (self.company_id or self.env.company).horizon_days)
+
+    def _get_period_of_time(self, period=None):
+        self.ensure_one()
+        if not period:
+            period = self.min_max_based_on
+        today = fields.Datetime.now()
+        start_date = limit_date = today
+        if period == 'one_week':
+            start_date = start_date - relativedelta(weeks=1)
+        elif period == 'one_month':
+            start_date = start_date - relativedelta(days=30)
+        elif period == 'three_months':
+            start_date = start_date - relativedelta(months=3)
+        elif period == 'one_year':
+            start_date = start_date - relativedelta(years=1)
+        else:  # Relative period of time.
+            start_date = datetime(year=today.year - 1, month=today.month, day=1)
+            if period == 'last_year_2':
+                start_date += relativedelta(months=1)
+            elif period == 'last_year_3':
+                start_date += relativedelta(months=2)
+            if period == 'last_year_quarter':
+                limit_date = start_date + relativedelta(months=3)
+            else:
+                limit_date = start_date + relativedelta(months=1)
+        return start_date, limit_date
+
+    def _get_daily_demand(self, period=None, ratio=None):
+        self.ensure_one()
+        if not ratio:
+            ratio = self.min_max_based_on_factor
+        date_from, date_to = self._get_period_of_time(period=period)
+        domain = Domain.AND([
+            [('product_id', '=', self.product_id.id)],
+            [('date', '>=', date_from)],
+            [('date', '<=', datetime.combine(date_to, time.max))],
+            [('state', 'in', ['assigned', 'confirmed', 'partially_available', 'done'])],
+            [('company_id', '=', self.company_id.id)],
+        ])
+        quantity_out = self.env['stock.move']._read_group(
+            Domain.AND([domain, [('location_dest_id.usage', 'in', ['customer', 'production'])]]),
+            aggregates=['product_qty:sum'],
+        )[0][0] or 0.0
+        quantity_returned = self.env['stock.move']._read_group(
+            Domain.AND([domain, [('location_id.usage', '=', 'customer')]]),
+            aggregates=['product_qty:sum'],
+        )[0][0] or 0.0
+        return ((quantity_out - quantity_returned) / (date_to - date_from).days) * (ratio / 100)

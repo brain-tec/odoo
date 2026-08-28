@@ -3109,7 +3109,7 @@ class MailThread(models.AbstractModel):
         DESC -> most important one is given last to be inserted last (see
         'mail_tracking' module). HTML therefore needs to reverse ordering. """
         tracking_html = self.env['ir.qweb']._render(
-            "mail.mail_tracking_template", {'trackingValues': reversed(tracking_values)}
+            "mail.mail_tracking_template", {'trackingValues': list(reversed(tracking_values))}
         ).strip()
         return append_content_to_html(
             body, tracking_html,

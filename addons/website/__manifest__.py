@@ -238,6 +238,7 @@
         'views/snippets/s_projects_list.xml',
         'views/snippets/s_about_bold.xml',
         'views/snippets/s_age_verification_popup.xml',
+        'views/http_routing_template.xml',
         'views/new_page_template_templates.xml',
         'views/website_views.xml',
         'views/website_pages_views.xml',
@@ -455,6 +456,14 @@
         ],
         'web._assets_bootstrap_frontend': [
             ('after', 'web/static/src/scss/utilities_custom.scss', 'html_builder/static/src/scss/utilities_custom.scss'),
+        ],
+        'website.font_urls_export': [
+            # A minimal bundle that includes all the variable/function files
+            # needed to compile font_urls_export.scss.
+            ('include', 'web._assets_helpers'),
+            ('include', 'web._assets_primary_variables'),
+            ('include', 'web._assets_secondary_variables'),
+            'website/static/src/scss/options/font_urls_export.scss',
         ],
         'html_editor.assets_link_popover': [
             'html_builder/static/src/utils/utils_css.js',

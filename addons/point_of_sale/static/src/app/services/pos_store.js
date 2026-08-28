@@ -51,6 +51,8 @@ import { PosRouterPlugin } from "@point_of_sale/app/plugins/pos_router_plugin";
 import { CustomerDisplayTerminalPlugin } from "@point_of_sale/app/plugins/customer_display_terminal_plugin";
 import { SIZES } from "@web/core/ui/ui_utils";
 import { SnoozeDialog } from "@point_of_sale/app/components/popups/product_info_popup/snooze_dialog/snooze_dialog";
+import { PosNumberBufferPlugin } from "@point_of_sale/app/plugins/pos_number_buffer_plugin";
+import { DebugModePlugin } from "@web/core/debug_mode_plugin";
 
 const { DateTime } = luxon;
 export const CONSOLE_COLOR = "#F5B427";
@@ -76,7 +78,6 @@ export class PosStore extends WithLazyGetterTrap {
 
     static serviceDependencies = [
         "bus_service",
-        "number_buffer",
         "barcode_reader",
         "ui",
         "pos_data",
@@ -100,7 +101,6 @@ export class PosStore extends WithLazyGetterTrap {
     async setup(
         env,
         {
-            number_buffer,
             barcode_reader,
             ui,
             dialog,
@@ -112,8 +112,10 @@ export class PosStore extends WithLazyGetterTrap {
             alert,
         }
     ) {
+        const debugMode = usePlugin(DebugModePlugin);
+
         this.env = env;
-        this.numberBuffer = number_buffer;
+        this.numberBuffer = usePlugin(PosNumberBufferPlugin);
         this.barcodeReader = barcode_reader;
         this.ui = ui;
         this.dialog = dialog;
@@ -172,7 +174,7 @@ export class PosStore extends WithLazyGetterTrap {
         this.syncAllOrdersDebounced = debounce(this.syncAllOrders, 100);
         this._searchTriggered = false;
 
-        if (this.env.debug) {
+        if (debugMode.isActive()) {
             registry.category("main_components").add("DebugWidget", {
                 Component: DebugWidget,
             });
@@ -282,14 +284,14 @@ export class PosStore extends WithLazyGetterTrap {
         }
         const loadResult = await this.loadNewProducts(domain, offset, 30);
         const result = loadResult["product.product"];
-        if (result.length === 0) {
-            this.notification.add(_t('No other products found for "%s".', query), 3000);
-        }
         if (previousQuery === query) {
             this.searchProductDBState.offset += result.length;
         } else {
             this.searchProductDBState.previousQuery = query;
             this.searchProductDBState.offset = result.length;
+        }
+        if (result.length === 0) {
+            this.notification.add(_t('No other products found for "%s".', query), 3000);
         }
     }
 
@@ -396,17 +398,33 @@ export class PosStore extends WithLazyGetterTrap {
         }?access_token=${this.config.access_token}&theme=${getColorScheme()}`;
     }
 
-    async reloadData(fullReload = false) {
-        const orders = this.models["pos.order"].getAll();
-        this.device.saveUnusedNumber(orders);
-        await this.data.resetIndexedDB();
-        const url = new URL(window.location.href);
-
-        if (fullReload) {
-            url.searchParams.set("limited_loading", "0");
+    async reloadData(showWarning = false) {
+        const reloadData = async () => {
+            const orders = this.models["pos.order"].getAll();
+            this.device.saveUnusedNumber(orders);
+            await this.data.resetIndexedDB();
+            sessionStorage.clear();
+            localStorage.clear();
+            window.location.reload();
+        };
+        if (showWarning) {
+            // Implement warning logic here
+            this.dialog.add(ConfirmationDialog, {
+                title: _t("Reload Data?"),
+                body: _t(
+                    "All data will be downloaded again from the server. On databases with " +
+                        "many records (products, pricelists, pricelist rules, …), this can take several minutes."
+                ),
+                confirmLabel: _t("Reload"),
+                confirm: async () => {
+                    await reloadData();
+                },
+                cancelLabel: _t("Cancel"),
+                cancel: () => {},
+            });
+            return;
         }
-
-        window.location.href = url.href;
+        await reloadData();
     }
 
     async showLoginScreen() {
@@ -810,7 +828,24 @@ export class PosStore extends WithLazyGetterTrap {
      * @returns {Promise<Object>}
      */
     async loadNewProducts(domain, offset = 0, limit = 0) {
-        const result = await this.data.loadProductFromPos(domain, offset, limit);
+        const modelDomain = {
+            "product.template": domain,
+        };
+        const modelOffset = {
+            "product.template": offset,
+        };
+        const modelLimit = {
+            "product.template": limit,
+        };
+        const result = await this.data.loadRecordsFromPos(
+            ["product.template"],
+            modelDomain,
+            modelOffset,
+            modelLimit,
+            {
+                active_test: false,
+            }
+        );
         this.productAttributesExclusion = this.computeProductAttributesExclusion(
             result["product.template.attribute.value"]
         );
@@ -1548,6 +1583,7 @@ export class PosStore extends WithLazyGetterTrap {
             (order) =>
                 order.isEmptyOrder() &&
                 !order.finalized &&
+                !order.isSynced &&
                 (!order.partner_id || order.partner_id.id === defaultPartnerId) &&
                 order.pricelist_id?.id === this.config.pricelist_id?.id &&
                 order.fiscal_position_id?.id === this.config.default_fiscal_position_id?.id
@@ -1614,7 +1650,7 @@ export class PosStore extends WithLazyGetterTrap {
     }
 
     removePendingOrder(order) {
-        this.pendingOrder["create"].delete(order.id);
+        this.pendingOrder["create"].delete(order.uuid);
         this.pendingOrder["write"].delete(order.id);
         this.pendingOrder["delete"].delete(order.id);
         return true;
@@ -2119,7 +2155,7 @@ export class PosStore extends WithLazyGetterTrap {
             return;
         }
         await this.data.call("pos.config", "load_demo_data", [[this.config.id]]);
-        await this.reloadData(true);
+        await this.reloadData();
     }
 
     async checkAccessRight() {
@@ -2487,9 +2523,9 @@ export class PosStore extends WithLazyGetterTrap {
     getExcludedProductIds() {
         return [
             this.config.tip_product_id?.product_tmpl_id?.id,
-            ...this.config._pos_special_products_ids.map(
-                (id) => this.models["product.product"].get(id)?.product_tmpl_id?.id
-            ),
+            ...this.models["product.product"]
+                .filter((p) => p._is_pos_special_product)
+                .map((p) => p.product_tmpl_id?.id),
         ].filter(Boolean);
     }
 

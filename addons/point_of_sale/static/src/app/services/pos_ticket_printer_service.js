@@ -11,7 +11,8 @@ import { waitImages } from "@point_of_sale/utils";
 import { SelectDefaultPrinterPopup } from "@point_of_sale/app/components/popups/select_default_printer_popup/select_default_printer_popup";
 import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { ZebraPrinter } from "@point_of_sale/app/utils/printer/zebra_printer";
-import { useApp } from "@odoo/owl";
+import { useApp, usePlugin } from "@odoo/owl";
+import { DebugModePlugin } from "@web/core/debug_mode_plugin";
 
 const { DateTime } = luxon;
 
@@ -25,6 +26,8 @@ export const posTicketPrinterService = {
 };
 
 export class PosTicketPrinterService {
+    debugMode = usePlugin(DebugModePlugin);
+
     constructor(...args) {
         this.setup(...args);
     }
@@ -92,7 +95,7 @@ export class PosTicketPrinterService {
     printWeb(iframe) {
         // By default ticket scale will be full width, when printing
         // this can be changed from the print dialog
-        if (odoo.debug === "assets") {
+        if (this.debugMode.isActive("assets")) {
             this.generateImage(iframe).then((image) => {
                 logPosImage(image);
             });
@@ -273,11 +276,6 @@ export class PosTicketPrinterService {
         formattedAmount,
         webFallback = true,
     }) {
-        const printer = this.defaultPrinter;
-        if (!printer) {
-            return;
-        }
-
         const generator = this.getGenerator({ models: this.data.models, order });
         const data = generator.generateCashMoveData({ reason, translatedType, formattedAmount });
         const iframe = await this.generateIframe("point_of_sale.pos_cash_move_receipt", data);

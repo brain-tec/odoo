@@ -1038,6 +1038,8 @@ class Field[T]:
             return True
 
         model = env[self.model_name]
+        if self.relational and getattr(env[self.comodel_name], '_access_domain_heavy', False):
+            return False
         query = model._as_query(ordered=False)
         try:
             model._order_field_to_sql(query.table, self.name, SQL(), SQL())
@@ -1057,6 +1059,8 @@ class Field[T]:
             return False
 
         model = env[self.model_name]
+        if self.relational and getattr(env[self.comodel_name], '_access_domain_heavy', False):
+            return False
         groupby = self.name if self.type not in ('date', 'datetime') else f"{self.name}:month"
         try:
             model._read_group_groupby(Query(model).table, groupby)
@@ -1076,6 +1080,8 @@ class Field[T]:
             return False
 
         model = env[self.model_name]
+        if self.relational and getattr(env[self.comodel_name], '_access_domain_heavy', False):
+            return None
         query = model._as_query(ordered=False)
         try:
             model._read_group_select(query.table, f"{self.name}:{self.aggregator}")
@@ -1330,10 +1336,15 @@ class Field[T]:
             ))
         # Mark computed fields to recompute
         if to_compute and self.compute:
-            _logger.info("Prepare computation of %s", self)
             cr.execute(SQL('SELECT id FROM %s WHERE %s IS NULL', SQL.identifier(model._table), SQL.identifier(self.name)))
             records = model.browse(row[0] for row in cr.fetchall())
+            self._init_column_notify_compute(records)
             model.env.add_to_compute(self, records)
+
+    def _init_column_notify_compute(self, records):
+        _logger.info("Prepare computation of %s in %s records", self, len(records))
+        if len(records) > 100000:
+            _logger.warning("%s: %s records will be computed", self, len(records))
 
     ############################################################################
     #
