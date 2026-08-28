@@ -310,6 +310,8 @@ class ProductTemplate(models.Model):
 
     def _is_donation(self):
         """Return whether this product is the donation product used by the donation snippet."""
+        if not self:
+            return False
         self.ensure_one()
         return self.id == self.env["ir.model.data"]._xmlid_to_res_id(
             "website_sale.product_donation"
@@ -683,7 +685,7 @@ class ProductTemplate(models.Model):
 
             if uom_price_enabled:
                 template_price_vals["base_unit_price"] = (
-                    template.product_variant_id._get_base_unit_price(
+                    (template.product_variant_id or template)._get_base_unit_price(
                         template_price_vals["price_reduce"]
                     )
                 )
@@ -1249,6 +1251,19 @@ class ProductTemplate(models.Model):
         ]
 
     @api.model
+    def _get_website_sale_search_fields(self, search_in_description=True):
+        search_fields = [
+            "name",
+            "variants_default_code",
+        ]
+        if search_in_description:
+            search_fields.append("description_ecommerce")
+        search_fields.extend(("attribute_line_ids.value_ids.name", "product_tag_ids.name"))
+        if search_in_description:
+            search_fields.append("description_sale")
+        return search_fields
+
+    @api.model
     def _search_get_detail(self, website, order, options):  # noqa: ARG002
         domains = [website.sale_product_domain()]
         category = options.get("category")
@@ -1278,15 +1293,7 @@ class ProductTemplate(models.Model):
             domains.append([("list_price", "<=", max_price)])
         if attribute_value_dict:
             domains.extend(self._get_attribute_value_domain(attribute_value_dict))
-        search_fields = [
-            "name",
-            "default_code",
-            "variants_default_code",
-            "description_ecommerce",
-            "attribute_line_ids.value_ids.name",
-            "product_tag_ids.name",
-            "description_sale",
-        ]
+        search_fields = self._get_website_sale_search_fields(options.get("displayDescription", True))
         fetch_fields = ["id", "name", "website_url", "description_ecommerce", "description_sale"]
         mapping = {
             "name": {"name": "name", "type": "text", "match": True},
