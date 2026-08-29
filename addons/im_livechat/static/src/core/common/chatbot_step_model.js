@@ -4,25 +4,24 @@ import { createElementFromContent } from "@mail/utils/common/html";
 export class ChatbotStep extends Record {
     static id = AND("scriptStep", "message");
 
-    static new(...args) {
-        const step = super.new(...args);
-        step.onChange(
-            () => [step.operatorFound],
+    setup() {
+        super.setup(...arguments);
+        this.onChange(
+            () => [this.operatorFound],
             function onOperatorFoundChange() {
                 if (this.operatorFound) {
                     this.operatorFoundEver = true;
                 }
             }
         );
-        step.onChange(
-            () => [step.selectedAnswer],
+        this.onChange(
+            () => [this.selectedAnswer],
             function onSelectedAnswerChange() {
                 if (this.selectedAnswer) {
                     this.selectedAnswerEver = this.selectedAnswer;
                 }
             }
         );
-        return step;
     }
 
     /**
@@ -50,11 +49,7 @@ export class ChatbotStep extends Record {
     /** Same unversioned-model problem, and same one-way fix, as `operatorFoundEver`. */
     selectedAnswerEver = fields.One("chatbot.script.answer");
     rawAnswer = fields.Html("");
-    step_type = fields.Attr("", {
-        compute() {
-            return this.scriptStep?.step_type;
-        },
-    });
+    step_type = this.computed(() => this.scriptStep?.step_type);
     isLast = false;
 
     get expectAnswer() {

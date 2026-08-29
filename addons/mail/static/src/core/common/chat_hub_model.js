@@ -18,12 +18,9 @@ export class ChatHub extends Record {
 
     BUBBLE = 56; // same value as $o-mail-ChatHub-bubblesWidth
     recomputeBubbleStart = 0;
-    BUBBLE_START = fields.Attr(CHAT_HUB_DEFAULT_BUBBLE_START, {
-        /** @this {import("models").Chathub} */
-        compute() {
-            void this.recomputeBubbleStart;
-            return this.computeBubbleStart();
-        },
+    BUBBLE_START = this.computed(() => {
+        void this.recomputeBubbleStart;
+        return this.computeBubbleStart();
     });
     computeBubbleStart() {
         return CHAT_HUB_DEFAULT_BUBBLE_START;
@@ -35,20 +32,25 @@ export class ChatHub extends Record {
     WINDOW = 380; // same value as $o-mail-ChatWindow-width
 
     /** @returns {import("models").ChatHub} */
-    static new() {
-        /** @type {import("models").ChatHub} */
-        const chatHub = super.new(...arguments);
-        browser.addEventListener("storage", (ev) => {
-            if (ev.key === CHAT_HUB_KEY) {
-                chatHub.load(ev.newValue);
-            } else if (ev.key === null) {
-                chatHub.load();
+    setup() {
+        super.setup(...arguments);
+        this.onChange(
+            () => [],
+            () => {
+                const onStorage = (ev) => {
+                    if (ev.key === CHAT_HUB_KEY) {
+                        this.load(ev.newValue);
+                    } else if (ev.key === null) {
+                        this.load();
+                    }
+                };
+                browser.addEventListener("storage", onStorage);
+                this.load(browser.localStorage.getItem(CHAT_HUB_KEY) ?? undefined).then(() =>
+                    this._resolveInit()
+                );
+                return () => browser.removeEventListener("storage", onStorage);
             }
-        });
-        chatHub
-            .load(browser.localStorage.getItem(CHAT_HUB_KEY) ?? undefined)
-            .then(() => chatHub._resolveInit());
-        return chatHub;
+        );
     }
 
     compact = fields.Attr(false, { localStorage: true });
@@ -149,11 +151,9 @@ export class ChatHub extends Record {
         );
     }
 
-    showConversations = fields.Attr(false, {
-        compute() {
-            return this.canShowOpened.length + this.canShowFolded.length > 0;
-        },
-    });
+    showConversations = this.computed(
+        () => this.canShowOpened.length + this.canShowFolded.length > 0
+    );
 }
 
 ChatHub.register();

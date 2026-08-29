@@ -1,7 +1,7 @@
 import { toRawValue } from "@mail/utils/common/local_storage";
 import { defineMailModels, start as start2 } from "@mail/../tests/mail_test_helpers";
 import { after, afterEach, beforeEach, describe, expect, test, tick } from "@odoo/hoot";
-import { animationFrame } from "@odoo/hoot-mock";
+import { advanceTime, animationFrame } from "@odoo/hoot-mock";
 import { Component, immediateEffect, markup, proxy, toRaw, xml } from "@odoo/owl";
 import {
     getService,
@@ -394,11 +394,9 @@ test("Computed fields: lazy (default) vs. eager", async () => {
                 return "group chat";
             }
         }
-        typeLazy = fields.Attr("", {
-            compute() {
-                expect.step("LAZY");
-                return this.computeType();
-            },
+        typeLazy = this.computed(() => {
+            expect.step("LAZY");
+            return this.computeType();
         });
         typeEager = fields.Attr("", {
             compute() {
@@ -640,14 +638,12 @@ test("lazy compute should re-compute while they are observed", async () => {
         static id = "id";
         id;
         count = 0;
-        multiplicity = fields.Attr(undefined, {
-            compute() {
-                expect.step("computing");
-                if (this.count > 3) {
-                    return "many";
-                }
-                return "few";
-            },
+        multiplicity = this.computed(() => {
+            expect.step("computing");
+            if (this.count > 3) {
+                return "many";
+            }
+            return "few";
         });
     }).register(localRegistry);
     const store = await start();
@@ -1643,4 +1639,249 @@ test("computed field first read by a component outlives that component", async (
     await animationFrame();
     channel.count = 5;
     expect.verifySteps(["multiplicity:many"]);
+});
+
+test("a record is its proxy in a field declaration and in setup", async () => {
+    (class Message extends Record {
+        static id = "id";
+        id;
+        author = fields.One("Partner");
+        readAuthorFromDeclaration = () => this.author;
+        readAuthorFromSetup;
+        setup() {
+            super.setup(...arguments);
+            this.readAuthorFromSetup = () => this.author;
+        }
+    }).register(localRegistry);
+    (class Partner extends Record {
+        static id = "name";
+        name;
+    }).register(localRegistry);
+    const store = await start();
+    const message = store.Message.insert({ id: 1, author: "John" });
+    expectRecord(message.readAuthorFromDeclaration()).toEqual(message.author);
+    expectRecord(message.readAuthorFromSetup()).toEqual(message.author);
+});
+
+test("a declared computed runs again only when what it read changes", async () => {
+    (class Thread extends Record {
+        static id = "name";
+        name;
+        counter = 0;
+        label = this.computed(() => {
+            expect.step(`label ${this.counter}`);
+            return `label ${this.counter}`;
+        });
+    }).register(localRegistry);
+    const store = await start();
+    const thread = store.Thread.insert("general");
+    expect(thread.label).toBe("label 0");
+    expect(thread.label).toBe("label 0");
+    expect.verifySteps(["label 0"]);
+    thread.counter = 1;
+    expect(thread.label).toBe("label 1");
+    expect.verifySteps(["label 1"]);
+});
+
+test("a getter runs on every read", async () => {
+    (class Thread extends Record {
+        static id = "name";
+        name;
+        get label() {
+            expect.step("label");
+            return "label";
+        }
+    }).register(localRegistry);
+    const store = await start();
+    const thread = store.Thread.insert("general");
+    expect(thread.label).toBe("label");
+    expect(thread.label).toBe("label");
+    expect.verifySteps(["label", "label"]);
+});
+
+test("a patch cannot redeclare a computed", async () => {
+    expect.errors(1);
+    const Thread = class Thread extends Record {
+        static id = "name";
+        name;
+        label = this.computed(() => "base");
+    };
+    Thread.register(localRegistry);
+    patchWithCleanup(Thread.prototype, {
+        setup() {
+            super.setup();
+            this.label = this.computed(() => "patched");
+        },
+    });
+    await expect(start()).rejects.toThrow(/cannot be redeclared/);
+    await animationFrame(); // wait for the store service to report the error
+    expect.verifyErrors([/cannot be redeclared/]);
+});
+
+test("a computed does not recompute once its record is deleted", async () => {
+    (class Thread extends Record {
+        static id = "name";
+        static _name = "Thread";
+        name;
+        message = fields.One("Message", { inverse: "thread" });
+        label = this.computed(() => {
+            expect.step(`compute ${this.message?.body ?? "none"}`);
+            return `label ${this.message?.body ?? "none"}`;
+        });
+    }).register(localRegistry);
+    (class Message extends Record {
+        static id = "id";
+        static _name = "Message";
+        id;
+        body;
+        thread = fields.One("Thread", { inverse: "message" });
+    }).register(localRegistry);
+    const store = await start();
+    const message = store.Message.insert({ id: 1, body: "hello" });
+    const thread = store.Thread.insert({ name: "general", message });
+    expect(thread.label).toBe("label hello");
+    expect.verifySteps(["compute hello"]);
+    thread.delete();
+    expect(thread.label).toBe("label hello");
+    message.body = "hi";
+    expect(thread.label).toBe("label hello");
+    expect.verifySteps([]);
+    const unread = store.Thread.insert("unread");
+    unread.delete();
+    expect(unread.label).toBe(undefined);
+    expect.verifySteps([]);
+});
+
+test("writing on a computed is warned + ignored", async () => {
+    patchWithCleanup(console, { warn: (msg) => expect.step(msg) });
+    (class Thread extends Record {
+        static id = "name";
+        name;
+        counter = 0;
+        label = this.computed(() => `label ${this.counter}`);
+    }).register(localRegistry);
+    const store = await start();
+    const thread = store.Thread.insert("general");
+    expect(thread.label).toBe("label 0");
+    store.Thread.insert({ name: "general", label: "from the server" });
+    expect.verifySteps(["Thread.label is computed: dropping the write."]);
+    expect(thread.label).toBe("label 0");
+    thread.counter = 1;
+    expect(thread.label).toBe("label 1");
+});
+
+test("an onChange registered in setup runs on the proxy and cleans up", async () => {
+    (class Thread extends Record {
+        static id = "name";
+        static _name = "Thread";
+        name;
+        messages = fields.Many("Message", { inverse: "thread" });
+        setup() {
+            super.setup(...arguments);
+            this.onChange(
+                () => [this.messages.length],
+                () => {
+                    expect.step(`${this.messages.length} ${this.messages[0]?.body ?? ""}`);
+                    return () => expect.step("cleanup");
+                }
+            );
+        }
+    }).register(localRegistry);
+    (class Message extends Record {
+        static id = "body";
+        static _name = "Message";
+        body;
+        thread = fields.One("Thread", { inverse: "messages" });
+    }).register(localRegistry);
+    const store = await start();
+    const thread = store.Thread.insert("general");
+    await expect.waitForSteps(["0 "]);
+    thread.messages.add("hello");
+    await expect.waitForSteps(["cleanup", "1 hello"]);
+    thread.delete();
+    await expect.waitForSteps(["cleanup"]);
+});
+
+test("a computed is left out of toData()", async () => {
+    (class Thread extends Record {
+        static id = "name";
+        name;
+        label = this.computed(() => "a thread");
+    }).register(localRegistry);
+    const store = await start();
+    const thread = store.Thread.insert("general");
+    expect(thread.label).toBe("a thread");
+    expect(Object.keys(thread.toData())).not.toInclude("label");
+});
+
+test("a read of a computed field in a child model reads it on the parent model", async () => {
+    (class Thread extends Record {
+        static id = "name";
+        static _name = "Thread";
+        name;
+        counter = 0;
+        channel = fields.One("Channel", { inverse: "thread" });
+        label = this.computed(() => `label ${this.counter}`);
+    }).register(localRegistry);
+    (class Channel extends Record {
+        static id = "name";
+        static _name = "Channel";
+        static _inherits = { Thread: "thread" };
+        name;
+        thread = fields.One("Thread", { inverse: "channel" });
+    }).register(localRegistry);
+    const store = await start();
+    const channel = store.Channel.insert("general");
+    channel.thread = { name: "general" };
+    expect(channel.label).toBe("label 0");
+    channel.thread.counter = 1;
+    expect(channel.label).toBe("label 1");
+});
+
+test("a computed until stale should recompute value when stale", async () => {
+    let ticks = 0;
+    (class Thread extends Record {
+        static id = "name";
+        name;
+        label = this.computedUntilStale(
+            () => {
+                expect.step(`compute ${ticks}`);
+                return `label ${ticks}`;
+            },
+            () => 1000
+        );
+    }).register(localRegistry);
+    const store = await start();
+    const thread = store.Thread.insert("general");
+    expect(thread.label).toBe("label 0");
+    expect.verifySteps(["compute 0"]);
+    ticks = 1;
+    expect(thread.label).toBe("label 0");
+    expect.verifySteps([]);
+    await advanceTime(1000);
+    expect(thread.label).toBe("label 1");
+    expect.verifySteps(["compute 1"]);
+});
+
+test("a record made while the store is made reads the true store", async () => {
+    localRegistry.remove("Store");
+    (class TestStore extends Store {
+        static _name = "Store";
+        thread = fields.One("Thread", { compute: () => ({ name: "boot" }), eager: true });
+    }).register(localRegistry);
+    (class Thread extends Record {
+        static id = "name";
+        static _name = "Thread";
+        name;
+        messages = fields.Many("Message", { inverse: "thread" });
+    }).register(localRegistry);
+    (class Message extends Record {
+        static id = "id";
+        static _name = "Message";
+        id;
+        thread = fields.One("Thread", { inverse: "messages" });
+    }).register(localRegistry);
+    const store = await start();
+    expect(store.thread.name).toBe("boot");
+    expect(store.thread.messages._store).toBe(store);
 });

@@ -1,7 +1,7 @@
 import { Store } from "./store";
 import {
-    STORE_SYM,
     fields,
+    isComputedDefinition,
     isFieldDefinition,
     isRelation,
     modelRegistry,
@@ -10,9 +10,8 @@ import {
 import { Record } from "./record";
 import { StoreInternal } from "./store_internal";
 import { ModelInternal } from "./model_internal";
-import { RecordInternal } from "./record_internal";
 
-import { markRaw, proxy, useApp } from "@odoo/owl";
+import { proxy, useApp } from "@odoo/owl";
 
 /** @returns {import("models").Store} */
 export function makeStore(env, { localRegistry } = {}) {
@@ -39,56 +38,30 @@ export function makeStore(env, { localRegistry } = {}) {
             );
         }
         const Model = {
-            [OgClass.getName()]: class extends OgClass {
-                constructor() {
-                    super();
-                    const record = this;
-                    record._raw = record;
-                    record.Model = Model;
-                    record._ = record[STORE_SYM] ? new StoreInternal() : new RecordInternal();
-                    this.setup();
-                    const recordProxy = new Proxy(record, {
-                        /**
-                         * Route a plain data descriptor through the set trap, as
-                         * patching a record defines the field rather than sets it.
-                         */
-                        defineProperty(target, name, descriptor) {
-                            if (
-                                descriptor.enumerable &&
-                                descriptor.writable &&
-                                "value" in descriptor
-                            ) {
-                                return record._.proxySet(target, name, descriptor.value);
-                            }
-                            return Reflect.defineProperty(target, name, descriptor);
-                        },
-                        get: (...args) => record._.proxyGet(...args),
-                        deleteProperty: (...args) => record._.proxyDeleteProperty(...args),
-                        /**
-                         * Using record.update(data) is preferable for performance to batch process
-                         * when updating multiple fields at the same time.
-                         */
-                        set: (...args) => record._.proxySet(...args),
-                    });
-                    record._proxy = markRaw(recordProxy);
-                    if (record?.[STORE_SYM]) {
-                        record._ = store._;
-                        store = record;
-                        Record.store = store;
-                    }
-                    return record._proxy;
-                }
-            },
+            [OgClass.getName()]: class extends OgClass {},
         }[OgClass.getName()];
         Model._ = new ModelInternal();
         Model.records = proxy({});
         Models[Model.getName()] = Model;
         store[Model.getName()] = Model;
         // Detect fields with a dummy record and setup getter/setters on them
-        const obj = new OgClass();
+        const obj = new Proxy(new OgClass(), {
+            set(target, name, value) {
+                if (isComputedDefinition(target[name]) && isComputedDefinition(value)) {
+                    throw new Error(
+                        `${OgClass.getName()}.${name}: a computed cannot be redeclared, patch the method its compute calls`
+                    );
+                }
+                return Reflect.set(target, name, value);
+            },
+        });
         obj.setup();
         for (const [name, val] of Object.entries(obj)) {
             if (technicalKeysOnRecords.has(name)) {
+                continue;
+            }
+            if (isComputedDefinition(val)) {
+                Model._.fieldsComputable.add(name);
                 continue;
             }
             if (!isFieldDefinition(val)) {
@@ -138,10 +111,13 @@ export function makeStore(env, { localRegistry } = {}) {
     for (const Model of Object.values(Models)) {
         if (Model._inherits) {
             const ownProperties = new Set([
+                ...Model._.fieldsComputable,
                 ...Model._.fields.keys(),
                 // the model's own members live on the registry class, one layer above the
                 // per-store subclass
                 ...Object.getOwnPropertyNames(Object.getPrototypeOf(Model.prototype)),
+                // a member of Record itself, `setup` in particular, never delegates
+                ...Object.getOwnPropertyNames(Record.prototype),
             ]);
             for (const [parentModelName, parentFieldName] of Object.entries(Model._inherits)) {
                 const inverseField = Model._.fieldsInverse.get(parentFieldName);
@@ -153,8 +129,11 @@ export function makeStore(env, { localRegistry } = {}) {
                 Model._.inheritsFields.add(parentFieldName);
                 const ParentModel = Models[parentModelName];
                 ParentModel._.inheritsInverseFields.add(inverseField);
-                // fields
-                for (const fieldName of ParentModel._.fields.keys()) {
+                // fields and computeds
+                for (const fieldName of [
+                    ...ParentModel._.fieldsComputable,
+                    ...ParentModel._.fields.keys(),
+                ]) {
                     if (ownProperties.has(fieldName)) {
                         continue;
                     }
@@ -174,13 +153,15 @@ export function makeStore(env, { localRegistry } = {}) {
             }
         }
     }
-    /**
-     * store/_rawStore are assigned on models at next step, but they are
-     * required on Store model to make the initial store insert.
-     */
-    Object.assign(store.Store, { store, _rawStore: store });
+    // point store/_rawStore at the temporary store, so the initial store
+    // insert can write through the proxy
+    for (const Model of Object.values(Models)) {
+        Model._rawStore = store;
+        Model.store = store._proxy;
+    }
     // Make true store (as a model)
     store = store.Store.insert()._raw;
+    Record.store = store;
     for (const Model of Object.values(Models)) {
         Model._rawStore = store;
         Model.store = store._proxy;

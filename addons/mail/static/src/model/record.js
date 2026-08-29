@@ -8,6 +8,7 @@ import {
     untrack,
 } from "@odoo/owl";
 import {
+    COMPUTED_SYM,
     OR_SYM,
     STORE_SYM,
     isCommandList,
@@ -19,7 +20,7 @@ import {
     technicalKeysOnRecords,
     untrackFunctions,
 } from "./misc";
-import { computedUntilStale } from "@mail/utils/common/signal";
+import { RecordInternal } from "./record_internal";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 
 /** @typedef {import("./misc").FieldDefinition} FieldDefinition */
@@ -51,8 +52,18 @@ export class Record {
     /** @type {string} */
     static _name;
 
-    constructor() {
+    /** @param {Object} [ids] the identifying values, from `Record.new` */
+    constructor(ids) {
         markRaw(this);
+        const Model = new.target;
+        this._raw = this;
+        if (!Model._) {
+            // the dummy record collecting the field declarations has no internals
+            return;
+        }
+        this.Model = Model;
+        this._ = this[STORE_SYM] ? Record.store._ : new RecordInternal();
+        return this._.prepareRecord(this, ids);
     }
 
     /** @param {() => any} fn */
@@ -192,12 +203,9 @@ export class Record {
         const Model = this;
         const store = Model._rawStore;
         return store.MAKE_UPDATE(function RecordNew() {
-            const recordProxy = new Model();
+            const recordProxy = new Model(ids);
             const record = recordProxy._raw;
-            Object.assign(record._, { localId: Model.localId(ids) });
-            for (const name of Model._.fields.keys()) {
-                record._.prepareField(record, name, recordProxy);
-            }
+            recordProxy.setup();
             Object.assign(recordProxy, { ...ids });
             Model.records[record.localId] = recordProxy;
             if (record.Model.getName() === "Store") {
@@ -205,14 +213,10 @@ export class Record {
             }
             // compute inherits fields in priority, as other fields might depend on them
             for (const fieldName of Model._.inheritsFields) {
-                record._.compute?.(record, fieldName);
+                record._.compute?.(fieldName);
             }
             for (const fieldName of record.Model._.fields.keys()) {
-                if (record.Model._.fieldsComputable.get(fieldName)) {
-                    // the owl computed() runs on the first read, nothing to request
-                    continue;
-                }
-                record._.requestCompute?.(record, fieldName);
+                record._.requestCompute?.(fieldName);
             }
             record._.isConstructing.set(false);
             return recordProxy;
@@ -300,6 +304,35 @@ export class Record {
     _proxy;
 
     setup() {}
+
+    /**
+     * Declares a value computed from the record, read like a field without
+     * being one: the value lives in an owl computed, and the model neither
+     * stores nor serializes it.
+     *
+     * @template T
+     * @param {() => T} compute
+     * @returns {T}
+     */
+    computed(compute) {
+        return { [COMPUTED_SYM]: true, compute };
+    }
+
+    /**
+     * Declares a computed whose value goes stale on its own, a value read
+     * from the clock in particular: `msUntilStale` gives the delay after
+     * which the value is made again, or nothing to leave it as it is. The
+     * value is made again while it is read and schedules nothing once nobody
+     * reads it.
+     *
+     * @template T
+     * @param {() => T} compute
+     * @param {(value: T) => number|void} msUntilStale
+     * @returns {T}
+     */
+    computedUntilStale(compute, msUntilStale) {
+        return { ...this.computed(compute), msUntilStale };
+    }
 
     /**
      * @param {Object|any} data
@@ -402,10 +435,10 @@ export class Record {
             // the dummy record collecting the field declarations has no internals
             return;
         }
-        const deps = record._.ensureScope(record).run(() =>
+        const deps = record._.ensureScope().run(() =>
             computed(dependencies.bind(record), { equals: shallowEqual })
         );
-        const boundCallback = callback.bind(record);
+        const boundCallback = (...values) => callback.apply(record._proxy, values);
         let firstRun = true;
         let cleanup;
         record._registerDisposeFn(
@@ -439,29 +472,6 @@ export class Record {
                 });
             })
         );
-    }
-
-    /**
-     * The `computedUntilStale` of this record kept under `key`, made on the
-     * first read so that a value nobody reads is never scheduled.
-     *
-     * @template T
-     * @param {string} key where the computed is kept, off the fields of the record
-     * @param {() => T} compute
-     * @param {(value: T) => number|void} msUntilStale
-     * @returns {() => T}
-     */
-    computedUntilStale(key, compute, msUntilStale) {
-        const record = this._raw;
-        const staleComputeds = (record._.staleComputeds ??= new Map());
-        let staleComputed = staleComputeds.get(key);
-        if (!staleComputed) {
-            staleComputed = record._.ensureScope(record).run(() =>
-                computedUntilStale(compute, msUntilStale)
-            );
-            staleComputeds.set(key, staleComputed);
-        }
-        return staleComputed;
     }
 
     /**

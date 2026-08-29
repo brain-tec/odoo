@@ -1,10 +1,6 @@
 import { MessagePinDialog } from "@mail/core/common/message_pin_dialog";
 import { fields, Record } from "@mail/model/export";
-import {
-    compareDatetime,
-    effectWithCleanup,
-    nearestGreaterThanOrEqual,
-} from "@mail/utils/common/misc";
+import { compareDatetime, nearestGreaterThanOrEqual } from "@mail/utils/common/misc";
 
 import { _t } from "@web/core/l10n/translation";
 import { formatList } from "@web/core/l10n/utils";
@@ -21,27 +17,27 @@ export class DiscussChannel extends Record {
     static _name = "discuss.channel";
     static _inherits = { "mail.thread": "thread" };
 
-    static new() {
-        /** @type {import("models").DiscussChannel} */
-        const channel = super.new(...arguments);
+    setup() {
+        super.setup(...arguments);
         // Handles subscriptions for non-members. Subscriptions for channels
         // that the user is a member of are handled by
         // `ir_websocket@_build_bus_channel_list`.
-        channel._registerDisposeFn(
-            effectWithCleanup(() => {
-                const busChannel =
-                    !channel.isTransient &&
-                    !channel.self_member_id &&
-                    channel.shouldSubscribeToBusChannel &&
-                    channel.busChannel;
-                const busService = channel.store.env.services.bus_service;
+        this.onChange(
+            () => {
+                const shouldSubscribe =
+                    !this.isTransient && !this.self_member_id && this.shouldSubscribeToBusChannel;
+                return [
+                    shouldSubscribe ? this.busChannel : undefined,
+                    this.store.env.services.bus_service,
+                ];
+            },
+            function subscribeToBusChannel(busChannel, busService) {
                 if (busService && busChannel) {
                     busService.addChannel(busChannel);
                     return () => busService.deleteChannel(busChannel);
                 }
-            })
+            }
         );
-        return channel;
     }
 
     /**
@@ -167,11 +163,7 @@ export class DiscussChannel extends Record {
             !this.is_readonly
         );
     }
-    canHide = fields.Attr(false, {
-        compute() {
-            return this._computeCanHide();
-        },
-    });
+    canHide = this.computed(() => this._computeCanHide());
     _computeCanHide() {
         return Boolean(this.self_member_id?.is_pinned);
     }
@@ -192,7 +184,7 @@ export class DiscussChannel extends Record {
         inverse: "channel",
         onAdd() {
             if (this.self_member_id && !this.self_member_id.is_pinned) {
-                this.self_member_id.is_pinned = true;
+                this.self_member_id.unpin_dt = false;
                 this.pinRpc({ pinned: true });
             }
         },
@@ -237,11 +229,9 @@ export class DiscussChannel extends Record {
         }
         return undefined;
     }
+    correspondents = this.computed(() => this.computedCorrespondents);
     /** @returns {import("models").ChannelMember[]} */
-    get correspondents() {
-        if (!this.channel) {
-            return [];
-        }
+    get computedCorrespondents() {
         return this.channel_member_ids.filter(({ persona }) => persona?.notEq(this.store.self));
     }
     get createDateSimple() {
@@ -252,12 +242,13 @@ export class DiscussChannel extends Record {
     discuss_category_id = fields.One("discuss.category", {
         inverse: "channel_ids",
     });
-    get displayName() {
+    displayName = this.computed(() => this.computedDisplayName);
+    get computedDisplayName() {
         if (this.channel_type === "chat" && this.correspondent) {
             return this.correspondent.name;
         }
         if (this.channel_name_member_ids.length && !this.name) {
-            const nameParts = this.channel_name_member_ids
+            const nameParts = [...this.channel_name_member_ids]
                 .sort((m1, m2) => m1.id - m2.id)
                 .slice(0, 3)
                 .map((member) => member.name);
@@ -353,21 +344,15 @@ export class DiscussChannel extends Record {
             });
         },
     });
-    hasOtherMembersTyping = fields.Attr(false, {
-        /** @this {import("models").DiscussChannel} */
-        compute() {
-            if (this.self_member_id?.mute_until_dt) {
-                return false;
-            }
-            return this.otherTypingMembers.length > 0;
-        },
+    hasOtherMembersTyping = this.computed(() => {
+        if (this.self_member_id?.mute_until_dt) {
+            return false;
+        }
+        return this.otherTypingMembers.length > 0;
     });
-    hasSeenFeature = fields.Attr(false, {
-        /** @this {import("models").DiscussChannel} */
-        compute() {
-            return this.store.channel_types_with_seen_infos.includes(this.channel_type);
-        },
-    });
+    hasSeenFeature = this.computed(() =>
+        this.store.channel_types_with_seen_infos.includes(this.channel_type)
+    );
     /** @type {number} */
     id = fields.Attr(undefined, {
         onUpdate() {
@@ -422,22 +407,19 @@ export class DiscussChannel extends Record {
             }
         },
     });
-    lastMessageSeenByAllId = fields.Attr(undefined, {
-        /** @this {import("models").DiscussChannel} */
-        compute() {
-            if (!this.hasSeenFeature) {
-                return;
+    lastMessageSeenByAllId = this.computed(() => {
+        if (!this.hasSeenFeature) {
+            return;
+        }
+        return this.channel_member_ids.reduce((lastMessageSeenByAllId, member) => {
+            if (member.notEq(this.self_member_id) && member.seen_message_id) {
+                return lastMessageSeenByAllId
+                    ? Math.min(lastMessageSeenByAllId, member.seen_message_id.id)
+                    : member.seen_message_id.id;
+            } else {
+                return lastMessageSeenByAllId;
             }
-            return this.channel_member_ids.reduce((lastMessageSeenByAllId, member) => {
-                if (member.notEq(this.self_member_id) && member.seen_message_id) {
-                    return lastMessageSeenByAllId
-                        ? Math.min(lastMessageSeenByAllId, member.seen_message_id.id)
-                        : member.seen_message_id.id;
-                } else {
-                    return lastMessageSeenByAllId;
-                }
-            }, undefined);
-        },
+        }, undefined);
     });
     lastSelfMessageSeenByEveryone = fields.One("mail.message", {
         /** @this {import("models").DiscussChannel} */
@@ -480,12 +462,7 @@ export class DiscussChannel extends Record {
     threadCreationMessages = fields.Many("mail.message", {
         inverse: "channelAsThreadCreationNotification",
     });
-    hasThreadCreationNotification = fields.Attr(false, {
-        /** @this {import("models").DiscussChannel} */
-        compute() {
-            return this.threadCreationMessages.length;
-        },
-    });
+    hasThreadCreationNotification = this.computed(() => this.threadCreationMessages.length);
     /** ⚠️ {@link AwaitChatHubInit} */
     get shouldSubscribeToBusChannel() {
         return (
@@ -799,7 +776,7 @@ export class DiscussChannel extends Record {
     /** @returns {boolean} true if the channel was opened, false otherwise */
     openChannel() {
         if (this.self_member_id && !this.self_member_id.is_pinned && !this.parent_channel_id) {
-            this.self_member_id.is_pinned = true;
+            this.self_member_id.unpin_dt = false;
             this.pinRpc({ pinned: true });
         }
         return this._openChannel();
@@ -899,7 +876,7 @@ export class DiscussChannel extends Record {
         if (this.self_member_id?.is_pinned) {
             undos.push(() => {
                 if (this.self_member_id) {
-                    this.self_member_id.is_pinned = true;
+                    this.self_member_id.unpin_dt = false;
                 }
                 this.pinRpc({ pinned: true });
             });
