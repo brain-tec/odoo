@@ -7,6 +7,7 @@ from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.tools.partner_identifiers import normalize_identifier
 
+from odoo.addons.l10n_fr_pdp.models.account_edi_xml_ubl_21_fr import CPRO_INVOICE_IDENTIFIER
 from odoo.addons.l10n_fr_pdp.tools.demo_utils import handle_demo
 
 _logger = logging.getLogger(__name__)
@@ -108,6 +109,11 @@ class ResPartner(models.Model):
         all_identifiers = self._get_all_identifiers(enrich=True)
         return all_identifiers.get('FR_SIREN')  # will be deduced by enrich=True if SIRET was set.
 
+    def _l10n_fr_pdp_get_siret(self):
+        self.ensure_one()
+        all_identifiers = self._get_all_identifiers(enrich=True)
+        return all_identifiers.get('FR_SIRET')
+
     def _get_edi_builder(self, invoice_edi_format):
         # EXTENDS 'account_edi_ubl_cii'
         if invoice_edi_format == 'ubl_21_fr':
@@ -165,25 +171,37 @@ class ResPartner(models.Model):
         scheme, _sep, _endpoint = routing_identifier.lower().partition(":")
         if scheme != '0225':
             return super()._get_peppol_verification_state(routing_identifier, invoice_edi_format, process_type=process_type, partner=partner)
-        return self._get_pdp_annuaire_verification_state(routing_identifier, invoice_edi_format)
+        return self._get_pdp_annuaire_verification_state(routing_identifier, invoice_edi_format, partner=partner)
 
     @api.model
-    def _get_pdp_annuaire_verification_state(self, edi_identification, invoice_edi_format):
+    def _get_pdp_annuaire_verification_state(self, edi_identification, invoice_edi_format, partner=None):
         if not edi_identification:
             return 'not_verified'
         if invoice_edi_format != 'ubl_21_fr':
             return 'not_valid_format'
-        participant_info = self._pdp_annuaire_lookup_participant(edi_identification)
-        if (participant_info or {}).get('in_annuaire'):
+        participant_info = self._pdp_annuaire_lookup_participant(edi_identification) or {}
+        if participant_info.get('in_annuaire'):
+            if partner and participant_info.get('b2g'):
+                # This is a bit of a hack to avoid having to add a field to signify the partner is behind Chorus Pro.
+                # The users that are associated with Chorus Pro (9999) on the annuaire are not on Peppol.
+                # They just communicate with Chorus Pro which communicates with the other platforms (not via Peppol).
+                # So the `peppol_supported_documents` would be empty for them otherwise.
+                # The CPRO_INVOICE_IDENTIFIER acts as a general placeholder and does not indicate the actually
+                # supported documents (i.e. credit notes and CDAR lifecycles are possible too ofc.).
+                partner.peppol_supported_documents = [CPRO_INVOICE_IDENTIFIER]
             return 'valid'
+
         return 'not_valid'
 
     @api.model
     @handle_demo
     def _pdp_annuaire_lookup_participant(self, edi_identification):
+        eas, _colon, pdp_identifier = edi_identification.partition(":")
+        if eas != '0225':
+            return None
+
         edi_mode = self.env.company._get_peppol_edi_mode()
         origin = self.env['account_edi_proxy_client.user']._get_proxy_urls()['pdp'][edi_mode]
-        pdp_identifier = edi_identification.partition(":")[2]
         query = parse.urlencode({'pdp_identifier': pdp_identifier})  # Note: the annuaire lookup is case-sensitive
         endpoint = f'{origin}/api/pdp/1/annuaire_lookup?{query}'
 
