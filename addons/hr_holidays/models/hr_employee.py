@@ -16,10 +16,12 @@ from odoo.tools import OrderedSet, float_round
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
+    def _get_leave_manager_domain(self):
+        return "[('share', '=', False), ('company_ids', 'in', company_id), ('role', 'in', ['group_user_regular', 'group_system']), ('all_group_ids', 'in', %s)]" % self.env.ref('hr_holidays.group_hr_holidays_employee').id
     leave_manager_id = fields.Many2one(
         'res.users', string='Time Off Approver',
         compute='_compute_leave_manager', store=True, readonly=False,
-        domain="[('share', '=', False), ('company_ids', 'in', company_id)]",
+        domain=_get_leave_manager_domain,
         help='Select the user responsible for approving "Time Off" of this employee.\n'
              'If empty, the approval is done by an Administrator or Approver (determined in settings/users).')
     current_work_entry_type_id = fields.Many2one('hr.work.entry.type', compute='_compute_current_work_entry_type_id', string="Current Time Type",
@@ -412,29 +414,17 @@ class HrEmployee(models.Model):
             'has_future_allocation': self.env['hr.work.entry.type'].has_future_allocation(),
             'has_accrual_allocation': self.env['hr.work.entry.type'].has_accrual_allocation(),
             'allocation_data': self.env['hr.work.entry.type'].get_allocation_data_request(target_date, False),
-            'allocation_request_days_hours': self.get_allocation_requests_days_hours(),
+            'allocations_number': self.get_allocations_number(),
         }
 
     @api.model
-    def get_allocation_requests_days_hours(self):
+    def get_allocations_number(self):
         employee = self._get_contextual_employee()
         allocations = self.env['hr.leave.allocation'].search([
             ('employee_id', '=', employee.id),
             ('state', '=', 'confirm'),
         ])
-        days = 0
-        hours = 0
-        for allocation in allocations:
-            if allocation.type_request_unit == 'hour':
-                hours += allocation.number_of_hours_display
-            else:
-                days += allocation.number_of_days_display
-        values = ''
-        if days:
-            values += f"{float_round(days, precision_digits=2):g}{'d ' if hours else ''}"
-        if hours:
-            values += f"{float_round(hours, precision_digits=2):g}h"
-        return values
+        return len(allocations)
 
     def _get_public_holidays(self, date_start, date_end):
         domain = [

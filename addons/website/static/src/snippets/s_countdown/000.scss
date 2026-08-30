@@ -49,8 +49,10 @@
         direction: ltr #{"/* rtl:ltr */"};
     }
 
+    // Only hide the labels visually: reading out loud "02 : 16 : 30" makes no
+    // sense without its time units, nor its compact version ("D").
     &.o_label_compact .o_count_item_label .o_other_letters, &.o_label_none .o_count_item_label {
-        display: none;
+        @include visually-hidden();
     }
 
     &.o_count_monospace .o_count_item_nbs {

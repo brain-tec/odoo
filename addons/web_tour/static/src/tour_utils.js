@@ -1,19 +1,6 @@
 import { _t } from "@web/core/l10n/translation";
 
 export const stepUtils = {
-    editSelectMenuInput(trigger, value) {
-        return [
-            {
-                content: "Make sure a SelectMenu has been opened",
-                trigger: `.o_select_menu_menu`,
-            },
-            {
-                trigger,
-                run: `edit ${value}`,
-            },
-        ];
-    },
-
     showAppsMenuItem() {
         return {
             isActive: ["community", "desktop"],
@@ -260,13 +247,6 @@ export const stepUtils = {
                     ".o_view_controller.o_list_view, .o_form_view > div > main > .o_form_readonly, .o_form_view > div > main > .o_form_saved",
             },
         ];
-    },
-
-    waitIframeIsReady() {
-        return {
-            content: "Wait until the iframe is ready",
-            trigger: `:iframe body[is-ready=true]`,
-        };
     },
 
     goToUrl(url) {
