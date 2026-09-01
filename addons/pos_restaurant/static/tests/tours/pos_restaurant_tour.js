@@ -137,6 +137,29 @@ registry.category("web_tour.tours").add("pos_restaurant_sync", {
             // There should be 0 synced draft order as we already deleted -00002.
             FloorScreen.clickTable("5"),
             ProductScreen.orderIsEmpty(),
+            ProductScreen.clickDisplayedProduct("Coca-Cola", true),
+            checkPreparationTicketData([{ name: "Coca-Cola", qty: 1 }]),
+            ProductScreen.clickOrderButton(),
+            Chrome.closePrintingWarning(),
+            FloorScreen.clickTable("5"),
+            checkPreparationTicketData([]),
+            checkPreparationTicketData([{ name: "Coca-Cola", qty: 1 }], { reprint: true }),
+            ProductScreen.clickDisplayedProduct("Water", true),
+            checkPreparationTicketData([{ name: "Water", qty: 1 }]),
+            ProductScreen.clickOrderButton(),
+            Chrome.closePrintingWarning(),
+            FloorScreen.clickTable("5"),
+            ProductScreen.orderlinesHaveNoChange(),
+            checkPreparationTicketData(
+                [
+                    { name: "Coca-Cola", qty: 1 },
+                    { name: "Water", qty: 1 },
+                ],
+                { reprint: true }
+            ),
+            ProductScreen.clickControlButton("Cancel Order"),
+            Dialog.confirm(),
+            FloorScreen.isShown(),
         ].flat(),
 });
 
@@ -1458,5 +1481,21 @@ registry.category("web_tour.tours").add("test_floating_order_name_change_partner
             Chrome.clickOrders(),
             TicketScreen.nthRowNotContains(1, "Deco Addict"),
             Chrome.clickRegister(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_guest_count_defaults_to_table_seats", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            FloorScreen.clickTable("5"),
+            ProductScreen.guestNumberIs("4"),
+            Dialog.cancel(),
+            ProductScreen.clickDisplayedProduct("Coca-Cola"),
+            ProductScreen.clickPayButton(false),
+            PaymentScreen.clickPaymentMethod("Cash"),
+            PaymentScreen.clickValidate(),
+            FeedbackScreen.isShown(),
         ].flat(),
 });
