@@ -31,6 +31,7 @@ class PdpRegistration(models.TransientModel):
         readonly=False,
         help="The identifier starts with the SIREN, the part after the SIREN is optional. The expected format of the identifier is: SIREN, SIREN_SIRET, SIREN_SIRET_CodeRoutage or SIREN_SuffixeAdressage",
     )
+    # DEPRECATED - was for the pre-prod phase
     pdp_pilot_phase = fields.Boolean(
         related='company_id.l10n_fr_pdp_pilot_phase',
         readonly=False,
@@ -235,8 +236,8 @@ class PdpRegistration(models.TransientModel):
             raise ValidationError(self.env._("Invalid email address '%s'", self.contact_email))
         base_url = self.company_id._pdp_get_iap_url()
         if self.env['res.company'].search_count([
-            ('peppol_eas', '=', '0225'),
-            ('peppol_endpoint', '=like', f'{self.siren_number}%'),
+            ('routing_scheme', '=', '0225'),
+            ('routing_endpoint', '=like', f'{self.siren_number}%'),
             ('account_peppol_proxy_state', 'in', ('receiver', 'smp_registration')),
         ], limit=1):
             # Another company/branch on same db registered with the same siren (and so will do the same kyc)
