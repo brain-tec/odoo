@@ -7,10 +7,28 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { FormViewDialog, formViewDialogProps } from "@web/views/view_dialogs/form_view_dialog";
 import { formView } from "@web/views/form/form_view";
 import { renderToFragment } from "@web/core/utils/render";
-import { Component, onMounted, onWillDestroy, useProps, signal, xml, proxy, t } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    onWillDestroy,
+    useProps,
+    signal,
+    xml,
+    proxy,
+    t,
+    usePlugin,
+} from "@odoo/owl";
 import { FormController, formControllerProps } from "@web/views/form/form_controller";
 import { registry } from "@web/core/registry";
 import { addLoadingEffect } from "@web/core/utils/ui";
+import { BootstrapInstance } from "@web/core/utils/bootstrap_plugin";
+
+export const pageDependenciesProps = {
+    resIds: t.array(),
+    resModel: t.string(),
+    mode: t.string(),
+    onDependenciesLoaded: t.function().optional(),
+};
 
 export class PageDependencies extends Component {
     static template = "website.PageDependencies";
@@ -21,17 +39,14 @@ export class PageDependencies extends Component {
             <div class="popover-body"/>
         </div>
     `;
-    static props = {
-        resIds: Array,
-        resModel: String,
-        mode: String,
-        onDependenciesLoaded: { type: Function, optional: true },
-    };
+    static propShape = pageDependenciesProps;
+    props = useProps(this.constructor.propShape);
 
     action = signal.ref();
 
     setup() {
         super.setup();
+        this.bootstrap = usePlugin(BootstrapInstance);
         this.orm = useService("orm");
 
         this.sprintf = sprintf;
@@ -64,7 +79,7 @@ export class PageDependencies extends Component {
     }
 
     showDependencies() {
-        const popover = window.Popover.getOrCreateInstance(this.action(), {
+        const popover = this.bootstrap.getOrCreateInstance(window.Popover, this.action(), {
             title: _t("Dependencies"),
             boundary: "viewport",
             placement: "right",
@@ -92,16 +107,16 @@ export class PageDependencies extends Component {
                     actionEl.addEventListener("hidden.bs.popover", handler);
                 });
             }
-            popover.dispose();
+            this.bootstrap.disposeBootstrapInstance(popover);
         }
     }
 }
 
 export class FormPageDependencies extends PageDependencies {
-    static props = {
+    static propShape = {
         ...standardFieldProps,
-        ...PageDependencies.props,
-        resIds: { type: Array, optional: true },
+        ...pageDependenciesProps,
+        resIds: t.array().optional(),
     };
 
     async getResIds() {
@@ -135,13 +150,13 @@ export class DeletePageDialog extends Component {
         CheckBox,
         WebsiteDialog,
     };
-    static props = {
-        resIds: Array,
-        resModel: String,
-        onDelete: { type: Function, optional: true },
-        close: Function,
-        hasNewPageTemplate: { type: Boolean, optional: true },
-    };
+    props = useProps({
+        resIds: t.array(),
+        resModel: t.string(),
+        onDelete: t.function().optional(),
+        close: t.function(),
+        hasNewPageTemplate: t.boolean().optional(),
+    });
 
     setup() {
         this.website = useService("website");
@@ -172,11 +187,11 @@ export class DeletePageDialog extends Component {
 export class DuplicatePageDialog extends Component {
     static components = { WebsiteDialog };
     static template = "website.DuplicatePageDialog";
-    static props = {
-        onDuplicate: Function,
-        close: Function,
-        pageIds: { type: Array, element: Number },
-    };
+    props = useProps({
+        onDuplicate: t.function(),
+        close: t.function(),
+        pageIds: t.array(t.number()),
+    });
     autofocusRef = signal.ref();
 
     setup() {
