@@ -264,8 +264,26 @@
                         'ad_storage': 'denied',
                         'ad_user_data': 'denied',
                         'ad_personalization': 'denied',
-                        'analytics_storage': 'denied'
+                        'analytics_storage': 'denied',
                     });
+
+                    function updateConsents(consentState) {
+                        gtag("consent", "update", {
+                            "ad_storage": consentState,
+                            "ad_user_data": consentState,
+                            "ad_personalization": consentState,
+                            "analytics_storage": consentState,
+                        });
+                    }
+                    document.addEventListener("optionalCookiesAccepted", () =&gt; {
+                        updateConsents("granted");
+                    });
+                    document.addEventListener("optionalCookiesDenied", () =&gt; {
+                        updateConsents("denied");
+                    });
+                    <t t-if="website._allConsentsGranted()">
+                        updateConsents("granted");
+                    </t>
                 </script>
             </t>
             <t t-if="is_google_analytics">
@@ -286,27 +304,6 @@
                     })(window,document,'script','dataLayer',<t t-out="json.dumps(website.google_analytics_key)"/>);
                 </script>
                 <!-- End Google Tag Manager -->
-            </t>
-            <t t-if="is_google_analytics or is_google_tag_manager">
-                <script id="update_consent">
-                    function updateConsents(consentState) {
-                        gtag("consent", "update", {
-                            "ad_storage": consentState,
-                            "ad_user_data": consentState,
-                            "ad_personalization": consentState,
-                            "analytics_storage": consentState,
-                        });
-                    }
-                    document.addEventListener("optionalCookiesAccepted", () =&gt; {
-                        updateConsents("granted");
-                    });
-                    document.addEventListener("optionalCookiesDenied", () =&gt; {
-                        updateConsents("denied");
-                    });
-                    <t t-if="website._allConsentsGranted()">
-                        updateConsents("granted");
-                    </t>
-                </script>
             </t>
         </t>
         <t t-if="website.plausible_shared_key and not editable">
@@ -3389,7 +3386,7 @@ Disallow: /*/my/*
         <attribute name="t-attf-class" remove="s_searchbar_input" separator=" "/>
     </xpath>
     <xpath expr="//div[@role='search']" position="replace">
-        <t t-set="placeholder" t-value="placeholder or 'Search...'" />
+        <t t-if="not placeholder" t-set="placeholder">Search...</t>
         <form t-attf-class="o_searchbar_form s_searchbar_input #{_form_classes}" t-att-action="action" method="get" t-attf-data-snippet="s_searchbar_input">
             <a t-if="_simple_button_layout" t-attf-class="o_search_btn {{_simple_button_classes or 'p-1 bg-o-color-3 lh-1'}} btn o_not_editable" role="button" title="Search" href="#">
                 <i class="oi-stack lh-lg oi" data-icon="search" role="img"/>
