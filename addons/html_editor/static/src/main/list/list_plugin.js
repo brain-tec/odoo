@@ -219,6 +219,12 @@ export class ListPlugin extends Plugin {
                 return true;
             }
         },
+        is_node_in_same_block_segment_predicates: (node, blockNode) => {
+            const listAncestor = closestElement(node, "ul, ol");
+            if (listAncestor && blockNode.contains(listAncestor)) {
+                return false;
+            }
+        },
 
         /** Providers */
         color_target_providers: (node) => {
@@ -1231,22 +1237,23 @@ export class ListPlugin extends Plugin {
         cursors.restore();
     }
 
-    postFormatAppliedOnList(node, formatName, applyStyle) {
-        if (formatName !== "fontSize") {
-            return;
-        }
+    postFormatAppliedOnList(node, formatSpec, applyStyle) {
         const listsSet = new Set();
         if (isListItem(node)) {
             const sublists = childNodes(node).filter(isListElement);
             for (const list of sublists) {
                 if (applyStyle) {
-                    list.classList.add("o_default_font_size");
+                    formatSpec.addNeutralStyle(list);
+                } else {
+                    formatSpec.removeStyle(list);
                 }
             }
             listsSet.add(node.parentElement);
         }
-        for (const list of listsSet) {
-            this.adjustListPadding(list);
+        if (formatSpec.id === "fontSize") {
+            for (const list of listsSet) {
+                this.adjustListPadding(list);
+            }
         }
     }
 
