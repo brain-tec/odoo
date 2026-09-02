@@ -148,18 +148,30 @@ async function fetchDependencies(addons) {
             });
         }
         dependencyBatch.push(...addonsToFetch);
-        dependencyBatchPromise.then((allDependencies) => {
-            for (const [moduleName, dependencyNames] of Object.entries(allDependencies)) {
-                dependencyCache[moduleName] ||= Promise.withResolvers();
-                dependencyCache[moduleName].resolve();
+        dependencyBatchPromise.then(
+            (allDependencies) => {
+                for (const [moduleName, dependencyNames] of Object.entries(allDependencies)) {
+                    dependencyCache[moduleName] ||= Promise.withResolvers();
+                    dependencyCache[moduleName].resolve();
 
-                dependencies[moduleName] = dependencyNames.filter(
-                    (dep) => !DEFAULT_ADDONS.includes(dep)
+                    dependencies[moduleName] = dependencyNames.filter(
+                        (dep) => !DEFAULT_ADDONS.includes(dep)
+                    );
+                }
+
+                resolveAddonDependencies(dependencies);
+            },
+            (error) => {
+                const reason = new Error(
+                    `could not fetch the dependencies of ${addonsToFetch.join(", ")}: ${
+                        error.message
+                    }`
                 );
+                for (const addon of addonsToFetch) {
+                    dependencyCache[addon].reject(reason);
+                }
             }
-
-            resolveAddonDependencies(dependencies);
-        });
+        );
     }
 
     await Promise.all([...addons].map((addon) => dependencyCache[addon]?.promise));
@@ -721,8 +733,6 @@ export async function runTests(options) {
         await __gcAndLogMemory(lastSuiteName, lastNumberTests);
     }
 
-    await stop();
-
     // Perform final cleanups
     moduleNamesCache.clear();
     serverModelCache.clear();
@@ -736,6 +746,9 @@ export async function runTests(options) {
     }
 
     await __gcAndLogMemory("tests done");
+
+    // Report last, as the server kills the browser on the result report.
+    await stop();
 }
 
 /**
