@@ -322,6 +322,14 @@ class Account_Edi_Proxy_ClientUser(models.Model):
                         ),
                     )
 
+    def _get_type_code(self, files_data):
+        file_data = files_data[0]
+        # Fallback to avoid issues with large EmbeddedDocumentBinaryObject
+        if file_data['xml_tree'] is None:
+            file_data['raw'] = REMOVE_EMBEDDED_DOCUMENT_BINARY_OBJECT_RE.sub(b'', file_data['raw'])
+            file_data['xml_tree'] = self.env['account.move']._get_xml_tree(file_data)
+        return file_data['xml_tree'].findtext('.//{*}InvoiceTypeCode') or file_data['xml_tree'].findtext('.//{*}CreditNoteTypeCode')
+
     def _peppol_import_invoice(self, attachment, peppol_state, uuid, journal=None):
         """Save new documents in an accounting journal, when one is specified on the company.
 
@@ -333,21 +341,17 @@ class Account_Edi_Proxy_ClientUser(models.Model):
         """
         self.ensure_one()
 
-        file_data = self.env['account.move']._to_files_data(attachment)[0]
-
-        # Fallback to avoid issues with large EmbeddedDocumentBinaryObject
-        if file_data['xml_tree'] is None:
-            file_data['raw'] = REMOVE_EMBEDDED_DOCUMENT_BINARY_OBJECT_RE.sub(b'', file_data['raw'])
-            file_data['xml_tree'] = self.env['account.move']._get_xml_tree(file_data)
-
-        # Self-billed invoices are invoices which your customer creates on your behalf and sends you via Peppol.
-        # In this case, the invoice needs to be created as an out_invoice in a self-billing sale journal.
-        # If no self-billing sale journal was found, the invoice will be created in a regular sale journal.
-        # 329/527: Self-billing invoice; 261: Self-billing credit note
         is_self_billed = False
-        if file_data['xml_tree'].findtext('.//{*}InvoiceTypeCode') in ['389', '527'] or file_data['xml_tree'].findtext('.//{*}CreditNoteTypeCode') == '261':
-            is_self_billed = True
-
+        files_data = self.env['account.move']._to_files_data(attachment)
+        try:
+            # Self-billed invoices are invoices which your customer creates on your behalf and sends you via Peppol.
+            # In this case, the invoice needs to be created as an out_invoice in a self-billing sale journal.
+            # If no self-billing sale journal was found, the invoice will be created in a regular sale journal.
+            # 389/527: Self-billing invoice; 261: Self-billing credit note
+            type_code = self._get_type_code(files_data)
+            is_self_billed = type_code in ['389', '527', '261']
+        except Exception:
+            _logger.exception("The Peppol XML file is invalid or empty for attachment ID %s", attachment.id)
         if not is_self_billed:
             journal = journal or self.company_id.peppol_purchase_journal_id
             move_type = 'in_invoice'
@@ -384,7 +388,7 @@ class Account_Edi_Proxy_ClientUser(models.Model):
             move.is_in_extractable_state = False
 
         try:
-            move._extend_with_attachments([file_data], new=True)
+            move._extend_with_attachments(files_data, new=True)
             move._autopost_bill()
         except Exception:
             _logger.exception("Unexpected error occurred during the import of bill with id %s", move.id)
@@ -682,19 +686,37 @@ class Account_Edi_Proxy_ClientUser(models.Model):
                 bodies={move.id: log_message for move in reference_moves},
             )
         else:
-            self.env['account.peppol.response'].create([{
+            responses = self.env['account.peppol.response'].create([{
                     'peppol_message_uuid': message['message_uuid'],
                     'response_code': status,
                     'peppol_state': 'processing',
                     'move_id': move.id,
                 }
                 for message, move in zip(response.get('messages'), reference_moves)
+                if message.get('message_uuid')
             ])
-            log_message = self.env._(
-                "A Peppol response was sent to the Peppol Access Point declaring you %(status)s this document.",
-                status=self.env._('received') if status == 'AB' else self.env._('accepted') if status == 'AP' else self.env._('rejected'),
+
+            sent_moves = responses.move_id
+            unsent_moves = reference_moves - sent_moves
+
+            status_string = (
+                self.env._('received') if status == 'AB'
+                else self.env._('accepted') if status == 'AP'
+                else self.env._('rejected')
             )
-        reference_moves._message_log_batch(bodies={move.id: log_message for move in reference_moves})
+            sent_message = self.env._(
+                "A Peppol response was sent to the Peppol Access Point declaring you %(status)s this document.",
+                status=status_string,
+            )
+            unsent_message = self.env._(
+                "A Peppol response declaring you %(status)s this document could not be sent to the Peppol Access Point.",
+                status=status_string,
+            )
+            message_bodies = {
+                **{move.id: sent_message for move in sent_moves},
+                **{move.id: unsent_message for move in unsent_moves},
+            }
+            reference_moves._message_log_batch(bodies=message_bodies)
 
     def _peppol_get_participant_status(self):
         for edi_user in self:
