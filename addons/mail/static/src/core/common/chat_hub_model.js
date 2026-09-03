@@ -1,5 +1,6 @@
 import { browser } from "@web/core/browser/browser";
 import { fields, Record } from "@mail/model/export";
+import { subscribeToStorage } from "@mail/utils/common/local_storage";
 
 import { Mutex } from "@web/core/utils/concurrency";
 
@@ -37,23 +38,22 @@ export class ChatHub extends Record {
         this.onChange(
             () => [],
             () => {
-                const onStorage = (ev) => {
+                const stopStorage = subscribeToStorage(CHAT_HUB_KEY, (ev) => {
                     if (ev.key === CHAT_HUB_KEY) {
                         this.load(ev.newValue);
-                    } else if (ev.key === null) {
+                    } else {
                         this.load();
                     }
-                };
-                browser.addEventListener("storage", onStorage);
+                });
                 this.load(browser.localStorage.getItem(CHAT_HUB_KEY) ?? undefined).then(() =>
                     this._resolveInit()
                 );
-                return () => browser.removeEventListener("storage", onStorage);
+                return stopStorage;
             }
         );
     }
 
-    compact = fields.Attr(false, { localStorage: true });
+    compact = this.localStorage(false);
     canShowOpened = fields.Many("ChatWindow");
     canShowFolded = fields.Many("ChatWindow");
     /** From left to right. Right-most will actually be folded */

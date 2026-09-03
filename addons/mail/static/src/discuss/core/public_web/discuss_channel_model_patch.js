@@ -19,18 +19,13 @@ const discussChannelPatch = {
             inverse: "channels",
             /** @this {import("models").DiscussChannel} */
             compute() {
-                return Object.values(this.store.MessagingMenuTab.records).filter((tab) =>
+                return [...this.store.MessagingMenuTab.records.values()].filter((tab) =>
                     tab.includesChannel(this)
                 );
             },
             eager: true,
         });
-        this.primaryMessagingMenuTab = fields.One("MessagingMenuTab", {
-            /** @this {import("models").DiscussChannel} */
-            compute() {
-                return this.messagingMenuTabs[0];
-            },
-        });
+        this.primaryMessagingMenuTab = this.computed(() => this.messagingMenuTabs[0]);
         this.messagingMenuTabsWithCounter = fields.Many("MessagingMenuTab", {
             inverse: "channelsWithCounter",
             /** @this {import("models").DiscussChannel} */

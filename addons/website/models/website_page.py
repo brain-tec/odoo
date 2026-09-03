@@ -32,7 +32,9 @@ class WebsitePage(models.Model):
         'website.published.multi.mixin',
         'website.searchable.mixin',
         'website.page_options.mixin',
+        'website.trackable.mixin',
     ]
+    _website_track_field = 'page_id'
     _description = 'Page'
     _order = 'website_id'
 
@@ -42,6 +44,7 @@ class WebsitePage(models.Model):
     name = fields.Char(
         string="Page Name",
         compute='_compute_name', inverse='_inverse_name', store=True,
+        copy=True,
         translate=True,
     )
     url = fields.Char('Page URL', required=True, translate=True, copy=lambda self: self.env['website'].get_unique_path(self.url))
@@ -387,15 +390,6 @@ class WebsitePage(models.Model):
         based on the current request, URL, or session.
         """
         return True
-
-    def _get_extra_tracking_values(self, **kwargs):
-        extra_tracking_values = super()._get_extra_tracking_values(**kwargs)
-        if (
-            kwargs.get('res_model') == self._name
-            and (res_id := kwargs.get('res_id'))
-        ):
-            extra_tracking_values['page_id'] = res_id
-        return extra_tracking_values
 
     @api.model
     def _post_process_response_from_cache(self, request, response) -> None:

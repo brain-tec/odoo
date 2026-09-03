@@ -14,7 +14,6 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Domain
 from odoo.tools import SQL, is_html_empty
 from odoo.tools.misc import format_duration
-from odoo.tools.translate import mark_as_copy
 
 _logger = logging.getLogger(__name__)
 
@@ -32,7 +31,9 @@ class SlideChannel(models.Model):
         'website.published.multi.mixin',
         'website.searchable.mixin',
         'website.structured_data.mixin',
+        'website.trackable.mixin',
     ]
+    _website_track_field = 'slide_channel_id'
     _order = 'sequence, id'
     _partner_unfollow_enabled = True
 
@@ -62,7 +63,7 @@ class SlideChannel(models.Model):
         return _('Contact Responsible')
 
     # description
-    name = fields.Char('Name', translate=True, required=True, copy=mark_as_copy('name'))
+    name = fields.Char('Name', translate=True, required=True)
     active = fields.Boolean(default=True, tracking=100)
     description = fields.Html('Description', translate=True, sanitize_attributes=False, sanitize_form=False, help="The description that is displayed on top of the course page, just below the title")
     description_short = fields.Html('Short Description', translate=True, sanitize_attributes=False, sanitize_form=False, help="The description that is displayed on the course card")
