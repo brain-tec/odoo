@@ -385,7 +385,7 @@ been taken for this time off type. Changing it now would affect existing employe
                     record.display_name = record.name
                 continue
             name = record.name
-            if record.requires_allocation:
+            if record.time_off_selectable and record.requires_allocation:
                 remaining_time = float_round(record.virtual_remaining_leaves, precision_digits=2) or 0.0
                 maximum = float_round(record.max_leaves, precision_digits=2) or 0.0
 
@@ -704,5 +704,5 @@ been taken for this time off type. Changing it now would affect existing employe
             }
             for fake_allocation in fake_allocations
         }
-        fake_allocations.invalidate_recordset()
+        fake_allocations._discard_fake_allocation()
         return carried_over_days_expiration_data

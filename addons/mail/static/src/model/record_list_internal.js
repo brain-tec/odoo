@@ -1,13 +1,13 @@
 import { isRecord, untrackFunctions } from "./misc";
 
-import { markRaw, proxy, signal } from "@odoo/owl";
+import { markRaw, signal } from "@odoo/owl";
 
 /** @typedef {import("./record").Record} Record */
 /** @typedef {import("./record_list").RecordList} RecordList */
 
 export class RecordListInternal {
-    /** @type {Record[]} raw */
-    data;
+    /** @type {import("@odoo/owl").Signal<Record[]>} raw */
+    data = signal.Array();
     /** @type {string} */
     name;
     /** @type {Record} */
@@ -16,18 +16,6 @@ export class RecordListInternal {
     recordList;
 
     constructor() {
-        /**
-         * The records of the list: a signal so a replacement notifies, read
-         * as a proxy so an in-place mutation notifies the touched keys alone.
-         */
-        const data = signal([]);
-        Object.defineProperty(this, "data", {
-            configurable: true,
-            get: () => proxy(data()),
-            set: (val) => {
-                data.set(val);
-            },
-        });
         markRaw(this);
     }
 
@@ -50,11 +38,11 @@ export class RecordListInternal {
             const record = self.insert(
                 last,
                 function recordList_AddNoInvOneInsert(record) {
-                    if (record !== self.data[0]) {
+                    if (record !== self.data()[0]) {
                         const old = recordList.at(-1);
-                        self.data.pop();
+                        self.data().pop();
                         old?._.uses.delete(recordList);
-                        self.data.push(record);
+                        self.data().push(record);
                         self.syncLength();
                         record._.uses.add(recordList);
                     }
@@ -71,8 +59,8 @@ export class RecordListInternal {
             const record = self.insert(
                 val,
                 function recordList_AddNoInvManyInsert(record) {
-                    if (self.data.indexOf(record) === -1) {
-                        self.data.push(record);
+                    if (self.data().indexOf(record) === -1) {
+                        self.data().push(record);
                         self.syncLength();
                         record._.uses.add(recordList);
                     }
@@ -114,7 +102,7 @@ export class RecordListInternal {
                     }
                 }
             }
-            self.data = newRecords;
+            self.data.set(newRecords);
             self.syncLength();
         });
     }
@@ -136,7 +124,7 @@ export class RecordListInternal {
             const record = this.insert(
                 val,
                 function recordList_DeleteNoInv_Insert(record) {
-                    const index = self.data.indexOf(record);
+                    const index = self.data().indexOf(record);
                     if (index !== -1) {
                         recordList.splice(index, 1);
                         self.syncLength();
@@ -219,12 +207,9 @@ export class RecordListInternal {
      */
     proxyGet(name, recordListProxy) {
         const recordList = this.recordList;
-        if (name === "data") {
-            return this.data;
-        }
         if (
             typeof name === "symbol" ||
-            Object.keys(recordList).includes(name) ||
+            (name !== "length" && Object.hasOwn(recordList, name)) ||
             Object.prototype.hasOwnProperty.call(recordList.constructor.prototype, name)
         ) {
             let res = Reflect.get(recordList, name, recordListProxy);
@@ -240,12 +225,12 @@ export class RecordListInternal {
             }
         }
         if (name === "length") {
-            return this.data.length;
+            return this.data().length;
         }
-        if (typeof name !== "symbol" && !window.isNaN(parseInt(name))) {
+        const index = parseInt(name);
+        if (!window.isNaN(index)) {
             // support for "array[index]" syntax
-            const index = parseInt(name);
-            return this.data[index]?._proxy;
+            return this.data()[index]?._proxy;
         }
         // Attempt an unimplemented array method call
         const array = [...recordList];
@@ -265,8 +250,8 @@ export class RecordListInternal {
                 // support for "array[index] = r3" syntax
                 const index = parseInt(name);
                 self.insert(val, function recordListSet_Insert(newRecord) {
-                    const oldRecord = self.data[index];
-                    self.data[index] = newRecord;
+                    const oldRecord = self.data()[index];
+                    self.data()[index] = newRecord;
                     if (oldRecord && oldRecord.notEq(newRecord)) {
                         oldRecord._.uses.delete(recordList);
                     }
@@ -289,15 +274,13 @@ export class RecordListInternal {
                 });
             } else if (name === "length") {
                 const newLength = parseInt(val);
-                if (newLength !== self.data.length) {
-                    if (newLength < self.data.length) {
+                if (newLength !== self.data().length) {
+                    if (newLength < self.data().length) {
                         recordList.splice(newLength, recordList.length - newLength);
                     }
-                    self.data.length = newLength;
+                    self.data().length = newLength;
                     self.syncLength();
                 }
-            } else if (name === "data") {
-                self.data = val;
             } else {
                 return Reflect.set(recordList, name, val, recordListProxy);
             }
@@ -308,10 +291,10 @@ export class RecordListInternal {
         this.owner._.fieldsComputeInNeed.set(this.name, true);
     }
     /**
-     * Sync reclist.data length with array length, as to not introduce confusion while debugging
+     * Sync the data length with the array length, as to not introduce confusion while debugging
      */
     syncLength() {
-        this.recordList.length = this.data.length;
+        this.recordList.length = this.data().length;
     }
 }
 

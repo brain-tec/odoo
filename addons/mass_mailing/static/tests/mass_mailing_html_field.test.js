@@ -2,7 +2,6 @@ import { defineMailModels } from "@mail/../tests/mail_test_helpers";
 import { beforeEach, describe, expect, test, waitUntil } from "@odoo/hoot";
 import { click, waitFor } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
-import { unmockedOrm } from "@web/../tests/_framework/module_set.hoot";
 import {
     clickSave,
     contains,
@@ -21,6 +20,7 @@ import { MassMailingHtmlField } from "../src/fields/html_field/mass_mailing_html
 import { MassMailingIframe } from "../src/iframe/mass_mailing_iframe";
 import { ThemeSelector } from "../src/themes/theme_selector/theme_selector";
 import { ThemeSelectorIframe } from "../src/themes/theme_selector/theme_selector_iframe";
+import { IrUiView, ResCompany } from "@mass_mailing/../tests/mass_mailing_test_helpers";
 
 class Mailing extends models.Model {
     _name = "mailing.mailing";
@@ -139,24 +139,6 @@ class Mailing extends models.Model {
     ];
 }
 
-const publicAssetsCache = new Map();
-class IrUiView extends models.Model {
-    async render_public_asset(template, values) {
-        const args = ["ir.ui.view", "render_public_asset", [template, values], {}];
-        if (
-            ["mass_mailing.email_designer_snippets", "mass_mailing.email_designer_themes"].includes(
-                template
-            )
-        ) {
-            if (!publicAssetsCache.has(template)) {
-                publicAssetsCache.set(template, unmockedOrm(...args));
-            }
-            return publicAssetsCache.get(template);
-        }
-        return unmockedOrm(...args);
-    }
-}
-
 class IrModel extends models.Model {
     _name = "ir.model";
 
@@ -184,7 +166,7 @@ class Event extends models.Model {
 }
 
 defineMailModels();
-defineModels([IrModel, IrUiView, Mailing, Event]);
+defineModels([IrModel, IrUiView, Mailing, Event, ResCompany]);
 
 const mailViewArch = `
 <form>
@@ -509,6 +491,27 @@ describe("field HTML", () => {
         });
         expect(getPagerValue()).toEqual([2]);
         expect(htmlField.state.activeTheme).toBe("basic");
+        expect(".o_mass_mailing-builder_sidebar").toHaveCount(0);
+        // editable builder
+        await contains(`.o_pager_next`).click();
+        await waitFor(".o_mass_mailing_iframe_wrapper :iframe .o_layout.o_empty_theme:only-child", {
+            timeout: 3000,
+        });
+        expect(getPagerValue()).toEqual([3]);
+        expect(htmlField.state.activeTheme).toBe("empty");
+        expect(".o_mass_mailing-builder_sidebar").toHaveCount(1);
+        // editable basic after switching back from builder
+        await contains(`.o_pager_previous`).click();
+        await waitFor(".o_mass_mailing_iframe_wrapper :iframe .o_layout.o_basic_theme:only-child", {
+            timeout: 3000,
+        });
+        expect(getPagerValue()).toEqual([2]);
+        expect(htmlField.state.activeTheme).toBe("basic");
+        expect(htmlField.withBuilder).toBe(false);
+        expect(":iframe .o_layout.o_basic_theme p:contains(Basic)").toHaveProperty(
+            "isContentEditable",
+            true
+        );
         expect(".o_mass_mailing-builder_sidebar").toHaveCount(0);
         // editable builder
         await contains(`.o_pager_next`).click();

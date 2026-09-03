@@ -236,7 +236,7 @@ export class Thread extends Record {
     scrollTop = "bottom";
     transientMessages = fields.Many("mail.message");
     /** @type {boolean|undefined} */
-    autoTranslateEnabled = fields.Attr(undefined, { localStorage: true });
+    autoTranslateEnabled = this.localStorage(undefined);
     /* The additional recipients are the recipients that are manually added
      * by the user by using the "To" or "Cc" fields of the Chatter. */
     additionalRecipients = fields.Attr([], { asProxy: true });
@@ -396,11 +396,7 @@ export class Thread extends Record {
         },
     });
 
-    newestPersistentOfAllMessage = fields.One("mail.message", {
-        compute() {
-            return this.newestPersistentAllMessages[0];
-        },
-    });
+    newestPersistentOfAllMessage = this.computed(() => this.newestPersistentAllMessages[0]);
 
     get oldestPersistentMessage() {
         return this.messages.find((msg) => Number.isInteger(msg.id));
