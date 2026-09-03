@@ -206,6 +206,14 @@ class AccountEdiProxyClientUser(models.Model):
             company.l10n_fr_pdp_annuaire_start_date = fields.Date.to_date(annuaire_start_date)
             company._force_update_l10n_fr_f10_moves()
 
+    def _get_type_code(self, files_data):
+        """ Override to unwrap the XML from the PDF with Factur-X."""
+        if (files_data[0]['import_file_type'] != 'pdf'):
+            return super()._get_type_code(files_data)
+        files_data.extend(self.env['account.move']._unwrap_attachments(files_data, recurse=False))
+        xml_tree = next(filter(lambda file: file['import_file_type'] == 'account.edi.xml.cii', files_data))['xml_tree']
+        return xml_tree.findtext('.//{*}ExchangedDocument/{*}TypeCode')
+
     def _peppol_get_new_documents(self, skip_no_journal=False):
         if 'pdp_einvoicing_chatter_messages' not in self.env.context:
             return self.with_context(pdp_einvoicing_chatter_messages={})._peppol_get_new_documents(skip_no_journal=skip_no_journal)
@@ -363,7 +371,7 @@ class AccountEdiProxyClientUser(models.Model):
                 bodies={move.id: log_message for move in reference_moves},
             )
             return
-        self.env['account.peppol.response'].create([
+        responses = self.env['account.peppol.response'].create([
             {
                 'peppol_message_uuid': message['message_uuid'],
                 'response_code': status,
@@ -378,12 +386,25 @@ class AccountEdiProxyClientUser(models.Model):
                 'pdp_flow_number': '2',
             }
             for message, move in zip(response.get('messages'), reference_moves)
+            if message.get('message_uuid')
         ])
-        log_message = self.env._(
+
+        sent_moves = responses.move_id
+        unsent_moves = reference_moves - sent_moves
+
+        sent_message = self.env._(
             "A French e-invoicing response with Response Code '%(status)s' was sent to the Approved Platform.",
             status=status_string,
         )
-        reference_moves._message_log_batch(bodies={move.id: log_message for move in reference_moves})
+        unsent_message = self.env._(
+            "A French e-invoicing response with Response Code '%(status)s' could not be sent to the Approved Platform.",
+            status=status_string,
+        )
+        message_bodies = {
+            **{move.id: sent_message for move in sent_moves},
+            **{move.id: unsent_message for move in unsent_moves},
+        }
+        reference_moves._message_log_batch(bodies=message_bodies)
 
     def _peppol_process_new_messages(self, messages):
         self.ensure_one()
