@@ -817,7 +817,6 @@
                                 groups="account.group_account_invoice"/>
                         <!-- Preview (only customer invoices) -->
                         <button name="preview_invoice" type="object" string="Preview" data-hotkey="o"
-                                title="Preview invoice"
                                 invisible="move_type not in ('out_invoice', 'out_refund') or state in ('draft', 'cancel')"/>
                         <!-- Reverse -->
                         <button name="%(action_view_account_move_reversal)d" string="Reverse Entry"
@@ -1156,13 +1155,13 @@
                             <group id="header_right_group">
                                 <label for="invoice_date" string="Invoice Date" style="font-weight:bold;"
                                        invisible="move_type not in ('out_invoice', 'out_refund', 'out_receipt')"/>
-                                <field name="invoice_date" nolabel="1" options="{'warn_future': true}"
+                                <field name="invoice_date" nolabel="1" options="{'warning': 'future'}"
                                        invisible="move_type not in ('out_invoice', 'out_refund', 'out_receipt')"
                                        readonly="state != 'draft'" placeholder="Today"/>
 
                                 <label for="invoice_date" string="Bill Date" style="font-weight:bold;"
                                        invisible="move_type not in ('in_invoice', 'in_refund', 'in_receipt')"/>
-                                <field name="invoice_date" nolabel="1" options="{'warn_future': true}"
+                                <field name="invoice_date" nolabel="1" options="{'warning': 'future'}"
                                        invisible="move_type not in ('in_invoice', 'in_refund', 'in_receipt')"
                                        required="move_type in ('in_invoice', 'in_refund', 'in_receipt')"
                                        readonly="state != 'draft'"/>
