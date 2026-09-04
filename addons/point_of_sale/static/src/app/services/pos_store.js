@@ -23,7 +23,6 @@ import {
     makeActionAwaitable,
 } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { PartnerList } from "../screens/partner_list/partner_list";
-import { computeComboItems } from "../models/utils/compute_combo_items";
 import { QRPopup } from "@point_of_sale/app/components/popups/qr_code_popup/qr_code_popup";
 import { CashMovePopup } from "@point_of_sale/app/components/popups/cash_move_popup/cash_move_popup";
 import { ClosePosPopup } from "@point_of_sale/app/components/popups/closing_popup/closing_popup";
@@ -596,15 +595,16 @@ export class PosStore extends WithLazyGetterTrap {
         await this.processProductAttributes();
         await this.initSnoozedProducts();
     }
-    cashMove() {
-        this.openCashbox(_t("Cash in / out"));
+    async cashMove() {
+        await this.openCashbox(_t("Cash in / out"));
         return makeAwaitable(this.dialog, CashMovePopup);
     }
     get canOpenCashdrawer() {
-        return (
-            this.config.receipt_printer_ids.length &&
-            this.ticketPrinter?.defaultPrinter?.use_cashdrawer
-        );
+        const defaultPrinter = this.ticketPrinter?.defaultPrinter;
+        if (defaultPrinter) {
+            return defaultPrinter.use_cashdrawer;
+        }
+        return this.config.receipt_printer_ids.some((printer) => printer.use_cashdrawer);
     }
     async openCashbox(action = undefined) {
         if (this.canOpenCashdrawer) {
@@ -1262,14 +1262,10 @@ export class PosStore extends WithLazyGetterTrap {
 
             // Product template of combo should not have more than 1 variant.
             const [childLineConf, comboExtraLines] = payload;
-            const comboPrices = computeComboItems(
-                values.product_tmpl_id.product_variant_ids[0],
+            const comboPrices = values.product_tmpl_id.getComboPrice(
                 childLineConf,
-                order.pricelist_id,
-                this.data.models["decimal.precision"].getAll(),
-                this.data.models["product.template.attribute.value"].getAllBy("id"),
                 comboExtraLines,
-                this.currency
+                order.pricelist_id
             );
 
             compleValue(comboPrices);
@@ -1815,12 +1811,23 @@ export class PosStore extends WithLazyGetterTrap {
             { context: { fiscal_position_id: order.fiscal_position_id?.id ?? false } }
         );
 
-        const productTaxDetails = productTemplate.getTaxDetails({
-            overridedValues: {
-                pricelist: order.pricelist_id,
-                fiscalPosition: order.fiscal_position_id,
-            },
-        });
+        let productTaxDetails = null;
+        if (productTemplate.type === "combo") {
+            productTaxDetails = productTemplate.getComboTaxDetails({
+                overridedValues: {
+                    pricelist: order.pricelist_id,
+                    fiscalPosition: order.fiscal_position_id,
+                },
+            });
+        } else {
+            productTaxDetails = productTemplate.getTaxDetails({
+                overridedValues: {
+                    pricelist: order.pricelist_id,
+                    fiscalPosition: order.fiscal_position_id,
+                },
+            });
+        }
+
         const priceWithoutTax = productTaxDetails.total_excluded;
         const margin = priceWithoutTax - productTemplate.standard_price;
         const orderPriceWithoutTax = order.priceExcl;
@@ -1864,6 +1871,7 @@ export class PosStore extends WithLazyGetterTrap {
             orderTaxTotalCurrency,
             orderPriceWithTaxCurrency,
             productInfo,
+            productTaxDetails,
         };
     }
     async getClosePosInfo() {
@@ -3026,14 +3034,10 @@ export class PosStore extends WithLazyGetterTrap {
                     });
                 }
             }
-            const comboPrices = computeComboItems(
-                comboProduct,
+            const comboPrices = comboProduct.getComboPrice(
                 childLineConf,
-                this.selectedOrder.pricelist_id,
-                this.data.models["decimal.precision"].getAll(),
-                this.data.models["product.template.attribute.value"].getAllBy("id"),
                 comboExtraLines,
-                this.currency
+                this.selectedOrder.pricelist_id
             );
             const baseLines = comboPrices.map((comboPrice) =>
                 accountTaxHelpers.prepare_base_line_for_taxes_computation(
@@ -3136,14 +3140,10 @@ export class PosStore extends WithLazyGetterTrap {
                 break;
             }
 
-            const comboPrices = computeComboItems(
-                productTmpl.product_variant_ids[0],
+            const comboPrices = productTmpl.getComboPrice(
                 payload[0],
-                order.pricelist_id,
-                this.data.models["decimal.precision"].getAll(),
-                this.data.models["product.template.attribute.value"].getAllBy("id"),
                 payload[1],
-                this.currency
+                order.pricelist_id
             );
 
             comboLine = await this.addLineToCurrentOrder(
