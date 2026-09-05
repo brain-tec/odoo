@@ -3,7 +3,13 @@ import { CreatePollDialog } from "@mail/core/common/create_poll_dialog";
 
 import { EmojiPicker, useEmojiPickerStoreScroll } from "@web/core/emoji_picker/emoji_picker";
 
-import { Action, ACTION_TAGS, useAction, UseActions } from "@mail/core/common/action";
+import {
+    Action,
+    ACTION_TAGS,
+    IS_ACTION_DEFINITION_SYM,
+    useAction,
+    UseActions,
+} from "@mail/core/common/action";
 import { SUGGESTION_DELIMITERS } from "@mail/core/common/suggestion_hook";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
@@ -27,7 +33,10 @@ export const composerActionsRegistry = registry.category("mail.composer/actions"
  * @param {ComposerActionDefinition} definition
  */
 export function registerComposerAction(id, definition) {
-    composerActionsRegistry.add(id, definition);
+    composerActionsRegistry.add(
+        id,
+        Object.assign(definition, { [IS_ACTION_DEFINITION_SYM]: true })
+    );
 }
 
 export function pickerGetAnchor({ action, owner }) {
@@ -106,7 +115,6 @@ registerComposerAction("upload-files", {
 });
 registerComposerAction("open-full-composer", {
     condition: ({ composer, owner }) =>
-        !composer.message &&
         owner.props.showFullComposer &&
         composer.targetThread &&
         composer.targetThread.model !== "discuss.channel" &&
@@ -117,7 +125,8 @@ registerComposerAction("open-full-composer", {
     icon: "expand_content",
     isActive: ({ composer, owner }) =>
         (composer.restoredFromFullComposer && !owner.state.isFullComposerOpen) || undefined,
-    name: _t("Open Full Composer"),
+    name: ({ composer }) =>
+        composer.message ? _t("Edit in Full Composer") : _t("Open Full Composer"),
     onSelected: ({ owner }) => owner.onClickFullComposer(),
     sequence: 30,
     tags: ({ composer, owner }) =>

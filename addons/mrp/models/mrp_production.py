@@ -303,6 +303,8 @@ class MrpProduction(models.Model):
     remaining_time = fields.Float('Remaining Working Time', compute='_compute_remaining_time',
                                   help="The remaining time to finish this production in hours.")
     active_workcenter_ids = fields.Many2many('mrp.workcenter', compute='_compute_active_workcenter_ids')
+    packages_count = fields.Integer(string='Packages Count', compute='_compute_packages_count', copy=False)
+    package_history_ids = fields.One2many('stock.package.history', 'production_id', string='Package History')
 
     _name_uniq = models.Constraint(
         'unique(name, company_id)',
@@ -581,19 +583,19 @@ class MrpProduction(models.Model):
     def _compute_lines(self):
         for production in self:
             production.finished_move_line_ids = production.move_finished_ids.mapped('move_line_ids')
+            production.finished_move_line_ids.production_id = production
 
     @api.depends(
-        'move_raw_ids.state', 'move_raw_ids.quantity', 'move_finished_ids.state',
-        'workorder_ids.state', 'product_qty', 'qty_producing', 'move_raw_ids.picked')
+        'move_raw_ids.state', 'move_finished_ids.state',
+        'workorder_ids.state', 'move_raw_ids.picked')
     def _compute_state(self):
         """ Compute the production state. This uses a similar process to stock
         picking, but has been adapted to support having no moves. This adaption
         includes some state changes outside of this compute.
 
         There exist 3 extra steps for production:
-        - progress: At least one item is produced or consumed.
-        - to_close: The quantity produced is greater than the quantity to
-        produce and all work orders has been finished.
+        - progress: At least one item(component) is consumed, or at least one work order is either in_progress or done.
+        - to_close: All work orders are either Finished or Cancelled.
         """
         for production in self:
             if not production.state or not production.uom_id or not (production.id or production._origin.id):
@@ -608,11 +610,8 @@ class MrpProduction(models.Model):
                 production.state = 'done'
             elif production.workorder_ids and all(wo_state in ('done', 'cancel') for wo_state in production.workorder_ids.mapped('state')):
                 production.state = 'to_close'
-            elif not production.workorder_ids and production.uom_id.compare(production.qty_producing, production.product_qty) >= 0:
-                production.state = 'to_close'
             elif (
                 any(wo_state in ('progress', 'done') for wo_state in production.workorder_ids.mapped('state'))
-                or production.uom_id and not production.uom_id.is_zero(production.qty_producing)
                 or any(production.move_raw_ids.mapped('picked'))
             ):
                 production.state = 'progress'
@@ -860,7 +859,7 @@ class MrpProduction(models.Model):
             else:
                 production.move_raw_ids = [Command.delete(move.id) for move in production.move_raw_ids.filtered(lambda m: m.bom_line_id)]
 
-    @api.depends('product_id', 'bom_id', 'product_qty', 'uom_id', 'location_dest_id', 'date_finished', 'move_dest_ids', 'never_product_template_attribute_value_ids')
+    @api.depends('product_id', 'bom_id', 'product_qty', 'uom_id', 'location_dest_id', 'date_finished', 'move_dest_ids', 'never_product_template_attribute_value_ids', 'qty_producing')
     def _compute_move_finished_ids(self):
         production_with_move_finished_ids_to_unlink_ids = OrderedSet()
         ignored_mo_ids = self.env.context.get('ignore_mo_ids', [])
@@ -982,14 +981,25 @@ class MrpProduction(models.Model):
         for production, workcenters in active_workcenters_by_mo:
             production.active_workcenter_ids = workcenters
 
+    @api.depends('move_finished_ids.move_line_ids.result_package_id')
+    def _compute_packages_count(self):
+        for mo in self:
+            packages = mo.move_finished_ids.move_line_ids.result_package_id
+            mo.packages_count = len(packages)
+
     def _change_producing(self):
         if self.state in ['draft', 'cancel'] or (self.state == 'done' and self.is_locked):
             return False
-        if self.state not in ('progress', 'done'):
-            self.state = 'progress'
         if self.product_tracking == 'serial' and self.lot_producing_ids and float_is_zero(self.qty_producing, precision_digits=0):
             self.qty_producing = len(self.lot_producing_ids)
-        productions_bypass_qty_producting = self.filtered(lambda p: p.lot_producing_ids and p.product_tracking == 'lot' and p._origin and p._origin.qty_producing == p.qty_producing)
+        productions_bypass_qty_producting = self.env['mrp.production']
+        if not self.env.context.get('barcode_view'):
+            productions_bypass_qty_producting = self.filtered(lambda p:
+                                p.lot_producing_ids and
+                                p.product_tracking == 'lot' and
+                                p._origin and
+                                p._origin.qty_producing == p.qty_producing
+                            )
         # sudo needed for portal users
         (self - productions_bypass_qty_producting).sudo()._set_qty_producing(False)
         return True
@@ -1098,7 +1108,7 @@ class MrpProduction(models.Model):
             if 'date_start' in vals and not self.env.context.get('force_date', False):
                 if production.state in ['done', 'cancel']:
                     raise UserError(_('You cannot move a manufacturing order once it is cancelled or done.'))
-                if production.is_planned:
+                if production.is_planned and vals.get('state') != 'progress':
                     production._unplan_workorders()
             if vals.get('date_start'):
                 production.move_raw_ids.write({'date': production.date_start, 'date_deadline': production.date_start})
@@ -1271,6 +1281,32 @@ class MrpProduction(models.Model):
                 if was_planned:
                     production._plan_workorders()
         self.is_outdated_bom = False
+
+    def action_detailed_operations(self):
+        self.ensure_one()
+        action = self.env['ir.actions.actions']._for_xml_id('mrp.action_detailed_operations')
+        action['domain'] = [('move_id.production_id', '=', self.id)]
+        action_context = literal_eval(action['context'])
+        action_context.update({
+            'default_production_id': self.id,
+            'default_location_dest_id': self.location_dest_id.id,
+            'default_company_id': self.company_id.id,
+            'hide_put_in_pack': all(move.state in ['done', 'cancel'] for move in self.move_finished_ids),
+        })
+        action['context'] = action_context
+        return action
+
+    def action_view_packages(self):
+        self.ensure_one()
+        packages = self.finished_move_line_ids.result_package_id
+        return {
+            'name': self.env._('Packages'),
+            'res_model': 'stock.package',
+            'view_mode': 'list',
+            'views': [(self.env.ref('stock.stock_package_view_list_editable').id, 'list'), (False, 'kanban'), (False, 'form')],
+            'type': 'ir.actions.act_window',
+            'domain': [('id', 'in', packages.ids)],
+        }
 
     def _get_bom_values(self, ratio=1):
         """ Returns the BoM lines, by-products and operations values needed to
@@ -1452,10 +1488,11 @@ class MrpProduction(models.Model):
         if self.product_tracking == 'serial' and self.lot_producing_ids and float_is_zero(self.qty_producing, precision_digits=0):
             self.qty_producing = self.product_id.uom_id._compute_quantity(len(self.lot_producing_ids), self.uom_id, rounding_method='HALF-UP')
 
-        for move in (
-            self.move_raw_ids
-            | self.move_finished_ids.filtered(lambda m: m.product_id != self.product_id or m.product_id.tracking == 'serial')
-        ):
+        moves = self.move_finished_ids
+        if not self.env.context.get('skip_raw_moves'):
+            moves |= self.move_raw_ids
+
+        for move in moves:
             is_byproduct = move in self.move_byproduct_ids
             # Never update already picked moves.
             # sudo needed for portal users
@@ -1477,11 +1514,17 @@ class MrpProduction(models.Model):
                         qty_taken += move_sibling.uom_id._compute_quantity(move_sibling.quantity, move.uom_id)
                 if relevant_orig_ids and move.uom_id.compare(qty_available, qty_taken) >= 0:
                     new_qty = min(new_qty, qty_available - qty_taken)
+
+            if move.product_id == self.product_id and not new_qty:
+                new_qty = move.uom_id.round((self.product_qty - self.qty_produced) * move.unit_factor)
+
             move._set_quantity_done(new_qty)
+
             if mark_moves_picked \
                     and move.quantity \
                     and not is_byproduct \
-                    and (move.raw_material_production_id or move.product_id.tracking != 'serial'):
+                    and (move.raw_material_production_id or move.product_id.tracking != 'serial') \
+                    and move.product_id != self.product_id:
                 move.picked = True
 
     def _should_postpone_date_finished(self, date_finished):
@@ -1735,10 +1778,7 @@ class MrpProduction(models.Model):
 
     def _link_workorders_and_moves(self):
         self.ensure_one()
-        if not self.workorder_ids:
-            return
         workorder_per_operation = {workorder.operation_id: workorder for workorder in self.workorder_ids}
-        workorder_boms = self.workorder_ids.operation_id.bom_id
         last_workorder_per_bom = defaultdict(lambda: self.env['mrp.workorder'])
         self.allow_workorder_dependencies = self.bom_id.allow_operation_dependencies
 
@@ -1774,13 +1814,24 @@ class MrpProduction(models.Model):
 
     def button_plan(self, as_soon_as_possible=True):
         """ Create work orders. And probably do stuff, like things. """
+        skip_orders_count = 0
         for order in self:
-            if order.is_planned:
+            if order.is_planned or not order._has_workorders():
+                skip_orders_count += 1
                 continue
             if as_soon_as_possible:
                 order.date_start = fields.Datetime.now()
             order._plan_workorders()
             order.message_post(body=self.env._("The manufacturing order has been planned."), subtype_id=self.env.ref('mrp.mt_mo_state').id)
+        if skip_orders_count == len(self):
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'message': self.env._("This MO cannot be planned because it has no Work Orders to Plan."),
+                    'type': 'warning',
+                },
+            }
         return True
 
     def _plan_workorders(self):
@@ -1788,10 +1839,6 @@ class MrpProduction(models.Model):
         work schedule.
         """
         self.ensure_one()
-
-        if not self.workorder_ids:
-            self.is_planned = True
-            return
 
         self._link_workorders_and_moves()
 
@@ -1802,8 +1849,9 @@ class MrpProduction(models.Model):
         )._action_plan(from_date=self.date_start)
 
     def button_unplan(self):
-        self._unplan_workorders()
-        for order in self:
+        orders_to_unplan = self.filtered(lambda order: order.is_planned)
+        orders_to_unplan._unplan_workorders()
+        for order in orders_to_unplan:
             if order.previous_date_start:
                 order.date_start = order.previous_date_start
             order.message_post(body=self.env._("The manufacturing order has been unplanned."))
@@ -2003,12 +2051,13 @@ class MrpProduction(models.Model):
             finish_moves = order.move_finished_ids.filtered(lambda m: m.product_id == order.product_id and m.state not in ('done', 'cancel'))
             # the finish move can already be completed by the workorder.
             for move in finish_moves:
-                if move.product_id.tracking in ['lot', 'serial'] and not move.lot_ids:
+                if move.product_id.tracking in ['lot', 'serial'] and (not move.lot_ids or any(not ml.lot_id for ml in move.move_line_ids)):
                     move.lot_ids = order.lot_producing_ids.ids
                     if move.product_id.tracking == 'lot' and order.lot_producing_ids:
                         lines_without_lot = move.move_line_ids.filtered(lambda ml: not ml.lot_id)
                         lines_without_lot.lot_id = order.lot_producing_ids[:1]
-                move.quantity = order.uom_id.round(order.qty_producing - order.qty_produced, rounding_method='HALF-UP')
+                # Distribute the produced qty across the finished moves (there can be several, exemple: after a split/merge)
+                move.quantity = order.uom_id.round((order.qty_producing - order.qty_produced) * move.unit_factor, rounding_method='HALF-UP')
                 extra_vals = order._prepare_finished_extra_vals()
                 if extra_vals:
                     move.move_line_ids.write(extra_vals)
@@ -2325,7 +2374,6 @@ class MrpProduction(models.Model):
 
         for production in self.filtered(lambda p: not p.uom_id.is_zero(production.qty_producing)):
             production.move_raw_ids.filtered(lambda m: not m.picked).picked = True
-
         productions_not_to_backorder._post_inventory(cancel_backorder=True)
         productions_to_backorder._post_inventory(cancel_backorder=True)
 
@@ -2614,7 +2662,7 @@ class MrpProduction(models.Model):
             action['res_id'] = wizard.id
             return action
         else:
-            if self.state not in ('draft', 'confirmed'):
+            if self.state not in ('draft', 'confirmed') or self.qty_producing > 0:
                 if self.qty_producing <= 0:
                     raise UserError(_("Please specify a quantity greater than 0."))
                 if self.qty_producing >= self.product_qty:
@@ -3096,7 +3144,22 @@ class MrpProduction(models.Model):
                     action = self.env.ref("stock.label_lot_template").report_action(lots_to_print.ids, config=False)
                     clean_action(action, self.env)
                     report_actions.append(action)
+        if self.env.user.has_group('stock.group_tracking_lot'):
+            mo_print_packages = self.filtered(lambda p: p.picking_type_id.auto_print_packages and p.finished_move_line_ids.result_package_id)
+            if mo_print_packages:
+                action = self.env.ref("mrp.action_report_mrp_packages").report_action(mo_print_packages.ids, config=False)
+                report_actions.append(clean_action(action, self.env))
         return report_actions
+
+    def _get_packages_for_print(self):
+        package_ids = OrderedSet()
+        for mo in self:
+            if mo.state == 'done':
+                package_ids.update(mo.package_history_ids.package_id.ids)
+            else:
+                package_ids.update(mo.finished_move_line_ids.result_package_id._get_all_package_dest_ids())
+
+        return self.env['stock.package'].browse(package_ids)
 
     def _autoprint_generated_lots(self, lot_ids):
         self.ensure_one()

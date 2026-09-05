@@ -13,7 +13,8 @@ import {
 } from "@mail/../tests/mail_test_helpers";
 import { hover } from "@odoo/hoot-dom";
 import { advanceTime, mockDate } from "@odoo/hoot-mock";
-import { mockService, onRpc, serverState } from "@web/../tests/web_test_helpers";
+import { mockService, onRpc, patchWithCleanup, serverState } from "@web/../tests/web_test_helpers";
+import { browser } from "@web/core/browser/browser";
 import { deserializeDateTime, serializeDate, today } from "@web/core/l10n/dates";
 import { getOrigin } from "@web/core/utils/urls";
 
@@ -213,6 +214,28 @@ test("activity with a summary layout", async () => {
     await start();
     await openFormView("res.partner", partnerId);
     await contains(".o-mail-Activity .o-mail-Activity-info span:text('test summary')");
+});
+
+test("call activity displays a phone link and opens the native dialer", async () => {
+    patchWithCleanup(browser, {
+        open(url) {
+            expect.step(url);
+        },
+    });
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({});
+    pyEnv["mail.activity"].create({
+        phone: "+1 202 555 0182",
+        res_id: partnerId,
+        res_model: "res.partner",
+    });
+    await start();
+    await openFormView("res.partner", partnerId);
+
+    await contains(".o-mail-Activity-phoneNumber", { text: "+1 202 555 0182" });
+    expect(".o-mail-Activity-phoneNumber > a").toHaveAttribute("href", "tel:+12025550182");
+    await click(".o-mail-Activity-phoneNumber > a");
+    expect.verifySteps(["tel:+12025550182"]);
 });
 
 test("activity without summary layout", async () => {
