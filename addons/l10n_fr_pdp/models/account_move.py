@@ -16,6 +16,7 @@ from odoo.addons.l10n_fr_pdp.utils import drom_com_territories
 
 PAID_CODES = frozenset({'ESC', 'RAB', 'REM', 'MPA', 'MEN'})
 G1_05_RE = re.compile(r'^(?! )(?!.*  )[A-Za-z0-9+\-_/ ]{1,20}(?<! )$')  # can't start with space, can't have 2 consecutive spaces, max 20 chars, allowed chars are alphanumeric, space, -, _, /, can't end with space
+VALID_PDP_TAX_RATES = {0, 0.9, 1.05, 1.75, 2.1, 5.5, 7, 8.5, 9.2, 9.6, 10, 13, 19.6, 20, 20.6}
 PDP_TRACKED_FIELDS = {
     'l10n_fr_pdp_last_flow_id',
     'l10n_fr_pdp_status',
@@ -193,10 +194,19 @@ class AccountMove(models.Model):
         for move in self:
             move.pdp_is_sent = move.peppol_is_sent and move.pdp_uses_pdp
 
-    def _pdp_get_paid_amount(self):
+    def _pdp_get_reconciled_amls(self):
         self.ensure_one()
         counterpart_move_type = 'out_invoice' if self.move_type == 'out_refund' else 'out_refund'
-        reconciled_amls = self._get_reconciled_amls().filtered(lambda l: l.move_id.move_type != counterpart_move_type)
+        return self._get_reconciled_amls().filtered(lambda l: l.move_id.move_type != counterpart_move_type)
+
+    def _pdp_get_payment_date(self):
+        reconciled_amls = self._pdp_get_reconciled_amls()
+        if not reconciled_amls:
+            return None
+        return max(aml.date for aml in reconciled_amls)
+
+    def _pdp_get_paid_amount(self):
+        reconciled_amls = self._pdp_get_reconciled_amls()
         return self.direction_sign * sum(reconciled_amls.mapped('balance'))
 
     def _pdp_get_paid_lifecycle_total_amount(self):
@@ -566,6 +576,13 @@ class AccountMove(models.Model):
                 ref_move = self.env._(" in referenced move %s", move.name) if move != self else ""
                 if not move.name or not G1_05_RE.match(move.name):
                     yield self.env._("Move name is not valid%s.", ref_move)
+                for tax in move.invoice_line_ids.tax_ids.flatten_taxes_hierarchy():
+                    if tax.amount not in VALID_PDP_TAX_RATES:
+                        yield self.env._(
+                            "Tax %(tax)s is not supported by French e-reporting%(ref_move)s.",
+                            tax=tax.display_name,
+                            ref_move=ref_move,
+                        )
                 if transaction_type == 'b2bi':
                     if not move.partner_shipping_id.street:
                         yield self.env._("Missing address street (line 1)%s.", ref_move)
