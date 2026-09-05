@@ -18,7 +18,7 @@ class AccountWithholdingLine(models.AbstractModel):
     # Fields declaration
     # ------------------
 
-    name = fields.Char(string="Sequence Number")
+    name = fields.Char(string="Sequence Number", copy=True)
     placeholder_value = fields.Char(help="Populated by the comodel during edition of the line.")
     placeholder_type = fields.Selection(
         selection=[
@@ -111,6 +111,7 @@ class AccountWithholdingLine(models.AbstractModel):
         index=True,
         store=True,
     )
+    country_code = fields.Char(related='company_id.account_fiscal_country_id.code')
     comodel_company_currency_id = fields.Many2one(
         related='company_id.currency_id',
     )

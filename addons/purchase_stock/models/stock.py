@@ -217,19 +217,21 @@ class StockWarehouseOrderpoint(models.Model):
     @api.depends('effective_route_id', 'supplier_id', 'rule_ids', 'product_id.seller_ids', 'product_id.seller_ids.delay')
     def _compute_supplier_id_placeholder(self):
         for orderpoint in self:
-            default_supplier = orderpoint._get_default_supplier()
-            orderpoint.supplier_id_placeholder = default_supplier.display_name if default_supplier else ''
+            orderpoint.supplier_id_placeholder = self.env['product.supplierinfo']._get_seller_info_display_name(
+                orderpoint._get_default_supplier())
 
     @api.depends('effective_route_id', 'supplier_id', 'rule_ids', 'product_id.seller_ids', 'product_id.seller_ids.delay')
     def _compute_effective_vendor_id(self):
         for orderpoint in self:
-            orderpoint.effective_vendor_id = (orderpoint.supplier_id if orderpoint.supplier_id else orderpoint._get_default_supplier()).partner_id
+            orderpoint.effective_vendor_id = orderpoint.supplier_id.partner_id or orderpoint._get_default_supplier().get('partner_id')
 
     def _search_effective_vendor_id(self, operator, value):
         target_partners = self.env['res.partner'].search([('id', operator, value)])
-
+        po_product_ids = self._get_po_history_product_ids(target_partners)
         orderpoints = self.env['stock.warehouse.orderpoint'].search([
-            ('vendor_ids.partner_id', 'in', target_partners.ids)
+            '|',
+            ('vendor_ids.partner_id', 'in', target_partners.ids),
+            ('product_id', 'in', list(po_product_ids)),
         ]).filtered(
             lambda op: op.effective_vendor_id in target_partners
         )
@@ -240,13 +242,23 @@ class StockWarehouseOrderpoint(models.Model):
         vendors = self.env['res.partner'].search([('id', operator, value)])
         orderpoints = self.env['stock.warehouse.orderpoint'].search([]).filtered(
             lambda orderpoint: orderpoint.product_id._prepare_sellers().mapped('partner_id') & vendors
+                or orderpoint.effective_vendor_id in vendors
         )
         return [('id', 'in', orderpoints.ids)]
+
+    def _get_po_history_product_ids(self, partners):
+        return set(self.env['purchase.order.line'].sudo().search([
+            ('order_id.partner_id', 'child_of', partners.ids),
+            ('order_id.state', '=', 'purchase'),
+            ('order_id.date_approve', '!=', False),
+            ('order_id.company_id', 'in', self.env.companies.ids),
+        ]).product_id.ids)
 
     def _compute_show_supply_warning(self):
         for orderpoint in self:
             if 'buy' in orderpoint.rule_ids.mapped('action') and not orderpoint.show_supply_warning:
-                orderpoint.show_supply_warning = not orderpoint.vendor_ids
+                orderpoint.show_supply_warning = not orderpoint.vendor_ids \
+                    and not orderpoint.product_id._has_confirmed_purchase(orderpoint.company_id)
                 continue
             super(StockWarehouseOrderpoint, orderpoint)._compute_show_supply_warning()
 
@@ -268,7 +280,7 @@ class StockWarehouseOrderpoint(models.Model):
     def _get_default_route(self, force_action=False):
         self.ensure_one()
         if not force_action or force_action == 'buy':
-            if self.product_id.seller_ids:
+            if self.product_id.seller_ids or self.product_id._has_confirmed_purchase(self.company_id):
                 route_id = self.rule_ids.filtered(lambda r: r.action == 'buy').route_id
                 if route_id:
                     return route_id[0]
@@ -283,7 +295,7 @@ class StockWarehouseOrderpoint(models.Model):
                 self.company_id, self.product_id, qty=self.qty_to_order, uom=self.uom_id
             )
         else:
-            return self.env['product.supplierinfo']
+            return {}
 
     def _get_lead_days_values(self):
         values = super()._get_lead_days_values()
@@ -330,12 +342,12 @@ class StockWarehouseOrderpoint(models.Model):
             planned_date -= relativedelta.relativedelta(days=int(global_horizon_days))
         date_deadline = planned_date or fields.Date.today()
         dates_info = self.product_id._get_dates_info(date_deadline, self.location_id, route_ids=self.route_id)
-        supplier = self.supplier_id or self.product_id.with_company(self.company_id)._select_seller(
+        seller_info = self.supplier_id._get_seller_info() or self.product_id.with_company(self.company_id)._select_seller(
             quantity=qty_to_order,
             date=max(dates_info['date_order'].date(), fields.Date.today()),
             uom_id=self.uom_id
         )
-        return supplier.uom_id
+        return seller_info.get('uom_id')
 
     def _quantity_in_progress(self):
         res = super()._quantity_in_progress()
