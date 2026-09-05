@@ -47,7 +47,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
     def test_mrp_plan_and_unplan_reset_date_start(self):
         past_date = fields.Datetime.now() - timedelta(days=1)
         mo = self.env['mrp.production'].create({
-            'product_id': self.bom_2.product_id.id,
+            'product_id': self.bom_4.product_id.id,
             'product_uom_qty': 1.0,
             'date_start': past_date,
         })
@@ -140,7 +140,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         man_order = mo_form.save()
 
         action = man_order.button_mark_done()
-        self.assertEqual(man_order.state, 'progress', "Production order should be open a backorder wizard, then not done yet.")
+        self.assertEqual(man_order.state, 'confirmed', "Production order should be open a backorder wizard, then not done yet.")
 
         backorder = Form(self.env['mrp.production.backorder'].with_context(**action['context'])).save()
         Form.from_action(self.env, backorder.action_close_mo()).save().action_confirm()
@@ -608,8 +608,8 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         """Editing the scheduled date after planning the MO should unplan the MO, and adjust the date on the stock moves"""
         date_start = datetime(2023, 5, 15, 9, 0)
         mo_form = Form(self.env['mrp.production'])
-        mo_form.product_id = self.product_4
-        mo_form.bom_id = self.bom_1
+        mo_form.product_id = self.product_6
+        mo_form.bom_id = self.bom_4
         mo_form.product_qty = 1
         mo_form.date_start = date_start
         mo = mo_form.save()
@@ -819,7 +819,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
 
         # Won't accept to be done, instead return a wizard
         mo.button_mark_done()
-        self.assertEqual(mo.state, 'to_close')
+        self.assertEqual(mo.state, 'confirmed')
 
         consumption_issues = mo._get_consumption_issues()
         action = mo._action_generate_consumption_wizard(consumption_issues)
@@ -2257,6 +2257,31 @@ class TestMrpOrder(TestMrpCommon, MailCase):
             ('raw_material_production_id', '=', mo_backorder.id)])
         self.assertEqual(sum(move_prod_1_bo.mapped('product_uom_qty')), 60.0)
         self.assertEqual(sum(move_prod_2_bo.mapped('product_uom_qty')), 40.0)
+
+    def test_merge_then_qty_change_no_double_production(self):
+        """ Test that a splitted production that is merged back together, then have its quantity
+        changed and validated, does not create double the finished products"""
+        mo, _bom, product, _c1, _c2 = self.generate_mo(qty_final=30, qty_base_1=1, qty_base_2=1)
+        productions = mo._split_productions({mo: [10, 10, 10]})
+        sibling_mo = productions[2]
+        productions[:2].action_merge()
+
+        # Create a move to simulate a MTO Manufacturing
+        # so the qty change copies the finished move (-> 2 moves)
+        sibling_mo.move_finished_ids.move_dest_ids = self.env['stock.move'].create({
+            'product_id': product.id,
+            'uom_id': product.uom_id.id,
+            'location_id': sibling_mo.location_dest_id.id,
+            'location_dest_id': self.env.ref('stock.stock_location_customers').id,
+        })
+        self.env['change.production.qty'].create({'mo_id': sibling_mo.id, 'product_qty': 15}).change_prod_qty()
+        sibling_mo.qty_producing = 15
+        sibling_mo._set_qty_producing()
+        sibling_mo.button_mark_done()
+
+        finished_moves = sibling_mo.move_finished_ids.filtered(lambda m: m.product_id == product)
+        self.assertEqual(sibling_mo.state, 'done')
+        self.assertEqual(sum(finished_moves.mapped('quantity')), 15.0)
 
     def test_backorder_with_underconsumption(self):
         """ Check that the components of the backorder have the correct quantities
@@ -5261,8 +5286,8 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         copied_operation = bom.operation_ids[1]
         self.assertFalse(copied_operation.bom_product_template_attribute_value_ids, "'Apply on Variants' should not be copied to the new operation.")
 
-    def test_mo_split_in_progress(self):
-        """Test to ensure that splitting an in progress MO is working as intended
+    def test_mo_split_with_qty_producing(self):
+        """Test to ensure that splitting an MO with a quantity producing is working as intended
         i.e Only splitting with a quantity less than the original quantity to produce and more than 0.
         """
         mo = self.env['mrp.production'].create({
@@ -5275,6 +5300,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         self.assertEqual(mo.qty_producing, mo.product_qty)  # MO product_qty = 8
         with self.assertRaises(UserError):
             mo.action_split()
+        mo.action_start()
         mo.qty_producing = 0
         with self.assertRaises(UserError):
             mo.action_split()
@@ -5646,6 +5672,19 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         mo.action_update_bom()
         self.assertTrue(mo.is_planned)
         self.assertEqual(mo.workorder_ids.sorted('sequence').mapped('date_start'), planned_starts)
+
+    def test_finished_move_line_production_id_link(self):
+        """
+        Verify that the computed finished_move_line_ids are explicitly
+        linked back to the manufacturing order via the production_id field.
+        """
+        mo, _bom, _final, _comp1, _comp2 = self.generate_mo(
+            qty_final=1,
+            qty_base_1=1,
+            qty_base_2=1
+        )
+        mo.qty_producing = 1.0
+        self.assertEqual(mo.finished_move_line_ids.production_id, mo)
 
 
 class TestMrpOrderPostInstall(TestMrpCommon):

@@ -1,4 +1,5 @@
 from odoo import api, fields, models
+from odoo.tools import SQL
 
 
 class AccountMove(models.Model):
@@ -21,6 +22,8 @@ class AccountMove(models.Model):
     )
     withholding_residual_amount_currency = fields.Monetary(
         compute="_compute_residual_withholding_amount",
+        compute_sql='_compute_sql_residual_withholding_amount',
+        compute_sudo=False,
         currency_field='currency_id',
         help="The remaining withholding amount to be deducted."
     )
@@ -98,6 +101,9 @@ class AccountMove(models.Model):
         for move in self:
             move.withholding_residual_amount_currency = move.withholding_total_amount_currency - move.withholding_deducted_amount_currency
 
+    def _compute_sql_residual_withholding_amount(self, table):
+        return SQL("%s - %s", table.withholding_total_amount_currency, table.withholding_deducted_amount_currency)
+
     @api.depends("amount_residual", "withholding_residual_amount_currency")
     def _compute_withholding_net_residual_amount(self):
         for move in self:
@@ -105,6 +111,16 @@ class AccountMove(models.Model):
                 move.withholding_net_residual_amount_currency = move.amount_residual - move.withholding_residual_amount_currency
             else:
                 move.withholding_net_residual_amount_currency = move.amount_residual
+
+    def _prepare_product_base_line_for_taxes_computation(self, product_line):
+        base_line = super()._prepare_product_base_line_for_taxes_computation(product_line)
+        withholding_taxes = product_line.tax_ids.filtered('is_withholding_tax')
+        if self.origin_payment_id and withholding_taxes:
+            base_line['calculate_withholding_taxes'] = True
+            withholding_tax_line = self.line_ids.filtered(lambda line: line.tax_line_id in withholding_taxes)[:1]
+            if withholding_tax_line.name:
+                base_line['manual_tax_line_name'] = withholding_tax_line.name
+        return base_line
 
     def _prepare_payments_widget_reconciled_info(self, partial_info):
         res = super()._prepare_payments_widget_reconciled_info(partial_info)
