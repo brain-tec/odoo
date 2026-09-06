@@ -1409,16 +1409,14 @@ class ResPartner(models.Model):
         winner_key, winner_value, winner_meta = candidates[0]
         return {'key': winner_key, 'value': winner_value, **winner_meta}
 
+    @api.depends_context('company')
     @api.depends('country_id')
     def _compute_available_additional_identifiers_metadata(self):
         for partner in self:
             vals = {
-                key: {
                     # Resolve lazy translations now: JSON would otherwise stringify them in a frame where
                     # no language can be detected.
-                    k: self.env._(v) if isinstance(v, LazyGettext) else v  # pylint: disable=gettext-variable
-                    for k, v in metadata.items()
-                }
+                key: self._lazy_translate_additional_identifiers_metadata(metadata)
                 for key, metadata in self._get_all_additional_identifiers_metadata().items()
                 if not metadata.get('countries') or partner.country_code in metadata['countries']  # includes international
             }
@@ -1426,6 +1424,13 @@ class ResPartner(models.Model):
                 # Pops out the default 'OTHER' only if another 'EN' identifier is available
                 vals.pop('OTHER', None)
             partner.available_additional_identifiers_metadata = vals
+
+    def _lazy_translate_additional_identifiers_metadata(self, metadata):
+        """Resolve lazy translation in additional identifier metadata"""
+        return {
+            key: self.env._(value) if isinstance(value, LazyGettext) else value  # pylint: disable=gettext-variable
+            for key, value in metadata.items()
+        }
 
     def _get_additional_identifier(self, identifier_type):
         """Convenience getter for an entry of the JSON."""
