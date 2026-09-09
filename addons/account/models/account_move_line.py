@@ -17,6 +17,7 @@ from odoo.addons.account.models.account_move import MAX_HASH_VERSION
 from odoo.addons.web.controllers.utils import clean_action
 
 _logger = logging.getLogger(__name__)
+_ignore_tax_lock_date = object()
 
 
 class AccountMoveLine(models.Model):
@@ -865,7 +866,7 @@ class AccountMoveLine(models.Model):
             return SQL("1")
 
         date_from = self.env.context.get('date_from')
-        date_to = self.env.context['date_to']
+        date_to = self.env.context.get('date_to')
         historical, average, current = self.env['res.currency']._get_parsed_rates(self.env.companies - self.env.company, date_from, date_to)
 
         raw_rates_alias = table._make_alias(f'raw_{currency_translation}')
@@ -1457,6 +1458,7 @@ class AccountMoveLine(models.Model):
                 grouping_key_counterpart = frozendict({
                     'move_id': move._origin.id,
                     'account_id': grouping_key['account_id'],
+                    'analytic_distribution': grouping_key['analytic_distribution'],
                     'display_type': 'epd',
                 })
                 aggregated_base_lines = [
@@ -2115,7 +2117,8 @@ class AccountMoveLine(models.Model):
             exit_stack.enter_context(self.env.protecting([protected for vals, line in zip(vals_list, lines) for protected in self.env['account.move']._get_protected_vals(vals, line)]))
             container['records'] = lines
 
-        lines._check_tax_lock_date()
+        if self.env.context.get('ignore_tax_lock_date') is not _ignore_tax_lock_date:
+            lines._check_tax_lock_date()
 
         # Log changes to move lines on each move
         if not self._track_disabled():
@@ -2292,11 +2295,12 @@ class AccountMoveLine(models.Model):
 
         # Check the lock date. (Only relevant if the move is posted and non zero lines)
         non_zero_lines = self.filtered(lambda l: l.balance or l.amount_currency)
-        moves_to_check = non_zero_lines.move_id.filtered(lambda m: m.state == 'posted')
-        moves_to_check._check_fiscal_lock_dates()
 
-        # Check the tax lock date.
-        self._check_tax_lock_date()
+        # Lock dates
+        if self.env.context.get('ignore_tax_lock_date') is not _ignore_tax_lock_date:
+            moves_to_check = non_zero_lines.move_id.filtered(lambda m: m.state == 'posted')
+            moves_to_check._check_fiscal_lock_dates()
+            self._check_tax_lock_date()
 
         if not self._track_disabled():
             # Log changes to move lines on each move
