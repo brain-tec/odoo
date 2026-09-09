@@ -134,6 +134,9 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
         if "website_helpdesk" in self.installed_modules:
             # Additional query used to check whether "Helpdesk" menu should be visible
             res["helpdesk_team"] += 1
+        if "website_sale_collect" in self.installed_modules:
+            # Additional query to check the delivery method of the cart for the Click & Collect
+            res["delivery_carrier"] += 1
         return res
 
     def test_product_page_generation(self):
@@ -283,8 +286,8 @@ class TestWebsiteSalePerformanceWithPricelistDepth(TestWebsiteSalePerformanceWit
             Command.create({
                 "base_pricelist_id": cls.pricelist.id,
                 "base": "pricelist",
-                "compute_price": "percentage",
-                "percent_price": 10,
+                "compute_price": "discount",
+                "price_discount": 10,
             })
         ]
 
@@ -335,6 +338,7 @@ class TestWebsiteSalePerformanceWithTrackedProducts(TestWebsiteSalePerformanceNo
 
     def _get_shop_page_queries(self):
         res = super()._get_shop_page_queries()
+        res["product_product"] += 1
         if "website_sale_stock" in self.installed_modules:
             res["stock_warehouse"] += 2
             res["stock_move"] += 2
@@ -368,9 +372,6 @@ class TestWebsiteSalePerformanceWithTrackedProducts(TestWebsiteSalePerformanceNo
 
         if "website_sale_mrp" in self.installed_modules:
             res["mrp_bom"] += 1
-
-        if "website_sale_collect" in self.installed_modules:
-            res["delivery_carrier"] += 1
 
         if "product_expiry" in self.installed_modules:
             res["stock_quant"] += 1

@@ -113,7 +113,7 @@ class TestMessageHelpersRobustness(MailCommon, HttpCase):
         p2_notifications = self.env['mail.notification'].search([('res_partner_id', '=', self.partner_employee_2.id)])
         p2_notifications.is_read = False
         self.authenticate(self.user_employee_2.login, self.user_employee_2.login)
-        data = self.make_jsonrpc_request("/mail/store", {"fetch_params": [["/mail/messaging_menu/mail.message/load_more", {"tab_id": "notification", "filter_id": "notification_unread", "limit": 20}]]})
+        data = self.make_jsonrpc_request("/mail/store", {"fetch_params": [["/mail/messaging_menu/mail.message/load_more", {"tab_id": "notification", "filter_ids": ["notification_unread"], "limit": 20}]]})
         self.assertEqual(
             {r["thread"]["id"] for r in data["mail.message"]},
             set(self.test_records_simple.ids),
@@ -167,6 +167,7 @@ class TestMessageValues(MailCommon):
         Check _update_content behavior when voiding messages (cleanup side
         records: stars, notifications).
         """
+        self.env = self.env(context={**self.env.context, 'lang': 'en_US'})
         note_subtype = self.env.ref('mail.mt_note')
         _attach_1 = self.env['ir.attachment'].with_user(self.user_employee).create({
             'name': 'Attach1',

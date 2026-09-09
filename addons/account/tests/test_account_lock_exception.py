@@ -2,8 +2,6 @@ from contextlib import closing
 
 from datetime import datetime, timedelta
 
-from freezegun import freeze_time
-
 from odoo import Command, fields
 from odoo.addons.account.models.company import SOFT_LOCK_DATE_FIELDS
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
@@ -22,8 +20,8 @@ class TestAccountLockException(AccountTestInvoicingCommon, MailCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.fakenow = cls.env.cr.now()
-        cls.startClassPatcher(freeze_time(cls.fakenow))
+        cls.fakenow = cls.env.cr.now().replace(microsecond=0)
+        cls.enterClassContext(cls.mock_datetime_and_now(cls.fakenow))
 
         cls.other_user = new_test_user(
             cls.env,
@@ -346,6 +344,7 @@ class TestAccountLockException(AccountTestInvoicingCommon, MailCase):
           * Every active exception gets revoked and recreated with the new company lock date
           * Non-active exceptions are not affected
         """
+        self.env = self.env(context={**self.env.context, 'lang': 'en_US'})
         self.env['account.lock_exception'].search([]).sudo().unlink()
         for lock_date_field, move_type in self.soft_lock_date_info:
             with self.subTest(lock_date_field=lock_date_field, move_type=move_type), closing(self.cr.savepoint()):

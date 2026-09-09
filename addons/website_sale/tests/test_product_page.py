@@ -79,9 +79,9 @@ class TestWebsiteSaleProductPage(HttpCase, ProductVariantsCommon, WebsiteSaleCom
             Command.clear(),
             Command.create({
                 "categ_id": self.product_category.id,
-                "compute_price": "percentage",
+                "compute_price": "discount",
                 "min_quantity": 5.0,
-                "percent_price": 50.0,
+                "price_discount": 50.0,
             }),
         ]
         self.start_tour(self.product.website_url, "website_sale.product_pricelist_qty_change")
@@ -112,3 +112,11 @@ class TestWebsiteSaleProductPage(HttpCase, ProductVariantsCommon, WebsiteSaleCom
         )
         self.assertTrue(product)
         self.assertTrue(product.website_published)
+
+    def test_open_shop_on_product_with_no_variants(self):
+        self.env['res.config.settings'].sudo().create({
+            "group_show_uom_price": True,
+        }).execute()
+        self.product_template_sofa.product_variant_ids.unlink()
+        response = self.url_open("/shop")
+        self.assertEqual(response.status_code, 200)

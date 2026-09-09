@@ -75,6 +75,7 @@ class TestPartner(MailCommon):
         return partner
 
     def test_address_tracking(self):
+        self.env = self.env(context={**self.env.context, 'lang': 'en_US'})
         self.env.company.name = 'YourCompany'
         company_partner = self.env.company.partner_id
         # use some wacky formatting to check inlining
@@ -499,7 +500,7 @@ class TestPartner(MailCommon):
     def test_log_portal_group(self):
         Users = self.env['res.users']
         subtype_note = self.env.ref('mail.mt_note')
-        group_portal, group_user = self.env.ref('base.group_portal'), self.env.ref('base.group_user_regular')
+        group_portal, group_user = self.env.ref('base.group_portal'), self.env.ref('base.group_user')
 
         # check at update
         new_user = Users.create({

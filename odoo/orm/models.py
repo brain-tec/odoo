@@ -3455,6 +3455,7 @@ class BaseModel(metaclass=MetaModel):
             return True
 
         origin = self._origin
+        # check the records for read access
         if operation == 'read' and origin:
             access = self.env._access_cache[self._name]
             if all(map(access.get, origin._ids)):
@@ -3463,13 +3464,23 @@ class BaseModel(metaclass=MetaModel):
             origin.__check_access_fill_cache(access, domain)
             return all(map(access.__getitem__, origin._ids))
 
-        domain = self._access_domain(operation)
         # resolve the 'access' operator if just checking model access
         # so that a rule `('order_id', 'access', 'read')` may become false
         if not origin:
+            if operation == 'read':
+                access = self.env._access_cache[self._name]
+                if isinstance(result := access.get(0), bool):
+                    return result
+            domain = self._access_domain(operation)
             domain = domain.map_conditions(
                 lambda cond: cond.optimize_dynamic(self.sudo()) if cond.operator == 'access' else cond)
-            return not domain.is_false()
+            result = not domain.is_false()
+            if operation == 'read':
+                access[0] = result
+            return result
+
+        # check the records for other access
+        domain = self._access_domain(operation)
         if domain.is_false():
             return False
         if domain.is_true():
@@ -4507,19 +4518,25 @@ class BaseModel(metaclass=MetaModel):
                         ir_model.name,
                     ))
 
-            # update parent_path of all records and their descendants
+            # update parent_path of all records and their descendants. The
+            # descendants were matched with
+            #     AND child.parent_path LIKE concat(node.parent_path, '%')
+            # whose pattern comes from a column, so PostgreSQL gets no index
+            # bounds and scans the table. The range below selects the same rows
+            # from the index: parent_path ends with '/' and '0' is the next
+            # character, so left(parent_path, -1) || '0' closes the range.
             updated = dict(self.env.execute_query(SQL(
                 """ UPDATE %(table)s child
                     SET parent_path = concat(%(prefix)s, substr(child.parent_path,
                             length(node.parent_path) - length(node.id || '/') + 1))
                     FROM %(table)s node
                     WHERE node.id IN %(ids)s
-                    AND child.parent_path LIKE concat(node.parent_path, %(wildcard)s)
+                    AND child.parent_path >= node.parent_path
+                    AND child.parent_path < left(node.parent_path, -1) || '0'
                     RETURNING child.id, child.parent_path """,
                 table=SQL.identifier(self._table),
                 prefix=prefix,
                 ids=tuple(records.ids),
-                wildcard='%',
             )))
 
             # update the cache of updated nodes, and determine what to recompute
@@ -4848,7 +4865,8 @@ class BaseModel(metaclass=MetaModel):
         else:
             sec_domain = self._access_domain('read')
             if sec_domain.is_false():
-                raise self._make_access_error_message('read', sec_domain)
+                self.browse().check_access('read')
+                domain = Domain.FALSE
 
         domain = Domain(domain)
         # inactive records unless they were explicitly asked for

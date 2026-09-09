@@ -142,6 +142,7 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
         self.assertEqual(self._get_mail_message(move).preview, 'The invoice has been sent to the Peppol Access Point. The following attachments were sent with the XML:')
 
     def test_send_peppol_alerts_not_valid_partner(self):
+        self.env = self.env(context={**self.env.context, 'lang': 'en_US'})
         move = self.create_move(self.invalid_partner)
         self.invalid_partner.invoice_edi_format = 'ubl_bis3'
         move.action_post()
@@ -484,10 +485,25 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
         moves.action_post()
         with mock_lookup_success('0208:0428759497'):
             wizard = self.create_send_and_print(moves, default=True)
-        self.assertEqual(wizard.summary_data, {
-            'email': {'count': 2, 'label': 'by Email'},
-            'peppol': {'count': 2, 'label': 'by Peppol'},
-        })
+        expected_result = {
+            "email": {
+                "count": 2,
+                "label": "by Email",
+                "moves": [
+                    {"id": move_1.id, "name": move_1.name, "partner_name": "Molly"},
+                    {"id": move_2.id, "name": move_2.name, "partner_name": "Molly"},
+                ],
+            },
+            "peppol": {
+                "count": 2,
+                "label": "by Peppol",
+                "moves": [
+                    {"id": move_1.id, "name": move_1.name, "partner_name": "Molly"},
+                    {"id": move_2.id, "name": move_2.name, "partner_name": "Molly"},
+                ],
+            },
+        }
+        self.assertEqual(wizard.summary_data, expected_result)
         wizard.action_send_and_print()
         with (
             mock_send_document(),

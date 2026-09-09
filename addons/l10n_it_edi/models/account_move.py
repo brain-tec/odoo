@@ -128,6 +128,10 @@ class AccountMove(models.Model):
         copy=False,
         init_storage=lambda model: None,  # avoid timeout on large databases
     )
+    l10n_it_available_document_type_ids = fields.Many2many(
+        comodel_name='l10n_it.document.type',
+        compute='_compute_l10n_it_available_document_type_ids',
+    )
 
     l10n_it_convention_code = fields.Char(
         string="Order/Convention Code",
@@ -180,6 +184,20 @@ class AccountMove(models.Model):
                 continue
 
             move.l10n_it_document_type = document_type.get(move._l10n_it_edi_get_document_type())
+
+    @api.depends('move_type', 'debit_origin_id')
+    def _compute_l10n_it_available_document_type_ids(self):
+        document_types = self.env['l10n_it.document.type'].search([])
+        for move in self:
+            if move.debit_origin_id:
+                if move.is_sale_document(include_receipts=True):
+                    move_type = 'sale_debit_note'
+                else:
+                    move_type = 'purchase_debit_note'
+            else:
+                move_type = move.move_type
+            available_document_type_ids = document_types.filtered(lambda doc_type: move_type in doc_type.move_types or [])
+            move.l10n_it_available_document_type_ids = available_document_type_ids or document_types
 
     @api.depends('commercial_partner_id.l10n_it_pa_index', 'company_id')
     def _compute_l10n_it_partner_pa(self):
@@ -1824,12 +1842,17 @@ class AccountMove(models.Model):
 
             # Invoice lines ---------------------------------------
             tag_name = './/DettaglioLinee' if not extra_info['simplified'] else './/DatiBeniServizi'
+            invoice_line_vals = []
             for element in tree.xpath(tag_name):
-                move_line = self.invoice_line_ids.create({
+                # Use `new` to avoid intermediary write calls to the database
+                move_line = self.invoice_line_ids.new({
                     'move_id': self.id,
                     'tax_ids': [fields.Command.clear()]})
                 if move_line:
                     message_to_log += self._l10n_it_edi_import_line(element, move_line, extra_info)
+                    invoice_line_vals.append(move_line._convert_to_write(move_line._cache))
+
+            self.invoice_line_ids.create(invoice_line_vals)
 
             attachment_vals = []
             for element in tree.xpath('.//Allegati'):
@@ -1875,12 +1898,24 @@ class AccountMove(models.Model):
 
     @api.model
     def _is_prediction_enabled(self):
-        return self.env['ir.module.module'].search([('name', '=', 'account_accountant'), ('state', '=', 'installed')])
+        return 'account_accountant' in self.env['ir.module.module']._installed()
+
+    def _get_prediction_cache_value(self, key, predict_function):
+        self.ensure_one()
+        if not callable(predict_function):
+            return
+
+        predict_cache = self.env.cr.cache.setdefault(f'_l10n_it_edi_predict_cache_{self.id}', {})
+        if key in predict_cache:
+            return predict_cache[key]
+        predict_cache[key] = predict_function()
+        return predict_cache[key]
 
     def _l10n_it_edi_import_line(self, element, move_line, extra_info=None):
         extra_info = extra_info or {}
         company = move_line.company_id
         partner = move_line.partner_id
+        type_tax_use_domain = extra_info.get('type_tax_use_domain', [('type_tax_use', '=', 'purchase')])
         message_to_log = []
         predict_enabled = self._is_prediction_enabled()
 
@@ -1890,7 +1925,8 @@ class AccountMove(models.Model):
             move_line.sequence = int(line_elements[0].text)
 
         # Name.
-        move_line.name = " ".join(get_text(element, './/Descrizione').split())
+        move_name = " ".join(get_text(element, './/Descrizione').split())
+        move_line.name = move_name
 
         # Product.
         company_domain = self.env['res.company']._check_company_domain(company)
@@ -1901,6 +1937,7 @@ class AccountMove(models.Model):
                 product = self.env['product.product'].search(Domain.AND([company_domain, Domain('barcode', '=', code.text)]))
                 if (product and type_code.text == 'EAN'):
                     move_line.product_id = product
+                    move_line.name = move_name
                     break
                 if partner:
                     product_supplier = self.env['product.supplierinfo'].search(Domain.AND([
@@ -1910,6 +1947,7 @@ class AccountMove(models.Model):
                     ]), limit=2)
                     if product_supplier and len(product_supplier) == 1 and product_supplier.product_id:
                         move_line.product_id = product_supplier.product_id
+                        move_line.name = move_name
                         break
             if not move_line.product_id:
                 for element_code in elements_code:
@@ -1917,10 +1955,15 @@ class AccountMove(models.Model):
                     product = self.env['product.product'].search(Domain.AND([company_domain, Domain('default_code', '=', code.text)]), limit=2)
                     if product and len(product) == 1:
                         move_line.product_id = product
+                        move_line.name = move_name
                         break
 
         # If no product is found, try to find a product that may be fitting
-        predicted_values = self.env['account.move.line']._get_predicted_values(move_line.name, self) if predict_enabled else {}
+        prediction_key = (company.id, partner.id, move_name)
+        predicted_values = self._get_prediction_cache_value(
+            prediction_key,
+            lambda: self.env['account.move.line']._get_predicted_values(move_line.name, self),
+        ) if predict_enabled else {}
         if predict_enabled and not move_line.product_id:
             fitting_product = predicted_values.get('product_id')
             if fitting_product:
@@ -1968,7 +2011,7 @@ class AccountMove(models.Model):
         move_line.tax_ids = [Command.clear()]
         if percentage is not None:
             l10n_it_exempt_reason = get_text(element, './/Natura').upper() or False
-            extra_domain = extra_info.get('type_tax_use_domain', [('type_tax_use', '=', 'purchase')])
+            extra_domain = type_tax_use_domain
             if move_line.product_id:
                 extra_domain = list(extra_domain)
                 tax_scope = 'service' if move_line.product_id.type == 'service' else 'consu'
