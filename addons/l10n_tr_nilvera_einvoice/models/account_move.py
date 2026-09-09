@@ -769,6 +769,12 @@ class AccountMove(models.Model):
             for line in self.invoice_line_ids
         )
 
+    def _l10n_tr_nilvera_einvoice_check_lines_missing_taxes(self):
+        return any(
+            line.display_type == 'product' and not line.tax_ids
+            for line in self.invoice_line_ids
+        )
+
     def _get_partner_l10n_tr_nilvera_customer_alias_name(self):
         # Allows overriding the default customer alias with a custom one.
         self.ensure_one()
@@ -856,7 +862,7 @@ class AccountMove(models.Model):
         for default_vals, move in zip(default_values_list, self):
             if move.country_code != 'TR' or move.move_type != "out_invoice":
                 continue
-            line_vals = move.line_ids.copy_data()
+            line_vals = move.line_ids.with_context(move_reverse_cancel=cancel).copy_data()
             for line, vals in zip(move.line_ids, line_vals):
                 vals.update(
                     {
