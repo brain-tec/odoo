@@ -4,7 +4,6 @@ import re
 
 from collections import defaultdict
 from copy import deepcopy
-from datetime import datetime
 from markupsafe import Markup
 from lxml import etree
 
@@ -886,29 +885,11 @@ class AccountEdiCommon(models.AbstractModel):
         return lines_values, logs
 
     def _retrieve_invoice_line_vals(self, record, tree, document_type=False, qty_factor=1):
-        # Start and End date (enterprise fields)
-        xpath_dict = self._get_invoice_line_xpaths(document_type, qty_factor)
-        deferred_values = {}
-        start_date = end_date = None
-        if self.env['account.move.line']._fields.get('deferred_start_date'):
-            start_date_node = tree.find(xpath_dict['deferred_start_date'])
-            end_date_node = tree.find(xpath_dict['deferred_end_date'])
-            if start_date_node is not None and end_date_node is not None:  # there is a constraint forcing none or the two to be set
-                start_date = datetime.strptime(start_date_node.text.strip(), xpath_dict['date_format'])
-                end_date = datetime.strptime(end_date_node.text.strip(), xpath_dict['date_format'])
-            deferred_values = {
-                'deferred_start_date': start_date,
-                'deferred_end_date': end_date,
-            }
-
         line_vals = self._retrieve_line_vals(record, tree, document_type, qty_factor)
         if not line_vals.get('price_subtotal'):
             return None
 
-        return {
-            **line_vals,
-            **deferred_values,
-        }
+        return line_vals
 
     @api.model
     def _retrieve_rebate_val(self, tree, xpath_dict, quantity):
@@ -1640,6 +1621,9 @@ class AccountEdiCommon(models.AbstractModel):
             if tax_values := allowance_charge_value.get('taxes_values'):
                 tax_values_list.append(tax_values)
 
+        for tax_values in tax_values_list:
+            tax_values['extra_domain'] = [('price_include_override', 'in', [False, 'tax_excluded'])]
+
         if customer := collected_values.get('customer_values', {}).get('customer'):
             fiscal_position = self.env['account.move'].new({
                 'company_id': collected_values['company'].id,
@@ -1774,10 +1758,6 @@ class AccountEdiCommon(models.AbstractModel):
 
         if name := to_write.get('name'):
             base_line_kwargs['_create_values']['name'] = name
-        if deferred_start_date := to_write.get('deferred_start_date'):
-            base_line_kwargs['_create_values']['deferred_start_date'] = deferred_start_date
-        if deferred_end_date := to_write.get('deferred_end_date'):
-            base_line_kwargs['_create_values']['deferred_end_date'] = deferred_end_date
         if vehicle_id := to_write.get('vehicle_id'):
             base_line_kwargs['_create_values']['vehicle_id'] = vehicle_id
 
@@ -1843,21 +1823,6 @@ class AccountEdiCommon(models.AbstractModel):
 
         AccountTax._add_tax_details_in_base_lines(base_lines, company)
         AccountTax._round_base_lines_tax_details(base_lines, company)
-
-        # Fix 'price_unit' if some price-included taxes are involved.
-        for base_line in base_lines:
-            if base_line['discount'] != 100:
-                for tax_data in base_line['tax_details']['taxes_data']:
-                    if tax_data['tax'].price_include:
-                        discount = base_line['discount'] / 100
-                        raw_tax_amount_currency = tax_data['raw_tax_amount_currency'] / (1 - discount)
-                        base_line['price_unit'] += raw_tax_amount_currency / (base_line['quantity'] if base_line['quantity'] else 1)
-            else:
-                new_base_line = AccountTax._prepare_base_line_for_taxes_computation(record=base_line, discount=0.0, special_mode="total_excluded")
-                AccountTax._add_tax_details_in_base_lines([new_base_line], company)
-                for tax_data in new_base_line['tax_details']['taxes_data']:
-                    if tax_data['tax'].price_include:
-                        base_line['price_unit'] += tax_data['raw_tax_amount_currency'] / (base_line['quantity'] if base_line['quantity'] else 1)
 
         # Remove lines having a zero amount.
         collected_values['base_lines'] = [

@@ -5,6 +5,7 @@ import {
     contains,
     defineMailModels,
     insertText,
+    listenStoreFetch,
     openDiscuss,
     openMessagingMenu,
     start,
@@ -13,10 +14,15 @@ import {
     MENU_ACTIVE_IDS,
     mockGetMedia,
 } from "@mail/../tests/mail_test_helpers";
-import { MENU_TABS } from "@mail/core/public_web/messaging_menu/messaging_menu_model";
+import {
+    MENU_TABS,
+    MessagingMenu,
+} from "@mail/core/public_web/messaging_menu/messaging_menu_model";
+import { fields } from "@mail/model/export";
+import { messagingMenuHelpers } from "@mail/../tests/mock_server/controllers/discuss/messaging_menu";
 
 import { describe, expect, mockPermission, test } from "@odoo/hoot";
-import { rightClick } from "@odoo/hoot-dom";
+import { rightClick, waitUntil } from "@odoo/hoot-dom";
 import { mockDate } from "@odoo/hoot-mock";
 
 import {
@@ -26,6 +32,7 @@ import {
     serverState,
     withUser,
 } from "@web/../tests/web_test_helpers";
+import { patch } from "@web/core/utils/patch";
 
 describe.current.tags("desktop");
 defineMailModels();
@@ -220,6 +227,63 @@ test("active filter with no match shows a neutral empty state, not the tab onboa
     await click("button:text(Thread)");
     await contains("button.o-active:text(Thread)");
     await contains(".o-mail-MessagingMenuEmpty:has(:text('No conversation matches this filter.'))");
+});
+
+test("plugin filter narrows a tab's content, ANDed with the chip filter", async () => {
+    const pyEnv = await startServer();
+    pyEnv["res.users"].write(serverState.userId, { notification_type: "inbox" });
+    const [aliceId, bobId] = pyEnv["res.partner"].create([{ name: "Alice" }, { name: "Bob" }]);
+    const [aliceUnreadId, aliceReadId, bobUnreadId] = pyEnv["mail.message"].create([
+        {
+            author_id: aliceId,
+            body: "hello",
+            model: "res.partner",
+            needaction: true,
+            res_id: aliceId,
+        },
+        {
+            author_id: aliceId,
+            body: "old news",
+            model: "res.partner",
+            needaction: false,
+            res_id: aliceId,
+        },
+        { author_id: bobId, body: "hi", model: "res.partner", needaction: true, res_id: bobId },
+    ]);
+    pyEnv["mail.notification"].create(
+        [aliceUnreadId, aliceReadId, bobUnreadId].map((mail_message_id) => ({
+            is_read: mail_message_id === aliceReadId,
+            mail_message_id,
+            notification_status: "sent",
+            notification_type: "inbox",
+            res_partner_id: serverState.partnerId,
+        }))
+    );
+    patch(messagingMenuHelpers, {
+        _get_menu_tab_filter_domain(env, tab_id, filter_id) {
+            if (tab_id === "notification" && filter_id === "test_author_alice") {
+                return [["author_id", "=", aliceId]];
+            }
+            return super._get_menu_tab_filter_domain(env, tab_id, filter_id);
+        },
+    });
+    await start();
+    await openMessagingMenu(MENU_ACTIVE_IDS.NOTIFICATION);
+    await contains("button.o-active:text(Unread)");
+    await click("button:text(All)");
+    await contains("button.o-active:text(All)");
+    await contains(".o-mail-MessagingMenuItem", { count: 3 });
+    getService("mail.store").messagingMenuSystrayState.setPluginFilter("test.author", {
+        id: "test_author_alice",
+        includesMessage: (msg) => msg.author_id?.id === aliceId,
+    });
+    await contains(".o-mail-MessagingMenuItem", { count: 2 });
+    await contains(".o-mail-MessagingMenuItem:has(:text('Alice: hello'))");
+    await contains(".o-mail-MessagingMenuItem:has(:text('Alice: old news'))");
+    await click("button:text(Unread)");
+    await contains("button.o-active:text(Unread)");
+    await contains(".o-mail-MessagingMenuItem", { count: 1 });
+    await contains(".o-mail-MessagingMenuItem:has(:text('Alice: hello'))");
 });
 
 test("create new chat from chat tab", async () => {
@@ -769,4 +833,116 @@ test("sync the meeting when another member converts it to a group chat", async (
     await contains(
         "   .o-mail-NotificationMessage:has(:text('Alice converted this meeting into a group chat'))"
     );
+});
+
+test("non app wide tab tracks its own counter but doesn't participate to the global one", async () => {
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ name: "Demo" });
+    const messageId = pyEnv["mail.message"].create({
+        author_id: partnerId,
+        body: "hello",
+        model: "res.partner",
+        needaction: true,
+        res_id: partnerId,
+    });
+    pyEnv["mail.notification"].create({
+        mail_message_id: messageId,
+        notification_status: "sent",
+        notification_type: "inbox",
+        res_partner_id: serverState.partnerId,
+    });
+    patch(messagingMenuHelpers, {
+        _get_menu_tab_domain(env, tab_id) {
+            if (tab_id === "test_not_app_wide") {
+                return [["needaction", "=", true]];
+            }
+            return super._get_menu_tab_domain(env, tab_id);
+        },
+    });
+    patch(MessagingMenu.prototype, {
+        setup() {
+            super.setup(...arguments);
+            this.testTab = fields.One("MessagingMenuTab", {
+                compute: () => ({
+                    id: "test_not_app_wide",
+                    recordType: "mail.message",
+                    appWide: false,
+                    includesMessage: (m) => m.needaction,
+                }),
+                eager: true,
+            });
+        },
+    });
+    await start();
+    const messagingMenu = getService("mail.store").messagingMenu;
+    await waitUntil(() => messagingMenu.testTab.counter === 1);
+    expect(messagingMenu.globalCounter).toBe(0);
+});
+
+test("tab added after boot fetches its own counter without re-fetching the others", async () => {
+    const pyEnv = await startServer();
+    pyEnv["res.users"].write(serverState.userId, { notification_type: "inbox" });
+    const partnerId = pyEnv["res.partner"].create({ name: "Demo" });
+    const messageId = pyEnv["mail.message"].create({
+        author_id: partnerId,
+        body: "hello",
+        model: "res.partner",
+        needaction: true,
+        res_id: partnerId,
+    });
+    pyEnv["mail.notification"].create({
+        mail_message_id: messageId,
+        notification_status: "sent",
+        notification_type: "inbox",
+        res_partner_id: serverState.partnerId,
+    });
+    patch(messagingMenuHelpers, {
+        _get_menu_tab_domain(env, tab_id) {
+            if (tab_id === "test_dynamic") {
+                return [["needaction", "=", true]];
+            }
+            return super._get_menu_tab_domain(env, tab_id);
+        },
+    });
+    listenStoreFetch("/mail/messaging_menu/initialize_counters", {
+        logParams: ["/mail/messaging_menu/initialize_counters"],
+    });
+    patch(MessagingMenu.prototype, {
+        setup() {
+            super.setup(...arguments);
+            this.testDynamicOn = fields.Attr(false);
+            this.testTab = fields.One("MessagingMenuTab", {
+                compute() {
+                    if (!this.testDynamicOn) {
+                        return;
+                    }
+                    return {
+                        id: "test_dynamic",
+                        recordType: "mail.message",
+                        label: "Dynamic Tab",
+                        includesMessage: (m) => m.needaction,
+                    };
+                },
+                eager: true,
+            });
+        },
+    });
+    await start();
+    await openMessagingMenu(MENU_ACTIVE_IDS.NOTIFICATION);
+    await contains(".o-mail-MessagingMenuItem", { count: 1 });
+    await expect.waitForSteps([
+        `store fetch: /mail/messaging_menu/initialize_counters - ${JSON.stringify({
+            filter_id_by_tab_id_by_record_type: {
+                "mail.message": { bookmark: null, notification: "notification_unread" },
+                "discuss.channel": { chat: null, channel: null, meeting: "meeting_today" },
+            },
+        })}`,
+    ]);
+    getService("mail.store").messagingMenu.testDynamicOn = true;
+    await contains(".o-mail-MessagingMenu-tab:has(:text('Dynamic Tab')):has(.badge:text(1))");
+    await expect.waitForSteps([
+        `store fetch: /mail/messaging_menu/initialize_counters - ${JSON.stringify({
+            filter_id_by_tab_id_by_record_type: { "mail.message": { test_dynamic: null } },
+        })}`,
+    ]);
 });

@@ -523,7 +523,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             "discuss.channel.rtc.session": [
                 self._expected_result_for_rtc_session(self.channel_channel_group_1, self.users[2]),
             ],
-            "res.groups": [{'full_name': 'Role / Light User', 'id': self.env.ref("base.group_user").id}],
+            "res.groups": [{'full_name': 'Role / User', 'id': self.env.ref("base.group_user").id}],
             "res.partner": self._filter_partners_fields(
                 self._expected_result_for_persona(self.users[0]),
                 self._expected_result_for_persona(self.users[14]),
@@ -636,7 +636,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 {"code": "IN", "id": self.env.ref("base.in").id, "name": "India"},
                 {"code": "BE", "id": self.env.ref("base.be").id, "name": "Belgium"},
             ],
-            "res.groups": [{"full_name": "Role / Light User", "id": self.env.ref("base.group_user").id}],
+            "res.groups": [{"full_name": "Role / User", "id": self.env.ref("base.group_user").id}],
             "res.partner": self._filter_partners_fields(
                 self._expected_result_for_persona(
                     self.users[0],
@@ -862,6 +862,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_editable": True,
                 "last_interest_dt": last_interest_dt,
                 "member_count": 2,
+                "member_indices": channel.member_indices,
                 "message_needaction_counter_bus_id": bus_last_id,
                 "message_needaction_counter": 0,
                 "name": "Ernest Employee, test14",
@@ -880,6 +881,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_editable": True,
                 "last_interest_dt": last_interest_dt,
                 "member_count": 2,
+                "member_indices": channel.member_indices,
                 "message_needaction_counter_bus_id": bus_last_id,
                 "message_needaction_counter": 0,
                 "name": "Ernest Employee, test15",
@@ -898,6 +900,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_editable": True,
                 "last_interest_dt": last_interest_dt,
                 "member_count": 2,
+                "member_indices": channel.member_indices,
                 "message_needaction_counter_bus_id": bus_last_id,
                 "message_needaction_counter": 0,
                 "name": "Ernest Employee, test2",
@@ -916,6 +919,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_editable": True,
                 "last_interest_dt": last_interest_dt,
                 "member_count": 2,
+                "member_indices": channel.member_indices,
                 "message_needaction_counter_bus_id": bus_last_id,
                 "message_needaction_counter": 0,
                 "name": "Ernest Employee, test3",

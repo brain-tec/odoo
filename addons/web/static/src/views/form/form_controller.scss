@@ -17,7 +17,6 @@
     --fieldWidget-margin-bottom: 0;
 
     grid-template-columns: minmax(0, 1fr);
-    margin-bottom: $o-form-spacing-unit * 4;
 
     .o_cell {
         max-width: 100%;
@@ -905,10 +904,10 @@
 
         .o_group {
             margin-top: 0;
+        }
 
-            .o_inner_group {
-                margin-bottom: 0 !important;
-            }
+        .o_inner_group {
+            margin-bottom: 0;
         }
 
         .o_notebook {
@@ -932,10 +931,6 @@
         .btn-add-record {
             margin-left: 0 !important;
             margin-bottom: 10px !important;
-        }
-
-        button.btn.o_external_button.fa {
-            padding-right: 0 !important;
         }
 
         .oe_inline.o_field_widget.o_field_many2one {

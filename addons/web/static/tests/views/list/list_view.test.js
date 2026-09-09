@@ -20972,7 +20972,6 @@ test(`custom button that creates record in list with sample data`, async () => {
 test(`widget visibility with invisible attribute`, async () => {
     class TestWidget extends Component {
         static template = xml`<div class="test_widget">Widget Content</div>`;
-        props = useProps();
     }
     registry.category("view_widgets").add("test_widget", { component: TestWidget });
 
@@ -20994,7 +20993,6 @@ test(`widget visibility with invisible attribute`, async () => {
 test(`widget column visibility with column_invisible attribute`, async () => {
     class TestWidget extends Component {
         static template = xml`<div class="test_widget">Widget Content</div>`;
-        props = useProps();
     }
     registry.category("view_widgets").add("test_widget", { component: TestWidget });
 
@@ -21056,6 +21054,92 @@ test(`column tag: uses string attribute as header label`, async () => {
     });
 
     expect(`thead th:not(.o_list_record_selector):eq(1)`).toHaveText("Details");
+});
+
+test(`column tag: numeric columns are right aligned`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list>
+                <column name="stacked_amount">
+                    <field name="amount"/>
+                    <field name="qux"/>
+                </column>
+                <column>
+                    <field name="foo"/>
+                    <field name="bar"/>
+                </column>
+                <column>
+                    <field name="date"/>
+                    <field name="int_field"/>
+                </column>
+            </list>
+        `,
+    });
+
+    expect(`thead th:not(.o_list_record_selector):eq(0)`).toHaveClass("o_list_number_th");
+    expect(`thead th:not(.o_list_record_selector):eq(0) .o_list_number_th`).toHaveCount(1, {
+        message: "header of a numeric stacked column should have o_list_number_th class",
+    });
+    expect(`thead th:not(.o_list_record_selector):eq(0) .o_list_number_th`).toHaveStyle(
+        { "text-align": "right" },
+        { message: "header label of a numeric stacked column should be right aligned" }
+    );
+    expect(`tbody tr:eq(0) td:not(.o_list_record_selector):eq(0)`).toHaveClass("o_list_number");
+    expect(`tbody tr:eq(0) td:not(.o_list_record_selector):eq(0)`).toHaveStyle(
+        { "text-align": "right" },
+        { message: "cells of a numeric stacked column should be right aligned" }
+    );
+
+    expect(`thead th:not(.o_list_record_selector):eq(1) .o_list_number_th`).toHaveCount(0, {
+        message: "header of a non numeric stacked column should not be right aligned",
+    });
+    expect(`tbody tr:eq(0) td:not(.o_list_record_selector):eq(1)`).not.toHaveClass(
+        "o_list_number"
+    );
+
+    expect(`thead th:not(.o_list_record_selector):eq(2) .o_list_number_th`).toHaveCount(0, {
+        message: "a stacked column follows its first sub-field, not the ones below it",
+    });
+    expect(`tbody tr:eq(0) td:not(.o_list_record_selector):eq(2)`).not.toHaveClass(
+        "o_list_number"
+    );
+});
+
+test(`column tag: aggregates of numeric columns are right aligned`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        groupBy: ["bar"],
+        arch: `
+            <list>
+                <field name="foo"/>
+                <column>
+                    <field name="int_field" sum="Sum"/>
+                    <field name="date"/>
+                </column>
+                <column>
+                    <field name="bar"/>
+                    <field name="qux" sum="Total"/>
+                </column>
+            </list>
+        `,
+    });
+
+    expect(`.o_group_header:eq(0) td.o_list_number`).toHaveCount(1, {
+        message: "group aggregate of a stacked column should be right aligned",
+    });
+    expect(`.o_group_header:eq(0) td.o_list_number`).toHaveText("-4");
+    expect(`tfoot td.o_list_number`).toHaveCount(1, {
+        message: "footer aggregate of a stacked column should be right aligned",
+    });
+    expect(`tfoot td.o_list_number`).toHaveText("32");
+
+    expect(`.o_group_header:eq(0) td:last`).not.toHaveClass("o_list_number", {
+        message: "the aggregate lines up with the values it aggregates",
+    });
+    expect(`tfoot td:last`).not.toHaveClass("o_list_number");
 });
 
 test(`column tag: column_invisible hides the entire stacked column`, async () => {

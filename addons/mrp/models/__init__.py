@@ -6,7 +6,6 @@ from . import mrp_bom
 from . import mrp_routing
 from . import mrp_workcenter
 from . import mrp_production
-from . import stock_traceability
 from . import mrp_unbuild
 from . import mrp_workorder
 from . import product
@@ -24,3 +23,5 @@ from . import stock_package
 from . import stock_package_history
 from . import stock_quant
 from . import stock_replenish_mixin
+
+from . import res_groups
