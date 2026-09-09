@@ -42,7 +42,7 @@ class HrEmployee(models.Model):
     """
     _name = 'hr.employee'
     _description = "Employee"
-    _order = 'name'
+    _order = 'name, id'
     _inherit = ['mail.thread.main.attachment', 'mail.thread.phone', 'mail.activity.mixin', 'resource.mixin', 'avatar.mixin']
     _mail_post_access = 'read'
     _mailing_enabled = True
@@ -1680,7 +1680,7 @@ class HrEmployee(models.Model):
                     raise UserError(self.env._('A user already exist with the following login: %(login)s. '
                                                'User Name: %(user_name)s. Please link the user instead before sending invitation.', login=login, user_name=user.name))
                 return user
-        groups = ResUsers._default_groups(group='user')
+        groups = ResUsers._default_groups()._reduce_to_light_groups()
         return ResUsers.create({
             'name': self.name,
             'login': login,

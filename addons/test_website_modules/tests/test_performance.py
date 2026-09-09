@@ -186,7 +186,7 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
                 'product_tmpl_id': cls.templateC.id,
                 'price_discount': 20,
                 'min_quantity': 2,
-                'compute_price': 'formula',
+                'compute_price': 'discount',
             })],
         })
         tax_group = cls.env['account.tax.group'].create({'name': 'Test 6%'})
@@ -386,7 +386,7 @@ class TestWebsiteAllPerformanceShop(TestWebsiteAllPerformance):
         queries['account_account_tag'] = 2
 
         if self.env['res.groups']._is_feature_enabled('uom.group_uom'):
-            queries['uom_uom'] += 2
+            queries['uom_uom'] += 1
 
         if self._has_demo_data():
             queries['ir_attachment'] += -1

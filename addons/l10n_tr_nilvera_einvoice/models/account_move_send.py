@@ -6,6 +6,8 @@ from collections import defaultdict
 from odoo import _, api, models
 from odoo.tools.float_utils import float_compare
 
+from odoo.addons.l10n_tr_nilvera_einvoice.const import GIB_RETURN_INVOICE_TYPES
+
 _logger = logging.getLogger(__name__)
 
 
@@ -132,6 +134,16 @@ class AccountMoveSend(models.AbstractModel):
                 "action": invalid_negative_lines._get_records_action(name=_("Check data on Invoice(s)")),
             }
 
+        if lines_missing_taxes_moves := tr_nilvera_moves.filtered(
+            lambda move: move._l10n_tr_nilvera_einvoice_check_lines_missing_taxes(),
+        ):
+            alerts['tr_lines_missing_taxes'] = {
+                'level': 'danger',
+                'message': self.env._("Cannot send via Nilvera: One or more line items are missing a tax rate."),
+                'action_text': self.env._("View Invoice(s)"),
+                'action': lines_missing_taxes_moves._get_records_action(name=self.env._("Check taxes on Invoice(s)")),
+            }
+
         if moves_with_invalid_name := tr_nilvera_moves.filtered(lambda move: not _is_valid_nilvera_name(move)):
             alerts['tr_moves_with_invalid_name'] = {
                 'level': 'danger',
@@ -163,7 +175,7 @@ class AccountMoveSend(models.AbstractModel):
             lambda m: m.l10n_tr_is_export_invoice or m.l10n_tr_exemption_code_id == exemption_702,
         )
         if non_eligible_tr_lines := tr_export_moves.invoice_line_ids.filtered(
-            lambda line: not (line.product_id or line.l10n_tr_ctsp_number),
+            lambda line: line.display_type == 'product' and not (line.product_id or line.l10n_tr_ctsp_number),
         ):
             alerts['l10n_tr_non_eligible_products'] = {
                 'message': self.env._(
@@ -208,8 +220,7 @@ class AccountMoveSend(models.AbstractModel):
             }
 
         if invalid_type_invoices := tr_nilvera_moves.filtered(
-            lambda r: (r.l10n_tr_gib_invoice_type in {"IADE", "TEVKIFATIADE"})
-            ^ (r.move_type == "out_refund")
+            lambda r: (r.l10n_tr_gib_invoice_type in GIB_RETURN_INVOICE_TYPES) != (r.move_type == "out_refund")
         ):
             alerts["tr_moves_with_invalid_type"] = {
                 "level": "danger",

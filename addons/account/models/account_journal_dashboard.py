@@ -98,7 +98,10 @@ class AccountJournal(models.Model):
             else 'current'
         )
 
-        balances = dict(self.env['account.move.line'].sudo().with_context(currency_translation=currency_translation)._read_group(
+        balances = dict(self.env['account.move.line'].sudo().with_context(
+            currency_translation=currency_translation,
+            date_to=today,
+        )._read_group(
             domain=[
                 ('parent_state', '=', 'posted'),
                 ('date', '>=', fiscal_year['date_from']),
@@ -1330,7 +1333,7 @@ class AccountJournal(models.Model):
         action_name = self.env.context.get('action_name', False)
         if not action_name:
             return False
-        ctx = dict(self.env.context, default_journal_id=self.id)
+        ctx = dict(self.env.context, default_journal_id=self.id, from_statement_view=True)
         if ctx.get('search_default_journal', False):
             ctx.update(search_default_journal_id=self.id)
             ctx['search_default_journal'] = False  # otherwise it will do a useless groupby in bank statements

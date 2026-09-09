@@ -11,14 +11,17 @@ const messagingMenuPatch = {
     setup() {
         super.setup(...arguments);
         this.filteredChannels = computed(() => {
-            const { activeTab, selectedFilter } = this.state();
-            const channels = selectedFilter?.includesChannel
-                ? activeTab.channels.filter((c) => selectedFilter.includesChannel(c))
-                : activeTab.channels;
-            return activeTab.getSortedChannels(selectedFilter, channels);
+            const filters = [...this.state().activePluginFilters];
+            if (this.state().selectedFilter) {
+                filters.push(this.state().selectedFilter);
+            }
+            const channels = this.state().activeTab.channels.filter((c) =>
+                filters.every((f) => !f.includesChannel || f.includesChannel(c))
+            );
+            return this.state().activeTab.getSortedChannels(this.state().selectedFilter, channels);
         });
         this.channels = computed(() => {
-            if (this.searchTerm()) {
+            if (this.state().searchTerm) {
                 return this.channelSearch.results;
             }
             return this.filteredChannels();
@@ -27,6 +30,7 @@ const messagingMenuPatch = {
             fetch: (searchTerm) =>
                 this.state().activeTab.loadMore({
                     filter: this.state().selectedFilter,
+                    pluginFilters: this.state().activePluginFilters,
                     searchTerm,
                 }),
             filter: (term) =>
@@ -37,7 +41,7 @@ const messagingMenuPatch = {
         });
         useEffect(() => {
             if (this.state().activeTab.recordType === "discuss.channel") {
-                this.channelSearch.searchTerm = this.searchTerm();
+                this.channelSearch.searchTerm = this.state().searchTerm;
             }
         });
         // Bound once so `onClickChannel` is a stable (useProps.static) handler.

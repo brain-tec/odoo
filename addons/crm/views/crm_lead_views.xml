@@ -86,11 +86,11 @@
                             <div class="col-auto d-flex flex-column">
                                 <div>
                                     <label for="probability" class="d-inline-block"/>
-                                    <a class="border-0 mx-1 p-0 mb-1 mb-md-0 btn btn-light"
+                                    <a class="border-0 mx-2 p-0 mb-1 mb-md-0 btn btn-light"
                                         name="action_set_automated_probability"
                                         role="button" type="object"
                                         invisible="is_automated_probability or won_status == 'lost'">
-                                            <img class="m-1 o_lead_opportunity_form_AI_switch_img"
+                                            <img class="o_lead_opportunity_form_AI_switch_img"
                                                 title="Switch to AI-computed probabilities"
                                                 aria-label="Switch to AI-computed probabilities"
                                                 src="/crm/static/src/img/pls-tooltip-ai-icon.png"
@@ -135,11 +135,11 @@
                                         <span>~ </span>
                                         <field name="automated_probability" force_save="1" style="width: 5ch;"/>
                                         <span> %</span>
-                                        <a class="btn btn-link"
+                                        <a class="btn btn-link p-0"
                                             name="action_set_automated_probability"
                                             role="button" type="object"
                                             invisible="is_automated_probability or won_status == 'lost'">
-                                            <img class="o_lead_opportunity_form_AI_switch_img mx-2"
+                                            <img class="o_lead_opportunity_form_AI_switch_img mx-1"
                                                 title="Switch to AI-computed probabilities"
                                                 aria-label="Switch to AI-computed probabilities"
                                                 src="/crm/static/src/img/pls-tooltip-ai-icon.png"
@@ -542,14 +542,18 @@
                             <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'on_tag_click': 'edit_color'}"/>
                             <field name="lead_properties" widget="properties"/>
                             <footer class="pt-1">
-                                <div class="d-flex mt-auto align-items-center">
+                                <div class="d-flex align-items-center">
                                     <field name="priority" widget="priority" groups="base.group_user" class="me-2"/>
                                     <field name="activity_ids" widget="kanban_activity"/>
                                 </div>
-                                <div class="ms-auto d-flex">
+                                <div class="d-flex align-items-center gap-2 min-w-0 ms-auto">
                                     <field name="is_rotting" invisible="1"/>
                                     <field name="rotting_days" class="d-flex" widget="rotting_days"/>
-                                    <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]" class="ms-2"/>
+                                    <span t-att-title="record.team_id.value" class="d-flex align-items-center text-truncate"
+                                        invisible="not context.get('team_switcher_enabled') or context.get('default_team_id')">
+                                        <field name="team_id" class="badge rounded-pill text-bg-300 fw-bold"/>
+                                    </span>
+                                    <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
                                 </div>
                             </footer>
                         </t>

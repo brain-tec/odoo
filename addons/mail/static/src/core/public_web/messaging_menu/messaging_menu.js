@@ -33,19 +33,21 @@ export class MessagingMenu extends Component {
 
     isIosPwa = isIOS() && isDisplayStandalone();
     filteredMessages = computed(() => {
-        const messages = this.activeTab().sortedMessages;
-        if (!this.state().selectedFilter?.includesMessage) {
-            return messages;
+        const filters = [...this.state().activePluginFilters];
+        if (this.state().selectedFilter) {
+            filters.push(this.state().selectedFilter);
         }
-        return messages.filter((m) => this.state().selectedFilter?.includesMessage(m));
+        const messages = this.activeTab().sortedMessages;
+        return messages.filter((m) =>
+            filters.every((f) => !f.includesMessage || f.includesMessage(m))
+        );
     });
     messages = computed(() => {
-        if (this.searchTerm()) {
+        if (this.state().searchTerm) {
             return this.messageSearch.results;
         }
         return this.filteredMessages();
     });
-    searchTerm = signal("");
     tabContentRef = signal.ref();
 
     setup() {
@@ -56,6 +58,7 @@ export class MessagingMenu extends Component {
             fetch: (term) =>
                 this.activeTab().loadMore({
                     filter: this.state().selectedFilter,
+                    pluginFilters: this.state().activePluginFilters,
                     searchTerm: term,
                 }),
             filter: (term) =>
@@ -85,11 +88,14 @@ export class MessagingMenu extends Component {
         // Bound once so `onClickMessage` is a stable (useProps.static) handler.
         this.onClickMessage = this.onClickMessage.bind(this);
         useOnBottomScrolled(this.tabContentRef, () =>
-            this.activeTab().loadMore({ filter: this.state().selectedFilter })
+            this.activeTab().loadMore({
+                filter: this.state().selectedFilter,
+                pluginFilters: this.state().activePluginFilters,
+            })
         );
         // On search term change: update the search state.
         useEffect(() => {
-            this.messageSearch.searchTerm = this.searchTerm();
+            this.messageSearch.searchTerm = this.state().searchTerm;
         });
         this.hasTouch = hasTouch;
     }
@@ -108,7 +114,7 @@ export class MessagingMenu extends Component {
     }
 
     get noSearchResultText() {
-        return this.searchTerm() ? _t('No results for "%s".', this.searchTerm()) : "";
+        return this.state().searchTerm ? _t('No results for "%s".', this.state().searchTerm) : "";
     }
 
     get noFilterResultText() {
@@ -122,7 +128,7 @@ export class MessagingMenu extends Component {
     get showNotificationHubExtras() {
         const menu = this.store.messagingMenu;
         return (
-            !this.searchTerm() &&
+            !this.state().searchTerm &&
             !this.state().selectedFilter &&
             this.state().activeTab.eq(menu.odooBotNotificationsTab)
         );
