@@ -371,11 +371,12 @@ def html_normalize(src, filter_callback=None, output_method="html"):
     # html: remove encoding attribute inside tags
     src = re.sub(r'(<[^>]*\s)(encoding=(["\'][^"\']*?["\']|[^\s\n\r>]+)(\s[^>]*|/)?>)', "", src)
 
-    src = src.replace('--!>', '-->')
-    src = re.sub(r'(<!-->|<!--->)', '<!-- -->', src)
     # On the specific case of Outlook desktop it adds unnecessary '<o:.*></o:.*>' tags which are parsed
     # in '<p></p>' which may alter the appearance (eg. spacing) of the mail body
     src = re.sub(r'</?o:.*?>', '', src)
+
+    src = src.replace('--!>', '-->')
+    src = re.sub(r'(<!-->|<!--->)', '<!-- -->', src)
 
     try:
         doc, single_body_element = fromstring(src)
@@ -389,7 +390,10 @@ def html_normalize(src, filter_callback=None, output_method="html"):
     for el in doc.iter(tag=etree.Element):
         tag_quote(el)
 
-    doc = html.fromstring(html.tostring(doc, method=output_method))
+    serialized = html.tostring(doc, method=output_method)
+    serialized = serialized.replace(b'--!>', b'-->')
+    serialized = re.sub(rb'(<!-->|<!--->)', b'<!-- -->', serialized)
+    doc = html.fromstring(serialized)
 
     if filter_callback:
         doc = filter_callback(doc)
