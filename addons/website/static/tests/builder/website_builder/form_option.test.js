@@ -176,8 +176,7 @@ test("undo redo add form field", async () => {
     expect(":iframe span.s_website_form_label_content").toHaveCount(1);
 
     await contains(":iframe span.s_website_form_label_content").click();
-    await contains("button[title='Add some content after this field']").click();
-    await contains("span.o-dropdown-item:contains('Field')").click();
+    await contains("button[title='Add a new field after this one']").click();
 
     expect(":iframe span.s_website_form_label_content").toHaveCount(2);
     undo(editor);
@@ -274,6 +273,27 @@ test("Set 'Message' as form success action and show/hide the message preview", a
     expect(":iframe .o_show_form_success_message").toHaveCount(2);
     await contains(".options-container [data-action-id='toggleEndMessage']").click();
     expect(":iframe .o_show_form_success_message").toHaveCount(0);
+});
+
+test("Undo change of default value of a text field", async () => {
+    onRpc("get_authorized_fields", () => ({}));
+    const builder = await setupWebsiteBuilderWithSnippet("s_website_form");
+
+    const questionInputSelector = ":iframe .s_website_form_field:contains(Your Question) textarea";
+    expect(questionInputSelector).toHaveProperty("value", "");
+    await contains(questionInputSelector).click();
+    await contains('[data-label="Default Value"] input').fill("hello");
+    expect(questionInputSelector).toHaveProperty("value", "hello");
+    undo(builder.getEditor());
+    expect(questionInputSelector).toHaveProperty("value", "");
+
+    const subjectInputSelector = ":iframe .s_website_form_field:contains(Subject) input";
+    expect(subjectInputSelector).toHaveProperty("value", "");
+    await contains(subjectInputSelector).click();
+    await contains('[data-label="Default Value"] input').fill("hello");
+    expect(subjectInputSelector).toHaveProperty("value", "hello");
+    undo(builder.getEditor());
+    expect(subjectInputSelector).toHaveProperty("value", "");
 });
 
 const formWithCondition = `
@@ -808,7 +828,7 @@ test("Only state fields have data-link-state-to-country attr", async () => {
     expect(":iframe select[name='state_id']").toHaveAttribute("data-link-state-to-country", "true");
 
     // Other 'select' elements shouldn't have this attribute
-    await contains(".options-container .btn[title='Add some content after this field']").click();
+    await contains(".options-container .btn[title='Add a new field after this one']").click();
     await contains(".hb-row[data-label='Type'] .dropdown-toggle").click();
     await contains(".o-hb-select-dropdown-item:contains('Selection')").click();
     expect(":iframe .s_website_form_field:last-child select").not.toHaveAttribute(
@@ -1625,4 +1645,34 @@ test("field added by the form action is displayed as a dropdown when it has more
     // More than five options: the selection is turned into a dropdown.
     expect(":iframe .s_website_form_field[data-type='many2one']").toHaveCount(1);
     expect(":iframe select[name='long_selection'] option").toHaveCount(6);
+});
+
+test("Changing field type from date to datetime removes value property (and attribute)", async () => {
+    onRpc("get_authorized_fields", () => ({}));
+
+    await setupWebsiteBuilder(`
+        <form class="s_website_form" data-model_name="mail.mail">
+            <div class="s_website_form_field" data-type="date">
+                <label class="s_website_form_label" for="field">
+                    <span class="s_website_form_label_content">Date</span>
+                </label>
+                <div class="s_website_form_date">
+                    <input id="field" class="datetimepicker-input s_website_form_input" type="text"/>
+                </div>
+            </div>
+        </form>
+    `);
+
+    // Set a default date.
+    await contains(":iframe input#field").click();
+    await contains(".hb-row[data-label='Default Value'] input").fill("08/20/2026");
+
+    expect(":iframe input#field").toHaveAttribute("value", "1787180400");
+    expect(":iframe input#field").toHaveProperty("value", "08/20/2026");
+
+    await contains(".hb-row[data-label='Type'] button.o-hb-select-toggle").click();
+    await contains(".o_popover [data-action-value='datetime']").click();
+
+    expect(":iframe input#field").toHaveAttribute("value", "");
+    expect(":iframe input#field").toHaveProperty("value", "");
 });

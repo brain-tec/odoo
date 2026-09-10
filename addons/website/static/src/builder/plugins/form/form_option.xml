@@ -92,19 +92,6 @@
     </button>
 </t>
 
-<t t-name="website.s_website_form_form_option_add_snippet_dropdown">
-    <Dropdown menuClass="'o-hb-select-dropdown'">
-        <button class="btn btn-success pe-2" t-att-title="this.props.tooltip">+ New</button>
-        <t t-set-slot="content">
-            <t t-foreach="this.snippets" t-as="snippet" t-key="snippet.name">
-                <DropdownItem onSelected="() => this.addField(snippet)">
-                    <t t-out="snippet.name"/>
-                </DropdownItem>
-            </t>
-        </t>
-    </Dropdown>
-</t>
-
 <t t-name="website.s_website_form_field_option_redraw">
     <FormFieldOption redrawSequence="this.domState.redrawSequence" t-props="this.props"/>
 </t>
@@ -203,16 +190,16 @@
         <BuilderCheckbox attributeAction="'checked'" attributeActionValue="'checked'"
             applyTo="`[data-type='boolean'] input[type='checkbox']`" preview="false"
         />
-        <BuilderTextInput attributeAction="'value'" action="'property'" actionParam="{ property: 'value' }"
+        <BuilderTextInput action="'propertyAndAttributeValue'"
             applyTo="`input[type='text']:not(.datetimepicker-input), input[type='email'], input[type='tel'], input[type='url']`"
         />
-        <BuilderNumberInput attributeAction="'value'" step="1" action="'property'" actionParam="{ property: 'value' }"
+        <BuilderNumberInput step="1" action="'propertyAndAttributeValue'"
             applyTo="`input[type='number']`"
         />
-        <BuilderDateTimePicker type="'datetime'" attributeAction="'value'" action="'property'" actionParam="{ property: 'value', format: this.format.datetime }"
+        <BuilderDateTimePicker type="'datetime'" action="'propertyAndAttributeValue'" actionParam="{ format: this.format.datetime }"
             applyTo="'.s_website_form_datetime input'"
         />
-        <BuilderDateTimePicker type="'date'" attributeAction="'value'" action="'property'" actionParam="{ property: 'value', format: this.format.date }"
+        <BuilderDateTimePicker type="'date'" action="'propertyAndAttributeValue'" actionParam="{ format: this.format.date }"
             applyTo="'.s_website_form_date input'"
         />
     </BuilderRow>
