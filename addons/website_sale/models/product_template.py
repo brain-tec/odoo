@@ -747,10 +747,7 @@ class ProductTemplate(models.Model):
         comparison_prices_enabled = self.env["res.groups"]._is_feature_enabled(
             "website_sale.group_product_price_comparison"
         )
-        uom_price_enabled = self.env["res.groups"]._is_feature_enabled(
-            "product.group_show_uom_price"
-        )
-
+        uom_price_enabled = website.show_product_reference_price
         res = {}
         for template in self:
             pricelist_price, pricelist_rule_id = pricelist_prices[template.id]
@@ -1018,7 +1015,7 @@ class ProductTemplate(models.Model):
             "taxes": taxes,  # taxes after fpos mapping
         })
 
-        if self.env["res.groups"]._is_feature_enabled("product.group_show_uom_price"):
+        if website.show_product_reference_price:
             price_per_product_uom = uom._compute_price(
                 price=combination_info["price"], to_unit=self.uom_id
             )
@@ -1370,7 +1367,7 @@ class ProductTemplate(models.Model):
         :return: List of service_tracking values that are allowed to have zero price.
         :rtype: list
         """
-        return []
+        return ['subcontract']  # added from sale_purchase as there is no bridge for website
 
     # ---------------------------------------------------------
     # Rating Mixin API
@@ -1546,7 +1543,7 @@ class ProductTemplate(models.Model):
     def _get_google_analytics_data(self, product, combination_info):
         self.ensure_one()
         tracking_data = {
-            "item_id": str(product.barcode or product.product_tmpl_id.id),
+            "item_id": str(product.default_code or product.product_tmpl_id.id),
             "item_name": self.with_context(display_default_code=False).display_name,
             "item_category": self.categ_id.name,
             "price": combination_info["price"],
@@ -1586,7 +1583,7 @@ class ProductTemplate(models.Model):
             price = price_vals.get("price_reduce", template.list_price)
             list_price = price_vals.get("base_price", price)
             tracking_data = {
-                "item_id": str(template.barcode or template.id),
+                "item_id": str(template.default_code or template.id),
                 "item_name": template.with_context(display_default_code=False).display_name,
                 "item_category": template.categ_id.name,
                 "item_list_name": item_list_name,

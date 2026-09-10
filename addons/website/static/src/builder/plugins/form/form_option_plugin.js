@@ -4,10 +4,7 @@ import { Cache } from "@web/core/utils/cache";
 import { Plugin } from "@html_editor/plugin";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { redirect } from "@web/core/utils/urls";
-import {
-    FormOptionAddFieldButton,
-    FormOptionAddContentDropdown,
-} from "./form_option_add_field_button";
+import { FormOptionAddFieldButton } from "./form_option_add_field_button";
 import {
     deleteConditionalVisibility,
     findCircular,
@@ -114,17 +111,17 @@ export class FormOptionPlugin extends Plugin {
                 selector: ".s_website_form",
                 applyTo: "form",
                 props: {
-                    addField: (formEl) => this.addFieldToForm(formEl),
+                    addField: this.addField.bind(this),
                     tooltip: _t("Add a new field at the end"),
                 },
             },
             {
-                Component: FormOptionAddContentDropdown,
+                Component: FormOptionAddFieldButton,
                 selector: ".s_website_form_field",
                 exclude: ".s_website_form_dnone",
                 props: {
-                    addField: (fieldEl, config) => this.addSnippetAfterField(fieldEl, config),
-                    tooltip: _t("Add some content after this field"),
+                    addField: this.addField.bind(this),
+                    tooltip: _t("Add a new field after this one"),
                 },
             },
         ],
@@ -184,7 +181,7 @@ export class FormOptionPlugin extends Plugin {
             SetVisibilityAction,
             SetVisibilityDependencyAction,
             SetFormCustomFieldValueListAction,
-            PropertyAction,
+            PropertyAndAttributeValueAction,
             SetDependencyValueListAction,
             SetCustomErrorMessageAction,
             SetRequirementComparatorAction,
@@ -568,47 +565,24 @@ export class FormOptionPlugin extends Plugin {
             }
         });
     }
-    addFieldToForm(formEl) {
+    addField(editingElement) {
+        const formEl = editingElement.closest("form");
         const field = getCustomField("char", this.dependencies.websiteBridge._t("Custom Text"));
         field.formatInfo = getDefaultFormat(formEl);
         const fieldEl = renderField(field);
-        let locationEl = formEl.querySelector(".s_website_form_submit, .s_website_form_recaptcha");
-        if (!locationEl) {
-            locationEl = formEl.querySelector(".s_website_form_rows");
-            locationEl.insertAdjacentElement("beforeend", fieldEl);
+        if (editingElement === formEl) {
+            const locationEl = formEl.querySelector(
+                ".s_website_form_submit, .s_website_form_recaptcha"
+            );
+            if (locationEl) {
+                locationEl.insertAdjacentElement("beforebegin", fieldEl);
+            } else {
+                formEl.querySelector(".s_website_form_rows").append(fieldEl);
+            }
         } else {
-            locationEl.insertAdjacentElement("beforebegin", fieldEl);
+            editingElement.insertAdjacentElement("afterend", fieldEl);
         }
         this.dependencies.builderOptions.setNextTarget(fieldEl);
-    }
-    addSnippetAfterField(fieldEl, snippet) {
-        let newSnippetEl = null;
-        const formEl = fieldEl.closest("form");
-        if (snippet.id === "field") {
-            const field = getCustomField("char", this.dependencies.websiteBridge._t("Custom Text"));
-            field.formatInfo = getFieldFormat(fieldEl);
-            field.formatInfo.requiredMark = isRequiredMark(formEl);
-            field.formatInfo.optionalMark = isOptionalMark(formEl);
-            field.formatInfo.mark = getMark(formEl);
-            newSnippetEl = renderField(field);
-        } else {
-            newSnippetEl = document.createElement("div");
-            newSnippetEl.className =
-                "s_website_form_inner_content o_no_direct_child_drop col-lg-12";
-            const snippetConfig = this.config.snippetModel.getSnippetByName(
-                "snippet_content",
-                snippet.id
-            );
-            const defaultSnippetEl = snippetConfig.content.cloneNode(true);
-            newSnippetEl.appendChild(snippet.build?.(defaultSnippetEl) || defaultSnippetEl);
-        }
-        // WARNING: For now, inner snippets allowed between form fields
-        // do not need to be built. If additional blocks that require building
-        // are introduced in the future, make sure to handle them here as well,
-        // either via "on_snippet_dropped_handlers" or through a dedicated
-        // resource.
-        fieldEl.insertAdjacentElement("afterend", newSnippetEl);
-        this.dependencies.builderOptions.setNextTarget(newSnippetEl);
     }
     /**
      * To be used in load for any action that uses getActiveField or
@@ -650,6 +624,7 @@ export class FormOptionPlugin extends Plugin {
         const activeField = getActiveField(oldFieldEl, { fields });
         if (activeField.type !== field.type) {
             field.value = "";
+            field.propertyValue = "";
         }
         const targetEl = oldFieldEl.querySelector(".s_website_form_input");
         if (targetEl) {
@@ -1655,9 +1630,12 @@ export class SetEmptyPlaceholderAction extends BuilderAction {
 }
 export class SelectTextareaValueAction extends BuilderAction {
     static id = "selectTextareaValue";
+    static dependencies = ["valueHistory"];
     apply({ editingElement: fieldEl, value }) {
+        // Set the property first, because changing the attribute silently
+        // sets the value (the first time), messing the history
+        this.dependencies.valueHistory.setValue(fieldEl, value);
         fieldEl.textContent = value;
-        fieldEl.value = value;
     }
     getValue({ editingElement: fieldEl }) {
         return fieldEl.textContent;
@@ -1946,13 +1924,27 @@ export class SetDependencyValueListAction extends BuilderAction {
     }
 }
 
-export class PropertyAction extends BuilderAction {
-    static id = "property";
+export class PropertyAndAttributeValueAction extends BuilderAction {
+    static id = "propertyAndAttributeValue";
+    static dependencies = ["valueHistory"];
 
-    apply({ editingElement, params: { property, format } = {}, value }) {
-        editingElement[property] = format ? format(value) : value;
+    getValue({ editingElement }) {
+        return editingElement.getAttribute("value");
+    }
+    apply({ editingElement, params: { format } = {}, value }) {
+        // Set both the property and the attribute in this action (instead of
+        // using the `attributeAction` shortcut) to ensure the order between
+        // the two, because setting the `value` attribute changes the `value`
+        // property the first time (leading to bad history)
+        this.dependencies.valueHistory.setValue(editingElement, format ? format(value) : value);
+        if (value) {
+            editingElement.setAttribute("value", value);
+        } else {
+            editingElement.removeAttribute("value");
+        }
     }
 }
+
 export class SetMultipleFilesAction extends BuilderAction {
     static id = "setMultipleFiles";
     apply({ editingElement }) {
