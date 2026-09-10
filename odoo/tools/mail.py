@@ -290,11 +290,12 @@ def html_normalize(src, filter_callback=None, output_method="html"):
     # in '<p></p>' which may alter the appearance (eg. spacing) of the mail body
     src = re.sub(r'</?o:[^<>\n]*?>', '', src)
 
-    src = src.replace('--!>', '-->')
-    src = re.sub(r'(<!-->|<!--->)', '<!-- -->', src)
     # On the specific case of Outlook desktop it adds unnecessary '<o:.*></o:.*>' tags which are parsed
     # in '<p></p>' which may alter the appearance (eg. spacing) of the mail body
     src = re.sub(r'</?o:.*?>', '', src)
+
+    src = src.replace('--!>', '-->')
+    src = re.sub(r'(<!-->|<!--->)', '<!-- -->', src)
 
     try:
         doc = html.fromstring(src)
@@ -308,6 +309,11 @@ def html_normalize(src, filter_callback=None, output_method="html"):
     if doc is not None:
         for el in doc.iter(tag=etree.Element):
             tag_quote(el)
+
+    serialized = html.tostring(doc, method=output_method)
+    serialized = serialized.replace(b'--!>', b'-->')
+    serialized = re.sub(rb'(<!-->|<!--->)', b'<!-- -->', serialized)
+    doc = html.fromstring(serialized)
 
     if filter_callback:
         doc = filter_callback(doc)
