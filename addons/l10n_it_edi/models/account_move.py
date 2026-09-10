@@ -515,7 +515,7 @@ class AccountMove(models.Model):
             # Down payment lines:
             # If there was a down paid amount that has been deducted from this move,
             # we need to put a reference to the down payment invoice in the DatiFattureCollegate tag
-            description = line.name
+            description = (line.with_context(display_default_code=False).label or '').replace('\n', ' ')
             if not is_downpayment and price_subtotal < 0:
                 downpayment_moves = line._get_downpayment_lines().move_id
                 if downpayment_moves:
@@ -524,7 +524,7 @@ class AccountMove(models.Model):
                     description = f"{description}{sep}{downpayment_moves_description}"
             # Workaround: remove line breaks due to Tax Agency portal bug.
             # This deviates from Odoo's standard behavior and must be reviewed if the issue gets fixed.
-            description = description and description.replace('\n', ' ').strip() or "NO NAME"
+            description = (description and description.strip()) or "NO NAME"
 
             # Price unit.
             if quantity:
@@ -678,22 +678,6 @@ class AccountMove(models.Model):
         )
         return not skip
 
-    def _prepare_product_base_line_for_taxes_computation(self, product_line):
-        """
-            Prepares tax base line. Rounding lines must appear in the XML,
-            so they are converted to regular lines with tax exemption code ('N2.2').
-        """
-        base_line = super()._prepare_product_base_line_for_taxes_computation(product_line)
-
-        if product_line.display_type == 'rounding':
-            base_line.update({
-                'quantity': 1,
-                'price_unit': -product_line.amount_currency,
-                'tax_ids': self._l10n_it_edi_search_tax_for_import(self.company_id, 0.0, l10n_it_exempt_reason='N2.2'),
-            })
-
-        return base_line
-
     def _l10n_it_edi_get_oss_line_values(self, aml, base_line, vat_tax, n7_tax, n22_tax):
         base_line['tax_ids'] = n7_tax
         tax_amount = (base_line['price_unit'] * (1 - (base_line['discount'] / 100.0))) * (vat_tax.amount / 100.0)
@@ -762,7 +746,7 @@ class AccountMove(models.Model):
         convert_to_euros = self.currency_id.name != 'EUR'
 
         # Base lines.
-        base_amls = self.line_ids.filtered(lambda x: x.display_type == 'product' or x.display_type == 'rounding')
+        base_amls = self.line_ids.filtered(lambda x: x.display_type == 'product')
 
         n7_tax = self.env['account.chart.template'].ref('00ex7', raise_if_not_found=False)
         n22_tax = self.env['account.chart.template'].ref('00ex', raise_if_not_found=False)
@@ -775,6 +759,14 @@ class AccountMove(models.Model):
                 base_lines += self._l10n_it_edi_get_oss_line_values(aml, base_line, vat_tax, n7_tax, n22_tax)
             else:
                 base_lines.append(base_line)
+
+        cash_rounding_tax_exempt = self._l10n_it_edi_search_tax_for_import(self.company_id, 0.0, l10n_it_exempt_reason='N2.2')
+        for aml in self.line_ids.filtered(lambda x: x.display_type == 'rounding'):
+            base_line = self._prepare_cash_rounding_base_line_for_taxes_computation(aml)
+            if cash_rounding_tax_exempt:
+                base_line['tax_ids'] |= cash_rounding_tax_exempt
+            base_lines.append(base_line)
+
         tax_amls = self.line_ids.filtered('tax_repartition_line_id')
         tax_lines = [self._prepare_tax_line_for_taxes_computation(x) for x in tax_amls]
 
@@ -1924,10 +1916,6 @@ class AccountMove(models.Model):
         if line_elements:
             move_line.sequence = int(line_elements[0].text)
 
-        # Name.
-        move_name = " ".join(get_text(element, './/Descrizione').split())
-        move_line.name = move_name
-
         # Product.
         company_domain = self.env['res.company']._check_company_domain(company)
         if elements_code := element.xpath('.//CodiceArticolo'):
@@ -1937,7 +1925,6 @@ class AccountMove(models.Model):
                 product = self.env['product.product'].search(Domain.AND([company_domain, Domain('barcode', '=', code.text)]))
                 if (product and type_code.text == 'EAN'):
                     move_line.product_id = product
-                    move_line.name = move_name
                     break
                 if partner:
                     product_supplier = self.env['product.supplierinfo'].search(Domain.AND([
@@ -1947,7 +1934,6 @@ class AccountMove(models.Model):
                     ]), limit=2)
                     if product_supplier and len(product_supplier) == 1 and product_supplier.product_id:
                         move_line.product_id = product_supplier.product_id
-                        move_line.name = move_name
                         break
             if not move_line.product_id:
                 for element_code in elements_code:
@@ -1955,14 +1941,16 @@ class AccountMove(models.Model):
                     product = self.env['product.product'].search(Domain.AND([company_domain, Domain('default_code', '=', code.text)]), limit=2)
                     if product and len(product) == 1:
                         move_line.product_id = product
-                        move_line.name = move_name
                         break
 
+        # Extract description for prediction.
+        description = get_text(element, './/Descrizione')
+
         # If no product is found, try to find a product that may be fitting
-        prediction_key = (company.id, partner.id, move_name)
+        prediction_key = (company.id, partner.id, description)
         predicted_values = self._get_prediction_cache_value(
             prediction_key,
-            lambda: self.env['account.move.line']._get_predicted_values(move_line.name, self),
+            lambda: self.env['account.move.line']._get_predicted_values(description, self),
         ) if predict_enabled else {}
         if predict_enabled and not move_line.product_id:
             fitting_product = predicted_values.get('product_id')
@@ -1976,6 +1964,18 @@ class AccountMove(models.Model):
             fitting_account = predicted_values.get('account_id')
             if fitting_account:
                 move_line.account_id = fitting_account
+
+        # Name.
+        if not move_line.name:
+            prefix = (
+                f'{move_line.product_id.with_context(display_default_code=False).display_name} '
+                if move_line.product_id
+                else None
+            )
+            if prefix and description.startswith(prefix):
+                move_line.name = description.removeprefix(prefix)
+            else:
+                move_line.name = description
 
         # Quantity.
         move_line.quantity = float(get_text(element, './/Quantita') or '1')

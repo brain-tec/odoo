@@ -282,6 +282,7 @@ class Website(models.Model):
         domain=[("type", "=", "sale")],
         check_company=True,
     )
+    show_product_reference_price = fields.Boolean(string="Product Reference Price")
 
     extra_step_category_ids = fields.Many2many(
         string="Extra Step Categories",
@@ -887,6 +888,12 @@ class Website(models.Model):
             "website_sale",
         ))
         return suggested_controllers
+
+    def _get_search_scopes(self):
+        return {
+            **super()._get_search_scopes(),
+            "products": {"label": self.env._("Products"), "url": const.SHOP_PATH},
+        }
 
     def _search_get_details(self, search_type, order, options):
         result = super()._search_get_details(search_type, order, options)

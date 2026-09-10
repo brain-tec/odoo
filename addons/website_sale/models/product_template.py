@@ -747,10 +747,7 @@ class ProductTemplate(models.Model):
         comparison_prices_enabled = self.env["res.groups"]._is_feature_enabled(
             "website_sale.group_product_price_comparison"
         )
-        uom_price_enabled = self.env["res.groups"]._is_feature_enabled(
-            "product.group_show_uom_price"
-        )
-
+        uom_price_enabled = website.show_product_reference_price
         res = {}
         for template in self:
             pricelist_price, pricelist_rule_id = pricelist_prices[template.id]
@@ -1018,7 +1015,7 @@ class ProductTemplate(models.Model):
             "taxes": taxes,  # taxes after fpos mapping
         })
 
-        if self.env["res.groups"]._is_feature_enabled("product.group_show_uom_price"):
+        if website.show_product_reference_price:
             price_per_product_uom = uom._compute_price(
                 price=combination_info["price"], to_unit=self.uom_id
             )
@@ -1370,7 +1367,7 @@ class ProductTemplate(models.Model):
         :return: List of service_tracking values that are allowed to have zero price.
         :rtype: list
         """
-        return []
+        return ['subcontract']  # added from sale_purchase as there is no bridge for website
 
     # ---------------------------------------------------------
     # Rating Mixin API
@@ -1410,7 +1407,11 @@ class ProductTemplate(models.Model):
         ]
         if search_in_description:
             search_fields.append("description_ecommerce")
-        search_fields.extend(("attribute_line_ids.value_ids.name", "product_tag_ids.name"))
+        search_fields.extend((
+            "attribute_line_ids.value_ids.name",
+            "product_tag_ids.name",
+            "public_categ_ids.name",
+        ))
         if search_in_description:
             search_fields.append("description_sale")
         return search_fields
@@ -1462,13 +1463,7 @@ class ProductTemplate(models.Model):
                 "html": True,
                 "match": True,
             },
-            "tags": {"name": "product_tag_ids", "type": "tags", "match": True},
-            "attribute_value_ids": {
-                "name": "attribute_value_ids",
-                "type": "tags",
-                "match": True,
-                "force_show": True,
-            },
+            "tags": {"name": "badges", "type": "tags", "match": True},
             "description_sale": {
                 "name": "description_sale",
                 "type": "text",
@@ -1499,20 +1494,26 @@ class ProductTemplate(models.Model):
                 "any",
                 [("name", "ilike", search_term), ("visible_to_customers", "=", True)],
             )
+        if field == "public_categ_ids.name":
+            return Domain(
+                "public_categ_ids",
+                "any",
+                Domain("name", "ilike", search_term) & self.env.website.website_domain(),
+            )
         return super()._search_get_field_domain(field, search_term)
 
     def _search_render_results(self, fetch_fields, mapping, icon, limit):
         results_data = super()._search_render_results(fetch_fields, mapping, icon, limit)
         search_term = self.env.context.get("search_term", "")
         search_words = search_term.lower().split() if search_term else []
+        website_domain = self.env.website.website_domain()
 
         for product, data in zip(self, results_data):
             combination_info = product._get_combination_info(only_template=True)
             values = product.mapped("attribute_line_ids.value_ids")
-            data["attribute_value_ids"] = values.read(["id", "name"])
-            data["product_tag_ids"] = product.product_tag_ids.filtered(
-                "visible_to_customers"
-            ).read(["name"])
+            tags = product.product_tag_ids.filtered("visible_to_customers").read(["name"])
+            categories = product.public_categ_ids.filtered_domain(website_domain).read(["name"])
+            data["badges"] = tags + categories + values.read(["name"])
             price = self._search_render_results_prices(mapping, combination_info)
             if price:
                 data["price"] = price
@@ -1542,7 +1543,7 @@ class ProductTemplate(models.Model):
     def _get_google_analytics_data(self, product, combination_info):
         self.ensure_one()
         tracking_data = {
-            "item_id": str(product.barcode or product.product_tmpl_id.id),
+            "item_id": str(product.default_code or product.product_tmpl_id.id),
             "item_name": self.with_context(display_default_code=False).display_name,
             "item_category": self.categ_id.name,
             "price": combination_info["price"],
@@ -1582,7 +1583,7 @@ class ProductTemplate(models.Model):
             price = price_vals.get("price_reduce", template.list_price)
             list_price = price_vals.get("base_price", price)
             tracking_data = {
-                "item_id": str(template.barcode or template.id),
+                "item_id": str(template.default_code or template.id),
                 "item_name": template.with_context(display_default_code=False).display_name,
                 "item_category": template.categ_id.name,
                 "item_list_name": item_list_name,

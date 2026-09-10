@@ -48,10 +48,10 @@ class StockMove(models.Model):
                 seller = move.purchase_line_id.sudo().selected_seller_id
                 vendor_reference = f'[{seller.product_code}]' if seller.product_code else ''
                 vendor_reference += f' {seller.product_name}' if seller.product_name else ''
-                if vendor_reference.strip() in current_description:
+                if current_description and vendor_reference.strip() in current_description:
                     vendor_reference = ''
                 no_variant_attributes = '\n'.join(f'{attribute.attribute_id.name}: {attribute.name}' for attribute in move.purchase_line_id.sudo().product_no_variant_attribute_value_ids)
-                move.description_picking = (no_variant_attributes + '\n' + vendor_reference + '\n' + current_description).strip()
+                move.description_picking = (no_variant_attributes + '\n' + vendor_reference + '\n' + (current_description or '')).strip()
 
     def write(self, vals):
         res = super().write(vals)
@@ -99,11 +99,6 @@ class StockMove(models.Model):
     def _should_ignore_pol_price(self):
         self.ensure_one()
         return self.origin_returned_move_id or not self.purchase_line_id or not self.product_id.id
-
-    def _prepare_extra_move_vals(self, qty):
-        vals = super()._prepare_extra_move_vals(qty)
-        vals['purchase_line_id'] = self.purchase_line_id.id
-        return vals
 
     def _prepare_move_split_vals(self, uom_qty):
         vals = super(StockMove, self)._prepare_move_split_vals(uom_qty)
