@@ -364,6 +364,16 @@ class SaleOrderLine(models.Model):
     amount_to_invoice_at_date = fields.Float(
         string="Amount", compute="_compute_amount_to_invoice_at_date"
     )
+    accrual_move_ids = fields.Many2many(
+        comodel_name='account.move',
+        relation='sale_order_line_accrual_move_rel',
+        column1='order_line_id',
+        column2='move_id',
+        string="Accrual Entries",
+        copy=False,
+        help="Accrual entries generated for this line, so it isn't accrued again while one is "
+             "still standing (posted, not yet reversed or cancelled).",
+    )
 
     # Same than `qty_delivered` and `qty_invoiced` but non-stored and depending of the context.
     qty_delivered_at_date = fields.Float(
@@ -371,6 +381,12 @@ class SaleOrderLine(models.Model):
     )
     qty_invoiced_at_date = fields.Float(
         string="Invoiced", compute="_compute_qty_invoiced_at_date", digits="Product Unit"
+    )
+    deferred_revenue = fields.Boolean(
+        string="Deferred Revenue", search="_search_deferred_revenue", store=False
+    )
+    invoice_to_be_issued = fields.Boolean(
+        string="Invoice to be Issued", search="_search_invoice_to_be_issued", store=False
     )
 
     # Technical field holding custom data for the taxes computation engine.
@@ -1558,6 +1574,67 @@ class SaleOrderLine(models.Model):
                 line.qty_delivered_at_date - line.qty_invoiced_at_date
             ) * line.price_unit
 
+    def _get_accrual_domain(self, date=False):
+        """ Reused by account.accrued.orders.wizard and stock_account's Stock Valuation report.
+        When `date` is given, also restrict to lines that need an accrual entry as of it: the
+        ones currently out of sync, or that were out of sync as of `date` but have since been
+        settled (nothing left to accrue today). Extended by `sale_stock`, which can also detect
+        a delivery-side mismatch via stock moves.
+        """
+        domain = Domain([
+            ("state", "=", "sale"),
+            ("display_type", "=", False),
+            ("is_downpayment", "=", False),
+            ("product_id.type", "!=", "combo"),
+            # Lines with an accrual entry that's still standing (posted, not yet reversed or
+            # cancelled) already have their accrual accounted for: excluded until it isn't.
+            ("accrual_move_ids", "not any", [("state", "=", "posted"), ("reversal_move_ids", "=", False)]),
+        ])
+        if date:
+            domain &= Domain.OR([
+                [("qty_to_invoice", "!=", 0)],
+                [
+                    ("order_id.invoice_status", "=", "invoiced"),
+                    ("order_id.delivery_status", "in", ("pending", "started", "partial")),
+                ],
+                [("invoice_lines.move_id.date", ">", date)],
+            ])
+        return domain
+
+    def _search_deferred_revenue(self, operator, value):
+        if operator != "in":
+            return NotImplemented
+        return [("id", "in", self._get_accrual_line_ids("deferred").ids)]
+
+    def _search_invoice_to_be_issued(self, operator, value):
+        if operator != "in":
+            return NotImplemented
+        return [("id", "in", self._get_accrual_line_ids("invoice_issued").ids)]
+
+    @api.model
+    def _get_accrual_line_ids(self, mode=False, date=False, extra_domain=None):
+        """ Order lines whose invoiced and delivered quantities are out of sync, i.e. that need
+        an accrual entry as of `date` (today if not given). `mode` splits the result by the
+        direction of the mismatch: 'deferred' (invoiced ahead of delivery) or 'invoice_issued'
+        (delivered ahead of invoicing). Reused by the `deferred_revenue`/`invoice_to_be_issued`
+        filters and by `res.company._get_accrual_candidate_lines`.
+        """
+        if not date:
+            date = fields.Date.to_date(self.env.context.get('accrual_entry_date'))
+        accrual_entry_date = date or fields.Date.context_today(self)
+        domain = self._get_accrual_domain(accrual_entry_date)
+        if extra_domain:
+            domain &= extra_domain
+        order_lines = self.env["sale.order.line"].search(domain)
+        # Applied after the search: flushing pending computations with this
+        # context would corrupt the stored quantities with at-date values.
+        order_lines = order_lines.with_context(accrual_entry_date=fields.Date.to_string(accrual_entry_date))
+        if mode == "deferred":
+            order_lines = order_lines.filtered(lambda l: l.amount_to_invoice_at_date < 0)
+        elif mode == "invoice_issued":
+            order_lines = order_lines.filtered(lambda l: l.amount_to_invoice_at_date > 0)
+        return order_lines
+
     @api.depends("order_id.partner_id", "product_id")
     def _compute_analytic_distribution(self):
         for line in self:
@@ -1706,13 +1783,6 @@ class SaleOrderLine(models.Model):
             return lines
 
         for line in lines:
-            if line.qty_delivered_method == "manual" and line.is_storable:
-                qty_delivered = line.product_uom_id._compute_quantity(
-                    line.qty_delivered, line.product_id.uom_id
-                )
-                line.product_id.sudo().with_company(line.company_id).with_context(
-                    skip_qty_available_update=True
-                ).sudo().qty_available -= qty_delivered
             if not line.display_type and line.state == "sale":
                 msg = self.env._("Extra line with %s", line.product_id.display_name or line.name)
                 line.order_id.message_post(body=msg)
@@ -1769,18 +1839,6 @@ class SaleOrderLine(models.Model):
             # the field is not sent by the client and expected to be recomputed, but isn't
             # because technical_price_unit is set.
             values.pop("technical_price_unit")
-
-        if "qty_delivered" in values:
-            for line in self:
-                if line.qty_delivered_method != "manual" or not line.is_storable:
-                    continue
-                delta_qty_delivered = values["qty_delivered"] - line.qty_delivered
-                delta_qty_delivered = line.product_uom_id._compute_quantity(
-                    delta_qty_delivered, line.product_id.uom_id
-                )
-                line.product_id.sudo().with_company(line.company_id).with_context(
-                    skip_qty_available_update=True
-                ).qty_available -= delta_qty_delivered
 
         # Prevent writing on a locked SO.
         protected_fields = self._get_protected_fields()
@@ -1901,14 +1959,7 @@ class SaleOrderLine(models.Model):
         if len(self) == 1:
             return self._get_discounted_price()
 
-        return parent_record.pricelist_id._get_product_price(
-            product=self.product_id,
-            quantity=1.0,
-            uom=self._get_product_uom(),
-            currency=parent_record.currency_id,
-            date=parent_record.date_order,
-            **kwargs,
-        )
+        return super()._get_catalog_unit_price(parent_record, **kwargs)
 
     def _can_be_unlinked_from_catalog(self):
         return super()._can_be_unlinked_from_catalog() and self.state in {"draft", "sent"}

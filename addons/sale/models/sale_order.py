@@ -2,6 +2,7 @@
 # ruff: noqa: PLW0642
 
 import json
+import math
 from datetime import timedelta
 from itertools import groupby
 
@@ -167,7 +168,8 @@ class SaleOrder(models.Model):
 
     validity_date = fields.Date(
         string="Expiration",
-        help="Validity of the quotation. After this date, you will no longer be able to sign and pay it.",
+        help="Validity of the quotation."
+        " After this date, you will no longer be able to sign and pay it.",
         compute="_compute_validity_date",
         store=True,
         readonly=False,
@@ -407,6 +409,12 @@ class SaleOrder(models.Model):
         " 'done' or 'authorized' and linked to this order.",
         compute="_compute_amount_paid",
         compute_sudo=True,
+    )
+    amount_unpaid = fields.Monetary(
+        string="Amount Remaining",
+        help="Amount left to pay to avoid double payment or double invoicing.",
+        compute="_compute_amount_unpaid",
+        store=True,
     )
 
     # UTMs - enforcing the fact that we want to 'set null' when relation is unlinked
@@ -916,12 +924,32 @@ class SaleOrder(models.Model):
             )
             trans.has_authorized_transaction_ids = bool(trans.authorized_transaction_ids)
 
-    @api.depends("transaction_ids")
+    @api.depends("transaction_ids.state", "transaction_ids.amount")
     def _compute_amount_paid(self):
         """Sum of the amount paid through all transactions for this SO."""
         for order in self:
             order.amount_paid = sum(
                 tx.amount for tx in order.transaction_ids if tx.state in ("authorized", "done")
+            )
+
+    @api.depends("amount_total", "amount_paid", "amount_invoiced", "transaction_ids.invoice_ids")
+    def _compute_amount_unpaid(self):
+        for order in self:
+            online_payments_invoices = order.transaction_ids.filtered(
+                lambda tx: tx.state in {"authorized", "done"}
+            ).invoice_ids
+            offline_invoice_lines = order.order_line.invoice_lines.filtered(
+                lambda line: (
+                    line.parent_state in {"draft", "posted"}
+                    and line.move_id not in online_payments_invoices
+                )
+            )
+            offline_invoice_amount = sum(
+                math.copysign(line.price_total, -line.balance) for line in offline_invoice_lines
+            )
+
+            order.amount_unpaid = max(
+                order.amount_total - order.amount_paid - offline_invoice_amount, 0
             )
 
     def _get_advantages(self):
@@ -2647,24 +2675,15 @@ class SaleOrder(models.Model):
     def _get_product_catalog_domain(self):
         return super()._get_product_catalog_domain() & Domain("sale_ok", "=", True)
 
-    def _get_product_price_type(self) -> str:
-        """Specify the price type that should be computed as product 'price' in the catalog."""
-        self.ensure_one()
-        # Disable the default price computation as the pricelist should be considered instead
-        return ""
-
-    def _get_product_catalog_order_data(self, products, **kwargs):
-        res = super()._get_product_catalog_order_data(products, **kwargs)
-        prices = self.pricelist_id._get_products_price(
+    def _get_product_catalog_default_prices(self, products, **kwargs) -> dict:
+        # Override the default price computation to consider the pricelist prices instead.
+        return self.pricelist_id._get_products_price(
             quantity=1.0,
             products=products,
-            currency=self.currency_id,
+            currency=self._get_catalog_currency(),
             date=self.date_order,
             **kwargs,
         )
-        for product in products:
-            res[product.id]["price"] = prices.get(product.id)
-        return res
 
     def _is_readonly(self) -> bool:
         """Return whether the sale order is read-only or not based on the state or the lock status.
@@ -2680,16 +2699,6 @@ class SaleOrder(models.Model):
         if product.sale_line_warn_msg and has_warning_group:
             product_data.update(warning=product.sale_line_warn_msg)
         return product_data
-
-    def _get_product_catalog_default_unit_price(self, product, uom, **kwargs):
-        return self.pricelist_id._get_product_price(
-            product=product,
-            quantity=1.0,
-            currency=self.currency_id,
-            uom=uom,
-            date=self.date_order,
-            **kwargs,
-        )
 
     def _has_sections(self) -> bool:
         return True
