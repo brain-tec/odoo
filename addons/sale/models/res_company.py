@@ -2,6 +2,9 @@
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.fields import Domain
+
+from odoo.addons.base.models.res_company import company_default_for
 
 SALE_INVOICE_POLICY = [("order", "Ordered quantities"), ("delivery", "Delivered quantities")]
 
@@ -9,6 +12,20 @@ SALE_INVOICE_POLICY = [("order", "Ordered quantities"), ("delivery", "Delivered 
 class ResCompany(models.Model):
     _inherit = "res.company"
     _check_company_auto = True
+
+    account_invoices_to_issue_id = fields.Many2one(
+        'account.account',
+        string='Invoices to be Issued Account',
+        **company_default_for('account_invoices_to_issue_id', 'product.category', 'property_account_invoices_to_issue_id'),
+        check_company=True,
+    )
+
+    account_invoiced_not_delivered_id = fields.Many2one(
+        'account.account',
+        string='Invoiced Not Delivered Account',
+        **company_default_for('account_invoiced_not_delivered_id', 'product.category', 'property_account_invoiced_not_delivered_id'),
+        check_company=True,
+    )
 
     _check_quotation_validity_days = models.Constraint(
         "CHECK(quotation_validity_days >= 0)",
@@ -104,3 +121,15 @@ class ResCompany(models.Model):
             return
         active_companies = self.search_count([("sale_automatic_invoice", "=", True)], limit=1)
         automatic_invoice_cron.sudo().active = bool(active_companies)
+
+    def _get_accrual_candidate_lines(self, date=False):
+        candidates = super()._get_accrual_candidate_lines(date=date)
+        extra_domain = Domain([
+            ('company_id', '=', self.id),
+            ('product_id.is_storable', '=', True),
+            ('product_id.valuation', '=', 'real_time'),
+        ])
+        order_lines = self.env['sale.order.line']._get_accrual_line_ids(date=date, extra_domain=extra_domain)
+        candidates['invoices_to_issue'] = order_lines.filtered(lambda l: l.amount_to_invoice_at_date > 0)
+        candidates['invoiced_not_delivered'] = order_lines.filtered(lambda l: l.amount_to_invoice_at_date < 0)
+        return candidates

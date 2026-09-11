@@ -350,6 +350,13 @@ TIN_METADATA = {
         'category': 'GST',
         'countries': ['NZ'],
     },
+    'PA_RUC': {
+        'sequence': 1,
+        'label': _lt('RUC'),
+        'help': _lt('Registro Único de Contribuyentes: the DGI tax ID for companies and registered individuals.'),
+        'category': 'TIN',
+        'countries': ['PA'],
+    },
     'PE_RUC': {
         'placeholder': _lt('10XXXXXXXXY or 20XXXXXXXXY or 15XXXXXXXXY or 16XXXXXXXXY or 17XXXXXXXXY'),
         'category': 'TIN',
@@ -938,6 +945,7 @@ ADDITIONAL_IDENTIFIERS_METADATA = {
         'display_optional': 'hide',
         'help': _lt('Global Location Number, used to identify parties and locations.'),
         'countries': False,
+        'synced': False,
     },
     'OTHER': {  # default non-structured identifier
         'sequence': 1000,

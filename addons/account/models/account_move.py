@@ -327,6 +327,7 @@ class AccountMove(models.Model):
         default='no_review', required=True,
     )
     posted_before = fields.Boolean(copy=False)
+    inventory_closing = fields.Boolean(string='Inventory Closing', default=False)
     suitable_journal_ids = fields.Many2many(
         'account.journal',
         compute='_compute_suitable_journal_ids',
@@ -2168,7 +2169,7 @@ class AccountMove(models.Model):
         return ["ref", "move_type", "partner_id", "invoice_date", "tax_totals", "currency_id"]
 
     def _fetch_duplicate_reference(self, matching_states=('draft', 'posted')):
-        moves = self.filtered(lambda m: m.is_sale_document() or m.is_purchase_document())
+        moves = self.filtered(lambda m: m.is_sale_document(include_receipts=True) or m.is_purchase_document(include_receipts=True))
 
         if not moves:
             return {}
@@ -2211,7 +2212,11 @@ class AccountMove(models.Model):
                     ON move.company_id = duplicate_move.company_id
                    AND move.id != duplicate_move.id
                    AND duplicate_move.state IN %(matching_states)s
-                   AND move.move_type = duplicate_move.move_type
+                   AND (
+                            move.move_type = duplicate_move.move_type
+                            OR (move.move_type IN ('in_invoice', 'in_receipt') AND duplicate_move.move_type IN ('in_invoice', 'in_receipt'))
+                            OR (move.move_type IN ('out_invoice', 'out_receipt') AND duplicate_move.move_type IN ('out_invoice', 'out_receipt'))
+                       )
                    AND move.currency_id = duplicate_move.currency_id
                    AND (%(move_type_sql_condition)s)
                  WHERE move.id IN %(moves)s
@@ -2229,10 +2234,10 @@ class AccountMove(models.Model):
 
     def _get_duplicate_ref_sql_conditions(self, moves, move_table_and_alias):
         to_query = []
-        out_moves = moves.filtered(lambda m: m.move_type in ('out_invoice', 'out_refund'))
+        out_moves = moves.filtered(lambda m: m.move_type in ('out_invoice', 'out_refund', 'out_receipt'))
         if out_moves:
             out_moves_sql_condition = SQL("""
-                move.move_type in ('out_invoice', 'out_refund')
+                move.move_type in ('out_invoice', 'out_refund', 'out_receipt')
                 AND (
                    move.amount_total = duplicate_move.amount_total
                    AND move.invoice_date = duplicate_move.invoice_date
@@ -2244,11 +2249,11 @@ class AccountMove(models.Model):
             """)
             to_query.append((out_moves, out_moves_sql_condition))
 
-        in_moves = moves.filtered(lambda m: m.move_type in ('in_invoice', 'in_refund'))
+        in_moves = moves.filtered(lambda m: m.move_type in ('in_invoice', 'in_refund', 'in_receipt'))
         if in_moves:
             in_moves_sql_condition = SQL("""
-                move.move_type in ('in_invoice', 'in_refund')
-                AND duplicate_move.move_type in ('in_invoice', 'in_refund')
+                move.move_type in ('in_invoice', 'in_refund', 'in_receipt')
+                AND duplicate_move.move_type in ('in_invoice', 'in_refund', 'in_receipt')
                 AND (
                    -- case 1: same ref and (no date or same year)
                      (
@@ -2283,7 +2288,11 @@ class AccountMove(models.Model):
             move.has_draft_move_duplicate = any(duplicate_move.state == 'draft' for duplicate_move in move.duplicated_ref_ids)
             move.is_exact_move_duplicate = any(
                 move.ref and move.ref == dup.ref
-                and move.move_type == dup.move_type
+                and (
+                    move.move_type == dup.move_type
+                    or (move.move_type in ['in_invoice', 'in_receipt'] and dup.move_type in ['in_invoice', 'in_receipt'])
+                    or (move.move_type in ['out_invoice', 'out_receipt'] and dup.move_type in ['out_invoice', 'out_receipt'])
+                )
                 and move.partner_id == dup.partner_id
                 and move.invoice_date == dup.invoice_date
                 and move.amount_total == dup.amount_total
@@ -3840,7 +3849,7 @@ class AccountMove(models.Model):
                 vals['line_ids'] = [
                     (command, _id, line_vals)
                     for command, _id, line_vals in vals['line_ids']
-                    if command == Command.CREATE
+                    if command == Command.CREATE and line_vals.get('display_type') != 'cogs'
                 ]
             elif move.move_type == 'entry':
                 if 'partner_id' not in vals or not self.env.context.get('move_reverse_cancel', False):
@@ -5964,6 +5973,162 @@ class AccountMove(models.Model):
             and aml.display_type not in ('line_section', 'line_subsection', 'line_note')
         )
 
+    def _create_cogs_lines(self):
+        """ Create the journal items (account.move.line) corresponding to the Cost of Good Sold
+        lines (COGS) for customer invoices.
+
+        Example:
+
+        Buy a product having a cost of 9 being a storable product and having a perpetual valuation in FIFO.
+        Sell this product at a price of 10. The customer invoice's journal entries looks like:
+
+        Account                                     | Debit | Credit
+        ---------------------------------------------------------------
+        200000 Product Sales                        |       | 10.0
+        ---------------------------------------------------------------
+        101200 Account Receivable                   | 10.0  |
+        ---------------------------------------------------------------
+
+        This method creates two additional journal items:
+
+        ---------------------------------------------------------------
+        500000 COGS (stock variation)               | 9.0   |
+        ---------------------------------------------------------------
+        110100 Stock Account                        |       | 9.0
+        ---------------------------------------------------------------
+
+        Note: COGS are only generated for customer invoices except refund made to cancel an invoice.
+        """
+        lines_vals_list = []
+
+        for move in self:
+            # Make the loop multi-company safe when accessing models like product.product
+            move = move.with_company(move.company_id)
+
+            if move.is_sale_document(include_receipts=True):
+                lines_vals_list += move._get_cogs_lines_vals()
+
+            if move.is_purchase_document(include_receipts=True) and move.company_id.anglo_saxon_accounting:
+                lines_vals_list += move._get_price_difference_lines_vals()
+
+        return self.env['account.move.line'].create(lines_vals_list)
+
+    def _get_cogs_common_vals(self, line):
+        return {
+            'name': line.name[:64] if line.name else '',
+            'move_id': self.id,
+            'partner_id': self.commercial_partner_id.id,
+            'product_id': line.product_id.id,
+            'product_uom_id': line.product_uom_id.id,
+            'quantity': line.quantity,
+            'analytic_distribution': line.analytic_distribution,
+            'display_type': 'cogs',
+            'tax_ids': [],
+            'cogs_origin_id': line.id,
+        }
+
+    def _get_cogs_lines_vals(self):
+        """Prepare the COGS journal items (account.move.line) for a customer invoice: one line
+        crediting the stock valuation account and one line debiting the expense account, for
+        each invoice line whose product is valued in real time.
+        """
+        self.ensure_one()
+        price_unit_prec = self.env['decimal.precision'].precision_get('Product Price')
+        sign = -1 if self.move_type == 'out_refund' else 1
+
+        lines_vals_list = []
+        for line in self.invoice_line_ids:
+            if not line._use_inventory_valuation():
+                continue
+
+            accounts = line.product_id.product_tmpl_id.get_product_accounts(fiscal_pos=self.fiscal_position_id)
+            stock_account = accounts['stock_valuation']
+            expense_account = accounts['expense'] or self.journal_id.default_account_id
+            if not stock_account or not expense_account:
+                continue
+
+            # `_get_cogs_value` always returns a price in the company currency (standard price,
+            # or FIFO/AVCO cost from the stock valuation layers), so the resulting amount below
+            # is a `balance`, not an `amount_currency`: let the ORM convert it using the move's
+            # currency_rate instead of assigning it to amount_currency directly.
+            price_unit = line._get_cogs_value()
+            balance = sign * line.product_uom_id._compute_quantity(line.quantity, line.product_id.uom_id) * price_unit
+            if self.company_currency_id.is_zero(balance) or float_is_zero(price_unit, precision_digits=price_unit_prec):
+                continue
+
+            common_vals = self._get_cogs_common_vals(line)
+            lines_vals_list.append({
+                **common_vals,
+                'price_unit': price_unit,
+                'balance': -balance,
+                'account_id': stock_account.id,
+            })
+            lines_vals_list.append({
+                **common_vals,
+                'price_unit': -price_unit,
+                'balance': balance,
+                'account_id': expense_account.id,
+            })
+        return lines_vals_list
+
+    def _get_price_difference_lines_vals(self):
+        ''' Prepare the price difference journal items (account.move.line) for a vendor bill:
+        for standard cost products, the stock valuation account is booked at the fixed standard
+        price, so the gap between that and the actual bill price (discount included) is
+        redirected to the price difference account.
+        '''
+        self.ensure_one()
+
+        lines_vals_list = []
+        for line in self.invoice_line_ids:
+            if not line._use_inventory_valuation():
+                continue
+            pdiff_account = self.fiscal_position_id.map_account(line.product_id._get_price_diff_account())
+            if not pdiff_account:
+                continue
+
+            # `price_subtotal` is in the move's currency: convert it to company currency with the
+            # move's own locked-in rate before comparing it to the (company-currency) standard value.
+            standard_value = line.product_id.uom_id._compute_price(line.product_id.standard_price, line.product_uom_id) * line.quantity
+            balance = self.company_currency_id.round(
+                self.direction_sign * (line.price_subtotal / self.invoice_currency_rate - standard_value)
+            )
+            if self.company_currency_id.is_zero(balance):
+                continue
+
+            common_vals = self._get_cogs_common_vals(line)
+            lines_vals_list.append({**common_vals, 'balance': balance, 'account_id': pdiff_account.id})
+            lines_vals_list.append({**common_vals, 'balance': -balance, 'account_id': line.account_id.id})
+        return lines_vals_list
+
+    def _update_qty_available(self, reverse=False):
+        for move in self:
+            if move.move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'):
+                continue
+            sign = -1 if move.move_type in ('out_invoice', 'in_refund') else 1
+            if reverse:
+                sign = -sign
+            for line in move.invoice_line_ids:
+                if line.display_type != 'product' or not line.product_id.is_storable:
+                    continue
+                qty = line.product_uom_id._compute_quantity(line.quantity, line.product_id.uom_id)
+                line.product_id.sudo().with_company(move.company_id).with_context(
+                    skip_qty_available_update=True,
+                ).qty_available += sign * qty
+
+    def _update_standard_price(self, reverse=False):
+        sign = -1 if reverse else 1
+        for move in self:
+            if move.move_type != 'in_invoice':
+                continue
+            for line in move.invoice_line_ids:
+                if line.display_type != 'product' or not line.product_id.is_storable or line.product_id.cost_method == 'standard':
+                    continue
+                qty = line.product_uom_id._compute_quantity(line.quantity, line.product_id.uom_id)
+                line.product_id.sudo().with_company(move.company_id)._update_standard_price(
+                    extra_value=sign * abs(line.balance), extra_quantity=sign * qty,
+                )
+
     def _post(self, soft=True):
         """Post/Validate the documents.
 
@@ -6153,6 +6318,12 @@ class AccountMove(models.Model):
             'state': 'posted',
             'posted_before': True,
         })
+
+        to_post._update_standard_price()
+        to_post._update_qty_available()
+
+        if not self.env.context.get('move_reverse_cancel'):
+            to_post._create_cogs_lines()
 
         if not self.env.user.has_group('account.group_partial_purchase_deductibility') and \
                 self.filtered(lambda move: move.move_type == 'in_invoice' and move.invoice_line_ids.filtered(lambda l: l.deductible_percentage != 1)):
@@ -6717,7 +6888,12 @@ class AccountMove(models.Model):
         self._unlink_next_draft_auto_post_moves()
         # We remove all the analytics entries for this journal
         self.line_ids.analytic_line_ids.with_context(skip_analytic_sync=True).unlink()
+        posted_moves = self.filtered(lambda move: move.state == 'posted')
+        posted_moves._update_standard_price(reverse=True)
+        posted_moves._update_qty_available(reverse=True)
         self.state = 'draft'
+        with self.env.protecting(self.env['account.move']._get_protected_vals({}, self)):
+            self.line_ids.filtered(lambda line: line.display_type == 'cogs').unlink()
         self.sending_data = False
 
         self._detach_attachments()

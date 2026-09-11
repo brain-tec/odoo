@@ -142,7 +142,6 @@
                                 <label for="name" class="d-md-none"/>
                                 <h1 class="o_employee_form_header_info d-flex flex-row align-items-center gap-2">
                                     <field name="name" placeholder="Employee's Name (e.g. John Doe, ...)" required="True"/>
-                                    <widget name="hr_employee_chat" options="{'show_label': True}" invisible="not user_id"/>
                                 </h1>
                                 <label for="work_email" class="d-md-none"/>
                                 <div class="d-flex align-items-baseline w-md-50 gap-2">
@@ -245,7 +244,7 @@
                                                 placeholder="e.g. Building 2, Remote, etc."/>
                                         </group>
                                         <group string="Note" name="note" groups="hr.group_hr_user">
-                                            <field name="additional_note" placeholder="Provide additional information about this version..." colspan="2" nolabel="1"/>
+                                            <field name="additional_note" placeholder="Provide additional information about this employee..." colspan="2" nolabel="1"/>
                                         </group>
                                     </div>
                                     <div id="o_employee_org_chart" class="o_hr_column col-lg-5">

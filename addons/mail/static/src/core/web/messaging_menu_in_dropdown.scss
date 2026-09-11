@@ -9,10 +9,6 @@
     --list-group-border-color: #{var(--mail-MessagingMenu-tabContentBorderColor, rgba($gray-200, .5))};
 }
 
-.o_popover:has(.o-mail-MessagingMenuInDropdown) {
-    --popover-border-color: #{$secondary};
-}
-
 .o-mail-MessagingMenuInDropdown-headerFilter {
     border: 1px solid transparent;
 
@@ -22,6 +18,8 @@
     }
 }
 
-.o_web_client:has(.o-mail-systrayFullscreenDropdownMenu) .o_main_navbar {
-    background-color: $o-navbar-background !important;
+.o_web_client.o-mail-discuss-systray-menu-open .o_main_navbar {
+    @include media-breakpoint-down(md) {
+        background-color: $o-navbar-background !important;
+    }
 }
