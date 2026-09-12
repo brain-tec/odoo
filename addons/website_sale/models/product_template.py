@@ -78,6 +78,7 @@ class ProductTemplate(models.Model):
         sanitize_overridable=True,
         sanitize_attributes=False,
         sanitize_form=False,
+        index="trigram",
     )
 
     alternative_product_ids = fields.Many2many(
@@ -188,6 +189,9 @@ class ProductTemplate(models.Model):
     )
     _description_sale_gist_idx = models.Index(
         lambda registry: get_translated_field_gist_index(registry, "description_sale")
+    )
+    _description_ecommerce_gist_idx = models.Index(
+        lambda registry: get_translated_field_gist_index(registry, "description_ecommerce")
     )
     _default_code_gist_idx = models.Index(
         lambda registry: (
@@ -1387,7 +1391,7 @@ class ProductTemplate(models.Model):
     def _get_google_analytics_data(self, product, combination_info):
         self.ensure_one()
         tracking_data = {
-            "item_id": product.barcode or product.id,
+            "item_id": product.default_code or product.id,
             "item_name": combination_info["display_name"],
             "item_category": self.categ_id.name,
             "currency": combination_info["currency"].name,
