@@ -497,6 +497,9 @@ class AccountMove(models.Model):
     )
     qr_code_method = fields.Selection(
         string="Payment QR-code", copy=False,
+        compute='_compute_qr_code_method',
+        store=True,
+        readonly=False,
         selection=lambda self: self.env['res.partner.bank'].get_available_qr_methods_in_sequence(),
         help="Type of QR-code to be generated for the payment of this invoice, "
              "when printing it. If left blank, the first available and usable method "
@@ -837,6 +840,11 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
+
+    @api.depends('commercial_partner_id', 'commercial_partner_id.qr_code_method')
+    def _compute_qr_code_method(self):
+        for move in self:
+            move.qr_code_method = move.with_company(move.company_id).commercial_partner_id.qr_code_method
 
     @api.depends('move_type', 'partner_id')
     def _compute_invoice_default_sale_person(self):
@@ -5864,25 +5872,6 @@ class AccountMove(models.Model):
 
         return rows
 
-    def _reconcile_reversed_moves(self, reverse_moves, move_reverse_cancel):
-        ''' Reconciles moves in self and reverse moves
-        :param move_reverse_cancel: parameter used when lines are reconciled
-                                    will determine whether the tax cash basis journal entries should be created
-        :param reverse_moves:       An account.move recordset, reverse of the current self.
-        :return:                    An account.move recordset, reverse of the current self.
-        '''
-        reconciliation_plan = []
-        for move, reverse_move in zip(self, reverse_moves):
-            group = (move.line_ids + reverse_move.line_ids) \
-                .filtered(lambda l: not l.reconciled and (
-                    l.is_account_reconcile or
-                    l.move_id.tax_cash_basis_origin_move_id
-                )) \
-                .grouped(lambda l: (l.account_id, l.currency_id))
-            reconciliation_plan.extend(group.values())
-        self.env['account.move.line'].with_context(move_reverse_cancel=move_reverse_cancel)._reconcile_plan(reconciliation_plan)
-        return reverse_moves
-
     def _reverse_moves(self, default_values_list=None, cancel=False):
         ''' Reverse a recordset of account.move.
         If cancel parameter is true, the reconcilable or liquidity lines
@@ -5893,12 +5882,6 @@ class AccountMove(models.Model):
         '''
         if not default_values_list:
             default_values_list = [{} for move in self]
-
-        if cancel:
-            lines = self.mapped('line_ids')
-            # Avoid maximum recursion depth.
-            if lines:
-                lines.remove_move_reconcile()
 
         reverse_moves = self.env['account.move']
         for move, default_values in zip(self, default_values_list):
@@ -6285,6 +6268,14 @@ class AccountMove(models.Model):
         # reconcile if state is in draft and move has reversal_entry_id set
         draft_reverse_moves = to_post.filtered(lambda move: move.reversed_entry_id and move.reversed_entry_id.state == 'posted')
 
+        # Store the accounts that were previously reconciled for automatic reconciliation
+        account_ids_to_reconcile = set()
+        if draft_reverse_moves:
+            lines = draft_reverse_moves.reversed_entry_id.line_ids + draft_reverse_moves.line_ids
+            account_ids_to_reconcile = set(lines.filtered('reconciled').account_id.mapped('id'))
+            if self.env.context.get('move_reverse_cancel'):
+                draft_reverse_moves.reversed_entry_id.line_ids.remove_move_reconcile()
+
         # deal with the eventually related draft moves to the ones we want to post
         partials_to_unlink = self.env['account.partial.reconcile']
 
@@ -6338,7 +6329,23 @@ class AccountMove(models.Model):
                     else _('%s - private part (taxes)', line.move_id.name)
                 )
 
-        draft_reverse_moves.reversed_entry_id._reconcile_reversed_moves(draft_reverse_moves, self.env.context.get('move_reverse_cancel', False))
+        # Reconcile moves in self and reverse moves
+        reconciliation_plan = []
+        for move, reverse_move in zip(draft_reverse_moves.reversed_entry_id, draft_reverse_moves):
+            group = (move.line_ids + reverse_move.line_ids) \
+                .filtered(lambda l: (
+                    not l.reconciled
+                    and (
+                        l.is_account_reconcile
+                        or l.account_id.id in account_ids_to_reconcile
+                        or l.tax_line_id.cash_basis_transition_account_id  # CABA tax lines
+                    )
+                ))\
+                .grouped(lambda l: (l.account_id, l.currency_id, l.tax_line_id))
+            reconciliation_plan.extend(group.values())
+        self.env['account.move.line']\
+            .with_context(move_reverse_cancel=self.env.context.get('move_reverse_cancel', False))\
+            ._reconcile_plan(reconciliation_plan)
         to_post.line_ids._reconcile_marked()
 
         customer_count, supplier_count = defaultdict(int), defaultdict(int)
@@ -8311,3 +8318,15 @@ class AccountMove(models.Model):
             'total_length': rows[0][2] if rows else 0,
             'records': [{'id': rounding_method_id, 'display_name': name} for rounding_method_id, name, _count in rows],
         }
+
+    def _get_document_partner_ident_line(self):
+        return (self.partner_id and (
+            (
+                (tax_ident := self.partner_id._get_preferred_tax_identifier_vals())
+                and f"{self.company_id.account_fiscal_country_id.vat_label or tax_ident.get('category') or 'Tax ID'}: {tax_ident.get('value')}"
+            )
+            or (
+                (legal_ident := self.partner_id._get_preferred_legal_entity_identifier_vals())
+                and f"{legal_ident.get('label') or legal_ident.get('key')}: {legal_ident.get('value')}"
+            )
+        )) or ""

@@ -118,7 +118,6 @@ export class Store extends BaseStore {
 
     /**
      * @param {string} [tz]
-     * @returns {string|null}
      */
     localTimeIn(tz) {
         const partnerTz = resolveTimeZoneName(tz);
@@ -211,8 +210,13 @@ export class Store extends BaseStore {
                 if (!tmpMessage) {
                     throw err;
                 }
+
+                tmpMessage.postFailMessage = err.data?.message
+                    ? _t("Failed to post the message (%s). Click to retry", err.data?.message)
+                    : _t("Failed to post the message. Click to retry");
                 tmpMessage.postFailRedo = () => {
                     tmpMessage.postFailRedo = undefined;
+                    tmpMessage.postFailMessage = undefined;
                     tmpMessage.thread.messages.delete(tmpMessage);
                     tmpMessage.thread.messages.add(tmpMessage);
                     this.doMessagePost(params, tmpMessage);
@@ -610,15 +614,31 @@ export class Store extends BaseStore {
                   (a) => a.textContent
               )
             : [body];
-        validMentions.partners = mentionedPartners.filter((partner) =>
-            segments.some((segment) => {
-                const name = thread?.getPersonaName(partner) ?? partner.displayName;
-                return Boolean(
-                    (name && segment.includes(`@${name}`)) ||
-                        (partner.email && segment.includes(`@${partner.email}`))
-                );
-            })
+        // Longest mention text first, so e.g. "@John" inside "@John Doe" isn't kept.
+        const mentionTexts = (partner) => {
+            const name = thread?.getPersonaName(partner) ?? partner.displayName;
+            return [name && `@${name}`, partner.email && `@${partner.email}`].filter(Boolean);
+        };
+        const remaining = [...segments];
+        const kept = new Set(
+            [...mentionedPartners]
+                .sort(
+                    (p1, p2) =>
+                        Math.max(0, ...mentionTexts(p2).map((text) => text.length)) -
+                        Math.max(0, ...mentionTexts(p1).map((text) => text.length))
+                )
+                .filter((partner) =>
+                    mentionTexts(partner).some((text) => {
+                        const i = remaining.findIndex((segment) => segment.includes(text));
+                        if (i === -1) {
+                            return false;
+                        }
+                        remaining[i] = remaining[i].replace(text, " ".repeat(text.length));
+                        return true;
+                    })
+                )
         );
+        validMentions.partners = mentionedPartners.filter((partner) => kept.has(partner));
         validMentions.roles = mentionedRoles.filter((role) =>
             segments.some((segment) => segment.includes(`@${role.name}`))
         );
