@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from psycopg2 import IntegrityError
@@ -999,3 +998,16 @@ class TestIrModelExplanation(TransactionCase):
             self.assertEqual(params['explanation'], expected)
         finally:
             del self.env.registry['mock.model']
+
+
+# at_install to check whether directly after installing base the reflection works
+@tagged('at_install', '-post_install')
+class TestFieldGroupsSync(TransactionCase):
+    def test_reflect_field_groups(self):
+        # Using a known static field with group restrictions (e.g., smtp_user = fields(...,groups='base.group_system'))
+        field = self.env['ir.mail_server']._fields['smtp_user']
+        expected_group = self.env.ref(field.groups)  # just the admin group
+        self.assertNotIn(',', expected_group, "only one group is expected")
+        ir_field = self.env['ir.model.fields']._get('ir.mail_server', 'smtp_user')
+        self.assertTrue(ir_field, "could not field corresponding field")
+        self.assertEqual(ir_field.groups, expected_group, "field.groups not found")

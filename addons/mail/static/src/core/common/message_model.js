@@ -120,6 +120,8 @@ export class Message extends Record {
      * @type {() => {} | undefined}
      */
     postFailRedo = undefined;
+    /** @type {string|undefined} */
+    postFailMessage = undefined;
     reactions = fields.Many("MessageReactions", { inverse: "message" });
     sortedReactions = fields.Many("MessageReactions", {
         compute() {
@@ -363,7 +365,7 @@ export class Message extends Record {
     }
 
     get persistent() {
-        return Number.isInteger(this.id);
+        return !this.is_transient && !this.isPending;
     }
 
     get resUrl() {

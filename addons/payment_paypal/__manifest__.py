@@ -10,6 +10,7 @@
     "depends": ["payment"],
     "data": [
         "views/payment_form_templates.xml",
+        "views/payment_paypal_templates.xml",
         "views/payment_provider_views.xml",
         "views/payment_transaction_views.xml",
         "data/payment_method_data.xml",
@@ -17,7 +18,13 @@
     ],
     "post_init_hook": "post_init_hook",
     "uninstall_hook": "uninstall_hook",
-    "assets": {"web.assets_frontend": ["payment_paypal/static/src/**/*"]},
+    "assets": {
+        "web.assets_frontend": [
+            "payment_paypal/static/src/interactions/**/*",
+            "payment_paypal/static/src/scss/payment_paypal.scss",
+        ],
+        "web.assets_backend": ["payment_paypal/static/src/onboarding/**/*"],
+    },
     "author": "Odoo S.A.",
     "license": "LGPL-3",
 }
