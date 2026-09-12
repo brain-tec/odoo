@@ -132,6 +132,11 @@ class StockPickingType(models.Model):
              " * Ask: users are asked to choose if they want to make a backorder for remaining products\n"
              " * Always: a backorder is automatically created for the remaining products\n"
              " * Never: remaining products are cancelled")
+    open_button_style = fields.Selection(
+        selection=[
+            ('primary', "Primary"),
+            ('secondary', "Secondary"),
+        ], compute='_compute_open_button_style')
     show_picking_type = fields.Boolean(compute='_compute_show_picking_type')
     show_return_picking_type = fields.Boolean(compute='_compute_show_return_picking_type')
 
@@ -355,6 +360,14 @@ class StockPickingType(models.Model):
             else:
                 picking_type.display_name = picking_type.name
 
+    @api.depends('count_picking_batch')
+    def _compute_open_button_style(self):
+        if self.env.user.has_groups('stock.group_stock_picking_batch'):
+            for picking_type in self:
+                picking_type.open_button_style = 'secondary' if picking_type.count_picking_batch > 0 else 'primary'
+        else:
+            self.open_button_style = 'primary'
+
     @api.depends('code')
     def _compute_use_create_lots(self):
         for picking_type in self:
@@ -490,8 +503,8 @@ class StockPickingType(models.Model):
             del action["mobile_view_mode"]
             del action["views"]
             action["view_mode"] = self.env.context["view_mode"]
-        if action["view_mode"] == "gantt":
-            action["context"].pop("group_by", None)
+        if (action["context"].get("search_default_group_by_picking_type_id") and len(self) == 1) or action["view_mode"] == "gantt":
+            action["context"]["search_default_group_by_picking_type_id"] = False
         return action
 
     def action_detailed_moves(self):

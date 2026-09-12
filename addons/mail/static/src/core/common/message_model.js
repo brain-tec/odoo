@@ -120,6 +120,8 @@ export class Message extends Record {
      * @type {() => {} | undefined}
      */
     postFailRedo = undefined;
+    /** @type {string|undefined} */
+    postFailMessage = undefined;
     reactions = fields.Many("MessageReactions", { inverse: "message" });
     sortedReactions = fields.Many("MessageReactions", {
         compute() {
@@ -170,7 +172,7 @@ export class Message extends Record {
     pinned_at = fields.Datetime();
     /** @type {string} */
     subject;
-    /** @type {string|undefined} */
+    /** @type {TranslatedString|undefined} */
     translationValue;
     /** @type {string|undefined} */
     translationSource;
@@ -363,7 +365,7 @@ export class Message extends Record {
     }
 
     get persistent() {
-        return Number.isInteger(this.id);
+        return !this.is_transient && !this.isPending;
     }
 
     get resUrl() {
@@ -434,10 +436,9 @@ export class Message extends Record {
 
     inlineBody = this.computed(() => {
         if (this.poll) {
-            let text = this.poll.poll_question;
-            if (this.ended_poll_ids.length) {
-                text = this.poll.pollClosedText;
-            }
+            const text = this.ended_poll_ids.length
+                ? this.poll.pollClosedText
+                : this.poll.poll_question;
             return markup`<i class="oi oi oi-fw o-me-0_5" data-icon="oi_view-cohort"></i>${text}`;
         }
         if (this.notificationType === "thread_deletion") {
@@ -519,7 +520,7 @@ export class Message extends Record {
     }
 
     bodyPreview = this.computed(() => {
-        let messageBody = "";
+        let messageBody;
         if (!this.hasOnlyAttachments) {
             return this.inlineBody || this.subtype_id?.description;
         }
