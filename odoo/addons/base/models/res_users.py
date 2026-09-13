@@ -444,9 +444,12 @@ class ResUsers(models.Model):
     @api.onchange('role')
     def _onchange_role(self):
         group_admin = self.env['res.groups'].new(origin=self.env.ref('base.group_system'))
+        group_regular = self.env['res.groups'].new(origin=self.env.ref('base.group_user_regular'))
         group_user = self.env['res.groups'].new(origin=self.env.ref('base.group_user'))
 
         if self.role == 'regular_user':
+            if group_regular not in self.all_group_ids:
+                self.group_ids += group_regular
             self.group_ids -= group_admin
         elif self.role == 'group_system':
             self.group_ids += group_admin + group_user
@@ -1166,27 +1169,16 @@ class ResUsers(models.Model):
         return self.with_context({}).all_group_ids._ids
 
     def _action_show(self):
-        """If self is a singleton, directly access the form view. If it is a recordset, open a list view"""
-        view_id = self.env.ref('base.view_users_form').id
-        action = {
+        """Directly access the form view"""
+        return {
             'type': 'ir.actions.act_window',
             'res_model': 'res.users',
             'context': {'create': False},
+            'name': _('Users'),
+            'view_mode': 'form',
+            'views': [[self.env.ref('base.view_users_form').id, 'form']],
+            'domain': [('id', 'in', self.ids)],
         }
-        if len(self) > 1:
-            action.update({
-                'name': _('Users'),
-                'view_mode': 'list,form',
-                'views': [[None, 'list'], [view_id, 'form']],
-                'domain': [('id', 'in', self.ids)],
-            })
-        else:
-            action.update({
-                'view_mode': 'form',
-                'views': [[view_id, 'form']],
-                'res_id': self.id,
-            })
-        return action
 
     def action_show_groups(self):
         self.ensure_one()
@@ -1409,6 +1401,9 @@ class UsersMultiCompany(models.Model):
         if values is None:
             values = {}
         user = super().new(values=values, origin=origin, ref=ref)
+
+        if origin:
+            return user
         group_multi_company_id = self.env['ir.model.data']._xmlid_to_res_id(
             'base.group_multi_company', raise_if_not_found=False)
         if group_multi_company_id:

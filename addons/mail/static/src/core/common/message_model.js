@@ -11,7 +11,12 @@ import {
     prepareBodyForEditing,
     htmlToTextContentInline,
 } from "@mail/utils/common/format";
-import { createElementFromContent, getInnerHtml, getOuterHtml } from "@mail/utils/common/html";
+import {
+    createElementFromContent,
+    getInnerHtml,
+    getOuterHtml,
+    removeHtmlComments,
+} from "@mail/utils/common/html";
 
 import { browser } from "@web/core/browser/browser";
 import { router } from "@web/core/browser/router";
@@ -123,11 +128,9 @@ export class Message extends Record {
     /** @type {string|undefined} */
     postFailMessage = undefined;
     reactions = fields.Many("MessageReactions", { inverse: "message" });
-    sortedReactions = fields.Many("MessageReactions", {
-        compute() {
-            return [...this.reactions].sort((r1, r2) => r1.sequence - r2.sequence);
-        },
-    });
+    sortedReactions = this.computed(() =>
+        [...this.reactions].sort((r1, r2) => r1.sequence - r2.sequence)
+    );
     notification_ids = fields.Many("mail.notification", { inverse: "mail_message_id" });
     self_notification = this.computed(() =>
         this.notification_ids.find((n) => n.res_partner_id?.eq(this.store.self_user?.partner_id))
@@ -172,7 +175,7 @@ export class Message extends Record {
     pinned_at = fields.Datetime();
     /** @type {string} */
     subject;
-    /** @type {string|undefined} */
+    /** @type {TranslatedString|undefined} */
     translationValue;
     /** @type {string|undefined} */
     translationSource;
@@ -300,13 +303,9 @@ export class Message extends Record {
         return _t("Last edited %(editedDate)s", { editedDate: this.editedDatetimeMedium });
     }
 
-    /** @type {import("models").Store["selvesBySequence"]} */
-    selvesBySequence = fields.Attr(undefined, {
-        /** @this {import("models").Message} */
-        compute() {
-            return this.thread?.selvesBySequence ?? this.store.selvesBySequence;
-        },
-    });
+    selvesBySequence = this.computed(
+        () => this.thread?.selvesBySequence ?? this.store.selvesBySequence
+    );
 
     /**
      * Get the effective persona performing actions on this message.
@@ -436,10 +435,9 @@ export class Message extends Record {
 
     inlineBody = this.computed(() => {
         if (this.poll) {
-            let text = this.poll.poll_question;
-            if (this.ended_poll_ids.length) {
-                text = this.poll.pollClosedText;
-            }
+            const text = this.ended_poll_ids.length
+                ? this.poll.pollClosedText
+                : this.poll.poll_question;
             return markup`<i class="oi oi oi-fw o-me-0_5" data-icon="oi_view-cohort"></i>${text}`;
         }
         if (this.notificationType === "thread_deletion") {
@@ -521,7 +519,7 @@ export class Message extends Record {
     }
 
     bodyPreview = this.computed(() => {
-        let messageBody = "";
+        let messageBody;
         if (!this.hasOnlyAttachments) {
             return this.inlineBody || this.subtype_id?.description;
         }
@@ -546,24 +544,21 @@ export class Message extends Record {
         return markup`<i class="oi me-1" data-icon="${this.previewIcon}"></i>${messageBody}`;
     });
 
-    previewText = fields.Html("", {
-        /** @this {import("models").Message} */
-        compute() {
-            const messageBody = this.bodyPreview;
-            if (this.isSelfAuthored) {
-                return markup`<i class="oi me-1 opacity-75" data-icon="reply"></i>${_t(
-                    "You: %(message_content)s",
-                    { message_content: messageBody }
-                )}`;
-            }
-            if (!this.author || this.author.notEq(this.thread?.channel?.correspondent?.persona)) {
-                return _t("%(authorName)s: %(message_content)s", {
-                    authorName: this.authorName,
-                    message_content: messageBody,
-                });
-            }
-            return messageBody;
-        },
+    previewText = this.computed(() => {
+        const messageBody = this.bodyPreview;
+        if (this.isSelfAuthored) {
+            return markup`<i class="oi me-1 opacity-75" data-icon="reply"></i>${_t(
+                "You: %(message_content)s",
+                { message_content: messageBody }
+            )}`;
+        }
+        if (!this.author || this.author.notEq(this.thread?.channel?.correspondent?.persona)) {
+            return _t("%(authorName)s: %(message_content)s", {
+                authorName: this.authorName,
+                message_content: messageBody,
+            });
+        }
+        return messageBody;
     });
 
     get previewIcon() {
@@ -671,6 +666,8 @@ export class Message extends Record {
         const updatedBodyEl = createElementWithContent("div", body);
         messageBodyEl.querySelector("span.o-mail-Message-edited")?.remove();
         updatedBodyEl.querySelector("span.o-mail-Message-edited")?.remove();
+        // The editor drops HTML comments (e.g. MSO ones) on parse; ignore them here too.
+        removeHtmlComments(messageBodyEl, updatedBodyEl);
         if (
             updatedBodyEl.innerHTML === messageBodyEl.innerHTML &&
             attachments.length === this.attachment_ids.length &&

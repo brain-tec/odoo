@@ -105,7 +105,7 @@ export class MessagingMenuTab extends Record {
      * Drives what is displayed when a tab is empty.
      *
      * @type {{
-     *  title?: string,
+     *  title?: TranslatedString,
      *  subtitle?: string,
      *  component?: typeof import("@odoo/owl").Component,
      *  action?: { text: string, onClick: () => void }
@@ -184,13 +184,11 @@ export class MessagingMenuTab extends Record {
         eager: true,
     });
     messages = fields.Many("mail.message", { inverse: "messagingMenuTabsAsMessages" });
-    sortedMessages = fields.Many("mail.message", {
-        compute() {
-            return [...this.messages].sort(
-                (m1, m2) => compareDatetime(m2.create_date, m1.create_date) || m2.id - m1.id
-            );
-        },
-    });
+    sortedMessages = this.computed(() =>
+        [...this.messages].sort(
+            (m1, m2) => compareDatetime(m2.create_date, m1.create_date) || m2.id - m1.id
+        )
+    );
     /** @type {"mail.message"|"discuss.channel"} */
     recordType;
     sequence = 0;
@@ -223,9 +221,9 @@ export class MessagingMenuTab extends Record {
     }
 
     /** Filters in the order they are shown, right after the "All" one. */
-    get sortedFilters() {
-        return [...this.filters].sort((f1, f2) => (f1.sequence ?? 0) - (f2.sequence ?? 0));
-    }
+    sortedFilters = this.computed(() =>
+        [...this.filters].sort((f1, f2) => (f1.sequence ?? 0) - (f2.sequence ?? 0))
+    );
 
     /**
      * Deterministic key for a given combination of active filters: the chip filter, if

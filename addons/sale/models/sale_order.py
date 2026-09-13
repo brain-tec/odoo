@@ -168,8 +168,8 @@ class SaleOrder(models.Model):
 
     validity_date = fields.Date(
         string="Expiration",
-        help="Validity of the quotation."
-        " After this date, you will no longer be able to sign and pay it.",
+        help="Validity of the quotation. After this date, you will no longer be able to sign and"
+        " pay it.",
         compute="_compute_validity_date",
         store=True,
         readonly=False,
@@ -1508,6 +1508,7 @@ class SaleOrder(models.Model):
             "name": self.env._("Discount"),
             "type": "ir.actions.act_window",
             "res_model": "sale.order.discount",
+            "views": [(False, "form")],
             "view_mode": "form",
             "target": "new",
         }
@@ -2343,7 +2344,8 @@ class SaleOrder(models.Model):
 
         prepayment_amount = self._get_prepayment_required_amount()
         if self.state in ("draft", "sent") and self.prepayment_percent > 0:
-            suggested_amount = prepayment_amount  # Suggest the amount needed to confirm the quote.
+            # Suggest the amount needed to confirm the quote.
+            suggested_amount = max(prepayment_amount - self.amount_paid, 0)
         else:  # The order is confirmed or doesn't require payment.
             suggested_amount = max(self.amount_total - self.amount_paid, 0.0)
         return {
@@ -2408,6 +2410,7 @@ class SaleOrder(models.Model):
         - it is not expired;
         - the prepayment percent is strictly positive;
         - the total amount is strictly positive.
+        - confirmation amount is not reached
 
         Note: self.ensure_one()
 
@@ -2420,6 +2423,7 @@ class SaleOrder(models.Model):
             and not self.is_expired
             and self.prepayment_percent > 0
             and self.amount_total > 0
+            and not self._is_confirmation_amount_reached()
         )
 
     def _get_portal_return_action(self):
@@ -2614,6 +2618,20 @@ class SaleOrder(models.Model):
             return 0
         return self.currency_id.round(self.amount_total * self.prepayment_percent)
 
+    def _is_confirmation_amount_reached(self):
+        """Return whether `self.amount_paid` is higher than the prepayment required amount.
+
+        Note: self.ensure_one()
+
+        :return: Whether `self.amount_paid` is higher than the prepayment required amount.
+        :rtype: bool
+        """
+        self.ensure_one()
+        amount_comparison = self.currency_id.compare_amounts(
+            self._get_prepayment_required_amount(), self.amount_paid
+        )
+        return amount_comparison <= 0
+
     def _generate_downpayment_invoices(self):
         """Generate invoices as down payments for sale order.
 
@@ -2724,17 +2742,49 @@ class SaleOrder(models.Model):
 
     # === TOOLING ===#
 
+    def _is_partially_paid(self):
+        """Return whether the sales order has a confirmed partial payment.
+
+        The order is not considered "partially" paid if it's fully paid.
+
+        :return: Whether the order is partially paid
+        :rtype: bool
+        """
+        self.ensure_one()
+
+        if self.state == "cancel":
+            return False  # Allow resetting the cart when it's canceled from the backend
+
+        if self._is_paid():
+            return False
+
+        return any(self.transaction_ids.filtered(lambda tx: tx.state in {"authorized", "done"}))
+
     def _is_paid(self):
         """Return whether the sale order is paid or not based on the linked transactions.
 
-        A sale order is considered paid if the sum of all the linked transaction is equal to or
-        higher than `self.amount_total`.
+        A sales order is considered paid if the sum of all the paid (i.e., `authorized` or `done`)
+        transactions' amount is equal to or higher than `self.amount_total`.
 
-        :return: Whether the sale order is paid or not.
+        :return: Whether the order is considered paid
         :rtype: bool
         """
         self.ensure_one()
         return self.currency_id.compare_amounts(self.amount_paid, self.amount_total) >= 0
+
+    def _check_not_partially_paid(self):
+        """Check if the order is partially paid, and raises an error if so.
+
+        :rtype: None
+        :raise UserError: If the error is partially paid
+        """
+        if self._is_partially_paid():
+            raise UserError(
+                self.env._(
+                    "It seems that there is already a payment in progress for your order; you can't"
+                    " modify it anymore."
+                )
+            )
 
     def _get_lang(self):
         self.ensure_one()
