@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.KanbanHeader">
-        <div class="o_kanban_header position-sticky top-0 z-1" t-ref="this.rootRef" t-attf-class="{{ !this.uiService.isSmall and this.group.isFolded ? 'd-print-none pt-2' : 'py-2 pt-print-0' }}">
+        <div class="o_kanban_header position-sticky top-0 z-2" t-ref="this.rootRef" t-attf-class="{{ !this.uiService.isSmall and this.group.isFolded ? 'd-print-none pt-2' : 'py-2 pt-print-0' }}">
             <div class="o_kanban_header_title position-relative d-flex lh-lg">
                 <div t-if="this.group.isFolded" class="o_column_title d-flex align-items-center pb-1 fs-4 lh-1 text-nowrap opacity-50 opacity-100-hover flex-grow-1 gap-1"
                      t-on-mouseenter="this.onTitleMouseEnter" t-on-mouseleave="this.onTitleMouseLeave">
@@ -18,7 +18,7 @@
                 </div>
                 <t t-if="this.uiService.isSmall or !this.group.isFolded">
                     <GroupConfigMenu t-props="this.configMenuProps"/>
-                    <button t-if="this.canQuickCreate()" class="o_kanban_quick_add o_btn_circle d-print-none btn me-0" t-on-click="() => this.quickCreate()">
+                    <button t-if="this.canQuickCreate()" class="o_kanban_quick_add o_btn_circle d-print-none btn btn-light me-0" t-on-click="() => this.quickCreate()">
                         <i class="oi" data-icon="add_2" role="img" aria-label="Quick add" title="Quick add"/>
                     </button>
                 </t>
