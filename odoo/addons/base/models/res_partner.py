@@ -1624,15 +1624,18 @@ class ResPartner(models.Model):
         return {'key': winner_key, 'value': winner_value, **winner_meta}
 
     @api.depends_context('company')
-    @api.depends('country_id')
+    @api.depends('country_id', 'additional_identifiers')
     def _compute_available_additional_identifiers_metadata(self):
         for partner in self:
+            stored_identifiers = partner.additional_identifiers or {}
             vals = {
                     # Resolve lazy translations now: JSON would otherwise stringify them in a frame where
                     # no language can be detected.
                 key: self._lazy_translate_additional_identifiers_metadata(metadata)
                 for key, metadata in self._get_all_additional_identifiers_metadata().items()
-                if not metadata.get('countries') or partner.country_code in metadata['countries']  # includes international
+                if not metadata.get('countries')
+                    or partner.country_code in metadata['countries']
+                    or key in stored_identifiers  # includes international, and any identifier already set on the record
             }
             if {key: metadata for key, metadata in vals.items() if metadata.get('category') == 'EN' and key != 'OTHER'}:
                 # Pops out the default 'OTHER' only if another 'EN' identifier is available
@@ -1847,6 +1850,11 @@ class ResPartner(models.Model):
         self.ensure_one()
         _vat, country_code = self._run_vat_checks(self.country_id, self.vat, validation=False)
         return country_code or self.country_code
+
+    @api.model
+    def _get_identifier_fields(self):
+        # To be extended by localization, used for the partner_autocomplete
+        return ['vat']
 
     # ============
     # VAT HELPERS
