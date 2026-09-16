@@ -1,8 +1,7 @@
-import base64
-
 from lxml import etree
 
 from odoo import api, fields, models
+from odoo.addons.l10n_gr_edi import utils
 from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
 from odoo.exceptions import UserError
 from odoo.tools import cleanup_xml_node, float_repr
@@ -116,7 +115,6 @@ class AccountMove(models.Model):
 
     def _l10n_gr_edi_prepare_invoice_submission(self):
         self.ensure_one()
-        self.env['res.company']._with_locked_records(self)
 
         # Recheck after locking in case another worker issued the invoice
         if self.env['l10n_gr_edi.document'].search([
@@ -262,14 +260,12 @@ class AccountMove(models.Model):
 
         if verification_url:
             values['barcode_src'] = image_data_uri(
-                base64.b64encode(
-                    self.env['ir.actions.report'].barcode(
-                        barcode_type='QR',
-                        value=verification_url,
-                        width=180,
-                        height=180,
-                        quiet=0,
-                    )
+                self.env['ir.actions.report'].barcode(
+                    barcode_type='QR',
+                    value=verification_url,
+                    width=180,
+                    height=180,
+                    quiet=0,
                 )
             )
 
@@ -279,9 +275,11 @@ class AccountMove(models.Model):
         # EXTENDS 'l10n_gr_edi'
         """Send customer invoices individually through the IAP proxy."""
         for company, invoices in self.grouped('company_id').items():
-            proxy_user = company._l10n_gr_edi_get_proxy_user()
+            proxy_user = company._l10n_gr_edi_get_or_create_proxy_user()
 
             for invoice in invoices:
+                invoice.lock_for_update()
+
                 submission = invoice._l10n_gr_edi_prepare_invoice_submission()
                 if not submission:
                     continue
@@ -309,12 +307,15 @@ class AccountMove(models.Model):
                 else:
                     invoice._l10n_gr_edi_handle_invoice_proxy_result(document, result)
 
+                if self._can_commit():
+                    self.env.cr.commit()
+
     def l10n_gr_edi_try_send_invoices(self):
         # EXTENDS 'l10n_gr_edi'
         valid_move_ids = []
         for move in self.filtered('l10n_gr_edi_enable_send_invoices'):
-            if error := move._l10n_gr_edi_get_pre_error_string():
-                move._l10n_gr_edi_create_error_document({'error': error})
+            if error := move._l10n_gr_edi_get_pre_error_dict():
+                self.env['l10n_gr_edi.document']._l10n_gr_edi_create_error_document(move, {'error': utils.get_pre_error_string(error)})
             else:
                 valid_move_ids.append(move.id)
 

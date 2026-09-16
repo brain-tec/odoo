@@ -1,21 +1,20 @@
 import {
-    SectionAndNoteFieldOne2Many,
-    sectionAndNoteFieldOne2Many,
-    SectionAndNoteListRenderer,
-    getSectionRecords,
-} from '@account/components/section_and_note_fields_backend/section_and_note_fields_backend';
+    ProductLabelSectionAndNoteListRender,
+    productLabelSectionAndNoteOne2Many,
+    ProductLabelSectionAndNoteOne2Many,
+} from "@account/components/product_label_section_and_note_o2m/product_label_section_and_note_field_o2m";
+import { getSectionRecords } from "@account/components/section_and_note_fields_backend/section_and_note_fields_backend";
 import { makeContext } from '@web/core/context';
 import { x2ManyCommands } from '@web/core/orm_plugin';
 import { registry } from '@web/core/registry';
 import { useSubEnv } from '@web/owl2/utils';
 
-export class SaleOrderTemplateLineListRenderer extends SectionAndNoteListRenderer {
+export class SaleOrderTemplateLineListRenderer extends ProductLabelSectionAndNoteListRender {
     static recordRowTemplate = 'sale_management.ListRenderer.RecordRow';
 
     setup() {
         super.setup();
         this.copyFields.push('is_optional');
-        this.productAndDescriptionColumn = "product_and_description";
         useSubEnv({
             adjustSectionQuantities: this.adjustSectionQuantities.bind(this),
             shouldCollapse: this.shouldCollapse.bind(this),
@@ -179,28 +178,6 @@ export class SaleOrderTemplateLineListRenderer extends SectionAndNoteListRendere
         super.add(params);
     }
 
-    isColumnGroupFieldVisible(fieldInfo, record) {
-        const isColumnVisible = super.isColumnGroupFieldVisible(fieldInfo, record);
-        if (!isColumnVisible) {
-            return false;
-        }
-
-        const isVariantFieldActive = this.optionalActiveFields["product_id"];
-        const isTemplateFieldActive = this.optionalActiveFields["product_template_id"];
-
-        if (fieldInfo.name === "product_template_id") {
-            return !isVariantFieldActive;
-        }
-        const isProductFieldActive = isVariantFieldActive || isTemplateFieldActive;
-        if (fieldInfo.name === "label") {
-            return !isProductFieldActive;
-        }
-        if (fieldInfo.name === "name") {
-            return isProductFieldActive;
-        }
-        return true;
-    }
-
     getCreateContext(params) {
         const evaluatedContext = makeContext([params.context]);
         // A falsy context indicates a product line (no `display_type` specified)
@@ -308,14 +285,14 @@ export class SaleOrderTemplateLineListRenderer extends SectionAndNoteListRendere
      * - Non-product lines (`display_type` set) are ignored.
      *
      */
-    async sortDrop(dataRowId, dataGroupId, { element, previous }) {
+    async sortDrop(dataRowId, { element, previous }) {
         const record = this.props.list.records.find(r => r.id === dataRowId);
         // Prevent the record from being abandoned when leaveEditMode or sortDrop is called
         record.dirty = true;
         await this.props.list.leaveEditMode();
         const recordMap = this._getRecordsToRecompute(record, previous ? previous.dataset.id : null);
 
-        await super.sortDrop(dataRowId, dataGroupId, { element, previous });
+        await super.sortDrop(dataRowId, { element, previous });
 
         await this._handleQuantityAdjustment(recordMap);
     }
@@ -439,7 +416,7 @@ export class SaleOrderTemplateLineListRenderer extends SectionAndNoteListRendere
         return { ...super.fieldsToReset(), is_optional: false };
     }
 }
-export class SaleOrderTemplateLineOne2Many extends SectionAndNoteFieldOne2Many {
+export class SaleOrderTemplateLineOne2Many extends ProductLabelSectionAndNoteOne2Many {
     static components = {
         ...super.components,
         ListRenderer: SaleOrderTemplateLineListRenderer,
@@ -447,7 +424,7 @@ export class SaleOrderTemplateLineOne2Many extends SectionAndNoteFieldOne2Many {
 }
 
 export const saleOrderTemplateLineOne2Many = {
-    ...sectionAndNoteFieldOne2Many,
+    ...productLabelSectionAndNoteOne2Many,
     component: SaleOrderTemplateLineOne2Many,
 };
 

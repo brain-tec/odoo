@@ -645,7 +645,7 @@ Please change the quantity done or the rounding precision in your settings.""",
            remaining demand and the available quantity of the lot if none is available.
         """
         for move in self:
-            if move.product_id.tracking == 'none':
+            if not move.product_id.tracking:
                 continue
             if move.state == 'assigned' and all(ml.lot_id in move.lot_ids for ml in move.move_line_ids) and move.move_line_ids.lot_id == move.lot_ids:
                 continue
@@ -1519,7 +1519,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         Updates the quantity of the move to match the quantity resulting from the `_set_lot_ids`.
         """
         product = self.product_id
-        if product.tracking == 'none':
+        if not product.tracking:
             return
 
         assigned_quantity = 0
@@ -2116,6 +2116,13 @@ Please change the quantity done or the rounding precision in your settings.""",
         grouped_move_lines_in = self._get_available_move_lines_in()
         grouped_move_lines_out = self._get_available_move_lines_out(assigned_moves_ids, partially_available_moves_ids)
         available_move_lines = {key: grouped_move_lines_in[key] - grouped_move_lines_out.get(key, 0) for key in grouped_move_lines_in}
+        # remove what this move already reserved
+        for move_line in self.move_line_ids:
+            if self.product_id.uom_id.is_zero(move_line.quantity_product_uom):
+                continue
+            key = (move_line.location_id, move_line.lot_id, move_line.package_id, move_line.owner_id)
+            if key in available_move_lines:
+                available_move_lines[key] -= move_line.quantity_product_uom
         # pop key if the quantity available amount to 0
         return {k: v for k, v in available_move_lines.items() if self.product_id.uom_id.compare(v, 0) > 0}
 
@@ -2219,10 +2226,6 @@ Please change the quantity done or the rounding precision in your settings.""",
                     available_move_lines = move._get_available_move_lines(assigned_moves_ids, partially_available_moves_ids)
                     if not available_move_lines:
                         continue
-                    for move_line in move.move_line_ids.filtered(lambda m: m.quantity_product_uom):
-                        if available_move_lines.get((move_line.location_id, move_line.lot_id, move_line.package_id, move_line.owner_id)):
-                            available_move_lines[(move_line.location_id, move_line.lot_id, move_line.package_id, move_line.owner_id)] -= move_line.quantity_product_uom
-
                     taken_quantities = {}
                     all_move_line_vals = []
                     for (location_id, lot_id, package_id, owner_id), quantity in available_move_lines.items():

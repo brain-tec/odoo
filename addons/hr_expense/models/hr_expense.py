@@ -424,13 +424,12 @@ class HrExpense(models.Model):
 
             managers = (
                 expense.manager_id
-                | employee.expense_manager_id
-                | employee.sudo().department_id.manager_id.user_id.sudo(self.env.su)
+                | employee._get_expense_managers()
             )
             if is_all_approver:
                 managers |= self.env.user
             if expense.employee_id.id in expenses_employee_ids_under_user_ones:
-                    managers |= self.env.user
+                managers |= self.env.user
             if not expense.is_own_expense and self.env.user in managers:
                 # If Approver-level or designated manager, can edit other people expense
                 expense.is_editable = True
@@ -1321,6 +1320,21 @@ class HrExpense(models.Model):
         return super().get_empty_list_help((help_message or '') + self._get_empty_list_mail_alias())
 
     @api.model
+    def get_views(self, views, options=None):
+        res = super().get_views(views, options)
+        if (
+            (form_toolbar := res['views'].get('form', {}).get('toolbar'))
+            and form_toolbar.get('print')
+            and (report := self.env.ref('hr_expense.action_report_hr_expense', raise_if_not_found=False))
+        ):
+            form_toolbar['print'] = [
+                dict(action, name=self.env._("Print"))
+                if action['id'] == report.id else action
+                for action in form_toolbar['print']
+            ]
+        return res
+
+    @api.model
     def message_new(self, msg_dict, custom_values=None):
         email_address = email_normalize(msg_dict.get('email_from'))
         employee = self._get_employee_from_email(email_address)
@@ -1658,9 +1672,8 @@ class HrExpense(models.Model):
 
             elif not is_hr_admin:
                 current_managers = (
-                        expense_employee.expense_manager_id
-                        | expense_employee.sudo().department_id.manager_id.user_id.sudo(self.env.su)
-                        | expense.manager_id
+                    expense_employee._get_expense_managers()
+                    | expense.manager_id
                 )
                 if expense_employee.id in expenses_employee_ids_under_user_ones:
                     current_managers |= self.env.user

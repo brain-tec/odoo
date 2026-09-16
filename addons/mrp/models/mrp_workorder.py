@@ -27,7 +27,7 @@ class MrpWorkorder(models.Model):
         return workcenters.browse(workcenter_ids)
 
     name = fields.Char(
-        'Work Order', required=True)
+        'Work Order', required=True, copy=True)
     sequence = fields.Integer("Sequence", compute='_compute_sequence', store=True, readonly=False, precompute=True)
     barcode = fields.Char(compute='_compute_barcode', store=True)
     workcenter_id = fields.Many2one(
@@ -832,8 +832,10 @@ class MrpWorkorder(models.Model):
             'res_model': 'mrp.production',
             'views': [(self.env.ref('mrp.mrp_production_to_plan').id, 'list')],
             'type': 'ir.actions.act_window',
-            'domain': [('state', 'in', ['confirmed', 'progress', 'to_close'])],
-            'context': {'search_default_filter_to_plan': True},
+            'context': {
+                'search_default_filter_confirmed': True,
+                'search_default_filter_to_plan': True,
+            },
             'target': 'new',
         }
 
@@ -1131,9 +1133,6 @@ class MrpWorkorder(models.Model):
             'view_mode': 'list,form',
             'views': [(self.env.ref('mrp.mrp_production_workorder_tree_view_backorders').id, 'list'), (False, 'form')],
         }
-
-    def _get_current_theoretical_operation_cost(self, without_employee_cost=False):
-        return (self.get_duration() / 60.0) * (self.costs_hour or self.workcenter_id.costs_hour)
 
     def _set_cost_mode(self):
         """ This should only be called once when the MO is confirmed. """
