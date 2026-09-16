@@ -18,7 +18,7 @@ class SaleOrderTemplate(models.Model):
     company_id = fields.Many2one(comodel_name="res.company", default=lambda self: self.env.company)
     currency_id = fields.Many2one(string="Currency", comodel_name="res.currency")
 
-    name = fields.Char(string="Template", required=True)
+    name = fields.Char(string="Template", required=True, translate=True)
     note = fields.Html(string="Terms and conditions", translate=True)
     sequence = fields.Integer(default=10)
     template_type = fields.Selection(
@@ -135,7 +135,7 @@ class SaleOrderTemplate(models.Model):
         for template in self:
             template.has_productless_lines = any(
                 not (line.product_id or line.display_type)
-                for line in self.sale_order_template_line_ids
+                for line in template.sale_order_template_line_ids
             )
 
     # === CONSTRAINT METHODS ===#

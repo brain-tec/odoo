@@ -23,7 +23,7 @@ class HrLeave(models.Model):
         self.ensure_one()
         return self.employee_id and \
                self.company_id.country_id.code == 'FR' and \
-               self.resource_calendar_id and \
+               not self.resource_calendar_id._is_flexible() and \
                self.resource_calendar_id != self.company_id.resource_calendar_id and \
                self.work_entry_type_id == self.company_id._get_fr_reference_work_entry_type()
 
@@ -86,6 +86,8 @@ class HrLeave(models.Model):
                 'request_date_from', 'request_date_to', 'employee_id')
     def _compute_date_from_to(self):
         super()._compute_date_from_to()
+        if self.env.context.get('leave_skip_date_from_to_computation'):
+            return
         for leave in self:
             if leave._l10n_fr_leave_applies():
                 new_date_from, new_date_to = leave._get_fr_date_from_to(leave.date_from, leave.date_to)

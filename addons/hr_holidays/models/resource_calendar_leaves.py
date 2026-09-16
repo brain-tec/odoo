@@ -40,6 +40,8 @@ class ResourceCalendarLeaves(models.Model):
                     raise ValidationError(self.env._('Two public holidays cannot overlap each other for the same working hours.'))
 
     def _get_domain(self, time_domain_dict):
+        # exclude remainder and output leaves (source_leave_id set): managed by the time rule
+        # engine, which re-runs automatically when their parent source leave is restored
         return Domain.OR(
             [
                 ('employee_company_id', '=', date['company_id']),
@@ -47,7 +49,7 @@ class ResourceCalendarLeaves(models.Model):
                 ('date_from', '<', date['date_to']),
             ]
             for date in time_domain_dict
-        ) & Domain('state', 'not in', ['refuse', 'cancel'])
+        ) & Domain('state', 'not in', ['refuse', 'cancel']) & Domain('source_leave_id', '=', False)
 
     def _get_time_domain_dict(self):
         return [{
@@ -71,7 +73,7 @@ class ResourceCalendarLeaves(models.Model):
         leaves.sudo().write({
             'state': 'confirm',
         })
-        sick_time_status = self.env['hr.work.entry.type'].search([('code', '=', 'LEAVE110')])
+        sick_time_status = self.env['hr.work.entry.type'].search([('code', '=', '013.00')])
         leaves_to_recreate = self.env['hr.leave']
         for previous_duration, leave, state in zip(previous_durations, leaves, previous_states):
             duration_difference = previous_duration - leave.number_of_days
@@ -169,7 +171,7 @@ class ResourceCalendarLeaves(models.Model):
                 companies_without_country |= company
                 continue
 
-            if not self.sudo().env['hr.work.entry.type'].search([('code', '=', 'LEAVE500'), ('country_code', '!=', company.country_code)], limit=1):
+            if not self.sudo().env['hr.work.entry.type'].search([('code', '=', '006.00'), ('country_code', '!=', company.country_code)], limit=1):
                 continue
             try:
                 csv_file_path = file_path(f"hr_holidays/data/public_holidays/public_holidays_{company.country_code.lower()}.csv")
