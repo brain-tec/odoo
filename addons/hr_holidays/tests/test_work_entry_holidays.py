@@ -289,10 +289,15 @@ class TestWorkEntryHolidays(TestWorkEntryBase, TestHolidayContract):
             },
         ])
 
-        self.jules_emp.write({
-            'resource_calendar_id': False,
+        calendar_flexible = self.env['resource.calendar'].create({
+            'name': 'Flexible Calendar',
+            'calendar_type': 'undefined',
+            'attendance_ids': [],
             'hours_per_week': 40,
             'hours_per_day': 8,
+        })
+        self.jules_emp.write({
+            'resource_calendar_id': calendar_flexible.id,
             'tz': self.jules_emp.tz
         })
 
@@ -404,7 +409,7 @@ class TestWorkEntryHolidays(TestWorkEntryBase, TestHolidayContract):
         self.create_leave(datetime(2015, 11, 8, 8, 0), datetime(2015, 11, 10, 22, 0), name="Doctor Appointment", employee_id=self.jules_emp.id)
 
         work_entries_vals = self.jules_emp.version_ids.generate_work_entries(date(2015, 11, 10), date(2015, 11, 21))
-        work_entry_type_attendance_id = self.env['hr.work.entry.type'].search([('code', '=', 'WORK100'), ('country_id', '=', self.env.company.country_id.id)])
+        work_entry_type_attendance_id = self.env['hr.work.entry.type'].search([('code', '=', '002.00'), ('country_id', '=', self.env.company.country_id.id)])
         work_entries_vals = [vals for vals in work_entries_vals if vals['work_entry_type_id'] == work_entry_type_attendance_id]
         sum_hours = sum(vals['duration'] for vals in work_entries_vals)
         self.assertEqual(sum_hours, 59, 'It should count 59 attendance hours')  # 24h first contract + 35h second contract
@@ -434,7 +439,7 @@ class TestWorkEntryHolidays(TestWorkEntryBase, TestHolidayContract):
         work_entries_vals = self.jules_emp.version_ids._generate_work_entries(start, end_generate)
         work_entries_vals = [vals for vals in work_entries_vals if vals['version_id'] == self.contract_cdi]
 
-        work_entry_type_attendance_id = self.env['hr.work.entry.type'].search([('code', '=', 'WORK100'), ('country_id', '=', self.env.company.country_id.id)])
+        work_entry_type_attendance_id = self.env['hr.work.entry.type'].search([('code', '=', '002.00'), ('country_id', '=', self.env.company.country_id.id)])
         work = [vals for vals in work_entries_vals if vals['work_entry_type_id'] == work_entry_type_attendance_id]
         leave = [vals for vals in work_entries_vals if vals['work_entry_type_id'] != work_entry_type_attendance_id]
         self.assertEqual(sum(vals['duration'] for vals in work), 49, "It should be 49 hours of work this month for this contract")
@@ -501,3 +506,57 @@ class TestWorkEntryHolidays(TestWorkEntryBase, TestHolidayContract):
         self.assertEqual(working_leave.request_hour_from, 11)
         self.assertEqual(working_leave.request_hour_to, 17)
         self.assertEqual(working_leave.with_context(leave_skip_state_check=True).duration_display, "6:00 hours")
+
+    def test_worked_time_leave_over_public_holiday(self):
+        """Worked-time leaves should not duplicate overlapping public holidays.
+
+        When a worked-time leave spans a public holiday, the public holiday takes precedence
+        on that day and produces its own work entry (with the holiday wet). The worked-time
+        leave entries appear only on the non-holiday days.
+        """
+        self.richard_emp.version_id.tz = 'UTC'
+        worked_time_type = self.env['hr.work.entry.type'].create({
+            'name': 'Worked Time Off',
+            'code': 'WORKEDTIMEOFF',
+            'count_as': 'working_time',
+            'requires_allocation': False,
+        })
+        # resource.calendar.leaves without resource_id auto-computes a public
+        # holiday wet via _compute_work_entry_type_id; capture it for assertions
+        public_holiday_leave = self.env['resource.calendar.leaves'].create({
+            'name': 'Public holiday',
+            'date_from': datetime(2026, 1, 6, 0, 0, 0),
+            'date_to': datetime(2026, 1, 6, 23, 59, 59),
+            'calendar_id': self.richard_emp.resource_calendar_id.id,
+            'count_as': 'absence',
+        })
+        public_holiday_wet = public_holiday_leave.work_entry_type_id
+        leave = self.env['hr.leave'].create({
+            'name': 'Worked time leave',
+            'employee_id': self.richard_emp.id,
+            'work_entry_type_id': worked_time_type.id,
+            'request_date_from': date(2026, 1, 5),
+            'request_date_to': date(2026, 1, 7),
+        })
+        leave.action_approve()
+
+        work_entries_vals = self.richard_emp.version_id.generate_work_entries(date(2026, 1, 5), date(2026, 1, 7))
+        employee_work_entries_vals = [
+            vals for vals in work_entries_vals
+            if vals['employee_id'] == self.richard_emp and date(2026, 1, 5) <= vals['date'] <= date(2026, 1, 7)
+        ]
+        pto_entries_vals = [
+            vals for vals in employee_work_entries_vals
+            if vals['work_entry_type_id'] == worked_time_type
+        ]
+        public_holiday_entries_vals = [
+            vals for vals in employee_work_entries_vals
+            if vals['work_entry_type_id'] != worked_time_type
+        ]
+
+        self.assertEqual(len(employee_work_entries_vals), 3)
+        self.assertEqual(sorted(vals['date'] for vals in pto_entries_vals), [date(2026, 1, 5), date(2026, 1, 7)])
+        self.assertEqual(len(public_holiday_entries_vals), 1)
+        self.assertEqual(public_holiday_entries_vals[0]['date'], date(2026, 1, 6))
+        # the public holiday wet is auto-computed from the resource.calendar.leaves
+        self.assertEqual(public_holiday_entries_vals[0]['work_entry_type_id'], public_holiday_wet)

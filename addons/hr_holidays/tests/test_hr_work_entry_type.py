@@ -56,23 +56,22 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
             self.assertEqual(employee.leave_date_from, leave_0.request_date_from)
             self.assertEqual(employee.leave_date_to, employee._get_first_working_interval_batch({employee.id: leave_0.date_to}).get(employee.id).date())
 
-        with self.assertRaises(ValidationError):
-            leave_1 = self.env['hr.leave'].create({
+        # leaves overlap between time on and time off is allowed even without allow_request_on_top
+        leave_1 = self.env['hr.leave'].create({
                 'name': 'Doctor Appointment',
                 'employee_id': employee.id,
                 'work_entry_type_id': work_entry_type.id,
                 'request_date_from': '2025-09-03',
                 'request_date_to': '2025-09-03',
         })
-
-        worked_work_entry_type.allow_request_on_top = True
-        leave_1 = self.env['hr.leave'].create({
-            'name': 'Doctor Appointment',
-            'employee_id': employee.id,
-            'work_entry_type_id': work_entry_type.id,
-            'request_date_from': '2025-09-03',
-            'request_date_to': '2025-09-03',
-        })
+        with self.assertRaises(ValidationError):
+            self.env['hr.leave'].create({
+                'name': 'Doctor Appointment',
+                'employee_id': employee.id,
+                'work_entry_type_id': work_entry_type.id,
+                'request_date_from': '2025-09-03',
+                'request_date_to': '2025-09-03',
+            })
 
         self.assertEqual(
             self.env['resource.calendar.leaves'].search([('holiday_id', '=', leave_1.id)]).count_as,
@@ -192,6 +191,49 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
         self.assertEqual(days, 7, "Duration should include all 7 days even with public holiday")
         self.assertEqual(hours, 56, "Duration should be 7 * 8 hours when including public holidays")
 
+    def test_calendar_duration_without_employee(self):
+        """Duration of a 'calendar days' leave that has no employee yet
+
+        This is the state of the form view when it is opened: no employee is set
+        yet, so the leave is not part of the batched per-employee mappings and the
+        calendar branch used to raise a KeyError. It has to fall back on the
+        company calendar computation instead.
+        """
+        calendar_work_entry_type = self.env['hr.work.entry.type'].create({
+            'name': 'Test Time Off (No Employee)',
+            'code': 'Test Time Off 5',
+            'requires_allocation': False,
+            'count_days_as': 'calendar',
+            'request_unit': 'hour',
+        })
+        working_work_entry_type = calendar_work_entry_type.copy({
+            'name': 'Test Time Off (No Employee, Working)',
+            'code': 'Test Time Off 6',
+            'count_days_as': 'working',
+        })
+
+        values = {
+            'request_date_from': date(2024, 6, 3),
+            'request_date_to': date(2024, 6, 3),
+            'request_hour_from': 8,
+            'request_hour_to': 12,
+        }
+        # this simulates opening a form with new employee ,
+        # because here .new() creates an unsaved record with a NewId, the same thing the web client works with when you open the form before filling anything in.
+        calendar_leave = self.env['hr.leave'].new(
+            dict(values, work_entry_type_id=calendar_work_entry_type.id))
+
+        working_leave = self.env['hr.leave'].new(
+            dict(values, work_entry_type_id=working_work_entry_type.id))
+
+        # in case of traceback this would fail first
+        days, hours = calendar_leave._get_durations()[calendar_leave.id]
+        self.assertTrue(hours, "Duration should be computed from the company calendar")
+        self.assertEqual(
+            (days, hours),
+            working_leave._get_durations()[working_leave.id],
+            "Without an employee, the duration falls back on the company calendar in both modes")
+
     def test_count_days_as_working_days(self):
         """Test duration calculation when count_days_as is worked days"""
         working_work_entry_type = self.env['hr.work.entry.type'].create({
@@ -232,3 +274,147 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
 
         with self.assertRaises(ValidationError):
             work_entry_type.count_days_as = 'working'
+
+    # --- _get_durations branch coverage --------------------------------------
+    # _get_durations dispatches on (has an employee, count_days_as, request
+    # unit) into five mutually exclusive branches. The tests above already pin
+    # the employee-less branch and the whole day "calendar days" one. These pin
+    # the partial day paths: the weekend adjustment of a "calendar days" leave,
+    # the flexible employee shortcut, and the generic resource computation.
+
+    def _duration_employee(self, name, resource_calendar_id=None):
+        """Employee used by the duration tests, with a pinned timezone.
+
+        The partial day computation compares `leave.date_from.date()`, which is
+        UTC, with dates built from the naive `request_date_from`. Leaving the
+        resource timezone to whatever the environment provides makes those two
+        fall on different days depending on the machine running the test.
+        """
+        values = {'name': name, 'company_id': self.company.id}
+        if resource_calendar_id is not None:
+            values['resource_calendar_id'] = resource_calendar_id
+        employee = self.env['hr.employee'].create(values)
+        employee.resource_id.tz = 'Europe/Brussels'
+        return employee
+
+    def _hourly_work_entry_type(self, code, count_days_as):
+        return self.env['hr.work.entry.type'].create({
+            'name': code,
+            'code': code,
+            'requires_allocation': False,
+            'count_days_as': count_days_as,
+            'request_unit': 'hour',
+        })
+
+    def test_duration_partial_day_on_working_day(self):
+        """A partial day on a working day: both counting modes agree.
+
+        Wednesday 2024-06-05, 09:00 -> 12:00 Brussels, on the standard 40h/week
+        schedule. "Calendar days" goes through the partial day branch, finds no
+        non working day to compensate, and keeps the resource result; "working
+        days" reaches the same result through the generic branch.
+
+        The resource computation does not prorate the day: per
+        `_get_attendance_intervals_days_data`, a day worth 3/4 of the theoretical
+        day or less counts as half a day, above that as a full one. 3 hours is
+        below 8 * 3 / 4, hence half a day for 3 hours.
+        """
+        calendar_leave = self.env['hr.leave'].create({
+            'employee_id': self._duration_employee('Calendar Wednesday').id,
+            'work_entry_type_id': self._hourly_work_entry_type('DUR_CAL_WD', 'calendar').id,
+            'request_date_from': date(2024, 6, 5),
+            'request_date_to': date(2024, 6, 5),
+            'request_hour_from': 9,
+            'request_hour_to': 12,
+        })
+        working_leave = self.env['hr.leave'].create({
+            'employee_id': self._duration_employee('Working Wednesday').id,
+            'work_entry_type_id': self._hourly_work_entry_type('DUR_WRK_WD', 'working').id,
+            'request_date_from': date(2024, 6, 5),
+            'request_date_to': date(2024, 6, 5),
+            'request_hour_from': 9,
+            'request_hour_to': 12,
+        })
+
+        self.assertEqual(calendar_leave._get_durations()[calendar_leave.id], (0.5, 3.0))
+        self.assertEqual(
+            working_leave._get_durations()[working_leave.id], (0.5, 3.0),
+            "On a working day both counting modes give the same duration")
+
+    def test_duration_partial_day_on_weekend(self):
+        """A partial day on a Saturday: this is where the modes diverge.
+
+        Saturday 2024-06-08 is not in the schedule, so the resource computation
+        returns nothing and the entire "calendar days" duration comes from the
+        non working day adjustment:
+
+            day_hours = min(day_end, request_hour_to) - max(day_start, request_hour_from)
+
+        with (day_start, day_end) == (8.0, 16.0), the 8h day centred on noon that
+        `_get_hours_for_date(..., count_non_working_days=True)` returns for an
+        employee whose calendar declares 8 hours a day. That is 12 - 9 = 3 hours.
+
+        Note that this branch prorates the day (`day_hours / hours_per_day`,
+        3 / 8 = 0.375) where the resource computation used on a working day snaps
+        to a half or a full day. The very same three hour request is therefore
+        worth half a day on the Wednesday and 0.375 day on the Saturday. This is
+        not what the refactor introduced, it is pinned here as it stands.
+
+        Counted as working days the same request is worth no day at all; it still
+        reports its hours because the type counts as working time.
+        """
+        calendar_leave = self.env['hr.leave'].create({
+            'employee_id': self._duration_employee('Calendar Saturday').id,
+            'work_entry_type_id': self._hourly_work_entry_type('DUR_CAL_WE', 'calendar').id,
+            'request_date_from': date(2024, 6, 8),
+            'request_date_to': date(2024, 6, 8),
+            'request_hour_from': 9,
+            'request_hour_to': 12,
+        })
+        working_leave = self.env['hr.leave'].create({
+            'employee_id': self._duration_employee('Working Saturday').id,
+            'work_entry_type_id': self._hourly_work_entry_type('DUR_WRK_WE', 'working').id,
+            'request_date_from': date(2024, 6, 8),
+            'request_date_to': date(2024, 6, 8),
+            'request_hour_from': 9,
+            'request_hour_to': 12,
+        })
+
+        self.assertEqual(
+            calendar_leave._get_durations()[calendar_leave.id], (0.375, 3.0),
+            "Calendar days count a Saturday like any other day")
+        self.assertEqual(
+            working_leave._get_durations()[working_leave.id], (0, 3.0),
+            "Working days count no day outside the schedule, only the hours")
+
+    def test_duration_partial_day_flexible_employee(self):
+        """A flexible employee takes the single day shortcut.
+
+        With no working schedule the employee has no interval to intersect, so
+        the duration is the requested window itself and the day count is that
+        window over a 24h day: 3 / 24 = 0.125. The custom hours unit means the
+        result is left unrounded.
+        """
+        flexible_calendar = self.env['resource.calendar'].create({
+            'name': 'Flexible',
+            'company_id': self.company.id,
+            'calendar_type': 'undefined',
+            'attendance_ids': [],
+            'hours_per_week': 0,
+            'hours_per_day': 0,
+        })
+        employee = self._duration_employee('Flexible', resource_calendar_id=flexible_calendar.id)
+        self.assertTrue(
+            employee.sudo()._is_flexible(),
+            "This test is only meaningful for an employee without a schedule")
+
+        leave = self.env['hr.leave'].create({
+            'employee_id': employee.id,
+            'work_entry_type_id': self._hourly_work_entry_type('DUR_FLEX', 'working').id,
+            'request_date_from': date(2024, 6, 5),
+            'request_date_to': date(2024, 6, 5),
+            'request_hour_from': 9,
+            'request_hour_to': 12,
+        })
+
+        self.assertEqual(leave._get_durations()[leave.id], (0.125, 3.0))

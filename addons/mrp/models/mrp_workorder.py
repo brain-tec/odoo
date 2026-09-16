@@ -27,7 +27,7 @@ class MrpWorkorder(models.Model):
         return workcenters.browse(workcenter_ids)
 
     name = fields.Char(
-        'Work Order', required=True)
+        'Work Order', required=True, copy=True)
     sequence = fields.Integer("Sequence", compute='_compute_sequence', store=True, readonly=False, precompute=True)
     barcode = fields.Char(compute='_compute_barcode', store=True)
     workcenter_id = fields.Many2one(
@@ -455,7 +455,7 @@ class MrpWorkorder(models.Model):
 
     def _calculate_date_finished(self, date_start=False, new_workcenter=False, compute_leaves=False):
         workcenter = new_workcenter or self.workcenter_id
-        if not workcenter.resource_calendar_id:
+        if workcenter.resource_calendar_id._is_flexible():
             duration_in_seconds = self.duration_expected * 60
             return (date_start or self.date_start) + timedelta(seconds=duration_in_seconds)
         return workcenter.resource_calendar_id.plan_hours(
@@ -478,7 +478,7 @@ class MrpWorkorder(models.Model):
                               "You should unplan the Manufacturing Order instead in order to unplan all the linked operations."))
 
     def _calculate_duration_expected(self, date_start=False, date_finished=False):
-        if not self.workcenter_id.resource_calendar_id:
+        if self.workcenter_id.resource_calendar_id._is_flexible():
             return ((date_finished or self.date_finished) - (date_start or self.date_start)).total_seconds() / 60
         interval = self.workcenter_id.resource_calendar_id.get_work_duration_data(
             date_start or self.date_start, date_finished or self.date_finished,
@@ -635,8 +635,6 @@ class MrpWorkorder(models.Model):
             best_date_finished = datetime.max
             vals = {}
             for workcenter in workcenters:
-                if not workcenter.resource_calendar_id:
-                    raise UserError(self.env._('There is no defined calendar on workcenter %s.', workcenter.name))
                 # Compute theoretical duration
                 if wo.workcenter_id == workcenter:
                     duration_expected = wo.duration_expected
@@ -832,8 +830,10 @@ class MrpWorkorder(models.Model):
             'res_model': 'mrp.production',
             'views': [(self.env.ref('mrp.mrp_production_to_plan').id, 'list')],
             'type': 'ir.actions.act_window',
-            'domain': [('state', 'in', ['confirmed', 'progress', 'to_close'])],
-            'context': {'search_default_filter_to_plan': True},
+            'context': {
+                'search_default_filter_confirmed': True,
+                'search_default_filter_to_plan': True,
+            },
             'target': 'new',
         }
 
@@ -1131,9 +1131,6 @@ class MrpWorkorder(models.Model):
             'view_mode': 'list,form',
             'views': [(self.env.ref('mrp.mrp_production_workorder_tree_view_backorders').id, 'list'), (False, 'form')],
         }
-
-    def _get_current_theoretical_operation_cost(self, without_employee_cost=False):
-        return (self.get_duration() / 60.0) * (self.costs_hour or self.workcenter_id.costs_hour)
 
     def _set_cost_mode(self):
         """ This should only be called once when the MO is confirmed. """

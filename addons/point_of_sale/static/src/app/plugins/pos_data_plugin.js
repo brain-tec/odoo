@@ -159,6 +159,11 @@ export class PosDataPlugin extends Plugin {
             return [key, model];
         });
 
+        // Ensure previous connection is closed to avoid blocking silently
+        if (this.indexedDB?.db) {
+            this.indexedDB.db.close();
+        }
+
         return new Promise((resolve) => {
             this.indexedDB = new IndexedDB(this.databaseName, false, models, resolve, this.dialog);
         });
@@ -390,13 +395,8 @@ export class PosDataPlugin extends Plugin {
 
         for (const posModel of registry.category("pos_available_models").getAll()) {
             const pythonModel = posModel.pythonModel;
-            const extraFields = posModel.extraFields || {};
-
             modelClasses[pythonModel] = posModel;
-            relations[pythonModel] = {
-                ...relations[pythonModel],
-                ...extraFields,
-            };
+            relations[pythonModel] ??= {};
         }
 
         const { models, baseData } = createRelatedModels(relations, modelClasses, this.opts);
@@ -482,10 +482,15 @@ export class PosDataPlugin extends Plugin {
         // Remove data related to models previously loaded but not anymore.
         // This can happen when uninstalling a module.
         const allModelNames = Object.keys(data);
+        const existingStoreNames = new Set(
+            this.indexedDB.dbStores.map(([, storeName]) => storeName)
+        );
         for (const [model, values] of Object.entries(localData)) {
             if (!allModelNames.includes(model)) {
-                const idsToRemove = values.map((r) => r.id);
-                await this.indexedDB.delete(model, idsToRemove);
+                if (existingStoreNames.has(model)) {
+                    const idsToRemove = values.map((r) => r.id);
+                    await this.indexedDB.delete(model, idsToRemove);
+                }
                 delete localData[model];
             }
         }
