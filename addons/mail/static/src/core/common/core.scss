@@ -71,6 +71,8 @@ $o-bubble-colors: (
 .o-discuss-dropdownMenu {
     --Dropdown_menu-margin-y: 0;
 
+    padding: $dropdown-padding-y $dropdown-padding-x;
+
     &.o-simulateDarkTheme {
         background-color: $gray-800;
         border-color: $gray-700 !important;
@@ -94,13 +96,44 @@ $o-bubble-colors: (
         }
     }
 
-    &:not(.o-simulateDarkTheme) {
-        background-color: $o-view-background-color;
+    .popover-arrow {
+        --position-max: calc(100% - #{map-get($spacers, 4)});
     }
 
-    .o_bottom_sheet_sheet:has(&) {
-        background-color: $gray-100;
-        box-shadow: unset !important;
+    .dropdown-item {
+        --#{$prefix}dropdown-item-padding-y: #{$dropdown-item-padding-y};
+        --#{$prefix}dropdown-item-padding-x: #{$dropdown-item-padding-x};
+        --#{$prefix}dropdown-item-border-radius: calc(#{$dropdown-border-radius - $dropdown-padding-x});
+        --#{$prefix}gradient: 0;
+
+        font-size: $dropdown-font-size;
+
+        &:hover {
+            background-color: $dropdown-link-hover-bg;
+        }
+    }
+}
+
+.o-discuss-ellipsisButton {
+    @include material-icon-base;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    padding: 0;
+    border-radius: 50%;
+    --btn-border-color: #{rgba($dark, var(--o-discuss-ellipsisButton-mutedBorderOpacity, .5))};
+    --btn-hover-border-color: #{$dark};
+    --btn-active-border-color: #{$o-action};
+    --btn-hover-color: #{color-contrast($light)};
+    --btn-active-color: #{color-contrast($light)};
+
+    &::before {
+        content: "more_horiz" / ""; // empty alt text: keeps the ligature out of the accessible name
+        font-size: map-get($icon-sizes, 'lg'); // .oi-lg
+        width: #{$oi-fw-ratio}em; // .oi-fw
+        text-align: center;
     }
 }
 

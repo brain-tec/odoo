@@ -38,8 +38,10 @@
         'data/digest_data.xml',
         'views/website_technical_views.xml',
         'views/website_templates.xml',
+        'views/theme_colors_preview.xml',
         'views/snippets/snippets.xml',
         'views/snippets/s_announcement_scroll.xml',
+        'views/snippets/s_animated_number.xml',
         'views/snippets/s_framed_intro.xml',
         'views/snippets/s_title.xml',
         'views/snippets/s_cover.xml',
@@ -474,6 +476,11 @@
             'website/static/src/components/googleplaces_autocomplete/*',
             'website/static/src/js/send_mail_form.js',
             'website/static/src/mail/core/common/**/*',
+        ],
+        'website.assets_theme_colors_preview': [
+            ('include', 'web._assets_helpers'),
+            'html_builder/static/src/core/operation.edit.scss',
+            'website/static/src/scss/theme_colors_preview.scss',
         ],
         'html_editor.assets_media_dialog': [
             'website/static/src/components/media_dialog/*',

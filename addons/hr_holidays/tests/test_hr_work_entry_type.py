@@ -56,23 +56,22 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
             self.assertEqual(employee.leave_date_from, leave_0.request_date_from)
             self.assertEqual(employee.leave_date_to, employee._get_first_working_interval_batch({employee.id: leave_0.date_to}).get(employee.id).date())
 
-        with self.assertRaises(ValidationError):
-            leave_1 = self.env['hr.leave'].create({
+        # leaves overlap between time on and time off is allowed even without allow_request_on_top
+        leave_1 = self.env['hr.leave'].create({
                 'name': 'Doctor Appointment',
                 'employee_id': employee.id,
                 'work_entry_type_id': work_entry_type.id,
                 'request_date_from': '2025-09-03',
                 'request_date_to': '2025-09-03',
         })
-
-        worked_work_entry_type.allow_request_on_top = True
-        leave_1 = self.env['hr.leave'].create({
-            'name': 'Doctor Appointment',
-            'employee_id': employee.id,
-            'work_entry_type_id': work_entry_type.id,
-            'request_date_from': '2025-09-03',
-            'request_date_to': '2025-09-03',
-        })
+        with self.assertRaises(ValidationError):
+            self.env['hr.leave'].create({
+                'name': 'Doctor Appointment',
+                'employee_id': employee.id,
+                'work_entry_type_id': work_entry_type.id,
+                'request_date_from': '2025-09-03',
+                'request_date_to': '2025-09-03',
+            })
 
         self.assertEqual(
             self.env['resource.calendar.leaves'].search([('holiday_id', '=', leave_1.id)]).count_as,
@@ -396,9 +395,17 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
         window over a 24h day: 3 / 24 = 0.125. The custom hours unit means the
         result is left unrounded.
         """
-        employee = self._duration_employee('Flexible', resource_calendar_id=False)
+        flexible_calendar = self.env['resource.calendar'].create({
+            'name': 'Flexible',
+            'company_id': self.company.id,
+            'calendar_type': 'undefined',
+            'attendance_ids': [],
+            'hours_per_week': 0,
+            'hours_per_day': 0,
+        })
+        employee = self._duration_employee('Flexible', resource_calendar_id=flexible_calendar.id)
         self.assertTrue(
-            employee.sudo().is_flexible,
+            employee.sudo()._is_flexible(),
             "This test is only meaningful for an employee without a schedule")
 
         leave = self.env['hr.leave'].create({
