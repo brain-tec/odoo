@@ -2728,7 +2728,8 @@ class AccountMove(models.Model):
                 copied_vals = line.copy_data()[0]
                 self.invoice_line_ids += self.env['account.move.line'].new(copied_vals)
 
-            self.currency_id = self.invoice_vendor_bill_id.currency_id
+            if self.currency_id != self.invoice_vendor_bill_id.currency_id:
+                self.currency_id = self.invoice_vendor_bill_id.currency_id
             self.fiscal_position_id = self.invoice_vendor_bill_id.fiscal_position_id
 
             # Reset
@@ -3334,7 +3335,7 @@ class AccountMove(models.Model):
         def get_base_line_tracked_fields(line):
             grouping_key = AccountTax._prepare_base_line_grouping_key(fake_base_line)
             if line.move_id.is_invoice(include_receipts=True):
-                extra_fields = ['price_unit', 'quantity', 'discount', 'deductible_percentage']
+                extra_fields = ['price_unit', 'quantity', 'discount', 'deductible_percentage', 'extra_tax_data']
             else:
                 extra_fields = ['amount_currency']
             return list(grouping_key.keys()) + extra_fields
