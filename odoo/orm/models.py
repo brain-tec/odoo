@@ -49,7 +49,6 @@ from odoo.tools import (
     SQL, sql, groupby,
 )
 from odoo.tools.constants import BIG_RECORDSET_SIZE, IN_MAX
-from odoo.tools.func import deprecated
 from odoo.tools.lru import LRU
 from odoo.tools.misc import ReversedIterable, exception_to_unicode, unquote
 from odoo.tools.safe_eval import _UNSAFE_ATTRIBUTES, safe_checker, safe_eval
@@ -914,7 +913,7 @@ class BaseModel(metaclass=MetaModel):
                 for record, xid in self.env[model].browse(ids).__ensure_xml_id():
                     for i, j in xidmap.pop((record._name, record.id)):
                         lines[i][j] = xid
-            assert not xidmap, "failed to export xids for %s" % ', '.join('{}:{}' % it for it in xidmap.items())
+            assert not xidmap, "failed to export xids for %s" % ', '.join('%s:%s' % it for it in xidmap.items())
 
         if _is_toplevel_call:
             self.env.cr.cache.pop('export_properties_cache', None)
@@ -2487,22 +2486,6 @@ class BaseModel(metaclass=MetaModel):
             if row['attnotnull']:
                 sql.drop_not_null(cr, self._table, row['attname'])
 
-    @deprecated("Since 20.0, field initialization is defined in Field.init_storage")
-    def _init_column(self, column_name):
-        """ Initialize the value of the given column for existing rows. """
-        field = self._fields[column_name]
-        columns = sql.table_columns(self.env.cr, self._table)
-        field.update_db(self, columns)
-
-    @api.ormcache()
-    @deprecated("Since 20.0, _table_has_rows is removed")
-    def _table_has_rows(self) -> bool:
-        """ Return whether the model's table has rows. This method should only
-            be used when updating the database schema (:meth:`~._auto_init`).
-        """
-        self.env.cr.execute(SQL('SELECT 1 FROM %s LIMIT 1', SQL.identifier(self._table)))
-        return bool(self.env.cr.rowcount)
-
     def _auto_init(self) -> None:
         """ Initialize the database schema of ``self``:
             - create the corresponding table,
@@ -2788,11 +2771,6 @@ class BaseModel(metaclass=MetaModel):
             )
 
         raise AccessError(error_msg)
-
-    @api.model
-    @deprecated("Since 20.0, use check_field_access()")
-    def _check_field_access(self, field: Field, operation: typing.Literal['read', 'write']) -> None:
-        return self.check_field_access(field, operation)
 
     @api.readonly
     def read(self, fields: Sequence[str] | None = None, load: str = '_classic_read') -> list[ValuesType]:
@@ -3571,32 +3549,6 @@ class BaseModel(metaclass=MetaModel):
             accessible_ids = set(accessible._ids)
             for id_ in records._ids:
                 access[id_] = id_ in accessible_ids
-
-    @deprecated("Since 20.0, use Model._access_domain instead")
-    def _check_access(self, operation: str) -> tuple[Self, Callable] | None:
-        """ Return ``None`` if the current user has permission to perform
-        ``operation`` on the records ``self``. Otherwise, return a pair
-        ``(records, function)`` where ``records`` are the forbidden records, and
-        ``function`` can be used to create some corresponding exception.
-
-        This method provides the base implementation of
-        methods :meth:`check_access`, :meth:`has_access`
-        and :meth:`_filtered_access`. The method may be overridden in order to
-        restrict the access to ``self``.
-        """
-        domain = self._access_domain(operation)
-        if domain.is_false():
-            return self, functools.partial(self._make_access_error_message, operation, domain)
-
-        origin = self._origin
-        if (
-            origin
-            and domain
-            and (forbidden := origin - origin.with_context(active_test=False).sudo().filtered_domain(domain))
-        ):
-            return forbidden, functools.partial(forbidden._make_access_error_message, operation, domain)
-
-        return None
 
     @api.model
     @api.ormcache('operation', 'self.env._access_context')
@@ -5385,21 +5337,6 @@ class BaseModel(metaclass=MetaModel):
             return list(self._ids)  # already real records
         return list(OriginIds(self._ids))
 
-    @property
-    @deprecated("Deprecated since 19.0, use self.env.cr directly")
-    def _cr(self):
-        return self.env.cr
-
-    @property
-    @deprecated("Deprecated since 19.0, use self.env.uid directly")
-    def _uid(self):
-        return self.env.uid
-
-    @property
-    @deprecated("Deprecated since 19.0, use self.env.context directly")
-    def _context(self):
-        return self.env.context
-
     #
     # Conversion methods
     #
@@ -5818,8 +5755,68 @@ class BaseModel(metaclass=MetaModel):
     @api.private
     def update(self, values: ValuesType) -> None:
         """ Update the records in ``self`` with ``values``. """
-        for name, value in values.items():
-            self[name] = value
+        if not self._ids or not values:
+            return
+
+        env = self.env
+        fields = self._fields
+
+        # group updates by ids {ids: [(field, value)]} for new and real records
+        new_updates = defaultdict(list)
+        real_updates = defaultdict(list)
+
+        for fname, value in values.items():
+            field = fields[fname]
+            ids = self._ids
+
+            if ((protected_ids := env._protected.get(field, ())) and
+                (protected_ids := tuple(id_ for id_ in ids if id_ in protected_ids))
+            ):
+                # records being computed: no business logic, no recomputation
+                protected_records = self.__class__(env, protected_ids, self._prefetch_ids)
+                field.write(protected_records, value)
+                if len(protected_ids) == len(ids):
+                    continue
+                ids = tuple(id_ for id_ in ids if id_ not in protected_ids)
+
+            new_ids = tuple(id_ for id_ in ids if not id_)
+            if new_ids:
+                new_updates[new_ids].append((field, value))
+                if len(new_ids) == len(ids):
+                    continue
+                ids = tuple(id_ for id_ in ids if id_)
+
+            real_updates[ids].append((field, value))
+
+        # new records: no business logic
+        for ids, field_vals in new_updates.items():
+            new_records = self.__class__(env, ids, self._prefetch_ids)
+            fields_to_protect = OrderedSet(
+                f
+                for field, _ in field_vals
+                for f in env.registry.field_computed.get(field, (field,))
+            )
+            with env.protecting(fields_to_protect, new_records):
+                new_records.modified(
+                    [field.name for field, _ in field_vals if field.relational], before=True,
+                )
+                for field, value in field_vals:
+                    field.write(new_records, value)
+                new_records.modified([field.name for field, _ in field_vals])
+
+            # special case: also assign parent records if they are new
+            for field, value in field_vals:
+                if field.inherited:
+                    parents = new_records[field.related.split('.')[0]]
+                    parents.filtered(lambda r: not r.id)[field.name] = value
+
+        # base case: full business logic
+        for ids, field_vals in real_updates.items():
+            records = self.__class__(env, ids, self._prefetch_ids)
+            records.write({
+                field.name: field.convert_to_write(value, records)
+                for field, value in field_vals
+            })
 
     @api.private
     def flush_model(self, fnames: Collection[str] | None = None) -> None:
@@ -6202,8 +6199,7 @@ class BaseModel(metaclass=MetaModel):
 
     def __setitem__(self, key: str, value: typing.Any):
         """ Assign the field ``key`` to ``value`` in record ``self``. """
-        # important: one must call the field's setter
-        return self._fields[key].__set__(self, value)
+        self.update({key: value})
 
     #
     # Cache and recomputation management
