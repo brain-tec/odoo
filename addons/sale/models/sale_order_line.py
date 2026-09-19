@@ -2214,16 +2214,17 @@ class SaleOrderLine(models.Model):
         line, depending on whether the linked line is saved in the DB.
         """
         self.ensure_one()
-        return (
-            self.linked_line_id
-            or (
-                self.linked_virtual_id
-                and self.order_id.order_line.filtered(
-                    lambda line: line.virtual_id == self.linked_virtual_id
-                ).ensure_one()
-            )
-            or self.env["sale.order.line"]
-        )
+        if self.id and self.linked_line_id:
+            return self.linked_line_id
+        if origin := self.linked_line_id._origin:
+            return self.order_id.order_line.filtered(
+                lambda line: line._origin == origin
+            ).ensure_one()
+        if self.linked_virtual_id:
+            return self.order_id.order_line.filtered(
+                lambda line: line.virtual_id == self.linked_virtual_id
+            ).ensure_one()
+        return self.env["sale.order.line"]
 
     def _get_linked_lines(self):
         """Return the linked lines of this line, if any."""
@@ -2288,10 +2289,6 @@ class SaleOrderLine(models.Model):
             and not self.combo_item_id
             and not self._is_discount_line()
         )
-
-    def _get_rounding(self):
-        self.ensure_one()
-        return self.product_uom_id.rounding
 
     def _is_analytic_reinvoice_line(self):
         self.ensure_one()
