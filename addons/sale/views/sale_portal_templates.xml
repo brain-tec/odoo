@@ -831,9 +831,10 @@
                                                 class="text-nowrap"/>
                                         </div>
                                         <div class="d-flex flex-wrap align-items-center gap-2 mt-1 small text-muted">
-                                            <span>1 Units</span>
+                                            <span t-field="line.section_qty"/>
+                                            <span t-field="line.section_uom_id"/>
                                             <span>×</span>
-                                            <span t-out="section_line['price_subtotal']"
+                                            <span t-out="section_line['price_subtotal']/line.section_qty"
                                                 t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"/>
                                         </div>
                                         <div t-if="display_taxes and section_line.get('tax_labels')"
@@ -1188,7 +1189,7 @@
                                         <td name="td_section_group_priceunit" class="d-none d-sm-table-cell text-end text-nowrap">
                                             <span
                                                 t-if="show_section_total"
-                                                t-out="section_line['price_subtotal']"
+                                                t-out="section_line['price_subtotal']/line.section_qty"
                                                 t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"
                                             />
                                         </td>
