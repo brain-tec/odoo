@@ -76,6 +76,7 @@ export class Dashboard extends Component {
             }
             this.state.selectedCard = "";
         });
+        useBus(this.env.bus, "reload", () => this.loadDashboardData());
 
         onWillStart(async () => {
             await this.loadDashboardData();
@@ -161,7 +162,7 @@ export class Dashboard extends Component {
     getDashboardCardAdditionalClass(cardName) {
         const dashboardCardClasses = [];
         if (this.isCardDisabled(cardName)) {
-            dashboardCardClasses.push("bg-secondary text-secondary-emphasis disabled");
+            dashboardCardClasses.push("bg-300 text-700 disabled");
         } else {
             dashboardCardClasses.push(`o_dashboard_card_${CARD_COLORS_MAPPING[cardName]}`);
         }
