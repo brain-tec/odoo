@@ -471,6 +471,7 @@ class ResUsers(models.Model):
             'light_user': is_user & ~is_user_regular,
             'regular_user': is_user & is_user_regular & ~is_system,
             'group_system': is_system,
+            False: ~is_user,
         }
         return Domain.OR([domains_by_role[v] for v in value if v in domains_by_role])
 
@@ -480,7 +481,12 @@ class ResUsers(models.Model):
             user.all_group_ids = user.group_ids.all_implied_ids
 
     def _search_all_group_ids(self, operator, value):
-        return [('group_ids.all_implied_ids', operator, value)]
+        if operator in Domain.NEGATIVE_OPERATORS:
+            return NotImplemented
+        domain = Domain('group_ids.all_implied_ids', operator, value)
+        if operator == 'in' and False in value:  # relation may be falsy
+            domain |= Domain('group_ids', '=', False)
+        return domain
 
     @api.depends('name')
     def _compute_signature(self):

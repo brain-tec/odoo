@@ -25,7 +25,7 @@ import unicodedata
 import warnings
 import zlib
 from collections import defaultdict
-from collections.abc import Iterable, Iterator, Mapping, MutableMapping, MutableSet, Reversible
+from collections.abc import Iterable, Iterator, Mapping, MutableMapping, MutableSet, Reversible, Set as AbstractSet
 from contextlib import ContextDecorator, contextmanager
 from difflib import HtmlDiff
 from functools import lru_cache, reduce, wraps
@@ -1032,6 +1032,16 @@ class OrderedSet[T](MutableSet[T]):
         other = set(other)
         return self._from_iterable(value for value in self if value in other)
 
+    def __sub__(self, other):
+        # preserve order of this set
+        if isinstance(other, OrderedSet):
+            other = other._map
+        elif not isinstance(other, AbstractSet):
+            if not isinstance(other, Iterable):
+                return NotImplemented
+            other = set(other)
+        return self._from_iterable(value for value in self if value not in other)
+
     def add(self, elem):
         self._map[elem] = None
 
@@ -1587,7 +1597,7 @@ def format_amount(env: Environment, amount: float, currency, lang_code: str | No
     formatted_amount = lang.format(fmt, currency.round(amount), grouping=True)\
         .replace(r' ', u'\N{NO-BREAK SPACE}').replace(r'-', u'-\N{ZERO WIDTH NO-BREAK SPACE}')
 
-    if not trailing_zeroes:
+    if not trailing_zeroes and currency.decimal_places:
         formatted_amount = re.sub(fr'{re.escape(lang.decimal_point)}?0+$', '', formatted_amount)
 
     pre = post = u''
