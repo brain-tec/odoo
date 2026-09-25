@@ -478,7 +478,12 @@ class SaleOrderLine(models.Model):
             line.product_template_id = line.product_id.product_tmpl_id
 
     def _search_product_template_id(self, operator, value):
-        return [("product_id.product_tmpl_id", operator, value)]
+        if operator in Domain.NEGATIVE_OPERATORS:
+            return NotImplemented
+        domain = Domain("product_id.product_tmpl_id", operator, value)
+        if operator == 'in' and False in value:  # relation may be falsy
+            domain |= Domain('product_id', '=', False)
+        return domain
 
     @api.depends("product_id")
     def _compute_is_product_archived(self):
@@ -1766,6 +1771,13 @@ class SaleOrderLine(models.Model):
             if not self.product_template_id:
                 self.product_id = False
                 self.name = ""
+
+    @api.onchange("label")
+    def _onchange_label(self):
+        """Immediately apply the label inverse to set the line name and prevent subsequent onchanges
+        from resetting it.
+        """
+        self._inverse_label()
 
     # === CRUD METHODS ===#
 
