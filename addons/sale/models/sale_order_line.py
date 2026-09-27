@@ -773,14 +773,22 @@ class SaleOrderLine(models.Model):
             if not line.order_id or line.is_downpayment or line._is_global_discount():
                 continue
 
-            # check if the price has been manually set or there is already invoiced amount.
-            # if so, the price shouldn't change as it might have been manually edited.
-            if (
-                (not force_recompute and has_manual_price(line))
-                or line.qty_invoiced > 0
-                or (line.product_id.reinvoice_policy == "cost" and line.is_expense)
+            if line.qty_invoiced > 0 or (
+                line.product_id.reinvoice_policy == "cost" and line.is_expense
             ):
                 continue
+
+            manual_price = has_manual_price(line)
+
+            # If the price was manually set (!= technical_price_unit), price shouldn't be reset
+            # unless it was requested (pricelist change).
+            if not force_recompute and manual_price:
+                continue
+
+            # The price of productless lines shouldn't be reset when the pricelist changes
+            if force_recompute and not line.product_id and manual_price:
+                continue
+
             line = line.with_context(sale_write_from_compute=True)
             if not line.product_uom_id or not line.product_id:
                 line.price_unit = 0.0
@@ -1978,6 +1986,11 @@ class SaleOrderLine(models.Model):
             return self._get_discounted_price()
 
         return super()._get_catalog_unit_price(parent_record, **kwargs)
+
+    def _get_product_catalog_lines_data(self, parent_record, **kwargs):
+        lines_data = super()._get_product_catalog_lines_data(parent_record, **kwargs)
+        lines_data["readOnly"] |= bool(self.combo_item_id)
+        return lines_data
 
     def _can_be_unlinked_from_catalog(self):
         return super()._can_be_unlinked_from_catalog() and self.state in {"draft", "sent"}
