@@ -1,6 +1,6 @@
 .o_project_sharing {
     .o_control_panel {
-        // to be able to vertically center the content of the control panel since there is no menu header displayed in project sharing
+        /* to be able to vertically center the content of the control panel since there is no menu header displayed in project sharing */
         padding-top: 16px !important;
     }
     .o-mail-Message-header {
@@ -13,7 +13,11 @@
 }
 .o_card_record {
     &.o_kanban_record_colored::after {
-            @include o-position-absolute(0, auto, 0, 0);
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: auto;
             width: 6px;
             border-right: 4px solid transparent;
             border-radius: inherit;

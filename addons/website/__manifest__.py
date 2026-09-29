@@ -390,7 +390,7 @@
             'website/static/src/scss/color_palettes.scss',
             'website/static/src/scss/view_hierarchy.scss',
             'website/static/src/scss/website.backend.scss',
-            'website/static/src/scss/website_visitor_views.scss',
+            'website/static/src/scss/website_visitor_views.css',
             'website/static/src/js/backend/**/*',
             'website/static/src/js/tours/tour_utils.js',
             'website/static/src/js/text_processing.js',
@@ -408,12 +408,12 @@
             'website/static/src/js/utils.js',
             'web/static/src/core/autocomplete/*',
             'website/static/src/components/autocomplete_with_pages/*',
-            'website/static/src/scss/website_controller_page_kanban.scss',
+            'website/static/src/scss/website_controller_page_kanban.css',
             'website/static/src/mail/core/common/**/*',
         ],
         "web.assets_web_dark": [
-            'website/static/src/components/dialog/*.dark.scss',
-            'website/static/src/scss/website.backend.dark.scss',
+            'website/static/src/components/dialog/*.dark.css',
+            'website/static/src/scss/website.backend.dark.css',
             'website/static/src/components/website_loader/website_loader.dark.scss'
         ],
         'web.assets_unit_tests': [
@@ -493,11 +493,12 @@
             'web/static/lib/bootstrap/scss/_maps.scss',
             'website/static/src/components/resource_editor/**/*',
             'website/static/src/components/edit_head_body_dialog/edit_head_body_dialog.js',
-            'website/static/src/components/edit_head_body_dialog/edit_head_body_dialog.scss',
+            'website/static/src/components/edit_head_body_dialog/edit_head_body_dialog.css',
             'website/static/src/components/edit_head_body_dialog/edit_head_body_dialog.xml',
             'website/static/src/utils/**/*',
             'website/static/src/components/dialog/*.js',
             'website/static/src/components/dialog/*.scss',
+            'website/static/src/components/dialog/*.css',
             'website/static/src/components/dialog/*.xml',
             'website/static/src/components/editor/editor.scss',
             'website/static/src/components/navbar/navbar.js',
@@ -513,7 +514,7 @@
             'website/static/src/js/backend/**/*',
 
             # Don't include dark mode files in light mode
-            ('remove', 'website/static/src/components/dialog/*.dark.scss'),
+            ('remove', 'website/static/src/components/dialog/*.dark.css'),
         ],
         'website.website_builder_assets': [
             ('include', 'html_builder.assets'),
