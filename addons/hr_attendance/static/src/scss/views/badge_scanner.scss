@@ -6,7 +6,8 @@
     align-items: center;
 
     @include media-breakpoint-up(md) {
-        @include o-position-absolute(0, 0, 0, 0);
+        position: absolute;
+        inset: 0;
     }
 }
 
@@ -21,8 +22,8 @@
             height: 185px;
             width: 275px;
         }
-        // In order to have the o_mobile_barcode button on both the image and the label,
-        // We use negative margin at the bottom and 0 opacity (since not needed in the view)
+        /* In order to have the o_mobile_barcode button on both the image and the label, */
+        /* We use negative margin at the bottom and 0 opacity (since not needed in the view) */
         .o_mobile_barcode {
             opacity: 0;
             height: 225px;
