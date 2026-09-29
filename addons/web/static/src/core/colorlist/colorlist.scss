@@ -33,7 +33,8 @@
 
         &.active {
             #{$-child}::after {
-                @include o-position-absolute(0, 0, 0, 0);
+                position: absolute;
+                inset: 0;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -58,13 +59,13 @@
     }
 }
 
-// No Color
+/* No Color */
 .o_colorlist_item_color_0 {
     background: transparent;
     box-shadow: inset 0 0 0 1px $gray-500;
 }
 
-// Set all the colors but the "no-color" one
+/* Set all the colors but the "no-color" one */
 @for $size from 2 through length($o-colors) {
     .o_colorlist_item_color_#{$size - 1} {
         @include o-print-color(nth($o-colors, $size), background-color, bg-opacity);

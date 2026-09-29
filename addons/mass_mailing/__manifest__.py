@@ -91,6 +91,7 @@
             'web/static/src/scss/animation.scss',
             'web/static/src/scss/mimetypes.scss',
             'web/static/src/scss/ui.scss',
+            'web/static/src/core/utils/text_overflow.css',
         ],
         # Minimal assets for theme selector iframe
         'mass_mailing.assets_iframe_theme_selector': [
@@ -174,7 +175,7 @@
             'mass_mailing/static/src/scss/mass_mailing_mobile_preview.scss',
             'mass_mailing/static/src/js/tours/**/*',
             # Don't include dark mode files in light mode
-            ('remove', 'mass_mailing/static/src/**/*.dark.scss'),
+            ('remove', 'mass_mailing/static/src/**/*.dark.css'),
             # Don't include shadowdom specific style
             ('remove', 'mass_mailing/static/src/**/*.shadowdom.scss'),
         ],
@@ -182,7 +183,7 @@
             'mass_mailing/static/src/views/mass_mailing_subscription_graph_renderer.js',
         ],
         'web.assets_web_dark': [
-            'mass_mailing/static/src/**/*.dark.scss',
+            'mass_mailing/static/src/**/*.dark.css',
         ],
         'mass_mailing.assets_mail_themes': [
             'mass_mailing/static/src/scss/themes/**/*',
