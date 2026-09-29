@@ -2853,6 +2853,15 @@ class AccountMove(models.Model):
             self.name = False
             self._compute_name()
 
+    @api.onchange('document_tax_mode')
+    def _onchange_document_tax_mode(self):
+        for move in self:
+            # Managed here due to limitations of the account.move.line model in
+            # handling related fields: the lines being edited keep the mode of
+            # the previous value, so their totals are not recomputed.
+            for line in move.invoice_line_ids:
+                line.document_tax_mode = move.document_tax_mode
+
     @api.onchange('invoice_cash_rounding_id')
     def _onchange_invoice_cash_rounding_id(self):
         for move in self:
@@ -6612,7 +6621,16 @@ class AccountMove(models.Model):
         '''
         self.ensure_one()
         partial = self.env['account.partial.reconcile'].browse(partial_id)
-        (partial.credit_move_id + partial.debit_move_id).remove_move_reconcile()
+        (partial.credit_move_id + partial.debit_move_id).move_id._remove_reconciliation_between_moves()
+
+    def _remove_reconciliation_between_moves(self):
+        """ Undo the reconciliation between the journal entries in self, on every account, while keeping the
+        reconciliation of these entries with any other journal entry.
+        """
+        self.env['account.partial.reconcile'].search([
+            ('debit_move_id.move_id', 'in', self.ids),
+            ('credit_move_id.move_id', 'in', self.ids),
+        ]).unlink()
 
     def set_moves_checked(self, is_checked=True):
         for move in self.filtered(lambda m: m.state == 'posted'):
