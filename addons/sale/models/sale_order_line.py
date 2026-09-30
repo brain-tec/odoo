@@ -1067,7 +1067,16 @@ class SaleOrderLine(models.Model):
     def _prepare_qty_invoiced(self):
         invoiced_qties = defaultdict(float)
         for line in self:
-            for invoice_line in line._get_invoice_lines():
+            invoice_lines = line._get_invoice_lines()
+            for invoice_line in invoice_lines:
+                if line.is_downpayment:
+                    if not line.currency_id.is_zero(sum(invoice_lines.filtered(lambda l: l.move_id.state != 'cancel').mapped('balance'))):
+                        invoiced_qties[line] = 1
+                        line.qty_invoiced = 1
+                    else:
+                        invoiced_qties[line] = 0
+                        line.qty_invoiced = 0
+                    continue
                 if invoice_line.move_id.state != 'cancel' or invoice_line.move_id.payment_state == 'invoicing_legacy':
                     invoice_qty = invoice_line.product_uom_id._compute_quantity(invoice_line.quantity, line.product_uom_id, round=False)
                     if invoice_line.move_id.move_type == 'out_invoice':
@@ -1353,9 +1362,16 @@ class SaleOrderLine(models.Model):
 
     # === ONCHANGE METHODS ===#
 
+    def onchange(self, values, field_names, fields_spec):
+        self_with_context = self
+        if not field_names:
+            # Some onchange methods should not apply to first onchange
+            self_with_context = self.with_context(sale_onchange_first_call=True)
+        return super(SaleOrderLine, self_with_context).onchange(values, field_names, fields_spec)
+
     @api.onchange('product_id')
     def _onchange_product_id(self):
-        if not self.product_id:
+        if not self.product_id or self.env.context.get("sale_onchange_first_call"):
             return
         self._reset_price_unit()
 
