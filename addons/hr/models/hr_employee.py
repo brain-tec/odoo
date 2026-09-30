@@ -632,6 +632,13 @@ class HrEmployee(models.Model):
             else:
                 version = employee.current_version_id
             employee.version_id = version
+            contract_type_field = self._fields.get('contract_type_id')
+            structure_type_field = self._fields.get('structure_type_id')
+            # Ensure the fields are fully initialized as computed and stored to prevent crashes during database setup.
+            if contract_type_field and contract_type_field.compute and contract_type_field.store:
+                self.env.add_to_compute(contract_type_field, employee)
+            if structure_type_field and structure_type_field.compute and structure_type_field.store:
+                self.env.add_to_compute(structure_type_field, employee)
 
     def _compute_child_count(self):
         employee_read_group = self._read_group(
@@ -1602,8 +1609,10 @@ class HrEmployee(models.Model):
     def _verify_barcode(self):
         for employee in self:
             if employee.barcode:
-                if not (re.match(r'^[A-Za-z0-9]+$', employee.barcode) and len(employee.barcode) <= 18):
-                    raise ValidationError(_("The Badge ID must be alphanumeric without any accents and no longer than 18 characters."))
+                # [!-~] matches every printable ASCII character except the space,
+                # which is excluded because leading or trailing spaces are invisible
+                if not re.fullmatch(r'[!-~]{1,18}', employee.barcode):
+                    raise ValidationError(_("The Badge ID must contain only printable ASCII characters, without spaces, and be no longer than 18 characters."))
 
     @api.onchange('user_id')
     def _onchange_user(self):
