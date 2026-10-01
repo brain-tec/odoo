@@ -132,6 +132,13 @@ function convertToOnChange(model, values, specification) {
         const field = model._fields[fname];
         if (isM2OField(field.type) && typeof val === "number") {
             values[fname] = getRelation(field).web_read(val, specification[fname].fields || {})[0];
+        } else if (isM2OField(field.type) && isObject(val)) {
+            // a many2one value can be given as the values of the co-record (e.g. the inverse field
+            // of a new x2many record): the server returns it as a web_read value if that co-record
+            // exists, and false otherwise, as a new record can't be represented client side
+            values[fname] = val.id
+                ? getRelation(field).web_read(val.id, specification[fname].fields || {})[0]
+                : false;
         } else if (isX2MField(field)) {
             const coModel = getRelation(field);
             for (const cmd of val) {
@@ -165,6 +172,20 @@ function createRawInstance(ModelClass) {
     const model = new ModelClass();
     modelInstanceLock--;
     return model;
+}
+
+/**
+ * @param {Model} model
+ * @param {string[]} errorMessages
+ */
+function ensureNoErrors(model, errorMessages) {
+    if (errorMessages.length) {
+        throw new MockServerError(
+            `Errors in model "${model._name}":\n${errorMessages
+                .map((msg) => `- ${msg}`)
+                .join("\n")}`
+        );
+    }
 }
 
 /**
@@ -319,12 +340,18 @@ function getModelDefinition(previous, constructor) {
     }
 
     // Fields declared on '_fields' object
+    /** @type {string[]} */
+    const errorMessages = [];
     for (const [fieldName, fieldDef] of Object.entries(model._fields)) {
         if (!fieldDef) {
             delete model._fields[fieldName];
             continue;
         }
-        validateFieldDefinition(fieldName, fieldDef);
+        if (S_FIELD_REQUIRED_KEYS in fieldDef && fieldDef.name) {
+            errorMessages.push(
+                `Cannot set the name of field "${fieldName}" from its definition: got "${fieldDef.name}"`
+            );
+        }
     }
 
     // Fields declared as JS class fields (do not override explicit fields)
@@ -333,9 +360,11 @@ function getModelDefinition(previous, constructor) {
             // Not a field
             continue;
         }
-        model._fields[fieldName] ||= validateFieldDefinition(fieldName, fieldDef);
+        model._fields[fieldName] ||= fieldDef;
         delete model[fieldName];
     }
+
+    ensureNoErrors(model, errorMessages);
 
     return model;
 }
@@ -534,108 +563,6 @@ function isValidCommand(command) {
         return false;
     }
     return command.length <= 3;
-}
-
-/**
- * @param {ModelRecord} record
- * @param {FieldDefinition} fieldDef
- * @param {unknown} value
- * @returns {null | string} null = valid - string = description of expected value
- */
-function isValidFieldValue(record, fieldDef) {
-    const value = record[fieldDef.name];
-    if (value === false) {
-        // False is the accepted default for all field types
-        return null;
-    }
-    let isValid = true;
-    switch (fieldDef.type) {
-        case "binary":
-        case "char":
-        case "html":
-        case "text": {
-            isValid = typeof value === "string";
-            break;
-        }
-        case "boolean": {
-            isValid = typeof value === "boolean";
-            break;
-        }
-        case "date": {
-            isValid = R_DATE.test(String(value));
-            break;
-        }
-        case "datetime": {
-            isValid = R_DATE_TIME.test(String(value));
-            break;
-        }
-        case "float":
-        case "monetary": {
-            isValid = typeof value === "number";
-            break;
-        }
-        case "integer": {
-            isValid = Number.isInteger(value);
-            break;
-        }
-        case "many2many":
-        case "one2many": {
-            if (!Array.isArray(value)) {
-                isValid = false;
-            } else if (
-                !value.every((id) => {
-                    if (Array.isArray(id)) {
-                        return isValidCommand(id);
-                    } else {
-                        return isValidId(id, fieldDef, record);
-                    }
-                })
-            ) {
-                return `an id referencing a "${fieldDef.relation}" record`;
-            }
-            break;
-        }
-        case "many2one":
-        case "many2one_reference": {
-            if (!isValidId(value, fieldDef, record)) {
-                return `an id referencing a "${fieldDef.relation}" record`;
-            }
-            break;
-        }
-        case "properties": {
-            isValid = isObject(value);
-            break;
-        }
-        case "properties_definition": {
-            isValid = value.every(
-                (def) => typeof def.name === "string" && typeof def.type === "string"
-            );
-            break;
-        }
-        case "reference": {
-            const [modelName, id] = getReferenceValue(value);
-            if (!fieldDef.selection.some(([selValue]) => selValue === modelName)) {
-                return formatList(
-                    "or",
-                    fieldDef.selection.map(([selValue]) => safeStringify(selValue))
-                );
-            }
-            if (!isValidId(id, { ...fieldDef, relation: modelName }, record)) {
-                return `an id referencing a "${modelName}" record`;
-            }
-            break;
-        }
-        case "selection": {
-            if (!fieldDef.selection.some(([selValue]) => selValue === value)) {
-                return formatList(
-                    "or",
-                    fieldDef.selection.map(([selValue]) => safeStringify(selValue))
-                );
-            }
-            break;
-        }
-    }
-    return isValid ? null : `"${fieldDef.type}" value`;
 }
 
 /**
@@ -1289,16 +1216,105 @@ function updateComodelRelationalFields(model, record, originalRecord) {
 }
 
 /**
- * @param {string} fieldName
+ * @param {ModelRecord} record
  * @param {FieldDefinition} fieldDef
+ * @param {unknown} value
+ * @returns {null | string} null = valid - string = description of expected value
  */
-function validateFieldDefinition(fieldName, fieldDef) {
-    if (S_FIELD_REQUIRED_KEYS in fieldDef && fieldDef.name) {
-        throw new MockServerError(
-            `Cannot set the name of field "${fieldName}" from its definition: got "${fieldDef.name}"`
-        );
+function validateFieldValue(record, fieldDef) {
+    const value = record[fieldDef.name];
+    if (value === false) {
+        // False is the accepted default for all field types
+        return null;
     }
-    return fieldDef;
+    let isValid = true;
+    switch (fieldDef.type) {
+        case "binary":
+        case "char":
+        case "html":
+        case "text": {
+            isValid = typeof value === "string";
+            break;
+        }
+        case "boolean": {
+            isValid = typeof value === "boolean";
+            break;
+        }
+        case "date": {
+            isValid = R_DATE.test(String(value));
+            break;
+        }
+        case "datetime": {
+            isValid = R_DATE_TIME.test(String(value));
+            break;
+        }
+        case "float":
+        case "monetary": {
+            isValid = typeof value === "number";
+            break;
+        }
+        case "integer": {
+            isValid = Number.isInteger(value);
+            break;
+        }
+        case "many2many":
+        case "one2many": {
+            if (!Array.isArray(value)) {
+                isValid = false;
+            } else if (
+                !value.every((id) => {
+                    if (Array.isArray(id)) {
+                        return isValidCommand(id);
+                    } else {
+                        return isValidId(id, fieldDef, record);
+                    }
+                })
+            ) {
+                return `an id referencing a "${fieldDef.relation}" record`;
+            }
+            break;
+        }
+        case "many2one":
+        case "many2one_reference": {
+            if (!isValidId(value, fieldDef, record)) {
+                return `an id referencing a "${fieldDef.relation}" record`;
+            }
+            break;
+        }
+        case "properties": {
+            isValid = isObject(value);
+            break;
+        }
+        case "properties_definition": {
+            isValid = value.every(
+                (def) => typeof def.name === "string" && typeof def.type === "string"
+            );
+            break;
+        }
+        case "reference": {
+            const [modelName, id] = getReferenceValue(value);
+            if (!fieldDef.selection.some(([selValue]) => selValue === modelName)) {
+                return formatList(
+                    "or",
+                    fieldDef.selection.map(([selValue]) => safeStringify(selValue))
+                );
+            }
+            if (!isValidId(id, { ...fieldDef, relation: modelName }, record)) {
+                return `an id referencing a "${modelName}" record`;
+            }
+            break;
+        }
+        case "selection": {
+            if (!fieldDef.selection.some(([selValue]) => selValue === value)) {
+                return formatList(
+                    "or",
+                    fieldDef.selection.map(([selValue]) => safeStringify(selValue))
+                );
+            }
+            break;
+        }
+    }
+    return isValid ? null : `"${fieldDef.type}" value`;
 }
 
 /**
@@ -2233,6 +2249,9 @@ export class Model extends Array {
                 }
             }
             Object.assign(onchangeValues, defaultValues);
+            // on the first call, the server returns the values of all fields of the spec, so the
+            // values it received are part of the result as well
+            Object.assign(onchangeValues, pick(values, ...fieldsFromView));
         }
 
         const finalValues = { ...serverValues, ...onchangeValues, ...values };
@@ -2254,6 +2273,18 @@ export class Model extends Array {
         return {
             value: convertToOnChange(this, onchangeValues, fieldsSpec),
         };
+    }
+
+    /**
+     * @param {Record<string, any>[]} valuesList
+     * @param {MaybeIterable<string>} fieldNames
+     * @param {Record<string, any>} fieldsSpec
+     */
+    onchange_batch(valuesList, fieldNames, fieldsSpec) {
+        const kwargs = getKwArgs(arguments, "values_list", "field_names", "fields_spec");
+        ({ values_list: valuesList, field_names: fieldNames, fields_spec: fieldsSpec } = kwargs);
+
+        return valuesList.map((values) => this.onchange([], values, fieldNames, fieldsSpec));
     }
 
     /**
@@ -3119,23 +3150,25 @@ export class Model extends Array {
         }
 
         // Validate record values
+        /** @type {string[]} */
+        const errorMessages = [];
         for (const record of this) {
             for (const fieldName of Object.keys(record)) {
-                const fieldDef = this._fields[fieldName];
-                const expected = isValidFieldValue(record, fieldDef);
+                const expected = validateFieldValue(record, this._fields[fieldName]);
                 if (expected) {
-                    throw new MockServerError(
+                    errorMessages.push(
                         `Invalid value for field "${fieldName}" on ${getRecordQualifier(
                             record
-                        )} in model "${this._name}": expected ${expected} and got: ${safeStringify(
-                            record[fieldName]
-                        )}`
+                        )}: expected ${expected} and got: ${safeStringify(record[fieldName])}`
                     );
                 }
             }
-
-            updateComodelRelationalFields(this, record, originalRecords[record.id]);
+            if (!errorMessages.length) {
+                updateComodelRelationalFields(this, record, originalRecords[record.id]);
+            }
         }
+
+        ensureNoErrors(this, errorMessages);
     }
 
     /**
