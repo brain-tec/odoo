@@ -11,7 +11,7 @@ a.o-discuss-mention {
 }
 
 .o-discuss-badge {
-    --mail-discuss-badge-mutedBg: #{$gray-500};
+    --mail-discuss-badge-mutedBg: var(--gray-500);
 }
 
 .o-discuss-ellipsisButton {
@@ -19,7 +19,7 @@ a.o-discuss-mention {
 }
 
 .o-discuss-text-body {
-    color: $o-main-text-color !important;
+    color: var(--o-main-text-color) !important;
 }
 
 .o-discuss-warningBadge .i {
@@ -27,7 +27,7 @@ a.o-discuss-mention {
 }
 
 .o-secondary {
-    --o-secondary: #{$o-gray-700};
+    --o-secondary: var(--o-gray-700);
 }
 
 // dark theme variant of `o-bubble-color-vars`
@@ -48,5 +48,5 @@ a.o-discuss-mention {
 }
 
 .o_popover_card {
-    --card-bg: #{$gray-100};
+    --card-bg: var(--gray-100);
 }

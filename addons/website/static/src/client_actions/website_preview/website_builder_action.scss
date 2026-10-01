@@ -1,7 +1,7 @@
 .o-website-builder_sidebar {
     z-index: 0;
     width: 0px;
-    background-color: $o-we-sidebar-bg;
+    background-color: var(--o-we-sidebar-bg);
     transition: width ease 400ms, border 400ms;
 
     &.o_builder_sidebar_open {
@@ -44,7 +44,7 @@
     }
 
     .o-website-discard-save-buttons {
-        max-width: $o-we-sidebar-width / 2;
+        max-width: calc(var(--o-we-sidebar-width) / 2);
 
         button {
             min-width: 40%;
@@ -117,8 +117,8 @@
 
 body.o_builder_open .o_notification_manager {
     position: absolute;
-    top: map-get($spacers, 2);
+    top: var(--o-bs-spacer-2);
     left: auto;
     bottom: auto;
-    right: calc(#{$o-we-sidebar-width} + 0.5rem);
+    right: calc(var(--o-we-sidebar-width) + 0.5rem);
 }

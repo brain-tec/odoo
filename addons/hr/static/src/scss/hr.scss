@@ -4,13 +4,12 @@
 }
 
 .o_icon_employee_absent {
-    color: $warning;
+    color: var(--warning);
 }
 
 .o_hr_employee_form_view .o_form_renderer {
-    .o_statusbar_buttons {
-        flex-grow: 1 !important;
-        padding-right: 0.25rem;
+    .o_field_employee_user_status {
+        margin-left: auto;
     }
     .o_form_sheet_bg {
         max-width: unset;
@@ -104,7 +103,7 @@
     align-items: flex-start;
 
     .o_field_hr_presence_status, .o_field_hr_presence_status_private {
-        --o-hr-presence-badge-size: #{$spacer};
+        --o-hr-presence-badge-size: var(--o-bs-spacer);
 
         position: absolute;
         top: 0;
@@ -119,7 +118,7 @@
         width: var(--o-hr-presence-badge-size);
         height: var(--o-hr-presence-badge-size);
         border-radius: 50%;
-        background-color: $o-view-background-color;
+        background-color: var(--o-view-background-color);
 
         span {
             width: var(--o-hr-presence-badge-size);
