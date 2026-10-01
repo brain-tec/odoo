@@ -4,11 +4,11 @@
     &[class*="o_calendar_color_"] {
         --o-bg-opacity: 1;
 
-        border-radius: $border-radius;
-        border-color: var(--o-cw-popover-color, #{$info});
-        padding: 0 map-get($spacers, 1);
+        border-radius: var(--border-radius);
+        border-color: var(--o-cw-popover-color, var(--info));
+        padding: 0 var(--o-bs-spacer-1);
         background: RGBA(var(--o-cw-popover-color--subtle, #{to-rgb($info)}), var(--o-bg-opacity));
-        font-weight: $font-weight-normal;
+        font-weight: var(--o-bs-font-weight-normal);
 
         &:hover {
             --o-bg-opacity: .5 !important;
@@ -18,10 +18,10 @@
             --o-bg-opacity: 0;
 
             &:before {
-                margin-right: map-get($spacers, 1);
+                margin-right: var(--o-bs-spacer-1);
                 font-family: 'Material Symbols Outlined';
-                font-size: $o-font-size-base-smaller;
-                color: var(--o-cw-popover-color, #{$info});
+                font-size: var(--o-font-size-base-smaller);
+                color: var(--o-cw-popover-color, var(--info));
                 content: '\f111';
             }
 

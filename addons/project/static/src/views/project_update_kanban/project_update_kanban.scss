@@ -6,13 +6,13 @@
         }
 
         &.o_kanban_color_9::after {
-            border-right-color: $o-info !important;
-            border-left-color: $o-info !important;
+            border-right-color: var(--o-info) !important;
+            border-left-color: var(--o-info) !important;
         }
 
         &.o_kanban_color_10::after {
-            border-right-color: $o-warning !important;
-            border-left-color: $o-warning !important;
+            border-right-color: var(--o-warning) !important;
+            border-left-color: var(--o-warning) !important;
         }
 
         &.o_kanban_color_11::after {
@@ -29,8 +29,8 @@
             bottom: 0;
             width: 3px;
 
-            border-right: 2px solid $primary !important;
-            border-left: 1px solid $primary !important;
+            border-right: 2px solid var(--primary) !important;
+            border-left: 1px solid var(--primary) !important;
         }
     }
 }

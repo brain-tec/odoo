@@ -16,13 +16,13 @@
     }
 
     select:hover, select:open {
-        color: $black;
+        color: var(--o-bs-black);
     }
 
     ::picker(select) {
         right: anchor(100%);
         border: 1px solid #d8dadd;
-        border-radius: $border-radius;
+        border-radius: var(--border-radius);
     }
 
     select:not(select:open) {
@@ -30,13 +30,13 @@
     }
 
     option:hover {
-        background-color: $dropdown-link-hover-bg;
-        color: $dropdown-link-hover-color;
+        background-color: var(--o-bs-dropdown-link-hover-bg);
+        color: var(--o-bs-dropdown-link-hover-color);
     }
 
     option::checkmark {
         font: .7em/1em 'Material Symbols Outlined';
-        color: $link-color;
+        color: var(--link-color);
         content: "check";
     }
 
@@ -48,7 +48,7 @@
         width: 7px;
         height: 4px;
         background-color: currentColor;
-        mask: $o-caret-down center / contain no-repeat;
+        mask: var(--o-caret-down) center / contain no-repeat;
         transition: rotate 0.4s;
     }
 

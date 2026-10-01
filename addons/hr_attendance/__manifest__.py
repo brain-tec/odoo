@@ -41,6 +41,7 @@ actions(Check in/Check out) performed by them.
             'hr_attendance/static/src/**/*.js',
             'hr_attendance/static/src/**/*.xml',
             'hr_attendance/static/src/scss/views/*.scss',
+            'hr_attendance/static/src/scss/views/*.css',
         ],
         'web.assets_unit_tests': [
             'hr_attendance/static/tests/*.test.js',
@@ -92,6 +93,7 @@ actions(Check in/Check out) performed by them.
             "barcodes/static/src/components/barcode_scanner.xml",
             "barcodes/static/src/components/barcode_scanner.scss",
             "barcodes/static/src/barcode_plugin.js",
+            ('after', 'hr_attendance/static/src/scss/kiosk/primary_variables.scss', 'hr_attendance/static/src/scss/css_variables.scss'),
 
         ],
     },

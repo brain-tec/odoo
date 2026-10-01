@@ -8,7 +8,7 @@
 
 .modal-body .numpad-button {
   @include media-breakpoint-down(xl) {
-    padding: map-get($spacers, 2) 0;
+    padding: var(--o-bs-spacer-2) 0;
   }
 }
 
@@ -17,7 +17,7 @@
     padding: 0;
   }
   background-color: var(--bg, var(--btn-bg));
-  border: $border-width solid var(--hover-bg, var(--border-color));
+  border: var(--border-width) solid var(--hover-bg, var(--border-color));
 
   &::after {
     content: '';
@@ -33,19 +33,19 @@
 
   &:where(:not(.modal-body .numpad-button, .table-selector .numpad-button)) {
     &:first-child {
-      border-radius: $btn-border-radius 0 0 0 !important;
+      border-radius: var(--o-bs-btn-border-radius) 0 0 0 !important;
     }
 
     &:nth-child(4) {
-      border-radius: 0 $btn-border-radius 0 0 !important;
+      border-radius: 0 var(--o-bs-btn-border-radius) 0 0 !important;
     }
 
     &:nth-last-child(4) {
-      border-radius: 0 0 0 $btn-border-radius !important;
+      border-radius: 0 0 0 var(--o-bs-btn-border-radius) !important;
     }
 
     &:last-child {
-      border-radius: 0 0 $btn-border-radius 0 !important;
+      border-radius: 0 0 var(--o-bs-btn-border-radius) 0 !important;
     }
   }
 
@@ -54,13 +54,13 @@
   }
 
   &.active, &:active {
-    --border-color: var(--hover-bg, #{$o-component-active-border});
-    --btn-active-bg: var(--bg, #{$o-component-active-bg});
+    --border-color: var(--hover-bg, var(--o-component-active-border));
+    --btn-active-bg: var(--bg, var(--o-component-active-bg));
   }
 
   &:disabled {
     opacity: 1;
-    background-color: $o-gray-200;
+    background-color: var(--o-gray-200);
   }
 }
 

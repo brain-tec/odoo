@@ -28,7 +28,7 @@ $o-account-dashboard-kpi-card-gap: $o-kanban-record-margin * 2;
 
 .o_account_dashboard_kpis_wrapper {
     display: grid;
-    gap: map-get($spacers, 2);
+    gap: var(--o-bs-spacer-2);
     align-items: start;
     flex: 0 0 100%;
     max-width: 100%;
@@ -112,14 +112,14 @@ $o-account-dashboard-kpi-card-gap: $o-kanban-record-margin * 2;
     display: flex;
     flex-direction: column;
     min-height: 4.5rem;
-    padding: map-get($spacers, 2) map-get($spacers, 3);
-    border: $border-width solid $border-color;
-    border-radius: $border-radius-lg;
-    background-color: $o-view-background-color;
+    padding: var(--o-bs-spacer-2) var(--o-bs-spacer-3);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    background-color: var(--o-view-background-color);
     scroll-snap-align: start;
 
     &:not(:disabled):hover {
-        border-color: $o-brand-primary;
+        border-color: var(--o-brand-primary);
         background-color: mix($o-brand-primary, $o-view-background-color, 5%);
     }
 
@@ -133,7 +133,7 @@ $o-account-dashboard-kpi-card-gap: $o-kanban-record-margin * 2;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    gap: map-get($spacers, 3);
+    gap: var(--o-bs-spacer-3);
     border: 2px dashed #8C96A0;
     background-color: #EAECEE;
     .o_account_dashboard_kpi_header {
@@ -150,10 +150,10 @@ $o-account-dashboard-kpi-card-gap: $o-kanban-record-margin * 2;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: map-get($spacers, 2);
+    gap: var(--o-bs-spacer-2);
     font-size: 1.125rem;
-    font-weight: $font-weight-semibold;
-    color: $text-muted;
+    font-weight: var(--o-bs-font-weight-semibold);
+    color: var(--o-bs-text-muted);
 }
 
 .o_account_dashboard_kpi_image {
@@ -167,9 +167,9 @@ $o-account-dashboard-kpi-card-gap: $o-kanban-record-margin * 2;
 }
 
 .o_account_dashboard_kpi_value {
-    margin-top: map-get($spacers, 1);
-    font-size: $h4-font-size;
-    font-weight: $font-weight-semibold;
+    margin-top: var(--o-bs-spacer-1);
+    font-size: var(--o-bs-h4-font-size);
+    font-weight: var(--o-bs-font-weight-semibold);
     line-height: 1.15;
     color: $headings-color;
 }
