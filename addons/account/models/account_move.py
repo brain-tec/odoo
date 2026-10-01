@@ -2895,6 +2895,15 @@ class AccountMove(models.Model):
             self.name = False
             self._compute_name()
 
+    @api.onchange('document_tax_mode')
+    def _onchange_document_tax_mode(self):
+        for move in self:
+            # Managed here due to limitations of the account.move.line model in
+            # handling related fields: the lines being edited keep the mode of
+            # the previous value, so their totals are not recomputed.
+            for line in move.invoice_line_ids:
+                line.document_tax_mode = move.document_tax_mode
+
     @api.onchange('invoice_cash_rounding_id', 'tax_totals')
     def _onchange_ineffective_cash_rounding(self):
         cash_rounding = self.invoice_cash_rounding_id
@@ -8198,7 +8207,7 @@ class AccountMove(models.Model):
             return
 
         original_invoice = self.filtered(lambda inv: inv.move_type == 'out_invoice'
-                                         and credit_note.invoice_line_ids.sale_line_ids in inv.invoice_line_ids.sale_line_ids)
+                                         and credit_note.invoice_line_ids.sale_line_ids <= inv.invoice_line_ids.sale_line_ids)
         if len(original_invoice) == 1 and original_invoice._refunds_origin_required():
             credit_note.reversed_entry_id = original_invoice.id
 
