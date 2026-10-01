@@ -3,7 +3,7 @@
 /* section and note on sale order and invoice. */
 
 table.o_section_and_note_list_view {
-    --o-SectionAndNote-border-color: #{$gray-500};
+    --o-SectionAndNote-border-color: var(--gray-500);
 
     .o_list_section_options {
         width: 1px;  /* to prevent the column to expand */
@@ -24,7 +24,7 @@ table.o_section_and_note_list_view {
             --table-bg-type: #{rgba($body-emphasis-color, .08)};
             --ListRenderer-data-row-focused-striped-bg: var(--table-bg-type);
 
-            font-weight: $font-weight-bolder;
+            font-weight: var(--o-bs-font-weight-bolder);
 
             &:where(:not(:empty)) {
                 /* When dragging, an empty tr is created we don't want */
@@ -33,7 +33,7 @@ table.o_section_and_note_list_view {
             }
 
             &.o_dragged {
-                border-width: $border-width 0;
+                border-width: var(--border-width) 0;
             }
         }
 
@@ -41,7 +41,7 @@ table.o_section_and_note_list_view {
             --table-hover-bg: #{rgba($body-emphasis-color, .05)};
             --table-bg-type: #{rgba($body-emphasis-color, .03)};
 
-            font-weight: $font-weight-bold;
+            font-weight: var(--o-bs-font-weight-bold);
         }
 
         /* Check if next sibling is a section to apply a border-color. */

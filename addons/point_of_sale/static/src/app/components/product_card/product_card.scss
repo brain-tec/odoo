@@ -1,9 +1,9 @@
 .product {
-    --btn-border-color: #{$o-gray-200};
+    --btn-border-color: var(--o-gray-200);
 
     &:hover {
-        border: $border-width solid $border-color;
-        --btn-hover-bg: #{$o-view-background-color};
+        border: var(--border-width) solid var(--border-color);
+        --btn-hover-bg: var(--o-view-background-color);
     }
 
     @at-root .rightpane .product {
@@ -20,8 +20,8 @@
 }
 
 .product-img img {
-    border-top-right-radius: $border-radius-lg;
-    border-top-left-radius: $border-radius-lg;
+    border-top-right-radius: var(--border-radius-lg);
+    border-top-left-radius: var(--border-radius-lg);
 }
 
 .pos-receipt {
@@ -45,7 +45,7 @@
 
 @media screen and (max-width: 768px) {
     .product:active {
-        box-shadow: 0 0 0 2px $primary;
+        box-shadow: 0 0 0 2px var(--primary);
     }
 }
 

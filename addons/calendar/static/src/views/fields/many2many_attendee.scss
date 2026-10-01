@@ -2,11 +2,11 @@
     --Avatar-size: 24px;
 
     position: relative;
-    margin-right: map-get($spacers, 2);
+    margin-right: var(--o-bs-spacer-2);
 
     img:hover {
         cursor: context-menu;
-        outline: $border-width solid $o-action;
+        outline: var(--border-width) solid var(--o-action);
     }
 
     .attendee_tag_status {
@@ -16,20 +16,20 @@
         bottom: $border-width * -1;
         right: calc(var(--Avatar-size) * -0.25);
         aspect-ratio: 1;
-        border: 1px $popover-bg solid;
+        border: 1px var(--o-bs-popover-bg) solid;
     }
 
     .o_attendee_status_accepted {
         background-color: tint-color($success, 80%);
-        color: $success;
+        color: var(--success);
     }
     .o_attendee_status_declined {
         background-color: tint-color($danger, 80%);
-        color: $danger;
+        color: var(--danger);
     }
     .o_attendee_status_tentative {
-        background-color: $gray-200;
-        color: $dark;
+        background-color: var(--gray-200);
+        color: var(--dark);
     }
 }
 .o_touch_device .o_form_view .o_field_widget.o_field_many2manyattendee:has(.o_tag):has(.o_field_many2many_selection) input {

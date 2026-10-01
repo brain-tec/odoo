@@ -1,20 +1,20 @@
 .orderline {
-    border-top: $border-width solid transparent;
-    border-bottom: $border-width solid transparent;
+    border-top: var(--border-width) solid transparent;
+    border-bottom: var(--border-width) solid transparent;
     transition: $transition-base;
 
     &:hover {
-        background-color: $o-gray-200;
+        background-color: var(--o-gray-200);
     }
     
     @media (hover: none) {
         &:hover {
-            background-color: $white;
+            background-color: var(--white);
         }
     }
 
     &.selected {
-        background-color: var(--orderline-selected, #{$o-component-active-bg});
+        background-color: var(--orderline-selected, var(--o-component-active-bg));
     }
 
     &.has-change::before {
@@ -23,7 +23,7 @@
         top: -1px;
         bottom: -1px;
         width: 6px;
-        background-color: $o-brand-primary;
+        background-color: var(--o-brand-primary);
     }
 
     &.has-change:first-child::before, &.has-change:not(.has-change + .has-change)::before {

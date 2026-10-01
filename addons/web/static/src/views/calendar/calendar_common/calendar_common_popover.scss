@@ -4,19 +4,19 @@
     max-height: var(--CwPopover-max-height, 80vh);
     max-width: var(--CwPopover-max-width, 95vw);
     width: var(--CwPopover-width, 448px);
-    z-index: $zindex-modal - 1;
-    font-size: $font-size-base;
+    z-index: calc(var(--o-bs-zindex-modal) - 1);
+    font-size: var(--o-bs-font-size-base);
 
     @include media-breakpoint-down(md) {
         height: 100%;
         border-radius: inherit;
-        background: $popover-bg;
+        background: var(--o-bs-popover-bg);
         z-index: 1;
 
         .o_popover:has(&) {
             $-margin-top: #{map-get($spacers, 5) * 3};
 
-            --#{$prefix}popover-border-radius: #{map-get($spacers, 2)} #{map-get($spacers, 2)} 0 0;
+            --#{$prefix}popover-border-radius: var(--o-bs-spacer-2) var(--o-bs-spacer-2) 0 0;
             --CwPopover-max-height: calc(100dvh - #{$-margin-top});
             --CwPopover-max-width: auto;
             --CwPopover-width: 100%;
@@ -49,7 +49,7 @@
     }
 
     .o_card_popover_close {
-        margin: map-get($spacers, 3) map-get($spacers, 2);
+        margin: var(--o-bs-spacer-3) var(--o-bs-spacer-2);
     }
 
     .o_popover_header {

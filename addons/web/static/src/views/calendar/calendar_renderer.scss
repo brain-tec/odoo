@@ -1,8 +1,8 @@
 .o_calendar_renderer {
-    --o-circle-padding: calc(#{map-get($spacers, 1 )} / 2);
-    --o-cw-border-color: #{$border-color};
+    --o-circle-padding: calc(var(--o-bs-spacer-1) / 2);
+    --o-cw-border-color: var(--border-color);
 
-    background-color: $o-view-background-color;
+    background-color: var(--o-view-background-color);
 
     @include media-breakpoint-down(lg) {
         border-top: 1px solid var(--o-cw-border-color);
@@ -26,8 +26,8 @@
         /* `web/lib/fullcalendar/core/main.css` gives events with links and draggable events a hand mouse pointer, */
         /* but doesn't take into account that events have popovers. */
         cursor: pointer;
-        --fc-event-text-color: #{$body-color};
-        --fc-event-bg-color: #{$o-view-background-color};
+        --fc-event-text-color: var(--body-color);
+        --fc-event-bg-color: var(--o-view-background-color);
         overflow: hidden;
 
         @include media-breakpoint-down(md) {
@@ -35,7 +35,7 @@
         }
 
         &:hover {
-            color: $body-color;
+            color: var(--body-color);
 
             &:not(.o_event_dot) .fc-bg {
                 --o-bg-opacity: .35;
@@ -104,7 +104,7 @@
 
             display: flex;
             align-items: center;
-            gap: map-get($spacers, 1);
+            gap: var(--o-bs-spacer-1);
             border: none;
 
             &:before {
@@ -145,7 +145,7 @@
 
         /* ===  Adapt calendar table borders and general layout === */
         /* ======================================================== */
-        --fc-page-bg-color: #{$o-view-background-color};
+        --fc-page-bg-color: var(--o-view-background-color);
         --fc-border-color: var(--o-cw-border-color);
         --fc-non-business-color: #{rgba($o-gray-300, .5)};
 
@@ -199,7 +199,7 @@
             justify-content: center;
 
             .fc-more-link {
-                color: $link-color;
+                color: var(--link-color);
                 cursor: pointer;
 
                 &:hover {
@@ -218,11 +218,11 @@
                 vertical-align: middle;
 
                 a {
-                    gap: map-get($spacers, 1);
-                    margin-left: map-get($spacers, 1);
+                    gap: var(--o-bs-spacer-1);
+                    margin-left: var(--o-bs-spacer-1);
                 }
                 .o_cw_day_number {
-                    padding: map-get($spacers, 1);
+                    padding: var(--o-bs-spacer-1);
                     place-content: center;
                     line-height: 1;
                 }
@@ -240,7 +240,7 @@
                 }
 
                 .o_cw_day_number {
-                    padding: map-get($spacers, 1);
+                    padding: var(--o-bs-spacer-1);
 
                     @include media-breakpoint-up(lg) {
                         font-size: 1.25rem;
@@ -252,12 +252,12 @@
         /* ====== Both Day and Week agenda */
         .fc-timeGridDay-view,
         .fc-timeGridWeek-view {
-            --o-cw-bg: #{$o-calendar-today-background-color};
-            --o-cw-color: #{$o-calendar-today-color};
+            --o-cw-bg: var(--o-calendar-today-background-color);
+            --o-cw-color: var(--o-calendar-today-color);
 
             .fc-scrollgrid-section-body {
                 &:not(.fc-scrollgrid-section-liquid) .fc-scroller-harness {
-                    background-color: $o-view-background-color;
+                    background-color: var(--o-view-background-color);
                 }
 
                 &:first-child td {
@@ -323,7 +323,7 @@
                 @include media-only(screen) {
                     &:after {
                         position: absolute;
-                        top: $border-width;
+                        top: var(--border-width);
                         left: 0;
                         bottom: calc(-1 * var(--fc-timegrid-divider-size, 15px));
                         right: 0;
@@ -358,11 +358,11 @@
 
                 /* Prevent events with similar color to visually overlap each other */
                 &:not(.o_event_allday):not(.o_homework_event) {
-                    box-shadow: 0 0 0 1px $o-view-background-color;
+                    box-shadow: 0 0 0 1px var(--o-view-background-color);
                 }
 
                 .fc-event-main {
-                    margin: map-get($spacers, 1);
+                    margin: var(--o-bs-spacer-1);
 
                     @include media-breakpoint-up(md) {
                         margin-top: 0;
@@ -405,8 +405,8 @@
                     position: absolute;
                     height: .75rem;
                     width: .75rem;
-                    border: $border-width solid $o-view-background-color;
-                    border-radius: $border-radius-pill;
+                    border: var(--border-width) solid var(--o-view-background-color);
+                    border-radius: var(--border-radius-pill);
                     background-color: var(--o-cw-bg);
                     transform: translate(-50%, -50%);
                 }
@@ -418,7 +418,7 @@
         .fc-timeGridWeek-view, .fc-dayGridMonth-view {
             .fc-col-header-cell a {
                 text-transform: uppercase;
-                font-size: $o-font-size-base-smaller;
+                font-size: var(--o-font-size-base-smaller);
             }
         }
 
@@ -430,8 +430,8 @@
             }
 
             .o-fc-week, .o-fc-week-header {
-                line-height: $line-height-sm;
-                font-size: $o-font-size-base-smaller;
+                line-height: var(--o-bs-line-height-sm);
+                font-size: var(--o-font-size-base-smaller);
                 opacity: .5;
                 @include media-breakpoint-down(md) {
                     width: 3ch;
@@ -444,8 +444,8 @@
 
             .fc-daygrid-body tr {
                 .fc-daygrid-week-number {
-                    line-height: $line-height-sm;
-                    font-size: $o-font-size-base-smaller;
+                    line-height: var(--o-bs-line-height-sm);
+                    font-size: var(--o-font-size-base-smaller);
                     opacity: .8;
 
                     @include media-breakpoint-down(lg) {
@@ -455,7 +455,7 @@
                     }
 
                     @include media-breakpoint-up(lg) {
-                        padding: map-get($spacers, 1);
+                        padding: var(--o-bs-spacer-1);
                     }
                 }
                 .fc-day {
@@ -471,7 +471,7 @@
                     .fc-daygrid-week-number {
                         /* only in Month view */
                         @include media-breakpoint-down(lg) {
-                            background-color: $gray-100;
+                            background-color: var(--gray-100);
                         }
                     }
 
@@ -494,8 +494,8 @@
                     }
 
                     &.fc-day-today {
-                        --o-cw-color: #{$o-calendar-today-color};
-                        --o-cw-bg: #{$o-calendar-today-background-color};
+                        --o-cw-color: var(--o-calendar-today-color);
+                        --o-cw-bg: var(--o-calendar-today-background-color);
 
                     }
                 }
@@ -510,7 +510,7 @@
             }
 
             .fc-event {
-                padding: 0 map-get($spacers, 1);
+                padding: 0 var(--o-bs-spacer-1);
 
                 .fc-event-main:not(.o_homework_single):not(.o_homework_multi) {
                     display: flex;
@@ -576,7 +576,7 @@
                     /* On mobile year view, make months take the full screen width. */
                     /* Using "vw" instead of "%" to keep each month weekday columns aligned. */
                     @include media-breakpoint-down(md) {
-                        width: calc(100vw - #{map-get($spacers, 5)});
+                        width: calc(100vw - var(--o-bs-spacer-5));
                     }
 
                     > .fc-toolbar.fc-header-toolbar {
@@ -585,7 +585,7 @@
                         justify-content: start;
 
                         h2 {
-                            font-size: $font-size-base;
+                            font-size: var(--o-bs-font-size-base);
                         }
                     }
 
@@ -607,7 +607,7 @@
                         }
 
                         .fc-day-header {
-                            font-size: $o-font-size-base-smaller;
+                            font-size: var(--o-font-size-base-smaller);
                         }
                     }
 
@@ -702,7 +702,7 @@
             }
 
             &.o_event_hatched:has(.fc-bg), &.o_attendee_status_tentative:has(.fc-bg) {
-                --fc-event-bg-color: #{$o-view-background-color};
+                --fc-event-bg-color: var(--o-view-background-color);
             }
             &.o_event_hatched:not(.o_event_dot):not(.fc-daygrid-event):not(.fc-timegrid-event), &.o_event_hatched .fc-bg, &.o_attendee_status_tentative:not(.o_event_dot) .fc-bg {
                 background: repeating-linear-gradient(
@@ -730,7 +730,7 @@
                 background-color: rgba(var(--o-event-bg--subtle-rgb), var(--o-bg-opacity));
 
                 &:before {
-                    color: var(--o-event-bg, #{$info});
+                    color: var(--o-event-bg, var(--info));
                 }
             }
         }

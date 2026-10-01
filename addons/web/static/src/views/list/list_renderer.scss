@@ -4,7 +4,7 @@
     --ListRenderer-thead-padding-y: #{map-get($spacers, 4)};
     --ListRenderer-thead-bg-color: linear-gradient(to bottom, #{$o-webclient-background-color}, #{rgba($o-webclient-background-color, .75)} );
     --ListRendererGrouped__th-bg-color: #{rgba($o-view-background-color, .5)};
-    --ListRenderer-thead-border-end-color: #{$border-color};
+    --ListRenderer-thead-border-end-color: var(--border-color);
     --ListRenderer-tfoot-bg-color: #{$o-list-footer-bg-color};
     --sticky-header-zindex: 1;
     --o-view-nocontent-zindex: calc(var(--sticky-header-zindex) + 1);
@@ -36,7 +36,7 @@
 
     .o_search_panel_resize + &,
     .o_search_panel_sidebar + & {
-        border-left: $border-width solid $border-color;
+        border-left: var(--border-width) solid var(--border-color);
     }
 
     .o_list_view & {
@@ -64,12 +64,12 @@
             border-spacing: 0;
 
             &.o_list_table_grouped .o_group_header {
-                --table-bg: #{$gray-200};
+                --table-bg: var(--gray-200);
                 color: color-contrast($gray-200);
             }
 
             &.o_list_table_ungrouped {
-                --table-striped-bg: #{$gray-100};
+                --table-striped-bg: var(--gray-100);
                 --table-striped-color: #{color-contrast($gray-100)};
             }
         }
@@ -375,7 +375,7 @@
                 left: auto;
                 bottom: 0;
                 right: 0;
-                background-color: #{$border-color};
+                background-color: var(--border-color);
                 width: 4px;
                 content: '';
             }
@@ -527,7 +527,7 @@
             a:active,
             button:focus,
             button:active {
-                color: $link-hover-color;
+                color: var(--link-hover-color);
                 outline: none;
             }
 
@@ -547,7 +547,7 @@
 
         &.o_invalid_cell:not(:focus-within),
         > .o_column_group_field.o_invalid_cell:not(.o_readonly_modifier):not(:focus-within) {
-            border-bottom: 1px solid $danger;
+            border-bottom: 1px solid var(--danger);
             background-color: $o-input-invalid-bg;
         }
     }

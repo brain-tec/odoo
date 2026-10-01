@@ -5,8 +5,8 @@
     /* backend, bootstrap is more standard and those are not added in the $grays */
     /* map (not needed and was actually a problem to make the enterprise dark */
     /* mode work properly). */
-    --white: #{$white};
-    --black: #{$black};
+    --white: var(--white);
+    --black: var(--o-bs-black);
 }
 
 .o_field_html {
@@ -75,6 +75,6 @@
 
 .editor_has_snippets {
     .oe_snippet.o_draggable_dragging {
-        z-index: $zindex-modal + 1 !important;
+        z-index: calc(var(--o-bs-zindex-modal) + 1) !important;
     }
 }

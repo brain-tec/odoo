@@ -1,11 +1,11 @@
 .pos {
-    background: $gray-900;
+    background: var(--gray-900);
     --btn-height-size: 54px;
     direction: ltr;
     padding: 0;
     margin: 0;
     background-color: #f0eeee;
-    color: $o-gray-900;
+    color: var(--o-gray-900);
     color-scheme: $o-webclient-color-scheme;
     -webkit-user-select: none;
        -moz-user-select: none;
@@ -27,7 +27,7 @@
 
 .pos a {
     text-decoration: none;
-    color: $gray-700;
+    color: var(--gray-700);
 }
 
 .pos li {

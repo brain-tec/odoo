@@ -37,16 +37,16 @@
 
 @include media-breakpoint-down(md) {
     .paymentlines-empty .message {
-        padding-bottom: map-get($spacers, 3);
+        padding-bottom: var(--o-bs-spacer-3);
     }
 }
 
 .paymentline {
-  border: $border-width solid $border-color;
+  border: var(--border-width) solid var(--border-color);
   &.selected {
-    background: $o-component-active-bg;
-    border-color: $o-component-active-border;
-    color: $o-component-active-color;
+    background: var(--o-component-active-bg);
+    border-color: var(--o-component-active-border);
+    color: var(--o-component-active-color);
   }
 }
 

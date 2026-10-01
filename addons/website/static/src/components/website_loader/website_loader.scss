@@ -1,8 +1,8 @@
 .o_website_loader_container {
     $-accent-color: #BB86FC; /* dark mode primary color */
-    background-color: $o-view-background-color;
+    background-color: var(--o-view-background-color);
     pointer-events: all;
-    z-index: $zindex-modal - 1;
+    z-index: calc(var(--o-bs-zindex-modal) - 1);
 
     .o_website_loader_odoo_logo {
         background-image: url('/web/static/img/odoo_logo.svg');
@@ -12,7 +12,7 @@
     }
     .o_website_loader_container_content {
         color: var(--website-loader-color);
-        background-color: $gray-100;
+        background-color: var(--gray-100);
         width: 100%;
 
         @include media-breakpoint-up(lg) {

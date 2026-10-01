@@ -6,7 +6,7 @@
 
     .o_search_panel_resize + &, .o_search_panel_sidebar + & {
         .o_kanban_renderer {
-            --Kanban-padding: 0 #{map-get($spacers, 2)} #{map-get($spacers, 3)} 0;
+            --Kanban-padding: 0 var(--o-bs-spacer-2) var(--o-bs-spacer-3) 0;
         }
     }
 }
@@ -22,11 +22,11 @@
         }
 
         .o_lunch_qty_btn.disabled .oi{
-            opacity: $btn-disabled-opacity;
+            opacity: var(--o-bs-btn-disabled-opacity);
         }
 
         &.o_lunch_order_line_input_disabled {
-            opacity: $btn-disabled-opacity;
+            opacity: var(--o-bs-btn-disabled-opacity);
         }
     }
 }
