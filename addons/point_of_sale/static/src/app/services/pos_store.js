@@ -569,7 +569,7 @@ export class PosStore extends WithLazyGetterTrap {
         this.currency = this.config.currency_id;
         this.models = this.data.models;
         this.screenState.partnerList.offsetBySearch = {
-            "": this.models["res.partner"].length,
+            "": this.config._limited_partner_count,
         };
 
         const models = Object.keys(this.models);
@@ -2769,7 +2769,7 @@ export class PosStore extends WithLazyGetterTrap {
                 paymentLines[0].payment_method_id.type === "pay_later" &&
                 this.currency.isNegative(paymentLines[0].amount))
         ) {
-            opts.fastPaymentMethod = this.config.payment_method_ids[0];
+            opts.fastPaymentMethod = this.config.paymentMethods[0];
         }
         return opts;
     }
