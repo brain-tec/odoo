@@ -30,6 +30,7 @@ class Cart(PaymentPortal):
             return request.redirect("/web/login")
 
         order_sudo = request.cart
+        cart_revived = False
 
         values = {}
         if id and access_token:
@@ -51,9 +52,11 @@ class Cart(PaymentPortal):
                 request.session["sale_order_id"] = abandoned_order.id
                 request.cart = abandoned_order
                 order_sudo = abandoned_order
+                cart_revived = True
             elif abandoned_order.id != request.session.get("sale_order_id"):
                 abandoned_order.order_line.write({"order_id": request.session["sale_order_id"]})
                 abandoned_order.action_cancel()
+                cart_revived = True
 
         values.update({
             "website_sale_order": order_sudo,
@@ -61,9 +64,7 @@ class Cart(PaymentPortal):
             "suggested_products": [],
         })
         if order_sudo:
-            order_sudo.order_line.filtered(
-                lambda sol: sol.product_id and not sol.product_id.active
-            ).unlink()
+            order_sudo._cleanup_cart(force_update_checks=cart_revived)
             values["suggested_products"] = order_sudo._cart_accessories()
             values.update(self._get_express_shop_payment_values(order_sudo))
             if self.env.website.google_analytics_key:
@@ -133,9 +134,7 @@ class Cart(PaymentPortal):
                 )
             )
         if not product or not product._is_add_to_cart_allowed():
-            raise UserError(
-                self.env._("The given product does not exist therefore it cannot be added to cart.")
-            )
+            raise UserError(self._get_product_user_error(product))
 
         if product.sudo().type == 'combo':
             combo_item_products = [
@@ -186,11 +185,7 @@ class Cart(PaymentPortal):
                         and not product_data.get("combo_item_id")
                     )
                 ):
-                    raise UserError(
-                        self.env._(
-                            "The given product does not exist therefore it cannot be added to cart."
-                        )
-                    )
+                    raise UserError(self._get_product_user_error(product_sudo))
 
                 product_values = order_sudo.with_context(skip_cart_verification=True)._cart_add(
                     product_id=product_data["product_id"],
@@ -269,6 +264,9 @@ class Cart(PaymentPortal):
             "tracking_info": tracking_info,
             "currency": order_sudo.currency_id.name,
         }
+
+    def _get_product_user_error(self, product):
+        return self.env._("The given product does not exist therefore it cannot be added to cart.")
 
     @route(
         route="/shop/cart/quick_add", type="jsonrpc", auth="user", methods=["POST"], website=True

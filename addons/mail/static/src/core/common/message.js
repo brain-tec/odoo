@@ -48,7 +48,7 @@ import {
     useLongPress,
     useRightClickMenu,
 } from "@mail/utils/common/hooks";
-import { ActionList } from "@mail/core/common/action_list";
+import { ActionList, CircleInlineAction } from "@mail/core/common/action_list";
 import { loadCssFromBundle } from "@mail/utils/common/misc";
 import { MessageContextMenu } from "@mail/core/common/message_context_menu";
 import { Priority } from "@mail/core/common/priority";
@@ -252,6 +252,10 @@ export class Message extends Component {
                 untrack(this.messageBody),
             ]
         );
+    }
+
+    get actionComponent() {
+        return CircleInlineAction;
     }
 
     get messageActionsParams() {
@@ -511,7 +515,7 @@ export class Message extends Component {
             // Mobile OS long press is handled with useLongPress()
             return;
         }
-        if (ev.composedPath()[0].closest("a") || !this.props.hasActions || this.isEditing) {
+        if (!this.hasActions || ev.composedPath()[0].closest("a")) {
             return;
         }
         if (!this.rightClickMenu.open(ev)) {
@@ -655,6 +659,10 @@ export class Message extends Component {
             !this.message.isSubjectSimilarToThreadName &&
             !this.message.isSubjectDefault
         );
+    }
+
+    get hasActions() {
+        return this.props.hasActions && this.message.hasActions && !this.isEditing;
     }
 }
 

@@ -133,7 +133,7 @@
 </t>
 
 <t t-name="mail.Message.actions">
-    <div t-if="this.props.hasActions and this.message.hasActions and !this.isEditing" class="o-mail-Message-actions d-print-none d-flex align-items-start"
+    <div t-if="this.hasActions" class="o-mail-Message-actions d-print-none d-flex align-items-start"
         t-att-class="{
             'start-0': this.isAlignedRight,
             'o-mt-0_5': this.message.bubbleColor and !this.isMobileOS,
@@ -155,7 +155,7 @@
         <t t-set="isReverse" t-value="this.env.inChatWindow and this.isAlignedRight"/>
         <t t-if="this.isMobileOS and isReverse" t-call="mail.Message.emptyQuickAction"/>
         <div class="d-flex rounded-1 overflow-hidden gap-1" t-att-class="{ 'flex-row-reverse': isReverse }">
-            <ActionList actions="this.actions" inline="true" fw="false"/>
+            <ActionList actions="this.actions" inline="true" fw="false" actionComponent="this.actionComponent"/>
             <t t-foreach="Array(Math.max(this.quickActionCount - this.quickActions().length - 1, 0))" t-as="i" t-key="i_index">
                 <t t-call="mail.Message.emptyQuickAction"/>
             </t>
