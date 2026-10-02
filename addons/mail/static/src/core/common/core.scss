@@ -77,26 +77,28 @@ $o-bubble-colors: (
 
     padding: $dropdown-padding-y $dropdown-padding-x;
 
-    &.o-simulateDarkTheme {
-        background-color: $gray-800;
-        border-color: $gray-700 !important;
+    @if $o-webclient-color-scheme != dark {
+        &.o-discussCallTheme {
+            background-color: $gray-800;
+            border-color: $gray-700 !important;
 
-        * {
-            color: white;
-        }
-
-        .btn, .o-dropdown-item {
-            --gradient: transparent;
-        }
-
-        .form-switch .form-check-input {
-            &:checked {
-                --#{$prefix}form-switch-bg: #{escape-svg($form-switch-bg-image-dark)};
+            * {
+                color: white;
             }
-        }
 
-        select option {
-            background-color: $gray-700;
+            .btn, .o-dropdown-item {
+                --gradient: transparent;
+            }
+
+            .form-switch .form-check-input {
+                &:checked {
+                    --#{$prefix}form-switch-bg: #{escape-svg($form-switch-bg-image-dark)};
+                }
+            }
+
+            select option {
+                background-color: $gray-700;
+            }
         }
     }
 
@@ -465,18 +467,4 @@ a.o-discuss-mention {
 .o-mail-favorite {
     color: $o-main-favorite-color;
     filter: drop-shadow(1px 1px 0px #000000b0);
-}
-
-.o_popover_card {
-    --card-bg: #{$popover-bg};
-    --card-border-color: #{$popover-border-color};
-    --card-border-radius: #{$popover-border-radius};
-    --card-border-width: 0;
-
-    overflow: hidden;
-
-    max-width: 380px;
-    @media screen  and (max-width: 480px) {
-        max-width: 90vw;
-    }
 }

@@ -4,7 +4,7 @@ import ast
 from collections import defaultdict
 
 from odoo import SUPERUSER_ID, Command, _, api, fields, models
-from odoo.tools import SQL
+from odoo.tools import SQL, sql
 from odoo.tools.convert import convert_file
 
 
@@ -17,6 +17,9 @@ class HrJob(models.Model):
     def _default_address_id(self):
         last_used_address = self.env['hr.job'].search([('company_id', 'in', self.env.companies.ids)], order='id desc', limit=1)
         if last_used_address:
+            # Schema initialization may evaluate the default before adding the column.
+            if self.env.context.get('module') and not sql.column_exists(self.env.cr, self._table, 'address_id'):
+                return False
             return last_used_address.address_id
         else:
             return self.env.company.partner_id
@@ -382,6 +385,9 @@ class HrJob(models.Model):
     def _creation_subtype(self):
         return self.env.ref('hr_recruitment.mt_job_new')
 
+    def _get_accessible_applicants(self):
+        return self.application_ids
+
     def action_open_attachments(self):
         return {
             'type': 'ir.actions.act_window',
@@ -399,7 +405,7 @@ class HrJob(models.Model):
             'search_view_id': self.env.ref('hr_recruitment.ir_attachment_view_search_inherit_hr_recruitment').ids,
             'domain': ['|',
                 '&', ('res_model', '=', 'hr.job'), ('res_id', 'in', self.ids),
-                '&', ('res_model', '=', 'hr.applicant'), ('res_id', 'in', self.application_ids.ids),
+                '&', ('res_model', '=', 'hr.applicant'), ('res_id', 'in', self._get_accessible_applicants().ids),
             ],
         }
 

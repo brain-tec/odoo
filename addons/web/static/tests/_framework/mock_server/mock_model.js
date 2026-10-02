@@ -20,7 +20,8 @@ import {
     safeSplit,
 } from "./mock_server_utils";
 
-const { DEFAULT_FIELD_VALUES, DEFAULT_RELATIONAL_FIELD_VALUES, S_FIELD, copyFields } = fields;
+const { DEFAULT_FIELD_VALUES, DEFAULT_RELATIONAL_FIELD_VALUES, S_FIELD_REQUIRED_KEYS, copyFields } =
+    fields;
 
 /**
  * @typedef {import("fields").INumerical["aggregator"]} Aggregator
@@ -126,6 +127,13 @@ function convertToOnChange(model, values, specification) {
         const field = model._fields[fname];
         if (isM2OField(field.type) && typeof val === "number") {
             values[fname] = getRelation(field).web_read(val, specification[fname].fields || {})[0];
+        } else if (isM2OField(field.type) && isObject(val)) {
+            // a many2one value can be given as the values of the co-record (e.g. the inverse field
+            // of a new x2many record): the server returns it as a web_read value if that co-record
+            // exists, and false otherwise, as a new record can't be represented client side
+            values[fname] = val.id
+                ? getRelation(field).web_read(val.id, specification[fname].fields || {})[0]
+                : false;
         } else if (isX2MField(field)) {
             const coModel = getRelation(field);
             for (const cmd of val) {
@@ -244,6 +252,18 @@ function formatFieldValue(fieldType, groupByField, val) {
 }
 
 /**
+ * @param {"or" | "and"} type
+ * @param {Iterable<string>} values
+ */
+function formatList(type, values) {
+    const formatter = new Intl.ListFormat("en", {
+        style: "long",
+        type: type === "and" ? "conjunction" : "disjunction",
+    });
+    return formatter.format(values);
+}
+
+/**
  * @param {unknown} value
  */
 function isEmptyValue(value) {
@@ -311,7 +331,8 @@ function getModelDefinition(previous, constructor) {
 
     // Fields declared as JS class fields (do not override explicit fields)
     for (const [fieldName, fieldDef] of Object.entries(model)) {
-        if (!fieldDef?.[S_FIELD]) {
+        if (!fieldDef?.[S_FIELD_REQUIRED_KEYS]) {
+            // Not a field
             continue;
         }
         model._fields[fieldName] ||= validateFieldDefinition(fieldName, fieldDef);
@@ -483,17 +504,17 @@ function getViewKey(viewType, viewId) {
 }
 
 /**
- * @param {string} data 
+ * @param {string} data
  * @returns {string}
  */
 function simpleHash(data) {
     let hash = 0;
     for (let i = 0; i < data.length; i++) {
-        hash = ((hash << 5) - hash) + data.charCodeAt(i);
+        hash = (hash << 5) - hash + data.charCodeAt(i);
         hash |= 0; // Convert to 32-bit integer
     }
     // unsigned hex
-    return (hash >>> 0).toString(16).padStart(8, '0');
+    return (hash >>> 0).toString(16).padStart(8, "0");
 }
 
 /**
@@ -543,78 +564,106 @@ function isValidCommand(command) {
  * @param {ModelRecord} record
  * @param {FieldDefinition} fieldDef
  * @param {unknown} value
+ * @returns {null | string} null = valid - string = description of expected value
  */
 function isValidFieldValue(record, fieldDef) {
     const value = record[fieldDef.name];
     if (value === false) {
         // False is the accepted default for all field types
-        return true;
+        return null;
     }
+    let isValid = true;
     switch (fieldDef.type) {
         case "char":
         case "html":
         case "text": {
-            return typeof value === "string";
+            isValid = typeof value === "string";
+            break;
         }
         case "boolean": {
-            return typeof value === "boolean";
+            isValid = typeof value === "boolean";
+            break;
         }
         case "date": {
-            return R_DATE.test(value);
+            isValid = R_DATE.test(String(value));
+            break;
         }
         case "datetime": {
-            return R_DATE_TIME.test(value);
+            isValid = R_DATE_TIME.test(String(value));
+            break;
         }
         case "float":
         case "monetary": {
-            return typeof value === "number";
+            isValid = typeof value === "number";
+            break;
         }
         case "integer": {
-            return Number.isInteger(value);
+            isValid = Number.isInteger(value);
+            break;
         }
         case "many2many":
         case "one2many": {
-            return (
-                Array.isArray(value) &&
-                value.every((id) => {
+            if (!Array.isArray(value)) {
+                isValid = false;
+            } else if (
+                !value.every((id) => {
                     if (Array.isArray(id)) {
                         return isValidCommand(id);
                     } else {
                         return isValidId(id, fieldDef, record);
                     }
                 })
-            );
+            ) {
+                return `an id referencing a "${fieldDef.relation}" record`;
+            }
+            break;
         }
         case "many2one":
         case "many2one_reference": {
-            return isValidId(value, fieldDef, record);
+            if (!isValidId(value, fieldDef, record)) {
+                return `an id referencing a "${fieldDef.relation}" record`;
+            }
+            break;
         }
         case "binary":
-            return typeof value === "string" || (
-                typeof value === "object" && value.content !== undefined
-            );
+            isValid =
+                typeof value === "string" ||
+                (typeof value === "object" && value.content !== undefined);
+            break;
         case "properties": {
-            return isObject(value);
+            isValid = isObject(value);
+            break;
         }
         case "properties_definition": {
-            return value.every(
+            isValid = value.every(
                 (def) => typeof def.name === "string" && typeof def.type === "string"
             );
+            break;
         }
         case "reference": {
             const [modelName, id] = getReferenceValue(value);
-            return (
-                fieldDef.selection.some(([value]) => value === modelName) &&
-                isValidId(id, { ...fieldDef, relation: modelName }, record)
-            );
+            if (!fieldDef.selection.some(([selValue]) => selValue === modelName)) {
+                return formatList(
+                    "or",
+                    fieldDef.selection.map(([selValue]) => safeStringify(selValue))
+                );
+            }
+            if (!isValidId(id, { ...fieldDef, relation: modelName }, record)) {
+                return `an id referencing a "${modelName}" record`;
+            }
+            break;
         }
         case "selection": {
-            return fieldDef.selection.some(([value]) => value === value);
-        }
-        default: {
-            return true;
+            if (!fieldDef.selection.some(([selValue]) => selValue === value)) {
+                return formatList(
+                    "or",
+                    fieldDef.selection.map(([selValue]) => safeStringify(selValue))
+                );
+            }
+            break;
         }
     }
+    return isValid ? null : `"${fieldDef.type}" value`;
 }
 
 /**
@@ -975,6 +1024,17 @@ function parseView(model, params) {
 }
 
 /**
+ * @param {any} value
+ */
+function safeStringify(value) {
+    try {
+        return JSON.stringify(value);
+    } catch {
+        return value;
+    }
+}
+
+/**
  * Equivalent to the server '_search_panel_domain_image' method.
  *
  * @param {Model} model
@@ -1035,7 +1095,7 @@ function searchPanelFieldImage(model, fieldName, kwargs) {
     const onlyCounters = kwargs.only_counters;
     const extraDomain = kwargs.extra_domain || [];
     const normalizedExtra = new Domain(extraDomain).toList();
-    const noExtra = JSON.stringify(normalizedExtra) === "[]";
+    const noExtra = safeStringify(normalizedExtra) === "[]";
     const modelDomain = kwargs.model_domain || [];
     const countDomain = new Domain([...modelDomain, ...extraDomain]).toList();
 
@@ -1263,12 +1323,11 @@ function updateComodelRelationalFields(model, record, originalRecord) {
  * @param {FieldDefinition} fieldDef
  */
 function validateFieldDefinition(fieldName, fieldDef) {
-    if (fieldDef[S_FIELD] && fieldDef.name) {
+    if (S_FIELD_REQUIRED_KEYS in fieldDef && fieldDef.name) {
         throw new MockServerError(
             `Cannot set the name of field "${fieldName}" from its definition: got "${fieldDef.name}"`
         );
     }
-    delete fieldDef[S_FIELD];
     return fieldDef;
 }
 
@@ -1278,7 +1337,7 @@ function validateFieldDefinition(fieldName, fieldDef) {
  * @param {number | false} viewId
  */
 function viewNotFoundError(modelName, viewType, viewId, consequence) {
-    let message = `Cannot find an arch for view "${viewType}" with ID ${JSON.stringify(
+    let message = `Cannot find an arch for view "${viewType}" with ID ${safeStringify(
         viewId
     )} in model "${modelName}"`;
     if (consequence) {
@@ -1923,7 +1982,7 @@ export class Model extends Array {
                 }
             }
             for (const group of recordGroupsValues) {
-                const valueKey = JSON.stringify(group);
+                const valueKey = safeStringify(group);
                 groups[valueKey] = groups[valueKey] || [];
                 groups[valueKey].push(record);
             }
@@ -2212,6 +2271,9 @@ export class Model extends Array {
                 }
             }
             Object.assign(onchangeValues, defaultValues);
+            // on the first call, the server returns the values of all fields of the spec, so the
+            // values it received are part of the result as well
+            Object.assign(onchangeValues, pick(values, ...fieldsFromView));
         }
 
         const finalValues = { ...serverValues, ...onchangeValues, ...values };
@@ -2236,6 +2298,18 @@ export class Model extends Array {
     }
 
     /**
+     * @param {Record<string, any>[]} valuesList
+     * @param {MaybeIterable<string>} fieldNames
+     * @param {Record<string, any>} fieldsSpec
+     */
+    onchange_batch(valuesList, fieldNames, fieldsSpec) {
+        const kwargs = getKwArgs(arguments, "values_list", "field_names", "fields_spec");
+        ({ values_list: valuesList, field_names: fieldNames, fields_spec: fieldsSpec } = kwargs);
+
+        return valuesList.map((values) => this.onchange([], values, fieldNames, fieldsSpec));
+    }
+
+    /**
      * @param {MaybeIterable<number>} idOrIds
      * @param {Iterable<string>} [fields]
      * @param {string | false} [load]
@@ -2248,9 +2322,6 @@ export class Model extends Array {
         return this._read_format(idOrIds, fieldNames, load, kwargs);
     }
 
-    /**
-     * @param {KwArgs<{ domain: DomainListRepr, group_by: string, progress_bar: any }>} [kwargs={}]
-     */
     /**
      * @param {DomainListRepr} domain
      * @param {string} groupBy
@@ -2347,7 +2418,7 @@ export class Model extends Array {
         const supportedTypes = ["many2one", "selection", "many2many"];
         if (!supportedTypes.includes(field.type)) {
             throw new MockServerError(
-                `Only category types ${supportedTypes.join(" and ")} are supported, got "${
+                `Only category types ${formatList("and", supportedTypes)} are supported, got "${
                     field.type
                 }"`
             );
@@ -2556,7 +2627,7 @@ export class Model extends Array {
                     if (groupBy && groupDomain) {
                         localExtraDomain = new Domain([
                             ...localExtraDomain,
-                            ...(groupDomain[JSON.stringify(groupId)] || []),
+                            ...(groupDomain[safeStringify(groupId)] || []),
                         ]).toList();
                     }
                     const searchCountDomain = new Domain([
@@ -2567,7 +2638,7 @@ export class Model extends Array {
                         count = this.search_count(searchCountDomain);
                     }
                     if (!expand) {
-                        if (enableCounters && JSON.stringify(localExtraDomain) === "[]") {
+                        if (enableCounters && safeStringify(localExtraDomain) === "[]") {
                             inImage = count;
                         } else {
                             inImage = this.search(searchDomain, [], 1).length;
@@ -3054,7 +3125,7 @@ export class Model extends Array {
             records: this.read(
                 records.map((r) => r.id),
                 unique(["id", ...fieldNames]),
-                "web",
+                "web"
             ),
         };
         if (countLimit) {
@@ -3109,21 +3180,25 @@ export class Model extends Array {
         }
 
         // Validate record values
+        const errors = [];
         for (const record of this) {
             for (const fieldName of Object.keys(record)) {
                 const fieldDef = this._fields[fieldName];
-                if (!isValidFieldValue(record, fieldDef)) {
-                    throw new MockServerError(
-                        `Invalid value for field "${fieldName}" on ${getRecordQualifier(
+                const expected = isValidFieldValue(record, fieldDef);
+                if (expected) {
+                    errors.push(
+                        `- invalid value for field "${fieldName}" on ${getRecordQualifier(
                             record
-                        )} in model "${this._name}": expected "${fieldDef.type}" and got: ${
-                            record[fieldName]
-                        }`
+                        )}: expected ${expected} and got: ${safeStringify(record[fieldName])}`
                     );
                 }
             }
-
-            updateComodelRelationalFields(this, record, originalRecords[record.id]);
+            if (!errors.length) {
+                updateComodelRelationalFields(this, record, originalRecords[record.id]);
+            }
+        }
+        if (errors.length) {
+            throw new MockServerError(`Errors in model ${this._name}:\n${errors.join("\n")}`);
         }
     }
 
@@ -3469,7 +3544,7 @@ export class Model extends Array {
                             result[field.name].filename = filename;
                         }
                     }
-                    if (load != 'web') {
+                    if (load !== "web") {
                         result[field.name].content = content;
                     }
                     if (content) {
@@ -3537,7 +3612,7 @@ export class Model extends Array {
                             const result = this.env[modelName].web_read(
                                 id,
                                 relatedFields,
-                                makeKwArgs({ context: {...context, ...spec[fieldName].context} })
+                                makeKwArgs({ context: { ...context, ...spec[fieldName].context } })
                             );
                             record[fieldName] = result[0];
                         }
@@ -3564,7 +3639,7 @@ export class Model extends Array {
                             const [result] = this.env[model].web_read(
                                 id,
                                 relatedFields,
-                                makeKwArgs({ context: {...context, ...spec[fieldName].context} })
+                                makeKwArgs({ context: { ...context, ...spec[fieldName].context } })
                             );
                             record[fieldName] = result;
                         }
@@ -3587,7 +3662,7 @@ export class Model extends Array {
                             let result = relModel.web_read(
                                 relResIds,
                                 relatedFields,
-                                makeKwArgs({ context: {...context, ...spec[fieldName].context} })
+                                makeKwArgs({ context: { ...context, ...spec[fieldName].context } })
                             );
                             if (limit) {
                                 result = result.map((r, i) => (i < limit ? r : { id: r.id }));
@@ -3604,7 +3679,9 @@ export class Model extends Array {
                                 record[fieldName] = getRelation(field).web_read(
                                     [record[fieldName]],
                                     relatedFields,
-                                    makeKwArgs({ context: {...context, ...spec[fieldName].context} })
+                                    makeKwArgs({
+                                        context: { ...context, ...spec[fieldName].context },
+                                    })
                                 )[0];
                             }
                         }
@@ -3683,7 +3760,7 @@ export class Model extends Array {
                         ids = [...command[2]];
                     } else {
                         throw new MockServerError(
-                            `Command "${JSON.stringify(
+                            `Command "${safeStringify(
                                 value
                             )}" is not supported by the MockServer on field "${fieldName}" in model "${
                                 this._name
@@ -3701,7 +3778,7 @@ export class Model extends Array {
                             continue;
                         }
                         throw new MockServerError(
-                            `Invalid ID "${JSON.stringify(
+                            `Invalid ID "${safeStringify(
                                 value
                             )}" for a many2one on field "${fieldName}" in model "${this._name}"`
                         );

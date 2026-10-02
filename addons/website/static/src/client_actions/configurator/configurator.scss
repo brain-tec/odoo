@@ -12,7 +12,7 @@
     .o_configurator_background {
         background-color: var(--o-webclient-background-color);
         transition: background-color 0.35s ease;
-        background-image: radial-gradient(rgba($gray-900, 0.2) 1px, transparent 1px), radial-gradient(rgba($gray-900, 0.2) 1px, transparent 1px);
+        background-image: radial-gradient(color-mix(in srgb, var(--gray-900) 20%, transparent) 1px, transparent 1px), radial-gradient(color-mix(in srgb, var(--gray-900) 20%, transparent) 1px, transparent 1px);
         background-size: 12px 12px;
         background-position: 0 0, 12px 12px;
 
@@ -71,15 +71,15 @@
             font-size: 28px;
             @extend %o_configurator_titles_weight;
 
-            @include media-breakpoint-up(md) {
+            @media screen and (min-width: 768px), print and (min-width: 188mm) {
                 font-size: 32px;
             }
 
-            @include media-breakpoint-up(lg) {
+            @media screen and (min-width: 992px), print and (min-width: 190mm) {
                 font-size: 36px;
             }
 
-            @include media-breakpoint-up(xl) {
+            @media screen and (min-width: 1200px), print and (min-width: 220mm) {
                 font-size: 40px;
             }
         }
@@ -310,7 +310,7 @@
                 animation-delay: 1s;
                 animation-fill-mode: backwards;
 
-                @include media-breakpoint-up(lg) {
+                @media screen and (min-width: 992px), print and (min-width: 190mm) {
                     width: 20rem;
                 }
             }
@@ -396,13 +396,13 @@
         }
 
         &.o_feature_selection_screen {
-            @include media-breakpoint-down(lg) {
+            @media screen and (max-width: 991.98px), print and (max-width: 189.98mm) {
                 .o_feature_card_container {
                     width: 50% !important;
                 }
             }
 
-            @include media-breakpoint-down(md) {
+            @media screen and (max-width: 767.98px), print and (max-width: 187.98mm) {
                 .o_feature_card_container {
                     width: 100% !important;
                 }
@@ -440,13 +440,13 @@
                 flex: 1 1 calc((100% - 4rem) / 3);
                 min-width: 300px;
 
-                @include media-breakpoint-down(sm) {
+                @media screen and (max-width: 575.98px), print and (max-width: 99.98mm) {
                     flex-basis: 100%;
                     min-width: 0;
                 }
             }
 
-            @include media-breakpoint-up(xl) {
+            @media screen and (min-width: 1200px), print and (min-width: 220mm) {
                 .o_theme_selection_container {
                     height: 100%;
                 }
