@@ -13,7 +13,7 @@ from odoo.fields import Domain
 from odoo.http import request
 from odoo.modules.db import FunctionStatus
 from odoo.tools import float_round, is_html_empty, lazy
-from odoo.tools.sql import SQL
+from odoo.tools.sql import SQL, column_exists
 from odoo.tools.translate import adapt_translated_field_value, html_translate
 
 from odoo.addons.website.tools import text_from_html
@@ -58,12 +58,16 @@ class ProductTemplate(models.Model):
         As we don't resequence the whole tree (as `sequence` does), this field
         might have negative value.
         """
+        start_sequence = 10000
+        # Schema initialization may evaluate the default before adding the column.
+        if self.env.context.get('module') and not column_exists(self.env.cr, self._table, 'website_sequence'):
+            return start_sequence
         self.env.cr.execute(
             SQL("SELECT MAX(website_sequence) FROM %s", SQL.identifier(self._table))
         )
         max_sequence = self.env.cr.fetchone()[0]
         if max_sequence is None:
-            return 10000
+            return start_sequence
         return max_sequence + 5
 
     # === FIELDS ===#
@@ -1809,12 +1813,8 @@ class ProductTemplate(models.Model):
                     ("assign", "!=", "manual")
                 ])
 
-            if auto_assign_ribbons:
-                variant = variant or self._get_variant_for_combination(
-                    self._get_first_available_combination()
-                )
             for rb in auto_assign_ribbons:
-                if rb._is_applicable_for(variant, price_vals):
+                if rb._is_applicable_for(variant or self, price_vals):
                     return rb
 
         return ribbon
@@ -1929,7 +1929,11 @@ class ProductTemplate(models.Model):
     def _get_first_available_combination(self, necessary_values=None):
         """Override of `product` to return the first combination that has stock."""
         res = super()._get_first_available_combination(necessary_values)
-        if not self.env.context.get("website_id"):
+        if (
+            not self.is_storable
+            or self.allow_out_of_stock_order
+            or not self.env.context.get("website_id")
+        ):
             return res
 
         for combination in self._get_possible_combinations(necessary_values):
