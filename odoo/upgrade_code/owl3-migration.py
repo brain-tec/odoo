@@ -1110,6 +1110,7 @@ MISC_WHITELIST = {
 # serviceName: [PluginClass, ImportPath]
 SERVICES_MAPPING = {
     "action": ['ActionPlugin', '@web/webclient/actions/action_plugin'],
+    "allowed_qweb_expressions": ['AllowedQwebExpressionsPlugin', '@web/views/fields/allowed_qweb_expressions_plugin'],
     "assetsWatchdog": ['AssetsWatchdogPlugin', '@bus/services/assets_watchdog_plugin'],
     "barcode": ['BarcodePlugin', '@barcodes/barcode_plugin'],
     "bottom_sheet": ['BottomSheetPlugin', '@web/core/bottom_sheet/bottom_sheet_plugin'],
@@ -1124,7 +1125,10 @@ SERVICES_MAPPING = {
     "effect": ['EffectPlugin', '@web/core/effects/effect_plugin'],
     "frequent_emoji": ['FrequentEmojiPlugin', '@web/core/emoji_picker/frequent_emoji_plugin'],
     "hotkey": ['HotkeyPlugin', '@web/core/hotkeys/hotkey_plugin'],
+    "lazy_session": ['LazySessionPlugin', '@web/webclient/lazy_session_plugin'],
     "mail.sound_effects": ['SoundEffectsPlugin', '@mail/core/common/sound_effects_plugin'],
+    "mail.store": ['StorePlugin', '@mail/core/common/store_plugin'],
+    "name": ['NamePlugin', '@web/core/name_plugin'],
     "notification": ['NotificationPlugin', '@web/core/notifications/notification_plugin'],
     "mobile": ['MobilePlugin', '@web_mobile/js/mobile_plugin'],
     "multi_tab": ['MultiTabPlugin', '@bus/multi_tab_plugin'],

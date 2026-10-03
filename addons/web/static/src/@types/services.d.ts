@@ -8,7 +8,7 @@ declare module "services" {
     import { fieldService } from "@web/core/field_service";
     import { fileUploadService } from "@web/core/file_upload/file_upload_service";
     import { hotkeyService } from "@web/core/hotkeys/hotkey_plugin";
-    import { nameService } from "@web/core/name_service";
+    import { nameService } from "@web/core/name_plugin";
     import { httpService } from "@web/core/network/http_service";
     import { notificationService } from "@web/core/notifications/notification_plugin";
     import { offlineService } from "@web/core/offline/offline_plugin";
@@ -22,7 +22,7 @@ declare module "services" {
     import { actionService } from "@web/webclient/actions/action_plugin";
     import { profilingService } from "@web/webclient/debug/profiling/profiling_service";
     import { menuService } from "@web/webclient/menus/menu_service";
-    import { lazySession } from "@web/webclient/session_service";
+    import { lazySessionService } from "@web/webclient/lazy_session_plugin";
     import { shareTargetService } from "@web/webclient/share_target/share_target_service";
 
     type ExtractServiceFactory<T extends ServicesRegistryShape> = Awaited<ReturnType<T["start"]>>;
@@ -41,7 +41,7 @@ declare module "services" {
         file_upload: typeof fileUploadService;
         hotkey: typeof hotkeyService;
         http: typeof httpService;
-        lazy_session: typeof lazySession;
+        lazy_session: typeof lazySessionService;
         menu: typeof menuService;
         name: typeof nameService;
         notification: typeof notificationService;

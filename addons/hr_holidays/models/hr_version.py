@@ -20,8 +20,8 @@ class HrVersion(models.Model):
     _description = 'Employee Contract'
 
     def _get_hr_responsible_domain(self):
-        return "[('share', '=', False), ('company_ids', 'in', company_id), ('all_group_ids', 'in', %s)]" % self.env.ref('hr_holidays.group_hr_holidays_user').id
-    hr_responsible_id = fields.Many2one(domain=_get_hr_responsible_domain)
+        return [('share', '=', False), ('company_ids', 'in', self.env.company.ids), ('all_group_ids', 'in', self.env.ref('hr_holidays.group_hr_holidays_user').id)]
+    hr_responsible_id = fields.Many2one(domain=lambda self: self._get_hr_responsible_domain())
     allocation_from_working_schedule_id = fields.Many2one('hr.leave.allocation', string="Allocation from working schedule", copy=False, groups="hr.group_hr_user")
 
     @api.constrains('contract_date_start', 'contract_date_end')
@@ -333,7 +333,7 @@ class HrVersion(models.Model):
             if not working_schedule or (working_schedule.work_time_rate <= 1.0 or not working_schedule.leave_accrual_plan_id):
                 continue
 
-            version.allocation_from_working_schedule_id = self.env['hr.leave.allocation'].create({
+            version.allocation_from_working_schedule_id = self.env['hr.leave.allocation'].with_context(allocation_skip_auto_approve=True).create({
                 'name': 'Compensatory Allocations for the difference in working schedules',
                 'accrual_plan_id': working_schedule.leave_accrual_plan_id.id,
                 'employee_id': version.employee_id.id,
