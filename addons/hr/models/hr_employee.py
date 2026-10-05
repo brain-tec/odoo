@@ -58,7 +58,7 @@ class HrEmployee(models.Model):
         compute='_compute_version_id',
         search='_search_version_id',
         compute_sql='_compute_sql_version_id',
-        ondelete='cascade',
+        ondelete='cascade',  # FIXME: cascade but not store to avoid Error => "Field definition for _inherits ..."
         required=True,
         store=False,
         compute_sudo=True,
@@ -2388,10 +2388,8 @@ class HrEmployee(models.Model):
         }
 
     def _store_avatar_card_fields(self, res: Store.FieldList):
-        res.one("department_id", ["name"])
         res.attr("resource_id", "_store_avatar_card_fields")
         res.one("user_id", "_store_avatar_card_fields")
-        res.one("work_location_id", ["location_type", "name"])
         res.extend([
             "active",
             "company_id",
