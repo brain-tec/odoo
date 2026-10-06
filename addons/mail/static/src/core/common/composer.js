@@ -7,7 +7,8 @@ import { NavigableList } from "@mail/core/common/navigable_list";
 import { MAIL_PLUGINS, MAIL_SMALL_UI_PLUGINS } from "@mail/core/common/plugin/plugin_sets";
 import { mapSuggestionsToOptions, useSuggestion } from "@mail/core/common/suggestion_hook";
 import { groupAttachments } from "@mail/utils/common/attachments";
-import { propComputed, useSelection, useVisible } from "@mail/utils/common/hooks";
+import { MessageHighlightPlugin } from "@mail/core/common/message_highlight_plugin";
+import { propComputed, useMaybePlugin, useSelection, useVisible } from "@mail/utils/common/hooks";
 import { generatePartnerMentionElement, trimEmptyBlocksAround } from "@mail/utils/common/format";
 import { getInnerHtml } from "@mail/utils/common/html";
 import { isDragSourceExternalFile } from "@mail/utils/common/misc";
@@ -76,6 +77,17 @@ export const COMPOSER_TYPES = {
     NOTE: "note",
     MESSAGE: "message",
 };
+
+/** Button to send the message, highlighted once there is something to send. */
+class SendMessageInlineAction extends CircleInlineAction {
+    get classObj() {
+        return {
+            ...super.classObj,
+            "o-sendMessageActive o-text-white shadow-sm": this.action.isActive,
+        };
+    }
+}
+
 class FullComposerRecoveryPopover extends Component {
     static template = "mail.FullComposerRecoveryPopover";
 
@@ -169,6 +181,7 @@ export class Composer extends Component {
         });
         this.rootRef = signal.ref(HTMLDivElement);
         this.notification = usePlugin(NotificationPlugin);
+        this.messageHighlight = useMaybePlugin(MessageHighlightPlugin);
         this.fullComposerRecoveryPopover = usePopover(FullComposerRecoveryPopover, {
             closeOnClickAway: false,
             closeOnEscape: false,
@@ -508,8 +521,12 @@ export class Composer extends Component {
         return this.props.mode === "extended";
     }
 
-    get actionComponent() {
-        return CircleInlineAction;
+    /** @type {import("@mail/core/common/action_list").GetActionComponent} */
+    getActionComponent({ action, inline }) {
+        if (!inline) {
+            return undefined;
+        }
+        return action.id === "send-message" ? SendMessageInlineAction : CircleInlineAction;
     }
 
     get CANCEL_OR_SAVE_EDIT_TEXT() {

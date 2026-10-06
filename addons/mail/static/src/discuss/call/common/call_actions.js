@@ -90,8 +90,6 @@ export const muteAction = {
 registerCallAction("mute", muteAction);
 /** @type {CallActionDefinition} */
 export const quickActionSettings = {
-    // Self's talking bars stand in for the chevron until hovered, as in the call menu.
-    btnClass: "o-discuss-quickVoiceSettings",
     condition: ({ owner, channel }) => !owner.env.inCallMenu && channel?.isSelfInCall,
     dropdownComponent: QuickVoiceSettings,
     dropdownMenuClass: ({ owner }) =>
@@ -248,7 +246,7 @@ registerCallAction("record-call", {
 });
 
 registerCallAction("fullscreen", {
-    btnAttrs: { "data-available-offline": true },
+    availableOffline: true,
     condition: ({ channel, owner, store }) =>
         channel?.isSelfInCall && !owner.env.pipWindow && !store.rtc.isBrowserFullscreen,
     name: _t("Fullscreen"),
@@ -339,7 +337,6 @@ registerCallAction("join-back", {
     tags: [ACTION_TAGS.JOIN_LEAVE_CALL, ACTION_TAGS.SUCCESS],
 });
 registerCallAction("join-with-camera", {
-    btnClass: "text-nowrap",
     condition: ({ channel }) =>
         !channel?.isSelfInCall &&
         !channel?.self_member_id?.rtc_inviting_session_id &&

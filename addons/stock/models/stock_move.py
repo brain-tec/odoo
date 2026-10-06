@@ -1122,7 +1122,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         count = next_serial_count or self.next_serial_count
         if not count:
             raise ValidationError(_("The number of Serial Numbers to generate must be greater than zero."))
-        lot_names = self.env['stock.lot'].generate_lot_names(next_serial, count)
+        lot_names = self.env['stock.lot'].generate_lot_names(next_serial, count, self.product_id.lot_sequence_id)
         field_data = [{'lot_name': lot_name['lot_name'], 'quantity': 1} for lot_name in lot_names]
         if self._can_create_lot():
             self._create_lot_ids_from_move_line_vals(field_data, self.product_id.id, self.company_id.id)
@@ -1225,15 +1225,15 @@ Please change the quantity done or the rounding precision in your settings.""",
         else:
             lot_qties = [1] * count
 
+        product = self.env['product.product'].browse(default_vals['product_id'])
         if mode == 'generate':
-            lot_names = self.env['stock.lot'].generate_lot_names(first_lot, len(lot_qties))
+            lot_names = self.env['stock.lot'].generate_lot_names(first_lot, len(lot_qties), product.lot_sequence_id)
         elif mode == 'import':
             lot_names = self.split_lots(lot_text)
             lot_qties = [1] * len(lot_names)
 
         vals_list = []
         loc_dest = self.env['stock.location'].browse(default_vals['location_dest_id'])
-        product = self.env['product.product'].browse(default_vals['product_id'])
         for lot, qty in zip(lot_names, lot_qties):
             if not lot.get('quantity'):
                 lot['quantity'] = qty
@@ -1335,11 +1335,10 @@ Please change the quantity done or the rounding precision in your settings.""",
 
     def _merge_moves_fields(self):
         """ This method will return a dict of stock move’s values that represent the values of all moves in `self` merged. """
-        merge_extra = self.env.context.get('merge_extra')
         state = self._get_relevant_state_among_moves()
         origin = '/'.join(set(self.filtered(lambda m: m.origin).mapped('origin')))
         return {
-            'product_uom_qty': sum(self.mapped('product_uom_qty')) if not merge_extra else self[0].product_uom_qty,
+            'product_uom_qty': sum(self.mapped('product_uom_qty')),
             'date': min(self.mapped('date')) if all(p.move_type == 'direct' for p in self.picking_id) else max(self.mapped('date')),
             'move_dest_ids': [(4, m.id) for m in self.mapped('move_dest_ids')],
             'move_orig_ids': [(4, m.id) for m in self.mapped('move_orig_ids')],
@@ -1356,8 +1355,6 @@ Please change the quantity done or the rounding precision in your settings.""",
         ]
         if self.env['ir.config_parameter'].sudo().get_bool('stock.merge_only_same_date'):
             fields.append('date')
-        if self.env.context.get('merge_extra'):
-            fields.pop(fields.index('procure_method'))
         if not self.env['ir.config_parameter'].sudo().get_bool('stock.merge_ignore_date_deadline'):
             fields.append('date_deadline')
         return fields
@@ -1436,8 +1433,7 @@ Please change the quantity done or the rounding precision in your settings.""",
                     # link all move lines to record 0 (the one we will keep).
                     moves.mapped('move_line_ids').write({'move_id': moves[0].id})
                     # merge move data
-                    merge_extra = self.env.context.get('merge_extra') and bool(merge_into)
-                    moves[0].write(moves.with_context(merge_extra=merge_extra)._merge_moves_fields())
+                    moves[0].write(moves._merge_moves_fields())
                     # update merged moves dicts
                     moves_to_unlink |= moves[1:]
                     merged_moves |= moves[0]

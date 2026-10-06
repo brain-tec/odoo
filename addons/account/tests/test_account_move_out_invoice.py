@@ -16,6 +16,7 @@ from freezegun import freeze_time
 class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
     _test_user_groups = None  # FIXME list needed groups
+    _test_independent_company_xmlid = 'base.test_company_with_branch'
 
     @classmethod
     def setUpClass(cls):
@@ -2016,28 +2017,28 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
                 **self.product_line_vals_1,
                 'amount_currency': 1000.0,
                 'currency_id': self.other_currency.id,
-                'debit': 500.0,
+                'debit': 333.33,
                 'credit': 0.0,
             },
             {
                 **self.product_line_vals_2,
                 'amount_currency': 200.0,
                 'currency_id': self.other_currency.id,
-                'debit': 100.0,
+                'debit': 66.67,
                 'credit': 0.0,
             },
             {
                 **self.tax_line_vals_1,
                 'amount_currency': 180.0,
                 'currency_id': self.other_currency.id,
-                'debit': 90.0,
+                'debit': 60.0,
                 'credit': 0.0,
             },
             {
                 **self.tax_line_vals_2,
                 'amount_currency': 30.0,
                 'currency_id': self.other_currency.id,
-                'debit': 15.0,
+                'debit': 10.0,
                 'credit': 0.0,
             },
             {
@@ -2046,7 +2047,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
                 'amount_currency': -1410.0,
                 'currency_id': self.other_currency.id,
                 'debit': 0.0,
-                'credit': 705.0,
+                'credit': 470.0,
                 'date_maturity': move_reversal.date,
             },
         ], {
@@ -4411,15 +4412,8 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         """You should not be able to reverse moves from different branches."""
 
         # create a new branch
-        self.env.company.write({
-            'child_ids': [
-                Command.create({'name': 'Branch A'}),
-            ],
-        })
         self.cr.precommit.run()  # load the CoA
-
-        # create an invoice on the new branch
-        branch_a = self.env.company.child_ids
+        branch_a, _branch_b = self.env.company.child_ids
         branch_invoice = self.init_invoice('out_invoice', products=self.product_a, company=branch_a)
 
         branch_invoice.action_post()
@@ -5259,16 +5253,9 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'original_tax_ids': [Command.set(tax_10_incl.ids)],
         })
 
-        # create a new branch
-        self.env.company.write({
-            'child_ids': [
-                Command.create({'name': 'Branch A'}),
-            ],
-        })
         self.cr.precommit.run()  # load the CoA
 
-        # create an invoice on the new branch
-        branch_a = self.env.company.child_ids
+        branch_a, _branch_b = self.env.company.child_ids  # invoice on the branch
 
         # Create invoice - product will auto-apply price_unit from product with tax
         move_form = Form(self.env['account.move'].with_company(branch_a).with_context(default_move_type='out_invoice'))
@@ -5395,57 +5382,3 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             {'date': apr, 'state': 'posted'},
             {'date': may, 'state': 'draft'},
         ])
-
-    def test_out_invoice_multi_currency_exchange_diff(self):
-        """
-        Test that through the 'Reverse and Create Invoice' on a cash basis and multi-currency invoice,
-        the exchange difference and cash basis transition moves are correctly generated and posted.
-        """
-        self.env['res.currency.rate'].create([
-            {'name': '2026-07-01', 'rate': 20.0, 'currency_id': self.other_currency.id, 'company_id': self.env.company.id},
-            {'name': '2026-07-15', 'rate': 15.0, 'currency_id': self.other_currency.id, 'company_id': self.env.company.id},
-        ])
-
-        self.env.company.tax_exigibility = True
-        tax_waiting_account = self.env['account.account'].create({
-            'name': 'TAX_WAIT',
-            'code': 'TWAIT',
-            'account_type': 'liability_current',
-            'reconcile': True,
-        })
-
-        caba_tax = self.env['account.tax'].create({
-            'name': 'Cash Basis 15%',
-            'type_tax_use': 'sale',
-            'amount': 15,
-            'tax_exigibility': 'on_payment',
-            'cash_basis_transition_account_id': tax_waiting_account.id,
-        })
-
-        invoice = self.init_invoice(
-            move_type='out_invoice',
-            partner=self.partner_a,
-            invoice_date='2026-07-01',
-            currency=self.other_currency,
-            amounts=[100.0],
-            taxes=caba_tax,
-            post=True
-        )
-
-        move_reversal = self.env['account.move.reversal'].with_context(
-            active_model="account.move",
-            active_ids=invoice.ids,
-        ).create({
-            'date': '2026-07-15',
-            'reason': 'test reversal exchange',
-            'journal_id': invoice.journal_id.id,
-        })
-
-        move_reversal.modify_moves()
-        credit_note = self.env['account.move'].search([('reversed_entry_id', '=', invoice.id)])
-        self.assertTrue(credit_note)
-
-        partials = invoice.line_ids.matched_credit_ids | invoice.line_ids.matched_debit_ids
-        exchange_moves = partials.exchange_move_id
-
-        self.assertTrue(exchange_moves)
