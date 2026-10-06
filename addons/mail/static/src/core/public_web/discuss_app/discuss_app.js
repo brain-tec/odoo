@@ -1,12 +1,13 @@
 import { EffectPlugin } from "@web/core/effects/effect_plugin";
-import { propSignal, useMessageScrolling } from "@mail/utils/common/hooks";
-import { useSubEnv } from "@web/owl2/utils";
+import { MessageHighlightPlugin } from "@mail/core/common/message_highlight_plugin";
+import { propSignal } from "@mail/utils/common/hooks";
 
 import {
     Component,
     computed,
     onMounted,
     onWillUnmount,
+    providePlugins,
     signal,
     t,
     useListener,
@@ -18,6 +19,7 @@ import { getActiveHotkey } from "@web/core/hotkeys/hotkey_utils";
 
 import { DiscussContent } from "@mail/core/public_web/discuss_content";
 import { MessagingMenu } from "@mail/core/public_web/messaging_menu/messaging_menu";
+import { useAncestors } from "@mail/core/common/ancestor_plugin";
 import { ResizablePanel } from "@web/core/resizable_panel/resizable_panel";
 import { useService } from "@web/core/utils/hooks";
 
@@ -41,14 +43,11 @@ export class Discuss extends Component {
             optional: true,
         });
         this.menuState = computed(() => this.store.discuss.sidebarState);
-        this.messageHighlight = useMessageScrolling({ thread: () => this.thread });
+        providePlugins([MessageHighlightPlugin], { thread: () => this.thread });
         this.orm = useService("orm");
         this.effect = usePlugin(EffectPlugin);
         this.ui = useService("ui");
-        useSubEnv({
-            inDiscussApp: true,
-            messageHighlight: this.messageHighlight,
-        });
+        useAncestors({ inDiscussApp: true });
         useListener(
             window,
             "keydown",

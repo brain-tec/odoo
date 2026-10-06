@@ -139,7 +139,7 @@ const chatterPatch = {
                 },
             },
             () =>
-                (!this.store.meetingViewOpened || this.env.inMeetingView) &&
+                (!this.store.meetingViewOpened || this.ancestors.inMeetingView) &&
                 (this.thread()?.isTransient || this.thread()?.canPostMessage) &&
                 !this.thread()?.messageInEdition?.composer?.isEditComposerVisible
         );
@@ -269,10 +269,10 @@ const chatterPatch = {
         return _t("Delete %(count)s files", { count });
     },
 
-    get subEnv() {
-        const res = super.subEnv;
-        assignGetter(res.inChatter, { aside: () => this.webChatterProps.isChatterAside });
-        Object.assign(res.inChatter, { toggleComposer: this.toggleComposer.bind(this) });
+    get chatterAncestor() {
+        const res = super.chatterAncestor;
+        assignGetter(res, { aside: () => this.webChatterProps.isChatterAside });
+        Object.assign(res, { toggleComposer: this.toggleComposer.bind(this) });
         return res;
     },
 
@@ -497,7 +497,9 @@ const chatterPatch = {
         if (status(this) === "destroyed") {
             return;
         }
-        await this.webChatterProps.saveRecord?.();
+        if (this.webChatterProps.saveRecord && !(await this.webChatterProps.saveRecord())) {
+            return;
+        }
         if (this.webChatterProps.record) {
             await this.webChatterProps.record.load();
         }

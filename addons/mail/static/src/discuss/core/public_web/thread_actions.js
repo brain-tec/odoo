@@ -30,19 +30,19 @@ registerThreadAction("show-threads", {
             this.actionPanelComponentProps
         );
     },
-    actionPanelOuterClass: ({ owner, store }) =>
+    actionPanelOuterClass: ({ ancestors, store }) =>
         attClassObjectToString({
             "o-mail-SubChannelList-panel": true,
-            [store.discussDropdownMenuClass(owner)]: !owner.env.inMeetingView,
+            [store.discussDropdownMenuClass(ancestors)]: !ancestors.inMeetingView,
         }),
-    btnAttrs: { "data-available-offline": true },
+    availableOffline: true,
     condition: ({ channel, owner }) =>
         (channel?.hasSubChannelFeature || channel?.parent_channel_id?.hasSubChannelFeature) &&
         !owner.isDiscussSidebarChannelActions,
     icon: "forum",
     name: _t("Threads"),
-    setup({ owner, store }) {
-        if (owner.env.inDiscussApp && !store.env.services.ui.isSmall) {
+    setup({ ancestors, store }) {
+        if (ancestors.inDiscussApp && !store.env.services.ui.isSmall) {
             this.popover = usePopover(SubChannelList, {
                 onClose: () => this.actionPanelClose(),
                 fixedPosition: true,

@@ -11,14 +11,14 @@
                     'pb-2': this.extended and !this.props.composer.message,
                     'o-extended': this.extended,
                     'o-isUiSmall': this.ui.isSmall,
-                    'ps-2 pe-4 pb-2': this.normal and !this.env.inDiscussApp and !this.env.inMeetingView,
-                    'ps-0 pe-3 pb-2': this.normal and this.env.inMeetingView,
+                    'ps-2 pe-4 pb-2': this.normal and !this.ancestors.inDiscussApp and !this.ancestors.inMeetingView,
+                    'ps-0 pe-3 pb-2': this.normal and this.ancestors.inMeetingView,
                     'o-hasSelfAvatar': this.showComposerAvatar,
                     'o-focused': this.props.composer.isFocused,
                     'o-editing': this.props.composer.message,
-                    'o-chatWindow mx-2 my-1': this.env.inChatWindow,
-                    'mb-2': this.env.inChatWindow and !this.props.composer.message,
-                    'o-discussApp pt-1 ps-2 pe-4': this.env.inDiscussApp,
+                    'o-chatWindow mx-2 my-1': this.ancestors.inChatWindow,
+                    'mb-2': this.ancestors.inChatWindow and !this.props.composer.message,
+                    'o-discussApp pt-1 ps-2 pe-4': this.ancestors.inDiscussApp,
                     'o-disabled': this.props.disabled,
                 }" t-attf-class="{{ this.props.className }}">
             <FileUploader t-if="this.allowUpload" multiUpload="this.isMultiUpload" onUploaded.bind="(data) => { this.attachmentUploader.uploadData(data) }">
@@ -31,7 +31,7 @@
             </div>
             <div class="o-mail-Composer-coreHeader min-w-0">
                 <div t-if="this.props.composer.replyToMessage" class="text-truncate small p-2 align-items-center d-flex">
-                    <span class="o-mail-Composer-replyingToJumpClickable cursor-pointer px-2 rounded-pill" t-on-click="() => this.env.messageHighlight?.highlightMessage(this.props.composer.replyToMessage)">
+                    <span class="o-mail-Composer-replyingToJumpClickable cursor-pointer px-2 rounded-pill" t-on-click="() => this.messageHighlight?.highlightMessage(this.props.composer.replyToMessage)">
                         Replying to <b t-out="this.props.composer.replyToMessage.authorName"/>
                     </span>
                     <span t-if="this.props.composer.replyToMessage.thread?.notEq(this.props.composer.thread)">
@@ -136,8 +136,8 @@
         t-att-class="{
             'btn-primary btn-sm': this.extended,
             'btn-link rounded-circle p-0': !this.extended,
-            'me-2': this.env.inDiscussApp,
-            'border-start-0': this.env.inDiscussApp and !this.props.composer.message,
+            'me-2': this.ancestors.inDiscussApp,
+            'border-start-0': this.ancestors.inDiscussApp and !this.props.composer.message,
             'border-0': this.props.composer.message,
         }"
         t-on-click="this.sendMessage"
@@ -152,7 +152,7 @@
 <t t-name="mail.Composer.quickActions">
     <div class="o-mail-Composer-quickActions o-mail-Composer-bg" t-attf-class="{{ actionsContainerClass }}" t-ref="this.quickActionsRef">
         <div class="o-mail-Composer-mainActions d-flex flex-grow-1 align-items-baseline">
-            <ActionList actions="this.quickActionsList" inline="true" actionComponent="this.actionComponent"/>
+            <ActionList actions="this.quickActionsList" inline="true" actionComponent.bind="this.getActionComponent"/>
         </div>
     </div>
 </t>
@@ -160,7 +160,7 @@
 <t t-name="mail.Composer.moreActions">
     <div class="o-mail-Composer-moreActions o-mail-Composer-bg" t-attf-class="{{ actionsContainerClass }}" t-ref="this.moreActionsRef">
         <div class="o-mail-Composer-mainActions d-flex flex-grow-1 align-items-baseline">
-            <ActionList actions="this.moreActionsList" inline="true" actionComponent="this.actionComponent"/>
+            <ActionList actions="this.moreActionsList" inline="true" actionComponent.bind="this.getActionComponent"/>
         </div>
     </div>
 </t>
@@ -168,7 +168,7 @@
 <t t-name="mail.Composer.extraActions">
     <div class="o-mail-Composer-extraActions" t-attf-class="{{ actionsContainerClass }}" t-ref="this.extraActionsRef">
         <div class="o-mail-Composer-mainActions d-flex flex-grow-1 align-items-baseline">
-            <ActionList actions="this.extraActionsList" inline="true" actionComponent="this.actionComponent"/>
+            <ActionList actions="this.extraActionsList" inline="true" actionComponent.bind="this.getActionComponent"/>
         </div>
     </div>
 </t>
