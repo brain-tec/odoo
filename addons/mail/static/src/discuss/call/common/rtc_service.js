@@ -431,9 +431,6 @@ export class Rtc extends Record {
             }
             return this._remotelyHostedChannelId;
         },
-        onDelete(channel) {
-            channel.clearActiveSpeakers();
-        },
     });
     /**
      * Html element embedding the rtc service. Used to scope the dialog to the correct
@@ -531,6 +528,10 @@ export class Rtc extends Record {
     });
 
     setup() {
+        this.onEnter(
+            () => [this.channel],
+            (channel) => () => channel.clearActiveSpeakers()
+        );
         // the services and the dialog the record holds, assigned when the service starts or
         // when a call runs
         /** @type {SfuClientState} */
@@ -2166,17 +2167,6 @@ export class Rtc extends Record {
                 fallback: this.fallbackMode,
             },
         };
-    }
-
-    logSnapshot() {
-        if (!this.localChannel) {
-            // a snapshot out of a call would not collect any data
-            return;
-        }
-        window.navigator.serviceWorker?.controller?.postMessage({
-            name: SW_MESSAGE_TYPE.POST_RTC_LOGS,
-            logs: [this.buildSnapshot()],
-        });
     }
 
     async ping() {

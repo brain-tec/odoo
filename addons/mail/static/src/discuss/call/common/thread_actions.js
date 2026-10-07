@@ -30,15 +30,15 @@ registerThreadAction("camera-call", {
             fullscreen: !store.inPublicPage,
         }),
     sequence: 5,
-    sequenceQuick: ({ owner }) => (owner.env.inDiscussApp ? 25 : 35),
+    sequenceQuick: ({ ancestors }) => (ancestors.inDiscussApp ? 25 : 35),
     tags: [ACTION_TAGS.SUCCESS, ACTION_TAGS.JOIN_LEAVE_CALL],
 });
 registerThreadAction("call-settings", {
     actionPanelComponent: CallSettings,
     actionPanelComponentProps: () => ({ isCompact: true }),
-    condition: ({ channel, owner, store }) =>
+    condition: ({ ancestors, channel, owner, store }) =>
         channel?.allowCalls &&
-        (owner.props.chatWindow?.isOpen || store.inPublicPage) &&
+        (ancestors.inChatWindow || store.inPublicPage) &&
         !owner.isDiscussSidebarChannelActions,
     icon: "settings",
     iconClass: "oi-filled oi-fw",
