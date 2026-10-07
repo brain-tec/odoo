@@ -180,10 +180,11 @@ export class Store extends BaseStore {
     /** @type {DebugModePlugin} */
     debugMode;
 
-    discussDropdownMenuClass(ctx) {
+    /** @param {Readonly<Record<string, any>>} [ancestors] @see useAncestors */
+    discussDropdownMenuClass(ancestors) {
         return attClassObjectToString({
             "o-discuss-dropdownMenu d-flex flex-column": true,
-            "o-discussCallTheme": Boolean(ctx?.env?.inDiscussCallTheme),
+            "o-discussCallTheme": Boolean(ancestors?.inDiscussCallTheme),
         });
     }
 
@@ -417,14 +418,6 @@ export class Store extends BaseStore {
         await this.chatHub.initPromise;
         channel.chatWindow?.update({ autofocus: 0 });
         await this.env.services["discuss.rtc"].startMeetingCall(channel, { fullscreen: true });
-    }
-
-    /**
-     * @param {import("menu_tabs").MenuTabs[keyof import("menu_tabs").MenuTabs]} tabId
-     * @returns Thread types matching the given tab.
-     */
-    tabIdToThreadTypes(tabId) {
-        return tabId === "chat" ? ["chat", "group"] : [tabId];
     }
 
     handleClickOnLink(ev, thread) {
@@ -725,12 +718,6 @@ export class Store extends BaseStore {
             params.canned_response_ids = cannedResponseIds;
         }
         return params;
-    }
-
-    notifySendFromMailbox(recordName) {
-        this.env.services.notification.add(_t('Message posted on "%s"', recordName), {
-            type: "info",
-        });
     }
 
     /**

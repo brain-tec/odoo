@@ -149,7 +149,6 @@ export class Thread extends Record {
         onDelete: (r) => r?.delete(),
     });
     counter = 0;
-    counter_bus_id = 0;
     /** @type {string} */
     defaultSubject;
     /** @type {string} */
@@ -707,7 +706,6 @@ export class Thread extends Record {
                 message.notIn(this.messages)
             );
             this.messages.push(...missingMessages);
-            this.messages.sort((m1, m2) => m1.id - m2.id);
         }
     }
 
