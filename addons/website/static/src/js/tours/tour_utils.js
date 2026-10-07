@@ -12,7 +12,6 @@ export function addMedia() {
 }
 export function assertCssVariable(variableName, variableValue, trigger = ":iframe body") {
     return {
-        isActive: ["auto"],
         content: `Check CSS variable ${variableName}=${variableValue}`,
         trigger: trigger,
         run() {
@@ -507,28 +506,6 @@ export function registerThemeHomepageTour(name, steps) {
             ...clickOnSave(),
         ]
     );
-}
-
-export function registerBackendAndFrontendTour(name, options, steps) {
-    if (typeof steps !== "function") {
-        throw new Error(`tour.steps has to be a function that returns TourStep[]`);
-    }
-    if (window.location.pathname === "/odoo") {
-        return registerWebsitePreviewTour(name, options, () => {
-            const newSteps = [];
-            for (const step of steps()) {
-                const newStep = Object.assign({}, step);
-                newStep.trigger = `:iframe ${step.trigger}`;
-                newSteps.push(newStep);
-            }
-            return newSteps;
-        });
-    }
-
-    return registry.category("web_tour.tours").add(name, {
-        ...options,
-        steps: () => steps(),
-    });
 }
 
 /**
