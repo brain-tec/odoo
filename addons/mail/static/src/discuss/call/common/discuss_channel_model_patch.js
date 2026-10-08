@@ -1,7 +1,6 @@
 import { fields } from "@mail/model/export";
 import { CALL_GRID_LAYOUT } from "@mail/discuss/call/common/call_layout";
 import { DiscussChannel } from "@mail/discuss/core/common/discuss_channel_model";
-import { nestedShallowEqual } from "@mail/utils/common/signal";
 
 import { localeCompare } from "@web/core/l10n/utils";
 import { patch } from "@web/core/utils/patch";
@@ -24,9 +23,11 @@ const DiscussChannelPatch = {
         this.lastSessionIds = new Set();
         /** @type {number|undefined} */
         this.cancelRtcInvitationTimeout = undefined;
-        this.rtc_session_ids = fields.Many("discuss.channel.rtc.session", {
-            onDelete: (r) => r?.delete(),
-        });
+        this.rtc_session_ids = fields.Many("discuss.channel.rtc.session");
+        this.onEnter(
+            () => this.rtc_session_ids,
+            (session) => () => session.delete()
+        );
         this.onChange(
             () => [...this.rtc_session_ids],
             function onChangeRtcSessionIds(...rtcSessions) {
@@ -47,7 +48,7 @@ const DiscussChannelPatch = {
         this.pruneSpeakersTimeout = undefined;
         this.pinnedRtcSession = fields.One("discuss.channel.rtc.session");
         /** @type {import("@mail/discuss/call/common/call").CardData[]} */
-        this.visibleCards = this.computed(
+        this.visibleCards = this.computedShallowEqual(
             () => {
                 const raisingHandCards = [];
                 const sessionCards = [];
@@ -107,7 +108,7 @@ const DiscussChannelPatch = {
                 });
                 return raisingHandCards.concat(sessionCards, invitationCards);
             },
-            { equals: nestedShallowEqual }
+            { nested: true }
         );
         this.useCameraByDefault = this.computed(() => {
             if (this.channel_type === "chat" && this.store.rtc.selfSession?.channel?.eq(this)) {

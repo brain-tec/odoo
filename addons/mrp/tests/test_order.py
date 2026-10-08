@@ -4205,6 +4205,37 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         mo.uom_id = self.uom_dozen
         self.assertEqual(mo.workorder_ids.duration_expected, 720, "Workorder duration should be 720 minutes after changing the MO UoM.")
 
+    def test_workorder_duration_with_bom_quantity_in_a_smaller_uom(self):
+        """Check that a work order lasts the full number of cycles when the BoM quantity
+        is expressed in a smaller unit than the order.
+        """
+        self.workcenter_2.capacity_ids.unlink()
+        mo = self.env['mrp.production'].create({
+            'bom_id': self.bom_4.id,
+            'uom_id': self.uom_dozen.id,
+            'product_qty': 2.0,
+        })
+        # 2 Dozens is 24 Units, which needs 24 cycles of 1 Unit at 60 minutes each.
+        self.assertEqual(mo.workorder_ids.duration_expected, 1440)
+
+    def test_workorder_duration_with_capacity_in_a_smaller_uom(self):
+        """Check that a work order lasts the full number of cycles when the work center
+        capacity is expressed in a smaller unit than the order.
+        """
+        self.workcenter_2.capacity_ids.unlink()
+        self.env['mrp.workcenter.capacity'].create({
+            'workcenter_id': self.workcenter_2.id,
+            'uom_id': self.uom_unit.id,
+            'capacity': 2.0,
+        })
+        mo = self.env['mrp.production'].create({
+            'bom_id': self.bom_4.id,
+            'uom_id': self.uom_dozen.id,
+            'product_qty': 10.0,
+        })
+        # 10 Dozens is 120 Units, which needs 60 cycles of 2 Units at 60 minutes each.
+        self.assertEqual(mo.workorder_ids.duration_expected, 3600)
+
     def test_multi_edit_start_date_wo(self):
         """
         Test setting the start date for multiple workorders, checking if the finish date
@@ -5626,7 +5657,7 @@ class TestMrpOrderPostInstall(TestMrpCommon):
         self.assertRecordValues(mo.lot_producing_ids.sorted('name'), [
             {'name': f"sn#0{13 + i}"} for i in range(20)
         ])
-        Form.from_action(self.env, mo.button_mark_done()).save().action_confirm()
+        mo.button_mark_done()
         self.assertRecordValues(mo.production_group_id.production_ids.sorted('state'), [
             {'state': 'confirmed', 'product_qty': 16.0, 'qty_produced': 0.0},
             {'state': 'done', 'product_qty': 20.0, 'qty_produced': 20.0},
@@ -5652,6 +5683,23 @@ class TestTourMrpOrder(HttpCase):
 
         self.start_tour(url, 'test_mrp_production_product_catalog', login='admin')
         self.assertEqual(len(mo.move_raw_ids), 1)
+
+    def test_mo_overview_no_byproducts(self):
+        """ The MO Overview must render for a production with no byproducts,
+        which is the default case since MoOverviewByproductsBlock is always
+        instantiated regardless of whether the BoM has byproduct lines. """
+        product = self.env['product.product'].create({
+            'name': 'MO Overview Test Product',
+            'is_storable': True,
+        })
+        mo = self.env['mrp.production'].create({
+            'product_id': product.id,
+            'product_uom_qty': 1.0,
+        })
+        mo.action_confirm()
+
+        url = f'/odoo/action-mrp.mrp_production_action/{mo.id}'
+        self.start_tour(url, 'mrp_mo_overview_no_byproducts_tour', login='admin')
 
     def test_manufacturing_and_byproduct_sm_to_sml_synchronization(self):
         """ Test the synchronization between stock moves and stock move lines within

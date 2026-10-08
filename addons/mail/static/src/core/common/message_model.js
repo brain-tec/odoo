@@ -31,13 +31,21 @@ import {
 import { renderToElement } from "@web/core/utils/render";
 import { url } from "@web/core/utils/urls";
 
-import { markup, shallowEqual } from "@odoo/owl";
+import { markup } from "@odoo/owl";
 import { emojiLoader } from "@web/core/emoji_picker/emoji_loader";
 import { discussComponentRegistry } from "./discuss_component_registry";
 
 const { DateTime } = luxon;
 export class Message extends Record {
     static _name = "mail.message";
+
+    setup() {
+        super.setup(...arguments);
+        this.onEnter(
+            () => [this.composer],
+            (composer) => () => composer.delete()
+        );
+    }
 
     attachment_ids = fields.Many("ir.attachment", { inverse: "message" });
     author_id = fields.One("res.partner");
@@ -63,7 +71,7 @@ export class Message extends Record {
         }
         return getInnerHtml(decorateEmojis(createElementFromContent(this.translationValue)));
     });
-    composer = fields.One("Composer", { inverse: "message", onDelete: (r) => r?.delete() });
+    composer = fields.One("Composer", { inverse: "message" });
     composerAsReplyToMessage = fields.One("Composer", { inverse: "replyToMessage" });
     date = fields.Datetime();
     /** @type {string} */
@@ -83,16 +91,13 @@ export class Message extends Record {
         return editedDate ? deserializeDateTime(editedDate) : undefined;
     });
     /** attachments not already clearly visible in the body, unlike inlined images */
-    extra_body_attachment_ids = this.computed(
-        () => {
-            const inlinedImageAttachmentIds = [
-                ...(this.bodyEl?.querySelectorAll("img[data-attachment-id]") ?? []),
-            ].map((img) => parseInt(img.dataset.attachmentId));
+    extra_body_attachment_ids = this.computedShallowEqual(() => {
+        const inlinedImageAttachmentIds = [
+            ...(this.bodyEl?.querySelectorAll("img[data-attachment-id]") ?? []),
+        ].map((img) => parseInt(img.dataset.attachmentId));
 
-            return this.attachment_ids.filter((a) => !inlinedImageAttachmentIds.includes(a.id));
-        },
-        { equals: shallowEqual }
-    );
+        return this.attachment_ids.filter((a) => !inlinedImageAttachmentIds.includes(a.id));
+    });
     hasLink = this.computed(() => {
         if (this.isBodyEmpty) {
             return false;
@@ -130,9 +135,8 @@ export class Message extends Record {
     /** @type {string|undefined} */
     postFailMessage = undefined;
     reactions = fields.Many("MessageReactions", { inverse: "message" });
-    sortedReactions = this.computed(
-        () => [...this.reactions].sort((r1, r2) => r1.sequence - r2.sequence),
-        { equals: shallowEqual }
+    sortedReactions = this.computedShallowEqual(() =>
+        [...this.reactions].sort((r1, r2) => r1.sequence - r2.sequence)
     );
     notification_ids = fields.Many("mail.notification", { inverse: "mail_message_id" });
     self_notification = this.computed(() =>
@@ -505,9 +509,8 @@ export class Message extends Record {
         return null;
     }
 
-    failureNotifications = this.computed(
-        () => this.notification_ids.filter((notification) => notification.isFailure),
-        { equals: shallowEqual }
+    failureNotifications = this.computedShallowEqual(() =>
+        this.notification_ids.filter((notification) => notification.isFailure)
     );
 
     get scheduledDateSimple() {

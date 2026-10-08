@@ -29,7 +29,6 @@ import {
     onWillDestroy,
     onWillUnmount,
     proxy,
-    shallowEqual,
     signal,
     t,
     untrack,
@@ -68,6 +67,7 @@ import { syntaxHighlightingEmbedding } from "@html_editor/others/embedded_compon
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { IndexedDB } from "@web/core/utils/indexed_db";
+import { computedShallowEqual } from "@mail/utils/common/signal";
 
 const EDIT_CLICK_TYPE = {
     CANCEL: "cancel",
@@ -396,6 +396,7 @@ export class Composer extends Component {
                     return;
                 }
                 setElementContent(this.editor.editable, composerHtml);
+                this.editor.processThrough("html_compatibility_processors", this.editor.editable);
                 this.setEditorCursorEnd();
                 this.editor.shared.history.commit();
             })
@@ -445,7 +446,7 @@ export class Composer extends Component {
         });
     });
 
-    moreActionsList = computed(() => [this.moreAction()], { equals: shallowEqual });
+    moreActionsList = computedShallowEqual(() => [this.moreAction()]);
 
     get isMultiUpload() {
         return true;
@@ -622,6 +623,7 @@ export class Composer extends Component {
         const props = {
             anchorRef: this.inputContainerRef,
             position: this.ancestors.inChatter ? "bottom-fit" : "top-fit",
+            onClose: () => this.suggestion.dismiss(),
             onSelect: (ev, option) => {
                 this.suggestion.insert(option);
                 markEventHandled(ev, "composer.selectSuggestion");

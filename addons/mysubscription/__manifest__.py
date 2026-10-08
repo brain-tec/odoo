@@ -7,13 +7,14 @@
     'depends': ['base', 'web'],
     'auto_install': True,
     'data': [
+        'data/ir_config_parameter_data.xml',
         'views/menus.xml',
     ],
     'assets': {
         'web.assets_backend': [
             'mysubscription/static/src/**/*.js',
             'mysubscription/static/src/**/*.xml',
-            'mysubscription/static/src/**/*.scss',
+            'mysubscription/static/src/**/*.css',
         ],
         'web.assets_unit_tests': [
             'mysubscription/static/tests/**/*',
