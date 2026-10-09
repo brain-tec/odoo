@@ -4285,6 +4285,7 @@ class TestMrpOrder(TestMrpCommon):
         be shown in planning gantt view
         """
         self.env.company.tz = 'Europe/Brussels'
+        (self.workcenter_1 | self.workcenter_2).tz = 'Europe/Brussels'
         mo = self.env['mrp.production'].create({
             'product_id': self.product.id,
             'uom_id': self.bom_1.uom_id.id,
@@ -4341,6 +4342,7 @@ class TestMrpOrder(TestMrpCommon):
                 in preparation but it will finish later than workcenter 1.
         """
 
+        self.env.company.tz = 'Europe/Brussels'
         self.product_1.uom_id = self.uom_unit.id
 
         workcenter_1 = self.env['mrp.workcenter'].create({
