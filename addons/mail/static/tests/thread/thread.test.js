@@ -725,7 +725,11 @@ test("chat window header should not have unread counter for non-channel thread",
 test("Thread messages are only loaded once", async () => {
     const pyEnv = await startServer();
     const channelIds = pyEnv["discuss.channel"].create([{ name: "General" }, { name: "Sales" }]);
-    listenStoreFetch("/discuss/channel/messages", { logParams: ["/discuss/channel/messages"] });
+    // is_prefetch depends on whether the load started on intent or on open.
+    listenStoreFetch("/discuss/channel/messages", {
+        logParams: ["/discuss/channel/messages"],
+        ignoreParamKeys: ["is_prefetch"],
+    });
     await start();
     pyEnv["mail.message"].create([
         {
@@ -761,6 +765,37 @@ test("Thread messages are only loaded once", async () => {
     await waitFor(".o-mail-Message-content:text('Message on channel1'):count(1)");
 });
 
+test("opening a thread with failed prefetch retries the load", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    pyEnv["mail.message"].create({
+        body: "Message on channel",
+        model: "discuss.channel",
+        res_id: channelId,
+    });
+    const prefetchDeferred = Promise.withResolvers();
+    let isPrefetch = true;
+    onRpc("/mail/store", async (request) => {
+        const { params } = await request.json();
+        if (params.fetch_params.some((param) => param[0] === "/discuss/channel/messages")) {
+            expect.step("fetch messages");
+            if (isPrefetch) {
+                isPrefetch = false;
+                await prefetchDeferred.promise;
+                throw new Error("prefetch failed");
+            }
+        }
+    });
+    await start();
+    await openDiscuss(MENU_ACTIVE_IDS.CHANNEL);
+    await click(".o-mail-NotificationItem:contains(General)");
+    await expect.waitForSteps(["fetch messages"]);
+    await contains(".o-mail-DiscussContent-threadName", { value: "General" });
+    prefetchDeferred.resolve();
+    await expect.waitForSteps(["fetch messages"]);
+    await contains(".o-mail-Message-content:text('Message on channel')");
+});
+
 test.tags("focus required");
 test("[text composer] Opening thread with needaction messages should mark all messages of thread as read", async () => {
     const pyEnv = await startServer();
@@ -781,7 +816,10 @@ test("[text composer] Opening thread with needaction messages should mark all me
             ["res_id", "=", channelId],
         ]);
     });
-    listenStoreFetch("/discuss/channel/messages", { logParams: ["/discuss/channel/messages"] });
+    listenStoreFetch("/discuss/channel/messages", {
+        logParams: ["/discuss/channel/messages"],
+        ignoreParamKeys: ["is_prefetch"],
+    });
     await start();
     await openDiscuss(channelId);
     await expect.waitForSteps([
@@ -839,7 +877,10 @@ test("Opening thread with needaction messages should mark all messages of thread
             ["res_id", "=", channelId],
         ]);
     });
-    listenStoreFetch("/discuss/channel/messages", { logParams: ["/discuss/channel/messages"] });
+    listenStoreFetch("/discuss/channel/messages", {
+        logParams: ["/discuss/channel/messages"],
+        ignoreParamKeys: ["is_prefetch"],
+    });
     await start();
     const composerService = getService("mail.composer");
     composerService.setHtmlComposer();

@@ -8,6 +8,8 @@ import { createElementWithContent } from "@web/core/utils/html";
 import { patch } from "@web/core/utils/patch";
 
 const commandRegistry = registry.category("discuss.channel_commands");
+// Past this delay, consumers stop waiting on the prefetch rather than delaying the user further.
+export const PREFETCH_MAX_WAIT = 200;
 
 /** @type {import("models").Thread} */
 const threadPatch = {
@@ -39,6 +41,10 @@ const threadPatch = {
         // applies them in the order it receives them, not the order they are sent.
         this.markReadSequential = useSequential();
         this.markingAsRead = false;
+        /** @type {Promise|undefined} resolves when the prefetch is done */
+        this.prefetching = undefined;
+        /** @type {Promise|undefined} like prefetching, but also resolves after PREFETCH_MAX_WAIT */
+        this.prefetchingOrTimeout = undefined;
         this.scrollUnread = true;
     },
     /** @override */
@@ -73,6 +79,50 @@ const threadPatch = {
     },
     get isUnread() {
         return this.channel?.self_member_id?.message_unread_counter > 0 || super.isUnread;
+    },
+    /** @override */
+    async loadAround() {
+        // Prefetch isn't done yet. Wait before calling super, this call would be ignored
+        // otherwise.
+        await this.prefetching;
+        return super.loadAround(...arguments);
+    },
+    /** @override */
+    async fetchInitialMessages({ routeParams = {} } = {}) {
+        if (this.channel?.self_member_id && this.scrollUnread) {
+            return this.loadAround({
+                messageId: this.channel.self_member_id.new_message_separator,
+                routeParams,
+            });
+        }
+        return super.fetchInitialMessages(...arguments);
+    },
+    /**
+     * Loads the initial messages ahead of the thread being opened, on intent to open it.
+     * Unlike `fetchInitialMessages`, it only applies to threads of which the user is a member
+     * and exposes `prefetching` and `prefetchingOrTimeout` so the opening can wait for it. A
+     * failure is silent, the load is retried when the thread is actually opened.
+     */
+    async prefetchInitialMessages() {
+        // Only members are kept up to date by the bus once loaded.
+        if (!this.channel?.self_member_id || this.status === "loading") {
+            return;
+        }
+        this.prefetching = this.fetchInitialMessages({ routeParams: { is_prefetch: true } });
+        this.prefetchingOrTimeout = Promise.race([
+            this.prefetching,
+            new Promise((resolve) => setTimeout(resolve, PREFETCH_MAX_WAIT)),
+        ]);
+        await this.prefetching;
+        this.prefetchingOrTimeout = undefined;
+        this.prefetching = undefined;
+        if (this.hasLoadingFailed && !this.channel.isDisplayed) {
+            // Retry on open instead of showing an error for a thread the user never opened.
+            this.hasLoadingFailed = false;
+            this.hasLoadingFailedError = undefined;
+            this.isLoaded = false;
+            this.status = "new";
+        }
     },
     /** @override */
     markAsRead() {

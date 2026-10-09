@@ -52,7 +52,18 @@ const messagingMenuPatch = {
         return super.isEmpty && !this.channels().length;
     },
     /** @param {import("models").DiscussChannel} channel */
-    onClickChannel(channel) {
+    async onClickChannel(channel) {
+        this.channelToOpen = channel;
+        const prefetchingOrTimeout = channel.thread?.prefetchingOrTimeout;
+        if (prefetchingOrTimeout) {
+            // Wait for the prefetch, so the thread shows already loaded instead of
+            // rendering once empty and again once it resolves.
+            const activeTab = this.state().activeTab;
+            await prefetchingOrTimeout;
+            if (this.channelToOpen !== channel || this.state().activeTab !== activeTab) {
+                return;
+            }
+        }
         channel.open({ focus: true, fromMessagingMenu: true, bypassCompact: true });
         this.close?.();
     },

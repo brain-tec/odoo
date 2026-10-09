@@ -99,6 +99,15 @@ export * from "./mail_test_helpers_contains";
 
 const { AudioContext } = window;
 
+/**
+ * Audio context that processes audio without rendering it to any output device.
+ */
+class SilentAudioContext extends AudioContext {
+    constructor(options) {
+        super({ ...options, sinkId: { type: "none" } });
+    }
+}
+
 before(prepareRegistriesWithCleanup);
 export const registryNamesToCloneWithCleanup = [];
 registryNamesToCloneWithCleanup.push("mock_server_callbacks", "discuss.model");
@@ -380,6 +389,7 @@ export async function start(options) {
             after(() => this.clear());
         },
     });
+    preventActualMediaUsage();
     serverState.serverVersion = options?.serverVersion ?? [99, 9]; // so local storage entries upgrade to latest version. HOOT sets 1.0 otherwise, ignoring all upgrades...
     if (!MockServer.current) {
         await startServer();
@@ -513,7 +523,7 @@ export async function patchUiSize({ height, size, width }) {
 }
 
 function createAudioStream() {
-    const ctx = new AudioContext();
+    const ctx = new SilentAudioContext();
     const dest = ctx.createMediaStreamDestination();
     after(() => {
         closeStream(dest.stream);
@@ -567,6 +577,29 @@ export function mockGetMedia() {
         },
     });
     return streams;
+}
+
+/**
+ * Prevents tests from using the actual microphone, camera, screen and speakers:
+ * media requests that are not mocked by the test get synthetic streams, and
+ * audio is processed without being rendered to an output device.
+ *
+ * The prototype is patched so that the test's own mocks on `navigator.mediaDevices`
+ * (e.g. `mockGetMedia`, denied permissions) take precedence regardless of order.
+ */
+function preventActualMediaUsage() {
+    patch(MediaDevices.prototype, {
+        async getUserMedia(constraints) {
+            return constraints?.audio ? createAudioStream() : createVideoStream();
+        },
+        async getDisplayMedia() {
+            return createVideoStream();
+        },
+    });
+    if (window.AudioContext === AudioContext) {
+        // not already mocked by the test, e.g. with `patchVoiceMessageAudio`
+        patch(window, { AudioContext: SilentAudioContext });
+    }
 }
 
 /**
@@ -953,8 +986,13 @@ export const STORE_FETCH_ROUTES = ["/mail/store"];
  * @param {function} [options.onRpc] entry point to override the onRpc of the intercepted calls.
  * @param {string[]} [options.logParams=[]] names of the store fetch params for which both the name
  *  and the specific params should be logged in expect.step. By default only the name is logged.
+ * @param {string[]} [options.ignoreParamKeys=[]] keys omitted from the logged params, for params
+ *  depending on timing (such as is_prefetch).
  */
-export function listenStoreFetch(nameOrNames = [], { logParams = [], onRpc: onRpcOverride } = {}) {
+export function listenStoreFetch(
+    nameOrNames = [],
+    { logParams = [], ignoreParamKeys = [], onRpc: onRpcOverride } = {}
+) {
     const namesToRegister = typeof nameOrNames === "string" ? [nameOrNames] : nameOrNames;
     function isRegistered(name) {
         return namesToRegister.length === 0 || namesToRegister.includes(name);
@@ -964,7 +1002,15 @@ export function listenStoreFetch(nameOrNames = [], { logParams = [], onRpc: onRp
             const res = await super.fetchStoreData(...arguments);
             if (isRegistered(name)) {
                 if (logParams.includes(name)) {
-                    expect.step(`store fetch: ${name} - ${JSON.stringify(params)}`);
+                    const loggedParams =
+                        params && typeof params === "object"
+                            ? Object.fromEntries(
+                                  Object.entries(params).filter(
+                                      ([key]) => !ignoreParamKeys.includes(key)
+                                  )
+                              )
+                            : params;
+                    expect.step(`store fetch: ${name} - ${JSON.stringify(loggedParams)}`);
                 } else {
                     expect.step(`store fetch: ${name}`);
                 }
@@ -1065,7 +1111,7 @@ class MockAudioContext {
         return new MockMediaStreamAudioSourceNode();
     }
     decodeAudioData(...args) {
-        return new AudioContext().decodeAudioData(...args);
+        return new SilentAudioContext().decodeAudioData(...args);
     }
     async resume() {}
 }

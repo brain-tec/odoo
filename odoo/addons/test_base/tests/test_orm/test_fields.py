@@ -2093,6 +2093,45 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         with self.assertRaises(MissingError):
             deleted.categories
 
+    @mute_logger('odoo.addons.base.models.ir_rule')
+    def test_33_prefetch_access_error_compute(self):
+        """ Test that a non-stored computed field is computed in batch on the
+        records of a one2many, even if the prefetch set of the one2many also
+        contains records that the user cannot read.
+        """
+        discussion = self.env['test_orm.discussion'].create({
+            'name': 'Discussion',
+            'participants': [Command.link(self.env.user.id)],
+        })
+        self.env['test_orm.message'].create([
+            {'discussion': discussion.id, 'body': f"Message {i}", 'important': i % 3 == 0}
+            for i in range(100)
+        ])
+        self.env['ir.access'].create({
+            'name': 'test_orm.message restriction',
+            'model_id': self.env['ir.model']._get('test_orm.message').id,
+            'operation': 'crud',
+            'domain': "[('important', '=', False)]",
+        })
+        self.env.invalidate_all()
+
+        messages = discussion.with_user(self.user_demo).messages
+        self.assertEqual(len(messages), 66)
+
+        # the computation of author_message_count below doesn't raise
+        # AccessError if message.author isn't already in cache
+        # (Explanation: The prefetching of all messages fails because some of
+        # them are not accessible. The prefetching is then retried on the first
+        # message, and as this one is already in cache, the ORM only checks
+        # access rights. The latter fills the access rights cache for all
+        # messages, which prefetches fields in sudo() to evaluate the domain.
+        # Once done, the cache of inaccessible records is polluted with the
+        # prefetched fields.)
+        messages.fetch()
+
+        with self.assertQueryCount(18):
+            messages.mapped('author_message_count')
+
     def test_40_real_vs_new(self):
         """ test field access on new records vs real records. """
         Model = self.env['test_orm.category']
@@ -4284,7 +4323,7 @@ class TestParentStore(TransactionCaseWithUserDemo):
         )
 
 
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestRequiredMany2one(TransactionCase):
 
     def test_explicit_ondelete(self):
@@ -4304,10 +4343,10 @@ class TestRequiredMany2one(TransactionCase):
         self.patch(field, 'ondelete', 'set null')
 
         with self.assertRaises(ValueError):
-            field.setup_nonrelated(Model)
+            field._setup(Model)
 
 
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestRequiredMany2oneTransient(TransactionCase):
 
     def test_explicit_ondelete(self):
@@ -4327,7 +4366,7 @@ class TestRequiredMany2oneTransient(TransactionCase):
         self.patch(field, 'ondelete', 'set null')
 
         with self.assertRaises(ValueError):
-            field.setup_nonrelated(Model)
+            field._setup(Model)
 
 
 @tagged('post_install', '-at_install')
@@ -4362,7 +4401,8 @@ class TestOne2manyInvalidInverse(TransactionCase):
         self.assertEqual(o2m.inverse_name, 'invalid key example')
 
         self.registry.__dict__.pop('field_inverses', None)
-        self.assertFalse(self.registry.field_inverses[o2m])
+        with self.assertWarnsRegex(UserWarning, 'ignoring manual field with invalid inverse name'):
+            self.assertFalse(self.registry.field_inverses[o2m])
 
 
 @tagged('m2oref')
@@ -4811,7 +4851,7 @@ class TestSelectionOndeleteAdvanced(TransactionCase):
             self.registry._setup_models__(self.env.cr, [])  # incremental setup
 
 
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestFieldParametersValidation(TransactionCase):
     def test_invalid_parameter(self):
         from odoo.orm.model_classes import add_to_registry  # noqa: PLC0415
@@ -4825,13 +4865,8 @@ class TestFieldParametersValidation(TransactionCase):
         add_to_registry(self.registry, Foo)
         self.addCleanup(self.registry.__delitem__, Foo._name)
 
-        with self.assertLogs('odoo.fields', level='WARNING') as cm:
+        with self.assertWarnsRegex(UserWarning, "unknown parameter 'invalid_parameter'"):
             self.registry._setup_models__(self.env.cr, [])  # incremental setup
-
-        self.assertTrue(cm.output[0].startswith(
-            "WARNING:odoo.fields:Field test_orm.field_parameter_validation.name: "
-            "unknown parameter 'invalid_parameter'",
-        ))
 
 
 def select(model, *fnames):

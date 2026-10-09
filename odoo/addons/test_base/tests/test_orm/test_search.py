@@ -253,23 +253,15 @@ class TestSubqueries(TransactionCase):
             LEFT JOIN "test_orm_partner" AS "test_orm_multi__partner"
             ON ("test_orm_multi"."partner" = "test_orm_multi__partner"."id")
             WHERE (
-                ("test_orm_multi"."partner" IS NOT NULL
-                    AND "test_orm_multi__partner"."id" IS NOT NULL AND (
-                    "test_orm_multi__partner"."email" LIKE %s
-                    OR "test_orm_multi__partner"."name" LIKE %s
-                ))
-                AND ("test_orm_multi"."partner" IS NULL OR "test_orm_multi"."partner" NOT IN (
-                    SELECT "test_orm_partner"."id" FROM "test_orm_partner"
-                    WHERE "test_orm_partner"."website" LIKE %s
-                ))
+                "test_orm_multi"."partner" IS NOT NULL
+                AND "test_orm_multi__partner"."id" IS NOT NULL
                 AND (
-                    ("test_orm_multi"."partner" IS NOT NULL
-                        AND "test_orm_multi__partner"."id" IS NOT NULL
-                        AND "test_orm_multi__partner"."email" LIKE %s)
-                    OR ("test_orm_multi"."partner" IS NULL OR "test_orm_multi"."partner" NOT IN (
-                        SELECT "test_orm_partner"."id" FROM "test_orm_partner"
-                        WHERE "test_orm_partner"."email" LIKE %s
-                    ))
+                    ("test_orm_multi__partner"."website" NOT LIKE %s OR "test_orm_multi__partner"."website" IS NULL)
+                    AND ("test_orm_multi__partner"."email" LIKE %s OR "test_orm_multi__partner"."name" LIKE %s)
+                    AND (
+                        "test_orm_multi__partner"."email" LIKE %s
+                        OR ("test_orm_multi__partner"."email" NOT LIKE %s OR "test_orm_multi__partner"."email" IS NULL)
+                    )
                 )
             )
             ORDER BY "test_orm_multi"."id"
@@ -2189,6 +2181,39 @@ class TestDatePartNumber(TransactionExpressionCase):
     def test_datetime_filtered(self):
         Person = self.env["test_orm.person"].with_context(active_test=False)
         self.assertEqual(self._search(Person, [('birthday.month_number', '=', 2)]), self.person)
+
+    def test_quarter_number_filtered(self):
+        Model = self.env['test_orm.mixed'].with_context(tz='UTC')
+        records = Model.create([
+            {'date': f'2026-{month:02d}-15', 'moment': f'2026-{month:02d}-15 12:00:00'}
+            for month in range(1, 13)
+        ])
+        empty = Model.create({})
+        for field_name in ('date', 'moment'):
+            for quarter in range(1, 5):
+                with self.subTest(field=field_name, quarter=quarter):
+                    domain = [
+                        ('id', 'in', (records + empty).ids),
+                        (f'{field_name}.quarter_number', '=', quarter),
+                    ]
+                    self.assertEqual(self._search(Model, domain), records[(quarter - 1) * 3:quarter * 3])
+
+    def test_day_of_week_filtered(self):
+        Model = self.env['test_orm.mixed'].with_context(tz='UTC')
+        records = Model.create([
+            {'date': f'2026-07-{day}', 'moment': f'2026-07-{day} 12:00:00'}
+            for day in range(12, 19)
+        ])
+        empty = Model.create({})
+        for field_name in ('date', 'moment'):
+            for weekday in range(7):
+                with self.subTest(field=field_name, weekday=weekday):
+                    domain = [
+                        ('id', 'in', (records + empty).ids),
+                        (field_name, '!=', False),
+                        (f'{field_name}.day_of_week', '=', weekday),
+                    ]
+                    self.assertEqual(self._search(Model, domain), records[weekday])
 
     def test_many2one(self):
         result = self._search(self.env["test_orm.lesson"], [('teacher_id.birthday.month_number', '=', 2)])
