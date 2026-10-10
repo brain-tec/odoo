@@ -1286,6 +1286,8 @@ class ProjectTask(models.Model):
                 if valid_milestone_tasks:
                     valid_milestone_tasks.sudo().write({'milestone_id': vals['milestone_id']})
                 del vals['milestone_id']
+                # the sub-tasks have already been handled by the writes above
+                valid_milestone_tasks = self.env['project.task']
 
             # 2. Parent's milestone is set to subtask with no milestone recursively
             subtasks_to_update = valid_milestone_tasks.child_ids.filtered(
@@ -2240,6 +2242,25 @@ class ProjectTask(models.Model):
     # ---------------------------------------------------
     # Project Sharing
     # ---------------------------------------------------
+
+    def _search_message_partner_ids(self, operator, operand):
+        """`project_task_rule_portal` OR's two sub-queries, which makes postgresql
+        seq-scan project_task instead of using its indexes. Materialize the ids of
+        each branch when there are few enough, so that it can BitmapOr them.
+        """
+        domain = super()._search_message_partner_ids(operator, operand)
+        if domain is NotImplemented or self.env.user._is_internal():
+            return domain
+        task_ids = self._search(
+            domain,
+            limit=self.env.cr.IN_MAX,
+            active_test=False,
+            bypass_access=True,
+            order=self._order,  # reason: postgresql chooses a bad plan without explicit order
+        ).get_result_ids()
+        if len(task_ids) < self.env.cr.IN_MAX:
+            domain = Domain('id', 'in', task_ids)
+        return domain
 
     def project_sharing_toggle_is_follower(self):
         self.ensure_one()
