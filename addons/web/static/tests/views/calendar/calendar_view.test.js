@@ -3,6 +3,7 @@ import {
     advanceTime,
     animationFrame,
     click,
+    drag,
     press,
     queryAllRects,
     queryAll,
@@ -47,6 +48,7 @@ import { CalendarModel } from "@web/views/calendar/calendar_model";
 import { CalendarRenderer } from "@web/views/calendar/calendar_renderer";
 import { calendarView } from "@web/views/calendar/calendar_view";
 import { CalendarYearRenderer } from "@web/views/calendar/calendar_year/calendar_year_renderer";
+import { TOUCH_SELECTION_THRESHOLD } from "@web/views/utils";
 import { WebClient } from "@web/webclient/webclient";
 import {
     changeScale,
@@ -3605,7 +3607,7 @@ test(`single day event from midnight to midnight`, async () => {
 
     expect(`.o_event`).toHaveCount(1);
     let eventWidth = queryOne(`.o_event`).getBoundingClientRect().width;
-    let cellWidth = queryFirst(`.o_calendar_day`).getBoundingClientRect().width;
+    let cellWidth = queryOne(`.o_event`).closest(`.o_calendar_day`).getBoundingClientRect().width;
     expect(eventWidth).toBeWithin(cellWidth - 1, cellWidth + 1); // over a single day
     await changeScale("month");
     expect(`.o_event`).toHaveCount(1);
@@ -3641,7 +3643,7 @@ test(`event over two days but lasting less than 24h`, async () => {
 
     expect(`.o_event`).toHaveCount(1);
     let eventWidth = queryOne(`.o_event`).getBoundingClientRect().width;
-    let cellWidth = queryFirst(`.o_calendar_day`).getBoundingClientRect().width;
+    let cellWidth = queryOne(`.o_event`).closest(`.o_calendar_day`).getBoundingClientRect().width;
     expect(eventWidth).toBeWithin(2 * cellWidth - 1, 2 * cellWidth + 2); // over 2 days
     await changeScale("month");
     expect(`.o_event`).toHaveCount(1);
@@ -3676,7 +3678,7 @@ test(`event over two days lasting longer than 24h`, async () => {
 
     expect(`.o_event`).toHaveCount(1);
     let eventWidth = queryOne(`.o_event`).getBoundingClientRect().width;
-    let cellWidth = queryFirst(`.o_calendar_day`).getBoundingClientRect().width;
+    let cellWidth = queryOne(`.o_event`).closest(`.o_calendar_day`).getBoundingClientRect().width;
     expect(eventWidth).toBeWithin(2 * cellWidth - 1, 2 * cellWidth + 2); // over 2 days
     await changeScale("month");
     expect(`.o_event`).toHaveCount(1);
@@ -3715,7 +3717,7 @@ test(`all day event lasting 2 days`, async () => {
 
     expect(`.o_event`).toHaveCount(1);
     let eventWidth = queryOne(`.o_event`).getBoundingClientRect().width;
-    let cellWidth = queryFirst(`.o_calendar_day`).getBoundingClientRect().width;
+    let cellWidth = queryOne(`.o_event`).closest(`.o_calendar_day`).getBoundingClientRect().width;
     expect(eventWidth).toBeWithin(2 * cellWidth - 1, 2 * cellWidth + 2); // over 2 days
     await changeScale("month");
     expect(`.o_event`).toHaveCount(1);
@@ -6327,6 +6329,34 @@ test(`swiping from a day cell changes the month without clicking on the day`, as
     await animationFrame();
     expect(`.o_calendar_current .o_calendar_day[data-date="2017-01-18"]`).toHaveCount(1);
     expect(`.o-calendar-quick-create`).toHaveCount(0);
+});
+
+test.tags("desktop");
+test("swiping from an event being dragged on touch devices", async () => {
+    mockTouch(true);
+    await mountView({
+        resModel: "event",
+        type: "calendar",
+        arch: `<calendar date_start="start" date_stop="stop" mode="month"/>`,
+    });
+    expect(".o_calendar_header h5").toHaveText("December 2016");
+
+    const eventEl = findEvent(2);
+    const swipeWidth = queryRect(".o_actionswiper").width;
+    const { moveTo, drop } = await drag(eventEl, { position: { x: 10 }, relative: true });
+    // move a bit before the swiper gets disabled
+    await moveTo(eventEl, { position: { x: 5 }, relative: true });
+    // long press: fullcalendar starts dragging the event
+    await advanceTime(TOUCH_SELECTION_THRESHOLD);
+    expect(".o_calendar_widget.o_interacting").toHaveCount(1);
+
+    // swipe to the next month: the calendar is re-rendered while the event is being dragged
+    await moveTo(eventEl, { position: { x: -swipeWidth }, relative: true });
+    await drop();
+    await advanceTime(1000);
+    await animationFrame();
+    expect(".o_calendar_header h5").toHaveText("January 2017");
+    expect(".o_interacting").toHaveCount(0);
 });
 
 test("Revert to the previous state if updateRecord fails (onEventResize)", async () => {

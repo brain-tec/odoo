@@ -147,7 +147,7 @@
                             </group>
                             <group col="2" name="group_worked_hours">
                                 <field name="worked_hours" string="Worked Time" widget="float_time"/>
-                                <field name="work_entry_type_id" groups="hr.group_hr_user"/>
+                                <field name="work_entry_type_id" widget="many2one_work_entry_type" groups="hr.group_hr_user"/>
                                 <field name="break_duration" widget="float_time" readonly="not can_edit"/>
                             </group>
                         </group>
@@ -329,7 +329,7 @@
                             </div>
                             <div class="d-flex align-items-baseline gap-2" invisible="not work_entry_type_id">
                                 <i class="oi oi-fw text-400" data-icon="label" aria-hidden="true" title="Time Type"/>
-                                <field name="work_entry_type_id"/>
+                                <field name="work_entry_type_id" widget="many2one_work_entry_type"/>
                             </div>
                             <div class="d-flex align-items-baseline gap-2" invisible="not worked_hours">
                                 <i class="oi oi-fw text-400" data-icon="schedule" aria-hidden="true" title="Worked Hours"/>
@@ -452,8 +452,12 @@
     <record id="hr_attendance_my_action" model="ir.actions.act_window">
         <field name="name">My Attendances</field>
         <field name="res_model">hr.attendance</field>
-        <field name="view_mode">calendar,list,pivot,graph</field>
-        <field name="view_id" ref="hr_attendance_my_calendar_view"/>
+        <field name="view_mode">calendar,list,form,pivot,graph</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'calendar', 'view_id': ref('hr_attendance_my_calendar_view')}),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_attendance_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('hr_attendance_my_form_view')}),
+        ]"/>
         <field name="domain">[('employee_id.user_id', '=', uid)]</field>
         <field name="search_view_id" ref="hr_attendance_view_filter"/>
         <field name="context">{"search_default_groupby_week": 1}</field>

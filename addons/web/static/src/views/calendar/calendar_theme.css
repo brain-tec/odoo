@@ -337,6 +337,11 @@
         --border-color: transparent;
     }
 
+    /* The fills start after the border of their first day, cover it as the cells are borderless */
+    .o_calendar_day + .o_calendar_day .o_calendar_fill {
+        inset-inline-start: calc(-1 * var(--border-width)) !important;
+    }
+
     /* Keep the months height independent from the other months on the same line */
     [role="listitem"] {
         align-self: flex-start;
@@ -347,10 +352,18 @@
         cursor: default;
     }
 
-    .o_calendar_month {
-        @media screen and (min-width: 768px), print and (min-width: 188mm) {
-            max-width: 21rem;
-            margin-inline: auto;
+    @media screen and (min-width: 768px), print and (min-width: 188mm) {
+        /* FullCalendar sizes each month as a column (inline width), spread them evenly instead */
+        [role="list"] {
+            justify-content: space-evenly;
+        }
+
+        [role="listitem"] {
+            width: auto !important;
+        }
+
+        .o_calendar_month {
+            width: 22rem;
         }
     }
 

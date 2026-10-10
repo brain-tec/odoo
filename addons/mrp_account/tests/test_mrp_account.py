@@ -304,9 +304,9 @@ class TestMrpAccount(TestBomPriceCommon, TestMrpCommon):
     def test_merge_then_qty_change_avco_prices_finished_moves(self):
         """ Same scenario as mrp's test_merge_then_qty_change_no_double_production
         but with an AVCO product: an order left with two finished moves for its
-        product must be priced without raising Expected singleton in _cal_price."""
+        product must allocate its production cost across both moves."""
         mo, _bom, product, component_1, component_2 = self.generate_mo(qty_final=30, qty_base_1=1, qty_base_2=1)
-        # AVCO so that _cal_price prices the finished moves (and would ensure_one).
+        # AVCO so that the production cost values the finished moves.
         product.categ_id = self.category_avco  # setup master-data
         self.assertEqual(product.cost_method, 'average')
         # 1 x component_1 + 1 x component_2 = 17.50 per produced unit.
@@ -333,8 +333,28 @@ class TestMrpAccount(TestBomPriceCommon, TestMrpCommon):
         finished_moves = sibling_mo.move_finished_ids.filtered(lambda m: m.product_id == product)
         self.assertEqual(sibling_mo.state, 'done')
         self.assertEqual(sum(finished_moves.mapped('quantity')), 15.0)
-        # Both finished_moves moves must carry the same, correct unit cost.
-        self.assertEqual(finished_moves.mapped('price_unit'), [17.50, 17.50])
+        # Both finished moves must carry the same, correct unit valuation.
+        self.assertEqual([move._get_price_unit() for move in finished_moves], [17.50, 17.50])
+
+    def test_finished_product_cannot_be_own_byproduct(self):
+        """ A duplicate stock move for the MO's own finished product on `move_finished_ids`
+        must not crash the MO Overview report: it must still compute a unit cost.
+        """
+        mo = self._create_mo(self.bom_1, 1)
+        mo.button_mark_done()
+        mo.action_toggle_is_locked()
+        self.assertEqual(mo.state, 'done')
+        self.env['stock.move'].create({
+            'product_id': mo.product_id.id,
+            'uom_id': mo.product_id.uom_id.id,
+            'quantity': 1.0,
+            'location_id': mo.production_location_id.id,
+            'location_dest_id': mo.location_dest_id.id,
+            'production_id': mo.id,
+        })
+        self.assertEqual(len(mo.move_finished_ids.filtered(lambda m: m.product_id == mo.product_id)), 2)
+        overview = self.env['report.mrp.report_mo_overview'].get_report_values(mo.id)
+        self.assertEqual(overview['data']['summary']['unit_cost'], 718.75)
 
 
 class TestMrpAccountWorkorder(TestBomPriceOperationCommon):
