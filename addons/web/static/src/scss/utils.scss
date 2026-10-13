@@ -39,13 +39,13 @@
 // ------------------------------------------------------------------
 // Text overflow
 // ------------------------------------------------------------------
-@mixin o-text-overflow($display: inline-block, $max-width: 100%) {
+@mixin o-text-overflow($display: inline-block, $max-width: 100%, $vertical-align: top) {
     display: $display;
     max-width: $max-width;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    vertical-align: top; // To update display context changed by overflow:hidden
+    vertical-align: $vertical-align; // To update display context changed by overflow:hidden
 }
 
 // ------------------------------------------------------------------
@@ -325,26 +325,6 @@
         } @else {
             --#{$key}: #{$value};
         }
-    }
-}
-
-
-// ----------------------------------------------------------------------------
-// Media Type
-// ----------------------------------------------------------------------------
-
-// Conditionally includes SCSS  based on the current media context.
-// It serves two main purposes:
-// 1. Keep the base code clean by avoiding redundant `@media only screen {}`.
-// 2. Reduces CSS footprint by only compiling styles that match the current `$o-webclient-media`.
-
-@mixin media-only($-media) {
-    @if ($-media != null and type-of($-media) == 'string') {
-        @if $-media == $o-webclient-media {
-            @content;
-        }
-    } @else {
-        @warn "'media-only()' - missing argument";
     }
 }
 

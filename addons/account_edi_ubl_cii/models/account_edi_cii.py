@@ -188,10 +188,16 @@ class AccountEdiCii(models.AbstractModel):
     def _cii_get_included_note_node(self, vals):
         nodes = []
         if note := self._cii_get_included_note(vals):
+            # [BR-FR-MAP-18] EN16931 caps the Note (BT-22) to 1024 characters.
+            if isinstance(note, str):
+                note = note[:1024]
             nodes.append({
                 'ram:Content': {'_text': note},
             })
         for code, content in self._get_default_notes(vals).items():
+            # [BR-FR-MAP-18] EN16931 caps the Note (BT-22) to 1024 characters.
+            if isinstance(content, str):
+                content = content[:1024]
             nodes.append({
                 'ram:Content': {'_text': content},
                 'ram:SubjectCode': {'_text': code},
@@ -272,13 +278,17 @@ class AccountEdiCii(models.AbstractModel):
     def _cii_get_line_specified_trade_product_node(self, vals, base_line):
         product = base_line['product_id']
         description = base_line['name']
+        name = product.name or description
+        # [BR-FR-MAP-17] EN16931 caps the Item name (BT-153) to 255 characters.
+        if isinstance(name, str):
+            name = name[:255]
         return {
             'ram:GlobalID': {
                 '_text': product.barcode,
                 'schemeID': "0160",
             } if product.barcode else None,
             'ram:SellerAssignedID': {'_text': product.default_code} if product.default_code else None,
-            'ram:Name': {'_text': product.name or description},
+            'ram:Name': {'_text': name},
             'ram:Description': {
                 '_text': description,
             } if product else None,
@@ -534,8 +544,12 @@ class AccountEdiCii(models.AbstractModel):
         }
 
     def _cii_get_postal_trade_address_node(self, vals, address_values):
+        postcode = address_values['postcode']
+        # [BR-FR-MAP-17/BR-FR-MAP-19] EN16931 caps these address lines to 255 characters (postal code: 10).
+        if isinstance(postcode, str):
+            postcode = postcode[:10]
         return {
-            'ram:PostcodeCode': {'_text': address_values['postcode']},
+            'ram:PostcodeCode': {'_text': postcode},
             'ram:LineOne': {'_text': address_values['line_one']},
             'ram:LineTwo': {
                 '_text': address_values['line_two'],
@@ -968,7 +982,7 @@ class AccountEdiCii(models.AbstractModel):
             ('street2', ".//{*}LineTwo"),
             ('city', ".//{*}CityName"),
             ('country_code', ".//{*}CountryID"),
-            ('vat', "./{*}SpecifiedTaxRegistration/{*}ID")
+            ('vat', './{*}SpecifiedTaxRegistration/{*}ID[@schemeID="VA"]'),
         ):
             customer_values[key] = None
             if (node := party_node.find(xpath)) is not None:
@@ -979,6 +993,15 @@ class AccountEdiCii(models.AbstractModel):
             customer_values['routing_endpoint'] = node.text
             if routing_scheme := node.attrib.get('schemeID'):
                 customer_values['routing_scheme'] = routing_scheme
+
+        # fallback to an unqualified tax registration only when no VA entry was found
+        if not customer_values['vat']:
+            nodes = [
+                node for node in party_node.findall('./{*}SpecifiedTaxRegistration/{*}ID')
+                if not node.attrib
+            ]
+            if len(nodes) > 0:
+                customer_values['vat'] = nodes[0].text
 
     def _import_cii_retrieve_customer(self, collected_values):
         self._import_retrieve_customer(collected_values)
