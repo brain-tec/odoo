@@ -407,7 +407,7 @@ class HrLeaveAllocation(models.Model):
         if carryover_time == 'year_start':
             carryover_date = date(date_from.year, 1, 1)
         elif carryover_time == 'allocation':
-            carryover_date = date(date_from.year, self.date_from.month, self.date_from.day)
+            carryover_date = self.date_from + relativedelta(year=date_from.year)
         else:
             month = int(accrual_plan.carryover_month)
             # 2020/2/31 will be changed to 2020/2/29
@@ -1086,6 +1086,7 @@ class HrLeaveAllocation(models.Model):
             'lastcall': False,
             'nextcall': False,
             'number_of_days': 0.0,
+            'yearly_accrued_days': 0,
             'carried_over_days_expiration_date': False,
             'previous_carryover_number_of_days': 0,
         }

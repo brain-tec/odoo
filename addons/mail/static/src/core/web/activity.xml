@@ -39,7 +39,7 @@
             <div t-if="this.activity().phone" class="o-mail-Activity-phoneNumber d-flex align-items-center gap-2">
                 <span t-out="this.activity().phone"/>
                 <CopyButton
-                    className="'o-mail-Activity-copy btn-link text-action p-0'"
+                    className="'o-mail-Activity-copy btn-hover-action p-0'"
                     content="this.activity().phone"
                     copyText.translate="Copy"
                     icon="'content_copy'"
@@ -60,9 +60,9 @@
                             <i class="oi oi-filled" data-icon="mail" role="img" aria-label="Compose Mail"/> Send
                         </button>
                     </t>
-                    <button t-if="this.activity().phone" type="button" class="o-mail-Activity-call btn btn-hover-action btn-sm" t-on-click="this.onClickPhoneNumber">
+                    <a t-if="this.activity().phone" t-att-href="this.phoneHref" class="o-mail-Activity-call btn btn-hover-action btn-sm" t-on-click="this.onClickPhoneNumber">
                         <i class="oi oi-filled" data-icon="phone"/> Call
-                    </button>
+                    </a>
                     <t t-if="this.activity().can_write">
                         <button class="o-mail-Activity-markDone btn btn-hover-success btn-sm" t-on-click="this.onClickMarkAsDone">
                             <i class="oi" data-icon="check"/> Done

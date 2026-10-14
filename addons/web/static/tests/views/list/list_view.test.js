@@ -2283,6 +2283,19 @@ test(`basic grouped list rendering`, async () => {
     expect(`th.o_group_name`).toHaveCount(2, { message: "should have 2 .o_group_name" });
 });
 
+test(`removing the default group by facet reloads the list without groups`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<list default_group_by="bar"><field name="foo"/><field name="bar"/></list>`,
+    });
+    expect(`tr.o_group_header`).toHaveCount(2);
+
+    await removeFacet("Bar");
+    expect(`tr.o_group_header`).toHaveCount(0);
+    expect(`tr.o_data_row`).toHaveCount(4);
+});
+
 test(`basic grouped list rendering with widget="handle" col`, async () => {
     await mountView({
         resModel: "foo",
@@ -21293,6 +21306,8 @@ test(`multi_edit: edit field with operator with localization`, async () => {
     await checkFieldValue("amount", "*=1.4", "Amount * 1.4");
     await checkFieldValue("amount", "- =1.4", "Amount - 1.4");
     await checkFieldValue("amount", "+= 1.4", "Amount + 1.4");
+    await checkFieldValue("amount", "*=(1+0.4)", "Amount * 1.4");
+    await checkFieldValue("amount", "-= 2*0.7", "Amount - 1.4");
 
     let field = "amount";
     await contains(`.o_data_cell[name=${field}]`).click();
