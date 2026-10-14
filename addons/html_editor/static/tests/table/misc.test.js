@@ -1369,13 +1369,13 @@ describe("table style migration", () => {
         expect(getContent(el)).toBe(
             unformat(`
                 <p data-selection-placeholder=""><br></p>
-                <table style="width: 500px; margin-left: 50px;">
+                <div class="o_table_wrapper"><table style="width: 500px; margin-left: 50px;">
                     <tbody>
                         <tr><td>1</td><td>2</td></tr>
                         <tr><td>3</td><td>4</td></tr>
                     </tbody>
-                </table>
-                <p data-selection-placeholder=""><br></p>
+                </table></div>
+                <p data-selection-placeholder="" style="margin: -9px 0px 8px;"><br></p>
             `)
         );
     });
@@ -1394,13 +1394,13 @@ describe("table style migration", () => {
         expect(getContent(el)).toBe(
             unformat(`
                 <p data-selection-placeholder=""><br></p>
-                <table style="width: 700px;">
+                <div class="o_table_wrapper"><table style="width: 700px;">
                     <tbody style="width: 500px; margin-left: 50px;">
                         <tr><td>1</td><td>2</td></tr>
                         <tr><td>3</td><td>4</td></tr>
                     </tbody>
-                </table>
-                <p data-selection-placeholder=""><br></p>
+                </table></div>
+                <p data-selection-placeholder="" style="margin: -9px 0px 8px;"><br></p>
             `)
         );
     });
