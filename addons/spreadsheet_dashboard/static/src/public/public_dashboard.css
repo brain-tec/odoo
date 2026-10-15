@@ -1,0 +1,22 @@
+.o-public-spreadsheet-filters {
+  --o-spreadsheet-filter-panel-width: 300px;
+
+  background-color: #e7e9ed;
+  gap: 20px 70px;
+  width: var(--o-spreadsheet-filter-panel-width);
+
+  .o-public-spreadsheet-filters-close-button {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+}
+
+.o-public-spreadsheet-filter-button {
+  z-index: 100;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #E7E9ED;
+  }
+}

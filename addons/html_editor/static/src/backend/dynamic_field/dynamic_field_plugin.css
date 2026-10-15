@@ -1,0 +1,5 @@
+.odoo-editor-editable.odoo-editor-qweb [t-field],
+.o_readonly [t-field] {
+    border-radius: 2px;
+    background-color: rgba(36, 154, 255, 0.16) !important;
+}
