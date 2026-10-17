@@ -1255,7 +1255,11 @@ Please change the quantity done or the rounding precision in your settings.""",
                 if key in self.env['stock.move.line'] and isinstance(self.env['stock.move.line'][key], models.Model):
                     values[key] = {
                         'id': value,
-                        'display_name': self.env['stock.move.line'][key].browse(value).display_name
+                        'display_name': (
+                            self.env['stock.move.line'][key]
+                            .browse(value)
+                            .with_context(show_lot_removal_date=context_data.get('show_lot_removal_date')).display_name
+                        ),
                     }
         if product.lot_sequence_id and first_lot:
             current_sequence = product.lot_sequence_id._get_current_sequence()
@@ -2637,7 +2641,7 @@ Please change the quantity done or the rounding precision in your settings.""",
                 res.append(Command.update(ml.id, {'quantity': avail_qty}))
 
         # First reserve on quants
-        if self.uom_id.compare(_move_qty(qty), 0.0) > 0:
+        if self.uom_id.compare(_move_qty(qty), 0.0) > 0 and not self._should_bypass_reservation():
             quants = self.env['stock.quant']._get_reserve_quantity(self.product_id, self.location_id, total_qty)
             for quant, avail_qty in quants:
                 if quant.id in consumed_quant:

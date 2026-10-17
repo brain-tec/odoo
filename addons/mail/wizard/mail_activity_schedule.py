@@ -91,7 +91,9 @@ class MailActivitySchedule(models.TransientModel):
         readonly=False, store=True, sanitize_style=True)
     activity_user_id = fields.Many2one(
         'res.users', 'Assigned to', compute='_compute_activity_user_id',
-        readonly=False, store=True)
+        readonly=False, store=True,
+        domain=lambda self: [('share', '=', False), ('role', '!=', 'light_user')],
+    )
     activity_role_id = fields.Many2one(
         'res.role', 'Role', compute='_compute_activity_role_id',
         readonly=False, store=True)
@@ -104,7 +106,6 @@ class MailActivitySchedule(models.TransientModel):
         for scheduler in self.filtered('res_model'):
             scheduler.res_model_id = self.env['ir.model']._get_id(scheduler.res_model)
 
-    @api.depends_context('active_ids')
     def _compute_res_ids(self):
         context = self.env.context
         for scheduler in self.filtered(lambda scheduler: not scheduler.res_ids):
@@ -180,7 +181,6 @@ class MailActivitySchedule(models.TransientModel):
         for scheduler in self:
             scheduler.plan_available_ids = self.env['mail.activity.plan'].search(scheduler._get_plan_available_base_domain())
 
-    @api.depends_context('plan_mode')
     @api.depends('plan_available_ids')
     def _compute_plan_id(self):
         for scheduler in self:
