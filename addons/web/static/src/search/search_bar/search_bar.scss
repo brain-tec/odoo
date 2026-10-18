@@ -24,7 +24,7 @@
     .o_facet_value {
         max-width: $o-search-bar-facet-value-width;
 
-        @include media-breakpoint-down(md) {
+        @media screen and (max-width: 767.98px), print and (max-width: 187.98mm) {
             max-width: $o-search-bar-facet-value-width / 2;
         }
     }
@@ -63,7 +63,11 @@
                 display: flex;
                 justify-content: center;
                 width: 25px;
-                @include o-position-absolute($left: 0);
+                position: absolute;
+                top: auto;
+                left: 0;
+                bottom: auto;
+                right: auto;
             }
         }
     }

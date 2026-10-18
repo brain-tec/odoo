@@ -78,7 +78,7 @@ Featuring
             'website_slides/static/src/core/**/*',
             'website_slides/static/src/slide_category_one2many_field.js',
             'website_slides/static/src/slide_category_list_renderer.js',
-            'website_slides/static/src/scss/slide_views.scss',
+            'website_slides/static/src/scss/slide_views.css',
             'website_slides/static/src/js/tours/slides_tour.js',
             'website_slides/static/src/js/components/**/*.js',
             'website_slides/static/src/views/**/*.js',
@@ -129,6 +129,7 @@ Featuring
             'web/static/src/core/utils/transitions.scss',  # included early because used by other files
             'web/static/src/core/**/*',
             ('remove', 'web/static/src/core/**/*.dark.scss'),
+            'web/static/src/css/**/*',
             'web/static/src/env.js',
             ('remove', 'web/static/src/core/emoji_picker/emoji_data.js'),
 
