@@ -568,6 +568,12 @@ class AccountMove(models.Model):
                 yield self.env._("The company SIREN is missing or invalid.")
 
             if transaction_type == 'b2bi':
+                partner_identifier = self.commercial_partner_id._l10n_fr_pdp_get_flow_10_identifier()[1]
+                if not partner_identifier:
+                    if self.commercial_partner_id.country_id in self.env.ref('base.europe').country_ids:
+                        yield self.env._("The partner VAT number is required for EU e-reporting.")
+                    else:
+                        yield self.env._("The partner identifier required for Flow 10 is missing.")
                 try:
                     self.commercial_partner_id._check_vat()
                 except ValidationError:
@@ -709,3 +715,11 @@ class AccountMove(models.Model):
                 # ensure RE flow exist for current move period (if move is never posted again)
                 self.env['l10n.fr.pdp.reports.flow']._get_open_flow_and_create_if_needed(move)
         return super().button_draft()
+
+    def _get_import_file_type(self, file_data):
+        """ Identify UBL files. """
+        # EXTENDS 'account'
+        if (tree := file_data['xml_tree']) is not None:
+            if tree.findtext('{*}CustomizationID') == 'urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr':
+                return 'account.edi.xml.ubl_21_fr'
+        return super()._get_import_file_type(file_data)
