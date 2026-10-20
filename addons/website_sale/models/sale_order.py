@@ -155,24 +155,24 @@ class SaleOrder(models.Model):
     def _search_abandoned_cart(self, operator, _value):
         if operator != "in":
             return NotImplemented
-        website_ids = self.env["website"].search_read(
-            fields=["id", "cart_abandoned_delay", "partner_id"]
+        website_ids = self.env["website"].search_fetch(
+            [], field_names=["cart_abandoned_delay", "partner_id"]
         )
         return Domain.AND((
             Domain("state", "=", "draft"),
             Domain("order_line", "!=", False),
             Domain.OR(
                 [
-                    ("website_id", "=", website_id["id"]),
+                    ("website_id", "=", website_id.id),
                     (
                         "date_order",
                         "<=",
                         fields.Datetime.to_string(
                             fields.Datetime.now()
-                            - relativedelta(hours=website_id["cart_abandoned_delay"] or 1.0)
+                            - relativedelta(hours=website_id.cart_abandoned_delay or 1.0)
                         ),
                     ),
-                    ("partner_id", "!=", website_id["partner_id"][0]),
+                    ("partner_id", "!=", website_id.partner_id.id),
                 ]
                 for website_id in website_ids
             ),
@@ -723,10 +723,8 @@ class SaleOrder(models.Model):
             available_qty = float_round(available_qty, precision_digits=0, rounding_method="DOWN")
 
             if product.minimum_quantity:
-                min_qty = float_round(
-                    product_uom._compute_quantity(product.minimum_quantity, uom, round=False),
-                    precision_digits=0,
-                    rounding_method="UP",
+                min_qty = self._get_remaining_minimum_qty(
+                    product, exclude_line=self._get_common_product_lines(product.id), uom=uom
                 )
                 if available_qty < min_qty:
                     if order_line:
