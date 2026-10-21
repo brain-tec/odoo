@@ -21,6 +21,16 @@ import { FORMATTABLE_TAGS } from "@html_editor/utils/formatting";
 
 export const ATTACHMENT_PENDING_RECORD_ID = "o_attachment_pending_record_id";
 
+export function extractUnmappedAttachmentsIds(content) {
+    return [...content.getElementsByClassName(ATTACHMENT_PENDING_RECORD_ID)]
+        .map((attachment) => {
+            attachment.classList.remove(ATTACHMENT_PENDING_RECORD_ID);
+            return attachment.dataset?.attachmentId;
+        })
+        .filter(Boolean)
+        .map((id) => parseInt(id));
+}
+
 /**
  * @typedef { Object } MediaShared
  * @property { MediaPlugin['openMediaDialog'] } openMediaDialog
@@ -109,6 +119,13 @@ export class MediaPlugin extends Plugin {
             }
         },
         is_node_editable_predicates: this.isEditableMediaElement.bind(this),
+        is_selectable_on_click_predicates: (el) => {
+            // Clicking an icon puts the cursor inside of it, where there is
+            // nothing to edit: select the icon itself instead.
+            if (isIconElement(el)) {
+                return true;
+            }
+        },
         is_functional_empty_node_predicates: (node) => {
             if (isMediaElement(node)) {
                 return true;
@@ -237,13 +254,7 @@ export class MediaPlugin extends Plugin {
     }
 
     extractUnmappedAttachmentsIds(content = this.editable) {
-        return [...content.getElementsByClassName(ATTACHMENT_PENDING_RECORD_ID)]
-            .map((attachment) => {
-                attachment.classList.remove(ATTACHMENT_PENDING_RECORD_ID);
-                return attachment.dataset?.attachmentId;
-            })
-            .filter(Boolean)
-            .map((id) => parseInt(id));
+        return extractUnmappedAttachmentsIds(content);
     }
 
     openMediaDialog(params = {}, editableEl = null) {
