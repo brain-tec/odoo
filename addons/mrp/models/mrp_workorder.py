@@ -530,7 +530,7 @@ class MrpWorkorder(models.Model):
         for workorder in workorders_with_new_wc:
             workorder.duration_expected = workorder._get_duration_expected()
             if workorder.date_start:
-                workorder.date_finished = workorder._calculate_date_finished(new_workcenter=new_workcenter)
+                workorder.with_context(bypass_duration_calculation=True).date_finished = workorder._calculate_date_finished(new_workcenter=new_workcenter)
 
         return res
 
@@ -804,8 +804,6 @@ class MrpWorkorder(models.Model):
                     'date_start': dec_workorders[idx - 1].date_start,
                     'sequence': max_seq - idx,
                 }
-                if wo.workcenter_id:
-                    vals['date_finished'] = datetime.max
                 wo.with_context(bypass_duration_calculation=True).write(vals)
                 dec_workorders[idx - 1].sequence = max_seq - idx + 1
         self.production_id.workorder_ids.action_replan()
