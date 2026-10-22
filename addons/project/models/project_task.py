@@ -563,8 +563,7 @@ class ProjectTask(models.Model):
 
     @api.depends('depend_on_ids')
     def _compute_depend_on_count(self):
-        tasks_with_dependency = self.filtered('allow_task_dependencies')
-        tasks_without_dependency = self - tasks_with_dependency
+        tasks_with_dependency, tasks_without_dependency = self.partitioned('allow_task_dependencies')
         tasks_without_dependency.depend_on_count = 0
         tasks_without_dependency.closed_depend_on_count = 0
         if not any(self._ids):
@@ -715,6 +714,11 @@ class ProjectTask(models.Model):
                     task.stage_id = project._get_default_task_stage().id
             else:
                 task.stage_id = False
+
+    @api.onchange('stage_id')
+    def _onchange_stage_id(self):
+        if self.state not in CLOSED_STATES and self.state != '04_waiting_normal' and self.stage_id != self._origin.stage_id:
+            self.state = '01_in_progress'
 
     @api.depends('user_ids')
     def _compute_portal_user_names(self):

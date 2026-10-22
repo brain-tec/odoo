@@ -2634,7 +2634,7 @@ class BaseModel(metaclass=MetaModel):
                 **info,
             )
 
-        if isinstance(exc, psycopg2.errors.ForeignKeyViolation):
+        if isinstance(exc, (psycopg2.errors.ForeignKeyViolation, psycopg2.errors.RestrictViolation)):
             if len(columns) != 1:
                 info['field_display'] = info['constraint_name']
             return self.env._(
@@ -4934,6 +4934,7 @@ class BaseModel(metaclass=MetaModel):
         *,
         active_test: bool = True,
         bypass_access: bool = False,
+        search_from_field: Field | None = None,
     ) -> Query:
         """
         Private implementation of search() method.
@@ -4973,7 +4974,7 @@ class BaseModel(metaclass=MetaModel):
             domain = Domain(self._active_name, 'in', OrderedSet((True,))) & domain
 
         # build the query
-        domain = domain.optimize_full(self)
+        domain = domain.optimize_full(self, search_from_field=search_from_field)
         if domain.is_false():
             return self.browse()._as_query()
         query = Query(self)
@@ -4983,7 +4984,7 @@ class BaseModel(metaclass=MetaModel):
         # security access domain
         if not sec_domain.is_true():
             self_sudo = self.sudo().with_context(active_test=False)
-            sec_domain = sec_domain.optimize_full(self_sudo, search_domain=domain)
+            sec_domain = sec_domain.optimize_full(self_sudo, search_domain=domain, search_from_field=search_from_field)
             if sec_domain.is_false():
                 return self.browse()._as_query()
             if (
@@ -5726,24 +5727,61 @@ class BaseModel(metaclass=MetaModel):
         if not func:
             # align with mapped()
             return self
-
-        if callable(func):
-            # normal function
-            pass
-        elif isinstance(func, str):
-            if '.' in func:
-                seq_fnames = func
-                func = lambda record: any(record.mapped(seq_fnames))  # noqa: E731
-            else:
-                # avoid costly mapped
-                func = self._fields[func].__get__
-        elif isinstance(func, Domain):
+        if isinstance(func, Domain):
             return self.filtered_domain(func)
-        else:
-            raise TypeError(f"Invalid function {func!r} to filter on {self._name}")
 
+        func = self._get_predicate(func)
         ids = tuple(id_ for id_, rec in zip(self._ids, self) if func(rec))
         return self.__class__(self.env, ids, self._prefetch_ids)
+
+    @api.private
+    def partitioned(self, *predicates: str | Callable[[Self], bool] | Domain | None) -> tuple[Self, ...]:
+        """Split the records of ``self`` according to ``predicates``, returning
+        ``len(predicates) + 1`` recordsets. Each record is put in the recordset
+        of the first predicate it satisfies, or in the last recordset if it
+        satisfies none of them. All the resulting recordsets are guaranteed to
+        be part of the same prefetch-set.
+
+        :param predicates: anything accepted by :meth:`filtered`
+
+        .. code-block:: python3
+
+            invoices, posted, others = moves.partitioned(
+                lambda m: m.is_invoice(),
+                Domain('state', '=', 'posted'),  # posted non-invoices
+            )
+        """
+        predicates = [self._get_predicate(predicate) for predicate in predicates]
+        partitions = [[] for _ in range(len(predicates) + 1)]
+        for record in self:
+            for ids, predicate in zip(partitions, predicates):
+                if predicate(record):
+                    ids.append(record._ids[0])
+                    break
+            else:
+                partitions[-1].append(record._ids[0])
+
+        cls, env, prefetch_ids = self.__class__, self.env, self._prefetch_ids
+        return tuple(cls(env, tuple(ids), prefetch_ids) for ids in partitions)
+
+    def _get_predicate(self, func: str | Callable[[Self], bool] | Domain | None) -> Callable[[Self], bool]:
+        """Return a function mapping a single record to a ``bool`` from anything
+        accepted by :meth:`filtered`.
+        """
+        if not func:
+            # align with filtered()
+            return lambda record: True
+        if isinstance(func, Domain):
+            return func._as_predicate(self)
+        if callable(func):
+            # normal function
+            return func
+        if isinstance(func, str):
+            if '.' in func:
+                return lambda record: any(record.mapped(func))
+            # avoid costly mapped
+            return self._fields[func].__get__
+        raise TypeError(f"Invalid function {func!r} to filter on {self._name}")
 
     @typing.overload
     def grouped(self, key: str) -> dict[typing.Any, Self]:
@@ -6565,8 +6603,7 @@ class BaseModel(metaclass=MetaModel):
                             records = records.browse(it and NewId(it) for it in records._ids)
                         break
             else:
-                new_records = self.filtered(lambda r: not r.id)
-                real_records = self - new_records
+                new_records, real_records = self.partitioned(lambda r: not r.id)
                 records = model.browse()
                 if real_records:
                     records = model.search([(field.name, 'in', real_records.ids)], order='id')

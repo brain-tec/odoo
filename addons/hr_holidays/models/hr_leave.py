@@ -634,10 +634,9 @@ class HrLeave(models.Model):
 
     @api.depends('employee_id', 'request_date_from', 'request_date_to')
     def _compute_resource_calendar_id(self):
-        leaves_without_emp_or_date = self.filtered(
+        leaves_without_emp_or_date, valid_leaves = self.partitioned(
             lambda leave: not (leave.employee_id and leave.request_date_from and leave.request_date_to)
         )
-        valid_leaves = self - leaves_without_emp_or_date
         leaves_without_emp_or_date.resource_calendar_id = self.env.company.resource_calendar_id
         if not valid_leaves:
             return
@@ -1333,7 +1332,8 @@ class HrLeave(models.Model):
 
     @api.depends('employee_id', 'work_entry_type_id')
     def _compute_leaves(self):
-        date_from = fields.Date.from_string(self.env.context['default_request_date_from']) if 'default_request_date_from' in self.env.context else fields.Date.context_today(self)
+        date_from_fields = [field for field in ("default_request_date_hour_from", "default_request_date_from") if field in self.env.context]
+        date_from = fields.Date.from_string(self.env.context[date_from_fields[0]]) if date_from_fields else fields.Date.context_today(self)
         balance_per_leave = self._get_allocation_balance(date_from)
         for leave in self:
             leave.virtual_remaining_leaves, leave.max_leaves = balance_per_leave[leave]
@@ -1353,7 +1353,7 @@ class HrLeave(models.Model):
             max_leaves = 0
             primary_unit = 'hours' if leave.work_entry_type_id.unit_of_measure == 'hour' else 'days'
             for allocation, allocation_dict in employee_days_per_allocation[leave.employee_id][leave.work_entry_type_id].items():
-                if allocation and (not allocation.date_to or allocation.date_to >= target_date):
+                if allocation and (not allocation.date_to or allocation.date_to >= target_date) and (allocation.date_from <= target_date):
                     max_leaves += allocation_dict[f'{primary_unit}_max_leaves']
                     virtual_remaining_leaves += allocation_dict[f'{primary_unit}_virtual_remaining_leaves']
             balance_per_leave[leave] = (virtual_remaining_leaves, max_leaves)
@@ -1952,15 +1952,12 @@ class HrLeave(models.Model):
 
     def action_approve(self, check_state=True):
         current_employee = self.env.user.employee_id
-        leave_to_approve = self.env['hr.leave']
-        leave_to_validate = self.env['hr.leave']
-        for leave in self:
-            if check_state and leave.can_validate or not check_state and leave.validation_type != "both":
-                leave_to_validate += leave
-            elif check_state and leave.can_approve or not check_state and leave.validation_type == 'both':
-                leave_to_approve += leave
-            else:
-                raise UserError(self.env._('You cannot approve this leave.'))
+        leave_to_validate, leave_to_approve, invalid_leaves = self.partitioned(
+            lambda leave: (check_state and leave.can_validate) or (not check_state and leave.validation_type != "both"),
+            lambda leave: (check_state and leave.can_approve) or (not check_state and leave.validation_type == 'both'),
+        )
+        if invalid_leaves:
+            raise UserError(self.env._('You cannot approve this leave.'))
         leave_to_approve.write({'state': 'validate1', 'first_approver_id': current_employee.id})
         leave_to_validate._action_validate(check_state)
         if not self.env.context.get('leave_fast_create'):
@@ -2099,14 +2096,7 @@ class HrLeave(models.Model):
         # skip_time_rules: resource.calendar.leaves doesn't exist yet so recompute after _validate_leave_request
         self.with_context(skip_time_rules=True).write({'state': 'validate'})
 
-        leaves_second_approver = self.env['hr.leave']
-        leaves_first_approver = self.env['hr.leave']
-
-        for leave in self:
-            if leave.validation_type == 'both':
-                leaves_second_approver += leave
-            else:
-                leaves_first_approver += leave
+        leaves_second_approver, leaves_first_approver = self.partitioned(lambda leave: leave.validation_type == 'both')
 
         leaves_second_approver.write({'second_approver_id': current_employee.id})
         leaves_first_approver.write({'first_approver_id': current_employee.id})

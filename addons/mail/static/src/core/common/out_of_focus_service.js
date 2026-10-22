@@ -1,7 +1,9 @@
 import { htmlToTextContentInline } from "@mail/utils/common/format";
 
+import { usePlugin } from "@odoo/owl";
 import { isAndroid } from "@web/core/browser/feature_detection";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 
 const PREVIEW_MSG_MAX_SIZE = 350; // optimal for native English speakers
@@ -22,7 +24,7 @@ export class OutOfFocusService {
         this.env = env;
         this.audio = undefined;
         this.multiTab = services.multi_tab;
-        this.notificationService = services.notification;
+        this.notificationService = usePlugin(NotificationPlugin);
         this.soundEffectService = services["mail.sound_effects"];
         /** @type {import("models").Store} */
         this.store = services["mail.store"];
@@ -52,21 +54,9 @@ export class OutOfFocusService {
         ) {
             return;
         }
-        const author = message.author;
-        let notificationTitle;
-        let icon = "/mail/static/src/img/odoobot_transparent.webp";
-        if (!author) {
-            notificationTitle = _t("New message");
-        } else {
-            icon = author.avatarUrl;
-            if (message.thread?.channel?.channel_type === "channel") {
-                notificationTitle = _t("%(author name)s from %(channel name)s", {
-                    "author name": message.authorName,
-                    "channel name": message.channel_id.displayName,
-                });
-            } else {
-                notificationTitle = message.authorName;
-            }
+        let title = message.thread?.displayName || _t("New message");
+        if (message.thread?.channel?.channel_type === "channel") {
+            title = `#${title}`;
         }
         let notificationContent = htmlToTextContentInline(message.bodyPreview);
         if (message.hasOnlyAttachments) {
@@ -78,9 +68,9 @@ export class OutOfFocusService {
         await this.sendNotification({
             message: notificationContent,
             sound: Boolean(message.channel_id),
-            title: notificationTitle,
+            title,
             type: "info",
-            icon,
+            icon: message.thread?.avatarUrl ?? "/mail/static/src/img/odoobot_transparent.webp",
         });
     }
 
@@ -196,7 +186,7 @@ export class OutOfFocusService {
 }
 
 export const outOfFocusService = {
-    dependencies: ["multi_tab", "notification", "mail.sound_effects", "mail.store"],
+    dependencies: ["multi_tab", "mail.sound_effects", "mail.store"],
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {import("services").ServiceFactories} services

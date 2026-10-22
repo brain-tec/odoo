@@ -856,6 +856,9 @@ class HrEmployee(models.Model):
         new_version = self.env['hr.version'].sudo().create(copy_vals).sudo(False)
         with self.env.protecting([f for f_name, f in version_fields.items() if f_name not in new_version_vals and f.copy], new_version):
             new_version.write(new_version_vals)
+        # Force recompute of fields possibly left stale by protecting() above (e.g. final_yearly_costs)
+        with self.env.protecting([f for f_name, f in version_fields.items() if f_name in new_version_vals and f.compute and not f.readonly], new_version):
+            new_version.modified(list(new_version_vals.keys()))
         if template_id := values.get('contract_template_id'):
             template = self.env['hr.version'].browse(template_id)
             template_vals = new_version.get_values_from_contract_template(template)
@@ -1066,7 +1069,7 @@ class HrEmployee(models.Model):
             else:
                 if len(employee.work_contact_id.employee_ids) <= 1:
                     partner = employee.work_contact_id
-                    if not employee.user_id:
+                    if not employee.user_id and not partner.user_ids:
                         partner = partner.sudo()
                     partner.write({
                         'email': employee.work_email or employee.private_email,
