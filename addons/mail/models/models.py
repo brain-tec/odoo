@@ -6,6 +6,7 @@ from datetime import datetime
 
 from lxml.builder import E
 from markupsafe import Markup
+from werkzeug.urls import url_encode
 
 from odoo import _, api, exceptions, models, tools
 from odoo.fields import Domain
@@ -309,8 +310,9 @@ class Base(models.AbstractModel):
             all_emails += defaults['partners'].mapped('email_normalized')
         ban_emails = []
         # ban emails: don't propose odoobot unless another active partner has the same email
-        if not self.env['res.partner'].search_count([('email_normalized', '=', self.env.ref('base.partner_root').email_normalized)]):
-            ban_emails.append(self.env.ref('base.partner_root').email_normalized)
+        root_email = self.env.ref('base.partner_root').email_normalized
+        if root_email in all_emails and not self.env['res.partner'].search_count([('email_normalized', '=', root_email)], limit=1):
+            ban_emails.append(root_email)
         ban_emails += self.env['mail.alias.domain'].sudo()._find_aliases(
             [email_key(e) for e in all_emails if e and e.strip()]
         )
@@ -775,6 +777,18 @@ class Base(models.AbstractModel):
         classes = f" class={extra_classes}" if extra_classes else ""
         return Markup("<a href=# data-oe-model='%s' data-oe-id='%s'%s>%s</a>") % (
             self._name, self.id, classes, title or self.display_name)
+
+    def _get_html_link_with_href(self, title=None):
+        self.ensure_one()
+        return Markup(
+            "<a href='/mail/view?%(params)s' data-oe-model='%(model)s' data-oe-id='%(id)s'>"
+            "%(title)s</a>",
+        ) % {
+            "id": self.id,
+            "model": self._name,
+            "params": url_encode({"model": self._name, "res_id": self.id}),
+            "title": title or self.display_name,
+        }
 
     @api.model
     def _get_backend_root_menu_ids(self):
