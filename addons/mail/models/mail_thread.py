@@ -4190,24 +4190,16 @@ class MailThread(models.AbstractModel):
             } for device in devices])
             self.env.ref('mail.ir_cron_web_push_notification')._trigger()
 
-    def _notify_by_web_push_prepare_payload(self, message, force_record_name=False):
-        """ Returns dictionary containing message information for a browser device.
-        This info will be delivered to a browser device via its recorded endpoint.
-        REM: It is having a limit of 4000 bytes (4kb)
+    def _notify_by_push_get_title(self, message, force_record_name=False):
+        return force_record_name or message.record_name or message.subject
 
-        :param str force_record_name: record_name to use instead of being
-          related record's display_name;
-        """
-        title = force_record_name or message.record_name
+    def _notify_by_push_get_body(self, message):
+        """ Plaintext body of the push notification, shared by all push channels.
+        Messages without text (polls, attachments) get a descriptive fallback. """
         body = message.body
         if message.message_type == 'tracking':
             body = "\n%s\n%s" % (message.subtype_id.description, body)
 
-        if message.author_id:
-            title = "%s: %s" % (message.author_id.name, title)
-            icon = "/web/image/res.partner/%d/avatar_128" % message.author_id.id
-        else:
-            icon = '/web/static/img/odoo-icon-192x192.png'
         if tools.is_html_empty(body):
             # sudo - mail.poll: accessing polls of a message we just posted is acceptable.
             if ended_poll := message.sudo().ended_poll_ids:
@@ -4251,11 +4243,38 @@ class MailThread(models.AbstractModel):
                     )
                 body = f"{symbol}\N{NO-BREAK SPACE}\N{NO-BREAK SPACE}{label}"
 
+        body = html2plaintext(body, include_references=False)
+        if prefix := self._notify_by_push_get_body_prefix(message):
+            body = f"{prefix}{body}"
+        return body
+
+    def _notify_by_push_get_body_prefix(self, message):
+        """ Author prefix for the notification body, when the title does not already name them. """
+        # sudo - mail.poll: accessing polls of a received message is acceptable.
+        if message.sudo().started_poll_ids or message.sudo().ended_poll_ids:
+            return ""
+        author = message.author_id or message.author_guest_id
+        if name := author.name or message.email_from:
+            return f"{name}: "
+        return ""
+
+    def _notify_by_push_get_icon(self, message):
+        if module := self._original_module:
+            return modules.module.get_module_icon(module)
+        return '/web/static/img/odoo-icon-192x192.png'
+
+    def _notify_by_web_push_prepare_payload(self, message, force_record_name=False):
+        """ Return a dictionary containing the message information for a browser.
+        The encrypted payload is limited to 4096 bytes: see ``_web_push_truncate_payload``.
+
+        :param str force_record_name: record name to use instead of the
+          related record's display_name;
+        """
         return {
-            'title': title,
+            'title': self._notify_by_push_get_title(message, force_record_name=force_record_name),
             'options': {
-                'body': html2plaintext(body, include_references=False),
-                'icon': icon,
+                'body': self._notify_by_push_get_body(message),
+                'icon': self._notify_by_push_get_icon(message),
                 'data': {
                     'model': message.model or '',
                     'res_id': message.res_id or '',
@@ -5126,8 +5145,7 @@ class MailThread(models.AbstractModel):
             ('res_id', '=', self.id),
             ('message_type', '!=', 'user_notification'),
         ])
-        non_generic_messages = messages.filtered(lambda m: m.subtype_id.res_model)
-        generic_messages = messages - non_generic_messages
+        non_generic_messages, generic_messages = messages.partitioned(lambda m: m.subtype_id.res_model)
 
         # update the messages
         msg_vals = {"res_id": new_thread.id, "model": new_thread._name}
@@ -5391,8 +5409,7 @@ class MailThread(models.AbstractModel):
         if 'original_id' in self.env['ir.attachment']._fields:
             # If the image is SVG: We take the png version if exist otherwise we take the svg
             # If the image is not SVG: We take the original one if exist otherwise we take it
-            svg_ids = res.filtered(lambda attachment: attachment.mimetype == 'image/svg+xml')
-            non_svg_ids = res - svg_ids
+            svg_ids, non_svg_ids = res.partitioned(lambda attachment: attachment.mimetype == 'image/svg+xml')
             original_ids = res.mapped('original_id')
             res = res.filtered(lambda attachment: (attachment in svg_ids and attachment not in original_ids) or (attachment in non_svg_ids and attachment.original_id not in non_svg_ids))
         return res
