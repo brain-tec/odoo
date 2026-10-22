@@ -5,6 +5,7 @@ from datetime import timedelta
 from markupsafe import Markup
 
 from odoo import Command, _, api, fields, models
+from odoo.fields import Domain
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tools import float_is_zero, format_datetime, plaintext2html
 
@@ -285,8 +286,12 @@ class PosSession(models.Model):
                 # model no longer exists (ex: module uninstalled)
                 non_existent_and_inactive_ids[model] = ids
                 continue
+            domain = [('id', 'in', ids)]
+            if model == 'product.pricelist.item':
+                # For product pricelist items, we only keep those whose pricelist is active
+                domain = Domain.AND([domain, [('pricelist_id.active', '=', True)]])
             try:
-                existing_active_records = self.env[model].search_read([('id', 'in', ids)], ['id'])
+                existing_active_records = self.env[model].search_read(domain, ['id'])
             except AccessError:
                 continue
             existing_active_records = [r['id'] for r in existing_active_records]
@@ -967,10 +972,9 @@ class PosSession(models.Model):
 
         # Build the out_receipt lines. Returns pm_data_list so we can
         # create the matching account.payment / statement line records after posting.
-        sale_orders = non_invoiced_orders.filtered(
+        sale_orders, refund_orders = non_invoiced_orders.partitioned(
             lambda order: not order.is_refund_or_negative() and order.amount_total >= 0,
         )
-        refund_orders = non_invoiced_orders - sale_orders
         sales_move = self._create_session_account_move(sale_orders)
         refunds_move = self._create_session_account_move(refund_orders)
         self.sudo().sale_move_ids |= sales_move
@@ -1139,8 +1143,7 @@ class PosSession(models.Model):
         """ Return the paid orders of the session that are not invoiced. """
         self.ensure_one()
         orders = self._get_order_for_session_closing()
-        invoiced_orders = orders.filtered(lambda o: o.is_singly_invoiced or o.is_globally_invoiced)
-        non_invoiced_orders = orders - invoiced_orders
+        invoiced_orders, non_invoiced_orders = orders.partitioned(lambda o: o.is_singly_invoiced or o.is_globally_invoiced)
         return non_invoiced_orders, invoiced_orders
 
     def _check_invoiced_orders_are_posted(self, invoiced_orders):

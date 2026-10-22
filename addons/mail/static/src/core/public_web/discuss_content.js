@@ -35,7 +35,6 @@ export class DiscussContent extends Component {
             optional: true,
         });
         this.ui = usePlugin(UIPlugin);
-        this.notification = useService("notification");
         this.rootRef = signal.ref(HTMLDivElement);
         this.threadAvatarRef = signal.ref(HTMLDivElement);
         this.threadActions = useThreadActions({ rootRef: this.rootRef, thread: () => this.thread });
@@ -77,10 +76,6 @@ export class DiscussContent extends Component {
         switch (action.id) {
             case "notification-settings":
                 return { ...this.panelPopover, fixedPosition: true, position: "bottom-end" };
-            case "show-threads":
-                return this.ancestors.inDiscussApp && !this.ui.isSmall()
-                    ? { ...this.panelPopover, fixedPosition: true }
-                    : undefined;
         }
         if (action.definition.panel?.component.compact) {
             return this.panelPopover;

@@ -458,7 +458,7 @@ class Domain:
         """
         return self._optimize(model, OptimizationLevel.DYNAMIC_VALUES)
 
-    def optimize_full(self, model: BaseModel, search_domain: Domain | None = None) -> Domain:
+    def optimize_full(self, model: BaseModel, search_domain: Domain | None = None, search_from_field: Field | None = None) -> Domain:
         """Perform optimizations of the node given a model.
 
         Basic and advanced optimizations are applied.
@@ -470,8 +470,9 @@ class Domain:
 
         The `search_domain` is the whole domain the user provided for searching.
         """
-        if search_domain is not model.env.context.get('search_domain'):
-            model = model.with_context(search_domain=search_domain)
+        if search_domain is not model.env.context.get('search_domain') or search_from_field is not model.env.context.get('search_from_field'):
+            assert search_domain is None or isinstance(search_domain, Domain)
+            model = model.with_context(search_domain=search_domain, search_from_field=search_from_field)
         return self._optimize(model, OptimizationLevel.FULL)
 
     @typing.final
@@ -1486,12 +1487,14 @@ def _optimize_any_domain_at_level(level: OptimizationLevel, condition, model):
     except KeyError:
         condition._raise("Cannot determine the comodel relation")
 
+    context = dict(model.env.context)
     if field.type in ('many2many', 'one2many'):
-        comodel = comodel.with_context(**field.context)
+        context.update(field.context)
     else:
-        comodel = comodel.with_context(active_test=False)
-
-    if isinstance(search_domain := model.env.context.get('search_domain'), Domain):
+        context['active_test'] = False
+    if level >= OptimizationLevel.DYNAMIC_VALUES:
+        context['search_from_field'] = field
+    if isinstance(search_domain := context.get('search_domain'), Domain):
         # model with search_domain like (field, 'any', comodel_domain)
         # => comodel with comodel_domain
         # a plain (field, 'in', ids) condition on the same field is just as
@@ -1516,9 +1519,10 @@ def _optimize_any_domain_at_level(level: OptimizationLevel, condition, model):
             else:
                 # in general case, accept all
                 comodel_domain = Domain.TRUE
-        comodel = comodel.with_context(search_domain=comodel_domain)
-
+        context['search_domain'] = comodel_domain
+    comodel = comodel.with_context(context)
     domain = domain._optimize(comodel, level)
+
     # const if the domain is empty, the result is a constant
     # if the domain is True, we keep it as is
     if domain.is_false():
@@ -1630,10 +1634,12 @@ def _optimize_boolean_in_all(condition, model):
     return condition
 
 
-def _value_to_date(value, env, iso_only=False):
+def _value_to_date(value, env, iso_only=False, inside_day=lambda dt: dt.date()):
     # check datetime first, because it's a subclass of date
     if isinstance(value, datetime):
-        return value.date()
+        if value.time() == time.min:
+            return value.date()
+        return inside_day(value)
     if isinstance(value, date) or value is False:
         return value
     if isinstance(value, str):
@@ -1646,9 +1652,9 @@ def _value_to_date(value, env, iso_only=False):
                 return value
         else:
             value = parse_date(value, env)
-        return _value_to_date(value, env)
+        return _value_to_date(value, env, inside_day=inside_day)
     if isinstance(value, COLLECTION_TYPES):
-        return OrderedSet(_value_to_date(v, env=env, iso_only=iso_only) for v in value)
+        return OrderedSet(_value_to_date(v, env=env, iso_only=iso_only, inside_day=inside_day) for v in value)
     raise ValueError(f'Failed to cast {value!r} into a date')
 
 
@@ -1661,7 +1667,26 @@ def _optimize_type_date(condition, model):
         or "." in condition.field_expr
     ):
         return condition
-    value = _value_to_date(condition.value, model.env, iso_only=True)
+
+    def inside_day(dt: datetime):
+        # when comparing to a date inside a day, update the operator
+        nonlocal operator
+        match operator:
+            case '<':
+                operator = '<='
+            case '>=':
+                operator = '>'
+            case '<=' | '>':
+                pass
+            case _:
+                return None  # filter out the value
+        return dt.date()
+
+    value = _value_to_date(condition.value, model.env, iso_only=True, inside_day=inside_day)
+    if isinstance(value, OrderedSet):
+        value.discard(None)
+    elif value is None:
+        return Domain(operator in NEGATIVE_CONDITION_OPERATORS)
     if value is False and operator[0] in ('<', '>'):
         # comparison to False results in an empty domain
         return _FALSE_DOMAIN
@@ -1983,6 +2008,8 @@ def _operator_access_rule_domain(condition, model):
     operation = condition.value
     if operation not in ('read', 'write', 'create', 'unlink'):
         condition._raise("Invalid value for 'access' operator")
+    if operation == 'read' and field in model.env.registry.field_inverses.get(model.env.context.get('search_from_field'), ()):
+        return Domain.TRUE  # the join will restrain the field to a not-null value
 
     comodel = comodel.sudo(False)
     access_domain = comodel._access_domain(operation)
