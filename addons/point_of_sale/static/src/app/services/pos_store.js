@@ -2758,16 +2758,6 @@ export class PosStore extends WithLazyGetterTrap {
         return getTimeUtil(date);
     }
 
-    orderDone(order) {
-        order.setScreenData({ name: "" });
-        this.searchProductWord = "";
-        const { page, params } = this.defaultPage;
-        this.navigate(
-            page,
-            page === "ProductScreen" ? { orderUuid: this.getEmptyOrder().uuid } : params
-        );
-    }
-
     async isSessionDeleted() {
         return (
             (await this.data.orm.searchCount("pos.session", [["id", "=", this.session.id]])) === 0
@@ -2828,11 +2818,26 @@ export class PosStore extends WithLazyGetterTrap {
     }
 
     async validateOrderFast(paymentMethod) {
+        const order = this.getOrder();
         const validation = new OrderPaymentValidation({
             pos: this,
-            orderUuid: this.getOrder().uuid,
+            orderUuid: order.uuid,
             fastPaymentMethod: paymentMethod,
         });
+        if (paymentMethod.payment_method_type === "bank_qr_code") {
+            const qrPaymentLines = order.payment_ids.filter(
+                (l) => l.payment_method_id.id === paymentMethod.id
+            );
+            if (!qrPaymentLines.length) {
+                return;
+            }
+            const line = qrPaymentLines[qrPaymentLines.length - 1];
+            const resp = await this.showQR(line);
+            if (!line.handlePaymentResponse(resp)) {
+                order.removePaymentline(line);
+                return;
+            }
+        }
         await validation.validateOrder(false);
     }
 
