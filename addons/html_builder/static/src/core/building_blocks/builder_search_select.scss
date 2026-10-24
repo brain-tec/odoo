@@ -1,18 +1,18 @@
 @mixin o_hb_select_wrapper {
     --border-color: var(--o-hb-border-color);
 
-    // TODO: the following rules essentially overrides utility classes
-    // "inherited" from the backend and apply BuilderSelect rules on top.
-    // To be improved by removing the unwanted classes and share relevant
-    // rules across the BuilderSelect AND SelectMany2X components.
+    /* TODO: the following rules essentially overrides utility classes
+       "inherited" from the backend and apply BuilderSelect rules on top.
+       To be improved by removing the unwanted classes and share relevant
+       rules across the BuilderSelect AND SelectMany2X components. */
 
-    border: 0 !important; // Override backend's `border`class
-    width: 100% !important; // Override backend's `w-auto`class
+    border: 0 !important; /* Override backend's `border`class */
+    width: 100% !important; /* Override backend's `w-auto`class */
 
     div:has(> &) {
-        // TODO: Add a class to this unnamed parent div
+        /* TODO: Add a class to this unnamed parent div */
         flex: 1 0 auto;
-        min-width: 7ch; // Approx 4 characters + caret
+        min-width: 7ch; /* Approx 4 characters + caret */
         max-width: 100%;
         display: flex;
     }
@@ -21,8 +21,8 @@
         padding-right: .95rem;
 
         &, &.btn-light.bg-light {
-            --border-color: #{$o-we-bg-light};
-            --btn-padding-x: #{map-get($spacers , 2)};
+            --border-color: var(--o-we-bg-light);
+            --btn-padding-x: var(--o-hb-spacer-2);
 
             @include button-variant(
                 $background: $o-we-item-clickable-bg,
@@ -39,19 +39,21 @@
                 $disabled-color: $o-we-fg-darker,
             );
 
-            // Handle native o_select_menu_toggler_caret icon inconsistencies
+            /* Handle native o_select_menu_toggler_caret icon inconsistencies */
             > span.o_select_menu_toggler_caret {
                 display: none;
             }
             &:after {
-                @include o-position-absolute(50%, map-get($spacers, 1));
+                position: absolute;
+                top: 50%;
+                inset-inline-end: var(--o-hb-spacer-1);
                 transform: translate(-50%, -50%);
                 font-size: .5rem;
                 content: "arrow_drop_down";
                 font-family: 'Material Symbols Outlined';
             }
 
-            // Tweak `bg-light` to inherit btn values
+            /* Tweak `bg-light` to inherit btn values */
             --background-color: var(--btn-bg);
 
             &:hover, &:focus-visible {
@@ -64,12 +66,12 @@
                 --background-color: var(--btn-disabled-bg);
             }
 
-            // Override backend's `.show` to inherit btn values
+            /* Override backend's `.show` to inherit btn values */
             &.show {
                 --background-color: var(--btn-hover-bg);
 
                 color: var(--btn-active-color);
-                border-color: var(--o-hb-btn-active-color, $o-we-color-accent) !important;
+                border-color: var(--o-hb-btn-active-color, var(--o-we-color-accent)) !important;
             }
         }
 
@@ -82,28 +84,28 @@
 @mixin o_hb_select_dropdown {
     --SelectMenu-padding: 0;
 
-    // Besides the horizontal padding ($o-hb-row-padding-left + map-get($spacers, 2)),
-    // we also need to reduce the width by an extra “Spacer 2” to compensate for the
-    // editor’s scrollbar.
+    /* Besides the horizontal padding ($o-hb-row-padding-left + map-get($spacers, 2)),
+       we also need to reduce the width by an extra “Spacer 2” to compensate for the
+       editor’s scrollbar. */
     width: o-to-rem($o-we-sidebar-width) - (2 * map-get($spacers, 2)) - o-to-rem($o-hb-row-padding-left);
-    scrollbar-color: $o-we-bg-lightest $o-we-bg-darker;
+    scrollbar-color: var(--o-we-bg-lightest) var(--o-we-bg-darker);
 
     .o_filtered_text {
-        --SelectMenu__filteredText-bg-color: #{rgba($o-we-color-accent, .25)};
+        --SelectMenu__filteredText-bg-color: color-mix(in srgb, var(--o-we-color-accent) 25%, transparent);
         --SelectMenu__filteredText-color: #{lighten($o-we-color-accent, 25%)};
     }
 
     .o_select_menu_searchbox {
-        --o-hb-select-color: #{$o-we-fg-lighter};
+        --o-hb-select-color: var(--o-we-fg-lighter);
 
         @include border-top-radius(var(--#{$prefix}popover-inner-border-radius));
-        background-color: $o-we-sidebar-content-field-input-bg;
+        background-color: var(--o-we-sidebar-content-field-input-bg);
 
         &:hover, &:focus-within {
-            --o-hb-select-bg-hover: #{$o-we-sidebar-content-field-input-bg};
+            --o-hb-select-bg-hover: var(--o-we-sidebar-content-field-input-bg);
         }
         &:focus-within {
-            box-shadow: 0 0 $o-we-border-width $o-we-border-width inset var(--o-hb-input-active-border, $o-we-sidebar-content-field-input-border-color);
+            box-shadow: 0 0 var(--o-we-border-width) var(--o-we-border-width) inset var(--o-hb-input-active-border, var(--o-we-sidebar-content-field-input-border-color));
         }
         &::before {
             color: var(--o-hb-select-color);
@@ -116,9 +118,9 @@
     .o_select_menu_group {
         margin: 0 !important;
         padding: 6px var(--dropdown-item-padding-x);
-        background-color: $o-we-bg-darker;
+        background-color: var(--o-we-bg-darker);
         color: var(--o-hb-select-color, $white);
-        font-size: $o-we-font-size-lg;
+        font-size: var(--o-we-font-size-lg);
         line-height: 1.7;
         z-index: 2;
     }
@@ -136,7 +138,7 @@
     }
 
     .dropdown-item.o_we_m2o_search_more {
-        color: $o-we-fg-lighter;
+        color: var(--o-we-fg-lighter);
     }
 }
 

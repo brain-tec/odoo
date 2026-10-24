@@ -1,0 +1,101 @@
+.o-mail-ChatHub-bubbles {
+    width: var(--o-mail-ChatHub-bubblesWidth);
+    z-index: calc(var(--o-mail-NavigableList-zIndex) - 1);
+}
+
+.o-mail-ChatHub:not(.o-dragged) .o-mail-ChatHub-bubbles {
+    bottom: calc(var(--mail-ChatHub-bubbles-bottom, 0px) + var(--mail-ChatHub-bubbles-bottomLift, 0px));
+
+    &.o-liftUp {
+        --mail-ChatHub-bubbles-bottomLift: 25px;
+    }
+
+    &.o-mobile {
+        margin-right: calc(var(--o-mail-ChatHub-bubblesMargin) + 5px);
+        --mail-ChatHub-bubbles-bottomLift: 35px;
+    }
+}
+
+.o-mail-ChatHub-bubbleBtn {
+    padding: 0 !important;
+    border-radius: 50%;
+    box-shadow: var(--box-shadow-sm);
+
+    &:not(.o-bordered) {
+        border: none !important;
+    }
+}
+
+.o-mail-ChatHub-hiddenAvatar {
+    width: 28px;
+    height: 28px;
+}
+
+.o-mail-ChatHub-hiddenBtnIcon {
+    color: #FFFFFF!important;
+    background-color: color-mix(in srgb, var(--gray-400), var(--gray-500)) !important;
+    width: var(--o-mail-ChatBubble-sizeBig) !important;
+    height: var(--o-mail-ChatBubble-sizeBig) !important;
+}
+
+.o-mail-ChatHub-hiddenBtnCounter {
+    padding: 4px 8px;
+    z-index: calc(var(--o-mail-NavigableList-zIndex) - 1);
+    top: -4px;
+    right: -4px;
+}
+
+.o-mail-ChatHub-hiddenClose {
+    margin-left: auto;
+    background-color: transparent;
+    opacity: 25%;
+    padding: calc(var(--o-bs-spacer-1) / 2);
+    border: var(--o-bs-border-width) solid transparent;
+
+    &:hover {
+        border-color: color-mix(in srgb, var(--o-gray-300), var(--o-gray-400));
+    }
+}
+
+.o-mail-ChatHub-hiddenCounter {
+    right: 20px;
+}
+
+.o-mail-ChatHub-hiddenItem {
+    display: flex;
+    align-items: center;
+    max-width: 225px;
+
+    &:hover:not(:has(.o-mail-ChatHub-hiddenClose:hover)), &.o-active {
+        background-color: var(--o-gray-300);
+    }
+
+    &:hover, &.o-active {
+        cursor: pointer;
+
+        .o-mail-ChatHub-hiddenClose {
+            opacity: 100%;
+        }
+    }
+}
+
+.o-mail-ChatHub-hiddenMenu {
+    border-color: color-mix(in srgb, var(--o-gray-300), var(--o-gray-400)) !important;
+}
+
+.o-mail-ChatHub-option {
+    &:hover, &.o-active {
+        cursor: pointer;
+    }
+}
+
+.o-mail-ChatHub-optionsBtn {
+    /* Half-lit while only the bubbles stack is hovered. */
+    &.o-bubblesHover:before {
+        opacity: 50%;
+    }
+
+    &:hover:before, &.show:before {
+        opacity: 100%;
+    }
+}

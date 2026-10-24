@@ -1,9 +1,9 @@
 .o_return_order_dialog {
-    @include media-breakpoint-down(sm) {
+    @media (max-width: 575.98px) {
         --ReturnOrderDialog-img-size-sm: 3.5rem;
 
         .o_return_order_dialog_price {
-            margin-left: calc(var(--ReturnOrderDialog-img-size-sm) + #{map-get($spacers, 2)});
+            margin-left: calc(var(--ReturnOrderDialog-img-size-sm) + var(--o-bs-spacer-2));
         }
     }
     .o_return_order_dialog_img {

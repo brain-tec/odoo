@@ -1,17 +1,17 @@
 $-editor-messages-margin-x: 2%;
 %o-editor-messages {
-    background: $o-we-dropzone-bg-color;
+    background: var(--o-we-dropzone-bg-color);
     text-align: center;
     color: #fff;
-    outline: $o-we-dropzone-border-width dashed $o-we-dropzone-accent-color;
-    outline-offset: -$o-we-dropzone-border-width;
+    outline: var(--o-we-dropzone-border-width) dashed var(--o-we-dropzone-accent-color);
+    outline-offset: calc(var(--o-we-dropzone-border-width) * -1);
 
     &:before {
         content: attr(data-editor-message);
         display: block;
         font-size: 20px;
     }
-    // Show the default editor message only for "empty" elements
+    /* Show the default editor message only for "empty" elements */
     &:not(:empty) {
         &[data-editor-message-default]:before {
             content: none;
@@ -28,7 +28,7 @@ $-editor-messages-margin-x: 2%;
     }
 }
 .o_we_snippet_area_animation {
-    animation-delay: 999ms; // Disable it but allow to inherit the animation
+    animation-delay: 999ms; /* Disable it but allow to inherit the animation */
 
     &::before {
         animation: inherit;
@@ -40,8 +40,8 @@ $-editor-messages-margin-x: 2%;
     &:not(:empty), &[data-oe-type] {
         &:not([data-oe-model="ir.ui.view"]):not([data-oe-type="html"]):not(.o_editable_no_shadow):not([data-oe-type="image"]):hover,
         &.o_editable_date_field_linked {
-            outline: $o-we-handle-border-width solid $o-we-handles-accent-color;
-            outline-offset: $o-we-handle-border-width;
+            outline: var(--o-we-handle-border-width) solid var(--o-we-handles-accent-color);
+            outline-offset: var(--o-we-handle-border-width);
         }
         &[data-oe-type="image"]:not(.o_editable_no_shadow):hover {
             position: relative;
@@ -49,10 +49,11 @@ $-editor-messages-margin-x: 2%;
             &:after {
                 content: "";
                 pointer-events: none;
-                @include o-position-absolute(0, 0, 0, 0);
+                position: absolute;
+                inset: 0;
                 z-index: 1;
-                outline: $o-we-handle-border-width solid $o-we-handles-accent-color;
-                outline-offset: $o-we-handle-border-width;
+                outline: var(--o-we-handle-border-width) solid var(--o-we-handles-accent-color);
+                outline-offset: var(--o-we-handle-border-width);
             }
         }
     }
@@ -60,8 +61,8 @@ $-editor-messages-margin-x: 2%;
         min-height: 0.8em;
         min-width: 8px;
 
-        // TODO this feature just needs to be reviewed to not have to make
-        // exceptions such as this
+        /* TODO this feature just needs to be reviewed to not have to make
+           exceptions such as this */
         &#o_footer_scrolltop_wrapper {
             min-height: 0;
             min-width: 0;
@@ -88,15 +89,15 @@ $-editor-messages-margin-x: 2%;
         }
     }
 
-    // This style block is about the "editor message" which highlights the areas
-    // where the user can drag & drop snippets.
+    /* This style block is about the "editor message" which highlights the areas
+       where the user can drag & drop snippets. */
     &.oe_structure.oe_empty, &[data-oe-type=html], .oe_structure.oe_empty {
-        // Base case (website.page (#wrap), t-field (product description), ..)
+        /* Base case (website.page (#wrap), t-field (product description), ..) */
         > .oe_drop_zone.oe_insert:not(.oe_vertical) {
             @extend %o-editor-messages;
             height: auto;
 
-            // Empty editable element during drag & drop
+            /* Empty editable element during drag & drop */
             &:only-child {
                 margin: 20px $-editor-messages-margin-x;
                 width: 100% - $-editor-messages-margin-x * 2;
@@ -113,7 +114,7 @@ $-editor-messages-margin-x: 2%;
             }
         }
 
-        // Exception 1: empty wrap NOT during drag & drop
+        /* Exception 1: empty wrap NOT during drag & drop */
         &#wrap:empty {
             @extend %o-editor-messages;
             padding: 112px 0px;
@@ -121,7 +122,7 @@ $-editor-messages-margin-x: 2%;
             border-radius: $border-radius-lg;
         }
 
-        // Exception 2: empty wrap during drag & drop (override of base case)
+        /* Exception 2: empty wrap during drag & drop (override of base case) */
         &#wrap > .oe_drop_zone.oe_insert:not(.oe_vertical):only-child {
             padding: 112px 0px;
             text-shadow: none;
@@ -139,11 +140,11 @@ $-editor-messages-margin-x: 2%;
     cursor: default;
 }
 .oe_structure_solo > .oe_drop_zone {
-    // TODO implement something more robust. This is currently for our only
-    // use case of oe_structure_solo: the footer. The dropzone in there need to
-    // be 1px lower that the end-of-page dropzone to distinguish them. The
-    // usability has to be reviewed anyway.
-    transform: translateY(10px); // For some reason "1px" is not enough...
+    /* TODO implement something more robust. This is currently for our only
+       use case of oe_structure_solo: the footer. The dropzone in there need to
+       be 1px lower that the end-of-page dropzone to distinguish them. The
+       usability has to be reviewed anyway. */
+    transform: translateY(10px); /* For some reason "1px" is not enough... */
 }
 
 /* Prevent the text contents of draggable elements from being selectable. */
@@ -162,7 +163,7 @@ $-editor-messages-margin-x: 2%;
     display: block!important;
 }
 
-// TODO: in master check if the class / rule is relevant at all
+/* TODO: in master check if the class / rule is relevant at all */
 .editor_enable [data-oe-type=html].oe_no_empty:empty {
     height: 16px!important;
 }
@@ -186,12 +187,12 @@ $-editor-messages-margin-x: 2%;
     }
 }
 
-// fontawesome
+/* fontawesome */
 #wrap.o_savable .oi {
     cursor: pointer;
 }
 
-// parallax dropzones are in conflict with outside of parallax dropzones
+/* parallax dropzones are in conflict with outside of parallax dropzones */
 .parallax .oe_structure > .oe_drop_zone {
     &:first-child {
         top: 16px;
@@ -205,7 +206,7 @@ $-editor-messages-margin-x: 2%;
     display: none !important;
 }
 
-// Facebook Page
+/* Facebook Page */
 .editor_enable .o_facebook_page:not(.o_facebook_preview) {
     @extend %o-disable-iframes;
     .o_facebook_alert .o_add_facebook_page {
@@ -213,12 +214,12 @@ $-editor-messages-margin-x: 2%;
     }
 }
 
-// Prevent Instagram block to open Instagram in edit mode.
+/* Prevent Instagram block to open Instagram in edit mode. */
 .editor_enable .s_instagram_page {
     @extend %o-disable-iframes;
 }
 
-// s_countdown preview classes
+/* s_countdown preview classes */
 body.editor_enable {
     .s_countdown {
         .s_countdown_enable_preview {
@@ -230,7 +231,7 @@ body.editor_enable {
     }
 }
 
-// Website Animate
+/* Website Animate */
 .editor_enable.o_animated_text_highlighted {
     .o_animated_text {
         position: relative;
@@ -238,21 +239,22 @@ body.editor_enable {
         &:after {
             content: "";
             pointer-events: none;
-            @include o-position-absolute(0, 0, 0, 0);
+            position: absolute;
+            inset: 0;
             z-index: 1;
-            // This border is useful when there is a green background behind
-            // the text.
+            /* This border is useful when there is a green background behind
+               the text. */
             border: 1px dotted white;
-            background-color: rgba(greenyellow, .2);
+            background-color: rgba(173, 255, 47, .2);
         }
     }
 }
 
-// Inputs in editable zones should not be possible to interact with.
-// TODO as this was done as a fix in 13.0, this only targets the inputs of
-// specific snippets and even targets snippets of other apps (which do not
-// declare files for edit mode only). In master it should be refactored to
-// target all inputs and/or target specific snippets in their own app.
+/* Inputs in editable zones should not be possible to interact with.
+   TODO as this was done as a fix in 13.0, this only targets the inputs of
+   specific snippets and even targets snippets of other apps (which do not
+   declare files for edit mode only). In master it should be refactored to
+   target all inputs and/or target specific snippets in their own app. */
 .editor_enable {
     .s_website_form, .s_searchbar_input, .js_subscribe, .s_group, .s_donation_form {
         input:not(.o_translatable_attribute) {
@@ -265,7 +267,7 @@ body.editor_enable {
         }
     }
 
-    // Some dropdown links are not deactivated in edit, so we prevent clicks.
+    /* Some dropdown links are not deactivated in edit, so we prevent clicks. */
     #o_logout,
     .js_change_lang {
         pointer-events: none;
@@ -274,25 +276,26 @@ body.editor_enable {
 .o_homepage_editor_welcome_message {
     padding-top: 128px;
     padding-bottom: 128px;
-    font-family: $o-font-family-sans-serif;
+    font-family: var(--o-font-family-sans-serif);
 }
-// offcanvas backdrop
+/* offcanvas backdrop */
 body.editor_enable {
-    // We prevent selection to avoid the powerbox hint from being added to the
-    // backdrop by clicking on it in edit mode.
+    /* We prevent selection to avoid the powerbox hint from being added to the
+       backdrop by clicking on it in edit mode. */
     .offcanvas-backdrop {
         user-select: none;
     }
 }
-// edit link popover
-$o-we-popover-bg: white;
+/* edit link popover */
 body.editor_enable {
+    --o-we-popover-bg: white;
+
     .o_edit_menu_popover {
-        background-color: $o-we-popover-bg;
-        font-family: $o-we-font-family;
+        background-color: var(--o-we-popover-bg);
+        font-family: var(--o-we-font-family);
 
         a {
-            color: $o-brand-primary;
+            color: var(--o-brand-primary);
 
             &.text-muted {
                 color: rgba(0, 0, 0, 0.65) !important;
@@ -302,21 +305,21 @@ body.editor_enable {
             color: rgba(0, 0, 0, 0.9);
         }
         &.bs-popover-auto[data-popper-placement^=top] > .popover-arrow::after {
-            border-top-color: $o-we-popover-bg;
+            border-top-color: var(--o-we-popover-bg);
         }
         &.bs-popover-auto[data-popper-placement^=right] > .popover-arrow::after {
-            border-right-color: $o-we-popover-bg;
+            border-right-color: var(--o-we-popover-bg);
         }
         &.bs-popover-auto[data-popper-placement^=bottom] > .popover-arrow::after {
-            border-bottom-color: $o-we-popover-bg;
+            border-bottom-color: var(--o-we-popover-bg);
         }
         &.bs-popover-auto[data-popper-placement^=left] > .popover-arrow::after {
-            border-left-color: $o-we-popover-bg;
+            border-left-color: var(--o-we-popover-bg);
         }
     }
 }
 
-// tooltip
+/* tooltip */
 body.editor_enable {
      .tooltip .tooltip-inner {
         color: white !important;

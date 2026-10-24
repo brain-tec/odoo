@@ -36,7 +36,7 @@
             'mrp_subcontracting/static/src/subcontracting_portal/move_list_view.js',
         ],
         'web.assets_frontend': [
-            'mrp_subcontracting/static/src/scss/subcontracting_portal.scss',
+            'mrp_subcontracting/static/src/scss/subcontracting_portal.css',
         ],
         'mrp_subcontracting.webclient': [
             ('include', 'web._assets_helpers'),
@@ -96,7 +96,6 @@
 
             'base/static/src/css/modules.css',
 
-            'web/static/src/core/utils/transitions.scss',
             'web/static/src/core/**/*',
             ('remove', 'web/static/src/core/**/*.dark.scss'),
             ('remove', 'web/static/src/core/emoji_picker/emoji_data.js'),
