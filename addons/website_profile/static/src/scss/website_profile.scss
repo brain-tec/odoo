@@ -1,8 +1,8 @@
-// Retrive the tab's height by summ its properties
+/* Retrive the tab's height by summ its properties */
 $owprofile-tabs-height: ($nav-link-padding-y*2) + ($font-size-base * $line-height-base);
 
-// Overal page bg-color: Blend it 'over' the color chosen by the user
-// ($body-bg), rather than force it replacing the variable's value.
+/* Overal page bg-color: Blend it 'over' the color chosen by the user
+   ($body-bg), rather than force it replacing the variable's value. */
 $owprofile-color-bg: mix($body-bg, #efeff4);
 
 .o_wprofile_body {
@@ -20,7 +20,7 @@ $owprofile-color-bg: mix($body-bg, #efeff4);
     background-size: cover;
     background-position: center;
 
-    @include media-breakpoint-up(md)  {
+    @media (min-width: 768px) {
         padding-top: 70%;
         border: 1px solid darken(#875A7B, 10%);
         border-bottom-width: 0;
@@ -28,12 +28,14 @@ $owprofile-color-bg: mix($body-bg, #efeff4);
 }
 
 .o_wprofile_header {
-    @include media-breakpoint-up(md)  {
+    @media (min-width: 768px) {
         &:before {
             content: "";
-            @include o-position-absolute(auto, 0, 0, 0);
+            position: absolute;
+            bottom: 0;
+            inset-inline: 0;
             height: $owprofile-tabs-height;
-            background: rgba(black, 0.2);
+            background: rgba(0, 0, 0, 0.2);
         }
     }
 }
@@ -41,13 +43,13 @@ $owprofile-color-bg: mix($body-bg, #efeff4);
 .o_wprofile_sidebar {
     border: 1px solid $border-color;
 
-    @include media-breakpoint-up(md) {
+    @media (min-width: 768px) {
         border-top-width: 0;
     }
 }
 
 .o_wprofile_nav_tabs {
-    @include media-breakpoint-up(md)  {
+    @media (min-width: 768px) {
         margin-top: $owprofile-tabs-height * -1;
         border-bottom: 0;
 
@@ -55,7 +57,11 @@ $owprofile-color-bg: mix($body-bg, #efeff4);
             border-radius: 0;
             border-width: 0 1px;
             line-height: $line-height-base;
-            @include o-hover-text-color(rgba(white, 0.8), white);
+            color: rgba(255, 255, 255, 0.8);
+
+            &:hover, &:focus, &.focus {
+                color: white;
+            }
 
             & {
                 border-color: transparent;
@@ -74,7 +80,7 @@ $owprofile-color-bg: mix($body-bg, #efeff4);
         }
     }
 
-    @include media-breakpoint-only(xs) {
+    @media (max-width: 575.98px) {
         overflow-x: auto;
         overflow-y: hidden;
 
@@ -85,24 +91,24 @@ $owprofile-color-bg: mix($body-bg, #efeff4);
 }
 
 .o_wprofile_tabs_content {
-    @include media-breakpoint-down(md) {
+    @media (max-width: 767.98px) {
         background-color: $nav-tabs-link-active-bg;
-        padding:0 ($grid-gutter-width * 0.5);
+        padding:0 calc(var(--o-bs-grid-gutter-width) * 0.5);
     }
 
-    @include media-breakpoint-only(xs) {
-        margin: 0 ($grid-gutter-width * -0.5);
+    @media (max-width: 575.98px) {
+        margin: 0 calc(var(--o-bs-grid-gutter-width) * -0.5);
     }
 }
 
-/// Progress Circle
+/* Progress Circle */
 .o_wprofile_progress_circle {
     position: relative;
     max-width: 300px;
 
     svg.o_pc_circular_chart {
-        // Allow hover effect on svg paths in order to display bootstrap tooltip,
-        // by pushing the circular chart above the next rank info.
+        /* Allow hover effect on svg paths in order to display bootstrap tooltip,
+           by pushing the circular chart above the next rank info. */
         z-index: 1;
         position: relative;
         display: block;
@@ -115,7 +121,7 @@ $owprofile-color-bg: mix($body-bg, #efeff4);
         }
 
         .o_pc_circle_bg {
-            stroke: rgba(black, 0.1);
+            stroke: rgba(0, 0, 0, 0.1);
         }
 
         .o_pc_circle {
@@ -124,15 +130,16 @@ $owprofile-color-bg: mix($body-bg, #efeff4);
 
         #gradient {
             --o-pc-color-stop-1: #{lighten(map-get($theme-colors, 'primary'), 10%)};
-            --o-pc-color-stop-2: #{map-get($theme-colors, 'primary')};
+            --o-pc-color-stop-2: var(--primary);
         }
     }
 
     .o_pc_overlay {
-        @include o-position-absolute(0,0,0,0);
+        position: absolute;
+        inset: 0;
         h4 {
             width: 60%;
-            // only apply ellipsis when in non-edit mode, that way the editor can see the full value
+            /* only apply ellipsis when in non-edit mode, that way the editor can see the full value */
             &:not(.o_savable) {
                 @include o-text-overflow();
             }
@@ -151,13 +158,13 @@ $owprofile-color-bg: mix($body-bg, #efeff4);
     }
 }
 
-// All Users Page
+/* All Users Page */
 .o_wprofile_all_users_nav {
     border-width: 1px 0;
 
     &, .o_wprofile_course_nav_search, .o_wprofile_all_users_nav_btn {
-        background-color: rgba(white, 0.05);
-        border-color: rgba(white, 0.1);
+        background-color: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.1);
         border-style: solid;
     }
 
@@ -166,11 +173,15 @@ $owprofile-color-bg: mix($body-bg, #efeff4);
     }
 
     .o_wprofile_all_users_nav_btn {
-        @include media-breakpoint-up(md) {
-            @include o-hover-text-color(white, $gray-800);
+        @media (min-width: 768px) {
+            color: white;
             margin-top: -1px;
             border-radius: 0;
             min-height: 35px;
+
+            &:hover, &:focus, &.focus {
+                color: var(--gray-800);
+            }
 
             &:hover {
                 background-color: white;
@@ -179,15 +190,19 @@ $owprofile-color-bg: mix($body-bg, #efeff4);
     }
 
     .o_wprofile_all_users_nav_btn_container {
-        @include media-breakpoint-down(md) {
+        @media (max-width: 767.98px) {
             ~ .o_wprofile_user_profile_sub_nav_mobile_col {
                 padding-left: 0;
             }
 
             .o_wprofile_all_users_nav_btn {
-                @include o-hover-text-color(white, white);
-                border-radius: $btn-border-radius;
-                background-color: rgba(black, 0.25);
+                color: white;
+                border-radius: var(--o-bs-btn-border-radius);
+                background-color: rgba(0, 0, 0, 0.25);
+
+                &:hover, &:focus, &.focus {
+                    color: white;
+                }
             }
         }
     }
@@ -197,7 +212,7 @@ $owprofile-color-bg: mix($body-bg, #efeff4);
     }
 
     .breadcrumb-item a, .breadcrumb-item + .breadcrumb-item::before, .o_wprofile_course_nav_search input::placeholder {
-        color: rgba(white, 0.8);
+        color: rgba(255, 255, 255, 0.8);
     }
 }
 
@@ -218,22 +233,22 @@ $owprofile-color-bg: mix($body-bg, #efeff4);
         a.page-link {
             background-color: transparent;
             border: 0;
-            color: $gray-600;
+            color: var(--gray-600);
             transition-duration: .3s;
 
             &:hover {
-                color: $primary;
+                color: var(--primary);
             }
         }
 
         &.active {
             a.page-link {
-                color: $white;
+                color: var(--white);
             }
         }
 
         &.o_wprofile_pager_arrow a {
-            color: $primary;
+            color: var(--primary);
 
             &:hover {
                 transform: scaleX(1.50) scaleY(1.50);
@@ -241,7 +256,7 @@ $owprofile-color-bg: mix($body-bg, #efeff4);
         }
 
         &.o_wprofile_pager_arrow.disabled a {
-            color: $gray-600;
+            color: var(--gray-600);
         }
 
         .page-link:focus {
@@ -255,7 +270,7 @@ $owprofile-color-bg: mix($body-bg, #efeff4);
 }
 
 
-// Other stuffs
+/* Other stuffs */
 .country_flag {
     display: inline-block;
     margin-left: 2px;
@@ -263,19 +278,19 @@ $owprofile-color-bg: mix($body-bg, #efeff4);
     width: auto !important;
 }
 
-// Tools
+/* Tools */
 .o_wprofile_pointer {
     cursor: pointer;
 }
 
-// Own profile border
+/* Own profile border */
 .o_wprofile_border_focus {
-    border-left: 4px solid map-get($theme-colors, 'secondary');
+    border-left: 4px solid var(--secondary);
 }
 
-// Edition mode
+/* Edition mode */
 .editor_enable {
-    // Allow to edit rank picture in edit mode
+    /* Allow to edit rank picture in edit mode */
     .o_wprofile_progress_circle .o_pc_overlay {
         z-index: initial;
     }

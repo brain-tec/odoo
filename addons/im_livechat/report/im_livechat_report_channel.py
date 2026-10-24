@@ -99,6 +99,7 @@ class Im_LivechatReportChannel(models.Model):
         return SQL("(%s %s %s)", self._select(), self._from(), self._where())
 
     def _select(self) -> SQL:
+        start_date_tz = SQL("timezone(%s, timezone('UTC', C.create_date))", str(self.env.tz))
         return SQL(
             """
             SELECT
@@ -109,10 +110,10 @@ class Im_LivechatReportChannel(models.Model):
                 C.livechat_channel_id as livechat_channel_id,
                 C.create_date as start_date,
                 livechat_visitor.partner_id AS visitor_partner_id,
-                to_char(date_trunc('hour', C.create_date), 'YYYY-MM-DD HH24:MI:SS') as start_date_hour,
-                to_char(date_trunc('hour', C.create_date), 'HH24') as start_hour,
-                to_char(date_trunc('minute', C.create_date), 'YYYY-MM-DD HH:MI:SS') AS start_date_minutes,
-                EXTRACT(dow from C.create_date)::text AS day_number,
+                to_char(date_trunc('hour', %(start_date_tz)s), 'YYYY-MM-DD HH24:MI:SS') as start_date_hour,
+                to_char(date_trunc('hour', %(start_date_tz)s), 'HH24') as start_hour,
+                to_char(date_trunc('minute', %(start_date_tz)s), 'YYYY-MM-DD HH:MI:SS') AS start_date_minutes,
+                EXTRACT(dow from %(start_date_tz)s)::text AS day_number,
                 EXTRACT('epoch' FROM COALESCE(C.livechat_end_dt, NOW() AT TIME ZONE 'utc') - C.create_date)/60 AS duration,
                 CASE
                     WHEN message_vals.first_agent_message_dt > C.livechat_end_dt THEN NULL
@@ -142,6 +143,7 @@ class Im_LivechatReportChannel(models.Model):
             rating_percentage=self.env["discuss.channel"]._rating_selection_to_percentage_sql(
                 SQL("C.livechat_rating")
             ),
+            start_date_tz=start_date_tz,
         )
 
     def _from(self) -> SQL:
@@ -236,13 +238,14 @@ class Im_LivechatReportChannel(models.Model):
                        MIN(CASE WHEN H.livechat_member_type = 'agent' THEN M.create_date END) AS first_agent_message_dt,
                        MAX(CASE WHEN H.livechat_member_type = 'bot' THEN M.create_date END) AS last_bot_message_dt
                   FROM mail_message M
-             LEFT JOIN im_livechat_channel_member_history H on H.channel_id = M.res_id AND (M.author_id = H.partner_id OR M.author_guest_id = H.guest_id)
-                 WHERE M.res_id = C.id and M.model = 'discuss.channel'
+             LEFT JOIN im_livechat_channel_member_history H on H.channel_id = C.id AND (M.author_id = H.partner_id OR M.author_guest_id = H.guest_id)
+                 WHERE %s
             ) AS message_vals ON TRUE
             """,
             self.env.lang,
             self._unknown_chatbot_answer_name,
             self.env.lang,
+            self.env["discuss.channel"]._get_message_sql(SQL("M"), SQL("C.id")),
         )
 
     def _where(self) -> SQL:

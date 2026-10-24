@@ -1,0 +1,29 @@
+.o_card_campaign_preview_frontend {
+    div.o_no_link_popover {
+        min-width: 100vw;
+        
+        div#url-div {
+            justify-content: center;
+            /* desktop */
+            @media (min-width: 576px) {
+                a.oi {
+                    margin: 0.5rem;
+                    width: 5rem;
+                    height: 5rem;
+                    line-height: 5rem;
+                    font-size: 2em;
+                }
+            }
+            /* mobile */
+            @media (max-width: 575.98px) {
+                a.oi {
+                    margin: 0.2rem;
+                    width: 4rem;
+                    height: 4rem;
+                    line-height: 4rem;
+                    font-size: 1.5em;
+                }
+            }
+        }
+    }
+}

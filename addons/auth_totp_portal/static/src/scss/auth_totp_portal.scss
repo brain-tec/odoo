@@ -9,16 +9,18 @@
         position: relative;
         width: 100% !important;
         border-radius: 5px;
-        border: 1px solid $primary;
+        border: 1px solid var(--primary);
         @include font-size($font-size-sm);
         text-transform: uppercase;
-        color: $o-brand-primary;
-        font-weight: $badge-font-weight;
+        color: var(--o-brand-primary);
+        font-weight: var(--o-bs-badge-font-weight);
         text-align: center;
         padding-right: 6rem;
         word-break: break-word;
         .o_clipboard_button {
-            @include o-position-absolute($top: 0, $right: 0);
+            position: absolute;
+            inset-block: 0 auto;
+            inset-inline: auto 0;
             &.o_btn_text_copy {
                 position: absolute;
                 top: 0;

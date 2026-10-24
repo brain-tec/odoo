@@ -1,0 +1,97 @@
+/* static stars */
+/* portal_rating */
+
+.o_website_rating_static {
+    color: currentColor;
+}
+
+.o_website_rating_card_container {
+
+    .o_message_counter {
+        color: var(--gray-700);
+    }
+
+    /* progress bars */
+    .o_website_rating_table {
+        .o_website_rating_table_percent {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .o_website_rating_table_progress {
+            .o_rating_progressbar {
+                background-color: var(--o-bs-body-color);
+            }
+        }
+
+        .progress {
+            --progress-height: .4rem;
+
+            @media (max-width: 991.98px) {
+                --progress-height: .8rem;
+            }
+        }
+    }
+}
+
+.o-portal-Chatter.o-review-Chatter {
+    .o-mail-Thread {
+        padding-top: 0;
+    }
+
+    .o-mail-Thread-content {
+        gap: var(--o-bs-spacer-4);
+    }
+}
+
+.o-review-Message-core {
+    display: grid !important;
+    grid-template-columns: max-content 1fr;
+
+    > .o-review-Message-content {
+        display: contents;
+
+        > *:not(.o-mail-Message-header) {
+            grid-column: span 2;
+        }
+
+        .o-mail-Message-body:not(.o-mail-Message-body-wrating) {
+            padding: 0 0 var(--o-bs-spacer-1) !important;
+            max-width: 74ch;
+        }
+
+        @media (max-width: 767.98px) {
+            .o-mail-Message-header {
+                position: relative;
+            }
+
+            .o-mail-Message-actions {
+                position: absolute;
+                right: 0;
+            }
+        }
+    }
+}
+
+/* Star Widget */
+.o-mail-Composer-starCard {
+    --o-w-rating-star-color: #FACC2E;
+
+    width: max-content;
+    .o-mail-Composer-stars {
+        display: inline-flex;
+        color: var(--o-w-rating-star-color);
+        margin-right: var(--o-bs-spacer-3);
+    }
+}
+
+/* Rating Popup Composer */
+.o_rating_popup_composer {
+
+    .o_rating_clickable {
+        cursor: pointer;
+    }
+
+    .o_portal_chatter_avatar {
+        margin-right: var(--o-bs-spacer-2);
+    }
+}
