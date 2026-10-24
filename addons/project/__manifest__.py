@@ -100,7 +100,7 @@
             'project/static/src/views/project_project_activity/**',
         ],
         'web.assets_frontend': [
-            'project/static/src/scss/portal_rating.scss',
+            'project/static/src/scss/portal_rating.css',
         ],
         'web.assets_unit_tests': [
             'project/static/tests/mock_server/**/*',
@@ -167,7 +167,6 @@
 
             'base/static/src/css/modules.css',
 
-            'web/static/src/core/utils/transitions.scss',
             'web/static/src/core/**/*',
             ('remove', 'web/static/src/core/**/*.dark.scss'),
             'web/static/src/css/**/*',

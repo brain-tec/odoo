@@ -1,0 +1,3 @@
+.o-mail-SearchInput input {
+    background-color: var(--mail-SearchInput-bgColor, var(--o-view-background-color));
+}

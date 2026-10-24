@@ -1,0 +1,15 @@
+.o_pager_indicator {
+    z-index: calc(var(--o-bs-zindex-modal) + 1);
+    transition: opacity 0.4s;
+
+    > .o_pager_indicator_inner {
+        min-width: 13ch;
+        border: var(--border-width) solid var(--o-gray-200);
+        border-radius: var(--border-radius);
+        background-color: var(--o-gray-200);
+    }
+
+    &.o-fade-leave, &.o-fade-enter {
+        opacity: 0;
+    }
+}

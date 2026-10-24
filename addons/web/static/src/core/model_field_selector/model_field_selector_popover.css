@@ -1,0 +1,16 @@
+.o_model_field_selector_popover {
+    width: 17rem;
+    max-height: 40vh;
+
+    .o_model_field_selector_popover_body {
+        .o_model_field_selector_popover_page {
+            > .o_model_field_selector_popover_item {
+                background: var(--o-bs-dropdown-bg);
+
+                &.active button {
+                    background: var(--o-bs-dropdown-link-hover-bg);
+                }
+            }
+        }
+    }
+}

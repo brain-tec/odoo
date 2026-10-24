@@ -1,7 +1,7 @@
 
 .o-mail-ChatBubble {
     height: auto !important;
-    z-index: $o-mail-ChatBubble-zindex;
+    z-index: var(--o-mail-ChatBubble-zindex);
     border: none !important;
     padding: 0;
     background-color: transparent !important;
@@ -20,8 +20,8 @@
     }
 
     &.o-bouncing {
-        // One iteration is a full bounce, so the component can stop the
-        // animation on any iteration boundary without the bubble jumping.
+        /* One iteration is a full bounce, so the component can stop the
+           animation on any iteration boundary without the bubble jumping. */
         animation: o-mail-ChatBubble-bouncing 0.5s;
         animation-timing-function: cubic-bezier(.5, 0.95, 0, .5);
         animation-iteration-count: infinite;
@@ -35,11 +35,11 @@
     z-index: 6;
     font-size: 11px;
     display: none;
-    padding: map-get($spacers, 1) / 2;
+    padding: calc(var(--o-bs-spacer-1) / 2);
     --border-opacity: .5;
 
     &:not(:hover) {
-        color: $text-muted;
+        color: var(--o-bs-text-muted);
     }
 
     &:hover {
@@ -63,18 +63,18 @@
 .o-mail-ChatBubble-preview {
     min-width: 160px;
     max-width: 225px;
-    right: $o-mail-ChatHub-bubblesWidth;
-    z-index: $o-mail-ChatBubble-zindex - 1;
-    border-color: $o-gray-300 !important;
+    right: var(--o-mail-ChatHub-bubblesWidth);
+    z-index: calc(var(--o-mail-ChatBubble-zindex) - 1);
+    border-color: var(--o-gray-300) !important;
 
     &.o-blue, &.o-green, &.o-orange {
         background-color: var(--o-bubble-bg) !important;
         border-color: var(--o-bubble-border-color) !important;
 
-        // the popover arrow is a sibling, not a descendant: it can't read the
-        // custom properties set below directly on this element, so it relies
-        // instead on inheriting them from their common ancestor (see the
-        // `.o_popover:has(...)` rule further down)
+        /* the popover arrow is a sibling, not a descendant: it can't read the
+           custom properties set below directly on this element, so it relies
+           instead on inheriting them from their common ancestor (see the
+           `.o_popover:has(...)` rule further down) */
         & + .popover-arrow {
             &::before {
                 border-left-color: var(--o-bubble-border-color) !important;
@@ -86,14 +86,14 @@
     }
 
     & + .popover-arrow {
-        // puts arrow above preview border
+        /* puts arrow above preview border */
         z-index: 1 !important;
         &::before {
-            border-left-color: $o-gray-300 !important;
+            border-left-color: var(--o-gray-300) !important;
             right: 1px !important;
         }
         &::after {
-            border-left-color: $o-view-background-color !important;
+            border-left-color: var(--o-view-background-color) !important;
             right: 2px !important;
         }
     }
