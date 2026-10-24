@@ -173,14 +173,6 @@ export class PaymentScreen extends Component {
         const result = this.currentOrder.addPaymentline(paymentMethod);
         if (result.status) {
             this.numberBuffer.set(result.data.amount.toString());
-            if (
-                paymentMethod.type === "pay_later" &&
-                this.currentOrder.hasCabaTax &&
-                !this.currentOrder.isToInvoice() &&
-                this.pos.config.canInvoice
-            ) {
-                this.currentOrder.setToInvoice(true);
-            }
             if (!this.isRefundOrder && paymentMethod.payment_method_type === "qr_code") {
                 const newPaymentLine = this.paymentLines.at(-1);
                 this.sendPaymentRequest(newPaymentLine);
@@ -334,7 +326,8 @@ export class PaymentScreen extends Component {
         // If a paymentline with a payment terminal linked to
         // it is removed, the terminal should get a cancel
         // request.
-        if (["waiting", "waitingCard", "timeout"].includes(line.getPaymentStatus())) {
+        const preCancelStatus = line.getPaymentStatus();
+        if (["waiting", "waitingCard", "timeout"].includes(preCancelStatus)) {
             line.setPaymentStatus("waitingCancel");
             line.payment_method_id.payment_terminal
                 .sendPaymentCancel(this.currentOrder, uuid)
@@ -342,6 +335,8 @@ export class PaymentScreen extends Component {
                     if (success) {
                         this.currentOrder.removePaymentline(line);
                         this.numberBuffer.reset();
+                    } else {
+                        line.setPaymentStatus(preCancelStatus);
                     }
                 });
         } else if (line.getPaymentStatus() !== "waitingCancel") {
