@@ -5,6 +5,7 @@ from lxml import etree
 from zipfile import ZipFile
 from odoo import fields, Command
 from odoo.tests import HttpCase, tagged
+from odoo.tools.pdf import OdooPdfFileWriter
 from odoo.tools.safe_eval import datetime
 
 from odoo.addons.account_edi_ubl_cii.tests.common import TestUblCiiCommon
@@ -172,6 +173,17 @@ class TestAccountEdiUblCii(TestUblCiiCommon, HttpCase):
         new_invoice = invoice.journal_id._create_document_from_attachment(attachment.ids)
         self.assertRecordValues(new_invoice.invoice_line_ids, line_vals)
 
+    def _get_pdf_bytes(self, xml_content=None, filename='factur-x.xml'):
+        """ Small A4 PDF, with `xml_content` embedded as `filename` if given. """
+        a4_width_pt, a4_height_pt = 595, 842
+        writer = OdooPdfFileWriter()
+        writer.add_blank_page(a4_width_pt, a4_height_pt)
+        if xml_content:
+            writer.add_attachment(filename, xml_content, subtype='text/xml', afrelationship='/Alternative')
+        buffer = BytesIO()
+        writer.write(buffer)
+        return buffer.getvalue()
+
     def _configure_seller_for_cii_export(self):
         """ Factur-X/ZUGFeRD/CII exports require a fully configured seller (VAT, phone, email,
         bank account with a sanitized account number) or the export raises validation errors. """
@@ -214,12 +226,39 @@ class TestAccountEdiUblCii(TestUblCiiCommon, HttpCase):
                 self.assertEqual(wizard.invoice_edi_format, edi_format)
                 wizard.action_send_and_print()
 
+                # no wkhtmltopdf in tests: the hook doesn't embed the XML, so put it in the PDF here
+                xml_content = invoice.ubl_cii_xml_id.raw.content
+                pdf_bytes = self._get_pdf_bytes(xml_content, filename='factur-x.xml')
+                invoice.invoice_pdf_report_file = base64.b64encode(pdf_bytes).decode()
+
                 # the XML was generated and embedded in the PDF...
                 self.assertTrue(invoice.ubl_cii_xml_id)
                 # ...but must not be listed as an extra attachment (it would duplicate the email attachment)
                 extra_attachments = self.env['account.move.send']._get_invoice_extra_attachments(invoice)
                 self.assertEqual(extra_attachments, invoice.invoice_pdf_report_id)
                 self.assertNotIn(invoice.ubl_cii_xml_id, extra_attachments)
+
+    def test_facturx_zugferd_keeps_xml_attachment_if_pdf_not_hybrid(self):
+        """ The PDF is not regenerated when it already exists, so it can be a plain PDF without the
+        XML inside. In that case the XML must still be sent as a separate attachment. """
+        company = self._configure_seller_for_cii_export()
+        self.partner_be.invoice_edi_format = 'zugferd'
+        invoice = self._create_invoice_one_line(
+            partner_id=self.partner_be,
+            price_unit=100.0,
+            tax_ids=self.company_data['default_tax_sale'],
+            partner_bank_id=company.partner_id.bank_ids[:1].id,
+            post=True,
+        )
+        # plain PDF generated before, without any XML embedded
+        invoice.invoice_pdf_report_file = base64.b64encode(self._get_pdf_bytes()).decode()
+
+        wizard = self._create_account_move_send_wizard_single(invoice, sending_methods=['manual'])
+        wizard.action_send_and_print()
+
+        self.assertTrue(invoice.ubl_cii_xml_id)
+        extra_attachments = self.env['account.move.send']._get_invoice_extra_attachments(invoice)
+        self.assertIn(invoice.ubl_cii_xml_id, extra_attachments)
 
     def test_ubl_bis3_keeps_xml_attachment(self):
         """ Unlike Factur-X/ZUGFeRD, Peppol UBL formats don't embed an identical XML in the PDF,
@@ -834,6 +873,50 @@ comment-->1000.0</TaxExclusiveAmount></xpath>"""
             "rsm": "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100",
         })
         self.assertEqual(node[0].text, self.company.vat, "Company VAT fallback")
+
+    def test_facturx_omits_schemeid_va_when_vat_is_slash(self):
+        """Test that Factur-X never outputs '/' as a VAT id.
+
+        '/' is the conventional value Odoo uses to mark a partner as not subject to VAT (as
+        opposed to one who simply hasn't had a VAT number entered yet): it must never be emitted
+        as a real VAT id, be it the seller's (the company's own VAT) or the buyer's. A VAT id
+        without its ISO country-code prefix (e.g. 'DE', 'FR') would otherwise violate EN16931
+        rule BR-CO-09.
+
+        (The fiscal position's foreign VAT isn't tested here: base_vat's format validation
+        already rejects '/' at creation, so that branch can never actually see it.)
+        """
+        namespaces = {
+            "ram": "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100",
+            "rsm": "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100",
+        }
+
+        # Company VAT and buyer VAT are both '/' at once: 2 independent t-if conditions evaluated
+        # on the same invoice, so one export already exercises both; a bug in either would
+        # surface a VA tag on its side.
+        self.company.vat = '/'
+        self.partner_a.write({'invoice_edi_format': 'facturx', 'vat': '/'})
+        invoice = self._create_invoice_one_line(price_unit=1)
+        invoice.action_post()
+
+        # The fix was applied to both the legacy QWeb template and the new dict-based builder:
+        # exercise both so neither regresses on its own. set_param(key, False) would unlink the
+        # parameter instead of storing it (see ir.config_parameter.set_param), silently falling
+        # back to its own True default, hence the str() conversion.
+        for use_new_dict_to_xml_helpers in (False, True):
+            self.env['ir.config_parameter'].sudo().set_bool(
+                'account_edi_ubl_cii.use_new_dict_to_xml_helpers', use_new_dict_to_xml_helpers)
+            with self.subTest(use_new_dict_to_xml_helpers=use_new_dict_to_xml_helpers):
+                xml_bytes = self.env["account.edi.xml.cii"]._export_invoice(invoice)[0]
+
+                self.assertFalse(
+                    etree.fromstring(xml_bytes).xpath("//ram:SellerTradeParty//ram:ID[@schemeID='VA']", namespaces=namespaces),
+                    "'/' company / seller VAT must not be output as a VA tag",
+                )
+                self.assertFalse(
+                    etree.fromstring(xml_bytes).xpath("//ram:BuyerTradeParty//ram:ID[@schemeID='VA']", namespaces=namespaces),
+                    "'/' buyer VAT must not be output as a VA tag",
+                )
 
     def test_facturx_line_without_product_has_name(self):
         """A line with no product_id (e.g. a sale order down payment invoice line) must still
