@@ -1,7 +1,7 @@
 import logging
 import re
 import requests
-
+from stdnum.fr import siren, siret
 from urllib import parse
 
 from odoo import Command, api, fields, models
@@ -91,6 +91,10 @@ class ResPartner(models.Model):
         edi_mode = self.env.company._get_peppol_edi_mode()
         if edi_mode in ('test', 'demo') and key in ('FR_SIRET', 'FR_SIREN', 'FR_CTC'):
             value = normalize_identifier(value)
+            if value and key in {'FR_SIRET', 'FR_SIREN'}:
+                compacted = (siret if key == 'FR_SIRET' else siren).compact(value)
+                if len(compacted) == (14 if key == 'FR_SIRET' else 9) and compacted.isdigit():
+                    value = compacted
             return {'valid': True, 'value': value, 'key': key}
         return super()._validate_identifier(key, value, validation)
 
@@ -114,7 +118,8 @@ class ResPartner(models.Model):
     def _l10n_fr_pdp_get_siren(self):
         self.ensure_one()
         all_identifiers = self._get_all_identifiers(enrich=True)
-        return all_identifiers.get('FR_SIREN')  # will be deduced by enrich=True if SIRET was set.
+        partner = self.commercial_partner_id or self
+        return all_identifiers.get('FR_SIREN') or (partner.l10n_fr_is_french and partner._l10n_fr_get_siren_from_vat())
 
     def _l10n_fr_pdp_get_siret(self):
         self.ensure_one()

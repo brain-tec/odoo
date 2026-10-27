@@ -23,7 +23,7 @@ import { user } from "@web/core/user";
  */
 
 /**
- * @typedef {Object} MessageRouteParams Specific overrides for the RPC route metadata usually provided by the caller component.
+ * @typedef {Object} MessageRouteParams Specific overrides for the RPC route metadata.
  */
 
 export class Thread extends Record {
@@ -478,9 +478,8 @@ export class Thread extends Record {
     /**
      * @param {Object} [options]
      * @param {"older"|"newer"} [options.epoch="older"]
-     * @param {MessageRouteParams} [options.routeParams]
      */
-    async fetchMoreMessages({ epoch = "older", routeParams = {} } = {}) {
+    async fetchMoreMessages({ epoch = "older" } = {}) {
         if (
             this.status === "loading" ||
             (epoch === "older" && !this.loadOlder) ||
@@ -494,7 +493,6 @@ export class Thread extends Record {
         try {
             fetched = await this.fetchMessages({
                 fetchParams: { after, before, limit: this.moreFetchLimit },
-                routeParams,
             });
         } catch {
             return;
@@ -650,6 +648,11 @@ export class Thread extends Record {
         return "/mail/thread/messages";
     }
 
+    /** @param {number} [messageId] */
+    isLoadedAround(messageId) {
+        return this.messages.some(({ id }) => id === messageId);
+    }
+
     /**
      * Get ready to jump to a message in a thread. This method will fetch the
      * messages around the message to jump to if required, and update the thread
@@ -660,19 +663,7 @@ export class Thread extends Record {
      * @param {MessageRouteParams} [options.routeParams]
      */
     async loadAround({ messageId, routeParams = {} } = {}) {
-        const oldestId = this.oldestPersistentMessage?.id;
-        const newestId = this.newestPersistentMessage?.id;
-        const hasTarget =
-            messageId !== undefined &&
-            oldestId !== undefined &&
-            (messageId >= oldestId || !this.loadOlder) &&
-            (messageId <= newestId || (!this.loadNewer && this.channel?.self_member_id));
-        const isFullyLoaded =
-            this.channel?.self_member_id &&
-            !this.loadOlder &&
-            !this.loadNewer &&
-            !this.hasLoadingFailed;
-        if (this.status === "loading" || (this.isLoaded && (hasTarget || isFullyLoaded))) {
+        if (this.status === "loading" || (this.isLoaded && this.isLoadedAround(messageId))) {
             return;
         }
         this.isLoaded = false;
