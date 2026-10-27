@@ -129,7 +129,8 @@ class ProductTemplate(models.Model):
         # product.template.attribute.value & product.template.attribute.line loading
         product_tmpl_attr_line = product_tmpls.attribute_line_ids
         product_tmpl_attr_line_read = product_tmpl_attr_line._load_pos_data_read(product_tmpl_attr_line, config)
-        product_tmpl_attr_value = product_tmpls.attribute_line_ids.product_template_value_ids
+        # Archived values stay linked to their line, filter them as the initial load does
+        product_tmpl_attr_value = product_tmpls.attribute_line_ids.product_template_value_ids._only_active()
         product_tmpl_attr_value_read = product_tmpl_attr_value._load_pos_data_read(product_tmpl_attr_value, config)
 
         # product.attribute loading — include archived attributes so that archived attribute lines
@@ -141,7 +142,7 @@ class ProductTemplate(models.Model):
         product_read = products._load_pos_data_read(products.with_context(display_default_code=False), config)
 
         # product.template loading
-        product_tmpl_read = self._load_pos_data_read(product_tmpls, config)
+        product_tmpl_read = self._load_pos_data_read(product_tmpls.with_context(active_test=True), config)
 
         # product.uom loading
         packaging_domain = Domain('product_id', 'in', products.ids)
