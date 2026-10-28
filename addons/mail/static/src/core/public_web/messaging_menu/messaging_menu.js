@@ -4,7 +4,7 @@ import { MessagingMenuEmpty } from "@mail/core/public_web/messaging_menu/messagi
 import { MessagingMenuItem } from "@mail/core/public_web/messaging_menu/messaging_menu_item";
 import { NotificationItem } from "@mail/core/public_web/notification_item";
 import { htmlToTextContentInline } from "@mail/utils/common/format";
-import { useOnBottomScrolled, usePeek, useSearch } from "@mail/utils/common/hooks";
+import { onClickIntent, useOnBottomScrolled, usePeek, useSearch } from "@mail/utils/common/hooks";
 import { computedShallowEqual, incrementFn } from "@mail/utils/common/signal";
 import { useAncestors } from "@mail/core/common/ancestor_plugin";
 
@@ -97,6 +97,7 @@ export class MessagingMenu extends Component {
         return this.filteredMessages();
     });
     tabContentRef = signal.ref();
+    navRef = signal.ref();
 
     setup() {
         super.setup();
@@ -155,6 +156,8 @@ export class MessagingMenu extends Component {
             this.containerRef()?.closest(".o-mail-DiscussApp-sidebar") ?? this.containerRef();
         this.peek = usePeek(peekRef, {
             enabled: () => this.canPeek(),
+            // The toggle expands the list instead of showing it over the content.
+            ignoreSelector: ".o-mail-MessagingMenu-toggleSidebar",
             keep: () => Boolean(this.state().searchTerm),
             onClose: () => {
                 this.clearPeekedTab();
@@ -164,6 +167,13 @@ export class MessagingMenu extends Component {
         this.guestNamePopover = usePopover(GuestNamePopover, {
             arrow: false,
             position: "right-end",
+        });
+        onClickIntent(this.navRef, (ev) => {
+            const tabId = ev.target.closest?.(".o-mail-MessagingMenu-tab")?.dataset.id;
+            const tab = this.visibleTabs.find((t) => String(t.id) === tabId);
+            if (tab?.getLoadStatus(tab.defaultFilter) === "new") {
+                tab.loadMore({ filter: tab.defaultFilter });
+            }
         });
     }
 
@@ -252,7 +262,6 @@ export class MessagingMenu extends Component {
     onClickToggleSidebar() {
         this.peek.close();
         this.onToggleSidebar();
-        this.peek.openIfHovered();
     }
 
     /** @param {MouseEvent} ev */
