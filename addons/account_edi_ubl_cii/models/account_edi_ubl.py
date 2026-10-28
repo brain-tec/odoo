@@ -240,22 +240,6 @@ class AccountEdiUBL(models.AbstractModel):
             return
         return tax_grouping_key
 
-    def _ubl_default_payable_amount_tax_withholding_grouping_key(self, base_line, tax_data, vals, currency):
-        """ Give the grouping key when moving the tax withholding amounts to PrepaidAmount.
-
-        :param base_line:   A base line (see '_prepare_base_line_for_taxes_computation').
-        :param tax_data:    One of the tax data in base_line['tax_details']['taxes_data'].
-        :param vals:        Some custom data.
-        :param currency:    The currency for which the grouping key is expressed.
-        :return:            A dictionary that could be used as a grouping key for the taxes helpers.
-        """
-        if not tax_data:
-            return
-        tax_grouping_key = self._ubl_default_tax_category_grouping_key(base_line, tax_data, vals, currency)
-        if not tax_grouping_key:
-            return
-        return tax_grouping_key['is_withholding']
-
     def _ubl_default_base_line_item_classified_tax_category_grouping_key(self, base_line, tax_data, vals, currency):
         """ Give the grouping key when computing taxes for Item -> ClassifiedTaxCategory.
 
@@ -1165,11 +1149,6 @@ class AccountEdiUBL(models.AbstractModel):
     def _ubl_add_document_currency_code_node(self, vals):
         vals['document_node']['cbc:DocumentCurrencyCode'] = {'_text': None}
 
-    def _ubl_add_tax_currency_code_node_company_currency_if_foreign_currency(self, vals):
-        company = vals['company']
-        currency = vals['currency_id']
-        vals['document_node']['cbc:TaxCurrencyCode'] = {'_text': None if currency == company.currency_id else company.currency_id.name}
-
     def _ubl_add_tax_currency_code_node_company_currency(self, vals):
         vals['document_node']['cbc:TaxCurrencyCode'] = {'_text': vals['company'].currency_id.name}
 
@@ -1496,17 +1475,6 @@ class AccountEdiUBL(models.AbstractModel):
                 for subtotal in tax_total['subtotals'].values()
             ],
         }
-
-    def _ubl_get_withholding_tax_total_node(self, vals, tax_total):
-        """ Generate the node 'cac:WithholdingTaxTotal'.
-
-        Note: 'cac:Subtotal' is managed by '_ubl_get_tax_subtotal_node'.
-
-        :param vals:            Some custom data.
-        :param tax_total:       An entry of vals['_ubl_values']['withholding_tax_totals'] containing all the necessary data to build the node.
-        :return:                A new node in 'cac:WithholdingTaxTotal'.
-        """
-        return self._ubl_get_tax_total_node(vals, tax_total)
 
     def _ubl_tax_totals_node_grouping_key(self, base_line, tax_data, vals, currency):
         tax_category_key = self._ubl_default_tax_category_grouping_key(base_line, tax_data, vals, currency)
@@ -1996,6 +1964,10 @@ class AccountEdiUBL(models.AbstractModel):
             first_line = group[0]
             total_excluded_currency = sum(bl['tax_details']['total_excluded_currency'] for bl in group)
 
+            tax_details = first_line['tax_details']
+            for base_line in group[1:]:
+                tax_details = AccountTax._merge_tax_details(tax_details, base_line['tax_details'])
+
             collapsed_line = AccountTax._prepare_base_line_for_taxes_computation(
                 first_line['record'],
                 quantity=1.0,
@@ -2003,14 +1975,13 @@ class AccountEdiUBL(models.AbstractModel):
                 discount=0.0,
                 tax_ids=first_line['tax_ids'],
                 currency_id=first_line['currency_id'],
+                tax_details=tax_details,
             )
             collapsed_line.update({
                 'name': section.name,
                 '_line_name': section.name,
                 'product_id': self.env['product.product'],
             })
-            AccountTax._add_tax_details_in_base_lines([collapsed_line], invoice.company_id)
-            AccountTax._round_base_lines_tax_details([collapsed_line], invoice.company_id)
             return collapsed_line
 
         def _get_collapsed_section_line_ids(invoice, base_lines):

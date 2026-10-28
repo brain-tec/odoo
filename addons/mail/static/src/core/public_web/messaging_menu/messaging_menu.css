@@ -1,0 +1,144 @@
+.o-mail-MessagingMenu {
+    background-color: var(--o-view-background-color);
+}
+
+.o-mail-NotificationItem-counterArea:not(:empty) {
+    height: 25px;
+    min-width: 25px;
+    min-height: 25px;
+    /* Center the counter on the preview line rather than on the whole row. */
+    margin-top: calc((var(--mail-NotificationItem-lineHeight) - 25px) * 0.5);
+}
+
+.o-mail-MessagingMenuItem:hover .o-mail-MessagingMenu-actions,
+.o-mail-MessagingMenu-actions:has(button[aria-expanded="true"]) {
+    display: flex !important;
+}
+
+.o-mail-MessagingMenu-tabCounter {
+    min-width: var(--o-badge-min-width);
+    left: auto;
+    right: calc(50% - var(--o-badge-min-width) * 1.5);
+    transform: translate(0, 25%);
+}
+
+.o-mail-MessagingMenu-tabUnread {
+    left: 50%;
+    transform: translate(0, 25%) !important;
+}
+
+.o-discuss-badge.o-mail-MessagingMenu-tabUnread {
+    --o-discuss-badge-bg: transparent;
+    opacity: 50%;
+    color: unset !important;
+}
+
+.o-mail-MessagingMenu-navbar {
+    background-color: var(--o-webclient-background-color);
+    width: 4.5rem;
+}
+
+.o-mail-MessagingMenu-selfToggler {
+    --btn-active-bg: rgba(var(--emphasis-color-rgb), 0.08);
+    --btn-hover-bg: rgba(var(--emphasis-color-rgb), 0.08);
+    --btn-active-border-color: transparent;
+    --btn-focus-box-shadow: none;
+}
+
+.o-mail-GuestNamePopover {
+    width: 15rem;
+}
+
+.o-mail-MessagingMenu-selfAvatar {
+    width: var(--o-mail-Avatar-size);
+    height: var(--o-mail-Avatar-size);
+}
+
+/* Level with the single-line composer: flush with the bottom of the tabs, two lines for the name. */
+.o-mail-MessagingMenu-self {
+    margin-bottom: -0.75rem;
+}
+
+.o-mail-MessagingMenu-selfName {
+    min-height: 2em;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+.o-mail-MessagingMenu-filters {
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.o-mail-MessagingMenu-filter {
+    --btn-hover-color: var(--o-bs-body-color);
+    --btn-border-color: var(--mail-MessagingMenu-filterBorderColor, var(--o-bs-border-color));
+    --btn-hover-border-color: var(--mail-MessagingMenu-filterBorderColor, var(--o-bs-border-color));
+
+    &.o-active {
+        --btn-color: var(--o-enterprise-action-color);
+        --btn-hover-color: var(--o-enterprise-action-color);
+        --btn-bg: color-mix(in srgb, var(--o-enterprise-action-color) calc(var(--mail-MessagingMenu-filterActiveBgOpacity, 0.12) * 100%), transparent);
+        --btn-hover-bg: color-mix(in srgb, var(--o-enterprise-action-color) calc(var(--mail-MessagingMenu-filterActiveBgOpacity, 0.12) * 100%), transparent);
+        --btn-border-color: color-mix(in srgb, var(--o-enterprise-action-color) calc(var(--mail-MessagingMenu-filterActiveBorderOpacity, 0.35) * 100%), transparent);
+        --btn-hover-border-color: color-mix(in srgb, var(--o-enterprise-action-color) calc(var(--mail-MessagingMenu-filterActiveBorderOpacity, 0.35) * 100%), transparent);
+    }
+}
+
+.o-mail-MessagingMenu-searchRow {
+    /* Keep the quick-action toggle button on its plain primary color while its */
+    /* dropdown is open, instead of Bootstrap's pale ".show" active shade. */
+    .btn-primary.show {
+        --btn-active-bg: var(--btn-bg);
+        --btn-active-color: var(--btn-color);
+    }
+}
+
+.o-mail-MessagingMenu-tab {
+    --mail-MessagingMenu-tabLabelOpacity: .65;
+
+    /* Peeked: its list shows, without being the active tab. */
+    &:hover, &.o-peeked {
+        .o-mail-MessagingMenu-tabIcon {
+            background: var(--gray-200);
+        }
+    }
+
+    &.active {
+        --btn-active-color: var(--o-enterprise-action-color);
+        --mail-MessagingMenu-tabLabelOpacity: 1;
+
+        .o-mail-MessagingMenu-tabIcon {
+            background: var(--o-component-active-bg);
+            color: var(--o-enterprise-action-color);
+            outline: var(--border-width) solid color-mix(in srgb, var(--o-enterprise-action-color) 15%, transparent);
+            outline-offset: calc(var(--o-bs-border-width) * -1);
+        }
+    }
+
+    &:focus-visible {
+        outline: var(--border-width) solid var(--o-enterprise-action-color) !important;
+    }
+
+    .o-mail-MessagingMenu-tabIcon {
+        width: calc(var(--o-bs-spacer) * 3);
+    }
+}
+
+.o-mail-MessagingMenu-tabLabel {
+    opacity: var(--mail-MessagingMenu-tabLabelOpacity);
+}
+
+.o-mail-MessagingMenu-dropdownMenu {
+    max-width: 250px !important;
+
+    .o_bottom_sheet & {
+        max-width: none !important;
+    }
+}
