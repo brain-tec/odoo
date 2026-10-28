@@ -41,6 +41,9 @@ class PosSelfOrderController(http.Controller):
         if preset_id and preset_id.service_at == 'delivery':
             self._ensure_delivery_fee(order_ids, preset_id)
 
+        if preset_id:
+            self._ensure_service_fee(order_ids, preset_id)
+
         # Recompute all prices from newly created lines to ensure price correctness and
         # avoid potential manipulation from the frontend
         order_ids.recompute_prices()
@@ -61,8 +64,10 @@ class PosSelfOrderController(http.Controller):
         orders = self.env['pos.order']._load_pos_self_data_read(order, config)
 
         for o in orders:
-            del o['email']
-            del o['mobile']
+            if config.self_ordering_mode != 'kiosk':
+                # Kiosk needs this data to print the preparation receipt
+                del o['email']
+                del o['mobile']
             o['partner_id'] = order._get_signed_self_partner_id(config, o['partner_id']) if o.get('partner_id') else False
 
         result = {
@@ -108,6 +113,27 @@ class PosSelfOrderController(http.Controller):
                 'full_product_name': delivery_product.name,
             })
             order._compute_line_price(new_line, price=preset.delivery_product_price)
+
+    def _ensure_service_fee(self, order, preset):
+        """Add or remove the service fee line based on the preset configuration."""
+        service_fee_product = preset.service_fee_product_id
+        if not service_fee_product:
+            return
+
+        existing_service_fee_lines = order.lines.filtered(
+            lambda l: l.product_id == service_fee_product
+        )
+        if not preset.service_fee:
+            existing_service_fee_lines.unlink()
+        elif not existing_service_fee_lines:
+            order.env['pos.order.line'].sudo().create({
+                'order_id': order.id,
+                'product_id': service_fee_product.id,
+                'qty': 1,
+                'price_subtotal': 0.0,
+                'price_subtotal_incl': 0.0,
+                'full_product_name': service_fee_product.name,
+            })
 
     @http.route('/pos-self-order/get-order/<int:order_id>', auth='public', type='jsonrpc', website=True)
     def get_order(self, access_token, order_id, order_access_token):
