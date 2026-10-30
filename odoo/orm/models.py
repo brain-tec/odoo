@@ -1639,7 +1639,7 @@ class BaseModel(metaclass=MetaModel):
 
         # delegate the default properties to the properties field
         for field in self._fields.values():
-            if field.type == 'properties':
+            if field.type == 'properties' and not avoid(field):
                 defaults[field.name] = field._add_default_values(self.env, defaults)
 
         return defaults
@@ -4697,9 +4697,12 @@ class BaseModel(metaclass=MetaModel):
             # order on many2one values
             terms = []
             nulls_code = nulls._sql_tuple[0]
+            # The null-ordering expression must be grouped too.
             if nulls_code == 'NULLS FIRST':
+                table._query._order_groupby.append(sql_field)
                 terms.append(SQL("%s IS NOT NULL", sql_field))
             elif nulls_code == 'NULLS LAST':
+                table._query._order_groupby.append(sql_field)
                 terms.append(SQL("%s IS NULL", sql_field))
 
             # LEFT JOIN the comodel table, in order to include NULL values, too
