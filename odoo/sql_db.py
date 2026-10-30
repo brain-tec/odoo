@@ -25,9 +25,8 @@ import psycopg2.extras
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT, ISOLATION_LEVEL_READ_COMMITTED, ISOLATION_LEVEL_REPEATABLE_READ
 from psycopg2.pool import PoolError
 from psycopg2.sql import SQL, Identifier
-from werkzeug import urls
-
 from . import tools
+from ._werkzeug_compat import url_parse
 from .tools.func import frame_codeinfo, locked
 
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
@@ -765,7 +764,7 @@ def connection_info_for(db_or_uri):
         app_name = "odoo-%d" % os.getpid()
     if db_or_uri.startswith(('postgresql://', 'postgres://')):
         # extract db from uri
-        us = urls.url_parse(db_or_uri)
+        us = url_parse(db_or_uri)
         if len(us.path) > 1:
             db_name = us.path[1:]
         elif us.username:
