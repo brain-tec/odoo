@@ -18,6 +18,9 @@ __path__ = [
 import sys
 assert sys.version_info > (3, 7), "Outdated python version detected, Odoo requires Python >= 3.7 to run."
 
+# Restore URL helpers removed by newer Werkzeug versions for Odoo and addons.
+from . import _werkzeug_compat
+
 #----------------------------------------------------------
 # Running mode flags (gevent, prefork)
 #----------------------------------------------------------
