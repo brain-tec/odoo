@@ -182,7 +182,7 @@ export class GeneratePrinterData {
     }
 
     generateLineData() {
-        return this.order.lines.map((line) => {
+        return this.order.getOrderlines().map((line) => {
             const productData = { ...line.product_id.raw };
             productData.display_name = line.getFullProductName();
             return {
@@ -284,14 +284,42 @@ export class GeneratePrinterData {
     preparePreparationGroupedData(changes) {
         const dataChanges = changes.data || [];
         if (dataChanges && dataChanges.some((c) => c.group)) {
+            const comboParents = {};
+            const childParentUuids = new Set();
+            for (const change of dataChanges) {
+                if (change.combo_line_ids?.length) {
+                    comboParents[change.uuid] = change;
+                }
+                if (change.combo_parent_uuid) {
+                    childParentUuids.add(change.combo_parent_uuid);
+                }
+            }
+
             const groupedData = dataChanges.reduce((acc, c) => {
-                const { name = "", index = -1 } = c.group || {};
+                if (c.combo_line_ids?.length && childParentUuids.has(c.uuid)) {
+                    return acc;
+                }
+                const { name = "", index = Infinity } = c.group || {};
                 if (!acc[name]) {
                     acc[name] = { name, index, data: [] };
                 }
                 acc[name].data.push(c);
                 return acc;
             }, {});
+
+            for (const group of Object.values(groupedData)) {
+                const seenParents = new Set();
+                for (let i = 0; i < group.data.length; i++) {
+                    const line = group.data[i];
+                    const parentUuid = line.combo_parent_uuid;
+                    if (parentUuid && !seenParents.has(parentUuid) && comboParents[parentUuid]) {
+                        seenParents.add(parentUuid);
+                        group.data.splice(i, 0, { ...comboParents[parentUuid] });
+                        i++;
+                    }
+                }
+            }
+
             changes.groupedData = Object.values(groupedData).sort((a, b) => a.index - b.index);
         }
         return changes;
@@ -366,23 +394,9 @@ export class GeneratePrinterData {
         const order = this.order;
         const override = opts.orderChange;
         let orderChange = override || order.getChanges({ cancelled: opts.cancelled });
-        let reprint = false;
-
+        const reprint = opts.explicitReprint;
         if (!opts.prepOrderLines) {
-            if (
-                !orderChange.addedQuantity.length &&
-                !orderChange.removedQuantity.length &&
-                !orderChange.noteUpdate.length &&
-                !orderChange.internal_note &&
-                !orderChange.general_customer_note &&
-                order.lastPrints.length
-            ) {
-                orderChange = [order.lastPrints.at(-1)];
-                reprint = true;
-            } else {
-                order.pushLastPrints(orderChange);
-                orderChange = [orderChange];
-            }
+            orderChange = [orderChange];
         }
 
         if (reprint && opts.orderDone) {

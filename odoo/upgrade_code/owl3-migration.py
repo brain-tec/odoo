@@ -1058,7 +1058,7 @@ MISC_WHITELIST = {
     "hr_calendar.CalendarCommonRenderer.buttonWorklocation": {'multiCalendar'},  # Nested t-inherits with a xpath t-call
     "hr_calendar.AttendeeCalendarCommonPopover.body": {'slot'},  # dynamic t-call
     "hr_payroll.ActionableWarningLine": {'warning'},  # Didn't check
-    "hr_skills.SkillsListRenderer.Rows": {'list'},  # dynamic t-call I guess
+    "hr.SkillsListRenderer.Rows": {'list'},  # dynamic t-call I guess
     "lunch.LunchDashboardOrder": {'currency'},  # Var above t-call
     'l10n_ae_faf.company_data_warning': {'warningParams'},  # dynamic t-call
     'l10n_be_reports.partner_vat_listing_missing_partners_warning': {'warningParams'},  # dynamic t-call
@@ -1128,6 +1128,7 @@ SERVICES_MAPPING = {
     "frequent_emoji": ['FrequentEmojiPlugin', '@web/core/emoji_picker/frequent_emoji_plugin'],
     "home_menu": ['HomeMenuPlugin', '@web_enterprise/webclient/home_menu/home_menu_plugin'],
     "hotkey": ['HotkeyPlugin', '@web/core/hotkeys/hotkey_plugin'],
+    "iapNotification": ['IapNotificationPlugin', '@iap_mail/js/services/iap_notification_plugin'],
     "lazy_session": ['LazySessionPlugin', '@web/webclient/lazy_session_plugin'],
     "mail.sound_effects": ['SoundEffectsPlugin', '@mail/core/common/sound_effects_plugin'],
     "mail.store": ['StorePlugin', '@mail/core/common/store_plugin'],
@@ -1144,7 +1145,9 @@ SERVICES_MAPPING = {
     "signInfo": ['SignInfoPlugin', '@sign/services/sign_info_plugin'],
     "sortable": ['SortablePlugin', '@web/core/utils/sortable_plugin'],
     "simple_notification": ['SimpleNotificationPlugin', '@bus/simple_notification_plugin'],
+    "timer": ['TimerPlugin', '@timer/services/timer_plugin'],
     "tooltip": ['TooltipPlugin', '@web/core/tooltip/tooltip_plugin'],
+    "translation_mode": ['TranslationModePlugin', '@test_translation_mode/translation_mode_plugin'],
     "ui": ['UIPlugin', '@web/core/ui/ui_plugin'],
     "view": ['ViewPlugin', '@web/views/view_plugin'],
     "worker_service": ['WorkerPlugin', '@bus/services/worker_plugin'],

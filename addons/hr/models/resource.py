@@ -24,6 +24,7 @@ class ResourceResource(models.Model):
     work_phone = fields.Char(related='employee_id.work_phone')
     show_hr_icon_display = fields.Boolean(related='employee_id.show_hr_icon_display')
     hr_icon_display = fields.Selection(related='employee_id.hr_icon_display')
+    employee_skill_ids = fields.One2many(related='employee_id.employee_skill_ids')
     calendar_id = fields.Many2one(compute='_compute_calendar_id', inverse='_inverse_calendar_id', store=True, readonly=False)
 
     @api.depends('employee_id.current_version_id.tz')
@@ -201,14 +202,15 @@ class ResourceResource(models.Model):
         """
         result = super()._get_calendar_data_at(date_target)
         resources_with_employee = self.filtered('employee_id')
+        # The hours per week and per day are those of the calendar (see _get_hours_per_week_batch
+        # and _get_hours_per_day_batch): the version in effect is looked up once.
         employee_calendars = resources_with_employee.employee_id._get_calendars(date_target.astimezone(tz))
-        employee_hours_per_week = resources_with_employee.employee_id._get_hours_per_week_batch(date_target.astimezone(tz))
-        employee_hours_per_day = resources_with_employee.employee_id._get_hours_per_day_batch(date_target.astimezone(tz))
         for resource in resources_with_employee:
+            calendar = employee_calendars[resource.employee_id.id]
             result[resource] = {
-                'resource_calendar_id': employee_calendars[resource.employee_id.id],
-                'hours_per_week': employee_hours_per_week[resource.employee_id.id],
-                'hours_per_day': employee_hours_per_day[resource.employee_id.id],
+                'resource_calendar_id': calendar,
+                'hours_per_week': calendar.sudo().hours_per_week,
+                'hours_per_day': calendar.sudo().hours_per_day,
             }
         return result
 

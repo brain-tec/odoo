@@ -1,5 +1,6 @@
 import { fields, Record } from "@mail/model/export";
 import { BlurManager } from "@mail/discuss/call/common/blur_manager";
+import { DiscussP2PPlugin } from "@mail/discuss/call/common/discuss_p2p_plugin";
 import { CallPermissionDialog } from "@mail/discuss/call/common/call_permission_dialog";
 import { CALL_GRID_LAYOUT } from "@mail/discuss/call/common/call_layout";
 import { monitorAudio } from "@mail/utils/common/media_monitoring";
@@ -7,7 +8,7 @@ import { CallPermissionDeniedDialog } from "@mail/discuss/call/common/call_permi
 import { rpc } from "@web/core/network/rpc";
 import { assignDefined, closeStream } from "@mail/utils/common/misc";
 
-import { markup, proxy, toRaw } from "@odoo/owl";
+import { markup, proxy, toRaw, usePlugin } from "@odoo/owl";
 
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
@@ -539,14 +540,14 @@ export class Rtc extends Record {
         this.fullscreen = undefined;
         /** @type {import("@web/core/notifications/notification_plugin").NotificationPlugin} */
         this.notification = undefined;
-        /** @type {Services["discuss.p2p"]} */
+        /** @type {import("@mail/discuss/call/common/peer_to_peer").PeerToPeer} */
         this.p2pService = undefined;
         /** @type {Services["discuss.pip_service"]} */
         this.pipService = undefined;
         /** @type {Services["discuss.ptt_extension"]} */
         this.pttExtService = undefined;
-        /** @type {Services["mail.sound_effects"]} */
-        this.soundEffectsService = undefined;
+        /** @type {import("@mail/core/common/sound_effects_plugin").SoundEffectsPlugin} */
+        this.soundEffects = undefined;
         this.linkVoiceActivationDebounce = debounce(this.linkVoiceActivation, 500);
         this.upgradeConnectionDebounce = debounce(this._upgradeConnection, 15000, true);
         this.blurManager = undefined;
@@ -556,13 +557,12 @@ export class Rtc extends Record {
         const services = this.store.env.services;
         this.notification = this.store.notification;
         this.dialog = services.dialog;
-        this.soundEffectsService = services["mail.sound_effects"];
+        this.soundEffects = this.store.soundEffects;
         this.pttExtService = services["discuss.ptt_extension"];
         if (this._broadcastChannel) {
             this._broadcastChannel.onmessage = this._onBroadcastChannelMessage.bind(this);
             this._postToTabs({ type: CROSS_TAB_CLIENT_MESSAGE.INIT });
         }
-        this.p2pService = services["discuss.p2p"];
         this.onChange(
             () => [this.channel],
             function onChangeChannel(channel) {
@@ -793,7 +793,7 @@ export class Rtc extends Record {
         this.pttReleaseTimeout = window.setTimeout(() => {
             this.setTalking(false);
             if (!this.localSession?.isMute) {
-                this.soundEffectsService.play("ptt-release");
+                this.soundEffects.play("ptt-release");
             }
         }, Math.max(this.store.settings.voiceActiveDuration || 0, duration));
     }
@@ -808,7 +808,7 @@ export class Rtc extends Record {
         }
         window.clearTimeout(this.pttReleaseTimeout);
         if (!this.localSession.isTalking && !this.localSession.isMute) {
-            this.soundEffectsService.play("ptt-press");
+            this.soundEffects.play("ptt-press");
         }
         this.setTalking(true);
     }
@@ -895,7 +895,7 @@ export class Rtc extends Record {
             this.pttExtService.unsubscribe();
             this.network?.disconnect();
             this.clear();
-            this.soundEffectsService.play("call-leave");
+            this.soundEffects.play("call-leave");
         }
     }
 
@@ -905,7 +905,7 @@ export class Rtc extends Record {
             return;
         }
         await this.setDeaf(true);
-        this.soundEffectsService.play("earphone-off");
+        this.soundEffects.play("earphone-off");
     }
 
     /**
@@ -948,7 +948,7 @@ export class Rtc extends Record {
             return;
         }
         await this.setMute(true);
-        this.soundEffectsService.play("mic-off");
+        this.soundEffects.play("mic-off");
     }
 
     /**
@@ -1155,7 +1155,7 @@ export class Rtc extends Record {
             return;
         }
         await this.setDeaf(false);
-        this.soundEffectsService.play("earphone-on");
+        this.soundEffects.play("earphone-on");
     }
 
     stopRecording() {
@@ -1381,7 +1381,7 @@ export class Rtc extends Record {
         } else {
             await this.resetMicAudioTrack({ force: true }, options);
         }
-        this.soundEffectsService.play("mic-on");
+        this.soundEffects.play("mic-on");
     }
 
     //----------------------------------------------------------------------
@@ -2048,7 +2048,7 @@ export class Rtc extends Record {
         if (!this.localChannel?.id) {
             return;
         }
-        this.soundEffectsService.play("call-join");
+        this.soundEffects.play("call-join");
         this._host();
         this.cleanups.push(
             // only register the beforeunload event if there is a call as FireFox will not place
@@ -2496,7 +2496,7 @@ export class Rtc extends Record {
         };
         if (!activateVideo) {
             if (type === "screen") {
-                this.soundEffectsService.play("screen-sharing");
+                this.soundEffects.play("screen-sharing");
             }
             if (type === "camera" && this.blurManager) {
                 this.blurManager.close();
@@ -2536,7 +2536,7 @@ export class Rtc extends Record {
                         controller,
                     });
                 }
-                this.soundEffectsService.play("screen-sharing");
+                this.soundEffects.play("screen-sharing");
             }
         } catch {
             this.showMediaUnavailableWarning(
@@ -2949,11 +2949,9 @@ Rtc.register();
 export const rtcService = {
     dependencies: [
         "bus_service",
-        "discuss.p2p",
         "discuss.pip_service",
         "discuss.ptt_extension",
         "mail.fullscreen",
-        "mail.sound_effects",
         "mail.store",
         "presence",
     ],
@@ -3028,7 +3026,7 @@ export const rtcService = {
                 })
                 .catch(() => {}),
         ]);
-        rtc.p2pService = services["discuss.p2p"];
+        rtc.p2pService = usePlugin(DiscussP2PPlugin).p2p;
         rtc.p2pService.acceptOffer = async (id, sequence) => {
             const session = await store["discuss.channel.rtc.session"].getWhenReady(Number(id));
             /**
