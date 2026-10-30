@@ -1,0 +1,3 @@
+.o_barcode_scanner {
+    max-width: var(--o-bs-breakpoint-sm);
+}

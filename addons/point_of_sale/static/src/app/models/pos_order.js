@@ -1,7 +1,7 @@
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { PosOrderAccounting } from "./accounting/pos_order_accounting";
-import { getStrNotes } from "./utils/order_change";
+import { getStrNotes, receiptLineGrouper, sortLinesByCategory } from "./utils/order_change";
 
 const { DateTime } = luxon;
 
@@ -658,9 +658,12 @@ export class PosOrder extends PosOrderAccounting {
 
     // NOTE: Overrided in pos_loyalty to put loyalty rewards at this end of array.
     getOrderlines() {
+        const lines = this.config?.iface_group_by_categ
+            ? sortLinesByCategory(this.lines)
+            : this.lines;
         const regularLines = [];
         const serviceFeeLines = [];
-        for (const line of this.lines) {
+        for (const line of lines) {
             (line.isServiceFeeLine() ? serviceFeeLines : regularLines).push(line);
         }
         return [...regularLines, ...serviceFeeLines];
@@ -695,23 +698,6 @@ export class PosOrder extends PosOrderAccounting {
     }
     setInternalNote(note) {
         this.internal_note = note || "";
-    }
-
-    get lastPrints() {
-        return this.print_history || [];
-    }
-    pushLastPrints(data) {
-        if (!this.print_history) {
-            this.print_history = [];
-        }
-        this.print_history.push({
-            addedQuantity: data.addedQuantity,
-            noteChange: data.noteChange,
-            noteUpdate: data.noteUpdate,
-            removedQuantity: data.removedQuantity,
-            internal_note: data.internal_note,
-            general_customer_note: data.general_customer_note,
-        });
     }
 
     get showChange() {
@@ -751,7 +737,10 @@ export class PosOrder extends PosOrderAccounting {
                 customer_note: getStrNotes(line?.getCustomerNote?.() || false),
                 pos_categ_id: product.pos_categ_ids[0]?.id || 0,
                 pos_categ_sequence: product.pos_categ_ids[0]?.sequence || 0,
-                group: (!opts.hideCourse && line?.getCourse?.()) || false,
+                group:
+                    (!opts.hideCourse && line?.getCourse?.()) ||
+                    receiptLineGrouper.getGroup(line) ||
+                    false,
                 combo_line_ids: line?.combo_line_ids?.map((l) => ({
                     id: l.id,
                     product_id: l.product_id.id,
@@ -978,7 +967,8 @@ export class PosOrder extends PosOrderAccounting {
     }
 
     get remainingDueAmount() {
-        return this.orderCurrency.convert(this.hasRemainingDue ? this.remainingDue : this.change);
+        const amount = this.hasRemainingDue ? this.remainingDue : this.change;
+        return this.convertAmountToCurrency(amount, this.orderCurrency);
     }
 
     get remainingDueLabel() {

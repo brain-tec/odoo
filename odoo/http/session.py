@@ -257,7 +257,11 @@ def authenticate(session: Session, env: Environment, credential: dict) -> dict:
 
     if request and request.session is session and request.db == env.registry.db_name:
         request.env = env(user=session.uid, context=session.context)
-        request.update_context(lang=get_lang(request.env(user=pre_uid)).code)
+        request.update_context(
+            lang=get_lang(request.env(user=pre_uid)).code,
+            host_id=env.context.get('host_id'),
+            website_id=env.context.get('website_id'),
+        )
 
     return auth_info
 
@@ -583,11 +587,10 @@ class SessionStore:
         else:
             self.delete(session)
             session.sid = self.generate_key()
-            if hasattr(threading.current_thread(), 'sess_id'):
+            if req_ident := getattr(threading.current_thread(), 'req_ident', False):
                 _logger.info(
-                    'Session rotated: %s -> %s', threading.current_thread().sess_id, session.sid[:8]
+                    'Session rotated: %s -> %s', req_ident[1], session.sid[:8]
                 )
-            threading.current_thread().sess_id = session.sid[:8]
         if session.uid:
             assert env, "saving this session requires an environment"
             update_session_token(session, env)
