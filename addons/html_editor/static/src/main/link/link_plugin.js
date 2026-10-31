@@ -161,7 +161,11 @@ async function fetchAttachmentMetaData(url, ormService) {
             return { name: url, type: "url" };
         }
         const attachmentId = parseInt(match[1]);
-        const [result] = await ormService.read("ir.attachment", [attachmentId], ["name", "mimetype", "type"]);
+        const [result] = await ormService.read(
+            "ir.attachment",
+            [attachmentId],
+            ["name", "mimetype", "type"]
+        );
         return result || { name: url, type: "url" };
     } catch {
         return { name: url, type: "url" };
@@ -369,6 +373,7 @@ export class LinkPlugin extends Plugin {
                 return closestLink;
             }
         },
+        system_classes: [FONT_SIZED_BUTTON_CLASS],
 
         /** Handlers */
         on_beforeinput_handlers: [
@@ -385,15 +390,15 @@ export class LinkPlugin extends Plugin {
         on_will_paste_handlers: this.updateCurrentLinkSyncState.bind(this),
         on_pasted_handlers: this.onPasteNormalizeLink.bind(this),
         on_selectionchange_handlers: this.handleSelectionChange.bind(this),
-        on_inserted_handlers: this.handleAfterInsert.bind(this),
-        system_classes: [FONT_SIZED_BUTTON_CLASS],
         on_will_remove_handlers: () => this.closeLinkTools(),
+        on_content_inserted_handlers: this.onContentInserted.bind(this),
 
         /** Overrides */
         split_element_block_overrides: this.handleSplitBlock.bind(this),
         insert_line_break_element_overrides: this.handleInsertLineBreak.bind(this),
         delete_image_overrides: this.deleteImageLink.bind(this),
         delete_backward_overrides: withSequence(15, this.handleDeleteBackward.bind(this)),
+        delete_forward_overrides: withSequence(15, this.handleDeleteForward.bind(this)),
         double_click_overrides: this.doubleClickLinkOverrides.bind(this),
         triple_click_overrides: this.tripleClickButtonOverrides.bind(this),
 
@@ -1482,8 +1487,7 @@ export class LinkPlugin extends Plugin {
         }
         [targetNode, targetOffset] = edge === "start" ? leftPos(targetNode) : rightPos(targetNode);
         blockToSplit = targetNode;
-        splitOrLineBreakCallback({ ...params, targetNode, targetOffset, blockToSplit });
-        return true;
+        return splitOrLineBreakCallback({ ...params, targetNode, targetOffset, blockToSplit });
     }
 
     handleDeleteBackward({ startContainer, startOffset, endContainer, endOffset }) {
@@ -1508,7 +1512,29 @@ export class LinkPlugin extends Plugin {
         return true;
     }
 
-    handleAfterInsert(insertedNodes) {
+    handleDeleteForward({ startContainer, startOffset }) {
+        if (
+            startContainer?.nextSibling?.textContent !== "\uFEFF" ||
+            nodeSize(startContainer) !== startOffset
+        ) {
+            return;
+        }
+        const feff = startContainer.nextSibling;
+        if (!feff.nextSibling || feff.nextSibling.nodeName !== "A") {
+            return;
+        }
+        const link = feff.nextSibling;
+        if (!link?.matches(".btn")) {
+            return;
+        }
+        this.dependencies.selection.setSelection({
+            anchorNode: link.firstChild,
+            anchorOffset: 1,
+        });
+        return true;
+    }
+
+    onContentInserted(insertedNodes) {
         for (const node of insertedNodes) {
             if (node.nodeType === Node.ELEMENT_NODE) {
                 for (const link of selectElements(node, "A")) {

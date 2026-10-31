@@ -17,6 +17,10 @@ import { normalize } from "@web/core/l10n/utils";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { useDebounced } from "@web/core/utils/timing";
+
+/** How long the pointer rests on a tab for the shown list to change to it. */
+export const PEEK_TAB_DELAY = 50;
 
 /** Never a submenu of an ancestor Dropdown it's embedded in, even visually/positionally. */
 class IsolatedDropdown extends Dropdown {
@@ -105,12 +109,15 @@ export class MessagingMenu extends Component {
         this.dialog = useService("dialog");
         this.notification = useService("mail.notification.permission");
         this.store = useService("mail.store");
+        this.ui = usePlugin(UIPlugin);
         this.selectedState = useProps.static(
             "state",
             types.signal(types.instanceOf(this.store.MessagingMenuUIState))
         );
-        /** The state of the shown list: the one of the peeked tab, if any. */
-        this.state = computed(() => this.peekedTabState() ?? this.selectedState());
+        /** The state of the shown list: the one of the peeked tab, if any, also while it hides. */
+        this.state = computed(
+            () => (this.canPeek() && this.peekedTabState()) || this.selectedState()
+        );
         this.activeTab = computed(() => this.state().activeTab);
         this.messageSearch = useSearch({
             fetch: (term) =>
@@ -140,7 +147,6 @@ export class MessagingMenu extends Component {
             types.signal(types.number()).optional(() => signal(0))
         );
         this.focusSearchInput = incrementFn(this.searchInputAutofocus);
-        this.ui = usePlugin(UIPlugin);
         // Bound once so `onClickMessage` is a stable (useProps.static) handler.
         this.onClickMessage = this.onClickMessage.bind(this);
         useOnBottomScrolled(this.tabContentRef, () =>
@@ -159,14 +165,16 @@ export class MessagingMenu extends Component {
             this.containerRef()?.closest(".o-mail-DiscussApp-sidebar") ?? this.containerRef();
         this.peek = usePeek(peekRef, {
             enabled: () => this.canPeek(),
-            // The toggle expands the list instead of showing it over the content.
-            ignoreSelector: ".o-mail-MessagingMenu-toggleSidebar",
+            // Only the tabs show the list, not the space around them nor the toggle.
+            triggerSelector: ".o-mail-MessagingMenu-tab",
             keep: () => Boolean(this.state().searchTerm),
-            onClose: () => {
-                this.clearPeekedTab();
-                this.selectedState().searchTerm = "";
-            },
         });
+        // Shown, the list changes once the pointer rests on a tab, not on each tab it passes.
+        this.peekTabLater = useDebounced((tab) => {
+            if (this.peek.isOpen()) {
+                this.peekTab(tab);
+            }
+        }, PEEK_TAB_DELAY);
         this.guestNamePopover = usePopover(GuestNamePopover, {
             arrow: false,
             position: "right-end",
@@ -242,6 +250,9 @@ export class MessagingMenu extends Component {
         if (!this.canPeek()) {
             return;
         }
+        if (!this.peek.isOpen()) {
+            this.resetPeek();
+        }
         if (tab.eq(this.selectedTab())) {
             this.clearPeekedTab();
         } else if (this.peekedTabState()) {
@@ -262,8 +273,18 @@ export class MessagingMenu extends Component {
         peekedTabState?.delete();
     }
 
+    /**
+     * Drops the tab and the search of the last peek. They stay once it ends, so that the list
+     * hides as it was shown, until the next one.
+     */
+    resetPeek() {
+        this.clearPeekedTab();
+        this.selectedState().searchTerm = "";
+    }
+
     onClickToggleSidebar() {
         this.peek.close();
+        this.resetPeek();
         this.onToggleSidebar();
     }
 
@@ -277,20 +298,25 @@ export class MessagingMenu extends Component {
     }
 
     /**
-     * @param {PointerEvent} ev
+     * Whether the tab looks selected: with the list hidden, only the one of the conversation.
+     *
      * @param {import("models").MessagingMenuTab} tab
      */
-    onClickTab(ev, tab) {
-        if (this.canPeek() && (ev.pointerType === "touch" || ev.pointerType === "pen")) {
+    isTabSelected(tab) {
+        return (
+            tab.eq(this.selectedTab()) && (!this.canPeek() || Boolean(this.store.discuss.thread))
+        );
+    }
+
+    /** @param {import("models").MessagingMenuTab} tab */
+    onClickTab(tab) {
+        if (this.canPeek()) {
             this.peekTab(tab);
             this.peek.open();
             return;
         }
         this.clearPeekedTab();
         this.selectedState().selectTab(tab);
-        if (this.canPeek()) {
-            this.peek.open();
-        }
     }
 
     /** A conversation of the list is opened in the content. */
@@ -317,7 +343,12 @@ export class MessagingMenu extends Component {
      * @param {import("models").MessagingMenuTab} tab
      */
     onPointerenterTab(ev, tab) {
-        if (ev.pointerType === "mouse") {
+        if (ev.pointerType !== "mouse") {
+            return;
+        }
+        if (this.peek.isOpen()) {
+            this.peekTabLater(tab);
+        } else {
             this.peekTab(tab);
         }
     }

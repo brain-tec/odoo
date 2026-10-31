@@ -1,0 +1,96 @@
+/* Dynamic grid layout for varying number of control buttons (2-18) — depends on
+screen size, modules installed and if product is selected – whilst keeping the
+buttons squarish */
+
+.modal-dialog:has(.control-button:nth-child(10)) {
+    --modal-width: 80vw;
+}
+
+.control-buttons-modal {
+    grid-template-columns: repeat(var(--grid-columns, 1), 1fr);
+    
+    .control-button {
+        aspect-ratio: var(--controlButton-aspectRatio, auto);
+    }
+
+    @media (min-width: 768px) {
+        --grid-columns: 3;
+        --controlButton-aspectRatio: 1.3;
+        --oi-font-size: 2rem;
+
+        &:has(.control-button:nth-child(2)):not(:has(.control-button:nth-child(3))) {
+            --grid-columns: 2;
+        }
+
+        @media (orientation: portrait) {
+            /* 5:8 (very narrow and tall screens) to 17:20 (portrait tablet) aspect ratios */
+            @media (min-aspect-ratio: 0.63) {
+                &:has(.control-button:nth-child(16)) {
+                    --controlButton-aspectRatio: 1.5;
+                }
+            }
+
+            /* 17:20 (portrait tablet) and above */
+            @media (min-aspect-ratio: 0.85) {
+                &:has(.control-button:nth-child(13)) {
+                    --controlButton-aspectRatio: 1.5;
+                }
+            }
+        }
+
+        @media (orientation: landscape) {
+            &:has(.control-button:nth-child(2)) {
+                --grid-columns: 2;
+            }
+
+            &:has(.control-button:nth-child(6)) {
+                --grid-columns: 3;
+            }
+
+            &:has(.control-button:nth-child(7)) {
+                --grid-columns: 4;
+            }
+
+            /* square to 7:5 (A4) aspect ratios (includes iPad's 13" aspect ratio) */
+            @media (min-aspect-ratio: 1) {
+                &:has(.control-button:nth-child(4)):not(:has(.control-button:nth-child(6))) {
+                    --grid-columns: 4;
+                }
+
+                &:has(.control-button:nth-child(17)):not(:has(.control-button:nth-child(18))) {
+                    --controlButton-aspectRatio: 1.5;
+                }
+            }
+
+            /* 7:5 (A4) to 5:3 (widescreen) aspect ratios (includes iPad's 11" aspect ratio) */
+            @media (min-aspect-ratio: 1.4) {
+                &:has(.control-button:nth-child(14)) {
+                    --controlButton-aspectRatio: 1.5;
+                }
+
+                &:has(.control-button:nth-child(18)) {
+                    --grid-columns: 5;
+                }
+            }
+
+            /* 5:3 (widescreen) aspect ratios and above */
+            @media (min-aspect-ratio: 1.66) {
+                &:has(.control-button:nth-child(4)):not(:has(.control-button:nth-child(6))) {
+                    --grid-columns: 4;
+                }
+
+                &:has(.control-button:nth-child(10)) {
+                    --grid-columns: 5;
+                }
+
+                &:has(.control-button:nth-child(14)) {
+                    --controlButton-aspectRatio: 1.3;
+                }
+
+                &:has(.control-button:nth-child(16)) {
+                    --grid-columns: 6;
+                }
+            }
+        }
+    }
+}
