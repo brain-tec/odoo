@@ -48,12 +48,13 @@
 # Saara Hakanen <sahak@odoo.com>, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2026.
 # MAHAMADASIF ANSARI <maan@odoo.com>, 2026.
+# Deleted User <noreply+18@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0+e\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-02-16 16:38+0000\n"
-"PO-Revision-Date: 2026-10-16 10:38+0000\n"
+"PO-Revision-Date: 2026-10-29 14:26+0000\n"
 "Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
 "Language-Team: Finnish <https://translate.odoo.com/projects/odoo-18/base/fi/>"
 "\n"
@@ -223,7 +224,8 @@ msgstr ""
 "salattua SSL/TLS-yhteyttä.\n"
 "Tämän avulla voidaan helposti luoda sähköpostipohjaisia työnkulkuja monille "
 "sähköpostia tukeville Odoo-dokumenteille, kuten esim:\n"
-"----------------------------------------------------------------------------------------------------------\n"
+"----------------------------------------------------------------------------------------------------------"
+"\n"
 "    * CRM liidit / myyntimahdollisuudet\n"
 "    * CRM-pyynnöt\n"
 "    * Projektiasiat\n"
@@ -546,8 +548,8 @@ msgstr ""
 "\n"
 "**Cuatro dígitos** se asignan a las cuentas de mayor: cuentas de primer "
 "orden\n"
-"1101- Efectivo y Equivalentes de Efectivo (Efectivo ja Efectivo-"
-"ekvivalentit)\n"
+"1101- Efectivo y Equivalentes de Efectivo (Efectivo ja Efectivo-ekvivalentit)"
+"\n"
 "2101- Cuentas y Documentos por pagar\n"
 "3101- Capital Social\n"
 "\n"
@@ -928,14 +930,12 @@ msgid ""
 "- the portal security settings page if the user is not internal.\n"
 msgstr ""
 "\n"
-"2FA-kutsuposti\n"
+"Kaksivaiheisen tunnistautumisen kutsuviesti\n"
 "===============\n"
-"Salli käyttäjille mahdollisuus kutsua toinen käyttäjä käyttämään "
-"kaksivaiheista tunnistusta\n"
-"lähettämällä sähköpostia kohdekäyttäjälle. Tämä sähköposti ohjaa heidät "
-"seuraavaan osoitteeseen:\n"
-"- käyttäjän suojausasetuksiin, jos käyttäjä on sisäinen.\n"
-"- portaalin suojausasetussivulle, jos käyttäjä ei ole sisäinen.\n"
+"Anna käyttäjien kutsua muita käyttämään kaksivaiheista tunnistautumista\n"
+"lähettämällä sähköpostia kohdekäyttäjälle. Tämä sähköposti ohjaa heidät:\n"
+"- käyttäjän tietoturva-asetuksiin, jos käyttäjä on sisäinen.\n"
+"- portaalin tietoturva-asetusten sivulle, jos käyttäjä ei ole sisäinen.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_auth_totp_mail_enforce
@@ -1365,7 +1365,8 @@ msgstr ""
 "\n"
 "Tämä moduuli perustuu tukemattomaan Ranska-moduuliin. Ota huomioon, että "
 "emme tue tätä moduulia.\n"
-"--------------------------------------------------------------------------------------------------------\n"
+"--------------------------------------------------------------------------------------------------------"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_hk_hr_payroll_account
@@ -2105,8 +2106,8 @@ msgstr ""
 "Singaporen kirjanpitoraportit\n"
 "================================\n"
 "Tämän moduulin avulla voidaan luoda IRAS-tilintarkastustiedosto.\n"
-" - Voit luoda IRAS-tarkastustiedoston valitsemalla kirjanpito -> Raportointi "
-"-> IRAS-tarkastustiedosto\n"
+" - Voit luoda IRAS-tarkastustiedoston valitsemalla kirjanpito -> "
+"Raportointi -> IRAS-tarkastustiedosto\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_es_reports
@@ -2668,7 +2669,7 @@ msgid ""
 "Adds approvals data to documents\n"
 msgstr ""
 "\n"
-"Lisää asiakirjoihin hyväksyntätietoja\n"
+"Lisää hyväksyntätiedot asiakirjoihin\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_documents_fleet
@@ -2837,7 +2838,7 @@ msgid ""
 "Allow clients to Schedule Appointments through the Portal\n"
 msgstr ""
 "\n"
-"Salli asiakkaiden varata tapaamisia portaalin kautta\n"
+"Anna asiakkaiden varata tapaamisia portaalin kautta\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_appointment
@@ -2894,7 +2895,7 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Salli luoda liidi ajoitetuista tapaamisista, joka tuli verkkosivutasi\n"
+"Salli liidien luominen verkkosivujesi kautta tehdyistä ajanvarauksista\n"
 "-----------------------------------------------------------------------\n"
 "\n"
 
@@ -3127,8 +3128,8 @@ msgid ""
 "operations.\n"
 msgstr ""
 "\n"
-"Mahdollistaa IoT-laitteiden, kuten vaa'an ja tulostimien, käytön "
-"jakelutoiminnoissa.\n"
+"Sallii IoT-laitteiden, kuten vaakojen ja tulostimien, käytön "
+"toimitusprosesseissa.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_stock_delivery
@@ -3159,7 +3160,7 @@ msgstr ""
 "\n"
 "Voit lisätä toimitustapoja myyntitilauksiin.\n"
 "==================================================\n"
-"Voit määritellä oman rahdinkuljettajan hintoja varten.\n"
+"Voit määritellä oman toimituspalvelusi hintoja varten.\n"
 "Järjestelmä pystyy lisäämään ja laskemaan toimitusrivin.\n"
 
 #. module: base
@@ -3496,8 +3497,8 @@ msgstr ""
 "(.pem). UNIX-järjestelmässä\n"
 "  järjestelmässä voit käyttää seuraavia komentoja:\n"
 "\n"
-"  - PFX -> CRT: openssl pkcs12 -in my_cert.pfx -out my_cert.crt -nokeys "
-"-clcerts\n"
+"  - PFX -> CRT: openssl pkcs12 -in my_cert.pfx -out my_cert.crt -nokeys -"
+"clcerts\n"
 "\n"
 "  - CRT -> CER: openssl x509 -inform pem -in my_cert.crt -outform der -out "
 "my_cert.cer\n"
@@ -3938,16 +3939,16 @@ msgstr ""
 "(.pem). UNIX-järjestelmässä\n"
 "  järjestelmässä voit käyttää seuraavia komentoja:\n"
 "\n"
-"  - PFX -> CRT: openssl pkcs12 -in my_cert.pfx -out my_cert.crt -nokeys "
-"-clcerts\n"
+"  - PFX -> CRT: openssl pkcs12 -in my_cert.pfx -out my_cert.crt -nokeys -"
+"clcerts\n"
 "\n"
 "  - CRT -> CER: openssl x509 -inform pem -in my_cert.crt -outform der -out "
 "my_cert.cer\n"
 "\n"
 "  - PFX -> PEM: openssl pkcs12 -in my_cert.pfx -out my_cert.pem -nodes\n"
 "\n"
-"  - PFX -> KEY: openssl pkcs12 -in my_cert.pfx -out my_cert.key -nocerts "
-"-nocerts\n"
+"  - PFX -> KEY: openssl pkcs12 -in my_cert.pfx -out my_cert.key -nocerts -"
+"nocerts\n"
 "\n"
 "- Ennen kuin voit käyttää sosiaaliturvan REST-verkkopalvelua, sinun on "
 "luotava tili\n"
@@ -4165,7 +4166,7 @@ msgid ""
 "Bridge module between CRM and Sale subscription.\n"
 msgstr ""
 "\n"
-"Siltamoduuli asiakkuudenhallinnan ja myyntitilauksen välillä.\n"
+"Siltamoduuli CRM:n ja myynnin tilausten välillä.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_mrp_subcontracting_quality
@@ -4221,9 +4222,9 @@ msgid ""
 "within the Documents app.\n"
 msgstr ""
 "\n"
-"Siltamoduuli Documents- ja Peppol-sovellusten välillä.\n"
+"Siltamoduuli Asiakirjat- ja Peppol-sovellusten välillä.\n"
 "Mahdollistaa vastaanotettujen Peppol-asiakirjojen tuonnin\n"
-"asiakirjasovelluksessa.\n"
+"Asiakirjat-sovelluksessa.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_documents_account
@@ -4235,11 +4236,10 @@ msgid ""
 "Documents app in the desired format(s).\n"
 msgstr ""
 "\n"
-"Yhdysmoduuli kirjanpito- ja asiakirjasovellusten välillä. Mahdollistaa\n"
-"laskujen luomisen Asiakirjat-moduulista, ja se lisää\n"
-"painikkeen kirjanpidon raportteihin, jonka avulla raportti voidaan tallentaa "
-"kirjanpidon\n"
-"Asiakirjat-sovellukseen halutussa muodossa (halutuissa muodoissa).\n"
+"Siltamoduuli kirjanpidon ja asiakirjojen välillä. Mahdollistaa\n"
+"laskujen luomisen Asiakirjat-moduulista sekä lisää\n"
+"painikkeen kirjanpitoraportteihin, jonka avulla raportin voi tallentaa\n"
+"Asiakirjat-sovellukseen halutussa muodossa.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_mail_enterprise
@@ -4705,8 +4705,8 @@ msgid ""
 "or generate a ticket from a business inquiry\n"
 msgstr ""
 "\n"
-"Muunna yrityskyselyt, jotka ovat vahingossa päätyneet Helpdesk-putkeen,\n"
-"tai luo tukipyyntö liiketoimintatiedustelusta\n"
+"Muunna vahingossa asiakaspalvelulle päätyneet tiedustelut liideiksi,\n"
+"tai luo tukipyyntö tiedustelusta\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_holidays_attendance
@@ -4745,7 +4745,7 @@ msgid ""
 "Create Credit Notes from Helpdesk tickets\n"
 msgstr ""
 "\n"
-"Luo hyvityksiä Helpdesk-tukipyyntöjen perusteella\n"
+"Luo hyvityslaskuja Asiakaspalvelun tukipyynnöistä\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_slides
@@ -4835,7 +4835,7 @@ msgid ""
 "Create booths for your favorite event.\n"
 msgstr ""
 "\n"
-"Luo näytteilleasettajien esittelytiloja suosikkitapahtumaasi varten.\n"
+"Luo näyttelypöytiä suosikkitapahtumaasi varten.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sale_loyalty
@@ -4923,21 +4923,19 @@ msgid ""
 "this event.\n"
 msgstr ""
 "\n"
-"Rekisteröinnin luominen myyntitilausten kanssa.\n"
+"Ilmoittautumisen luominen myyntitilausten kanssa.\n"
 "========================================\n"
 "\n"
-"Tämän moduulin avulla voit automatisoida ja yhdistää rekisteröinnin luomisen "
-"ja\n"
-"päämyyntivirtaasi ja siten mahdollistaa rekisteröintien "
+"Tämän moduulin avulla voit automatisoida ja yhdistää ilmoittautumisen "
+"luomisen sekä\n"
+"myyntiprosessisi, ja siten mahdollistaa ilmoittautumisten "
 "laskutusominaisuuden.\n"
 "\n"
-"Se määrittelee uudenlaisen palvelutuotteen, joka tarjoaa sinulle seuraavat "
-"mahdollisuudet\n"
-"valita siihen liittyvä tapahtumaluokka. Kun koodaat myyntitilauksen\n"
-"tuotteelle, voit valita olemassa olevan tapahtuman kyseisestä kategoriasta "
-"ja\n"
-"kun vahvistat myyntitilauksen, se luo automaattisesti rekisteröinnin "
-"seuraavalle tuotteelle\n"
+"Se määrittää uudenlaisen palvelutuotteen, joka tarjoaa sinulle "
+"mahdollisuuden\n"
+"valita siihen liittyvä tapahtumakategoria. Kun lisäät myyntitilauksen\n"
+"tuotteelle, voit valita olemassa olevan tapahtuman kyseisestä kategoriasta.\n"
+"Vahvistaessasi myyntitilauksen, se luo automaattisesti ilmoittautumisen\n"
 "tähän tapahtumaan.\n"
 
 #. module: base
@@ -5096,8 +5094,8 @@ msgid ""
 "By default, the audit trail is enabled for GoBD compliance.\n"
 msgstr ""
 "\n"
-"Tämä moduuli sisältää saksalaisen tilikartan, joka perustuu SKR03 tai SKR04 "
-"-määrityksiin.\n"
+"Tämä moduuli sisältää saksalaisen tilikartan, joka perustuu SKR03 tai SKR04 -"
+"määrityksiin.\n"
 "=========================================================================================\n"
 "\n"
 "Saksankielinen tilikartta ja lokalisointi.\n"
@@ -5278,8 +5276,8 @@ msgstr ""
 "E-laskujen factoring\n"
 "===================\n"
 "Tämä moduuli on chileläisen sähköisen laskutuksen laajennus.\n"
-"Se luo sähköisen tiedoston (Archivo Electrónico de Cesión de créditos - "
-"AEC), jonka avulla voidaan tuottaa luottoa\n"
+"Se luo sähköisen tiedoston (Archivo Electrónico de Cesión de créditos - AEC)"
+", jonka avulla voidaan tuottaa luottoa\n"
 "laskut factoring-yhtiölle.\n"
 "Se luo myös tiliöinnin, jotta lasku voidaan maksaa ja kääntää luotto "
 "factoring-yhtiölle.\n"
@@ -5719,7 +5717,7 @@ msgid ""
 "Easily access your documents from your employee profile.\n"
 msgstr ""
 "\n"
-"Pääset helposti käsiksi asiakirjoihisi työntekijäprofiilissasi.\n"
+"Avaa asiakirjat helposti työntekijäprofiilistasi käsin.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_eg
@@ -6000,8 +5998,8 @@ msgid ""
 "Employee payslips will be automatically integrated to the Document app.\n"
 msgstr ""
 "\n"
-"Työntekijöiden palkkalaskelmat integroidaan automaattisesti "
-"asiakirjasovellukseen.\n"
+"Työntekijöiden palkkalaskelmat integroidaan automaattisesti Asiakirjat-"
+"sovellukseen.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_documents_l10n_ch_hr_payroll
@@ -6142,7 +6140,7 @@ msgid ""
 "It is primarily used for EDIs that might need a special city code.\n"
 msgstr ""
 "\n"
-"Laajennettujen osoitteiden hallinta\n"
+"Laajennettu osoitteiden hallinta\n"
 "=============================\n"
 "\n"
 "Tämä moduuli tarjoaa mahdollisuuden valita kaupunki luettelosta (tietyissä "
@@ -6825,22 +6823,20 @@ msgstr ""
 "\n"
 "Pelillistämisprosessi\n"
 "====================\n"
-"Gamification-moduuli tarjoaa keinoja arvioida ja motivoida Odoon käyttäjiä.\n"
+"Pelillistämismoduuli tarjoaa keinoja arvioida ja motivoida Odoon käyttäjiä.\n"
 "\n"
-"Käyttäjiä voidaan arvioida tavoitteiden ja saavutettavien numeeristen "
-"tavoitteiden avulla.\n"
-"**Tavoitteet** asetetaan **haasteiden** avulla, jotta tiimin jäseniä voidaan "
-"arvioida ja verrata toisiinsa ja ajan myötä.\n"
+"Käyttäjiä voi arvioida päämäärien ja numeeristen tavoitteiden avulla.\n"
+"**Tavoitteet** asetetaan **haasteiden** avulla, jotta tiimin jäseniä voi "
+"arvioida ja verrata toisiinsa ajan kuluessa.\n"
 "\n"
-"Muita kuin numeerisia saavutuksia varten käyttäjille voidaan myöntää "
-"**merkkejä**. Merkki on helppo tapa ilmaista käyttäjälle kiitollisuutta "
-"hänen hyvästä työstään, vaikka se olisi pelkkä kiitos tai poikkeuksellinen "
-"saavutus.\n"
+"Muita kuin numeerisia saavutuksia varten käyttäjille voi myöntää "
+"**ansiomerkkejä**. Ansiomerkki on helppo tapa kiittää käyttäjää hyvästä "
+"työstä.\n"
 "\n"
-"Sekä tavoitteet että merkit ovat joustavia, ja ne voidaan mukauttaa "
-"monenlaisiin moduuleihin ja toimintoihin. Kun tämä moduuli on asennettu, se "
-"luo helppoja tavoitteita, jotka auttavat uusia käyttäjiä tutustumaan Odoon "
-"ja määrittämään käyttäjäprofiilinsa.\n"
+"Sekä tavoitteet että ansiomerkit ovat joustavia, ja niitä voi räätälöidä "
+"monenlaisiin moduuleihin ja toimintoihin. Tämä moduuli luo helppoja "
+"tavoitteita, jotka auttavat uusia käyttäjiä tutustumaan Odooseen sekä "
+"määrittämään käyttäjäprofiilinsa.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_attendance_gantt
@@ -7214,7 +7210,7 @@ msgid ""
 "Helpdesk integration with time off\n"
 msgstr ""
 "\n"
-"Helpdesk-integraatio vapaa-ajan hallinnan kanssa\n"
+"Asiakaspalvelun integraatio Vapaiden kanssa\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_hk_hr_payroll
@@ -7411,8 +7407,8 @@ msgstr ""
 "\n"
 "Lisäsimme mahdollisuuden tulostaa kupongin, joka tulostaa myös\n"
 "summan sanoina (numeroiden kiinalaiset erikoismerkit)\n"
-"oikein, kun cn2an-kirjasto on asennettu. (esim. pip3 install cn2an "
-"-komennolla)\n"
+"oikein, kun cn2an-kirjasto on asennettu. (esim. pip3 install cn2an -"
+"komennolla)\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_cn_city
@@ -8272,8 +8268,8 @@ msgstr ""
 "==================================\n"
 "\n"
 "Tämän sovelluksen avulla voit hallita myyntitavoitteitasi tehokkaasti ja "
-"tuloksellisesti pitämällä kirjaa kaikista myyntitilauksista ja "
-"-historiasta.\n"
+"tuloksellisesti pitämällä kirjaa kaikista myyntitilauksista ja -"
+"historiasta.\n"
 "\n"
 "Se käsittelee koko myynnin työnkulun:\n"
 "\n"
@@ -8338,8 +8334,7 @@ msgid ""
 "Manage the after sale of the products from helpdesk tickets.\n"
 msgstr ""
 "\n"
-"Hallinnoi tuotteiden myynnin jälkeistä myyntiä helpdesk-lippujen "
-"perusteella.\n"
+"Hallinnoi tuotteita myynnin jälkeen asiakaspalvelun tukipyyntöjen kautta.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sale_mrp
@@ -8399,29 +8394,29 @@ msgid ""
 "request is accepted by setting up a type of meeting in time off Type.\n"
 msgstr ""
 "\n"
-"Hallinnoi vapaata koskevia pyyntöjä ja määrärahoja\n"
+"Hallinnoi vapaapyyntöjä ja määrärahoja\n"
 "=====================================\n"
 "\n"
-"Tämä sovellus hallitsee yrityksesi vapaapäivien aikataulua. Sen avulla "
-"työntekijät voivat pyytää vapaita. Tämän jälkeen esimiehet voivat "
-"tarkastella vapaapyyntöjä ja hyväksyä tai hylätä ne. Näin voit valvoa "
-"yrityksen tai osaston yleistä vapaiden suunnittelua.\n"
+"Tämä sovellus hallinnoi yrityksesi vapaapäivien ja lomien aikataulua. Sen "
+"avulla työntekijät voivat pyytää vapaita. Tämän jälkeen esihenkilöt voivat "
+"tarkastella vapaapyyntöjä ja hyväksyä tai hylätä ne. Näin valvot yrityksen "
+"tai osaston yleistä vapaiden suunnittelua.\n"
 "\n"
 "Voit määrittää useita erilaisia vapaapäiviä (sairauspoissaolot, palkalliset "
-"päivät, ...) ja jakaa vapaat työntekijälle tai osastolle nopeasti vapaiden "
-"jakamisen avulla. Työntekijä voi myös pyytää lisää vapaapäiviä tekemällä "
-"uuden vapaa-ajan varauksen. Se lisää kyseisen vapaatyypin käytettävissä "
-"olevien päivien kokonaismäärää (jos pyyntö hyväksytään).\n"
+"päivät, ...) sekä myöntää työntekijälle tai osastolle vapaita nopeasti. "
+"Työntekijä voi myös pyytää lisää vapaapäiviä tekemällä uuden lomavarauksen. "
+"Se lisää kyseisen lomatyypin käytettävissä olevien päivien kokonaismäärää "
+"(jos pyyntö hyväksytään).\n"
 "\n"
-"Voit seurata vapaapäiviä eri tavoin seuraavien raporttien avulla:\n"
+"Voit seurata vapaapäiviä eri tavoin näiden raporttien avulla:\n"
 "\n"
-"* Yhteenveto vapaista\n"
-"* Vapaa-aika osastoittain\n"
-"* Vapaa-aika-analyysi\n"
+"* Vapaiden yhteenveto\n"
+"* Vapaat osastoittain\n"
+"* Vapaiden analyysi\n"
 "\n"
-"Synkronointi sisäisen esityslistan kanssa (CRM-moduulin kokoukset) on myös "
-"mahdollista, jotta voidaan luoda automaattisesti kokous, kun vapaapyyntö "
-"hyväksytään, määrittämällä kokoustyyppi kohdassa Vapaapäivätyyppi.\n"
+"Synkronointi sisäisen agendan kanssa (CRM-moduulin tapaamiset) on myös "
+"mahdollinen. Näin tapaamisen voi luoda automaattisesti lomapyynnön "
+"hyväksynnän yhteydessä määrittämällä tapaamistyyppin vapaatyypissä.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_mail_group
@@ -8678,13 +8673,13 @@ msgid ""
 "that have no counterpart in the general financial accounts.\n"
 msgstr ""
 "\n"
-"Moduuli analyyttisen kirjanpitokohteen määrittelyä varten.\n"
+"Moduuli laskentakohteiden objektin määrittelyyn.\n"
 "===============================================\n"
 "\n"
-"Odoossa analyyttiset tilit on liitetty yleisiin tileihin, mutta niitä "
+"Odoossa laskentakohteet on linkitetty yleisiin tileihin, mutta niitä "
 "käsitellään\n"
-"täysin itsenäisesti. Voit siis syöttää erilaisia analyyttisiä toimintoja\n"
-"joilla ei ole vastinetta yleisillä rahoitustileillä.\n"
+"täysin itsenäisesti. Voit siis syöttää erilaisia laskennallisia toimintoja,\n"
+"joille ei ole vastinetta yleisillä rahoitustileillä.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_bg_reports_ledger
@@ -8961,7 +8956,8 @@ msgstr ""
 "\n"
 "Kun määritelty, voit tulostaa muistutukset automaattisesti joka päivä "
 "klikkaamalla valikkoa:\n"
-"------------------------------------------------------------------------------------------------------\n"
+"------------------------------------------------------------------------------------------------------"
+"\n"
 "    Maksun seuranta / Lähetä sähköpostia ja kirjeitä\n"
 "\n"
 "Luo PDF-tiedoston / lähettää sähköposteja / asettaa toimintoja eri tasojen "
@@ -9317,33 +9313,29 @@ msgid ""
 "  need or want an online import can avoid it being available to users.\n"
 msgstr ""
 "\n"
-"Uusi laajennettavissa oleva tiedostojen tuonti Odoon\n"
+"Uusi laajennettava tiedostojen tuonti Odooseen\n"
 "======================================\n"
 "\n"
-"Toteuta Odoon tiedostojen tuontijärjestelmä uudelleen:\n"
+"Ota Odoon tiedostojen tuontijärjestelmä uudelleen käyttöön:\n"
 "\n"
 "* Palvelinpuolella, edellinen järjestelmä pakottaa suurimman osan "
 "logiikasta\n"
-"  asiakkaalle, mikä kaksinkertaistaa työn (asiakkaiden välillä), tekee "
-"ohjelmistosta\n"
-"  tuontijärjestelmä on paljon vaikeampi käyttää ilman asiakasta (suora RPC "
+"  asiakkaalle, mikä kaksinkertaistaa työn (asiakkaiden välillä), tekee\n"
+"  tuontijärjestelmästä paljon vaikeamman käyttää ilman asiakasta (suora RPC "
 "tai\n"
-"  automaation muita muotoja) ja tekee tietämyksestä ja tiedostoista\n"
-"  tuonti-/vientijärjestelmästä on paljon vaikeampi kerätä, koska se on "
-"hajaantunut eri puolille\n"
-"  3+ eri hankkeessa.\n"
+"  automaation muut muodot) sekä vaikeuttaa tuonti-/vientijärjestelmän\n"
+"  tietojen keräämistä, koska se on hajautettu\n"
+"  3+ eri projektin välillä.\n"
 "\n"
-"* Laajennettavampi, jotta käyttäjät ja kumppanit voivat rakentaa omia "
-"järjestelmiään\n"
-"  oman etusivun, jolla voidaan tuoda muista tiedostomuodoista (esim. "
+"* Laajennettavampi, jotta käyttäjät ja kumppanit voivat rakentaa omia\n"
+"  selainpuolen näkymiä muista tiedostomuodoista tuomiseksi (esim. "
 "OpenDocument\n"
-"  tiedostoista), joita voi olla yksinkertaisempi käsitellä heidän "
-"työnkulussaan tai jotka ovat peräisin\n"
-"  tietojen tuotantolähteistä.\n"
+"  -tiedostoista), joita voi olla yksinkertaisempi käsitellä heidän "
+"työnkulussaan tai\n"
+"  tietojen tuotantolähteissä.\n"
 "\n"
-"* Moduulissa, jotta Odoon ylläpitäjät ja käyttäjät, jotka eivät ole\n"
-"  tarvitsevat tai haluavat online-tuontia, voivat välttää sen olevan "
-"käyttäjien käytettävissä.\n"
+"* Moduulissa, jotta Odoon ylläpitäjät ja käyttäjät ilman verkkotuonnin\n"
+"  tarvetta tai halua voivat pitää sen poissa kättäjien käytettävistä.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ng
@@ -10348,9 +10340,9 @@ msgstr ""
 "=======================================================\n"
 "\n"
 "Envia tarjoaa integroituja lähetys- ja seurantaratkaisuja kasvaville "
-"verkkossa toimiville yrityksille.\n"
-"Se integroituu saumattomasti eri kuriiripalveluiden ja alustojen kanssa\n"
-"ja voit virtaviivaistaa jokaisen toimitusprosessisi vaiheen\n"
+"verkkokauppayrityksille.\n"
+"Se integroituu saumattomasti eri kuriiripalveluiden ja alustojen kanssa.\n"
+"Voit suoraviivaistaa jokaisen toimitusprosessisi vaiheen,\n"
 "vähentäen käsittelyaikaa ja parantaen asiakaskokemusta.\n"
 
 #. module: base
@@ -10367,14 +10359,14 @@ msgid ""
 "reduce handling time and improve customer experience.\n"
 msgstr ""
 "\n"
-"Lähetä lähetyksesi Starshipitin kautta ja seuraa niitä verkossa\n"
+"Lähetä toimituksesi Starshipitin kautta ja seuraa niitä verkossa\n"
 "=======================================================\n"
 "\n"
 "Starshipit on johtava integroitujen lähetys- ja seurantaratkaisujen "
 "palveluntarjoaja kasvaville verkkokaupoille.\n"
 "Integroituu saumattomasti useiden tavarantoimitusyritysten ja -alustojen "
 "kanssa.\n"
-"Voit virtaviivaistaa toimitusprosessin jokaisen vaiheen,\n"
+"Voit suoraviivaistaa toimitusprosessin jokaisen vaiheen,\n"
 "vähentää käsittelyaikaa sekä parantaa asiakaskokemusta.\n"
 
 #. module: base
@@ -10796,9 +10788,10 @@ msgid ""
 "--------------------------------------------------------------------------------------------------------------\n"
 msgstr ""
 "\n"
-"Ota huomioon työntekijöiden työaikataulu (sairauslomat, osa-aikatyö, jne.), "
-"kun aikataulutat tapaamisia\n"
-"--------------------------------------------------------------------------------------------------------------\n"
+"Huomioi työntekijöiden aikataulut (sairauslomat, osa-aikaisuus, ...) "
+"tapaamisia aikatauluttaessasi\n"
+"--------------------------------------------------------------------------------------------------------------"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_tz_account
@@ -10858,8 +10851,8 @@ msgid ""
 "International (PINT) model for Billing.\n"
 msgstr ""
 "\n"
-"Japanin UBL PINT -verkkolaskutusmuoto perustuu Peppol International (PINT) "
-"-laskutuksen malliin.\n"
+"Japanin UBL PINT -verkkolaskutusmuoto perustuu Peppol International (PINT) -"
+"laskutuksen malliin.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_my_ubl_pint
@@ -10869,8 +10862,8 @@ msgid ""
 "International (PINT) model for Billing.\n"
 msgstr ""
 "\n"
-"Malesian UBL:n PINT-verkkolaskutusmuoto perustuu Peppol International (PINT) "
-"-laskutusmalliin.\n"
+"Malesian UBL:n PINT-verkkolaskutusmuoto perustuu Peppol International "
+"(PINT) -laskutusmalliin.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_sg_ubl_pint
@@ -11131,7 +11124,8 @@ msgstr ""
 "säädetään tietyistä perusteista, jotka koskevat yksityishenkilöille (B2C) "
 "tapahtuvaan myyntiin liittyvien tietojen muuttumattomuutta, turvallisuutta, "
 "säilytystä ja arkistointia.\n"
-"-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
+"-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+"\n"
 "\n"
 "Asenna tämä, jos käytät kassasovellusta myyntiin yksityishenkilöille.\n"
 "\n"
@@ -12539,8 +12533,8 @@ msgstr ""
 "epo2_info/popis_struktury_detail.faces?zkratka=DPHSHV\n"
 "\n"
 "3. Veroraportti (XML-vienti). Löydät lisätietoja osoitteesta:  https://"
-"adisspr.mfcr.cz/dpr/adis/idpr_pub/epo2_info/popis_struktury_detail.faces?"
-"zkratka=DPHDP3\n"
+"adisspr.mfcr.cz/dpr/adis/idpr_pub/epo2_info/"
+"popis_struktury_detail.faces?zkratka=DPHDP3\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_approvals_purchase
@@ -12550,9 +12544,8 @@ msgid ""
 "RFQ from an approval purchase request.\n"
 msgstr ""
 "\n"
-"Tämä moduuli lisää hyväksyntätyönkulkuun mahdollisuuden luoda seuraavia "
-"tietoja\n"
-"RFQ hyväksynnän ostopyynnöstä.\n"
+"Tämä moduuli lisää hyväksyntien työnkulkuun mahdollisuuden luoda\n"
+"tarjouspyynnön hyväksytystä ostopyynnöstä.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_attendance
@@ -12724,18 +12717,18 @@ msgid ""
 "trigger an automatic reminder email.\n"
 msgstr ""
 "\n"
-"Tämän moduulin avulla voidaan toteuttaa automaatiosääntöjä mille tahansa "
+"Tämä moduuli mahdollistaa automaatiosääntöjen käyttöönoton mille tahansa "
 "kohteelle.\n"
 "================================================================\n"
 "\n"
-"Automaatiosääntöjen avulla voit käynnistää automaattisesti toimintoja eri "
-"näytöissä.\n"
+"Hyödynnä automaatiosääntöjä käynnistääksesi toimintoja automaattisesti eri "
+"näytöillä.\n"
 "\n"
-"**Esimerkki:** Tietyn käyttäjän luoma johto voidaan asettaa automaattisesti "
-"tiettyyn osoitteeseen\n"
-"Myyntitiimille, tai tilaisuus, jonka tila on edelleen 14 päivän jälkeen "
-"vireillä, saattaa olla\n"
-"laukaista automaattisen muistutussähköpostin.\n"
+"**Esimerkki:** Tietyn käyttäjän luoman liidin voi määrittää automaattisesti "
+"tietylle\n"
+"myyntitiimille, tai 14 päivän jälkeen edelleen \"odottaa\"-tilassa oleva "
+"myyntimahdollisuus saattaa\n"
+"käynnistää automaattisen muistutussähköpostin lähettämisen.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_onboarding
@@ -13016,8 +13009,8 @@ msgstr ""
 "Se tukee erilaisia jäseniä:\n"
 "--------------------------------------\n"
 "    * Vapaa jäsen\n"
-"    * Liitännäisjäsen (esim.: ryhmä tilaa jäsenyyden kaikille "
-"tytäryhtiöille)\n"
+"    * Liitännäisjäsen (esim.: ryhmä tilaa jäsenyyden kaikille tytäryhtiöille)"
+"\n"
 "    * Maksulliset jäsenet\n"
 "    * Erityiset jäsenhinnat\n"
 "\n"
@@ -13282,8 +13275,8 @@ msgid ""
 "can be verified to make sure the code has not been tampered with.\n"
 msgstr ""
 "\n"
-"Tämä moduuli sertifioi Kassajärjestelmän LNE:ssa "
-"(Laboratoire national de métrologie et d'essais),\n"
+"Tämä moduuli sertifioi Kassajärjestelmän LNE:ssa (Laboratoire national de "
+"métrologie et d'essais),\n"
 "mikä on lakisääteinen vaatimus tietyissä EU-maissa. Se pakottaa tietyt "
 "asetukset ja tarjoaa tarkistussumman, jonka\n"
 "voi vahvistaa koodin alkuperäisyyden varmistamiseksi.\n"
@@ -14097,8 +14090,8 @@ msgstr ""
 "3. Siirry kohtaan Asetukset / Käyttäjät / Yritykset / Yritykset ja määritä "
 "verotunnistenumero, DGI:n pääkonttorin tai sivukonttorin koodi, kaikki "
 "osoitteeseen liittyvät kentät.\n"
-"4. Siirry kohtaan Laskut ja vahvista ne. Käytä sitten Lähetä ja tulosta "
-"-toimintoa lähettääksesi laskun viranomaisille ja luodaksesi CFE:n. Näet "
+"4. Siirry kohtaan Laskut ja vahvista ne. Käytä sitten Lähetä ja tulosta -"
+"toimintoa lähettääksesi laskun viranomaisille ja luodaksesi CFE:n. Näet "
 "uuden kentän \"CFE Status\", joka näyttää sähköisen asiakirjan tilan: aluksi "
 "se on \"Waiting DGI response\" (Odottaa DGI:n vastausta), ja jonkin ajan "
 "kuluttua se päivittyy automaattisesti muotoon Approved/Rejected (Hyväksytty/"
@@ -14269,15 +14262,15 @@ msgid ""
 "creates next activities for the related approvers.\n"
 msgstr ""
 "\n"
-"Tämä moduuli hallinnoi hyväksynnän työnkulkua\n"
+"Tämä moduuli hallinnoi hyväksyntien työnkulkua\n"
 "======================================\n"
 "\n"
 "Tämä moduuli hallinnoi hyväksymispyyntöjä, kuten työmatkoja,\n"
-"poissaolot, ylityöt, lainattavat tavarat, yleiset hyväksynnät,\n"
-"hankinnat, sopimusten hyväksyntä jne.\n"
+"poissaoloja, ylitöitä, lainattavia tavaroita, yleisiä hyväksyntiä,\n"
+"hankintoja, sopimusten hyväksymistä, jne.\n"
 "\n"
-"Hyväksyntätyypin määrityksen mukaan pyyntö\n"
-"luo seuraavia toimintoja niihin liittyville hyväksyjille.\n"
+"Hyväksyntätyypin määrityksen mukaisesti pyyntö\n"
+"luo seuraavia toimenpiteitä niistä vastaaville hyväksyjille.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_check_printing
@@ -14438,8 +14431,8 @@ msgid ""
 "You need to configure your certificate and the tax agency.\n"
 msgstr ""
 "\n"
-"Tämä moduuli lähettää laskut ja myyjien laskut \"Diputaciones Diputaciones\" "
-"-järjestelmään\n"
+"Tämä moduuli lähettää laskut ja myyjien laskut \"Diputaciones "
+"Diputaciones\" -järjestelmään\n"
 "Forales\" Araba/Álavaan, Bizkaiaan ja Gipuzkoaan.\n"
 "\n"
 "Laskut ja laskut muunnetaan XML-muotoon ja lähetetään säännöllisesti "
@@ -14486,8 +14479,8 @@ msgstr ""
 "veroihin asetetusta konfiguraatiosta.  Verot\n"
 "jotka olivat taulukkomallissa (l10n_es), ovat automaattisesti\n"
 "konfiguroitu oikean tyyppisiksi.  On kuitenkin mahdollista, että\n"
-"että on luotava ylimääräisiä veroja tietyistä verovapaista/no sujeta "
-"-syistä.\n"
+"että on luotava ylimääräisiä veroja tietyistä verovapaista/no sujeta -"
+"syistä.\n"
 "\n"
 "Sinun on konfiguroitava todistus ja verovirasto.\n"
 
@@ -14657,7 +14650,7 @@ msgid ""
 "Time off documents will be automatically integrated to the Document app.\n"
 msgstr ""
 "\n"
-"Vapaa-ajan asiakirjat integroidaan automaattisesti Asiakirjat-sovellukseen.\n"
+"Vapaiden asiakirjat integroidaan automaattisesti Asiakirjat-sovellukseen.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_product_expiry
@@ -14749,24 +14742,20 @@ msgid ""
 "can setup API keys to replace their main password.\n"
 msgstr ""
 "\n"
-"Kaksivaiheinen tunnistus (TOTP)\n"
+"Kaksivaiheinen tunnistautuminen (TOTP)\n"
 "================================\n"
-"Mahdollistaa käyttäjien määrittää kaksivaiheisen tunnistuksen "
+"Antaa käyttäjien määrittää kaksivaiheisen tunnistautumisen "
 "käyttäjätililleen\n"
-"lisäsuojausta varten käyttämällä aikapohjaisia kertakäyttösalasanoja "
-"(TOTP).\n"
+"lisäsuojausta varten. Hyödyntää aikapohjaisia kertakäyttösalasanoja (TOTP).\n"
 "\n"
-"Kun MFA on otettu käyttöön, käyttäjän on syötettävä 6-numeroinen koodi, joka "
-"on annettu\n"
-"todennussovelluksen antaman koodin ennen kuin hänelle myönnetään pääsy "
-"järjestelmään.\n"
-"Kaikkia suosittuja tunnistautumissovelluksia tuetaan.\n"
+"Kun otettu käyttöön, käyttäjän on syötettävä tunnistautumissovelluksen\n"
+"antama 6-numeroinen koodi ennen pääsyä järjestelmään.\n"
+"Kaikki suosituimmat tunnistautumissovellukset on tuettu.\n"
 "\n"
-"Huomautus: loogisesti kaksitekijäisyys estää salasanapohjaisen RPC-käytön "
-"käyttäjiltä\n"
-"joissa se on käytössä. Jotta käyttäjä voisi suorittaa RPC-skriptejä, hänen "
-"on täytettävä seuraavat vaatimukset\n"
-"voi määrittää API-avaimet korvaamaan pääsalasanansa.\n"
+"Huomio: kaksivaiheinen tunnistautuminen estää käyttäjien salasanapohjaisen "
+"RPC-pääsyn kohteisiin,\n"
+"joissa se on otettu käyttöön. Suorittaakseen RPC-skriptejä, käyttäjän on\n"
+"määritettävä API-avaimet korvatakseen pääsalasanansa.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_tr_hr_payroll
@@ -15086,20 +15075,20 @@ msgid ""
 "* Analysis graph for costs\n"
 msgstr ""
 "\n"
-"Ajoneuvot, leasing, vakuutukset, kustannukset\n"
+"Kulkuneuvot, leasing, vakuutukset, kustannukset\n"
 "==================================\n"
-"Tämän moduulin kautta Odoo auttaa sinua hallinnoimaan kaikkia ajoneuvojasi, "
-"\n"
+"Tämän moduulin avulla Odoo auttaa sinua hallinnoimaan kaikkia "
+"kulkuneuvojasi, \n"
 "niihin liittyviä sopimuksia sekä palveluita, kustannuksia\n"
-"sekä monia muita ominaisuuksia, jotka ovat välttämättömiä kuljetuskalustosi\n"
-"hallinnoimiseksi\n"
+"ja monia muita ominaisuuksia, jotka ovat välttämättömiä\n"
+"kuljetuskalustosi hallinnoimiseksi\n"
 "\n"
-"Keskeiset ominaisuudet\n"
+"Keskeisimmät ominaisuudet\n"
 "-------------\n"
-"* Lisää ajoneuvoja kuljetuskalustoosi\n"
-"* Hallinnoi ajoneuvojen sopimuksia\n"
-"* Muistutus, kun sopimus saavuttaa eräpäivänsä\n"
-"* Lisää palveluita sekä matkamittarin arvoja kaikille ajoneuvoille\n"
+"* Ajoneuvojen lisääminen kuljetuskalustoon\n"
+"* Ajoneuvojen sopimusten hallinta\n"
+"* Muistutus, kun sopimus saavuttaa päättymispäivämääränsä\n"
+"* Palveluiden lisääminen, matkamittarin arvot kaikille ajoneuvoille\n"
 "* Näytä kaikki ajoneuvoon tai palvelutyyppiin liittyvät kustannukset\n"
 "* Kustannusten analyysikaavio\n"
 
@@ -15148,8 +15137,8 @@ msgstr ""
 "\n"
 "Varastonhallinnan kojelauta/raportit sisältää:\n"
 "------------------------------------------------------\n"
-"* Varaston inventaarioarvo tiettynä päivänä (tukee menneisyyden "
-"päivämääriä)\n"
+"* Varaston inventaarioarvo tiettynä päivänä (tukee menneisyyden päivämääriä)"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_helpdesk_forum
@@ -15562,9 +15551,9 @@ msgid ""
 "'%(value)s' does not seem to be a valid Property value for field '%%"
 "(field)s'. Each property need at least 'name', 'type' and 'string' attribute."
 msgstr ""
-"'%(value)s' ei näytä olevan kelvollinen ominaisuusarvo kentälle '%%"
-"(field)s'. Jokaisen ominaisuuden on oltava vähintään attribuutit 'name', "
-"'type' ja 'string'."
+"'%(value)s' ei näytä olevan kelvollinen ominaisuusarvo kentälle '%%(field)"
+"s'. Jokaisen ominaisuuden on oltava vähintään attribuutit 'name', 'type' ja "
+"'string'."
 
 #. module: base
 #. odoo-python
@@ -15583,8 +15572,8 @@ msgid ""
 "'%(value)s' does not seem to be a valid Tag value for '%(label_property)s' "
 "(subfield of '%%(field)s' field)."
 msgstr ""
-"'%(value)s' ei näytä olevan kelvollinen tunniste kentälle '%"
-"(label_property)s' (kentän '%%(field)s' alakenttä)."
+"'%(value)s' ei näytä olevan kelvollinen tunniste kentälle '%(label_property)"
+"s' (kentän '%%(field)s' alakenttä)."
 
 #. module: base
 #. odoo-python
@@ -15802,7 +15791,7 @@ msgstr "2. %a ,%A         ==&gt; pe, perjantai"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_auth_totp_mail
 msgid "2FA Invite mail"
-msgstr "2FA-kutsuposti"
+msgstr "Kaksivaiheisen tunnistautumisen kutsuviesti"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_auth_totp_mail_enforce
@@ -15948,8 +15937,7 @@ msgstr "<code>record</code>: tietue, jossa toiminto käynnistetään"
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
 msgid ""
 "<code>record</code>: record on which the action is triggered; may be be void"
-msgstr ""
-"<code>record</code>: tietue, johon toiminto kohdistuu; voi olla mitätön"
+msgstr "<code>record</code>: tietue, johon toiminto kohdistuu; voi olla mitätön"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
@@ -15987,8 +15975,8 @@ msgid ""
 "<code>time</code>, <code>datetime</code>, <code>dateutil</code>, "
 "<code>timezone</code>: useful Python libraries"
 msgstr ""
-"<code>time</code>, <code>datetime</code>, <code>dateutil</code>, "
-"<code>timezone</code>: käytännöllisiä Python-kirjastoja"
+"<code>time</code>, <code>datetime</code>, <code>dateutil</code>, <code>"
+"timezone</code>: käytännöllisiä Python-kirjastoja"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_res_company_kanban
@@ -16011,8 +15999,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_res_users_kanban
 msgid "<i class=\"fa fa-circle\" role=\"img\" aria-label=\"Ok\" title=\"Ok\"/>"
-msgstr ""
-"<i class=\"fa fa-circle\" role=\"img\" aria-label=\"Ok\" title=\"Ok\"/>"
+msgstr "<i class=\"fa fa-circle\" role=\"img\" aria-label=\"Ok\" title=\"Ok\"/>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_res_users_kanban
@@ -16036,8 +16023,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_currency_kanban
 msgid "<span class=\"badge rounded-pill bg-light border\">inactive</span>"
-msgstr ""
-"<span class=\"badge rounded-pill bg-light border\">ei aktiivinen</span>"
+msgstr "<span class=\"badge rounded-pill bg-light border\">ei aktiivinen</span>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_device_view_kanban
@@ -16149,8 +16135,8 @@ msgstr ""
 "<span colspan=\"2\">Vuoden päivä: %(doy)s</span>\n"
 "                                <span colspan=\"2\">Vuoden päivä: Vuoden "
 "viikko: %(woy)s</span>\n"
-"                                <span colspan=\"2\">Viikonpäivä "
-"(0:maanantai): %(weekday)s</span>"
+"                                <span colspan=\"2\">Viikonpäivä (0:maanantai)"
+": %(weekday)s</span>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.sequence_view
@@ -16162,10 +16148,10 @@ msgid ""
 "                                <span colspan=\"2\">Second: %(sec)s</span>"
 msgstr ""
 "<span colspan=\"2\">Tunti 00-&gt;24: %(h24)s</span>\n"
-"                                <span colspan=\"2\">Tunti 00-&gt;12: %"
-"(h12)s</span>\n"
-"                                <span colspan=\"2\">Minuutti: %(min)s</"
-"span>\n"
+"                                <span colspan=\"2\">Tunti 00-&gt;12: %(h12)"
+"s</span>\n"
+"                                <span colspan=\"2\">Minuutti: %(min)s</span>"
+"\n"
 "                                <span colspan=\"2\">Sekunti: %(sec)s</span>"
 
 #. module: base
@@ -16205,8 +16191,8 @@ msgstr ""
 "versiota.</span>\n"
 "                        <span invisible=\"reset_mode != 'hard'\">Tämä näkymä "
 "ei tule tiedostosta.</span>\n"
-"                        <span invisible=\"reset_mode != "
-"'other_view'\">Tarvitset kaksi näkymää vertailuun.</span>"
+"                        <span invisible=\"reset_mode != 'other_view'\">"
+"Tarvitset kaksi näkymää vertailuun.</span>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
@@ -16337,8 +16323,8 @@ msgid ""
 "store it securely."
 msgstr ""
 "<strong>Tärkeää:</strong>\n"
-"                            Avainta ei voi hakea myöhemmin, ja se antaa "
-"<b>täyden käyttöoikeuden</b>\n"
+"                            Avainta ei voi hakea myöhemmin, ja se antaa <b>"
+"täyden käyttöoikeuden</b>\n"
 "                            käyttäjätiliisi, joten on erittäin tärkeää "
 "säilyttää se turvallisesti."
 
@@ -16599,8 +16585,8 @@ msgstr ""
 "\n"
 ".. kuva:: static/description/compute_landed_cost.png\n"
 "\n"
-"* Vahvista purettujen kustannusten jako napsauttamalla Validate (Vahvista) "
-"-painiketta.\n"
+"* Vahvista purettujen kustannusten jako napsauttamalla Validate (Vahvista) -"
+"painiketta.\n"
 "\n"
 ".. kuva:: static/description/validate_landed_cost.png\n"
 "\n"
@@ -16654,7 +16640,7 @@ msgstr ""
 #: model:ir.module.module,summary:base.module_payment_buckaroo
 msgid "A Dutch payment provider covering several countries in Europe."
 msgstr ""
-"Alankomaalainen maksupalveluntarjoaja, joka kattaa useita Euroopan maita."
+"Hollantilainen maksupalveluntarjoaja, joka kattaa useita Euroopan maita."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_worldline
@@ -16682,9 +16668,8 @@ msgid ""
 "effortlessly check in and out while ensuring seamless notifications for "
 "hosts."
 msgstr ""
-"Kattava vastaanottotiskin hallintajärjestelmä, jonka avulla vieraat voivat "
-"kirjautua sisään ja ulos vaivattomasti ja joka varmistaa saumattomat "
-"ilmoitukset isännille."
+"Kattava vastaanoton hallintajärjestelmä. Vieraat voivat kirjautua sisään ja "
+"ulos vaivattomasti, varmistaen samalla saumattomat ilmoitukset majoittajille."
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_res_groups
@@ -16821,8 +16806,7 @@ msgstr "Maksupalveluntarjoaja, joka kattaa Latinalaisen Amerikan."
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_mercado_pago
 msgid "A payment provider covering several countries in Latin America."
-msgstr ""
-"Maksupalvelujen tarjoaja, joka kattaa useita Latinalaisen Amerikan maita."
+msgstr "Maksupalveluntarjoaja, kattaa useita Latinalaisen Amerikan maita."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_xendit
@@ -17640,8 +17624,8 @@ msgid ""
 "Add information of sale order linked to the registration for the creation of "
 "the lead."
 msgstr ""
-"Lisää tiedot myyntitilauksesta, joka liittyy rekisteröintiin liidin luomista "
-"varten."
+"Lisää tietoja myyntitilauksesta, joka on linkitetty ilmoittautumiseen liidin "
+"luomista varten."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_mass_mailing_crm
@@ -17659,8 +17643,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_mx_hr_payroll_localisation
 msgid "Add models and fields for complete mexican localisation"
-msgstr ""
-"Lisää malleja ja kenttiä täydellistä meksikolaista lokalisointia varten"
+msgstr "Lisää malleja ja kenttiä täydellistä meksikolaista lokalisointia varten"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_social_sale
@@ -17993,8 +17976,8 @@ msgstr ""
 "(käyttäjätunnusten on oltava yksilöllisiä)\n"
 "odoossa, jopa useiden yritysten välillä).\n"
 "\n"
-"Myös anonyymiä LDAP-sidontaa tuetaan (LDAP-palvelimilla, jotka sallivat "
-"sen)\n"
+"Myös anonyymiä LDAP-sidontaa tuetaan (LDAP-palvelimilla, jotka sallivat sen)"
+"\n"
 "yksinkertaisesti pitämällä LDAP-käyttäjä ja salasana tyhjinä LDAP-"
 "konfiguraatiossa.\n"
 "Tämä ei salli anonyymiä todennusta käyttäjille, vaan ainoastaan masterille\n"
@@ -18056,8 +18039,8 @@ msgstr ""
 "**Varoitus:** Jos asetat salasanan käyttäjämallille, tämä salasana on\n"
 "         määritetään paikallisena salasanana jokaiselle uudelle LDAP-"
 "käyttäjälle, mikä käytännössä asettaa\n"
-"         *pääsalasana* näille käyttäjille (kunnes se muutetaan "
-"manuaalisesti). Sinä\n"
+"         *pääsalasana* näille käyttäjille (kunnes se muutetaan manuaalisesti)"
+". Sinä\n"
 "         et yleensä halua tätä. Yksi helppo tapa määrittää mallikäyttäjä on "
 "seuraava tapa\n"
 "         kirjaudutaan kerran sisään voimassa olevalla LDAP-käyttäjällä, "
@@ -18535,7 +18518,7 @@ msgstr "Salli kenttätyön tehtävien luominen tukipyynnöistä"
 #. module: base
 #: model:ir.module.module,summary:base.module_appointment
 msgid "Allow people to book meetings in your agenda"
-msgstr "Anna ihmisten varata kokouksia kanssasi"
+msgstr "Anna muiden varata tapaamisia kalenteristasi"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_event_crm
@@ -18567,7 +18550,7 @@ msgstr "Salli Outlook-kalenterin synkronointi ajanvaraussovelluksesta"
 #. module: base
 #: model:ir.module.module,summary:base.module_account_update_tax_tags
 msgid "Allow updating tax grids on existing entries"
-msgstr "Salli olemassa olevien merkintöjen veroruudukoiden päivittäminen"
+msgstr "Salli olemassa olevien kirjausten verotaulukoiden päivittäminen"
 
 #. module: base
 #: model:ir.module.module,description:base.module_industry_fsm_repair
@@ -18590,7 +18573,7 @@ msgstr "Sallitut ryhmät"
 #. module: base
 #: model:ir.module.module,summary:base.module_mail_plugin
 msgid "Allows integration with mail plugins."
-msgstr "Mahdollistaa integroinnin sähköpostiliitännäisten kanssa."
+msgstr "Mahdollistaa integraation sähköpostilisäosien kanssa."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_stock_barcode_mrp_subcontracting
@@ -18669,7 +18652,8 @@ msgstr "Mahdollistaa lähettää tekstiviestejä sivuston kävijä, joka on joht
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_stock_renting
 msgid "Allows use of stock application to manage rentals inventory"
-msgstr "Mahdollistaa varastosovelluksen käytön vuokrien varaston hallintaan"
+msgstr ""
+"Sallii varastosovelluksen käytön vuokratuotteiden varastonhallintaa varten"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_accountant_batch_payment
@@ -19508,8 +19492,7 @@ msgstr "Amerikan Samoa"
 msgid ""
 "Amounts in this currency are rounded off to the nearest multiple of the "
 "rounding factor."
-msgstr ""
-"Tämän valuutan määrä pyöristetään pyöristyskerrointa lähimpään kertaan."
+msgstr "Tämän valuutan määrä pyöristetään pyöristyskerrointa lähimpään kertaan."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_aps
@@ -19772,7 +19755,7 @@ msgstr "Ajanvaraus"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_appointment_google_calendar
 msgid "Appointment Google Calendar"
-msgstr "Google-kalenterin kokousvaraus"
+msgstr "Google-kalenterin ajanvaraus"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_appointment_google_reserve
@@ -19787,7 +19770,7 @@ msgstr "Ajanvarauksen liidienluonti"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_appointment_microsoft_calendar
 msgid "Appointment Microsoft Calendar"
-msgstr "Varaukset Microsoftin kalenteri"
+msgstr "Microsoft-kalenterin ajanvaraus"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_appointment_sms
@@ -20911,7 +20894,7 @@ msgstr "Työsopimuksiin perustuvat automaatiosäännöt"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_automobile
 msgid "Automobile Spare Parts"
-msgstr "Auton varaosat"
+msgstr "Autojen varaosat"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__available_model_ids
@@ -21347,7 +21330,7 @@ msgstr "Pohja"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_base_install_request
 msgid "Base - Module Install Request"
-msgstr "Base - Moduulien asennuspyyntö"
+msgstr "Perus - Moduulin asennuspyyntö"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_test_base_automation
@@ -21982,7 +21965,7 @@ msgstr "Yhteysmoduuli varastojen ja kirjanpidon välillä"
 #. module: base
 #: model:ir.module.module,description:base.module_sale_subscription_timesheet
 msgid "Bridge created to add computation of timesheet to subscription"
-msgstr "Silta luotu lisäämään työaikakirjausten laskenta tilaukselle"
+msgstr "Silta luotu työaikakirjauslaskennan lisäämiseksi tilauksiin"
 
 #. module: base
 #: model:ir.module.module,description:base.module_project_account_asset
@@ -22311,17 +22294,17 @@ msgstr "CRM pelillistäminen"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_livechat
 msgid "CRM Livechat"
-msgstr "CRM Livechat"
+msgstr "CRM-livechat"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_mail_plugin
 msgid "CRM Mail Plugin"
-msgstr "CRM Sähköpostiliitännäinen"
+msgstr "CRM-sähköpostilisäosa"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_sale_subscription
 msgid "CRM Sale Subscription"
-msgstr "CRM Myynti Tilaus"
+msgstr "CRM myynnin tilaukset"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_enterprise
@@ -23553,8 +23536,8 @@ msgid ""
 "<strong>Compute</strong>."
 msgstr ""
 "Lasketut kentät määritellään kentillä\n"
-"                                   <strong>Riippuvuudet</strong> ja "
-"<strong>Laskenta</strong>."
+"                                   <strong>Riippuvuudet</strong> ja <strong>"
+"Laskenta</strong>."
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_device__device_type__computer
@@ -23831,7 +23814,7 @@ msgstr "Yhteyshenkilöt ja osoitteet"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_contacts_enterprise
 msgid "Contacts Enterprise"
-msgstr "Yhteystiedot Enterprise"
+msgstr "Yrityksen yhteystiedot"
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_res_partner_check_name
@@ -24250,12 +24233,12 @@ msgstr "Luo liidi livechat-keskustelusta"
 #. module: base
 #: model:ir.module.module,description:base.module_event_crm
 msgid "Create leads from event registrations."
-msgstr "Luo liidit tapahtumien rekisteröinneistä."
+msgstr "Luo liidejä tapahtumien ilmoittautumisista."
 
 #. module: base
 #: model:ir.module.module,description:base.module_crm_livechat
 msgid "Create new lead with using /lead command in the channel"
-msgstr "Luo uusi liidi käyttämällä /lead-komentoa kanavassa"
+msgstr "Luo uusi liidi käyttämällä /lead-komentoa kanavalla"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_work_entry_contract_planning_attendance
@@ -24812,7 +24795,7 @@ msgstr "DHL Express Shipping"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_dhl
 msgid "DHL Express Shipping (Legacy)"
-msgstr "DHL Express Shipping (Legacy)"
+msgstr "DHL Express Shipping (vanha versio)"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_din5008
@@ -25196,7 +25179,7 @@ msgstr "Toimitusosoite"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery
 msgid "Delivery Costs"
-msgstr "Toimituskustannukset"
+msgstr "Toimituskulut"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_stock_picking_batch
@@ -26259,7 +26242,7 @@ msgid ""
 "Easily format text data across multiple records. Find duplicate records and "
 "easily merge them."
 msgstr ""
-"Muotoile helposti tekstidataa useissa tietueissa. Etsi päällekkäiset "
+"Muotoile tekstitiedot helposti useissa tietueissa. Etsi päällekkäiset "
 "tietueet ja yhdistä ne helposti."
 
 #. module: base
@@ -26570,7 +26553,7 @@ msgstr "Tyhjä riippuvuus \"%s\"-kentässä"
 #. module: base
 #: model:ir.module.module,description:base.module_appointment_google_reserve
 msgid "Enable a link between your appointment type and the google API"
-msgstr "Salli linkki tapaamistyyppisi ja Google API:n välillä"
+msgstr "Ota käyttöön linkki ajanvaraustyyppisi ja Google API:n välillä"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_appointment_sale
@@ -26587,8 +26570,8 @@ msgid ""
 "Enable choosing a Google Calendar videoconference link to give to your "
 "clients for an appointment."
 msgstr ""
-"Mahdollistaa Google-kalenterin videokonferenssilinkin valitsemisen, jonka "
-"voit antaa asiakkaillesi tapaamista varten."
+"Ota käyttöön Google-kalenterin videokonferenssilinkkien valitseminen. Voit "
+"jakaa linkin asiakkaillesi tapaamisia varten."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_payment
@@ -26623,7 +26606,7 @@ msgstr "Ota profilointi käyttöön kunnes"
 #: model:ir.module.module,description:base.module_appointment_sms
 msgid "Enable sending appointment reminders via SMS to your clients."
 msgstr ""
-"Mahdollistaa ajanvarausmuistutusten lähettämisen tekstiviestillä "
+"Ota käyttöön ajanvarausmuistutusten lähettäminen tekstiviestitse "
 "asiakkaillesi."
 
 #. module: base
@@ -26762,7 +26745,7 @@ msgstr "Lukumäärä"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_envia
 msgid "Envia Shipping"
-msgstr "Envia-lähetys"
+msgstr "Envia-toimitus"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_theme_environment
@@ -27504,12 +27487,12 @@ msgstr "Tapahtumakojujen myynti"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_event
 msgid "Events Organization"
-msgstr "Tapahtumien organisaatio"
+msgstr "Tapahtumien järjestäminen"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_event_enterprise
 msgid "Events Organization Add-on"
-msgstr "Tapahtumien organisaatio-lisäosa"
+msgstr "Tapahtumien järjestämisen lisäosa"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_event_product
@@ -27519,7 +27502,7 @@ msgstr "Tapahtumatuote"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_event_sale
 msgid "Events Sales"
-msgstr "Tapahtumamyynti"
+msgstr "Tapahtumien myynti"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_event_booth
@@ -28049,12 +28032,12 @@ msgstr "Liittovaltiot kuuluvat maihin ja ovat osa yhteystietojesi osoitteita."
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_fedex_rest
 msgid "Fedex Shipping"
-msgstr "Fedex Toimitus"
+msgstr "Fedex-toimitus"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_fedex
 msgid "Fedex Shipping (Legacy)"
-msgstr "Fedex Shipping (Legacy)"
+msgstr "Fedex-toimitus (vanha versio)"
 
 #. module: base
 #: model:res.currency,currency_subunit_label:base.CNH
@@ -28448,7 +28431,7 @@ msgstr "Hae ilmaisia korkearesoluutiokuvia Unsplashistä."
 #: model:ir.module.module,description:base.module_data_recycle
 #: model:ir.module.module,summary:base.module_data_recycle
 msgid "Find old records and archive/delete them"
-msgstr "Etsi vanhat tietueet ja arkistoi tai poista ne"
+msgstr "Etsi vanhat tietueet ja arkistoi/poista ne"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_industry_restaurant
@@ -29092,7 +29075,7 @@ msgstr "Luo sähköinen lasku mukautetuilla numeroilla"
 #: model:ir.module.module,summary:base.module_crm_iap_mine
 msgid "Generate Leads/Opportunities based on country, industries, size, etc."
 msgstr ""
-"Luo liidejä / myyntimahdollisuuksia maan, toimialojen, koon jne. perusteella."
+"Luo liidejä/myyntimahdollisuuksia perustuen maahan, toimialaan, kokoon, jne."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_crm_iap_reveal
@@ -29808,7 +29791,7 @@ msgstr "Helpdesk - Tekstiviesti"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_account
 msgid "Helpdesk Account"
-msgstr "Helpdesk-tili"
+msgstr "Asiakaspalvelun tili"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_sale
@@ -29838,12 +29821,12 @@ msgstr "Helpdesk-tietämys"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_mail_plugin
 msgid "Helpdesk Mail Plugin"
-msgstr "Helpdesk sähköpostin liitännäinen"
+msgstr "Asiakaspalvelun sähköpostilisäosa"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_data_merge_helpdesk
 msgid "Helpdesk Merge action"
-msgstr "Helpdeskin yhdistämistoiminto"
+msgstr "Asiakaspalvelun yhdistämistoiminto"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_repair
@@ -29868,7 +29851,7 @@ msgstr "Helpdeskin varastotili"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_holidays
 msgid "Helpdesk Time Off"
-msgstr "Helpdeskin vapaa-aika"
+msgstr "Asiakaspalvelu, Vapaat"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_timesheet
@@ -30449,8 +30432,8 @@ msgid ""
 "few records (e.g. Stages, Job Positions, Event Types, etc.)."
 msgstr ""
 "Jos valitaan, kaikki kohdemallin tietueet otetaan mukaan\n"
-"ryhmiteltyyn tulokseen (esim. 'Group By' -suodattimet, Kanban-sarakkeet "
-"jne.).\n"
+"ryhmiteltyyn tulokseen (esim. 'Group By' -suodattimet, Kanban-sarakkeet jne.)"
+".\n"
 "Huomaa, että se voi heikentää suorituskykyä merkittävästi, jos kohdemallia "
 "on\n"
 "kentän tietueita on paljon; käytetään yleensä malleissa, joissa on seuraavat "
@@ -30708,7 +30691,7 @@ msgstr "Vaikuttaa moduuleihin"
 #. module: base
 #: model:ir.module.module,summary:base.module_auth_password_policy
 msgid "Implement basic password policy configuration & check"
-msgstr "Salasanakäytäntöjen perusmäärittelyn ja tarkistuksen toteuttaminen"
+msgstr "Ota käyttöön salasanakäytäntöjen perusmääritys ja -tarkistus"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence__implementation
@@ -31224,7 +31207,7 @@ msgstr "Periytyy"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_base_setup
 msgid "Initial Setup Tools"
-msgstr "Perusasetustyökalut"
+msgstr "Käyttöönottotyökalut"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_profile__init_stack_trace
@@ -31280,8 +31263,8 @@ msgstr "Asennettu versio"
 #: model:ir.module.module,description:base.module_bus
 msgid "Instant Messaging Bus allow you to send messages to users, in live."
 msgstr ""
-"Pikaviestiväylän avulla voit lähettää viestejä käyttäjille suorassa "
-"lähetyksessä."
+"Pikaviestiväylä mahdollistaa viestien reaaliaikaisen lähettämisen "
+"käyttäjille."
 
 #. module: base
 #. odoo-python
@@ -31944,8 +31927,8 @@ msgid ""
 msgstr ""
 "On erittäin tärkeää, että tämä kuvaus on selkeä\n"
 "                        ja täydellinen, <strong>se on ainoa keino \n"
-"                        tunnistaa avain sen jälkeen, kun se on luotu</"
-"strong>."
+"                        tunnistaa avain sen jälkeen, kun se on luotu</strong>"
+"."
 
 #. module: base
 #: model_terms:res.partner,website_description:base.res_partner_3
@@ -32167,7 +32150,7 @@ msgstr "K - RAHOITUS- JA VAKUUTUSTOIMINTA"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_digest
 msgid "KPI Digests"
-msgstr "KPI-yhteenveto"
+msgstr "KPI-yhteenvedot"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_act_window_view__view_mode__kanban
@@ -32218,7 +32201,7 @@ msgstr "Seuraa toisiinsa liittyviä osto- ja korjaustilauksia"
 #. module: base
 #: model:ir.module.module,summary:base.module_appointment_hr_recruitment
 msgid "Keep track of recruitment appointments"
-msgstr "Seuraa rekrytointitapaamisia"
+msgstr "Seuraa rekrytoinnin ajanvarauksia"
 
 #. module: base
 #: model:res.country,name:base.ke
@@ -33213,7 +33196,7 @@ msgstr "Reaaliaikainen keskustelu"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_currency_rate_live
 msgid "Live Currency Exchange Rate"
-msgstr "Automaattisesti päivittyvä valuuttakurssi"
+msgstr "Reaaliaikainen valuuttakurssi"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_event_track_live
@@ -33680,7 +33663,7 @@ msgstr "Maltan vaatimustenmukaisuuskirje EXO-numeroa varten"
 #. module: base
 #: model:ir.module.module,summary:base.module_appointment_hr
 msgid "Manage Appointments with Employees"
-msgstr "Hallitse työntekijöiden tapaamisia"
+msgstr "Hallinnoi ajanvarauksia työntekijöiden kanssa"
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_partner_title_contact
@@ -33895,7 +33878,7 @@ msgstr "Näytteilleasettajien tapahtumakoppien hallinnointi"
 #. module: base
 #: model:ir.module.module,summary:base.module_event_booth_sale
 msgid "Manage event booths sale"
-msgstr "Hallitse näytteilleasettajien tapahtumakoppien myyntiä"
+msgstr "Hallinnoi näyttelypöytien myyntiä"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_be_hr_payroll_attendance
@@ -35771,8 +35754,7 @@ msgstr "Ei asennettu"
 #. odoo-python
 #: code:addons/base/models/ir_model.py:0
 msgid "Not enough access rights on the external ID \"%(module)s.%(xml_id)s\""
-msgstr ""
-"Ulkoisen tunnuksen \"%(module)s.%(xml_id)s\" käyttöoikeudet eivät riitä"
+msgstr "Ulkoisen tunnuksen \"%(module)s.%(xml_id)s\" käyttöoikeudet eivät riitä"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner__comment
@@ -36043,8 +36025,8 @@ msgstr ""
 "Google Analytics -integraatio\n"
 "----------------------------\n"
 "\n"
-"Saat selkeän näkyvyyden myyntisuppilostasi. Odoon Google Analytics "
-"-seurantalaitteet\n"
+"Saat selkeän näkyvyyden myyntisuppilostasi. Odoon Google Analytics -"
+"seurantalaitteet\n"
 "on oletusarvoisesti määritetty seuraamaan kaikenlaisia ostoksiin liittyviä "
 "tapahtumia\n"
 "ostoskoreihin, call-to-actions-toimintoihin jne.\n"
@@ -37932,8 +37914,8 @@ msgstr ""
 "Puhdas Google Analytics -integraatio\n"
 "------------------------------------\n"
 "\n"
-"Saat selkeän näkyvyyden myyntisuppilostasi. Odoon Google Analytics "
-"-seurantalaitteet\n"
+"Saat selkeän näkyvyyden myyntisuppilostasi. Odoon Google Analytics -"
+"seurantalaitteet\n"
 "on oletusarvoisesti määritetty seuraamaan kaikenlaisia ostoksiin liittyviä "
 "tapahtumia\n"
 "ostoskoriin, call-to-actions-toimintoihin jne.\n"
@@ -38746,8 +38728,8 @@ msgstr ""
 "\n"
 "### Hallitse myyntisuppiloasi Google Analyticsin avulla\n"
 "\n"
-"Saat selkeän näkyvyyden myyntisuppiloosi. Odoon Google Analytics "
-"-seurantalaitteet on oletusarvoisesti määritetty seuraamaan kaikenlaisia "
+"Saat selkeän näkyvyyden myyntisuppiloosi. Odoon Google Analytics -"
+"seurantalaitteet on oletusarvoisesti määritetty seuraamaan kaikenlaisia "
 "tapahtumia, jotka liittyvät ostoskoriin, kutsutoimintoihin jne.\n"
 "\n"
 "Koska Odoon markkinointityökalut (massapostitus, kampanjat jne.) on myös "
@@ -39727,7 +39709,7 @@ msgstr "Kumppanit"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_base_geolocalize
 msgid "Partners Geolocation"
-msgstr "Kumppanien geolokaatio"
+msgstr "Kumppanien geopaikannus"
 
 #. module: base
 #. odoo-python
@@ -39766,7 +39748,7 @@ msgstr "Salasanan hallinta"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_auth_password_policy
 msgid "Password Policy"
-msgstr "Salasanakäytänteet"
+msgstr "Salasanakäytäntö"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_auth_password_policy_portal
@@ -39831,7 +39813,7 @@ msgstr "Muotoiltava kuvio"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_appointment_account_payment
 msgid "Pay to Book"
-msgstr "Maksa varauksesta"
+msgstr "Maksa varataksesi"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_appointment_account_payment
@@ -40331,7 +40313,7 @@ msgstr "Kassajärjestelmän vuokrausvarasto"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_restaurant_appointment
 msgid "Point of Sale Restaurant Appointment"
-msgstr "Kassajärjestelmän ravintolan ajanvaraus"
+msgstr "Kassajärjestelmä ravintolaan - Ajanvaraukset"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_settle_due
@@ -41091,12 +41073,14 @@ msgstr "Projektin taidot"
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_fsm_sale
 msgid "Project, Helpdesk, FSM, Timesheet and Sale Orders"
-msgstr "Projekti, Helpdesk, FSM, työaikataulu ja myyntitilaukset"
+msgstr ""
+"Projekti, Asiakaspalvelu, Kenttähuollon hallinta, Työäikakirjaukset ja "
+"Myyntitilaukset"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_sale_timesheet
 msgid "Project, Helpdesk, Timesheet and Sale Orders"
-msgstr "Projekti, Helpdesk, työaikataulu ja myyntitilaukset"
+msgstr "Projekti, Asiakaspalvelu, Työaikakirjaukset ja Myyntitilaukset"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_account
@@ -41116,7 +41100,7 @@ msgstr "Projekti, tehtävät, korjaus"
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_sale_loyalty
 msgid "Project, Tasks, Sale Loyalty"
-msgstr "Projekti, tehtävät, kanta-asiakkuus"
+msgstr "Projekti, tehtävät, myynnin kanta-asiakkuus"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_stock
@@ -41805,7 +41789,7 @@ msgstr "Rekrytointiraportointi"
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_hr_recruitment
 msgid "Recruitment resumés and letters from documents"
-msgstr "Rekrytointi ansioluettelot ja kirjeet asiakirjoista"
+msgstr "Rekrytoinnin ansioluettelot ja kirjeet asiakirjoista"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_appointment_hr_recruitment
@@ -43092,7 +43076,7 @@ msgstr "Skannaa myyjän laskujen QR-koodi(Intia)"
 #. module: base
 #: model:ir.module.module,summary:base.module_barcodes
 msgid "Scan and Parse Barcodes"
-msgstr "Skannaa ja analysoi viivakoodeja"
+msgstr "Skannaa ja jäsennä viivakoodeja"
 
 #. module: base
 #: model:ir.module.module,description:base.module_event_sms
@@ -43344,7 +43328,7 @@ msgstr "Myy kursseja"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_helpdesk_sale_timesheet
 msgid "Sell Helpdesk Timesheet"
-msgstr "Myy Helpdeskin työaikakirjauksia"
+msgstr "Myy asiakaspalvelun työaikakirjauksia"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_timesheet
@@ -43364,7 +43348,7 @@ msgstr "Myy vuokratuotteita verkkokaupassa"
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_stock_renting
 msgid "Sell rental products on your eCommerce and manage stock"
-msgstr "Myy vuokratuotteita verkkokaupassa ja hallinnoi niidenvarastoa"
+msgstr "Myy vuokratuotteita verkkokaupassa ja hallinnoi niiden varastoa"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_subscription
@@ -43501,11 +43485,11 @@ msgid ""
 "developer.dhl.com/. It is no longercompatible with the older DHL SOAP APIs "
 "(which have their own credentials)."
 msgstr ""
-"Lähetä lähetyksesi DHL:n kautta ja seuraa niitä verkossa. Tämä DHL-versio on "
-"yhteensopiva DHL REST -ohjelmointirajapinnan kanssa, joka on saatavilla "
+"Lähetä toimituksesi DHL:n kautta ja seuraa niitä verkossa. Tämä DHL-versio "
+"on yhteensopiva DHL REST -ohjelmointirajapinnan kanssa, joka on saatavilla "
 "osoitteessa https://developer.dhl.com/. Se ei ole enää yhteensopiva "
-"vanhempien DHL SOAP -ohjelmointirajapintojen kanssa "
-"(joilla on omat tunnistetietonsa)."
+"vanhempien DHL SOAP -ohjelmointirajapintojen kanssa (joilla on omat "
+"tunnistetietonsa)."
 
 #. module: base
 #: model:ir.module.module,description:base.module_delivery_fedex_rest
@@ -43515,11 +43499,11 @@ msgid ""
 "developer.fedex.com/. It is no longercompatible with the older FedEx SOAP "
 "APIs (which have their own credentials)."
 msgstr ""
-"Lähetä lähetyksesi FedExin kautta ja seuraa niitä verkossa. Tämä FedEx-"
+"Lähetä toimituksesi FedExin kautta ja seuraa niitä verkossa. Tämä FedEx-"
 "versio on yhteensopiva FedEx REST -ohjelmointirajapinnan kanssa, joka on "
 "saatavilla osoitteessa https://developer.fedex.com/. Se ei ole enää "
-"yhteensopiva vanhempien FedEx SOAP -ohjelmointirajapintojen kanssa "
-"(joilla on omat tunnistetietonsa)."
+"yhteensopiva vanhempien FedEx SOAP -ohjelmointirajapintojen kanssa (joilla "
+"on omat tunnistetietonsa)."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_delivery_ups_rest
@@ -43860,7 +43844,7 @@ msgstr "Toimitusintegraatio Sendcloud-alustan kanssa"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_shiprocket
 msgid "Shiprocket Shipping"
-msgstr "Shiprocket Shipping"
+msgstr "Shiprocket-toimitus"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_shiprocket
@@ -43953,7 +43937,7 @@ msgstr "Tehtäviin liitettyjen asiakirjojen allekirjoittaminen"
 #. module: base
 #: model:ir.module.module,summary:base.module_sign_itsme
 msgid "Sign documents with itsme® identification"
-msgstr "Allekirjoita asiakirjat itsme®-tunnisteella"
+msgstr "Allekirjoita asiakirjoja itsme®-tunnistautumisella"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sign_itsme
@@ -43963,7 +43947,7 @@ msgstr "Allekirjoita itsme"
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_sign
 msgid "Signature templates from Documents"
-msgstr "Allekirjoitusmallit asiakirjoista"
+msgstr "Allekirjoituspohjat asiakirjoista"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_auth_signup
@@ -44677,7 +44661,7 @@ msgstr "Vakioitu auditointitiedosto verojen perusmoduulille"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_starshipit
 msgid "Starshipit Shipping"
-msgstr "Starshipit Shipping"
+msgstr "Starshipit-toimitus"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_upgrade_install
@@ -44810,7 +44794,7 @@ msgstr "Tallenna chatter-liitteet Googlen pilvipalveluun"
 #. module: base
 #: model:ir.module.module,summary:base.module_cloud_storage
 msgid "Store chatter attachments in the cloud"
-msgstr "Tallenna keskusteluliitteet pilvipalveluun"
+msgstr "Tallenna chatterin liitteet pilvipalveluun"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_l10n_be_hr_payroll
@@ -44825,7 +44809,7 @@ msgstr "Tallenna työntekijöiden työsopimukset Dokumentit-sovellukseen"
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_hr_payroll
 msgid "Store employee payslips in the Document app"
-msgstr "Tallenna työntekijän palkkalaskelmat Dokumentit-sovellukseen"
+msgstr "Tallenna työntekijöiden palkkalaskelmat Asiakirjat-sovellukseen"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_l10n_ke_hr_payroll
@@ -44836,7 +44820,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_hr_holidays
 msgid "Store employee's time off documents in the Document app"
-msgstr "Tallenna työntekijän vapaa-ajan dokumentit Dokumentit-sovellukseen"
+msgstr "Tallenna työntekijän vapaapäivien asiakirjat Asiakirjat-sovellukseen"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_hr_expense
@@ -45206,7 +45190,7 @@ msgstr "TLS (STARTTLS)"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_auth_totp_portal
 msgid "TOTPortal"
-msgstr "TOTPortaali"
+msgstr "TOTPortal"
 
 #. module: base
 #: model:res.country,vat_label:base.zm
@@ -45277,7 +45261,7 @@ msgstr "Tala"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_headhunter
 msgid "Talent Acquisition"
-msgstr "Kykyjenhankinta"
+msgstr "Osaajahankinta"
 
 #. module: base
 #: model_terms:res.partner,website_description:base.res_partner_2
@@ -45788,9 +45772,9 @@ msgid ""
 "106,500. Provided ',' as the thousand separator in each case."
 msgstr ""
 "Erotinmuodon pitäisi olla [,n], jossa 0 < n :alkaen yksikön numerosta. -1 "
-"lopettaa erottelun. esim. [3,2,-1] esittää 106500:n olevan 1,06,500; "
-"[1,2,-1] esittää sen olevan 106,50,0; [3] esittää sen olevan 106,500. "
-"Annetaan ',' tuhannen erottimeksi kussakin tapauksessa."
+"lopettaa erottelun. esim. [3,2,-1] esittää 106500:n olevan 1,06,500; [1,2,-"
+"1] esittää sen olevan 106,50,0; [3] esittää sen olevan 106,500. Annetaan ',' "
+"tuhannen erottimeksi kussakin tapauksessa."
 
 #. module: base
 #. odoo-python
@@ -45802,9 +45786,9 @@ msgid ""
 "106,500. Provided as the thousand separator in each case."
 msgstr ""
 "Erotinmuodon pitäisi olla [,n], jossa 0 < n :alkaen yksikön numerosta. -1 "
-"lopettaa erottelun. esim. [3,2,-1] esittää 106500:n olevan 1,06,500; "
-"[1,2,-1] esittää sen olevan 106,50,0; [3] esittää sen olevan 106,500. "
-"Annetaan kussakin tapauksessa tuhannen erottimena."
+"lopettaa erottelun. esim. [3,2,-1] esittää 106500:n olevan 1,06,500; [1,2,-"
+"1] esittää sen olevan 106,50,0; [3] esittää sen olevan 106,500. Annetaan "
+"kussakin tapauksessa tuhannen erottimena."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_company__vat
@@ -46294,8 +46278,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/base/models/ir_model.py:0
 msgid "The ondelete policy \"%(policy)s\" is not valid for field \"%(field)s\""
-msgstr ""
-"Ondelete-käytäntö \"%(policy)s\" ei ole voimassa kentälle \"%(field)s\""
+msgstr "Ondelete-käytäntö \"%(policy)s\" ei ole voimassa kentälle \"%(field)s\""
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_model_fields_form
@@ -46731,8 +46714,8 @@ msgid ""
 msgstr ""
 "Tämä kenttä tallentaa nykyisen `arch_db`-tietokannan ennen kuin siihen "
 "kirjoitetaan.\n"
-"                                                                         Hyödyllinen "
-"rikkinäisen näkymän (pehmeään) nollaamiseen."
+"                                                                         "
+"Hyödyllinen rikkinäisen näkymän (pehmeään) nollaamiseen."
 
 #. module: base
 #. odoo-python
@@ -46814,8 +46797,8 @@ msgid ""
 "and uninstall this one as soon as possible."
 msgstr ""
 "Tätä vanhaa DHL Express -integraatiota ei enää "
-"tueta.                         Ole hyvä ja asenna uusi "
-"\"DHL Express Shipping\" moduuli ja poista tämä niin pian kuin mahdollista."
+"tueta.                         Ole hyvä ja asenna uusi \"DHL Express "
+"Shipping\" moduuli ja poista tämä niin pian kuin mahdollista."
 
 #. module: base
 #: model:ir.module.module,description:base.module_delivery_fedex
@@ -46825,8 +46808,8 @@ msgid ""
 "uninstall this one as soon as possible. This integration will stop working "
 "in 2024."
 msgstr ""
-"Kyseessä on FedExin vanha integrointi, jota ei enää tueta.         Asenna "
-"uusi \"FedEx Shipping\" -moduuli ja poista tämä moduuli mahdollisimman pian. "
+"Tämä on FedExin vanha integraatio, joka ei ole enää tuettu.         Asenna "
+"uusi \"FedEx-toimitus\" moduuli ja poista tämä moduuli mahdollisimman pian. "
 "Tämä integraatio lakkaa toimimasta vuonna 2024."
 
 #. module: base
@@ -46836,9 +46819,9 @@ msgid ""
 "Please install the new \"UPS Shipping\" module and uninstall this one as "
 "soon as possible. This integration will stop working in 2024."
 msgstr ""
-"Tämä on UPS:n vanha integrointi, jota ei enää tueta. Asenna uusi \"UPS "
-"Shipping\" -moduuli ja poista tämä mahdollisimman pian. Tämä integraatio "
-"lakkaa toimimasta vuonna 2024."
+"Tämä on UPS:n vanha integraatio, joka ei ole enää tuettu.         Asenna "
+"uusi \"UPS-toimitus\" -moduuli ja poista tämä mahdollisimman pian. Tämä "
+"integraatio lakkaa toimimasta vuonna 2024."
 
 #. module: base
 #: model:ir.module.module,description:base.module_delivery_usps
@@ -46847,9 +46830,8 @@ msgid ""
 "States Postal Service (USPS) Shipping\" module and uninstall this one as "
 "soon as possible."
 msgstr ""
-"Tämä on vanhanmallinen integraatio USPS:n kanssa. Asenna uusi \"United "
-"States Postal Service (USPS) Shipping\" -moduuli ja poista tämä "
-"mahdollisimman pian."
+"Tämä on vanha USPS-integraatio. Asenna uusi \"Yhdysvaltain postilaitos "
+"(USPS) -toimitus\" -moduuli ja poista tämä mahdollisimman pian."
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_no
@@ -47286,7 +47268,7 @@ msgstr ""
 "Tätä varten se lisää\n"
 "\n"
 "  * osallistujien kohorttianalyysin;\n"
-"  * tapahtumien gantt-näkymä;\n"
+"  * tapahtumien gantt-näkymän;\n"
 "\n"
 
 #. module: base
@@ -47315,7 +47297,7 @@ msgstr "Tämä moduuli integroi myynnin WhatsAppin kanssa"
 #. module: base
 #: model:ir.module.module,description:base.module_pos_sms
 msgid "This module integrates the Point of Sale with SMS"
-msgstr "Tämä moduuli integroi kassan tekstiviestien kanssa"
+msgstr "Tämä moduuli integroi kassajärjestelmän tekstiviestien kanssa"
 
 #. module: base
 #: model:ir.module.module,description:base.module_whatsapp_event
@@ -47596,8 +47578,8 @@ msgid ""
 "remaining=task_remaining_count)</code>"
 msgstr ""
 "Jos haluat ilmoittaa CRON-kutsun edistymisestä ja käynnistää kutsun "
-"uudelleen, jos tehtäviä on jäljellä, käytä "
-"<code>env['ir.cron']._notify_progress(done=task_done_count, "
+"uudelleen, jos tehtäviä on jäljellä, käytä <code>"
+"env['ir.cron']._notify_progress(done=task_done_count, "
 "remaining=task_remaining_count)</code>"
 
 #. module: base
@@ -47719,7 +47701,7 @@ msgstr "Seuraa työntekijöiden paikallaoloa"
 #: model:ir.module.module,summary:base.module_hr_timesheet
 #: model:ir.module.module,summary:base.module_timesheet_grid
 msgid "Track employee time on tasks"
-msgstr "Seuraa työntekijöiden työaikaa tehtävillä"
+msgstr "Seuraa työntekijän tehtäviin käyttämää aikaa"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_maintenance
@@ -47739,7 +47721,7 @@ msgstr "Seuraa rekrytointiprosessin kulkua"
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk
 msgid "Track, prioritize, and solve customer tickets"
-msgstr "Seuraa, priorisoi ja ratkaise asiakkaiden palvelupyyntöjä"
+msgstr "Seuraa, priorisoi ja ratkaise asiakastukipyyntöjä"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_event
@@ -47880,8 +47862,8 @@ msgid ""
 "Turn emails received in your mailbox into leads and log their content as "
 "internal notes."
 msgstr ""
-"Tee postilaatikkoosi saapuneista sähköpostiviesteistä myyntiliidejä ja "
-"kirjaa niiden sisältö sisäisinä muistiinpanoina."
+"Muunna postilaatikkoosi saapuneet sähköpostit liideiksi ja kirjaa niiden "
+"sisältö sisäisinä muistiinpanoina."
 
 #. module: base
 #: model:ir.module.module,description:base.module_project_mail_plugin
@@ -47905,7 +47887,7 @@ msgstr "Twilio-tekstiviesti"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_auth_totp
 msgid "Two-Factor Authentication (TOTP)"
-msgstr "Kaksivaiheinen kirjautuminen (TOTP)"
+msgstr "Kaksivaiheinen tunnistautuminen (TOTP)"
 
 #. module: base
 #: model:res.currency,currency_subunit_label:base.KGS
@@ -48055,12 +48037,12 @@ msgstr "UNSPSC:n tuotekoodit"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_ups_rest
 msgid "UPS Shipping"
-msgstr "UPS Toimitus"
+msgstr "UPS-toimitus"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_ups
 msgid "UPS Shipping (Legacy)"
-msgstr "UPS Shipping (Legacy)"
+msgstr "UPS-toimitus (vanha versio)"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_ups
@@ -48381,12 +48363,12 @@ msgstr "Yhdysvallat - Palkanlaskenta ja kirjanpito"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_usps_rest
 msgid "United States Postal Service (USPS) Shipping"
-msgstr "United States Postal Service (USPS) Toimitukset"
+msgstr "Yhdysvaltain postilaitos (USPS) -toimitus"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_usps
 msgid "United States Postal Service (USPS) Shipping (Legacy)"
-msgstr "Yhdysvaltain postipalvelu (USPS) Toimitus (Legacy)"
+msgstr "Yhdysvaltain postilaitos (USPS) -toimitus (vanha versio)"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_uom
@@ -49305,7 +49287,7 @@ msgstr "WMS Kirjanpito"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_data_merge_stock_account
 msgid "WMS Accounting Merge"
-msgstr "WMS Accounting Merge"
+msgstr "Varastokirjanpidon yhdistäminen"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_landed_costs
@@ -49326,7 +49308,7 @@ msgstr "Varastonhallinta: joukkosiirto"
 #: model:ir.module.module,description:base.module_data_merge_stock_account
 #: model:ir.module.module,summary:base.module_data_merge_stock_account
 msgid "Warn user in case of products merging"
-msgstr "Varoittaa käyttäjää, jos tuotteita yhdistetään"
+msgstr "Varoita käyttäjää yhdistettävistä tuotteista"
 
 #. module: base
 #. odoo-python
@@ -50409,8 +50391,8 @@ msgid ""
 "You cannot use “%(property_name)s” because the linked “%(model_name)s” model "
 "doesn't exist or is invalid"
 msgstr ""
-"Et voi käyttää \"%(property_name)s\", koska linkitettyä \"%(model_name)s\" "
-"-mallia ei ole olemassa tai se on virheellinen"
+"Et voi käyttää \"%(property_name)s\", koska linkitettyä \"%(model_name)s\" -"
+"mallia ei ole olemassa tai se on virheellinen"
 
 #. module: base
 #. odoo-python

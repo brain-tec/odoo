@@ -16,16 +16,16 @@
 # Rita Bastos, 2025
 # Maitê Dietze, 2025
 # Daniel Reis, 2025
-# Humberto Sousa <humberto.sousa@smartimprove.pt>, 2025.
+# Humberto Sousa <humberto.sousa@smartimprove.pt>, 2025, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 # Cristina Paniagua Ramiro <crpan@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:38+0000\n"
-"PO-Revision-Date: 2026-10-06 21:02+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 14:52+0000\n"
+"Last-Translator: Humberto Sousa <humberto.sousa@smartimprove.pt>\n"
 "Language-Team: Portuguese <https://translate.odoo.com/projects/odoo-18/web/"
 "pt/>\n"
 "Language: pt\n"
@@ -5710,6 +5710,12 @@ msgstr "Pesquisar"
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 msgid "Search More..."
 msgstr "Procurar Mais..."
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/reference/reference_field.js:0
+msgid "Search a record..."
+msgstr ""
 
 #. module: web
 #. odoo-javascript

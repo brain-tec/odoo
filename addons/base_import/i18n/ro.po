@@ -12,16 +12,18 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Larisa_nexterp, 2025\n"
-"Language-Team: Romanian (https://app.transifex.com/odoo/teams/41243/ro/)\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 09:52+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-18/"
+"base_import/ro/>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?"
-"2:1));\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
+"20)) ? 1 : 2;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: base_import
 #. odoo-javascript
@@ -462,15 +464,6 @@ msgstr ""
 "Dacă modelul folosește openchatter, urmărirea istoricului va seta abonamente "
 "și va trimite notificări în timpul importului, dar va duce la un import mai "
 "lent."
-
-#. module: base_import
-#. odoo-python
-#: code:addons/base_import/models/base_import.py:0
-msgid ""
-"Image size excessive, imported images must be smaller than 42 million pixel"
-msgstr ""
-"Dimensiunea imaginii este excesivă, imaginile importate trebuie să fie mai "
-"mici de 42 de milioane de pixeli"
 
 #. module: base_import
 #. odoo-javascript
@@ -1007,3 +1000,10 @@ msgstr "secunde"
 #: code:addons/base_import/models/base_import.py:0
 msgid "unknown error code %s"
 msgstr "cod de eroare necunoscut %s"
+
+#~ msgid ""
+#~ "Image size excessive, imported images must be smaller than 42 million "
+#~ "pixel"
+#~ msgstr ""
+#~ "Dimensiunea imaginii este excesivă, imaginile importate trebuie să fie "
+#~ "mai mici de 42 de milioane de pixeli"

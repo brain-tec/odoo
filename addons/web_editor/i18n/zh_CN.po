@@ -7,13 +7,13 @@
 # Wil Odoo, 2024
 # 何彬 <vnsoft.he@gmail.com>, 2024
 # Chloe Wang, 2024
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-10 18:39+0000\n"
-"PO-Revision-Date: 2025-11-21 06:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-28 03:34+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
 "projects/odoo-18/web_editor/zh_Hans/>\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: web_editor
 #. odoo-javascript
@@ -765,6 +765,12 @@ msgstr "复制粘贴您的网址或在这里嵌入代码"
 
 #. module: web_editor
 #. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Correct"
+msgstr "正确的"
+
+#. module: web_editor
+#. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/snippets.editor.js:0
 msgid "Could not install module %s"
 msgstr "无法安装模块 %s"
@@ -1199,6 +1205,12 @@ msgstr "由于技术原因，构造块不能放在这里"
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "Format"
 msgstr "格式"
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Friendly"
+msgstr "友好的"
 
 #. module: web_editor
 #. odoo-javascript
@@ -1718,6 +1730,12 @@ msgstr "左"
 
 #. module: web_editor
 #. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Lengthen"
+msgstr "延长"
+
+#. module: web_editor
+#. odoo-javascript
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 msgid "Light"
 msgstr "浅色"
@@ -2042,6 +2060,12 @@ msgid "Patterns"
 msgstr "模式"
 
 #. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Persuasive"
+msgstr "有说服力的"
+
+#. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
 msgid "Position"
@@ -2053,6 +2077,12 @@ msgstr "位置"
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 msgid "Preview"
 msgstr "预览"
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Professional"
+msgstr "专业版"
 
 #. module: web_editor
 #. odoo-javascript
@@ -2510,6 +2540,12 @@ msgstr "形状:缩略图"
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 msgid "Shapes"
 msgstr "形状"
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Shorten"
+msgstr "缩短"
 
 #. module: web_editor
 #. odoo-javascript
@@ -3106,13 +3142,13 @@ msgstr "网络编辑器转换器测试"
 #. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/snippets.options.js:0
 msgid "WebGL is not enabled on your browser."
-msgstr ""
+msgstr "您的浏览器未启用 WebGL。"
 
 #. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/snippets.options.js:0
 msgid "WebP compression not supported on this browser"
-msgstr ""
+msgstr "此浏览器不支持 WebP 压缩"
 
 #. module: web_editor
 #. odoo-javascript

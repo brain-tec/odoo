@@ -16,15 +16,15 @@
 # Karolina Tonković <karolina.tonkovic@storm.hr>, 2024
 # Jurica Pomper, 2024
 # Luka Carević <luka@uvid.hr>, 2025
-# Karlo Mikešić <karlo@uvid.hr>, 2025.
+# Karlo Mikešić <karlo@uvid.hr>, 2025, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
-# Ana Matulin <ana@uvid.hr>, 2025.
+# Ana Matulin <ana@uvid.hr>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-03 18:40+0000\n"
-"PO-Revision-Date: 2026-04-24 07:53+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-27 15:39+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Croatian <https://translate.odoo.com/projects/odoo-18/payment/"
 "hr/>\n"
@@ -34,7 +34,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 5.17\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_provider_onboarding_wizard___data_fetched
@@ -96,10 +96,10 @@ msgid ""
 "transactions you intend to capture can only be captured in full. Handle the "
 "transactions individually to capture a partial amount.\"/>"
 msgstr ""
-"<i class=\"fa fa-info-circle oe_inline\" invisible=\"support_partial_capture "
-"!= 'full_only'\" title=\"Neke transakcije koje namjeravate naplatiti mogu se "
-"naplatiti samo u cijelosti. Obradite transakcije pojedinačno za djelomičnu "
-"naplatu.\"/>"
+"<i class=\"fa fa-info-circle oe_inline\" "
+"invisible=\"support_partial_capture != 'full_only'\" title=\"Neke "
+"transakcije koje namjeravate naplatiti mogu se naplatiti samo u cijelosti. "
+"Obradite transakcije pojedinačno za djelomičnu naplatu.\"/>"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.token_form
@@ -3358,10 +3358,14 @@ msgid "Zalopay"
 msgstr "Zalopay"
 
 #. module: payment
-#: model:ir.model.fields,field_description:payment.field_payment_transaction__partner_zip
 #: model:payment.method,name:payment.payment_method_zip
 msgid "Zip"
 msgstr "Poštanski br."
+
+#. module: payment
+#: model:ir.model.fields,field_description:payment.field_payment_transaction__partner_zip
+msgid "Zip Code"
+msgstr "Poštanski broj"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_cofidis

@@ -13,8 +13,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-10 18:38+0000\n"
-"PO-Revision-Date: 2026-07-10 08:22+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-27 14:14+0000\n"
 "Last-Translator: \"Marta (wacm)\" <wacm@odoo.com>\n"
 "Language-Team: Polish <https://translate.odoo.com/projects/odoo-18/sale/pl/>"
 "\n"
@@ -25,7 +25,7 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
 "(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
 "n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
-"X-Generator: Weblate 2026.6.1\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_payment_provider_onboarding_wizard___data_fetched
@@ -930,30 +930,30 @@ msgstr ""
 "        Twoja\n"
 "        <t t-if=\"ctx.get('proforma')\">\n"
 "            Faktura pro forma za <t t-out=\"doc_name or ''\">ofertę</t> "
-"<span style=\"font-weight: bold;\" t-out=\"object.name or ''\">S00052</span>"
-"\n"
+"<span style=\"font-weight: bold;\" t-out=\"object.name or ''\">S00052</"
+"span>\n"
 "            <t t-if=\"object.origin\">\n"
-"                (o numerze referencyjnym: <t t-out=\"object.origin or "
-"''\"/> )\n"
+"                (o numerze referencyjnym: <t t-out=\"object.origin or ''\"/"
+"> )\n"
 "            </t>\n"
-"            na kwotę <span style=\"font-weight: bold;\" t-out=\"format_amount"
-"(object.amount_total, object.currency_id) or ''\">$ 10.00</span> jest już "
-"dostępna.\n"
+"            na kwotę <span style=\"font-weight: bold;\" t-"
+"out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
+"10.00</span> jest już dostępna.\n"
 "        </t>\n"
 "        <t t-else=\"\">\n"
 "            <t t-out=\"doc_name or ''\">oferta</t> <span style=\"font-"
 "weight: bold;\" t-out=\"object.name or ''\">S00052</span>\n"
 "            <t t-if=\"object.origin\">\n"
-"                (o numerze referencyjnym: <t t-out=\"object.origin or ''\">"
-"S00052</t> )\n"
+"                (o numerze referencyjnym: <t t-out=\"object.origin or "
+"''\">S00052</t> )\n"
 "            </t>\n"
-"            na kwotę <span style=\"font-weight: bold;\" t-out=\"format_amount"
-"(object.amount_total, object.currency_id) or ''\">$ 10.00</span> jest gotowa "
-"do wglądu.\n"
+"            na kwotę <span style=\"font-weight: bold;\" t-"
+"out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
+"10.00</span> jest gotowa do wglądu.\n"
 "        </t>\n"
 "        <br/>\n"
-"        <t t-set=\"documents\" t-value=\"object._get_product_documents()\"/>"
-"\n"
+"        <t t-set=\"documents\" t-value=\"object._get_product_documents()\"/"
+">\n"
 "        <t t-if=\"documents\">\n"
 "            <br/> \n"
 "            <t t-if=\"len(documents)&gt;1\">\n"
@@ -5987,11 +5987,9 @@ msgstr ""
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__validity_date
 msgid ""
-"Validity of the order, after that you will not able to sign & pay the "
-"quotation."
-msgstr ""
-"Ważność zamówienia, po tym czasie nie będziesz mieć możliwości podpisania i "
-"zapłacenia za ofertę."
+"Validity of the quotation. After this date, you will no longer be able to "
+"sign and pay it."
+msgstr "Ważność oferty. Po tej dacie nie będzie można już podpisać ani opłacić."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -6125,17 +6123,6 @@ msgstr "Nie można zmienić cennika potwierdzonego zamówienia!"
 
 #. module: sale
 #. odoo-python
-#: code:addons/sale/models/product_product.py:0
-#: code:addons/sale/models/product_template.py:0
-msgid ""
-"You cannot change the product's type because it is already used in sales "
-"orders."
-msgstr ""
-"Nie możesz zmienić typu produktu ponieważ jest już użyty w zamówieniu "
-"sprzedaży."
-
-#. module: sale
-#. odoo-python
 #: code:addons/sale/models/sale_order_line.py:0
 msgid ""
 "You cannot change the type of a sale order line. Instead you should delete "
@@ -6168,6 +6155,19 @@ msgstr ""
 "Musisz zdefiniować produkt dla wszystkiego, co sprzedajesz lub kupujesz,\n"
 "niezależnie od tego, czy jest to produkt do przechowywania, materiał "
 "eksploatacyjny czy usługa."
+
+#. module: sale
+#. odoo-python
+#: code:addons/sale/models/product_product.py:0
+#: code:addons/sale/models/product_template.py:0
+msgid ""
+"You should not change the product type because this product is already used "
+"in sales orders. Changing it may affect how the related order lines are "
+"delivered."
+msgstr ""
+"Nie zaleca się zmiany typu produktu, ponieważ ten produkt jest już "
+"wykorzystywany w innych zamówieniach zakupu. Zmiana ta może wpłynąć na "
+"sposób dostawy powiązanych linii zamówienia."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.portal_my_home_sale
@@ -6336,6 +6336,20 @@ msgid ""
 msgstr ""
 "{{ object.company_id.name }} {{ object.type_name }} Anulowane (Ref "
 "{{ object.name or 'n/a' }})"
+
+#~ msgid ""
+#~ "Validity of the order, after that you will not able to sign & pay the "
+#~ "quotation."
+#~ msgstr ""
+#~ "Ważność zamówienia, po tym czasie nie będziesz mieć możliwości podpisania "
+#~ "i zapłacenia za ofertę."
+
+#~ msgid ""
+#~ "You cannot change the product's type because it is already used in sales "
+#~ "orders."
+#~ msgstr ""
+#~ "Nie możesz zmienić typu produktu ponieważ jest już użyty w zamówieniu "
+#~ "sprzedaży."
 
 #~ msgid "2023-12-31"
 #~ msgstr "2023-12-31"
