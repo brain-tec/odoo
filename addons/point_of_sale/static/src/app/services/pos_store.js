@@ -791,7 +791,7 @@ export class PosStore extends WithLazyGetterTrap {
     async openConfigurator(pTemplate, opts = {}) {
         const attrById = this.models["product.attribute"].getAllBy("id");
         const attributeLines = pTemplate.attribute_line_ids.filter(
-            (attr) => attr.attribute_id?.id in attrById
+            (attr) => attr.active !== false && attr.attribute_id?.id in attrById
         );
         let attributeLinesValues = attributeLines.map((attr) => attr.product_template_value_ids);
         let variantProduct = null;
@@ -2494,6 +2494,9 @@ export class PosStore extends WithLazyGetterTrap {
     }
     async closePos() {
         this.resetCashier();
+        // The redirect below may not happen (beforeunload guard, failed sync):
+        // never leave a screen where orders can be made without a cashier.
+        this.navigate("LoginScreen");
         // If pos is not properly loaded, we just go back to /web without
         // doing anything in the order data.
         if (!this) {
