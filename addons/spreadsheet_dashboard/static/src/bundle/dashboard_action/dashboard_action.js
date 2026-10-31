@@ -3,13 +3,14 @@ import {
     Component,
     computed,
     onWillStart,
+    providePlugins,
     proxy,
     useEffect,
     useListener,
     useProps,
 } from "@odoo/owl";
 import { SpreadsheetComponent } from "@spreadsheet/actions/spreadsheet_component";
-import { SpreadsheetShareButton } from "@spreadsheet/components/share_button/share_button";
+import { DashboardShareButton } from "@spreadsheet_dashboard/bundle/dashboard_share_button/dashboard_share_button";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -22,6 +23,7 @@ import { Status } from "./dashboard_loader_service";
 import { DashboardSearchBar } from "./dashboard_search_bar/dashboard_search_bar";
 import { MobileFigureContainer } from "./mobile_figure_container/mobile_figure_container";
 import { DashboardMobileSearchPanel } from "./mobile_search_panel/mobile_search_panel";
+import { DashboardSharePlugin } from "../owl_plugins/dashboard_share_owl_plugin";
 
 export const dashboardActionRegistry = new Registry();
 
@@ -33,7 +35,7 @@ export class SpreadsheetDashboardAction extends Component {
         SpreadsheetComponent,
         DashboardMobileSearchPanel,
         MobileFigureContainer,
-        SpreadsheetShareButton,
+        DashboardShareButton,
         DashboardSearchBar,
     };
     static displayName = _t("Dashboards");
@@ -53,6 +55,7 @@ export class SpreadsheetDashboardAction extends Component {
         this.uiService = useService("ui");
         this.actionService = useService("action");
         this.loader = useService("spreadsheet_dashboard_loader");
+        providePlugins([DashboardSharePlugin], { resIdSignal: this.activeDashboardId });
         onWillStart(async () => {
             if (this.props.state && this.props.state.dashboardLoader) {
                 const state = this.props.state.dashboardLoader;
