@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2026-08-28 15:48+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 09:44+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Arabic <https://translate.odoo.com/projects/odoo-18/"
 "base_import/ar/>\n"
@@ -454,14 +454,6 @@ msgstr ""
 "إذا كان النموذج يستخدم الدردشة المفتوحة، سوف يقوم تتبع السجل بتعيين اشتراكات "
 "وإرسال إشعارات خلال عملية الاستيراد، ولكن يؤدي ذلك إلى إبطاء عملية "
 "الاستيراد. "
-
-#. module: base_import
-#. odoo-python
-#: code:addons/base_import/models/base_import.py:0
-msgid ""
-"Image size excessive, imported images must be smaller than 42 million pixel"
-msgstr ""
-"حجم الصورة كبير جداً، يجب أن تكون الصور المستوردة أصغر من 42 مليون بكسل "
 
 #. module: base_import
 #. odoo-javascript
@@ -998,3 +990,9 @@ msgstr "ثواني"
 #: code:addons/base_import/models/base_import.py:0
 msgid "unknown error code %s"
 msgstr "كود خطأ غير معروف %s "
+
+#~ msgid ""
+#~ "Image size excessive, imported images must be smaller than 42 million "
+#~ "pixel"
+#~ msgstr ""
+#~ "حجم الصورة كبير جداً، يجب أن تكون الصور المستوردة أصغر من 42 مليون بكسل "
