@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-20 09:01+0000\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
 "PO-Revision-Date: 2026-08-03 07:54+0000\n"
 "Last-Translator: \"Kira Petersen François (peti)\" <peti@odoo.com>\n"
 "Language-Team: Danish <https://translate.odoo.com/projects/odoo-s19-2/"
@@ -156,8 +156,8 @@ msgstr "Kolonne %(column)s indeholder ukorrekte værdier (værdi: %(value)s)"
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"Column %(column)s contains incorrect values. Error in line %(line)d: "
-"%(error)s"
+"Column %(column)s contains incorrect values. Error in line %(line)d: %"
+"(error)s"
 msgstr ""
 "Kolonne %(column)s indeholder ukorrekte værdier. Fejl i linje %(line)d: %"
 "(error)s"
@@ -309,8 +309,8 @@ msgstr "Fejl ved import af poster: Tekstseparatoren skal være et enkelt tegn."
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
 "Error while importing records: all rows should be of the same size, but the "
-"title row has %(title_row_entries)d entries while the first row has "
-"%(first_row_entries)d. You may need to change the separator character."
+"title row has %(title_row_entries)d entries while the first row has %"
+"(first_row_entries)d. You may need to change the separator character."
 msgstr ""
 "Fejl ved import af datarækker: Alle rækker skal have samme antal felter, men "
 "titellinjen indeholder %(title_row_entries)d-posteringer, mens den første "
@@ -462,15 +462,6 @@ msgstr ""
 "sende notifikationer under importen, hvilket kan gøre importen langsommere."
 
 #. module: base_import
-#. odoo-python
-#: code:addons/base_import/models/base_import.py:0
-msgid ""
-"Image size excessive, imported images must be smaller than 42 million pixel"
-msgstr ""
-"Billedet er for stort, importerede billeder må ikke overstige 42 millioner "
-"pixels"
-
-#. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.xml:0
 msgid "Import"
@@ -525,9 +516,9 @@ msgid ""
 "Invalid cell format at row %(row)s, column %(col)s: %(cell_value)s, with "
 "format: %(cell_format)s, as (%(format_type)s) formats are not supported."
 msgstr ""
-"Ugyldigt celleformat i række %(row)s, kolonne %(col)s: værdien %(cell_value)"
-"s med formatet %(cell_format)s understøttes ikke, da %(format_type)s-"
-"formater ikke kan bruges."
+"Ugyldigt celleformat i række %(row)s, kolonne %(col)s: værdien %"
+"(cell_value)s med formatet %(cell_format)s understøttes ikke, da %"
+"(format_type)s-formater ikke kan bruges."
 
 #. module: base_import
 #. odoo-python
@@ -1012,3 +1003,10 @@ msgstr "sekunder"
 #: code:addons/base_import/models/base_import.py:0
 msgid "unknown error code %s"
 msgstr "ukendt fejlkode %s"
+
+#~ msgid ""
+#~ "Image size excessive, imported images must be smaller than 42 million "
+#~ "pixel"
+#~ msgstr ""
+#~ "Billedet er for stort, importerede billeder må ikke overstige 42 "
+#~ "millioner pixels"

@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-20 09:01+0000\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
 "PO-Revision-Date: 2025-09-16 08:10+0000\n"
 "Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
 "Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
@@ -146,8 +146,8 @@ msgstr "直欄 %(column)s 內有不正確的值（值：%(value)s）"
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"Column %(column)s contains incorrect values. Error in line %(line)d: "
-"%(error)s"
+"Column %(column)s contains incorrect values. Error in line %(line)d: %"
+"(error)s"
 msgstr "%(column)s 欄包含不正確數值。錯誤位於第 %(line)d 行：%(error)s"
 
 #. module: base_import
@@ -296,8 +296,8 @@ msgstr "匯入記錄時出錯： 文本分隔符應為單字符。"
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
 "Error while importing records: all rows should be of the same size, but the "
-"title row has %(title_row_entries)d entries while the first row has "
-"%(first_row_entries)d. You may need to change the separator character."
+"title row has %(title_row_entries)d entries while the first row has %"
+"(first_row_entries)d. You may need to change the separator character."
 msgstr ""
 "匯入記錄時發生錯誤：所有列的大小應該相同，但標題列有 %(title_row_entries)d 個"
 "記項，而第一行有 %(first_row_entries)d 個。你可能需要更改分隔符。"
@@ -445,13 +445,6 @@ msgstr ""
 "致匯入速度變慢。"
 
 #. module: base_import
-#. odoo-python
-#: code:addons/base_import/models/base_import.py:0
-msgid ""
-"Image size excessive, imported images must be smaller than 42 million pixel"
-msgstr "圖片尺寸過大，匯入圖片必須小於4200萬像素"
-
-#. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.xml:0
 msgid "Import"
@@ -506,8 +499,8 @@ msgid ""
 "Invalid cell format at row %(row)s, column %(col)s: %(cell_value)s, with "
 "format: %(cell_format)s, as (%(format_type)s) formats are not supported."
 msgstr ""
-"儲存格格式無效：列 %(row)s，欄 %(col)s，值為：%(cell_value)s，格式為："
-"%(cell_format)s。系統不支援「%(format_type)s」格式。"
+"儲存格格式無效：列 %(row)s，欄 %(col)s，值為：%(cell_value)s，格式為：%"
+"(cell_format)s。系統不支援「%(format_type)s」格式。"
 
 #. module: base_import
 #. odoo-python
@@ -977,3 +970,8 @@ msgstr "秒"
 #: code:addons/base_import/models/base_import.py:0
 msgid "unknown error code %s"
 msgstr "未知錯誤代碼  %s"
+
+#~ msgid ""
+#~ "Image size excessive, imported images must be smaller than 42 million "
+#~ "pixel"
+#~ msgstr "圖片尺寸過大，匯入圖片必須小於4200萬像素"

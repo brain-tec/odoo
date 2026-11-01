@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-03 18:37+0000\n"
+"POT-Creation-Date: 2026-10-30 17:36+0000\n"
 "PO-Revision-Date: 2025-10-08 18:37+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -68,24 +68,18 @@ msgid "Discount"
 msgstr "Chegirma"
 
 #. module: pos_discount
-#: model_terms:ir.ui.view,arch_db:pos_discount.res_config_settings_view_form
-#, fuzzy
-msgid "Discount %"
-msgstr "Chegirma %"
-
-#. module: pos_discount
-#: model:ir.model.fields,field_description:pos_discount.field_pos_config__discount_pc
-#: model:ir.model.fields,field_description:pos_discount.field_res_config_settings__pos_discount_pc
-#, fuzzy
-msgid "Discount Percentage"
-msgstr "Chegirma foizi"
-
-#. module: pos_discount
 #: model:ir.model.fields,field_description:pos_discount.field_pos_config__discount_product_id
 #: model_terms:ir.ui.view,arch_db:pos_discount.res_config_settings_view_form
 #, fuzzy
 msgid "Discount Product"
 msgstr "Chegirmali mahsulot"
+
+#. module: pos_discount
+#: model:ir.model.fields,field_description:pos_discount.field_pos_config__discount_pc
+#: model:ir.model.fields,field_description:pos_discount.field_res_config_settings__pos_discount_pc
+#: model_terms:ir.ui.view,arch_db:pos_discount.res_config_settings_view_form
+msgid "Discount Value"
+msgstr ""
 
 #. module: pos_discount
 #: model:ir.model.fields,field_description:pos_discount.field_account_move_line__display_name
@@ -121,7 +115,7 @@ msgstr "Chegirmali mahsulot topilmadi"
 
 #. module: pos_discount
 #. odoo-javascript
-#: code:addons/pos_discount/static/src/app/screens/ticket_screen/ticket_screen.js:0
+#: code:addons/pos_discount/static/src/app/services/pos_store.js:0
 msgid "Oh snap !"
 msgstr ""
 
@@ -157,9 +151,8 @@ msgstr "Mahsulot"
 #. module: pos_discount
 #: model:ir.model.fields,help:pos_discount.field_pos_config__discount_pc
 #: model:ir.model.fields,help:pos_discount.field_res_config_settings__pos_discount_pc
-#, fuzzy
-msgid "The default discount percentage when clicking on the Discount button"
-msgstr "Chegirma tugmasini bosganingizda standart chegirma foizi"
+msgid "The default discount value when clicking on the Discount button"
+msgstr ""
 
 #. module: pos_discount
 #. odoo-javascript
@@ -180,7 +173,19 @@ msgstr "Chiptaga chegirma qo‘llash uchun ishlatiladigan mahsulot."
 
 #. module: pos_discount
 #. odoo-javascript
-#: code:addons/pos_discount/static/src/app/screens/ticket_screen/ticket_screen.js:0
+#: code:addons/pos_discount/static/src/app/services/pos_store.js:0
 #, fuzzy
 msgid "You cannot edit a discount line."
 msgstr "Chegirma qatorini tahrirlay olmaysiz."
+
+#, fuzzy
+#~ msgid "Discount %"
+#~ msgstr "Chegirma %"
+
+#, fuzzy
+#~ msgid "Discount Percentage"
+#~ msgstr "Chegirma foizi"
+
+#, fuzzy
+#~ msgid "The default discount percentage when clicking on the Discount button"
+#~ msgstr "Chegirma tugmasini bosganingizda standart chegirma foizi"

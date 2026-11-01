@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-31 17:36+0000\n"
+"POT-Creation-Date: 2026-10-30 17:36+0000\n"
 "PO-Revision-Date: 2026-09-04 18:07+0000\n"
 "Last-Translator: \"Fernanda Alvarez (mfar)\" <mfar@odoo.com>\n"
 "Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
@@ -747,7 +747,8 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_template_preview_view_form
 msgid "<span class=\"fst-italic\" invisible=\"subject\">Unspecified</span>"
-msgstr "<span class=\"fst-italic\" invisible=\"subject\">Sin especificar</span>"
+msgstr ""
+"<span class=\"fst-italic\" invisible=\"subject\">Sin especificar</span>"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_ice_server_kanban
@@ -5137,8 +5138,8 @@ msgid ""
 "Failed to render inline_template template: %(template_txt)s\n"
 "Error details: %(error)s"
 msgstr ""
-"Ocurrió un error al renderizar la plantilla inline_template: %(template_txt)"
-"s\n"
+"Ocurrió un error al renderizar la plantilla inline_template: %"
+"(template_txt)s\n"
 "Detalles del error: %(error)s"
 
 #. module: mail
@@ -6278,8 +6279,8 @@ msgid ""
 "If you don't recognize it, you should change your password immediately via "
 "this link:<br/>"
 msgstr ""
-"Si no la reconoces, cambia tu contraseña ahora mismo a través de este "
-"enlace:<br/>"
+"Si no la reconoces, cambia tu contraseña ahora mismo a través de este enlace:"
+"<br/>"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_res_config_settings__alias_domain_id
@@ -7032,6 +7033,11 @@ msgstr "EN VIVO"
 #: model:ir.model.fields,field_description:mail.field_mail_template__lang
 msgid "Language"
 msgstr "Idioma"
+
+#. module: mail
+#: model:ir.model.fields,help:mail.field_mail_message_translation__target_lang
+msgid "Language code used as the target for the translation request."
+msgstr ""
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_discuss_channel__last_interest_dt
@@ -9987,6 +9993,12 @@ msgid "Pop out Attachments"
 msgstr "Abrir archivos adjuntos en otra ventana"
 
 #. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/core/common/attachment_view.js:0
+msgid "Pop out is not supported on mobile."
+msgstr ""
+
+#. module: mail
 #: model:ir.model.fields,field_description:mail.field_fetchmail_server__port
 msgid "Port"
 msgstr "Puerto"
@@ -11682,13 +11694,6 @@ msgstr "Compartido con todos los usuarios."
 #: model:ir.model.fields,field_description:mail.field_mail_canned_response__source
 msgid "Shortcut"
 msgstr "Acceso directo"
-
-#. module: mail
-#: model:ir.model.fields,help:mail.field_mail_message_translation__target_lang
-msgid "Shortened language code used as the target for the translation request."
-msgstr ""
-"Código abreviado del idioma utilizado como destino de la solicitud de "
-"traducción."
 
 #. module: mail
 #. odoo-javascript
@@ -14716,6 +14721,14 @@ msgstr ""
 #. odoo-python
 #: code:addons/mail/models/discuss/discuss_channel.py:0
 msgid ""
+"You do not have the rights to change the name, description or avatar as a "
+"regular member of these read-only channels: %(channels)s."
+msgstr ""
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/discuss/discuss_channel.py:0
+msgid ""
 "You do not have the rights to change the read-only state of: %(channels)s."
 msgstr ""
 "No tienes permisos para cambiar el estado de solo lectura de: %(channels)s."
@@ -14987,12 +15000,6 @@ msgstr "conversaciones"
 #: code:addons/mail/models/discuss/discuss_channel.py:0
 msgid "created this channel."
 msgstr "creó este canal."
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/js/rotting_mixin/rotting_statusbar.xml:0
-msgid "d"
-msgstr "d"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.account_security_alert
@@ -15571,6 +15578,15 @@ msgstr "\"%s\""
 #: code:addons/mail/models/mail_canned_response.py:0
 msgid "🔒 Private"
 msgstr "🔒 Privado"
+
+#~ msgid ""
+#~ "Shortened language code used as the target for the translation request."
+#~ msgstr ""
+#~ "Código abreviado del idioma utilizado como destino de la solicitud de "
+#~ "traducción."
+
+#~ msgid "d"
+#~ msgstr "d"
 
 #~ msgid "Search for a GIF"
 #~ msgstr "Buscar un GIF"

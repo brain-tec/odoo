@@ -18,7 +18,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:36+0000\n"
 "PO-Revision-Date: 2026-10-01 14:33+0000\n"
 "Last-Translator: \"Noemi Pla Garcia (nopl)\" <nopl@odoo.com>\n"
 "Language-Team: Spanish <https://translate.odoo.com/projects/odoo-s19-2/"
@@ -406,8 +406,8 @@ msgid ""
 "ms-1\">Contact Us</span>"
 msgstr ""
 "<i class=\"fa fa-envelope fa-fw\" role=\"presentation\"/>\n"
-"                                            <span class=\"o_label small ms-"
-"1\">Contacta con nosotros</span>"
+"                                            <span class=\"o_label small "
+"ms-1\">Contacta con nosotros</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
@@ -2939,7 +2939,8 @@ msgstr "Personalizar plantillas de correo electrónico"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product
 msgid "DROP BUILDING BLOCKS HERE TO MAKE THEM AVAILABLE ACROSS ALL PRODUCTS"
-msgstr "ARRASTRA BLOQUES AQUÍ PARA QUE ESTÉN DISPONIBLES EN TODOS LOS PRODUCTOS"
+msgstr ""
+"ARRASTRA BLOQUES AQUÍ PARA QUE ESTÉN DISPONIBLES EN TODOS LOS PRODUCTOS"
 
 #. module: website_sale
 #. odoo-javascript
@@ -6563,6 +6564,14 @@ msgstr "Agotado"
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/controllers/main.py:0
+msgid ""
+"Some products in your cart are not available for purchase in your country. "
+"Please remove them or contact us."
+msgstr ""
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
 msgid "Sorry, we are unable to ship your order."
 msgstr "Lo sentimos, no podemos enviar tu pedido."
 
@@ -6888,7 +6897,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/website_sale/controllers/cart.py:0
 msgid "The given product does not exist therefore it cannot be added to cart."
-msgstr "El producto dado no existe, por lo tanto no se puede añadir a la cesta."
+msgstr ""
+"El producto dado no existe, por lo tanto no se puede añadir a la cesta."
 
 #. module: website_sale
 #. odoo-python
@@ -6917,6 +6927,14 @@ msgstr ""
 "El modo seleccionado aquí se aplicará como política de facturación a los "
 "nuevos productos que se                            creen, pero no a los "
 "productos ya existentes."
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/cart.py:0
+msgid ""
+"The number of selected combo items must match the number of available combo "
+"choices."
+msgstr ""
 
 #. module: website_sale
 #. odoo-python
@@ -7063,6 +7081,18 @@ msgstr "Este producto ya no está disponible."
 #: code:addons/website_sale/models/sale_order.py:0
 msgid "This product is not available (anymore) in this unit of measure."
 msgstr "Este producto ya no está disponible en esta unidad de medida."
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+msgid "This product is not available for purchase in your country."
+msgstr ""
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/cart.py:0
+msgid "This product is part of a combo and can't be updated individually."
+msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products_item
@@ -7796,12 +7826,6 @@ msgid "Your payment has been authorized."
 msgstr "Tu pago ha sido autorizado."
 
 #. module: website_sale
-#. odoo-javascript
-#: code:addons/website_sale/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.js:0
-msgid "Your postal code"
-msgstr "Tu código postal"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.cart
 msgid "Your previous cart has already been completed."
 msgstr "Se ha completado su cesta anterior."
@@ -7815,6 +7839,12 @@ msgstr "¡Tu lista de deseos está vacía!"
 #: model:ir.ui.menu,name:website_sale.menu_delivery_zip_prefix
 msgid "Zip Prefix"
 msgstr "Prefijo de C. P."
+
+#. module: website_sale
+#. odoo-javascript
+#: code:addons/website_sale/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.js:0
+msgid "Zip or City"
+msgstr ""
 
 #. module: website_sale
 #. odoo-javascript
@@ -8086,6 +8116,9 @@ msgstr "x"
 #: model_terms:ir.ui.view,arch_db:website_sale.dynamic_filter_template_product_product_products_item
 msgid "{{0}} image"
 msgstr "{{0}} imagen"
+
+#~ msgid "Your postal code"
+#~ msgstr "Tu código postal"
 
 #~ msgid "Payment Transaction"
 #~ msgstr "Transacción de pago"
