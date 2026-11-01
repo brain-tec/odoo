@@ -72,6 +72,12 @@ export class Store extends BaseStore {
      * public page.
      */
     inPublicPage = false;
+    /**
+     * Color scheme of the public page.
+     *
+     * @type {"light"|"dark"|undefined}
+     */
+    publicColorScheme;
     /** @type {boolean|undefined} */
     isOdooWhiteTheme;
     odoobot = fields.One("res.partner");
@@ -279,11 +285,11 @@ export class Store extends BaseStore {
      * crash and listeners to be registered twice.
      */
     onStarted() {
-        this.isOdooWhiteTheme = cookie.get("color_scheme") !== "dark" || this.inPublicPage;
+        this.isOdooWhiteTheme = cookie.get("color_scheme") !== "dark";
         navigator.serviceWorker?.addEventListener("message", ({ data = {} }) => {
             const { type, payload } = data;
             if (type === "notification-display-request") {
-                const { correlationId, model, res_id } = payload;
+                const { correlationId, model, res_id, message_id } = payload;
                 const thread = this["mail.thread"].get({ model, id: res_id });
                 let isTabFocused;
                 try {
@@ -291,9 +297,14 @@ export class Store extends BaseStore {
                 } catch {
                     // assumes tab not focused: parent.document from iframe triggers CORS error
                 }
+                const isMessageSeen =
+                    model === "discuss.channel"
+                        ? thread?.channel?.self_member_id?.seen_message_id?.id >= message_id
+                        : thread?.messages.some((m) => m.id === message_id);
                 if (
                     this.self_user?.im_status === "busy" ||
-                    (isTabFocused && thread?.channel?.isDisplayed)
+                    (isTabFocused && thread?.channel?.isDisplayed) ||
+                    isMessageSeen
                 ) {
                     navigator.serviceWorker.controller?.postMessage({
                         type: "notification-display-response",
