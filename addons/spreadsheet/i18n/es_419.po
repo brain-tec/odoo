@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 17:44+0000\n"
+"POT-Creation-Date: 2026-10-30 17:39+0000\n"
 "PO-Revision-Date: 2026-08-21 19:29+0000\n"
 "Last-Translator: \"Fernanda Alvarez (mfar)\" <mfar@odoo.com>\n"
 "Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
@@ -13592,6 +13592,12 @@ msgstr "Usa la fila %(row_position)s como encabezados"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "Use tabular form:"
+msgstr "Utiliza el formato tabular:"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 msgid "Use value-based gradient"
 msgstr "Utilizar el gradiente basado en valores"
 
@@ -14848,9 +14854,6 @@ msgstr "ayer"
 #~ msgstr ""
 #~ "Esta operación no es posible debido a una combinación. Elimine primero "
 #~ "las combinaciones e inténtelo de nuevo."
-
-#~ msgid "Use tabular form:"
-#~ msgstr "Utiliza el formato tabular:"
 
 #~ msgid ""
 #~ "Some list column titles have been locked to avoid translation issues."

@@ -28,7 +28,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 17:42+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-10-28 12:34+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Persian <https://translate.odoo.com/projects/odoo-s19-3/"
@@ -262,12 +262,6 @@ msgstr "تعداد بلوک‌ها"
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
 msgid "$ 32M"
 msgstr ""
-
-#. module: website
-#. odoo-python
-#: code:addons/website/models/ir_ui_view.py:0
-msgid "%(error)s (website: %(website_id)s)"
-msgstr "%(error)s (وب سایت: %(website_id)s)"
 
 #. module: website
 #. odoo-python
@@ -642,8 +636,8 @@ msgid ""
 "50,000+ companies run Odoo <br class=\"d-none d-lg-inline\"/>to grow their "
 "businesses."
 msgstr ""
-"بیش از 50,000 شرکت از اودوو استفاده می‌کنند <br class=\"d-none d-lg-inline\"/>"
-"تا کسب‌وکار خود را رشد دهند."
+"بیش از 50,000 شرکت از اودوو استفاده می‌کنند <br class=\"d-none d-lg-inline\"/"
+">تا کسب‌وکار خود را رشد دهند."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_call_to_action
@@ -782,8 +776,8 @@ msgid ""
 "                        <a href=\"#\" class=\"btn btn-secondary mb-2 "
 "o_translate_inline\">Learn more</a>"
 msgstr ""
-"<a href=\"#\" class=\"btn btn-primary mb-2 o_translate_inline\">شروع کنید</a>"
-"\n"
+"<a href=\"#\" class=\"btn btn-primary mb-2 o_translate_inline\">شروع کنید</"
+"a>\n"
 "                        <a href=\"#\" class=\"btn btn-secondary mb-2 "
 "o_translate_inline\">بیشتر بدانید</a>"
 
@@ -793,8 +787,8 @@ msgid ""
 "<a href=\"#\" class=\"btn btn-primary o_translate_inline\" "
 "role=\"button\">More details</a>"
 msgstr ""
-"<a href=\"#\" class=\"btn btn-primary o_translate_inline\" role=\"button\">"
-"جزئیات بیشتر</a>"
+"<a href=\"#\" class=\"btn btn-primary o_translate_inline\" "
+"role=\"button\">جزئیات بیشتر</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_text_box
@@ -840,8 +834,8 @@ msgid ""
 "<a href=\"#\" role=\"button\" class=\"btn btn-secondary "
 "o_translate_inline\">View All</a>"
 msgstr ""
-"<a href=\"#\" role=\"button\" class=\"btn btn-secondary o_translate_inline\">"
-"مشاهده همه</a>"
+"<a href=\"#\" role=\"button\" class=\"btn btn-secondary "
+"o_translate_inline\">مشاهده همه</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
@@ -1091,8 +1085,8 @@ msgstr ""
 "نام در پلتفرم ما با استفاده از آدرس ایمیل یا حساب‌های شبکه‌های اجتماعی شما "
 "می‌شود. پس از ایجاد حساب، ایمیلی حاوی لینک فعال‌سازی حساب برای شما ارسال "
 "می‌شود. پس از فعال‌سازی، از شما خواسته می‌شود تا پروفایل خود را تکمیل کنید، که "
-"شامل تنظیمات، افزودن اطلاعات پرداخت لازم و انتخاب ویژگی‌ها یا ماژول‌های اولیه‌ای "
-"است که می‌خواهید استفاده کنید."
+"شامل تنظیمات، افزودن اطلاعات پرداخت لازم و انتخاب ویژگی‌ها یا ماژول‌های "
+"اولیه‌ای است که می‌خواهید استفاده کنید."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -1538,8 +1532,8 @@ msgid ""
 "                        </small>"
 msgstr ""
 "<small class=\"text-muted\" style=\"text-align: center;\">\n"
-"                            اطلاعات شما با روش رمزنگاری شده محافظت می‌شود<br/>"
-"\n"
+"                            اطلاعات شما با روش رمزنگاری شده محافظت می‌شود<br/"
+">\n"
 "                            و از روش‌های پرداخت معتمدی استفاده می‌شود.\n"
 "                        </small>"
 
@@ -1651,8 +1645,8 @@ msgid ""
 "<small class=\"text-muted\">Your information is protected with encrypted "
 "checkout and trusted payment methods.</small>"
 msgstr ""
-"<small class=\"text-muted\">حفاظت از اطلاعات شما با تسویه حساب رمزگذاری شده و "
-"روش‌های پرداخت معتبر.</small>"
+"<small class=\"text-muted\">حفاظت از اطلاعات شما با تسویه حساب رمزگذاری شده "
+"و روش‌های پرداخت معتبر.</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
@@ -2056,8 +2050,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
 "rounded-circle pe-none\" contenteditable=\"false\"/>\n"
-"                        <small class=\"text-muted\">۱۵ اردیبهشت 1405</small>"
-"\n"
+"                        <small class=\"text-muted\">۱۵ اردیبهشت 1405</"
+"small>\n"
 "                        <strong>افزودن پشتیبانی چندزبانه یکپارچه</strong>"
 
 #. module: website
@@ -2149,8 +2143,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_small-fs\">\n"
 "                                        متخصص طراحی مبلمان\n"
-"                                        <br/><br/><br/><br/><br/><br/><br/>"
-"<br/><br/><br/><br/>\n"
+"                                        <br/><br/><br/><br/><br/><br/><br/"
+"><br/><br/><br/><br/>\n"
 "                                    </span>"
 
 #. module: website
@@ -2744,8 +2738,8 @@ msgid ""
 "A buttery, flaky pastry with a golden-brown crust, perfect for breakfast or "
 "a light snack."
 msgstr ""
-"یک شیرینی خوشمزه و لایه‌ای با پوسته طلایی-قهوه‌ای، مناسب برای صبحانه یا میان‌وعده "
-"سبک."
+"یک شیرینی خوشمزه و لایه‌ای با پوسته طلایی-قهوه‌ای، مناسب برای صبحانه یا "
+"میان‌وعده سبک."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel_cards
@@ -3467,9 +3461,9 @@ msgid ""
 "documentation, video tutorials, and community forums where you can connect "
 "with other users and share insights."
 msgstr ""
-"علاوه بر این، یک پایگاه دانش جامع ارائه می‌دهیم که شامل مستندات دقیق، آموزش‌های "
-"ویدیویی و تالارهای گفتگو است که می‌توانید با سایر کاربران ارتباط برقرار کرده و "
-"بینش‌ها را به اشتراک بگذارید."
+"علاوه بر این، یک پایگاه دانش جامع ارائه می‌دهیم که شامل مستندات دقیق، "
+"آموزش‌های ویدیویی و تالارهای گفتگو است که می‌توانید با سایر کاربران ارتباط "
+"برقرار کرده و بینش‌ها را به اشتراک بگذارید."
 
 #. module: website
 #. odoo-javascript
@@ -4058,8 +4052,8 @@ msgid ""
 "Are you sure you want to discard all your changes? Once you do, they're gone "
 "for good."
 msgstr ""
-"آیا مطمئن هستید که می‌خواهید تمام تغییرات خود را نادیده بگیرید؟ پس از این کار"
-"، تغییرات برای همیشه از بین خواهند رفت."
+"آیا مطمئن هستید که می‌خواهید تمام تغییرات خود را نادیده بگیرید؟ پس از این "
+"کار، تغییرات برای همیشه از بین خواهند رفت."
 
 #. module: website
 #. odoo-javascript
@@ -4914,8 +4908,8 @@ msgid ""
 "points, list, group, benefits, features, advantages"
 msgstr ""
 "فراخوان به عمل، دکمه، اقدام، مشارکت، لینک، پیشنهاد، درخواست، فراخوان به عمل، "
-"اعلان، تعامل، محرک، آیتم‌ها، چک‌لیست‌ها، ثبت‌ها، توالی‌ها، بالت‌ها، نقاط، لیست، گروه"
-"، مزایا، ویژگی‌ها، برتری‌ها"
+"اعلان، تعامل، محرک، آیتم‌ها، چک‌لیست‌ها، ثبت‌ها، توالی‌ها، بالت‌ها، نقاط، لیست، "
+"گروه، مزایا، ویژگی‌ها، برتری‌ها"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -5463,8 +5457,8 @@ msgid ""
 "Classic pizza with fresh mozzarella, San Marzano tomatoes, and basil leaves, "
 "drizzled with extra virgin olive oil."
 msgstr ""
-"پیتزای کلاسیک با موزارلا تازه، گوجه‌فرنگی سن مارزانو و برگ ریحان، همراه با روغن "
-"زیتون فوق بکر."
+"پیتزای کلاسیک با موزارلا تازه، گوجه‌فرنگی سن مارزانو و برگ ریحان، همراه با "
+"روغن زیتون فوق بکر."
 
 #. module: website
 #. odoo-javascript
@@ -7535,9 +7529,9 @@ msgid ""
 "and we provide detailed release notes to keep you informed of new features "
 "and improvements."
 msgstr ""
-"هر به‌روزرسانی به طور کامل آزمایش می‌شود تا سازگاری و قابلیت اطمینان تضمین شود"
-"، و ما یادداشت‌های انتشار دقیق ارائه می‌دهیم تا شما را از ویژگی‌ها و بهبودهای "
-"جدید مطلع کنیم."
+"هر به‌روزرسانی به طور کامل آزمایش می‌شود تا سازگاری و قابلیت اطمینان تضمین "
+"شود، و ما یادداشت‌های انتشار دقیق ارائه می‌دهیم تا شما را از ویژگی‌ها و "
+"بهبودهای جدید مطلع کنیم."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
@@ -8309,6 +8303,12 @@ msgstr "نمای گسترشی"
 #: model:ir.model.fields,field_description:website.field_website_page__xml_id
 msgid "External ID"
 msgstr "آیدی خارجی"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "External ID can not be loaded: %(error)s (website: %(website_id)s)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -9923,6 +9923,12 @@ msgstr "هیبرید"
 #: model_terms:ir.ui.view,arch_db:website.cookies_bar
 msgid "I agree"
 msgstr "موافقم"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/form/utils.js:0
+msgid "I agree to the"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -13047,8 +13053,8 @@ msgid ""
 "Note that the \"Website / Editor and Designer\" group is implicitly added "
 "when saving if any group is specified."
 msgstr ""
-"توجه داشته باشید که گروه «وب سایت / ویرایشگر و طراح»، اگر گروهی مشخص شده باشد"
-"، به طور ضمنی در هنگام ذخیره‌سازی اضافه می‌شود."
+"توجه داشته باشید که گروه «وب سایت / ویرایشگر و طراح»، اگر گروهی مشخص شده "
+"باشد، به طور ضمنی در هنگام ذخیره‌سازی اضافه می‌شود."
 
 #. module: website
 #. odoo-javascript
@@ -16592,8 +16598,8 @@ msgid ""
 "Soft, sweet dough rolled with cinnamon and sugar, topped with a rich cream "
 "cheese frosting."
 msgstr ""
-"خمیر نرم و شیرین که با دارچین و شکر پیچیده شده و با یک لایه غلیظ از خامه پنیر "
-"تزئین شده است."
+"خمیر نرم و شیرین که با دارچین و شکر پیچیده شده و با یک لایه غلیظ از خامه "
+"پنیر تزئین شده است."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -16617,8 +16623,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
 msgid "Sophia evaluates financial data and provides strategic insights."
-msgstr ""
-"سوفیا داده‌های مالی را ارزیابی می‌کند و بینش‌های استراتژیک ارائه می‌دهد."
+msgstr "سوفیا داده‌های مالی را ارزیابی می‌کند و بینش‌های استراتژیک ارائه می‌دهد."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
@@ -17196,6 +17201,12 @@ msgstr "شناسه قالب: %s"
 #: model_terms:ir.ui.view,arch_db:website.qweb_500
 msgid "Template fallback"
 msgstr "<div>قالب جایگزین</div>"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "Template not found: '%(error)s' (website: %(website_id)s)"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega
@@ -19469,9 +19480,9 @@ msgid ""
 "Refunds are processed within 5-7 business days of receiving the returned "
 "item."
 msgstr ""
-"ما یک سیاست بازگشت 30 روزه برای تمام محصولات ارائه می‌دهیم. اقلام باید در شرایط "
-"اصلی خود، استفاده نشده و شامل رسید یا اثبات خرید باشند. بازپرداخت‌ها ظرف 5-7 "
-"روز کاری پس از دریافت کالای مرجوعی انجام می‌شوند."
+"ما یک سیاست بازگشت 30 روزه برای تمام محصولات ارائه می‌دهیم. اقلام باید در "
+"شرایط اصلی خود، استفاده نشده و شامل رسید یا اثبات خرید باشند. بازپرداخت‌ها "
+"ظرف 5-7 روز کاری پس از دریافت کالای مرجوعی انجام می‌شوند."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cards_grid
@@ -20296,9 +20307,10 @@ msgid ""
 "chat on our website. Our dedicated team is available 24/7 to assist with any "
 "inquiries or issues."
 msgstr ""
-"می‌توانید از طریق ایمیل info@yourcompany.example.com، تماس با شماره 021-476-"
-"26486 یا استفاده از چت زنده در وب سایت با تیم پشتیبانی مشتریان ما تماس "
-"بگیرید. تیم اختصاصی ما 24/7 برای کمک به هرگونه سؤال یا مشکل در دسترس است."
+"می‌توانید از طریق ایمیل info@yourcompany.example.com، تماس با شماره "
+"021-476-26486 یا استفاده از چت زنده در وب سایت با تیم پشتیبانی مشتریان ما "
+"تماس بگیرید. تیم اختصاصی ما 24/7 برای کمک به هرگونه سؤال یا مشکل در دسترس "
+"است."
 
 #. module: website
 #. odoo-python
@@ -20387,8 +20399,8 @@ msgid ""
 "if you reject or discard those cookies."
 msgstr ""
 "می‌توانید استفاده شخص ثالث از کوکی‌ها را با مراجعه به <a "
-"class=\"o_translate_inline\" href=\"https://optout.networkadvertising.org/"
-"?c=1\" rel=\"nofollow\">صفحه انصراف از تبلیغات شبکه</a> غیر فعال کنید.\n"
+"class=\"o_translate_inline\" href=\"https://optout.networkadvertising.org/?"
+"c=1\" rel=\"nofollow\">صفحه انصراف از تبلیغات شبکه</a> غیر فعال کنید.\n"
 "                                                وب سایت در صورت رد یا دور "
 "انداختن کوکی‌ها همچنان کار خواهد کرد."
 
@@ -20811,8 +20823,9 @@ msgid ""
 "collapsible, hide-show, movement, information, image, picture, photo, "
 "illustration, media, visual"
 msgstr ""
-"پاسخ‌های رایج، سؤالات رایج، سؤالات متداول، QA، جمع‌شونده، قابل گسترش، تغییر وضعیت"
-"، جمع‌شدنی، پنهان-نمایش، حرکت، اطلاعات، تصویر، عکس، تصویرسازی، رسانه، بصری"
+"پاسخ‌های رایج، سؤالات رایج، سؤالات متداول، QA، جمع‌شونده، قابل گسترش، تغییر "
+"وضعیت، جمع‌شدنی، پنهان-نمایش، حرکت، اطلاعات، تصویر، عکس، تصویرسازی، رسانه، "
+"بصری"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -20921,8 +20934,8 @@ msgid ""
 "combination, network, relationships, interactions, connectivity, "
 "collaborations"
 msgstr ""
-"محتوا، تصویر، عکس، تصویرسازی، رسانه، بصری، مقاله، داستان، ترکیب، شبکه، روابط"
-"، تعاملات، اتصال، همکاری‌ها"
+"محتوا، تصویر، عکس، تصویرسازی، رسانه، بصری، مقاله، داستان، ترکیب، شبکه، "
+"روابط، تعاملات، اتصال، همکاری‌ها"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -20930,8 +20943,8 @@ msgid ""
 "content, picture, photo, illustration, media, visual, article, story, "
 "combination, trendy, pattern, design"
 msgstr ""
-"محتوا، تصویر، عکس، تصویرسازی، رسانه، بصری، مقاله، داستان، ترکیب، مد روز، الگو"
-"، طراحی"
+"محتوا، تصویر، عکس، تصویرسازی، رسانه، بصری، مقاله، داستان، ترکیب، مد روز، "
+"الگو، طراحی"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -20939,8 +20952,8 @@ msgid ""
 "content, picture, photo, illustration, media, visual, article, story, "
 "combination, trendy, pattern, design, shape, geometric, patterned"
 msgstr ""
-"محتوا، تصویر، عکس، تصویرسازی، رسانه، بصری، مقاله، داستان، ترکیب، مد روز، الگو"
-"، طراحی، شکل، هندسی، الگودار"
+"محتوا، تصویر، عکس، تصویرسازی، رسانه، بصری، مقاله، داستان، ترکیب، مد روز، "
+"الگو، طراحی، شکل، هندسی، الگودار"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -20948,8 +20961,8 @@ msgid ""
 "content, picture, photo, illustration, media, visual, article, story, "
 "combination, trendy, pattern, design, shape, geometric, patterned, contrast"
 msgstr ""
-"محتوا، تصویر، عکس، تصویرسازی، رسانه، بصری، مقاله، داستان، ترکیب، مد روز، الگو"
-"، طراحی، شکل، هندسی، الگودار، کنتراست"
+"محتوا، تصویر، عکس، تصویرسازی، رسانه، بصری، مقاله، داستان، ترکیب، مد روز، "
+"الگو، طراحی، شکل، هندسی، الگودار، کنتراست"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -20958,8 +20971,9 @@ msgid ""
 "combination, trendy, pattern, design, shape, geometric, patterned, contrast, "
 "collage, arrangement, gallery, creative, mosaic"
 msgstr ""
-"محتوا، تصویر، عکس، تصویرسازی، رسانه، بصری، مقاله، داستان، ترکیب، مد روز، الگو"
-"، طراحی، شکل، هندسی، الگودار، کنتراست، کلاژ، چیدمان، گالری، خلاقانه، موزاییک"
+"محتوا، تصویر، عکس، تصویرسازی، رسانه، بصری، مقاله، داستان، ترکیب، مد روز، "
+"الگو، طراحی، شکل، هندسی، الگودار، کنتراست، کلاژ، چیدمان، گالری، خلاقانه، "
+"موزاییک"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21112,8 +21126,9 @@ msgid ""
 "thumbnails, engage, call to action, cta, showcase"
 msgstr ""
 "چهار بخش، ستون، گرید، تقسیم، تقسیم، بخش‌ها، تصاویر، تصویرسازی، رسانه، عکس‌ها، "
-"کاشی‌ها، چیدمان، گالری، گرید تصاویر، ترکیبی، مجموعه، چیدمان، گرید بصری، ویترین"
-"، بصری‌ها، پورتفولیو، تصاویر کوچک، درگیر کردن، فراخوان به عمل، cta، ویترین"
+"کاشی‌ها، چیدمان، گالری، گرید تصاویر، ترکیبی، مجموعه، چیدمان، گرید بصری، "
+"ویترین، بصری‌ها، پورتفولیو، تصاویر کوچک، درگیر کردن، فراخوان به عمل، cta، "
+"ویترین"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.brand_promotion
@@ -21156,8 +21171,8 @@ msgid ""
 "rotating, swipe, transition, media-carousel, movement, cta, engagement, call "
 "to action"
 msgstr ""
-"گالری، کروسل، اسلایدر، اسلایدشو، عکس، تصویر، اسلایدر-تصویر، چرخان، سوایپ، انتقال"
-"، کروسل-رسانه، حرکت، cta، تعامل، فراخوان عمل"
+"گالری، کروسل، اسلایدر، اسلایدشو، عکس، تصویر، اسلایدر-تصویر، چرخان، سوایپ، "
+"انتقال، کروسل-رسانه، حرکت، cta، تعامل، فراخوان عمل"
 
 #. module: website
 #. odoo-javascript
@@ -21176,8 +21191,8 @@ msgid ""
 "graph, table, diagram, pie, plot, bar, metrics, figures, data-visualization, "
 "statistics, stats, analytics, infographic, skills, report"
 msgstr ""
-"نمودار، جدول، نمودار، پای، پلات، میله، معیارها، ارقام، تجسم داده‌ها، آمار، آمار"
-"، تحلیل‌ها، اینفوگرافیک، مهارت‌ها، گزارش"
+"نمودار، جدول، نمودار، پای، پلات، میله، معیارها، ارقام، تجسم داده‌ها، آمار، "
+"آمار، تحلیل‌ها، اینفوگرافیک، مهارت‌ها، گزارش"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21221,8 +21236,8 @@ msgid ""
 "article, combination, trendy, pattern, design, bold, impactful, vibrant, "
 "standout"
 msgstr ""
-"سرتیتر، هدر، محتوا، تصویر، عکس، تصویرسازی، رسانه، بصری، مقاله، ترکیب، مد روز"
-"، الگو، طراحی، پررنگ، تاثیرگذار، پرانرژی، برجسته"
+"سرتیتر، هدر، محتوا، تصویر، عکس، تصویرسازی، رسانه، بصری، مقاله، ترکیب، مد "
+"روز، الگو، طراحی، پررنگ، تاثیرگذار، پرانرژی، برجسته"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21261,8 +21276,8 @@ msgid ""
 "hero, jumbotron, headline, header, branding, intro, home, showcase, "
 "spotlight, lead, welcome, announcement, splash, top, main"
 msgstr ""
-"قهرمان، جامبوترون، سرتیتر، هدر، برندینگ، مقدمه، خانه، ویترین، نورافکن، پیشرو"
-"، خوش‌آمدگویی، اعلامیه، اسپلش، بالا، اصلی"
+"قهرمان، جامبوترون، سرتیتر، هدر، برندینگ، مقدمه، خانه، ویترین، نورافکن، "
+"پیشرو، خوش‌آمدگویی، اعلامیه، اسپلش، بالا، اصلی"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21289,9 +21304,9 @@ msgid ""
 "cta, button, highlight, showcase, spotlight, sober, trendy, design, picture, "
 "photo, illustration, visual, description, containers, layouts, product, buy"
 msgstr ""
-"قهرمان، جامبوترون، عنوان، سربرگ، معرفی، بنر، فراخوان عمل، cta، دکمه، هایلایت، "
-"ویترین، کانون توجه، ساده، مد روز، طراحی، عکس، تصویر، تصویرسازی، بصری، توضیحات"
-"، کانتینرها، طرح‌بندی‌ها، محصول، خرید"
+"قهرمان، جامبوترون، عنوان، سربرگ، معرفی، بنر، فراخوان عمل، cta، دکمه، "
+"هایلایت، ویترین، کانون توجه، ساده، مد روز، طراحی، عکس، تصویر، تصویرسازی، "
+"بصری، توضیحات، کانتینرها، طرح‌بندی‌ها، محصول، خرید"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21363,8 +21378,8 @@ msgid ""
 "to action, cta, minimalist, marketing"
 msgstr ""
 "قهرمان، جامبوترون، عنوان، سربرگ، فروشگاه، سبد خرید، محصول، تجارت الکترونیکی، "
-"عکس، تصویر، تصویرسازی، رسانه، بصری، مقدمه، خانه، محتوا، توضیحات، فراخوان عمل"
-"، cta، مینیمالیستی، بازاریابی"
+"عکس، تصویر، تصویرسازی، رسانه، بصری، مقدمه، خانه، محتوا، توضیحات، فراخوان "
+"عمل، cta، مینیمالیستی، بازاریابی"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21416,8 +21431,8 @@ msgid ""
 "photo, illustration, media, visual"
 msgstr ""
 "تاریخچه، داستان، رویدادها، نقاط عطف، گاه‌شمار، توالی، پیشرفت، دستاوردها، "
-"تغییرات، به‌روزرسانی‌ها، اطلاعیه‌ها، اخیر، جدیدترین، عکس، تصویر، تصویرسازی، رسانه"
-"، بصری"
+"تغییرات، به‌روزرسانی‌ها، اطلاعیه‌ها، اخیر، جدیدترین، عکس، تصویر، تصویرسازی، "
+"رسانه، بصری"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -21444,8 +21459,8 @@ msgid ""
 "images, pictures, photos, illustrations, media, visual, slider, tabs, "
 "switch, tabbed, sections, navigation"
 msgstr ""
-"تصاویر، عکس‌ها، نگاره‌ها، رسانه، بصری، اسلایدر، تب‌ها، سوئیچ، تب‌بندی شده، بخش‌ها، "
-"ناوبری"
+"تصاویر، عکس‌ها، نگاره‌ها، رسانه، بصری، اسلایدر، تب‌ها، سوئیچ، تب‌بندی شده، "
+"بخش‌ها، ناوبری"
 
 #. module: website
 #. odoo-javascript
@@ -21512,8 +21527,8 @@ msgid ""
 "masonry, grid, column, pictures, photos, album, showcase, visuals, "
 "portfolio, mosaic, collage, arrangement, collection, visual-grid"
 msgstr ""
-"سنگ‌چین، گرید، ستون، تصاویر، عکس‌ها، آلبوم، ویترین، بصری‌ها، پورتفولیو، موزاییک"
-"، کلاژ، چیدمان، مجموعه، گرید بصری"
+"سنگ‌چین، گرید، ستون، تصاویر، عکس‌ها، آلبوم، ویترین، بصری‌ها، پورتفولیو، "
+"موزاییک، کلاژ، چیدمان، مجموعه، گرید بصری"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21572,8 +21587,8 @@ msgid ""
 "organization, company, people, column, members, staffs, profiles, bios, "
 "roles, personnel, crew"
 msgstr ""
-"سازمان، شرکت، افراد، ستون، اعضا، کارکنان، پروفایل‌ها، بیوگرافی‌ها، نقش‌ها، پرسنل"
-"، تیم"
+"سازمان، شرکت، افراد، ستون، اعضا، کارکنان، پروفایل‌ها، بیوگرافی‌ها، نقش‌ها، "
+"پرسنل، تیم"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21581,8 +21596,8 @@ msgid ""
 "organization, company, people, members, staffs, profiles, bios, roles, "
 "personnel, crew, patterned"
 msgstr ""
-"سازمان، شرکت، افراد، اعضا، کارکنان، پروفایل‌ها، بیوگرافی‌ها، نقش‌ها، پرسنل، خدمه"
-"، طرح‌دار"
+"سازمان، شرکت، افراد، اعضا، کارکنان، پروفایل‌ها، بیوگرافی‌ها، نقش‌ها، پرسنل، "
+"خدمه، طرح‌دار"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21590,8 +21605,8 @@ msgid ""
 "organization, company, people, members, staffs, profiles, bios, roles, "
 "personnel, crew, patterned, trendy"
 msgstr ""
-"سازمان، شرکت، افراد، اعضا، کارکنان، پروفایل‌ها، بیوگرافی‌ها، نقش‌ها، پرسنل، تیم"
-"، الگودار، مد روز"
+"سازمان، شرکت، افراد، اعضا، کارکنان، پروفایل‌ها، بیوگرافی‌ها، نقش‌ها، پرسنل، "
+"تیم، الگودار، مد روز"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21599,8 +21614,8 @@ msgid ""
 "organization, company, people, members, staffs, profiles, bios, roles, "
 "personnel, crew, patterned, trendy, social"
 msgstr ""
-"سازمان، شرکت، افراد، اعضا، کارکنان، پروفایل‌ها، بیوگرافی‌ها، نقش‌ها، پرسنل، تیم"
-"، الگودار، مد روز، اجتماعی"
+"سازمان، شرکت، افراد، اعضا، کارکنان، پروفایل‌ها، بیوگرافی‌ها، نقش‌ها، پرسنل، "
+"تیم، الگودار، مد روز، اجتماعی"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21718,8 +21733,8 @@ msgid ""
 "information, knowledge, guide, troubleshooting, assistance, QA, terms of "
 "services"
 msgstr ""
-"سؤالات، پاسخ‌ها، پاسخ‌های رایج، سؤالات رایج، سؤالات متداول، کمک، پشتیبانی، اطلاعات"
-"، دانش، راهنما، عیب‌یابی، کمک، QA، شرایط خدمات"
+"سؤالات، پاسخ‌ها، پاسخ‌های رایج، سؤالات رایج، سؤالات متداول، کمک، پشتیبانی، "
+"اطلاعات، دانش، راهنما، عیب‌یابی، کمک، QA، شرایط خدمات"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21727,8 +21742,8 @@ msgid ""
 "questions, answers, common answers, common questions, faq, help, support, "
 "information, knowledge, guide, troubleshooting, assistance, columns, QA"
 msgstr ""
-"سؤالات، پاسخ‌ها، پاسخ‌های رایج، سؤالات رایج، سؤالات متداول، کمک، پشتیبانی، اطلاعات"
-"، دانش، راهنما، عیب‌یابی، کمک، ستون‌ها، QA"
+"سؤالات، پاسخ‌ها، پاسخ‌های رایج، سؤالات رایج، سؤالات متداول، کمک، پشتیبانی، "
+"اطلاعات، دانش، راهنما، عیب‌یابی، کمک، ستون‌ها، QA"
 
 #. module: website
 #. odoo-javascript
@@ -21817,8 +21832,8 @@ msgid ""
 "shop, cart, product, categories, ecommerce, e-commerce, cards, trendy, "
 "column, layouts, picture, photo, illustration, media, visual"
 msgstr ""
-"فروشگاه، سبد خرید، محصول، دسته‌بندی‌ها، تجارت الکترونیکی، کارت‌ها، مد روز، ستون"
-"، طرح‌بندی، تصویر، عکس، تصویرسازی، رسانه، بصری"
+"فروشگاه، سبد خرید، محصول، دسته‌بندی‌ها، تجارت الکترونیکی، کارت‌ها، مد روز، "
+"ستون، طرح‌بندی، تصویر، عکس، تصویرسازی، رسانه، بصری"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -22015,6 +22030,9 @@ msgstr "✽ پیتزاها"
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid "✽  What We Offer"
 msgstr "✽ پیشنهاد ما"
+
+#~ msgid "%(error)s (website: %(website_id)s)"
+#~ msgstr "%(error)s (وب سایت: %(website_id)s)"
 
 #~ msgid "Accounts are usable across all your multiple websites"
 #~ msgstr "حساب‌ها در تمامی وب‌سایت‌ های متعدد شما قابل استفاده هستند"

@@ -23,7 +23,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 17:42+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-10-28 15:35+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Slovenian <https://translate.odoo.com/projects/odoo-s19-3/"
@@ -261,12 +261,6 @@ msgstr "Število blokov"
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
 msgid "$ 32M"
 msgstr "$ 32M"
-
-#. module: website
-#. odoo-python
-#: code:addons/website/models/ir_ui_view.py:0
-msgid "%(error)s (website: %(website_id)s)"
-msgstr "%(error)s (spletno mesto: %(website_id)s)"
 
 #. module: website
 #. odoo-python
@@ -773,8 +767,8 @@ msgid ""
 "email\">info@yourcompany.example.com</a>"
 msgstr ""
 "<a class=\"o_translate_inline\" href=\"mail-"
-"to:info@yourcompany.example.com\" title=\"Pošlji e-pošto\">"
-"info@yourcompany.example.com</a>"
+"to:info@yourcompany.example.com\" title=\"Pošlji e-"
+"pošto\">info@yourcompany.example.com</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_call_to_action
@@ -782,8 +776,8 @@ msgid ""
 "<a class=\"o_translate_inline\" "
 "href=\"mailto:info@yourcompany.example.com\">info@yourcompany.example.com</a>"
 msgstr ""
-"<a class=\"o_translate_inline\" href=\"mailto:info@yourcompany.example.com\">"
-"info@yourcompany.example.com</a>"
+"<a class=\"o_translate_inline\" "
+"href=\"mailto:info@yourcompany.example.com\">info@yourcompany.example.com</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_contact_info
@@ -821,8 +815,8 @@ msgid ""
 "<a href=\"#\" class=\"btn btn-primary o_translate_inline\" "
 "role=\"button\">More details</a>"
 msgstr ""
-"<a href=\"#\" class=\"btn btn-primary o_translate_inline\" role=\"button\">"
-"Več podrobnosti</a>"
+"<a href=\"#\" class=\"btn btn-primary o_translate_inline\" "
+"role=\"button\">Več podrobnosti</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_text_box
@@ -870,8 +864,8 @@ msgid ""
 "<a href=\"#\" role=\"button\" class=\"btn btn-secondary "
 "o_translate_inline\">View All</a>"
 msgstr ""
-"<a href=\"#\" role=\"button\" class=\"btn btn-secondary o_translate_inline\">"
-"Prikaži vse</a>"
+"<a href=\"#\" role=\"button\" class=\"btn btn-secondary "
+"o_translate_inline\">Prikaži vse</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
@@ -888,8 +882,8 @@ msgid ""
 "<a href=\"/contactus\" class=\"btn btn-primary o_translate_inline\">Contact "
 "us</a>"
 msgstr ""
-"<a href=\"/contactus\" class=\"btn btn-primary o_translate_inline\">"
-"Kontaktirajte nas</a>"
+"<a href=\"/contactus\" class=\"btn btn-primary "
+"o_translate_inline\">Kontaktirajte nas</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.footer_cookie_policy_link
@@ -1353,8 +1347,8 @@ msgid ""
 "<i class=\"fa fa-fw o_button_icon fa-circle text-success\" "
 "title=\"Connected\"/>"
 msgstr ""
-"<i class=\"fa fa-fw o_button_icon fa-circle text-success\" "
-"title=\"Povezan\"/>"
+"<i class=\"fa fa-fw o_button_icon fa-circle text-success\" title=\"Povezan\"/"
+">"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_pages_kanban_view
@@ -1535,8 +1529,8 @@ msgstr ""
 "                        30-dnevni spletni rok za vračila\n"
 "                    </small>\n"
 "                    <small class=\"d-flex align-items-center\">\n"
-"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/>"
-"\n"
+"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/"
+">\n"
 "                        Standardna dostava\n"
 "                    </small>"
 
@@ -1755,7 +1749,8 @@ msgstr "<small>Brezplačna vračila in standardna dostava</small>"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons_horizontal
 msgid "<small>Instant setup, satisfied or reimbursed.</small>"
-msgstr "<small>Takojšnja nastavitev, zadovoljni ali vam povrnemo denar.</small>"
+msgstr ""
+"<small>Takojšnja nastavitev, zadovoljni ali vam povrnemo denar.</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
@@ -2200,8 +2195,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_small-fs\">\n"
 "                                        Specialist za oblikovanje pohištva\n"
-"                                        <br/><br/><br/><br/><br/><br/><br/>"
-"<br/><br/><br/><br/>\n"
+"                                        <br/><br/><br/><br/><br/><br/><br/"
+"><br/><br/><br/><br/>\n"
 "                                    </span>"
 
 #. module: website
@@ -2489,8 +2484,8 @@ msgid ""
 msgstr ""
 "<span style=\"font-size: 10.75rem;\">\n"
 "                        <font class=\"text-gradient\" style=\"background-"
-"image: linear-gradient(0deg, var(--o-color-4) 25%, var(--o-color-5) 90%);\">"
-"\n"
+"image: linear-gradient(0deg, var(--o-color-4) 25%, var(--o-color-5) 90%);"
+"\">\n"
 "                            87%\n"
 "                        </font>\n"
 "                    </span>"
@@ -3478,8 +3473,8 @@ msgid ""
 "Add this page to the \"+New\" page templates. It will be added to the "
 "\"Custom\" category."
 msgstr ""
-"Dodajte to stran med predloge strani »+Novo«. Dodana bo v kategorijo »Po meri"
-"«."
+"Dodajte to stran med predloge strani »+Novo«. Dodana bo v kategorijo »Po "
+"meri«."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.external_snippets
@@ -6920,8 +6915,8 @@ msgid ""
 "Design is the intermediary between <strong>information</strong> and "
 "<strong>understanding</strong>"
 msgstr ""
-"Oblikovanje je posrednik med <strong>informacijami</strong> in <strong>"
-"razumevanjem</strong>"
+"Oblikovanje je posrednik med <strong>informacijami</strong> in "
+"<strong>razumevanjem</strong>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_headline
@@ -7855,8 +7850,8 @@ msgid ""
 msgstr ""
 "Izboljšajte svoj bivalni prostor s pohištvom, ki združuje sodobno estetiko "
 "in klasični šarm ter je izdelano tako, da v vaš dom vnese udobje in slog.\n"
-"                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"
-"<br/><br/><br/><br/><br/>"
+"                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/"
+"><br/><br/><br/><br/><br/>"
 
 #. module: website
 #. odoo-javascript
@@ -8060,7 +8055,8 @@ msgstr "Vneseni datum ali čas ni pravilen! Mora biti %(start)s (%(format)s)."
 #: code:addons/website/static/src/builder/plugins/form/form_option_plugin.js:0
 msgid ""
 "Entered date or time is not correct! It must be after %(start)s (%(format)s)."
-msgstr "Vneseni datum ali čas ni pravilen! Mora biti po %(start)s (%(format)s)."
+msgstr ""
+"Vneseni datum ali čas ni pravilen! Mora biti po %(start)s (%(format)s)."
 
 #. module: website
 #. odoo-javascript
@@ -8414,6 +8410,12 @@ msgstr "Razširjeni prikaz"
 #: model:ir.model.fields,field_description:website.field_website_page__xml_id
 msgid "External ID"
 msgstr "Zunanji ID"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "External ID can not be loaded: %(error)s (website: %(website_id)s)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -10028,6 +10030,12 @@ msgstr "Hibrid"
 #: model_terms:ir.ui.view,arch_db:website.cookies_bar
 msgid "I agree"
 msgstr "Strinjam se"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/form/utils.js:0
+msgid "I agree to the"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -14410,7 +14418,8 @@ msgstr "Prodajna mesta"
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/popup_option.xml:0
 msgid "Pop-up appears when a user is about to leave the website."
-msgstr "Pojavno okno se prikaže, ko uporabnik namerava zapustiti spletno mesto."
+msgstr ""
+"Pojavno okno se prikaže, ko uporabnik namerava zapustiti spletno mesto."
 
 #. module: website
 #. odoo-javascript
@@ -17323,6 +17332,12 @@ msgstr "ID predloge: %s"
 #: model_terms:ir.ui.view,arch_db:website.qweb_500
 msgid "Template fallback"
 msgstr "Zasilna predloga"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "Template not found: '%(error)s' (website: %(website_id)s)"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega
@@ -22219,6 +22234,9 @@ msgstr "✽ Pizze"
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid "✽  What We Offer"
 msgstr "✽  Kaj ponujamo"
+
+#~ msgid "%(error)s (website: %(website_id)s)"
+#~ msgstr "%(error)s (spletno mesto: %(website_id)s)"
 
 #~ msgid "Accounts are usable across all your multiple websites"
 #~ msgstr "Računi so uporabni na vseh vaših spletnih mestih"
