@@ -35,8 +35,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:37+0000\n"
-"PO-Revision-Date: 2026-10-08 11:33+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-29 07:49+0000\n"
 "Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
 "Language-Team: Finnish <https://translate.odoo.com/projects/odoo-s19-4/"
 "hr_holidays/fi/>\n"
@@ -577,6 +577,11 @@ msgid ""
 msgstr ""
 
 #. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
+msgid "A supporting document is required for this type of time off."
+msgstr ""
+
+#. module: hr_holidays
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 msgid "A time off cannot be duplicated."
@@ -947,7 +952,8 @@ msgstr "Varauksen toinen hyväksyntä"
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 msgid "Allocation must be \"To Approve\" in order to approve it."
-msgstr "Varauksen täytyy olla tilassa \"Hyväksyttävä\", jotta sen voi hyväksyä."
+msgstr ""
+"Varauksen täytyy olla tilassa \"Hyväksyttävä\", jotta sen voi hyväksyä."
 
 #. module: hr_holidays
 #. odoo-python
@@ -1242,22 +1248,22 @@ msgid "Both Approved and Confirmed"
 msgstr "Sekä hyväksytty että vahvistettu."
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__manager
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__manager
-msgid "By Employee's Approver"
-msgstr "Työntekijän hyväksyjän mukaan"
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__hr
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__hr
+msgid "By HR Responsible"
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__both
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__both
-msgid "By Employee's Approver and Time Off Officer"
-msgstr "Työntekijän hyväksyjän ja lomapäällikön mukaan"
+msgid "By HR Responsible and Time Off Approver"
+msgstr ""
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__hr
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__hr
-msgid "By Time Off Officer"
-msgstr "Lomapäällikön mukaan"
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__manager
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__manager
+msgid "By Time Off Approver"
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__count_days_as__calendar
@@ -2381,6 +2387,14 @@ msgstr ""
 "sitä."
 
 #. module: hr_holidays
+#: model:ir.model.fields,help:hr_holidays.field_hr_work_entry_type__create_calendar_meeting
+msgid ""
+"If this field is checked, every leave request of this type will have a "
+"corresponding entry in the calendar application. There will be no entry if "
+"this stays unchecked."
+msgstr ""
+
+#. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_work_entry_type__count_days_as
 msgid ""
 "If you take a leave on the whole week, worked days will result in a various "
@@ -2427,7 +2441,7 @@ msgstr "On seuraaja"
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__is_name_custom
 msgid "Is Name Custom"
-msgstr "Onko nimi mukautettu"
+msgstr "Nimi on mukautettu"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__is_officer
@@ -3257,6 +3271,8 @@ msgstr ""
 
 #. module: hr_holidays
 #. odoo-javascript
+#. odoo-python
+#: code:addons/hr_holidays/models/resource_calendar.py:0
 #: code:addons/hr_holidays/static/src/views/calendar/calendar_side_panel/calendar_side_panel.xml:0
 #: model:ir.actions.act_window,name:hr_holidays.open_view_public_holiday
 #: model:ir.actions.act_window,name:hr_holidays.resource_calendar_global_leaves_action_from_calendar
@@ -3879,7 +3895,8 @@ msgstr "Alkamispäivän on oltava aikaisempi kuin päättymispäivän."
 #. module: hr_holidays
 #: model:ir.model.constraint,message:hr_holidays.constraint_hr_leave_date_check2
 msgid "The start date must be before or equal to the end date."
-msgstr "Alkamispäivän on oltava aikaisempi tai yhtä suuri kuin päättymispäivän."
+msgstr ""
+"Alkamispäivän on oltava aikaisempi tai yhtä suuri kuin päättymispäivän."
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_allocation__state
@@ -3989,7 +4006,8 @@ msgstr ""
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__accrual_validity_type
 msgid "This field defines the unit of time after which the accrual ends."
-msgstr "Tässä kentässä määritellään aikayksikkö, jonka jälkeen kertymä päättyy."
+msgstr ""
+"Tässä kentässä määritellään aikayksikkö, jonka jälkeen kertymä päättyy."
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__start_type
@@ -4395,7 +4413,8 @@ msgstr "Kaksi kertaa vuodessa"
 #: code:addons/hr_holidays/models/resource_calendar_leaves.py:0
 msgid ""
 "Two public holidays cannot overlap each other for the same working hours."
-msgstr "Kaksi yleistä vapaapäivää ei voi olla päällekkäin saman työajan aikana."
+msgstr ""
+"Kaksi yleistä vapaapäivää ei voi olla päällekkäin saman työajan aikana."
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_employee_report_filter
@@ -5376,6 +5395,15 @@ msgstr "vahvistaa"
 #: code:addons/hr_holidays/static/src/components/accrual_level/accrual_levels.js:0
 msgid "year(s)"
 msgstr "vuosi(a)"
+
+#~ msgid "By Employee's Approver"
+#~ msgstr "Työntekijän hyväksyjän mukaan"
+
+#~ msgid "By Employee's Approver and Time Off Officer"
+#~ msgstr "Työntekijän hyväksyjän ja lomapäällikön mukaan"
+
+#~ msgid "By Time Off Officer"
+#~ msgstr "Lomapäällikön mukaan"
 
 #~ msgid "There is no valid allocation to cover that request."
 #~ msgstr "Pyyntöä varten ei ole voimassa olevia varauksia."

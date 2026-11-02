@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:36+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-10-21 13:33+0000\n"
 "Last-Translator: Bren Driesen <brdri@odoo.com>\n"
 "Language-Team: Dutch <https://translate.odoo.com/projects/odoo-s19-4/stock/"
@@ -609,8 +609,8 @@ msgid ""
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        Hallo <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>"
-",<br/><br/>\n"
+"        Hallo <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>,"
+"<br/><br/>\n"
 "        <t t-if=\"hasattr(object, 'delivery_type') and object.delivery_type "
 "== 'in_store'\">\n"
 "            Je bestelling is opgehaald.\n"
@@ -626,8 +626,8 @@ msgstr ""
 "                <t t-set=\"multiple_carrier_tracking\" t-"
 "value=\"object.get_multiple_carrier_tracking()\"/>\n"
 "                <t t-if=\"multiple_carrier_tracking\">\n"
-"                    <t t-foreach=\"multiple_carrier_tracking\" t-as=\"line\">"
-"\n"
+"                    <t t-foreach=\"multiple_carrier_tracking\" t-"
+"as=\"line\">\n"
 "                        <br/><a t-att-href=\"line[1]\" target=\"_blank\" t-"
 "out=\"line[0] or ''\"/>\n"
 "                    </t>\n"
@@ -643,8 +643,8 @@ msgstr ""
 "            </strong>\n"
 "        </t>\n"
 "        <br/><br/>\n"
-"        In de bijlage kun je de leveringsorder terugvinden voor meer "
-"details.<br/><br/>\n"
+"        In de bijlage kun je de leveringsorder terugvinden voor meer details."
+"<br/><br/>\n"
 "        Bedankt,\n"
 "        <t t-if=\"user.signature\">\n"
 "            <br/>\n"
@@ -920,8 +920,8 @@ msgid ""
 "strong>"
 msgstr ""
 "<strong>Als gevolg van enkele voorraadverplaatsingen tussen je initiële "
-"update van het aantal en nu, is het verschil in aantal niet meer "
-"consistent.</strong>"
+"update van het aantal en nu, is het verschil in aantal niet meer consistent."
+"</strong>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_picking
@@ -1576,6 +1576,12 @@ msgstr "Vraag"
 
 #. module: stock
 #. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Assign"
+msgstr ""
+
+#. module: stock
+#. odoo-javascript
 #: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 msgid "Assign All"
 msgstr "Alles toewijzen"
@@ -1589,6 +1595,12 @@ msgstr "Eigenaar toewijzen"
 #: model:ir.model.fields,field_description:stock.field_stock_request_count__user_id
 msgid "Assign to"
 msgstr "Toewijzen aan"
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
+msgid "Assigned"
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_package__child_package_dest_ids
@@ -3912,6 +3924,7 @@ msgid "Full Package Name"
 msgstr "Volledige pakketnaam"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Future Activities"
 msgstr "Toekomstige activiteiten"
@@ -4352,12 +4365,9 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_show_allocation_report
 msgid ""
-"If this checkbox is ticked, Odoo will automatically show the allocation "
-"report (if there are moves to allocate to) when validating."
+"If this checkbox is ticked, Odoo will show the allocation report (if there "
+"are moves to allocate to.)"
 msgstr ""
-"Als dit selectievakje is aangevinkt, zal Odoo automatisch het "
-"toewijzingsrapport tonen (als er verplaatsingen zijn om aan toe te wijzen) "
-"bij het bevestigen."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move__show_operations
@@ -5179,6 +5189,7 @@ msgid "Late"
 msgstr "Te laat"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Late Activities"
 msgstr "Te late activiteiten"
@@ -5268,7 +5279,8 @@ msgstr "Lengte maateenheid label"
 #: model:ir.model.fields,help:stock.field_stock_quant__company_id
 #: model:ir.model.fields,help:stock.field_stock_quant_relocate__company_id
 msgid "Let this field empty if this location is shared between companies"
-msgstr "Laat dit veld leeg als de locatie gedeeld wordt door meerdere bedrijven"
+msgstr ""
+"Laat dit veld leeg als de locatie gedeeld wordt door meerdere bedrijven"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_move_form
@@ -5818,6 +5830,7 @@ msgid "Multiple destinations"
 msgstr "Meerdere bestemmingen"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "My Activities"
 msgstr "Mijn activiteiten"
@@ -8169,7 +8182,6 @@ msgstr "Deelverpakkingen reserveren"
 
 #. module: stock
 #. odoo-javascript
-#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 #: code:addons/stock/static/src/allocation_report/out_line/out_line.js:0
 msgid "Reserved"
 msgstr "Gereserveerd"
@@ -10322,6 +10334,7 @@ msgid "Today"
 msgstr "Vandaag"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Today Activities"
 msgstr "Activiteiten van vandaag"
@@ -10611,6 +10624,12 @@ msgstr "Bewerkingstype"
 #: model:ir.model.fields,help:stock.field_stock_picking__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr "Type van de geregistreerde uitzonderingsactiviteit."
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Unassign"
+msgstr ""
 
 #. module: stock
 #. odoo-python
@@ -11977,3 +11996,11 @@ msgid ""
 "{{ object.company_id.name }} Delivery Order (Ref {{ object.name or 'n/a' }})"
 msgstr ""
 "{{ object.company_id.name }} Leveringsorder (Ref {{ object.name or 'nvt' }})"
+
+#~ msgid ""
+#~ "If this checkbox is ticked, Odoo will automatically show the allocation "
+#~ "report (if there are moves to allocate to) when validating."
+#~ msgstr ""
+#~ "Als dit selectievakje is aangevinkt, zal Odoo automatisch het "
+#~ "toewijzingsrapport tonen (als er verplaatsingen zijn om aan toe te "
+#~ "wijzen) bij het bevestigen."

@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-10 17:37+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-09-14 12:32+0000\n"
 "Last-Translator: \"Anastasiia Koroleva (koan)\" <koan@odoo.com>\n"
 "Language-Team: Russian <https://translate.odoo.com/projects/odoo-s19-4/mail/"
@@ -307,9 +307,9 @@ msgid ""
 msgstr ""
 "%(new_line)s%(new_line)s%(bold_start)s@username%(bold_end)s – упомянуть "
 "пользователя%(new_line)s%(bold_start)s@role%(bold_end)s – уведомить группу%"
-"(new_line)s%(bold_start)s/command%(bold_end)s – выполнить команду%(new_line)"
-"s%(bold_start)s::shortcut%(bold_end)s – вставить готовый ответ%(new_line)s%"
-"(bold_start)s:emoji:%(bold_end)s – вставить смайлик"
+"(new_line)s%(bold_start)s/command%(bold_end)s – выполнить команду%"
+"(new_line)s%(bold_start)s::shortcut%(bold_end)s – вставить готовый ответ%"
+"(new_line)s%(bold_start)s:emoji:%(bold_end)s – вставить смайлик"
 
 #. module: mail
 #. odoo-javascript
@@ -1010,7 +1010,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/mail/models/mail_scheduled_message.py:0
 msgid "A Scheduled Message cannot be scheduled in the past"
-msgstr "Запланированное сообщение не может быть запланировано на прошедшую дату"
+msgstr ""
+"Запланированное сообщение не может быть запланировано на прошедшую дату"
 
 #. module: mail
 #: model:ir.model.constraint,message:mail.constraint_discuss_channel_member_partner_or_guest_exists
@@ -1251,6 +1252,7 @@ msgstr "Активируется по умолчанию при подписке
 #: model:ir.model.fields,field_description:mail.field_discuss_channel__active
 #: model:ir.model.fields,field_description:mail.field_fetchmail_server__active
 #: model:ir.model.fields,field_description:mail.field_ir_access__active
+#: model:ir.model.fields,field_description:mail.field_ir_cron__active
 #: model:ir.model.fields,field_description:mail.field_mail_activity__active
 #: model:ir.model.fields,field_description:mail.field_mail_activity_plan__active
 #: model:ir.model.fields,field_description:mail.field_mail_activity_type__active
@@ -1442,8 +1444,8 @@ msgid ""
 msgstr ""
 "Планы активностей используются для назначения списка активностей в несколько "
 "кликов\n"
-"                    (напр., «Адаптация», «Работа с потенциальным клиентом», «"
-"Встреча по вехе проекта» и т. д.)"
+"                    (напр., «Адаптация», «Работа с потенциальным клиентом», "
+"«Встреча по вехе проекта» и т. д.)"
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_activity_schedule
@@ -1764,8 +1766,9 @@ msgid ""
 "(alias_model_name)s (%(matching_id)s) and used by the %(parent_name)s %"
 "(parent_model_name)s."
 msgstr ""
-"Псевдоним %(matching_name)s (%(current_id)s) уже связан с %(alias_model_name)"
-"s (%(matching_id)s) и используется %(parent_name)s %(parent_model_name)s."
+"Псевдоним %(matching_name)s (%(current_id)s) уже связан с %"
+"(alias_model_name)s (%(matching_id)s) и используется %(parent_name)s %"
+"(parent_model_name)s."
 
 #. module: mail
 #. odoo-python
@@ -1774,8 +1777,8 @@ msgid ""
 "Alias %(matching_name)s (%(current_id)s) is already linked with %"
 "(alias_model_name)s (%(matching_id)s)."
 msgstr ""
-"Псевдоним %(matching_name)s (%(current_id)s) уже связан с %(alias_model_name)"
-"s (%(matching_id)s)."
+"Псевдоним %(matching_name)s (%(current_id)s) уже связан с %"
+"(alias_model_name)s (%(matching_id)s)."
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_alias__alias_contact
@@ -2966,12 +2969,6 @@ msgstr "Не удается выполнить поиск, выбрано сли
 
 #. module: mail
 #. odoo-python
-#: code:addons/mail/models/mail_message.py:0
-msgid "Cannot search, too many messages"
-msgstr "Не удается выполнить поиск, выбрано слишком много сообщений"
-
-#. module: mail
-#. odoo-python
 #: code:addons/mail/models/mail_scheduled_message.py:0
 msgid "Cannot search, too many scheduled messages"
 msgstr "Поиск недоступен: слишком много запланированных сообщений"
@@ -3461,7 +3458,8 @@ msgstr "ID партнеров в копии через запятую (можн�
 #: model:ir.model.fields,help:mail.field_mail_template__partner_to
 msgid ""
 "Comma-separated ids of recipient To partners (placeholders may be used here)"
-msgstr "ID основных получателей через запятую (можно использовать плейсхолдеры)"
+msgstr ""
+"ID основных получателей через запятую (можно использовать плейсхолдеры)"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_template_preview__email_to
@@ -3897,7 +3895,8 @@ msgstr "Создать новый «%(document)s»"
 #. odoo-python
 #: code:addons/mail/models/mail_thread.py:0
 msgid "Create new %(document)s by sending an email to %(email_link)s"
-msgstr "Создать новый документ «%(document)s», отправив email на %(email_link)s"
+msgstr ""
+"Создать новый документ «%(document)s», отправив email на %(email_link)s"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_search
@@ -7272,7 +7271,8 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_tracking_duration_mixin__duration_tracking
 msgid "JSON that maps ids from a many2one field to seconds spent"
-msgstr "JSON, который сопоставляет ID из поля many2one с затраченными секундами"
+msgstr ""
+"JSON, который сопоставляет ID из поля many2one с затраченными секундами"
 
 #. module: mail
 #. odoo-javascript
@@ -7419,6 +7419,11 @@ msgstr "В ЭФИРЕ"
 #: model:ir.model.fields,field_description:mail.field_mail_template__lang
 msgid "Language"
 msgstr "Язык"
+
+#. module: mail
+#: model:ir.model.fields,help:mail.field_mail_message_translation__target_lang
+msgid "Language code used as the target for the translation request."
+msgstr ""
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_discuss_channel__last_interest_dt
@@ -9719,8 +9724,8 @@ msgid ""
 msgstr ""
 "Опциональный язык перевода (код ISO), выбираемый при отправке e-mail. Если "
 "не установлен, будет использоваться язык основного партнера. Обычно это "
-"выражение-заполнитель, предоставляющее нужный язык, напр. {{ "
-"object.partner_id.lang }}."
+"выражение-заполнитель, предоставляющее нужный язык, напр. "
+"{{ object.partner_id.lang }}."
 
 #. module: mail
 #. odoo-javascript
@@ -9743,8 +9748,8 @@ msgid ""
 "tracking message-id instead of original document discussion thread. \n"
 " This has an impact on the generated message-id."
 msgstr ""
-"Исходное обсуждение: Ответы попадают в ветку обсуждения исходного документа. "
-"\n"
+"Исходное обсуждение: Ответы попадают в ветку обсуждения исходного "
+"документа. \n"
 " Другой email-адрес: Ответы отправляются на email-адрес, указанный в "
 "отслеживаемом message-id, а не в ветку обсуждения исходного документа. \n"
 " Это влияет на генерируемый message-id."
@@ -10423,6 +10428,12 @@ msgid "Pop out Attachments"
 msgstr "Открыть вложения в новом окне"
 
 #. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/core/common/attachment_view.js:0
+msgid "Pop out is not supported on mobile."
+msgstr ""
+
+#. module: mail
 #: model:ir.model.fields,field_description:mail.field_fetchmail_server__port
 msgid "Port"
 msgstr "Порт"
@@ -10560,8 +10571,8 @@ msgid ""
 msgstr ""
 "Нажмите %(open_samp)sESC%(close_samp)s %(open_em)sдля %(open_cancel)sотмены%"
 "(close_cancel)s%(close_em)s, %(open_samp)s%(save_keyboard_shortcut)s%"
-"(close_samp)s %(open_em)sдля %(open_save)sсохранения%(close_save)s%(close_em)"
-"s"
+"(close_samp)s %(open_em)sдля %(open_save)sсохранения%(close_save)s%"
+"(close_em)s"
 
 #. module: mail
 #. odoo-javascript
@@ -11625,6 +11636,12 @@ msgstr "Поиск серверов входящей почты"
 
 #. module: mail
 #. odoo-javascript
+#: code:addons/mail/static/src/discuss/gif_picker/common/gif_picker.xml:0
+msgid "Search Klipy"
+msgstr ""
+
+#. module: mail
+#. odoo-javascript
 #: code:addons/mail/static/src/chatter/web/chatter.xml:0
 #: code:addons/mail/static/src/core/common/search_messages_panel.js:0
 #: code:addons/mail/static/src/core/common/thread_actions.js:0
@@ -11655,12 +11672,6 @@ msgstr "Поиск по названию"
 #: code:addons/mail/static/src/discuss/core/public_web/discuss_command_palette.js:0
 msgid "Search conversations"
 msgstr "Поиск по диалогам"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/discuss/gif_picker/common/gif_picker.xml:0
-msgid "Search for a GIF"
-msgstr "Найти GIF"
 
 #. module: mail
 #. odoo-javascript
@@ -12191,11 +12202,6 @@ msgstr "Доступно всем пользователям"
 #: model:ir.model.fields,field_description:mail.field_mail_canned_response__source
 msgid "Shortcut"
 msgstr "Горячая клавиша"
-
-#. module: mail
-#: model:ir.model.fields,help:mail.field_mail_message_translation__target_lang
-msgid "Shortened language code used as the target for the translation request."
-msgstr "Сокращенный код языка, используемый как целевой для запроса на перевод."
 
 #. module: mail
 #. odoo-javascript
@@ -12913,8 +12919,8 @@ msgid ""
 "\"%(plan_name)s\" because it is limited to the model \"%"
 "(activity_type_model)s\"."
 msgstr ""
-"Тип активности \"%(activity_type_name)s\" несовместим с планом \"%(plan_name)"
-"s\", поскольку он ограничен моделью \"%(activity_type_model)s\"."
+"Тип активности \"%(activity_type_name)s\" несовместим с планом \"%"
+"(plan_name)s\", поскольку он ограничен моделью \"%(activity_type_model)s\"."
 
 #. module: mail
 #: model:ir.model.constraint,message:mail.constraint_discuss_category_name_unique
@@ -13017,8 +13023,8 @@ msgid ""
 "contact us at %(default_email)s instead."
 msgstr ""
 "Сообщение ниже не могло быть принято адресом %(alias_display_name)s.\n"
-"                 Только %(contact_description)s могут с ним "
-"связываться.<br /><br />\n"
+"                 Только %(contact_description)s могут с ним связываться.<br /"
+"><br />\n"
 "                 Убедитесь, что вы используете правильный адрес, или "
 "свяжитесь с нами по адресу %(default_email)s."
 
@@ -13461,8 +13467,8 @@ msgstr ""
 msgid ""
 "Those values are not supported when posting or notifying: %(param_names)s"
 msgstr ""
-"Эти значения не поддерживаются при публикации или уведомлении: %(param_names)"
-"s"
+"Эти значения не поддерживаются при публикации или уведомлении: %"
+"(param_names)s"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_search
@@ -13717,6 +13723,14 @@ msgstr "Завтра утром"
 #: code:addons/mail/static/src/core/web/activity.xml:0
 msgid "Tomorrow:"
 msgstr "Завтра:"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_message.py:0
+msgid ""
+"Too many messages to be processed.\n"
+"Please apply additional filters to reduce the number of potential messages."
+msgstr ""
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.discuss_channel_view_search
@@ -15308,10 +15322,18 @@ msgstr ""
 #. odoo-python
 #: code:addons/mail/models/discuss/discuss_channel.py:0
 msgid ""
+"You do not have the rights to change the name, description or avatar as a "
+"regular member of these read-only channels: %(channels)s."
+msgstr ""
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/discuss/discuss_channel.py:0
+msgid ""
 "You do not have the rights to change the read-only state of: %(channels)s."
 msgstr ""
-"У вас нет прав для изменения режима «только чтение» для каналов: %(channels)"
-"s."
+"У вас нет прав для изменения режима «только чтение» для каналов: %"
+"(channels)s."
 
 #. module: mail
 #. odoo-python
@@ -15596,12 +15618,6 @@ msgid "created this channel."
 msgstr "создал этот канал."
 
 #. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/js/rotting_mixin/rotting_statusbar.xml:0
-msgid "d"
-msgstr "д."
-
-#. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.account_security_alert
 msgid "day, month dd, yyyy - hh:mm:ss (GMT)"
 msgstr "день, месяц дд, гггг - чч:мм:сс (GMT)"
@@ -15684,8 +15700,8 @@ msgstr "например, «Приветственное письмо»"
 msgid ""
 "e.g. \"Welcome to MyCompany\" or \"Nice to meet you, {{ object.name }}\""
 msgstr ""
-"например, «Добро пожаловать в MyCompany» или «Рады знакомству, {{ "
-"object.name }}»"
+"например, «Добро пожаловать в MyCompany» или «Рады знакомству, "
+"{{ object.name }}»"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_alias_domain_view_form
@@ -16178,6 +16194,20 @@ msgstr "«%(member_name)s» в «%(channel_name)s»"
 #: code:addons/mail/models/mail_canned_response.py:0
 msgid "🔒 Private"
 msgstr "🔒 Закрытый"
+
+#~ msgid "Cannot search, too many messages"
+#~ msgstr "Не удается выполнить поиск, выбрано слишком много сообщений"
+
+#~ msgid ""
+#~ "Shortened language code used as the target for the translation request."
+#~ msgstr ""
+#~ "Сокращенный код языка, используемый как целевой для запроса на перевод."
+
+#~ msgid "d"
+#~ msgstr "д."
+
+#~ msgid "Search for a GIF"
+#~ msgstr "Найти GIF"
 
 #~ msgid ""
 #~ "Add a Tenor GIF API key to enable GIFs support. https://"

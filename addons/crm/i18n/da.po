@@ -14,11 +14,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-30 00:49+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-09-03 15:11+0000\n"
 "Last-Translator: \"Kira Petersen François (peti)\" <peti@odoo.com>\n"
-"Language-Team: Danish <https://translate.odoo.com/projects/odoo-s19-4/crm/"
-"da/>\n"
+"Language-Team: Danish <https://translate.odoo.com/projects/odoo-s19-4/crm/da/"
+">\n"
 "Language: da\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -212,8 +212,8 @@ msgstr "<span class=\"me-1\"> af </span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
-msgid "<span class=\"ms-2 mb-1\"> at</span>"
-msgstr "<span class=\"ms-2 mb-1\"> på</span>"
+msgid "<span class=\"mx-3 mb-1\" invisible=\"type == 'lead'\"> at</span>"
+msgstr ""
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -223,8 +223,8 @@ msgid ""
 "                                    <span class=\"o_stat_text\" "
 "invisible=\"duplicate_lead_count &gt; 1\">Similar Lead</span>"
 msgstr ""
-"<span class=\"o_stat_text\" invisible=\"duplicate_lead_count &lt; 2\">"
-"Lignende leads</span>\n"
+"<span class=\"o_stat_text\" invisible=\"duplicate_lead_count &lt; "
+"2\">Lignende leads</span>\n"
 "                                    <span class=\"o_stat_text\" "
 "invisible=\"duplicate_lead_count &gt; 1\">Lignende leads</span>"
 
@@ -236,8 +236,8 @@ msgid ""
 "invisible=\"use_leads\">Opportunities</span>"
 msgstr ""
 "<span class=\"o_stat_text\" invisible=\"not use_leads\">Leads</span>\n"
-"                        <span class=\"o_stat_text\" invisible=\"use_leads\">"
-"Salgsmuligheder</span>"
+"                        <span class=\"o_stat_text\" "
+"invisible=\"use_leads\">Salgsmuligheder</span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lost_reason_view_form
@@ -311,8 +311,8 @@ msgid ""
 "default.\n"
 "                                </span>"
 msgstr ""
-"<span>Tildel regelmæssigt leads baseret på prioriteter og filtre.</span><br/>"
-"\n"
+"<span>Tildel regelmæssigt leads baseret på prioriteter og filtre.</span><br/"
+">\n"
 "                               <span invisible=\"not "
 "crm_use_auto_assignment\"> \n"
 "                                    Alle salgsteams vil som standard bruge "
@@ -368,21 +368,21 @@ msgstr ""
 "Francisco)</t>.\n"
 "Det er dejligt at møde dig! Nu hvor du er om bord, vil du se, hvad <t t-"
 "out=\"object.company_id.name or ''\">Min Virksomhed (San Francisco)</t> har "
-"at byde på. Mit navn er <t t-out=\"object.user_id.name or ''\">Marc Demo</t>"
-", og jeg vil hjælpe dig med at få det bedste ud af Odoo. Kan vi aftale en "
+"at byde på. Mit navn er <t t-out=\"object.user_id.name or ''\">Marc Demo</"
+"t>, og jeg vil hjælpe dig med at få det bedste ud af Odoo. Kan vi aftale en "
 "hurtig demo snart?<br/>\n"
 "Du er velkommen til at kontakte mig når som helst!<br/><br/>\n"
 "Med venlig hilsen<br/>\n"
 "<t t-if=\"object.user_id\">\n"
 "   <b><t t-out=\"object.user_id.name or ''\"> Marc Demo</t></b>\n"
-"   <br/> E-mail: <t t-out=\"object.user_id.email or ''\">"
-"mark.brown23@eksempel.com</t>\n"
-"    <br/>Telefon: <t t-out=\"object.user_id.phone or ''\">+1 650-123-4567</t>"
-"\n"
+"   <br/> E-mail: <t t-out=\"object.user_id.email or "
+"''\">mark.brown23@eksempel.com</t>\n"
+"    <br/>Telefon: <t t-out=\"object.user_id.phone or ''\">+1 650-123-4567</"
+"t>\n"
 "</t>\n"
 "<t t-else=\"\">\n"
-"    <t t-out=\"object.company_id.name or ''\">Min Virksomhed (San Francisco)"
-"</t>\n"
+"    <t t-out=\"object.company_id.name or ''\">Min Virksomhed (San "
+"Francisco)</t>\n"
 "</t>\n"
 "       </t>"
 
@@ -2549,8 +2549,8 @@ msgid ""
 "Member preferred assignment domain for user %(user)s and team %(team)s is "
 "incorrectly formatted"
 msgstr ""
-"Formatet for det foretrukne ansvarsområde ved tildeling til brugeren %(user)"
-"s og teamet %(team)s er ugyldigt"
+"Formatet for det foretrukne ansvarsområde ved tildeling til brugeren %"
+"(user)s og teamet %(team)s er ugyldigt"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__module_partnership
@@ -3321,7 +3321,8 @@ msgstr "Bedømmelser"
 #. odoo-javascript
 #: code:addons/crm/static/src/js/tours/crm.js:0
 msgid "Ready to boost your sales? Let's have a look at your <b>Pipeline</b>."
-msgstr "Klar til at booste dit salg? Lad os tage et kig på din <b>Pipeline</b>."
+msgstr ""
+"Klar til at booste dit salg? Lad os tage et kig på din <b>Pipeline</b>."
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.merge_opportunity_form
@@ -4512,6 +4513,11 @@ msgstr "tildelt)"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
+msgid "at"
+msgstr ""
+
+#. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 #: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
 msgid "e.g. \"Monthly\""
 msgstr "f.eks. \"månedlig\""
@@ -4659,3 +4665,6 @@ msgstr "gyldig e-mailadresse"
 #: code:addons/crm/static/src/views/crm_form/crm_pls_tooltip_button.xml:0
 msgid "valid phone number"
 msgstr "gyldigt telefonnummer"
+
+#~ msgid "<span class=\"ms-2 mb-1\"> at</span>"
+#~ msgstr "<span class=\"ms-2 mb-1\"> på</span>"

@@ -21,7 +21,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:39+0000\n"
+"POT-Creation-Date: 2026-10-30 17:39+0000\n"
 "PO-Revision-Date: 2026-08-31 21:09+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
@@ -82,12 +82,6 @@ msgstr ""
 #: code:addons/web/static/src/core/l10n/dates.js:0
 msgid "'%s' is not a correct date or datetime"
 msgstr "'%s'不是正确的日期或时间"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/form/form_error_dialog/form_error_dialog.xml:0
-msgid "'Oh snap!'"
-msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -1189,7 +1183,8 @@ msgstr "计费"
 msgid ""
 "Binary fields can not be exported to Excel unless their content is base64-"
 "encoded. That does not seem to be the case for %s."
-msgstr "二进制字段不能导出到Excel，除非它们的内容是Base64编码。这似乎不适用于 %s。"
+msgstr ""
+"二进制字段不能导出到Excel，除非它们的内容是Base64编码。这似乎不适用于 %s。"
 
 #. module: web
 #. odoo-javascript
@@ -1790,6 +1785,7 @@ msgstr "转换为webp格式"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 #: code:addons/web/static/src/core/errors/error_dialogs.js:0
 #: code:addons/web/static/src/views/fields/copy_clipboard/copy_clipboard_field.js:0
 msgid "Copied"
@@ -1801,6 +1797,12 @@ msgstr "已复制"
 #: code:addons/web/static/src/webclient/actions/action_service.js:0
 msgid "Copy"
 msgstr "复制"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
+msgid "Copy Arch"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -2977,7 +2979,8 @@ msgstr "不支持字段属性"
 msgid ""
 "Field that holds the maximum value of the progress bar. If set, will be "
 "displayed next to the progress bar (e.g. 10 / 200)."
-msgstr "保存进度条最大值的字段。如果设置，将显示在进度条旁边（例如 10 / 200）。"
+msgstr ""
+"保存进度条最大值的字段。如果设置，将显示在进度条旁边（例如 10 / 200）。"
 
 #. module: web
 #. odoo-javascript
@@ -3391,8 +3394,8 @@ msgid ""
 "numbers, underscores, hyphens, or dots in the database name, and you'll be "
 "golden."
 msgstr ""
-"休斯顿，我们遇到了数据库命名问题！确保在数据库名称中只使用字母、数字、下划线"
-"、连字符或点，这样就万无一失了。"
+"休斯顿，我们遇到了数据库命名问题！确保在数据库名称中只使用字母、数字、下划"
+"线、连字符或点，这样就万无一失了。"
 
 #. module: web
 #. odoo-javascript
@@ -3478,7 +3481,8 @@ msgstr ""
 msgid ""
 "If checked, users will not be able to create records based on the text "
 "input; they will still be able to create records via a popup form."
-msgstr "如果选中该选项，用户将无法根据文本输入创建记录；但仍可通过弹出表单创建记录。"
+msgstr ""
+"如果选中该选项，用户将无法根据文本输入创建记录；但仍可通过弹出表单创建记录。"
 
 #. module: web
 #. odoo-javascript
@@ -3488,8 +3492,8 @@ msgid ""
 "If checked, users will not be able to create records based through a popup "
 "form; they will still be able to create records based on the text input."
 msgstr ""
-"如果选中此选项，用户将无法通过弹出式表单创建记录；但仍可根据文本输入创建记录"
-"。"
+"如果选中此选项，用户将无法通过弹出式表单创建记录；但仍可根据文本输入创建记"
+"录。"
 
 #. module: web
 #. odoo-javascript
@@ -5130,7 +5134,8 @@ msgstr "Odoo首先需要您的授权。"
 msgid ""
 "Of the %(selectedRecord)s selected records, only the first %(firstRecords)s "
 "have been archived/unarchived."
-msgstr "在所选的 %(selectedRecord)s 项记录中，只归档/取消归档了 %(firstRecords)s 项。"
+msgstr ""
+"在所选的 %(selectedRecord)s 项记录中，只归档/取消归档了 %(firstRecords)s 项。"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.webclient_offline
@@ -5141,6 +5146,12 @@ msgstr "离线"
 #. odoo-javascript
 #: code:addons/web/static/src/core/offline/offline_service.js:0
 msgid "Offline features not available in a non-secure context"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/form/form_error_dialog/form_error_dialog.xml:0
+msgid "Oh snap!"
 msgstr ""
 
 #. module: web
@@ -5193,7 +5204,8 @@ msgstr "只支持类型为%(supported_types)s的分类（发现类型为%(field_
 msgid ""
 "Only types %(supported_types)s are supported for filter (found type %"
 "(field_type)s)"
-msgstr "只支持类型为 %(supported_types)s 的筛选条件 (发现类型为 %(field_type)s)"
+msgstr ""
+"只支持类型为 %(supported_types)s 的筛选条件 (发现类型为 %(field_type)s)"
 
 #. module: web
 #. odoo-javascript
@@ -6243,6 +6255,12 @@ msgstr "搜索更多..."
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/reference/reference_field.js:0
+msgid "Search a record..."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_picker.js:0
 msgid "Search emoji"
 msgstr "搜索表情符号"
@@ -6547,6 +6565,7 @@ msgstr "Shaka"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.js:0
+#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
 msgid "Share"
 msgstr ""
 
@@ -6585,6 +6604,12 @@ msgstr "新干线"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Shinto"
 msgstr "神道教"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
+msgid "Shortcuts"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -7006,12 +7031,21 @@ msgid "The app seems to be installed on your device"
 msgstr "该应用程序似乎已安装在您的设备上"
 
 #. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/search/search_arch_parser.js:0
+msgid ""
+"The autocomplete value for %(field)s has not been found: the record with id %"
+"(id)s doesn't seem to exist"
+msgstr ""
+
+#. module: web
 #. odoo-python
 #: code:addons/web/controllers/export.py:0
 msgid ""
 "The content of this cell is too long for an XLSX file (more than %s "
 "characters). Please use the CSV format for this export."
-msgstr "对于XLSX文件，此单元格的内容太长（超过%s个字符）。请使用此导出的CSV格式。"
+msgstr ""
+"对于XLSX文件，此单元格的内容太长（超过%s个字符）。请使用此导出的CSV格式。"
 
 #. module: web
 #. odoo-javascript
@@ -7096,6 +7130,14 @@ msgstr ""
 msgid ""
 "The user should have one unique embedded action setting per user setting, "
 "action and record id."
+msgstr ""
+
+#. module: web
+#. odoo-python
+#: code:addons/web/controllers/export.py:0
+msgid ""
+"There are too many columns (%(count)s columns, limit: %(limit)s) to export "
+"as Excel 2007-2013 (.xlsx) format. Consider splitting the export."
 msgstr ""
 
 #. module: web

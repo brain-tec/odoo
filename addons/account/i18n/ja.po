@@ -20,8 +20,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:37+0000\n"
-"PO-Revision-Date: 2026-10-16 03:33+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
+"PO-Revision-Date: 2026-10-26 02:36+0000\n"
 "Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-s19-4/"
 "account/ja/>\n"
@@ -166,8 +166,8 @@ msgstr ""
 msgid ""
 "%(auto_post_name)s auto-posting enabled. Next accounting date: %(move_date)s."
 msgstr ""
-"%(auto_post_name)s の自動記帳が有効になっています。次の仕訳日は: %(move_date)"
-"sです。"
+"%(auto_post_name)s の自動記帳が有効になっています。次の仕訳日は: %"
+"(move_date)sです。"
 
 #. module: account
 #. odoo-python
@@ -180,7 +180,8 @@ msgstr "%(exception)s ： %(user)s%(end_datetime_string)s%(reason)sに対する�
 #: code:addons/account/models/account_move.py:0
 msgid ""
 "%(failed_count)s out of %(total_count)s entries could not be reset to draft."
-msgstr "%(total_count)s 件中 %(failed_count)s 件の仕訳をドラフトに戻せませんでした。"
+msgstr ""
+"%(total_count)s 件中 %(failed_count)s 件の仕訳をドラフトに戻せませんでした。"
 
 #. module: account
 #. odoo-python
@@ -224,8 +225,8 @@ msgid ""
 "%(order)s - %(order_line)s; %(qty_invoiced)s invoiced, %(qty_delivered)s "
 "delivered at %(unit_price)s"
 msgstr ""
-"%(order)s - %(order_line)s; %(qty_invoiced)s請求済、 %(qty_delivered)s納品済"
-"、価格： %(unit_price)s"
+"%(order)s - %(order_line)s; %(qty_invoiced)s請求済、 %(qty_delivered)s納品"
+"済、価格： %(unit_price)s"
 
 #. module: account
 #. odoo-python
@@ -374,10 +375,10 @@ msgid ""
 msgstr ""
 "- 税抜き価格の場合、税ごとに丸め処理を行うことを推奨します。これにより、未丸"
 "め税額をまず合計し、最終的な税総額のみを一度丸めるため、累積丸め誤差を最小限"
-"に抑えられます。\\n"
-"                                                                                                                                                                                - "
-"税込価格の場合、行ごとに丸め処理を行うことを推奨します。これにより、各行の小"
-"計の合計が税込み総額と一致します。"
+"に抑えられます。"
+"\\n                                                                                                                                                                                "
+"- 税込価格の場合、行ごとに丸め処理を行うことを推奨します。これにより、各行の"
+"小計の合計が税込み総額と一致します。"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_bank_statement_kanban
@@ -587,8 +588,8 @@ msgstr ""
 "Freeman</t>様\n"
 "                </t>\n"
 "                <br/><br/>\n"
-"                いつもお世話になっております。以下の通りself-billing"
-"クレジットノートをお送りさせていただきます。\n"
+"                いつもお世話になっております。以下の通りself-billingクレジッ"
+"トノートをお送りさせていただきます。\n"
 "                <t t-if=\"object.name\">\n"
 "                    self-billingクレジットノート <span style=\"font-"
 "weight:bold;\" t-out=\"object.name or ''\">RINV/2021/05/0001</span>\n"
@@ -597,13 +598,14 @@ msgstr ""
 "                    self-billingクレジットノート\n"
 "                </t>\n"
 "                <t t-if=\"object.invoice_origin\">\n"
-"                    (参照番号: <t t-out=\"object.invoice_origin or ''\">"
-"SUB003</t>)\n"
+"                    (参照番号: <t t-out=\"object.invoice_origin or "
+"''\">SUB003</t>)\n"
 "                </t>\n"
-"                金額：<span style=\"font-weight:bold;\" t-out=\"format_amount"
-"(object.amount_total, object.currency_id) or ''\">$ 143,750.00</span>\n"
-"                発行元： <t t-out=\"object.company_id.name or ''\">"
-"YourCompany</t>.\n"
+"                金額：<span style=\"font-weight:bold;\" t-"
+"out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
+"143,750.00</span>\n"
+"                発行元： <t t-out=\"object.company_id.name or "
+"''\">YourCompany</t>.\n"
 "                <br/><br/>\n"
 "                ご不明な点がございましたら、お気軽にお問い合わせください。何"
 "卒よろしくお願いいたします。\n"
@@ -716,8 +718,9 @@ msgstr ""
 "        <t t-if=\"object.invoice_origin\">\n"
 "            (参照番号: <t t-out=\"object.invoice_origin or ''\">SUB003</t>)\n"
 "        </t>\n"
-"        金額 <span style=\"font-weight:bold;\" t-out=\"format_amount"
-"(object.amount_total, object.currency_id) or ''\">$ 143,750.00</span>\n"
+"        金額 <span style=\"font-weight:bold;\" t-"
+"out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
+"143,750.00</span>\n"
 "        発行元<t t-out=\"object.company_id.name or ''\">YourCompany</t>.\n"
 "        <t t-if=\"object.payment_state in ('paid', 'in_payment')\">\n"
 "            本請求書のお支払いは完了しております。\n"
@@ -738,9 +741,9 @@ msgstr ""
 "        <t t-if=\"hasattr(object, 'display_timesheet_portal_link') and "
 "object.display_timesheet_portal_link\">\n"
 "            <br/><br/>\n"
-"            追伸: タイムシートは <a t-att-href=\"'/my/"
-"timesheets?search_in=invoice&amp;search=%s' % object.name\">ポータルよりご確"
-"認いただけます。</a>\n"
+"            追伸: タイムシートは <a t-att-href=\"'/my/timesheets?"
+"search_in=invoice&amp;search=%s' % object.name\">ポータルよりご確認いただけま"
+"す。</a>\n"
 "        </t>\n"
 "        <br/><br/>\n"
 "        ご不明な点がございましたら、お気軽にお問い合わせください。\n"
@@ -839,8 +842,9 @@ msgstr ""
 "        <t t-if=\"object.invoice_origin\">\n"
 "            (参照番号: <t t-out=\"object.invoice_origin or ''\">SUB003</t>)\n"
 "        </t>\n"
-"        金額 <span style=\"font-weight:bold;\" t-out=\"format_amount"
-"(object.amount_total, object.currency_id) or ''\">$ 143,750.00</span>\n"
+"        金額 <span style=\"font-weight:bold;\" t-"
+"out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
+"143,750.00</span>\n"
 "        発行元 <t t-out=\"object.company_id.name or ''\">YourCompany</t>.\n"
 "        <t t-if=\"object.payment_state in ('paid', 'in_payment')\">\n"
 "            本セルフビリング請求書のお支払いは完了しております。\n"
@@ -848,9 +852,9 @@ msgstr ""
 "        <t t-if=\"hasattr(object, 'display_timesheet_portal_link') and "
 "object.display_timesheet_portal_link\">\n"
 "            <br/><br/>\n"
-"            追伸: タイムシート <a t-att-href=\"'/my/"
-"timesheets?search_in=invoice&amp;search=%s' % object.name\">はポータルよりご"
-"確認いただけます。</a>\n"
+"            追伸: タイムシート <a t-att-href=\"'/my/timesheets?"
+"search_in=invoice&amp;search=%s' % object.name\">はポータルよりご確認いただけ"
+"ます。</a>\n"
 "        </t>\n"
 "        <br/><br/>\n"
 "        ご不明な点がございましたら、お気軽にお問い合わせください。よろしくお"
@@ -928,8 +932,9 @@ msgstr ""
 "        <t t-if=\"object.invoice_origin\">\n"
 "            (参照番号: <t t-out=\"object.invoice_origin or ''\">SUB003</t>)\n"
 "        </t>\n"
-"        金額: <span style=\"font-weight:bold;\" t-out=\"format_amount"
-"(object.amount_total, object.currency_id) or ''\">$ 143,750.00</span>\n"
+"        金額: <span style=\"font-weight:bold;\" t-"
+"out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
+"143,750.00</span>\n"
 "        発行元: <t t-out=\"object.company_id.name or ''\">YourCompany</t>.\n"
 "        <br/><br/>\n"
 "        ご不明な点がございましたら、お気軽にお問い合わせください。何卒よろし"
@@ -971,15 +976,15 @@ msgid ""
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        <t t-out=\"object.partner_id.name or ''\">Azure Interior</t>様<br/>"
-"<br/>\n"
+"        <t t-out=\"object.partner_id.name or ''\">Azure Interior</t>様<br/"
+"><br/>\n"
 "        いつもお世話になっております。この度は、お忙しい中、お支払いいただき"
 "誠にありがとうございました。領収書をお送りさせていただきます。\n"
 "        領収書番号: <span style=\"font-weight:bold;\" t-out=\"(object.name "
 "or '').replace('/','-') or ''\">BNK1-2021-05-0002</span>\n"
-"        金額: <span style=\"font-weight:bold;\" t-out=\"format_amount"
-"(object.amount, object.currency_id) or ''\">$ 10.00</span> 発行元: <t t-"
-"out=\"object.company_id.name or ''\">YourCompany</t>.\n"
+"        金額: <span style=\"font-weight:bold;\" t-"
+"out=\"format_amount(object.amount, object.currency_id) or ''\">$ 10.00</"
+"span> 発行元: <t t-out=\"object.company_id.name or ''\">YourCompany</t>.\n"
 "        <br/><br/>\n"
 "        ご不明な点がございましたら、お気軽にお問い合わせください。\n"
 "        <br/><br/>\n"
@@ -1109,7 +1114,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
 msgid ""
 "<i class=\"oi oi-fw o_button_icon oi-arrow-right\"/> Configure Alias Domain"
-msgstr "<i class=\"oi oi-fw o_button_icon oi-arrow-right\"/> エイリアスドメインの設定"
+msgstr ""
+"<i class=\"oi oi-fw o_button_icon oi-arrow-right\"/> エイリアスドメインの設定"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.portal_my_details
@@ -1181,8 +1187,8 @@ msgid ""
 "<span class=\"o_form_label oe_inline\" invisible=\"amount_type == "
 "'fixed'\">%</span>"
 msgstr ""
-"<span class=\"o_form_label oe_inline\" invisible=\"amount_type == 'fixed'\">"
-"%</span>"
+"<span class=\"o_form_label oe_inline\" invisible=\"amount_type == "
+"'fixed'\">%</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_form
@@ -1204,12 +1210,10 @@ msgid ""
 "<span class=\"o_stat_text\" invisible=\"move_type != 'out_refund'\">Invoice</"
 "span>\n"
 "                                <span class=\"o_stat_text\" "
-"invisible=\"move_type != 'in_refund'\">Vendor Bill</span>"
-msgstr ""
-"<span class=\"o_stat_text\" invisible=\"move_type != 'out_refund'\">顧客請求"
-"書</span>\n"
+"invisible=\"move_type != 'in_refund'\">Vendor Bill</span>\n"
 "                                <span class=\"o_stat_text\" "
-"invisible=\"move_type != 'in_refund'\">仕入先請求書</span>"
+"invisible=\"move_type != 'entry'\">Journal Entry</span>"
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_lock_exception_form
@@ -1271,16 +1275,12 @@ msgid "<span class=\"o_stat_text\">Invoiced</span>"
 msgstr "<span class=\"o_stat_text\">請求済</span>"
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
-msgid "<span class=\"o_stat_text\">Journal Entries</span>"
-msgstr "<span class=\"o_stat_text\">仕訳</span>"
-
-#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
 msgid "<span class=\"o_stat_text\">Journal Entry</span>"
 msgstr "<span class=\"o_stat_text\">仕訳</span>"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "<span class=\"o_stat_text\">Journal Items</span>"
 msgstr "<span class=\"o_stat_text\">仕訳明細</span>"
@@ -1360,8 +1360,8 @@ msgid ""
 "<span invisible=\"name or name_placeholder or "
 "document_sequence_editable\">Draft</span>"
 msgstr ""
-"<span invisible=\"name or name_placeholder or document_sequence_editable\">"
-"ドラフト</span>"
+"<span invisible=\"name or name_placeholder or document_sequence_editable\">ド"
+"ラフト</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.autopost_bills_wizard
@@ -1376,7 +1376,8 @@ msgstr "<span invisible=\"not account_id\"></span>"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_payment_term_form
 msgid "<span invisible=\"not early_discount\"> % if paid within </span>"
-msgstr "<span invisible=\"not early_discount\"> %もし以下内に支払われた場合</span>"
+msgstr ""
+"<span invisible=\"not early_discount\"> %もし以下内に支払われた場合</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_payment_term_form
@@ -1851,8 +1852,8 @@ msgstr ""
 "<div style=\"margin: 0px; padding: 0px; font-family:Verdana, Arial,sans-"
 "serif; color: #454748;\">\n"
 "    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-"
-"top: 16px; background-color: #F1F1F1; width: 100%; border-"
-"collapse:separate;\">\n"
+"top: 16px; background-color: #F1F1F1; width: 100%; border-collapse:separate;"
+"\">\n"
 "        <tr>\n"
 "            <td align=\"center\">\n"
 "                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
@@ -1873,8 +1874,8 @@ msgstr ""
 "                                    <td align=\"right\" style=\"padding-"
 "right: 16px;\">\n"
 "                                        <img alt=\"Odoo\" src=\"/web/static/"
-"img/logo_inverse_white_206px.png\" style=\"height: 2em; object-fit: "
-"contain;\" class=\"align-baseline w-auto\"/>\n"
+"img/logo_inverse_white_206px.png\" style=\"height: 2em; object-fit: contain;"
+"\" class=\"align-baseline w-auto\"/>\n"
 "                                    </td>\n"
 "                                </tr>\n"
 "                            </table>\n"
@@ -1924,11 +1925,11 @@ msgstr ""
 "                                                    <span style=\"font-"
 "weight:bold;\">仕入先:</span> <t t-out=\"inv.partner_id.name\"/><br/>\n"
 "                                                </t>\n"
-"                                                <t t-if=\"inv.amount_total\">"
-"\n"
+"                                                <t t-"
+"if=\"inv.amount_total\">\n"
 "                                                    <span style=\"font-"
-"weight:bold;\">金額:</span> <t t-out=\"inv.amount_total\" t-options=\""
-"{'widget': 'monetary', 'display_currency': inv.currency_id or "
+"weight:bold;\">金額:</span> <t t-out=\"inv.amount_total\" t-"
+"options=\"{'widget': 'monetary', 'display_currency': inv.currency_id or "
 "object.company_id.currency_id}\"/><br/>\n"
 "                                                </t>\n"
 "                                                <t t-"
@@ -1943,11 +1944,11 @@ msgstr ""
 "padding-top: 24px;\">\n"
 "                                            <a t-if=\"invoice_count != 1\" t-"
 "attf-href=\"/odoo/accounting/action-"
-"account.action_account_moves_email_preview?active_ids={{ "
-"invoice_preview_ids }}\" target=\"_blank\" t-attf-style=\"padding: 12px "
-"24px; font-size: 14px; font-weight: bold; color: #FFFFFF; text-decoration: "
-"none !important; background-color: #008384; border-radius:3px; display: "
-"inline-block;\">\n"
+"account.action_account_moves_email_preview?"
+"active_ids={{ invoice_preview_ids }}\" target=\"_blank\" t-attf-"
+"style=\"padding: 12px 24px; font-size: 14px; font-weight: bold; color: "
+"#FFFFFF; text-decoration: none !important; background-color: #008384; border-"
+"radius:3px; display: inline-block;\">\n"
 "                                               Consult Invoices\n"
 "                                            </a>\n"
 "                                            <a t-else=\"\" t-attf-href=\"/"
@@ -2213,8 +2214,8 @@ msgid ""
 "            "
 msgstr ""
 "<t t-set=\"portal_url\" t-value=\"object.get_portal_url()\"/>\n"
-"<t t-set=\"unsubscribe_url\" t-value=\"ctx.get('unsubscribe_url', False)\"/>"
-"\n"
+"<t t-set=\"unsubscribe_url\" t-value=\"ctx.get('unsubscribe_url', False)\"/"
+">\n"
 "\n"
 "<div style=\"margin:0; padding:0; color:#2c2431;\">\n"
 "    <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" "
@@ -2226,16 +2227,16 @@ msgstr ""
 "border-radius:16px; overflow:hidden; box-shadow:0 20px 45px rgba(56, 37, 60, "
 "0.12);\">\n"
 "                    <tr>\n"
-"                        <td colspan=\"2\" style=\"background:linear-gradient"
-"(140deg,#714B67 0%,#8a6381 55%,#bfa8c2 100%); color:#ffffff; padding:38px;\">"
-"\n"
+"                        <td colspan=\"2\" style=\"background:linear-"
+"gradient(140deg,#714B67 0%,#8a6381 55%,#bfa8c2 100%); color:#ffffff; "
+"padding:38px;\">\n"
 "                            <table cellpadding=\"0\" cellspacing=\"0\" "
 "border=\"0\" style=\"width:100%;\">\n"
 "                                <tr>\n"
 "                                    <td style=\"font-size:13px; letter-"
 "spacing:0.3px; text-transform:uppercase; opacity:0.78;\">\n"
-"                                        <t t-if=\"object.is_sale_document"
-"(include_receipts=True)\">出荷請求書</t>\n"
+"                                        <t t-"
+"if=\"object.is_sale_document(include_receipts=True)\">出荷請求書</t>\n"
 "                                        <t t-else=\"\">入荷請求書</t>\n"
 "                                    </td>\n"
 "                                    <td align=\"right\">\n"
@@ -2246,8 +2247,8 @@ msgstr ""
 "                                </tr>\n"
 "                                <tr>\n"
 "                                    <td colspan=\"2\" style=\"padding-"
-"top:22px; font-size:26px; line-height:1.45; font-weight:600; "
-"color:#ffffff;\">\n"
+"top:22px; font-size:26px; line-height:1.45; font-weight:600; color:#ffffff;"
+"\">\n"
 "                                        新規請求書<t t-"
 "out=\"object.journal_id.display_name\"/>\n"
 "                                    </td>\n"
@@ -2315,8 +2316,8 @@ msgstr ""
 "                                            <tr>\n"
 "                                                <td style=\"padding:0;\">\n"
 "                                                    <div "
-"style=\"display:flex; flex-wrap:wrap; gap:12px; justify-content:flex-"
-"start;\">\n"
+"style=\"display:flex; flex-wrap:wrap; gap:12px; justify-content:flex-start;"
+"\">\n"
 "                                                        <t t-"
 "if=\"object.partner_id\">\n"
 "                                                            <div "
@@ -2402,17 +2403,18 @@ msgstr ""
 "                            <div style=\"margin:18px 0 0; padding:18px 22px; "
 "background:#f9f2f9; border-radius:12px; border:1px solid #eadff0; font-"
 "size:13px; color:#6f5c73; line-height:1.6;\">\n"
-"                                <strong style=\"color:#2c2431;\">添付"
-"ファイル:</strong> ご参考までに元のドキュメントを添付しています。\n"
+"                                <strong style=\"color:#2c2431;\">添付ファイ"
+"ル:</strong> ご参考までに元のドキュメントを添付しています。\n"
 "                            </div>\n"
 "\n"
-"                            <div style=\"margin-top:32px; text-"
-"align:center;\" t-if=\"object.move_type != 'in_invoice'\">\n"
-"                                <a t-if=\"portal_url\" t-attf-href=\"{{ "
-"portal_url }}\" style=\"display:inline-block; margin:0 10px 14px; "
-"padding:13px 30px; min-width:210px; background:linear-gradient"
-"(135deg,#714B67 0%,#9b77a3 100%); color:#FFFFFF; text-decoration:none; "
-"border-radius:12px; font-weight:600; font-size:14px;\" target=\"_blank\">\n"
+"                            <div style=\"margin-top:32px; text-align:center;"
+"\" t-if=\"object.move_type != 'in_invoice'\">\n"
+"                                <a t-if=\"portal_url\" t-attf-"
+"href=\"{{ portal_url }}\" style=\"display:inline-block; margin:0 10px 14px; "
+"padding:13px 30px; min-width:210px; background:linear-"
+"gradient(135deg,#714B67 0%,#9b77a3 100%); color:#FFFFFF; text-"
+"decoration:none; border-radius:12px; font-weight:600; font-size:14px;\" "
+"target=\"_blank\">\n"
 "                                    ポータルを見る\n"
 "                                </a>\n"
 "                            </div>\n"
@@ -2508,8 +2510,8 @@ msgid ""
 "and is used by domestic money transfer protocols (from/to bank accounts in "
 "the same country)."
 msgstr ""
-"クリアリング番号(またはルーティング番号)は、銀行・支店・拠点を識別する番号で"
-"、国内送金プロトコル(同一国内の銀行口座間の送金)で使用されます。"
+"クリアリング番号(またはルーティング番号)は、銀行・支店・拠点を識別する番号"
+"で、国内送金プロトコル(同一国内の銀行口座間の送金)で使用されます。"
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_credit_statement_tree
@@ -2534,7 +2536,8 @@ msgstr "この国には、外国税IDが設定された会計ポジションが�
 msgid ""
 "A journal entry consists of several journal items, each of\n"
 "                which is either a debit or a credit transaction."
-msgstr "1つの仕訳には複数の仕訳明細が含まれ、それらは借方又は貸方のいずれかです。"
+msgstr ""
+"1つの仕訳には複数の仕訳明細が含まれ、それらは借方又は貸方のいずれかです。"
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_account_journal_form
@@ -2556,14 +2559,15 @@ msgstr "明細は子とgroupby 数値の両方を持つことはできません 
 #: code:addons/account/models/account_move.py:0
 msgid "A line of this move is using a archived account, you cannot post it."
 msgstr ""
-"この仕訳の明細は、アーカイブされた勘定科目を使用しているため、記帳できません"
-"。"
+"この仕訳の明細は、アーカイブされた勘定科目を使用しているため、記帳できませ"
+"ん。"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/company.py:0
 msgid "A new Hard Lock Date must be posterior (or equal) to the previous one."
-msgstr "新しい確定ロック日は、以前のものより後(または同日)でなければなりません。"
+msgstr ""
+"新しい確定ロック日は、以前のものより後(または同日)でなければなりません。"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -2835,6 +2839,11 @@ msgid "Account Move Count"
 msgstr "会計仕訳数"
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_tax__account_move_line_ids
+msgid "Account Move Line"
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__name
 #: model:ir.model.fields,field_description:account.field_account_move_line__account_name
 #: model_terms:ir.ui.view,arch_db:account.view_account_form
@@ -2883,6 +2892,11 @@ msgstr "売掛金勘定"
 #: model:ir.model.fields,field_description:account.field_res_users__property_account_receivable_active
 msgid "Account Receivable Active"
 msgstr "売掛金勘定が有効"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_tax__account_reconcile_model_line_ids
+msgid "Account Reconcile Model Line"
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__account_root_id
@@ -2949,6 +2963,7 @@ msgstr ""
 "したり、次年度繰越金を作成したりのに、情報として使われます。"
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_accrued_orders_wizard__account_types
 #: model:ir.model.fields,field_description:account.field_account_report__filter_account_type
 msgid "Account Types"
 msgstr "勘定科目タイプ"
@@ -3061,8 +3076,8 @@ msgid ""
 "put on the regular tax account."
 msgstr ""
 "現金に基づく税の税額を処理するための勘定科目です。元の請求書が消込されていな"
-"い限り、この口座には税額が格納されます。消込時には、この口座の金額が"
-"キャンセルされ、通常の税額口座に格納されます。"
+"い限り、この口座には税額が格納されます。消込時には、この口座の金額がキャンセ"
+"ルされ、通常の税額口座に格納されます。"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_search
@@ -3237,43 +3252,43 @@ msgstr "未払金合計"
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_depreciation_buildings
-msgid "Accumulated Amortization - Buildings"
-msgstr "減価償却累計 - 建物"
+msgid "Accumulated Depreciation - Buildings"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_depreciation_furniture
-msgid "Accumulated Amortization - Furniture & Fixtures"
-msgstr "減価償却累計 - 家具・備品"
+msgid "Accumulated Depreciation - Furniture & Fixtures"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_depreciation_improvements
-msgid "Accumulated Amortization - Improvements"
-msgstr "減価償却累計 - 改良費"
+msgid "Accumulated Depreciation - Improvements"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_depreciation_machines
-msgid "Accumulated Amortization - Machines & Tools"
-msgstr "減価償却累計 - 機械・工具"
+msgid "Accumulated Depreciation - Machines & Tools"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_depreciation_other_property
-msgid "Accumulated Amortization - Other Property"
-msgstr "減価償却累計 - その他の不動産"
+msgid "Accumulated Depreciation - Other Property"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_depreciation_technology
-msgid "Accumulated Amortization - Technology"
-msgstr "減価償却累計 - テクノロジー"
+msgid "Accumulated Depreciation - Technology"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_depreciation_vehicles
-msgid "Accumulated Amortization - Vehicles"
-msgstr "減価償却累計 - 車両"
+msgid "Accumulated Depreciation - Vehicles"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_acc_depreciation
-msgid "Accumulated Depreciation"
-msgstr "減価償却累計額"
+msgid "Accumulated Depreciation Misc"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.21_retained_earnings
@@ -3428,7 +3443,8 @@ msgstr "メモを追加"
 msgid ""
 "Add a QR-code to your invoices so that your customers can pay instantly with "
 "their mobile banking application."
-msgstr "請求書にQRコードを追加して、お客様が銀行アプリですぐに支払えるようにします。"
+msgstr ""
+"請求書にQRコードを追加して、お客様が銀行アプリですぐに支払えるようにします。"
 
 #. module: account
 #. odoo-javascript
@@ -3722,7 +3738,8 @@ msgstr "すべての取引先"
 #. odoo-python
 #: code:addons/account/wizard/account_move_reversal.py:0
 msgid "All selected moves for reversal must belong to the same company."
-msgstr "逆仕訳のために選択されたすべての記帳は、同じ会社に属している必要があります。"
+msgstr ""
+"逆仕訳のために選択されたすべての記帳は、同じ会社に属している必要があります。"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_secure_entries_wizard__not_hashable_unlocked_move_ids
@@ -4126,7 +4143,8 @@ msgstr ""
 msgid ""
 "Any entry up to and including that date will be postponed to a later time, "
 "in accordance with its journal's sequence."
-msgstr "その日付以前の仕訳はすべて、仕訳帳の順序に従って、後日まで延期されます。"
+msgstr ""
+"その日付以前の仕訳はすべて、仕訳帳の順序に従って、後日まで延期されます。"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_company__tax_lock_date
@@ -4143,13 +4161,15 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_move_line.py:0
 msgid "Any journal item on '%s' (Payable) must have a due date."
-msgstr "「%s 」(買掛金)に関する仕訳明細には、必ず支払期日を記載する必要があります。"
+msgstr ""
+"「%s 」(買掛金)に関する仕訳明細には、必ず支払期日を記載する必要があります。"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_move_line.py:0
 msgid "Any journal item on '%s' (Receivable) must have a due date."
-msgstr "「%s 」(売掛金)に関する仕訳明細には、必ず支払期日を記載する必要があります。"
+msgstr ""
+"「%s 」(売掛金)に関する仕訳明細には、必ず支払期日を記載する必要があります。"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_form
@@ -4161,14 +4181,16 @@ msgstr "任意のラベル"
 msgid ""
 "Any purchase entry prior to and including this date will be postponed to a "
 "later date, in accordance with its journal's sequence."
-msgstr "その日付以前の購買仕訳はすべて、仕訳帳の順序に従って、後日まで延期されます。"
+msgstr ""
+"その日付以前の購買仕訳はすべて、仕訳帳の順序に従って、後日まで延期されます。"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_company__sale_lock_date
 msgid ""
 "Any sales entry prior to and including this date will be postponed to a "
 "later date, in accordance with its journal's sequence."
-msgstr "その日付以前の販売仕訳はすべて、仕訳帳の順序に従って、後日まで延期されます。"
+msgstr ""
+"その日付以前の販売仕訳はすべて、仕訳帳の順序に従って、後日まで延期されます。"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account_tag__applicability
@@ -4404,7 +4426,8 @@ msgstr "以下まで自動記帳："
 msgid ""
 "Auto-post was disabled on this invoice because a potential duplicate was "
 "detected."
-msgstr "重複の可能性が検出されたため、この顧客請求書では自動記帳が無効化されました。"
+msgstr ""
+"重複の可能性が検出されたため、この顧客請求書では自動記帳が無効化されました。"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__autopost_bills
@@ -4564,8 +4587,20 @@ msgstr "仕入先請求書に戻る"
 #. module: account
 #. odoo-javascript
 #: code:addons/account/static/src/components/product_catalog/kanban_controller.js:0
+msgid "Back to Credit Note"
+msgstr ""
+
+#. module: account
+#. odoo-javascript
+#: code:addons/account/static/src/components/product_catalog/kanban_controller.js:0
 msgid "Back to Invoice"
 msgstr "顧客請求書に戻る"
+
+#. module: account
+#. odoo-javascript
+#: code:addons/account/static/src/components/product_catalog/kanban_controller.js:0
+msgid "Back to Refund"
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -4609,7 +4644,7 @@ msgstr "残高割合が0になることはありません"
 #: code:addons/account/models/account_journal.py:0
 #: code:addons/account/models/chart_template.py:0
 #: model:account.account,name:account.21_bank_journal_default_account_163
-#: model:account.account,name:account.22_bank_journal_default_account_296
+#: model:account.account,name:account.22_bank_journal_default_account_297
 #: model:account.journal,name:account.21_bank
 #: model:account.journal,name:account.22_bank
 #: model:ir.model.fields,field_description:account.field_res_partner__bank_account_count
@@ -4674,8 +4709,8 @@ msgid ""
 "Partner bank account number."
 msgstr ""
 "請求書の支払先となる銀行口座番号。顧客請求書又は仕入先クレジットノートの場合"
-"は、自社の銀行口座になりますが、それ以外の場合は取引先銀行口座番号になります"
-"。"
+"は、自社の銀行口座になりますが、それ以外の場合は取引先銀行口座番号になりま"
+"す。"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_setup_bank_manual_config__l10n_us_bank_account_type
@@ -4876,6 +4911,8 @@ msgid "Banks"
 msgstr "銀行"
 
 #. module: account
+#. odoo-javascript
+#: code:addons/account/static/src/components/many2x_tax_tags/tax_tag_popover.xml:0
 #: model:ir.model.fields.selection,name:account.selection__account_tax_repartition_line__repartition_type__base
 msgid "Base"
 msgstr "ベース"
@@ -5257,7 +5294,8 @@ msgstr "グループ支払可能"
 #. odoo-python
 #: code:addons/account/models/company.py:0
 msgid "Can't disable restricted audit trail: forced by localization."
-msgstr "制限付き監査証跡は無効にできません: ローカライズによって強制されています。"
+msgstr ""
+"制限付き監査証跡は無効にできません: ローカライズによって強制されています。"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
@@ -5343,7 +5381,8 @@ msgstr "未使用のアカウントコードは生成できません。"
 msgid ""
 "Cannot generate an unused journal code. Please change the name for journal "
 "%s."
-msgstr "未使用の仕訳帳コードを生成できません。仕訳帳%s用の名前を変更して下さい。"
+msgstr ""
+"未使用の仕訳帳コードを生成できません。仕訳帳%s用の名前を変更して下さい。"
 
 #. module: account
 #. odoo-python
@@ -5382,7 +5421,7 @@ msgstr "以下へ繰越す："
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_journal.py:0
-#: model:account.account,name:account.21_cash_journal_default_account_306
+#: model:account.account,name:account.21_cash_journal_default_account_307
 #: model:ir.model.fields.selection,name:account.selection__account_journal__type__cash
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
@@ -5395,12 +5434,12 @@ msgid "Cash Account"
 msgstr "現金アカウント"
 
 #. module: account
-#: model:account.account,name:account.21_cash_journal_default_account_303
+#: model:account.account,name:account.21_cash_journal_default_account_304
 msgid "Cash Bakery"
 msgstr "現金 ベーカリー"
 
 #. module: account
-#: model:account.account,name:account.21_cash_journal_default_account_305
+#: model:account.account,name:account.21_cash_journal_default_account_306
 msgid "Cash Bar"
 msgstr "現金バー"
 
@@ -5442,7 +5481,7 @@ msgid "Cash Basis Transition Account"
 msgstr "現金基準移行勘定"
 
 #. module: account
-#: model:account.account,name:account.21_cash_journal_default_account_302
+#: model:account.account,name:account.21_cash_journal_default_account_303
 msgid "Cash Clothes Shop"
 msgstr "現金 洋服店"
 
@@ -5504,7 +5543,7 @@ msgid "Cash Discount Write-Off Loss Account"
 msgstr "現金値引損償却口座"
 
 #. module: account
-#: model:account.account,name:account.21_cash_journal_default_account_301
+#: model:account.account,name:account.21_cash_journal_default_account_302
 msgid "Cash Furn. Shop"
 msgstr "現金 家具屋"
 
@@ -5515,7 +5554,7 @@ msgid "Cash Registers"
 msgstr "キャッシュレジスタ"
 
 #. module: account
-#: model:account.account,name:account.21_cash_journal_default_account_304
+#: model:account.account,name:account.21_cash_journal_default_account_305
 msgid "Cash Restaurant"
 msgstr "現金レストラン"
 
@@ -5671,8 +5710,8 @@ msgid ""
 "Check this box if you don't want to share the same sequence on payments and "
 "bank transactions posted on this journal"
 msgstr ""
-"この仕訳から作成された支払と銀行取引で同じ付番を共有したくない場合は、"
-"チェックして下さい"
+"この仕訳から作成された支払と銀行取引で同じ付番を共有したくない場合は、チェッ"
+"クして下さい"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -5795,9 +5834,9 @@ msgid ""
 "Item).             When set, the report lines will generate sublines grouped "
 "by those keys except when specified on the report line."
 msgstr ""
-"仕訳項目(account.move.line)のフィールドをカンマ区切りで指定します。"
-"            設定すると、レポート行で個別に指定されている場合を除き、レポート"
-"行はこれらのキーでグループ化されたサブ行を生成します。"
+"仕訳項目(account.move.line)のフィールドをカンマ区切りで指定しま"
+"す。            設定すると、レポート行で個別に指定されている場合を除き、レ"
+"ポート行はこれらのキーでグループ化されたサブ行を生成します。"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_report__groupby
@@ -5806,8 +5845,8 @@ msgid ""
 "Item).             When set, this report will have report lines generating "
 "sublines grouped by those keys except when specified on the report line."
 msgstr ""
-"仕訳項目(account.move.line)のフィールドをカンマ区切りで指定します。"
-"             設定すると、レポート行で個別に指定されている場合を除き、この"
+"仕訳項目(account.move.line)のフィールドをカンマ区切りで指定しま"
+"す。             設定すると、レポート行で個別に指定されている場合を除き、この"
 "レポートでは、これらのキーでグループ化されたサブ行を生成するレポート行が作成"
 "されます。"
 
@@ -5818,8 +5857,8 @@ msgid ""
 "Comma-separated list of fields from account.move.line (Journal Item). When "
 "set, this line will generate sublines grouped by those keys."
 msgstr ""
-"account.move.line (Journal Item)のフィールドをカンマ区切りでリスト化したもの"
-"。設定すると、この行はこれらのキーでグループ化されたサブ行を生成します。"
+"account.move.line (Journal Item)のフィールドをカンマ区切りでリスト化したも"
+"の。設定すると、この行はこれらのキーでグループ化されたサブ行を生成します。"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__commercial_partner_id
@@ -6094,6 +6133,7 @@ msgstr ""
 "ださい。"
 
 #. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_report__availability_condition__consolidation
 #: model_terms:ir.ui.view,arch_db:account.view_account_form
 msgid "Consolidation"
 msgstr "連結"
@@ -6126,8 +6166,8 @@ msgid ""
 "Contains either the section name or error message, depending on the line "
 "type."
 msgstr ""
-"明細タイプに応じて、セクション名またはエラーメッセージのいずれかが含まれます"
-"。"
+"明細タイプに応じて、セクション名またはエラーメッセージのいずれかが含まれま"
+"す。"
 
 #. module: account
 #. odoo-python
@@ -6229,8 +6269,8 @@ msgid ""
 "Could not compute any code for the copy automatically. Please create it "
 "manually."
 msgstr ""
-"コピーのコードを自動で計算することができませんでした。手動で作成してください"
-"。"
+"コピーのコードを自動で計算することができませんでした。手動で作成してくださ"
+"い。"
 
 #. module: account
 #. odoo-python
@@ -6442,8 +6482,8 @@ msgid ""
 "Create a structured report with multiple sections for convenient navigation "
 "and simultaneous printing."
 msgstr ""
-"便利なナビゲーションと同時印刷のための複数のセクションを持つ構造化された"
-"レポートを作成します。"
+"便利なナビゲーションと同時印刷のための複数のセクションを持つ構造化されたレ"
+"ポートを作成します。"
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_move_in_invoice
@@ -6464,8 +6504,8 @@ msgid ""
 "                    adjustments, ensuring compliance with diverse "
 "regulations."
 msgstr ""
-"現地GAAP、IFRS、または会計調整用の個別の元帳を維持するために必要な数の元帳"
-"グループを作成し、\n"
+"現地GAAP、IFRS、または会計調整用の個別の元帳を維持するために必要な数の元帳グ"
+"ループを作成し、\n"
 "                    様々な法令へのコンプライアンスを確保します。"
 
 #. module: account
@@ -6678,20 +6718,16 @@ msgid "Credit Move"
 msgstr "貸方移動"
 
 #. module: account
+#. odoo-javascript
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
+#: code:addons/account/static/src/components/many2x_tax_tags/tax_tag_popover.js:0
 #: model:ir.model.fields.selection,name:account.selection__account_payment__reconciled_invoices_type__credit_note
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "Credit Note"
 msgstr "クレジットノート"
-
-#. module: account
-#. odoo-javascript
-#: code:addons/account/static/src/components/many2x_tax_tags/tax_tag_popover.xml:0
-msgid "Credit Note :"
-msgstr "クレジットノート："
 
 #. module: account
 #. odoo-python
@@ -6762,39 +6798,39 @@ msgstr "口座の累積残高。"
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_depreciation_buildings
-msgid "Cumulative amortization recorded for building assets."
-msgstr "建物資産に計上された減価償却累計額。"
+msgid "Cumulative depreciation recorded for building assets."
+msgstr ""
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_depreciation_technology
-msgid "Cumulative amortization recorded for capitalized technology assets."
-msgstr "資産計上されたテクノロジー資産に計上された減価償却累計額。"
+msgid "Cumulative depreciation recorded for capitalized technology assets."
+msgstr ""
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_depreciation_furniture
-msgid "Cumulative amortization recorded for furniture and fixture assets."
-msgstr "家具・什器資産に計上された減価償却累計額。"
+msgid "Cumulative depreciation recorded for furniture and fixture assets."
+msgstr ""
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_depreciation_improvements
 msgid ""
-"Cumulative amortization recorded for leasehold or property improvements."
-msgstr "賃借物件の改良費（資産）に計上された減価償却累計額。"
+"Cumulative depreciation recorded for leasehold or property improvements."
+msgstr ""
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_depreciation_machines
-msgid "Cumulative amortization recorded for machinery and tool assets."
-msgstr "機械・工具資産に計上された減価償却累計額。"
+msgid "Cumulative depreciation recorded for machinery and tool assets."
+msgstr ""
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_depreciation_other_property
-msgid "Cumulative amortization recorded for other depreciable property assets."
-msgstr "その他の減価償却資産(不動産)に計上された減価償却累計額。"
+msgid "Cumulative depreciation recorded for other depreciable property assets."
+msgstr ""
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_depreciation_vehicles
-msgid "Cumulative amortization recorded for vehicle assets."
-msgstr "車両資産に計上された減価償却累計額。"
+msgid "Cumulative depreciation recorded for vehicle assets."
+msgstr ""
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_retained_earnings
@@ -7556,6 +7592,11 @@ msgid "Depreciation"
 msgstr "減価償却"
 
 #. module: account
+#: model:account.account,name:account.22_account_account_us_deprec_amort_expense
+msgid "Depreciation & Amortization Expense"
+msgstr ""
+
+#. module: account
 #: model:account.account,name:account.22_account_account_us_expense_buildings
 msgid "Depreciation Expense - Buildings"
 msgstr "減価償却費 - 建物"
@@ -7594,6 +7635,7 @@ msgstr "減価償却費 - 車両"
 #: model:ir.model.fields,field_description:account.field_account_account__description
 #: model:ir.model.fields,field_description:account.field_account_tax__description
 #: model_terms:ir.ui.view,arch_db:account.view_account_form
+#: model_terms:ir.ui.view,arch_db:account.view_message_tree_audit_log
 #: model_terms:ir.ui.view,arch_db:account.view_message_tree_audit_log_search
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "Description"
@@ -8411,7 +8453,8 @@ msgstr "以下の早期支払割引:"
 #: code:addons/account/models/account_payment_term.py:0
 msgid ""
 "Early Payment Discount: <b>%(amount)s</b> if paid before <b>%(date)s</b>"
-msgstr "早期支払割引： <b>%(amount)s</b>、<b>%(date)s</b>より前に支払われた場合"
+msgstr ""
+"早期支払割引： <b>%(amount)s</b>、<b>%(date)s</b>より前に支払われた場合"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -8463,11 +8506,9 @@ msgstr "メールテンプレート"
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__incoming_einvoice_notification_email
 msgid ""
-"Email addresses that will receive copy for sent and received invoices. "
-"Separate entries with ';'."
+"Email addresses that should receive invoices copy/return reminders. Separate "
+"entries with ';'."
 msgstr ""
-"送受信した請求書のコピーを受信するメールアドレス。各アドレスは「;」で区切って"
-"ください。"
 
 #. module: account
 #. odoo-javascript
@@ -8556,7 +8597,8 @@ msgstr "取引先に対して信用限度額を有効にします。"
 #: model:ir.model.fields,help:account.field_res_company__restrictive_audit_trail
 #: model:ir.model.fields,help:account.field_res_config_settings__restrictive_audit_trail
 msgid "Enable this option to prevent deletion of journal item related logs"
-msgstr "仕訳帳関連のログを削除しないようにするには、このオプションを有効にします"
+msgstr ""
+"仕訳帳関連のログを削除しないようにするには、このオプションを有効にします"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_report__filter_hide_0_lines__by_default
@@ -8698,16 +8740,6 @@ msgstr "純資産"
 #: code:addons/account/models/account_document_import_mixin.py:0
 msgid "Error importing attachment %(filename)s:"
 msgstr "添付ファイル %(filename)s のインポート中にエラーが発生しました:"
-
-#. module: account
-#. odoo-python
-#: code:addons/account/controllers/download_docs.py:0
-msgid ""
-"Error while creating XML:\n"
-"- %s"
-msgstr ""
-"XMLを作成中にエラーが発生しました:\n"
-"- %s"
 
 #. module: account
 #. odoo-python
@@ -8897,7 +8929,8 @@ msgstr "社用車やトラックの修理・整備にかかる費用"
 msgid ""
 "Expenses made for the repair and maintenance of laptops, peripherals, and "
 "computing equipment"
-msgstr "ノートパソコン、周辺機器、およびコンピュータ機器の修理・保守にかかる費用"
+msgstr ""
+"ノートパソコン、周辺機器、およびコンピュータ機器の修理・保守にかかる費用"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_lock_exception__state__expired
@@ -8917,7 +8950,8 @@ msgstr "式"
 #. module: account
 #: model:ir.model.constraint,message:account.constraint_account_report_expression_domain_engine_subformula_required
 msgid "Expressions using 'domain' engine should all have a subformula."
-msgstr "'ドメイン' エンジンを用いた式はすべてサブ計算式を持っている必要があります。"
+msgstr ""
+"'ドメイン' エンジンを用いた式はすべてサブ計算式を持っている必要があります。"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_line__external_formula
@@ -9073,7 +9107,7 @@ msgstr "仕訳帳"
 #. module: account
 #: model:account.account.tag,name:account.account_tag_financing
 msgid "Financing Activities"
-msgstr "会計業務"
+msgstr "財務活動"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_resequence_wizard__first_date
@@ -9126,6 +9160,11 @@ msgstr "会計上の国"
 #: model:ir.model.fields,field_description:account.field_res_config_settings__account_fiscal_country_id
 msgid "Fiscal Country Code"
 msgstr "会計上の国コード"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_tax__company_country_code
+msgid "Fiscal Country Code of the Company"
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_term__fiscal_country_codes
@@ -9456,8 +9495,8 @@ msgid ""
 "expression), in case it is different from the parent line."
 msgstr ""
 "line_code.expression_label形式の式。これにより、(_carryover_*ラベルの付いた式"
-"で)親行と異なる場合に、この式のキャリーオーバーの対象を設定することができます"
-"。"
+"で)親行と異なる場合に、この式のキャリーオーバーの対象を設定することができま"
+"す。"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_search
@@ -9542,9 +9581,9 @@ msgid ""
 "customers. The search tool can also be used to personalise your Invoices "
 "reports and so, match this analysis to your needs."
 msgstr ""
-"このレポートから、顧客に請求した金額の概要を確認できます。検索ツールを使って"
-"、請求レポートとその他をパーソナライズすることもできるため、この分析をニーズ"
-"に合わせてください。"
+"このレポートから、顧客に請求した金額の概要を確認できます。検索ツールを使っ"
+"て、請求レポートとその他をパーソナライズすることもできるため、この分析をニー"
+"ズに合わせてください。"
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_fuel
@@ -9913,8 +9952,8 @@ msgid ""
 msgstr ""
 "通知：\n"
 "    <br/><br/>\n"
-"   お送りいただいたメールは処理されず、破棄されました。ご利用いただいた"
-"メールアドレスでは、新規の請求書に関するメールのみを受け付けています:"
+"   お送りいただいたメールは処理されず、破棄されました。ご利用いただいたメール"
+"アドレスでは、新規の請求書に関するメールのみを受け付けています:"
 
 #. module: account
 #. odoo-javascript
@@ -10264,7 +10303,8 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
 msgid "If set, this account is used to automatically balance entries."
-msgstr "設定した場合は、この勘定科目は自動的に記帳をバランスするのに使われます。"
+msgstr ""
+"設定した場合は、この勘定科目は自動的に記帳をバランスするのに使われます。"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_account__non_trade
@@ -10309,15 +10349,16 @@ msgid ""
 "performed on demand by the Secure Entries wizard."
 msgstr ""
 "チェックを入れると、仕訳が記帳された際に、その仕訳から最後にハッシュ化された"
-"仕訳まで、その間のすべての仕訳を遡って、順番にハッシュ化します。ハッシュ化は"
-"、セキュア仕訳ウィザードでオンデマンドで実行することもできます。"
+"仕訳まで、その間のすべての仕訳を遡って、順番にハッシュ化します。ハッシュ化"
+"は、セキュア仕訳ウィザードでオンデマンドで実行することもできます。"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid ""
 "If you check this box, you will be able to collect payments using SEPA "
 "Direct Debit mandates."
-msgstr "チェックした場合は、SEPAダイレクトデビットマンデートで支払を受け取れます。"
+msgstr ""
+"チェックした場合は、SEPAダイレクトデビットマンデートで支払を受け取れます。"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -10333,8 +10374,8 @@ msgstr ""
 msgid ""
 "If you have not installed a chart of account, please install one first.<br>"
 msgstr ""
-"勘定科目表をインストールしていない場合は、最初にインストールしてください"
-"。<br>"
+"勘定科目表をインストールしていない場合は、最初にインストールしてください。"
+"<br>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -10755,7 +10796,8 @@ msgstr "内部タイプ"
 msgid ""
 "Internal field to shorten expression_ids creation for the account_codes "
 "engine"
-msgstr "account_codesエンジンのexpression_idsの作成を短縮するための内部フィールド"
+msgstr ""
+"account_codesエンジンのexpression_idsの作成を短縮するための内部フィールド"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_report_line__aggregation_formula
@@ -10872,6 +10914,7 @@ msgstr "投資・その他の活動"
 #. odoo-javascript
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
+#: code:addons/account/static/src/components/many2x_tax_tags/tax_tag_popover.js:0
 #: code:addons/account/static/src/components/receipt_selector/receipt_selector.js:0
 #: model:ir.model.fields.selection,name:account.selection__account_analytic_applicability__business_domain__invoice
 #: model:ir.model.fields.selection,name:account.selection__account_payment__reconciled_invoices_type__invoice
@@ -10887,12 +10930,6 @@ msgstr "請求書"
 #: model_terms:ir.ui.view,arch_db:account.portal_my_invoices
 msgid "Invoice #"
 msgstr "請求書番号"
-
-#. module: account
-#. odoo-javascript
-#: code:addons/account/static/src/components/many2x_tax_tags/tax_tag_popover.xml:0
-msgid "Invoice :"
-msgstr "請求書 :"
 
 #. module: account
 #: model:ir.ui.menu,name:account.menu_action_account_invoice_report_all
@@ -11049,7 +11086,8 @@ msgstr ""
 msgid ""
 "Invoice and credit note distribution should have a total factor (+) equals "
 "to 100."
-msgstr "顧客請求書とクレジットノート分配の合計要素(+)は100％でなければなりません。"
+msgstr ""
+"顧客請求書とクレジットノート分配の合計要素(+)は100％でなければなりません。"
 
 #. module: account
 #. odoo-python
@@ -11084,7 +11122,14 @@ msgstr ""
 msgid ""
 "Invoice and credit note repartition should have at least one tax repartition "
 "line."
-msgstr "請求書とクレジットノートの再分割には、少なくとも1つの税金の再分割が必要です。"
+msgstr ""
+"請求書とクレジットノートの再分割には、少なくとも1つの税金の再分割が必要です。"
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_send.py:0
+msgid "Invoice generated but not sent."
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -11270,8 +11315,8 @@ msgid ""
 "Irregularities due to draft, cancelled or deleted bills with a sequence "
 "number since last lock date."
 msgstr ""
-"最終ロック日以降のシーケンス番号の仕入先請求書のキャンセルまたは削除された"
-"ドラフトによる不正。"
+"最終ロック日以降のシーケンス番号の仕入先請求書のキャンセルまたは削除されたド"
+"ラフトによる不正。"
 
 #. module: account
 #. odoo-python
@@ -11280,8 +11325,8 @@ msgid ""
 "Irregularities due to draft, cancelled or deleted invoices with a sequence "
 "number since last lock date."
 msgstr ""
-"最終ロック日以降のシーケンス番号の顧客請求書の、キャンセルまたは削除された"
-"ドラフトによる不正。"
+"最終ロック日以降のシーケンス番号の顧客請求書の、キャンセルまたは削除されたド"
+"ラフトによる不正。"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__is_being_sent
@@ -11745,8 +11790,8 @@ msgid ""
 "expense account on the product category will be used."
 msgstr ""
 "プロダクトカテゴリのデフォルト値を使用するには、このフィールドを空のままにし"
-"ます。自動評価方式のアングロサクソン会計が設定されている場合は、"
-"プロダクトカテゴリの費用勘定が使用されます。"
+"ます。自動評価方式のアングロサクソン会計が設定されている場合は、プロダクトカ"
+"テゴリの費用勘定が使用されます。"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_digest_digest__kpi_account_total_revenue_value
@@ -11780,6 +11825,12 @@ msgstr "請求書上のラベル"
 #: model_terms:ir.ui.view,arch_db:account.view_tax_group_form
 msgid "Label on PoS Receipts"
 msgstr "POS領収書上のラベル"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_bank_statement_line__sanitize_payment_reference
+#: model:ir.model.fields,field_description:account.field_account_move__sanitize_payment_reference
+msgid "Label sanitize"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_land
@@ -12072,8 +12123,8 @@ msgid ""
 "Line \"%(line)s\" defines line \"%(parent_line)s\" as its parent, but "
 "appears before it in the report. The parent must always come first."
 msgstr ""
-"明細 \"%(line)s\" は明細\"%(parent_line)s\"をその親として定義していますが、"
-"レポートでは親より前に表示されています。必ず親が初めに来る必要があります。"
+"明細 \"%(line)s\" は明細\"%(parent_line)s\"をその親として定義していますが、レ"
+"ポートでは親より前に表示されています。必ず親が初めに来る必要があります。"
 
 #. module: account
 #. odoo-python
@@ -12315,10 +12366,9 @@ msgid ""
 "partner will have granted to you. Module account_sepa is necessary.\n"
 msgstr ""
 "手動： Odoo以外の方法で支払を受けます。\n"
-"決済プロバイダ： 各決済プロバイダにはそれぞれ独自の決済方法があります。"
-"オンラインで購入またはサブスクリプション利用する際にパートナーによって保存さ"
-"れた決済トークンによって、カード上またはカード宛に取引を要求することができま"
-"す。\n"
+"決済プロバイダ： 各決済プロバイダにはそれぞれ独自の決済方法があります。オンラ"
+"インで購入またはサブスクリプション利用する際にパートナーによって保存された決"
+"済トークンによって、カード上またはカード宛に取引を要求することができます。\n"
 "バッチ入金： 複数の顧客の小切手を一度に収集し、銀行へのバッチ入金を生成して送"
 "信します。会計_バッチ_決済（account_batch_payment）モジュールが必要です。\n"
 "SEPAダイレクトデビット： パートナーから付与された権限により、SEPAゾーンで支払"
@@ -12335,8 +12385,8 @@ msgstr ""
 "手動： Odoo以外の方法で支払います。\n"
 "小切手：小切手で請求書を支払い、Odooから印刷することができます。\n"
 "SEPAクレジット転送： 銀行にSEPAクレジット転送ファイルを提出することで、SEPA"
-"ゾーン内で支払うことができます。会計_SEPA（account_sepa）モジュールが必要です"
-"。\n"
+"ゾーン内で支払うことができます。会計_SEPA（account_sepa）モジュールが必要で"
+"す。\n"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_payment__payment_method_line_id
@@ -12387,9 +12437,9 @@ msgid ""
 "partner will have granted to you. Module account_sepa is necessary.\n"
 msgstr ""
 "手動： Odoo以外の方法で支払を受けます。\n"
-"決済プロバイダー： 各決済プロバイダーにはそれぞれ独自の決済方法があります。"
-"オンラインで購入またはサブスクリプション利用する際にパートナーによって保存さ"
-"れた決済トークンによって、カード上またはカード宛に取引を要求することができま"
+"決済プロバイダー： 各決済プロバイダーにはそれぞれ独自の決済方法があります。オ"
+"ンラインで購入またはサブスクリプション利用する際にパートナーによって保存され"
+"た決済トークンによって、カード上またはカード宛に取引を要求することができま"
 "す。\n"
 "小切手：小切手で請求書を支払い、Odooから印刷することができます。\n"
 "バッチ入金： 複数の顧客の小切手を一度に収集し、銀行へのバッチ入金を生成して送"
@@ -13132,6 +13182,14 @@ msgid "No possible action found with the selected lines."
 msgstr "可能なアクションが、選択された行に対して見つかりませんでした。"
 
 #. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_send.py:0
+msgid ""
+"No valid sending method could be applied, so this invoice was not sent "
+"automatically. Please configure a sending method and send it manually."
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax__non_deductible_amount
 msgid "Non Deductible Amount"
 msgstr "控除対象外金額"
@@ -13521,8 +13579,8 @@ msgid ""
 "Once installed, set 'Bank Feeds' to 'File Import' in bank account "
 "settings.This adds a button to import from the Accounting dashboard."
 msgstr ""
-"銀行口座settings.Thisに'ファイルのインポート'に、セット'銀行フィード'を"
-"インストールしたら、会計ダッシュボードからのインポートにボタンを追加します。"
+"銀行口座settings.Thisに'ファイルのインポート'に、セット'銀行フィード'をインス"
+"トールしたら、会計ダッシュボードからのインポートにボタンを追加します。"
 
 #. module: account
 #. odoo-javascript
@@ -13548,6 +13606,12 @@ msgid "Online Payments"
 msgstr "オンライン支払"
 
 #. module: account
+#. odoo-python
+#: code:addons/account/models/partner.py:0
+msgid "Only Accounting managers can create foreign taxes."
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_report__only_tax_exigible
 msgid "Only Tax Exigible Lines"
 msgstr "税対象行のみ"
@@ -13558,7 +13622,8 @@ msgstr "税対象行のみ"
 msgid ""
 "Only a report without a root report of its own can be selected as root "
 "report."
-msgstr "基レポートとして選択できるのは、それ自身の基レポートがないレポートのみです。"
+msgstr ""
+"基レポートとして選択できるのは、それ自身の基レポートがないレポートのみです。"
 
 #. module: account
 #. odoo-python
@@ -13914,6 +13979,11 @@ msgid "Overdue Amount"
 msgstr "期限超過額"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.res_partner_view_search
+msgid "Overdue Invoices"
+msgstr ""
+
+#. module: account
 #. odoo-python
 #: code:addons/account/controllers/portal.py:0
 msgid "Overdue invoices"
@@ -14203,7 +14273,8 @@ msgstr "支払"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Pay your bills in one-click using Euro SEPA Service / ISO20022"
-msgstr "ユーロSEPAサービス / ISO20022 を使用して、ワンクリックで請求書を支払えます"
+msgstr ""
+"ユーロSEPAサービス / ISO20022 を使用して、ワンクリックで請求書を支払えます"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_account__account_type__liability_payable
@@ -14704,8 +14775,8 @@ msgid ""
 "Please install a chart of accounts or create a miscellaneous journal before "
 "proceeding."
 msgstr ""
-"勘定科目表をインストールするか、続行する前にその他の仕訳帳を作成してください"
-"。"
+"勘定科目表をインストールするか、続行する前にその他の仕訳帳を作成してくださ"
+"い。"
 
 #. module: account
 #. odoo-python
@@ -15021,7 +15092,8 @@ msgstr "プロダクトバリアント"
 msgid ""
 "Production of printed or digital materials, such as photocopies, brochures, "
 "flyers, manuals."
-msgstr "コピー、パンフレット、チラシ、マニュアルなどの印刷物またはデジタル資料の作成"
+msgstr ""
+"コピー、パンフレット、チラシ、マニュアルなどの印刷物またはデジタル資料の作成"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.product_product_action_purchasable
@@ -15163,6 +15235,7 @@ msgid "Purchase Lock date"
 msgstr "購買ロック日"
 
 #. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_invoice_report__move_type__in_receipt
 #: model:ir.model.fields.selection,name:account.selection__account_move__move_type__in_receipt
 msgid "Purchase Receipt"
 msgstr "仕入先領収書"
@@ -15814,6 +15887,11 @@ msgid "Restrictive Audit Trail"
 msgstr "監査証跡の制限"
 
 #. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_account__account_type__equity_retained
+msgid "Retained Earnings"
+msgstr ""
+
+#. module: account
 #: model:account.account,description:account.22_account_account_us_pension
 msgid "Retirement plans costs (401K match)"
 msgstr "退職金制度の費用(401Kマッチング拠出)"
@@ -15842,6 +15920,11 @@ msgstr "収益/費用勘定"
 #: model:ir.model.fields,field_description:account.field_account_accrued_orders_wizard__reversal_date
 msgid "Reversal Date"
 msgstr "逆仕訳日付"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_move_form
+msgid "Reversal Entries"
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__reversal_move_ids
@@ -16161,6 +16244,7 @@ msgid "Sales Lock Date"
 msgstr "販売ロック日"
 
 #. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_invoice_report__move_type__out_receipt
 #: model:ir.model.fields.selection,name:account.selection__account_move__move_type__out_receipt
 msgid "Sales Receipt"
 msgstr "販売領収書"
@@ -16254,7 +16338,8 @@ msgstr "QRコードをスキャン<br/>またはクリックしてオンライ�
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_qr_code_preview
 msgid "Scan this QR Code with<br/>your banking application"
-msgstr "このバーコードを<br/>あなたの銀行アプリケーションでスキャンして下さい。"
+msgstr ""
+"このバーコードを<br/>あなたの銀行アプリケーションでスキャンして下さい。"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__search_account_id
@@ -16376,7 +16461,8 @@ msgstr "これらの仕訳を確定すると、選択した日付以降の仕訳
 #. odoo-python
 #: code:addons/account/wizard/account_secure_entries_wizard.py:0
 msgid "Securing these entries will create at least one gap in the sequence."
-msgstr "これらの仕訳を確定すると、シーケンスに少なくとも1つのギャップが生じます。"
+msgstr ""
+"これらの仕訳を確定すると、シーケンスに少なくとも1つのギャップが生じます。"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__access_token
@@ -16404,9 +16490,9 @@ msgid ""
 "analytic default (e.g. create new customer invoice or Sales order if we "
 "select this product, it will automatically take this as an analytic account)"
 msgstr ""
-"デフォルトで指定された分析アカウントを使用するプロダクトカテゴリを選択します"
-"。（例：このプロダクトを選択すると、新規顧客請求書または販売オーダが作成され"
-"、自動的に販売オーダ析アカウントとして使用されます）"
+"デフォルトで指定された分析アカウントを使用するプロダクトカテゴリを選択しま"
+"す。（例：このプロダクトを選択すると、新規顧客請求書または販売オーダが作成さ"
+"れ、自動的に販売オーダ析アカウントとして使用されます）"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_analytic_distribution_model__product_id
@@ -16415,9 +16501,9 @@ msgid ""
 "create new customer invoice or Sales order if we select this product, it "
 "will automatically take this as an analytic account)"
 msgstr ""
-"分析分配の対象となるプロダクトを選択します（例：新規顧客請求書または販売"
-"オーダを作成する場合、このプロダクトを選択すると、自動的に分析勘定として扱わ"
-"れます）"
+"分析分配の対象となるプロダクトを選択します（例：新規顧客請求書または販売オー"
+"ダを作成する場合、このプロダクトを選択すると、自動的に分析勘定として扱われま"
+"す）"
 
 #. module: account
 #. odoo-python
@@ -16452,8 +16538,8 @@ msgid ""
 "Select this if the taxes should use cash basis, which will create an entry "
 "for such taxes on a given account during reconciliation."
 msgstr ""
-"税金が現金主義を使用する必要がある場合は、これを選択してください。これにより"
-"、消込中に特定の勘定科目にそのような税金の仕訳が作成されます。"
+"税金が現金主義を使用する必要がある場合は、これを選択してください。これによ"
+"り、消込中に特定の勘定科目にそのような税金の仕訳が作成されます。"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__selected_payment_method_codes
@@ -17429,6 +17515,8 @@ msgid "Target Line"
 msgstr "ターゲットライン"
 
 #. module: account
+#. odoo-javascript
+#: code:addons/account/static/src/components/many2x_tax_tags/tax_tag_popover.xml:0
 #: model:account.report.column,name:account.generic_tax_report_account_tax_column_tax
 #: model:account.report.column,name:account.generic_tax_report_column_tax
 #: model:account.report.column,name:account.generic_tax_report_tax_account_column_tax
@@ -17991,8 +18079,8 @@ msgstr "銀行でドメインを取得するための技術フィールド"
 msgid ""
 "Technical field used to display warnings if there's a potential phishing risk"
 msgstr ""
-"フィッシングのリスクが潜在する場合に警告を表示するために使用される技術"
-"フィールド"
+"フィッシングのリスクが潜在する場合に警告を表示するために使用される技術フィー"
+"ルド"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__sequence_override_regex
@@ -18006,14 +18094,14 @@ msgid ""
 "e.g: ^(?P<prefix1>.*?)(?P<year>\\d{4})(?P<prefix2>\\D*?)(?P<month>\\d{2})(?"
 "P<prefix3>\\D+?)(?P<seq>\\d+)(?P<suffix>\\D*?)$"
 msgstr ""
-"システムが通常誤解する複雑な付番構成を強化するために使用される技術フィールド"
-"。\n"
+"システムが通常誤解する複雑な付番構成を強化するために使用される技術フィール"
+"ド。\n"
 "prefix1、year、prefix2、month、prefix3、seq、suffixのすべての確定グループを含"
 "めることができる正規表現です。\n"
 "プレフィックス*グループは、年、月、および実際に増加する付番数（seq）の間の区"
 "切り文字です。\n"
-"e.g: ^(?P<prefix1>.*?)(?P<year>\\d{4})(?P<prefix2>\\D*?)(?P<month>\\d{2})"
-"(?P<prefix3>\\D+?)(?P<seq>\\d+)(?P<suffix>\\D*?)$"
+"e.g: ^(?P<prefix1>.*?)(?P<year>\\d{4})(?P<prefix2>\\D*?)(?P<month>\\d{2})(?"
+"P<prefix3>\\D+?)(?P<seq>\\d+)(?P<suffix>\\D*?)$"
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_technology
@@ -18160,8 +18248,8 @@ msgid ""
 msgstr ""
 "入力した%(date_field)s(%(date)s)順序が既存のシーケンス番号(%(sequence)s)と一"
 "致していません。続行するには、シーケンス番号をクリアして下さい。\n"
-"日付ベースの付番を維持するには、仕訳を選択し、開発者モードで利用可能な"
-"アクションメニューから再付番オプションを使用します。"
+"日付ベースの付番を維持するには、仕訳を選択し、開発者モードで利用可能なアク"
+"ションメニューから再付番オプションを使用します。"
 
 #. module: account
 #. odoo-python
@@ -18212,7 +18300,8 @@ msgstr "早期支払割引の日数は、必ず正の値である必要があり
 msgid ""
 "The Early Payment Discount functionality can only be used with payment terms "
 "using a single 100% line. "
-msgstr "早期支払割引機能は、100％の単一明細を使用する支払条件でのみ使用できます。 "
+msgstr ""
+"早期支払割引機能は、100％の単一明細を使用する支払条件でのみ使用できます。 "
 
 #. module: account
 #. odoo-python
@@ -18259,6 +18348,7 @@ msgstr "IBANが無効です。国コードで始まる必要があります"
 #: model:ir.model.fields,help:account.field_account_payment_register__country_code
 #: model:ir.model.fields,help:account.field_account_secure_entries_wizard__country_code
 #: model:ir.model.fields,help:account.field_account_setup_bank_manual_config__country_code
+#: model:ir.model.fields,help:account.field_account_tax__company_country_code
 #: model:ir.model.fields,help:account.field_account_tax__country_code
 #: model:ir.model.fields,help:account.field_account_tax_group__country_code
 #: model:ir.model.fields,help:account.field_base_document_layout__country_code
@@ -18300,8 +18390,9 @@ msgstr "この勘定科目 %(name)s (%(code)s) はアーカイブされていま
 #. odoo-python
 #: code:addons/account/models/account_account.py:0
 msgid ""
-"The account code can only contain alphanumeric characters, dots, and dashes."
-msgstr "勘定科目コードには、英数字・ドット（.）・ハイフン（-）のみ使用できます。"
+"The account code can only contain alphanumeric characters, dots, and dashes. "
+"(account code: %s)"
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -18310,8 +18401,8 @@ msgid ""
 "The account is already in use in a 'sale' or 'purchase' journal. This means "
 "that the account's type couldn't be 'receivable' or 'payable'."
 msgstr ""
-"アカウントは'販売'または'購入'台帳で既に使用されています。アカウントの種類は"
-"、'売掛金'または'買掛金'で あることができなかったことを、この手段。"
+"アカウントは'販売'または'購入'台帳で既に使用されています。アカウントの種類"
+"は、'売掛金'または'買掛金'で あることができなかったことを、この手段。"
 
 #. module: account
 #. odoo-python
@@ -18320,8 +18411,8 @@ msgid ""
 "The account selected on your journal entry forces to provide a secondary "
 "currency. You should remove the secondary currency on the account."
 msgstr ""
-"仕訳入力で選択されたアカウントは、二次通貨を提供するように強制します。"
-"アカウントの二次通貨を削除する必要があります。"
+"仕訳入力で選択されたアカウントは、二次通貨を提供するように強制します。アカウ"
+"ントの二次通貨を削除する必要があります。"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_setup_bank_manual_config__journal_id
@@ -18381,8 +18472,8 @@ msgid ""
 "The application scope of taxes in a group must be either the same as the "
 "group or left empty."
 msgstr ""
-"グループ内の税の適用範囲は、グループと同じ、又は空のままでなければなりません"
-"。"
+"グループ内の税の適用範囲は、グループと同じ、又は空のままでなければなりませ"
+"ん。"
 
 #. module: account
 #. odoo-python
@@ -18494,8 +18585,8 @@ msgid ""
 "The country of the foreign Tax ID could not be detected. Please assign a "
 "country to the fiscal position."
 msgstr ""
-"外国の税IDの国を検出できませんでした。会計ポジションに国を割り当ててください"
-"。"
+"外国の税IDの国を検出できませんでした。会計ポジションに国を割り当ててくださ"
+"い。"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_fiscal_position__company_country_id
@@ -18650,8 +18741,8 @@ msgid ""
 "The entry is using accounts (%(accounts_codes_names)s) from a different "
 "company."
 msgstr ""
-"この仕訳では、別の会社の勘定科目(%(accounts_codes_names)s)が使用されています"
-"。"
+"この仕訳では、別の会社の勘定科目(%(accounts_codes_names)s)が使用されていま"
+"す。"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_product_category__property_account_expense_categ_id
@@ -18986,8 +19077,8 @@ msgid ""
 "The residual amount on a journal item expressed in its currency (possibly "
 "not the company currency)."
 msgstr ""
-"選択された通貨で表示される仕訳明細の残額 (会社の通貨ではない可能性があります)"
-"。"
+"選択された通貨で表示される仕訳明細の残額 (会社の通貨ではない可能性がありま"
+"す)。"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_move_line__amount_residual
@@ -19015,7 +19106,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_report.py:0
 msgid "The sections defined on a report cannot have sections themselves."
-msgstr "レポートに定義されたセクションはそれ自体セクションを有することはできません。"
+msgstr ""
+"レポートに定義されたセクションはそれ自体セクションを有することはできません。"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.validate_account_move_view
@@ -19062,7 +19154,8 @@ msgstr ""
 msgid ""
 "The sequence field is used to define order in which the tax lines are "
 "applied."
-msgstr "付番フィールドは、税の明細が適用される順序を定義するために使用されます。"
+msgstr ""
+"付番フィールドは、税の明細が適用される順序を定義するために使用されます。"
 
 #. module: account
 #. odoo-python
@@ -19263,8 +19356,8 @@ msgid ""
 "The entries from journal prefixes containing them will not be secured: %"
 "(prefix_info)s"
 msgstr ""
-"選択した日付より前の未消込の銀行明細行が残っています。それらを含む仕訳帳"
-"プレフィックスからの仕訳は保護されません。%(prefix_info)s"
+"選択した日付より前の未消込の銀行明細行が残っています。それらを含む仕訳帳プレ"
+"フィックスからの仕訳は保護されません。%(prefix_info)s"
 
 #. module: account
 #. odoo-python
@@ -19273,8 +19366,8 @@ msgid ""
 "There are still unreconciled bank statement lines in the period you want to "
 "lock.You should either reconcile or delete them."
 msgstr ""
-"ロックしたい期間に未調整の銀行取引明細書行がまだあります。それらを調整するか"
-"、削除する必要があります。"
+"ロックしたい期間に未調整の銀行取引明細書行がまだあります。それらを調整する"
+"か、削除する必要があります。"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_accrued_orders_wizard
@@ -19411,7 +19504,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_account.py:0
 msgid "This account was split off from %(account_name)s (%(company_name)s)."
-msgstr "この勘定科目は %(account_name)s (%(company_name)s) から分割されました。"
+msgstr ""
+"この勘定科目は %(account_name)s (%(company_name)s) から分割されました。"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_product_category__property_account_income_categ_id
@@ -19521,8 +19615,8 @@ msgid ""
 "This entry has already been supervised. You need the accounting manager role "
 "to change it."
 msgstr ""
-"この仕訳はすでに承認済みです。変更するには、会計マネージャーの権限が必要です"
-"。"
+"この仕訳はすでに承認済みです。変更するには、会計マネージャーの権限が必要で"
+"す。"
 
 #. module: account
 #. odoo-python
@@ -19545,9 +19639,8 @@ msgstr "この仕訳は%sから逆仕訳されました"
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
-msgid ""
-"This entry has been reviewed, You need the bookkeeper role to change it."
-msgstr "この仕訳は確認済みです。変更するには、記帳担当者の権限が必要です。"
+msgid "This entry has been reviewed by accountants, only them can edit it now."
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -19714,8 +19807,8 @@ msgid ""
 "                such as for sending by email or reviewing a batch of records."
 msgstr ""
 "このビューには、Eメールでの送信やレコードの一括レビューなど、\n"
-"                別のコンテキストから選択された仕訳エントリのみが表示されます"
-"。"
+"                別のコンテキストから選択された仕訳エントリのみが表示されま"
+"す。"
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_account_reconcile_model
@@ -19780,7 +19873,8 @@ msgstr "未検証"
 #: model_terms:ir.ui.view,arch_db:account.email_template_mail_gateway_failed
 msgid ""
 "To add information to a previously sent invoice, reply to your \"sent\" email"
-msgstr "送信済の顧客請求書に情報を追加するには、 \"送信済\" メールに返信して下さい。"
+msgstr ""
+"送信済の顧客請求書に情報を追加するには、 \"送信済\" メールに返信して下さい。"
 
 #. module: account
 #. odoo-python
@@ -20185,8 +20279,8 @@ msgid ""
 "there are still some records referencing them. How about archiving them "
 "instead?"
 msgstr ""
-"この支払条件は多くのレコードで使われているため、削除できません。代わりに"
-"アーカイブしてみてはいかがでしょうか？"
+"この支払条件は多くのレコードで使われているため、削除できません。代わりにアー"
+"カイブしてみてはいかがでしょうか？"
 
 #. module: account
 #. odoo-python
@@ -20561,7 +20655,8 @@ msgstr ""
 msgid ""
 "Used to register a profit when the ending balance of a cash register differs "
 "from what the system computes"
-msgstr "レジの終了残高がシステムの計算と異なる場合に利益を登録するために使用されます"
+msgstr ""
+"レジの終了残高がシステムの計算と異なる場合に利益を登録するために使用されます"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__user_id
@@ -20970,8 +21065,8 @@ msgid ""
 "When targeting an expression for carryover, the label of that expression "
 "must start with _applied_carryover_"
 msgstr ""
-"キャリーオーバーの対象となる式を指定する場合、その式のラベル"
-"は_applied_carryover_で始まる必要があります。"
+"キャリーオーバーの対象となる式を指定する場合、その式のラベルは"
+"_applied_carryover_で始まる必要があります。"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__show_on_dashboard
@@ -21024,7 +21119,8 @@ msgstr "顧客名を書き <b>作成する</b> または <b>提案を見る</b>"
 #. odoo-javascript
 #: code:addons/account/static/src/js/tours/account.js:0
 msgid "Write here <b>your own email address</b> to test the flow."
-msgstr "フローをテストするために、<b>自分のメールアドレス</b>を書いてください。"
+msgstr ""
+"フローをテストするために、<b>自分のメールアドレス</b>を書いてください。"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_register__writeoff_is_exchange_account
@@ -21095,16 +21191,10 @@ msgid ""
 "You can not archive a journal containing draft journal entries.\n"
 "\n"
 "To proceed:\n"
-"1/ click on the top-right button 'Journal Entries' from this journal form\n"
-"2/ then filter on 'Draft' entries\n"
+"1/ go to Accounting > Accounting > Journal Entries\n"
+"2/ filter on this journal and on 'Unposted' entries\n"
 "3/ select them all and post or delete them through the action menu"
 msgstr ""
-"ドラフトの仕訳を含む仕訳をアーカイブすることはできません。\n"
-"\n"
-"続けるには：\n"
-"1 /この仕訳帳フォームの右上のボタン「仕訳」をクリックします\n"
-"2 /次に「ドラフト」仕訳でフィルターしてください\n"
-"3 /ドラフトの仕訳をすべて選択し、アクションメニューから投稿または削除します"
 
 #. module: account
 #. odoo-python
@@ -21171,8 +21261,8 @@ msgid ""
 "invoices, once validated, to help the customer to refer to that particular "
 "invoice when making the payment."
 msgstr ""
-"ここで、検証後に顧客の請求書に表示されるデフォルト参照を設定できます。これで"
-"、顧客が決済する時に請求書を参照できるようになります。"
+"ここで、検証後に顧客の請求書に表示されるデフォルト参照を設定できます。これ"
+"で、顧客が決済する時に請求書を参照できるようになります。"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.portal_my_journal_mail_notifications
@@ -21198,7 +21288,8 @@ msgstr "支払済顧客請求書をブロックすることはできません。
 msgid ""
 "You can't change the company of your journal since there are some journal "
 "entries linked to it."
-msgstr "いくつかの仕訳と紐付けられているため、仕訳の会社を変更することはできません。"
+msgstr ""
+"いくつかの仕訳と紐付けられているため、仕訳の会社を変更することはできません。"
 
 #. module: account
 #. odoo-python
@@ -21207,8 +21298,8 @@ msgid ""
 "You can't change the company of your tax since there are some journal items "
 "linked to it."
 msgstr ""
-"いくつかの仕訳明細と紐付けられているため、税の会社を変更することはできません"
-"。"
+"いくつかの仕訳明細と紐付けられているため、税の会社を変更することはできませ"
+"ん。"
 
 #. module: account
 #. odoo-python
@@ -21227,7 +21318,8 @@ msgstr ""
 msgid ""
 "You can't create a new statement line without a suspense account set on the "
 "%s journal."
-msgstr "%sの仕訳帳に設定された仮勘定をせずに新しい文の行を作成することはできません。"
+msgstr ""
+"%sの仕訳帳に設定された仮勘定をせずに新しい文の行を作成することはできません。"
 
 #. module: account
 #. odoo-python
@@ -21293,7 +21385,8 @@ msgstr ""
 msgid ""
 "You can't provide a foreign currency without specifying an amount in 'Amount "
 "in Currency' field."
-msgstr "「通貨の金額」フィールドに金額を指定せずに外貨を指定することはできません。"
+msgstr ""
+"「通貨の金額」フィールドに金額を指定せずに外貨を指定することはできません。"
 
 #. module: account
 #. odoo-python
@@ -21310,8 +21403,16 @@ msgid ""
 "You can't register payments for both inbound and outbound moves at the same "
 "time."
 msgstr ""
-"インバウンド仕訳とアウトバウンド仕訳の支払いを同時に登録することはできません"
-"。"
+"インバウンド仕訳とアウトバウンド仕訳の支払いを同時に登録することはできませ"
+"ん。"
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+msgid ""
+"You can't reset to draft those journal entries. You need to request a "
+"cancellation instead."
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -21372,8 +21473,8 @@ msgid ""
 "You cannot create a fiscal position with a foreign Tax ID within your fiscal "
 "country without assigning it a state."
 msgstr ""
-"自国の税務管轄区域内で、外国の税IDを持つ会計ポジションを作成するには、"
-"ステータスを割り当てる必要があります。"
+"自国の税務管轄区域内で、外国の税IDを持つ会計ポジションを作成するには、ステー"
+"タスを割り当てる必要があります。"
 
 #. module: account
 #. odoo-python
@@ -21422,8 +21523,8 @@ msgid ""
 "You cannot delete this account tag (%s), it is used on the chart of account "
 "definition."
 msgstr ""
-"この勘定科目タグ(%s)は削除できません。勘定科目表定義に使用されているためです"
-"。"
+"この勘定科目タグ(%s)は削除できません。勘定科目表定義に使用されているためで"
+"す。"
 
 #. module: account
 #. odoo-python
@@ -21451,8 +21552,8 @@ msgid ""
 "You cannot delete this report (%s), it is used by the accounting PDF "
 "generation engine."
 msgstr ""
-"このレポート(%s)を削除することはできません。このレポートは、会計PDF生成"
-"エンジンで使用されます。"
+"このレポート(%s)を削除することはできません。このレポートは、会計PDF生成エンジ"
+"ンで使用されます。"
 
 #. module: account
 #. odoo-python
@@ -21467,8 +21568,8 @@ msgid ""
 "You cannot disable this setting because some of your taxes are cash basis. "
 "Modify your taxes first before disabling this setting."
 msgstr ""
-"税金の一部が現金主義を使用しているため、この設定を無効にすることはできません"
-"。この設定を無効にする前に、まず税金設定を変更してください。"
+"税金の一部が現金主義を使用しているため、この設定を無効にすることはできませ"
+"ん。この設定を無効にする前に、まず税金設定を変更してください。"
 
 #. module: account
 #. odoo-python
@@ -21519,9 +21620,9 @@ msgid ""
 "assigned, unless the name is removed or set to \"/\". This might create a "
 "gap in the sequence."
 msgstr ""
-"仕訳番号が割り当てられている仕訳の仕訳帳は編集できません(名称を削除するか「/"
-"」に設定した場合を除く)。この操作により、番号付け(シーケンス)に欠番が生じる可"
-"能性があります。"
+"仕訳番号が割り当てられている仕訳の仕訳帳は編集できません(名称を削除するか"
+"「/」に設定した場合を除く)。この操作により、番号付け(シーケンス)に欠番が生じ"
+"る可能性があります。"
 
 #. module: account
 #. odoo-python
@@ -21529,7 +21630,8 @@ msgstr ""
 msgid ""
 "You cannot have a receivable/payable account that is not reconcilable. "
 "(account code: %s)"
-msgstr "消込不可能な売掛金/買掛金勘定を持つことはできません(アカウントコード:%s)"
+msgstr ""
+"消込不可能な売掛金/買掛金勘定を持つことはできません(アカウントコード:%s)"
 
 #. module: account
 #. odoo-python
@@ -21568,8 +21670,10 @@ msgstr "すでに会計仕訳がある仕訳の項目%sを変更することは�
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
-msgid "You cannot modify the following readonly fields on a posted move: %s"
-msgstr "記帳された仕訳の以下の読取り専用フィールドは変更できません:%s"
+msgid ""
+"You cannot modify the following readonly fields on the posted move %(move)s: "
+"%(fields)s"
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -21609,8 +21713,8 @@ msgid ""
 "You cannot reduce the number of decimal places of a currency which has "
 "already been used to make accounting entries."
 msgstr ""
-"会計入力にすでに使用されている通貨の小数点以下の桁数を減らすことはできません"
-"。"
+"会計入力にすでに使用されている通貨の小数点以下の桁数を減らすことはできませ"
+"ん。"
 
 #. module: account
 #. odoo-python
@@ -21647,7 +21751,8 @@ msgstr ""
 msgid ""
 "You cannot remove/deactivate the accounts \"%s\" which are set on a tax "
 "repartition line."
-msgstr "税金の仕切り直しに設定されている行 \"%s\"を削除・無効化することはできません。"
+msgstr ""
+"税金の仕切り直しに設定されている行 \"%s\"を削除・無効化することはできません。"
 
 #. module: account
 #. odoo-python
@@ -21756,9 +21861,9 @@ msgid ""
 "create a credit note instead. Use the action menu to transform it into a "
 "credit note or refund."
 msgstr ""
-"合計金額がマイナスの請求書を確認することはできません。代わりに"
-"クレジットノートを作成する必要があります。アクションメニューを使用して、"
-"クレジットノートまたは返金に変換してください。"
+"合計金額がマイナスの請求書を確認することはできません。代わりにクレジットノー"
+"トを作成する必要があります。アクションメニューを使用して、クレジットノートま"
+"たは返金に変換してください。"
 
 #. module: account
 #. odoo-python
@@ -21816,8 +21921,8 @@ msgid ""
 "You may only use samples in demo mode, try uploading one of your invoices "
 "instead."
 msgstr ""
-"サンプルはデモモードでのみ使用可能です。代わりに、ご自身の顧客請求書を"
-"アップロードしてみてください。"
+"サンプルはデモモードでのみ使用可能です。代わりに、ご自身の顧客請求書をアップ"
+"ロードしてみてください。"
 
 #. module: account
 #. odoo-python
@@ -21875,8 +21980,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.account_default_terms_and_conditions
 msgid "You should update this document to reflect your T&amp;C."
 msgstr ""
-"お客様の取引条件を反映させるために、このドキュメントを更新する必要があります"
-"。"
+"お客様の取引条件を反映させるために、このドキュメントを更新する必要がありま"
+"す。"
 
 #. module: account
 #. odoo-javascript
@@ -21886,8 +21991,8 @@ msgid ""
 "database.\n"
 "This change cannot be undone without technical support."
 msgstr ""
-"データベース内のすべての価格に対する小数点設定を永久に変更しようとしています"
-"。\n"
+"データベース内のすべての価格に対する小数点設定を永久に変更しようとしていま"
+"す。\n"
 "この変更は、技術サポートなしでは元に戻せません。"
 
 #. module: account
@@ -22004,7 +22109,8 @@ msgstr "請求に割当"
 msgid ""
 "become involved in costs related to a country's legislation. The amount of "
 "the invoice will therefore be due to"
-msgstr "は、その国の法律に関連する費用に関与する。従って、請求額は以下の通りである："
+msgstr ""
+"は、その国の法律に関連する費用に関与する。従って、請求額は以下の通りである："
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.autopost_bills_wizard
@@ -22424,8 +22530,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.validate_account_move_view
 msgid "will be posted. Some of them may be future-dated or require hashing,"
 msgstr ""
-"が記帳されます。一部は将来の日付になっているか、ハッシュ化が必要な場合があり"
-"、"
+"が記帳されます。一部は将来の日付になっているか、ハッシュ化が必要な場合があ"
+"り、"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.validate_account_move_view
@@ -22459,8 +22565,8 @@ msgid ""
 "{{ object.company_id.name }} - New invoice in "
 "{{ object.journal_id.display_name or 'Invoices' }} journal"
 msgstr ""
-"{{ object.company_id.name }} - 新規顧客請求書 {{ "
-"object.journal_id.display_name or 'Invoices' }} 仕訳帳"
+"{{ object.company_id.name }} - 新規顧客請求書 "
+"{{ object.journal_id.display_name or 'Invoices' }} 仕訳帳"
 
 #. module: account
 #: model:mail.template,subject:account.email_template_edi_credit_note
@@ -22479,7 +22585,8 @@ msgstr "{{ object.company_id.name }} 請求書 (Ref {{ object.name or 'n/a' }})"
 #: model:mail.template,subject:account.mail_template_data_payment_receipt
 msgid ""
 "{{ object.company_id.name }} Payment Receipt (Ref {{ object.name or 'n/a' }})"
-msgstr "{{ object.company_id.name }} 支払受領書 (Ref {{ object.name or 'n/a' }})"
+msgstr ""
+"{{ object.company_id.name }} 支払受領書 (Ref {{ object.name or 'n/a' }})"
 
 #. module: account
 #: model:mail.template,subject:account.email_template_edi_self_billing_credit_note
@@ -22487,8 +22594,8 @@ msgid ""
 "{{ object.company_id.name }} Self-billing credit note (Ref {{ object.name or "
 "'n/a' }})"
 msgstr ""
-"{{ object.company_id.name }} セルフビリング・クレジットノート (参照番号 {{ "
-"object.name or 'n/a' }})"
+"{{ object.company_id.name }} セルフビリング・クレジットノート (参照番号 "
+"{{ object.name or 'n/a' }})"
 
 #. module: account
 #: model:mail.template,subject:account.email_template_edi_self_billing_invoice
@@ -22498,6 +22605,117 @@ msgid ""
 msgstr ""
 "{{ object.company_id.name }} セルフビリング請求書(参照番号 {{ object.name or "
 "'n/a' }})"
+
+#~ msgid "Credit Note :"
+#~ msgstr "クレジットノート："
+
+#~ msgid ""
+#~ "Email addresses that will receive copy for sent and received invoices. "
+#~ "Separate entries with ';'."
+#~ msgstr ""
+#~ "送受信した請求書のコピーを受信するメールアドレス。各アドレスは「;」で区"
+#~ "切ってください。"
+
+#~ msgid "Invoice :"
+#~ msgstr "請求書 :"
+
+#~ msgid ""
+#~ "<span class=\"o_stat_text\" invisible=\"move_type != "
+#~ "'out_refund'\">Invoice</span>\n"
+#~ "                                <span class=\"o_stat_text\" "
+#~ "invisible=\"move_type != 'in_refund'\">Vendor Bill</span>"
+#~ msgstr ""
+#~ "<span class=\"o_stat_text\" invisible=\"move_type != 'out_refund'\">顧客請"
+#~ "求書</span>\n"
+#~ "                                <span class=\"o_stat_text\" "
+#~ "invisible=\"move_type != 'in_refund'\">仕入先請求書</span>"
+
+#~ msgid "<span class=\"o_stat_text\">Journal Entries</span>"
+#~ msgstr "<span class=\"o_stat_text\">仕訳</span>"
+
+#~ msgid "Accumulated Amortization - Buildings"
+#~ msgstr "減価償却累計 - 建物"
+
+#~ msgid "Accumulated Amortization - Furniture & Fixtures"
+#~ msgstr "減価償却累計 - 家具・備品"
+
+#~ msgid "Accumulated Amortization - Improvements"
+#~ msgstr "減価償却累計 - 改良費"
+
+#~ msgid "Accumulated Amortization - Machines & Tools"
+#~ msgstr "減価償却累計 - 機械・工具"
+
+#~ msgid "Accumulated Amortization - Other Property"
+#~ msgstr "減価償却累計 - その他の不動産"
+
+#~ msgid "Accumulated Amortization - Technology"
+#~ msgstr "減価償却累計 - テクノロジー"
+
+#~ msgid "Accumulated Amortization - Vehicles"
+#~ msgstr "減価償却累計 - 車両"
+
+#~ msgid "Accumulated Depreciation"
+#~ msgstr "減価償却累計額"
+
+#~ msgid "Cumulative amortization recorded for building assets."
+#~ msgstr "建物資産に計上された減価償却累計額。"
+
+#~ msgid "Cumulative amortization recorded for capitalized technology assets."
+#~ msgstr "資産計上されたテクノロジー資産に計上された減価償却累計額。"
+
+#~ msgid "Cumulative amortization recorded for furniture and fixture assets."
+#~ msgstr "家具・什器資産に計上された減価償却累計額。"
+
+#~ msgid ""
+#~ "Cumulative amortization recorded for leasehold or property improvements."
+#~ msgstr "賃借物件の改良費（資産）に計上された減価償却累計額。"
+
+#~ msgid "Cumulative amortization recorded for machinery and tool assets."
+#~ msgstr "機械・工具資産に計上された減価償却累計額。"
+
+#~ msgid ""
+#~ "Cumulative amortization recorded for other depreciable property assets."
+#~ msgstr "その他の減価償却資産(不動産)に計上された減価償却累計額。"
+
+#~ msgid "Cumulative amortization recorded for vehicle assets."
+#~ msgstr "車両資産に計上された減価償却累計額。"
+
+#~ msgid ""
+#~ "Error while creating XML:\n"
+#~ "- %s"
+#~ msgstr ""
+#~ "XMLを作成中にエラーが発生しました:\n"
+#~ "- %s"
+
+#~ msgid ""
+#~ "The account code can only contain alphanumeric characters, dots, and "
+#~ "dashes."
+#~ msgstr ""
+#~ "勘定科目コードには、英数字・ドット（.）・ハイフン（-）のみ使用できます。"
+
+#~ msgid ""
+#~ "This entry has been reviewed, You need the bookkeeper role to change it."
+#~ msgstr "この仕訳は確認済みです。変更するには、記帳担当者の権限が必要です。"
+
+#~ msgid ""
+#~ "You can not archive a journal containing draft journal entries.\n"
+#~ "\n"
+#~ "To proceed:\n"
+#~ "1/ click on the top-right button 'Journal Entries' from this journal "
+#~ "form\n"
+#~ "2/ then filter on 'Draft' entries\n"
+#~ "3/ select them all and post or delete them through the action menu"
+#~ msgstr ""
+#~ "ドラフトの仕訳を含む仕訳をアーカイブすることはできません。\n"
+#~ "\n"
+#~ "続けるには：\n"
+#~ "1 /この仕訳帳フォームの右上のボタン「仕訳」をクリックします\n"
+#~ "2 /次に「ドラフト」仕訳でフィルターしてください\n"
+#~ "3 /ドラフトの仕訳をすべて選択し、アクションメニューから投稿または削除しま"
+#~ "す"
+
+#~ msgid "You cannot modify the following readonly fields on a posted move: %s"
+#~ msgstr "記帳された仕訳の以下の読取り専用フィールドは変更できません:%s"
 
 #~ msgid "PEPPOL Electronic Invoicing"
 #~ msgstr "PEPPOL電子請求"

@@ -26,7 +26,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-10 17:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 17:43+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Persian <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -37,11 +37,6 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
 "X-Generator: Weblate 2026.8.1\n"
-
-#. module: project
-#: model:ir.model.fields.selection,name:project.selection__project_project__privacy_visibility__portal
-msgid " All internal users and invited portal users"
-msgstr ""
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__rating_count
@@ -872,6 +867,11 @@ msgid "All internal users"
 msgstr "همه کاربران داخلی"
 
 #. module: project
+#: model:ir.model.fields.selection,name:project.selection__project_project__privacy_visibility__portal
+msgid "All internal users and invited portal users"
+msgstr ""
+
+#. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__allocated_hours
 #: model:ir.model.fields,field_description:project.field_project_task_burndown_chart_report__allocated_hours
 msgid "Allocated Time"
@@ -1109,8 +1109,8 @@ msgid ""
 "Automatically send an email to customers when a task reaches a specific "
 "stage in a project by setting this template on that stage"
 msgstr ""
-"هنگامی که یک کار به مرحله خاصی از پروژه می رسد، با تنظیم این الگو در آن مرحله"
-"، به طور خودکار برای مشتریان ایمیل ارسال کنید."
+"هنگامی که یک کار به مرحله خاصی از پروژه می رسد، با تنظیم این الگو در آن "
+"مرحله، به طور خودکار برای مشتریان ایمیل ارسال کنید."
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__rating_avg
@@ -1694,7 +1694,8 @@ msgid ""
 "you can get statistics on the time it usually takes to assign tasks."
 msgstr ""
 "تاریخی که این کار آخرین بار اختصاص داده شد (یا لغو اختصاص داده شد). بر اساس "
-"این، می‌توانید آمار زمانی را که معمولاً برای اختصاص کارها صرف می‌شود، بدست آورید."
+"این، می‌توانید آمار زمانی را که معمولاً برای اختصاص کارها صرف می‌شود، بدست "
+"آورید."
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project_stage__rotting_threshold_days
@@ -2178,6 +2179,7 @@ msgid "Future"
 msgstr "آینده"
 
 #. module: project
+#: model_terms:ir.ui.view,arch_db:project.project_update_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "Future Activities"
@@ -2658,6 +2660,7 @@ msgid "Last Updated on"
 msgstr "آخرین بروز رسانی در"
 
 #. module: project
+#: model_terms:ir.ui.view,arch_db:project.project_update_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "Late Activities"
@@ -2884,6 +2887,7 @@ msgid "Months"
 msgstr "ماه"
 
 #. module: project
+#: model_terms:ir.ui.view,arch_db:project.project_update_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "My Activities"
@@ -4376,6 +4380,7 @@ msgid "Show Sub-Tasks"
 msgstr ""
 
 #. module: project
+#: model_terms:ir.ui.view,arch_db:project.project_update_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "Show all records whose next activity date is past"
@@ -5124,8 +5129,8 @@ msgid ""
 msgstr ""
 "این پروژه با %(project_company)s مرتبط است، در حالی که مرحله انتخابی به %"
 "(stage_company)s تعلق دارد. چند گزینه برای بررسی وجود دارد: یا نام شرکت را "
-"از پروژه یا از مرحله حذف کنید. در غیر این صورت، می‌توانید اطلاعات شرکت را برای "
-"این سوابق به‌روزرسانی کنید تا آن‌ها را تحت همان شرکت هم‌راستا کنید."
+"از پروژه یا از مرحله حذف کنید. در غیر این صورت، می‌توانید اطلاعات شرکت را "
+"برای این سوابق به‌روزرسانی کنید تا آن‌ها را تحت همان شرکت هم‌راستا کنید."
 
 #. module: project
 #. odoo-python
@@ -5277,6 +5282,7 @@ msgid "Today"
 msgstr "امروز"
 
 #. module: project
+#: model_terms:ir.ui.view,arch_db:project.project_update_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "Today Activities"
@@ -5296,7 +5302,8 @@ msgstr "رسیدن به نقاط پیشرفت عمده‌ای که باید بر
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.project_milestone_action
 msgid "Track major progress points that must be reached to achieve success."
-msgstr "ردیابی نقاط پیشرفت عمده ای که برای دستیابی به موفقیت باید به آنها رسید."
+msgstr ""
+"ردیابی نقاط پیشرفت عمده ای که برای دستیابی به موفقیت باید به آنها رسید."
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.res_config_settings_view_form

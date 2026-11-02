@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 14:10+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -193,10 +193,11 @@ msgstr ""
 ".heartBeat { animation: heartBeat 1.3s ease-in-out forwards; animation-"
 "delay: 0.75s; transform-origin: 80.5px 28.5px; } .tilt { animation: tilt 1s "
 "ease forwards; animation-delay: 0.75s; transform-origin: bottom left; } "
-"@keyframes heartBeat { 0% { transform: scale(1); } 14% { transform: scale"
-"(1.2); } 28% { transform: scale(1); } 42% { transform: scale(1.2); } 70% { "
-"transform: scale(1); } } @keyframes tilt { 0% { transform: rotate(0deg); } "
-"50% { transform: rotate(-7deg); } 100% { transform: rotate(0deg); } }"
+"@keyframes heartBeat { 0% { transform: scale(1); } 14% { transform: "
+"scale(1.2); } 28% { transform: scale(1); } 42% { transform: scale(1.2); } "
+"70% { transform: scale(1); } } @keyframes tilt { 0% { transform: "
+"rotate(0deg); } 50% { transform: rotate(-7deg); } 100% { transform: "
+"rotate(0deg); } }"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippets
@@ -466,9 +467,8 @@ msgid ""
 ">\n"
 "                    <span class=\"o_label small ms-1\">Add to Cart</span>"
 msgstr ""
-"<i class=\"fa fa-fw fa-shopping-cart o_not-animable\" "
-"role=\"presentation\"/> <span class=\"o_label small ms-1\">Savatga qo‘shish</"
-"span>"
+"<i class=\"fa fa-fw fa-shopping-cart o_not-animable\" role=\"presentation\"/"
+"> <span class=\"o_label small ms-1\">Savatga qo‘shish</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_add_to_wishlist
@@ -679,8 +679,8 @@ msgid ""
 "                                            </span>"
 msgstr ""
 "<span class=\"fw-bold\" name=\"product_price\" data-oe-type=\"monetary\" "
-"data-oe-expression=\"data['price']\"> <span class=\"oe_currency_value\">"
-"140,00</span> </span>"
+"data-oe-expression=\"data['price']\"> <span "
+"class=\"oe_currency_value\">140,00</span> </span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_dynamic_snippet_products_preview_data
@@ -693,8 +693,8 @@ msgid ""
 "                                            </span>"
 msgstr ""
 "<span class=\"fw-bold\" name=\"product_price\" data-oe-type=\"monetary\" "
-"data-oe-expression=\"data['price']\"> <span class=\"oe_currency_value\">"
-"33,00</span> </span>"
+"data-oe-expression=\"data['price']\"> <span "
+"class=\"oe_currency_value\">33,00</span> </span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_dynamic_snippet_products_preview_data
@@ -707,8 +707,8 @@ msgid ""
 "                                            </span>"
 msgstr ""
 "<span class=\"fw-bold\" name=\"product_price\" data-oe-type=\"monetary\" "
-"data-oe-expression=\"data['price']\"> <span class=\"oe_currency_value\">"
-"750,00</span> </span>"
+"data-oe-expression=\"data['price']\"> <span "
+"class=\"oe_currency_value\">750,00</span> </span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.delivery_method
@@ -754,9 +754,9 @@ msgstr ""
 "<span class=\"s_badge badge text-bg-primary o_animable\" data-"
 "name=\"Badge\"> <i class=\"fa fa-dollar fa-fw o_not-animable\"/> Arzon "
 "narxlar </span> <span class=\"s_badge badge text-bg-primary o_animable\" "
-"data-name=\"Badge\"> <i class=\"fa fa-shopping-basket fa-fw o_not-"
-"animable\"/> Oson qaytarish </span> <span class=\"s_badge badge text-bg-"
-"primary o_animable\" data-name=\"Badge\"> <i class=\"fa fa-truck fa-fw o_not-"
+"data-name=\"Badge\"> <i class=\"fa fa-shopping-basket fa-fw o_not-animable\"/"
+"> Oson qaytarish </span> <span class=\"s_badge badge text-bg-primary "
+"o_animable\" data-name=\"Badge\"> <i class=\"fa fa-truck fa-fw o_not-"
 "animable\"/> Tez yetkazib berish </span>"
 
 #. module: website_sale
@@ -852,8 +852,8 @@ msgid ""
 "<span name=\"o_wsale_cta_wrapper_boxed_price_label\" class=\"text-"
 "muted\">Price</span>"
 msgstr ""
-"<span name=\"o_wsale_cta_wrapper_boxed_price_label\" class=\"text-muted\">"
-"Narx</span>"
+"<span name=\"o_wsale_cta_wrapper_boxed_price_label\" class=\"text-"
+"muted\">Narx</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.billing_address_list
@@ -992,7 +992,8 @@ msgid ""
 "                                <td width=\"19%\" align=\"right\" "
 "style=\"max-width: 100%; vertical-align: top;\">\n"
 "                                    <t t-"
-"out=\"format_amount(object.list_price, object.currency_id)\">$ 450</t>\n"
+"out=\"format_amount(ctx.get('product_price') or 0, object.currency_id)\">$ "
+"450</t>\n"
 "                                </td>\n"
 "                            </tr>\n"
 "                        </table>\n"
@@ -3394,12 +3395,6 @@ msgstr ""
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/models/product_template.py:0
-msgid "Donation products cannot be archived."
-msgstr ""
-
-#. module: website_sale
-#. odoo-python
-#: code:addons/website_sale/models/product_template.py:0
 msgid "Donation products cannot be deleted."
 msgstr ""
 
@@ -4198,7 +4193,8 @@ msgstr "Agar belgilansa, yangi xabarlar e'tiboringizni talab qiladi."
 #: model:ir.model.fields,help:website_sale.field_product_template__message_has_sms_error
 #, fuzzy
 msgid "If checked, some messages have a delivery error."
-msgstr "Agar belgilansa, ba'zi xabarlarni yetkazib berishda xatolik yuz bergan."
+msgstr ""
+"Agar belgilansa, ba'zi xabarlarni yetkazib berishda xatolik yuz bergan."
 
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_product_public_category__not_in_shop
@@ -7279,6 +7275,14 @@ msgid ""
 msgstr ""
 
 #. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/models/sale_order.py:0
+msgid ""
+"Some products in your cart are not available for purchase in your country. "
+"Please remove them or contact us."
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.sort
 #, fuzzy
 msgid "Sort By"
@@ -7694,6 +7698,14 @@ msgstr ""
 
 #. module: website_sale
 #. odoo-python
+#: code:addons/website_sale/controllers/cart.py:0
+msgid ""
+"The number of selected combo items must match the number of available combo "
+"choices."
+msgstr ""
+
+#. module: website_sale
+#. odoo-python
 #: code:addons/website_sale/controllers/payment.py:0
 #, fuzzy
 msgid "The order has been cancelled."
@@ -7844,8 +7856,20 @@ msgstr ""
 
 #. module: website_sale
 #. odoo-python
+#: code:addons/website_sale/models/sale_order.py:0
+msgid "This product is not available for purchase in your country."
+msgstr ""
+
+#. module: website_sale
+#. odoo-python
 #: code:addons/website_sale/controllers/wishlist.py:0
 msgid "This product is not eligible for stock notifications."
+msgstr ""
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/cart.py:0
+msgid "This product is part of a combo and can't be updated individually."
 msgstr ""
 
 #. module: website_sale
@@ -8581,8 +8605,8 @@ msgid ""
 msgstr ""
 "Siz bir vaqtning o‘zida <b>yetkazib berish va to‘lov</b> manzillaringizni "
 "tahrirlayapsiz!<br/> Agar to‘lov manzilingizni o‘zgartirmoqchi bo‘lsangiz, "
-"<a class=\"o_translate_inline\" href=\"/shop/address?address_type=billing\">"
-"yangi manzil yarating</a>."
+"<a class=\"o_translate_inline\" href=\"/shop/address?"
+"address_type=billing\">yangi manzil yarating</a>."
 
 #. module: website_sale
 #. odoo-javascript

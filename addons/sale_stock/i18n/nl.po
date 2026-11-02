@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-05 19:34+0000\n"
+"POT-Creation-Date: 2026-10-24 17:40+0000\n"
 "PO-Revision-Date: 2026-08-31 19:47+0000\n"
 "Last-Translator: Bren Driesen <brdri@odoo.com>\n"
 "Language-Team: Dutch <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -145,8 +145,8 @@ msgstr "<strong>Geretourneerde producten</strong>"
 #. module: sale_stock
 #. odoo-python
 #: code:addons/sale_stock/controllers/return_order.py:0
-msgid "A return label has been downloaded for the following products:<br/>"
-msgstr "Er is een retourlabel gedownload voor de volgende producten:<br/>"
+msgid "A return label has been downloaded for the following products:"
+msgstr ""
 
 #. module: sale_stock
 #: model:ir.model.fields,help:sale_stock.field_sale_order_line__qty_delivered_method
@@ -1026,3 +1026,6 @@ msgstr "verwerkt in plaats van"
 #: code:addons/sale_stock/static/src/xml/delay_alert.xml:0
 msgid "will be late."
 msgstr "zat te laat zijn."
+
+#~ msgid "A return label has been downloaded for the following products:<br/>"
+#~ msgstr "Er is een retourlabel gedownload voor de volgende producten:<br/>"

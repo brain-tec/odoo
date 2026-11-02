@@ -30,7 +30,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:36+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 21:13+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Estonian <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -436,8 +436,8 @@ msgstr ""
 "* Klient: Virtuaalne asukoht, mis tähistab teie klientidele saadetud toodete "
 "sihtkoha asukohta\n"
 "* Inventuuri kadu: inventuuride taseme korrigeerimiseks kasutatavate "
-"inventuuri toimingute vastena kasutatav virtuaalne asukoht (füüsilised varud)"
-"\n"
+"inventuuri toimingute vastena kasutatav virtuaalne asukoht (füüsilised "
+"varud)\n"
 "* Tootmine: tootmistoimingute virtuaalne asukoht: see asukoht kasutab "
 "komponente ja toodab valmistooteid\n"
 "* Transiit: vastaspoole asukoht, mida tuleks kasutada ettevõttevahelistes "
@@ -759,8 +759,7 @@ msgid ""
 "                                        </span>"
 msgstr ""
 "<span class=\"o_stat_value text-muted\">\n"
-"                                                                                      "
-"Prognoositud\n"
+"                                                                                      Prognoositud\n"
 "                                                                          </"
 "span>"
 
@@ -1520,6 +1519,12 @@ msgstr "Küsi"
 
 #. module: stock
 #. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Assign"
+msgstr ""
+
+#. module: stock
+#. odoo-javascript
 #: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 msgid "Assign All"
 msgstr "Määra kõik"
@@ -1533,6 +1538,12 @@ msgstr "Määratud omanik"
 #: model:ir.model.fields,field_description:stock.field_stock_request_count__user_id
 msgid "Assign to"
 msgstr "Määra"
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
+msgid "Assigned"
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_package__child_package_dest_ids
@@ -2155,8 +2166,8 @@ msgstr ""
 "                                                                     annab "
 "varude täiendamisel edumaa ja aitab vältida viivitusi. Või määra "
 "ajahorisondiks \n"
-"                                                                     „0 päeva"
-"“, et käivitada täiendamine täpselt õigel ajal ja vältida ülelaoseisu."
+"                                                                     „0 "
+"päeva“, et käivitada täiendamine täpselt õigel ajal ja vältida ülelaoseisu."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -3841,6 +3852,7 @@ msgid "Full Package Name"
 msgstr "Täielik pakendi nimi"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Future Activities"
 msgstr "Tulevased tegevused"
@@ -4021,7 +4033,8 @@ msgstr "Ajahorisont"
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__reservation_method
 msgid "How products in transfers of this operation type should be reserved."
-msgstr "Kuidas peaks reserveerima tooteid sellise operatsioonitüübiga siiretel."
+msgstr ""
+"Kuidas peaks reserveerima tooteid sellise operatsioonitüübiga siiretel."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_barcode_rule__id
@@ -4266,8 +4279,8 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_show_allocation_report
 msgid ""
-"If this checkbox is ticked, Odoo will automatically show the allocation "
-"report (if there are moves to allocate to) when validating."
+"If this checkbox is ticked, Odoo will show the allocation report (if there "
+"are moves to allocate to.)"
 msgstr ""
 
 #. module: stock
@@ -5071,6 +5084,7 @@ msgid "Late"
 msgstr "Üle tähtaja"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Late Activities"
 msgstr "Hilinenud tegevused"
@@ -5711,6 +5725,7 @@ msgid "Multiple destinations"
 msgstr "Mitu sihtkohta"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "My Activities"
 msgstr "Minu tegevused"
@@ -7711,7 +7726,8 @@ msgstr "Võta kaup vastu ja talleta (2 sammu)"
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_warehouse__reception_steps__three_steps
 msgid "Receive, Quality Control, then Store (3 steps)"
-msgstr "Võta kaup vastu, tee kvaliteedi kontroll ja siis talleta laos (3 sammu)"
+msgstr ""
+"Võta kaup vastu, tee kvaliteedi kontroll ja siis talleta laos (3 sammu)"
 
 #. module: stock
 #. odoo-python
@@ -7741,8 +7757,8 @@ msgid ""
 "                        locations management traceability, quality control, "
 "etc."
 msgstr ""
-"Vähenda kaubapuudust teavituste, triipkoodirakenduse, täiendamissoovituste, "
-"\n"
+"Vähenda kaubapuudust teavituste, triipkoodirakenduse, "
+"täiendamissoovituste, \n"
 "                                                    asukohtade halduse, "
 "jälgitavuse ja kvaliteedikontrolli abil jne."
 
@@ -8042,7 +8058,6 @@ msgstr "Reserveeri osalisi pakendeid"
 
 #. module: stock
 #. odoo-javascript
-#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 #: code:addons/stock/static/src/allocation_report/out_line/out_line.js:0
 msgid "Reserved"
 msgstr ""
@@ -10146,6 +10161,7 @@ msgid "Today"
 msgstr "Täna"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Today Activities"
 msgstr "Tänased tegevused"
@@ -10429,6 +10445,12 @@ msgstr ""
 #: model:ir.model.fields,help:stock.field_stock_picking__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr "Kirjel oleva erandtegevuse tüüp."
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Unassign"
+msgstr ""
 
 #. module: stock
 #. odoo-python

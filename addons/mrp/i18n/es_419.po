@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-10-09 16:29+0000\n"
 "Last-Translator: \"Fernanda Alvarez (mfar)\" <mfar@odoo.com>\n"
 "Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
@@ -357,8 +357,8 @@ msgstr ""
 "<span class=\"o_annotation o_annotation_1 o_annotation_end position-"
 "absolute\">Registro de tiempo</span>\n"
 "                                        <span class=\"o_annotation "
-"o_annotation_2 o_annotation_end position-absolute\">Control de calidad</span>"
-"\n"
+"o_annotation_2 o_annotation_end position-absolute\">Control de calidad</"
+"span>\n"
 "                                        <span class=\"o_annotation "
 "o_annotation_3 o_annotation_start position-absolute\">Ciclo de "
 "retroalimentación</span>\n"
@@ -4686,7 +4686,8 @@ msgstr "Defecto en el proceso"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
 msgid "Process manufacturing orders from the barcode application"
-msgstr "Procese las órdenes de fabricación desde la aplicación Código de barras"
+msgstr ""
+"Procese las órdenes de fabricación desde la aplicación Código de barras"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
@@ -5448,7 +5449,8 @@ msgstr "Números de serie"
 #. odoo-python
 #: code:addons/mrp/models/mrp_production.py:0
 msgid "Serial number(s) for product %(product_name)s already produced"
-msgstr "Ya se produjeron los números de serie para el producto %(product_name)s"
+msgstr ""
+"Ya se produjeron los números de serie para el producto %(product_name)s"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_change_production_qty_wizard
@@ -5672,7 +5674,8 @@ msgstr "Tornillo de acero inoxidable"
 #. module: mrp
 #: model_terms:product.template,description:mrp.product_product_computer_desk_bolt_product_template
 msgid "Stainless steel screw full (dia - 5mm, Length - 10mm)"
-msgstr "Tornillo de acero inoxidable completo (diámetro - 5mm, longitud - 10mm)"
+msgstr ""
+"Tornillo de acero inoxidable completo (diámetro - 5mm, longitud - 10mm)"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_filter
@@ -5934,6 +5937,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_filter
 msgid "The day after tomorrow"
 msgstr "Pasado mañana"
+
+#. module: mrp
+#. odoo-python
+#: code:addons/mrp/models/mrp_production.py:0
+msgid "The end date cannot be set in the future."
+msgstr ""
 
 #. module: mrp
 #. odoo-python
@@ -7293,7 +7302,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/mrp/models/mrp_production.py:0
 msgid "You need at least two production orders to merge them."
-msgstr "Necesita por lo menos dos órdenes de producción para poder fusionarlas."
+msgstr ""
+"Necesita por lo menos dos órdenes de producción para poder fusionarlas."
 
 #. module: mrp
 #. odoo-python

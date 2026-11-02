@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:36+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 19:11+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
@@ -34,6 +34,18 @@ msgstr "%(line_description)s（已取消）"
 #: code:addons/pos_sale/models/account_move.py:0
 msgid "%(old_name)s (Cancelled)"
 msgstr "%(old_name)s（已取消）"
+
+#. module: pos_sale
+#. odoo-python
+#: code:addons/pos_sale/models/pos_config.py:0
+msgid "%s needs a Default Product"
+msgstr ""
+
+#. module: pos_sale
+#. odoo-python
+#: code:addons/pos_sale/models/pos_config.py:0
+msgid "%s needs a Down Payment Product"
+msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
@@ -204,22 +216,6 @@ msgid "Invoiced"
 msgstr "已開立發票"
 
 #. module: pos_sale
-#. odoo-javascript
-#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
-msgid ""
-"It seems that you didn't configure a down payment product in your point of "
-"sale. You can go to your point of sale configuration to choose one."
-msgstr ""
-
-#. module: pos_sale
-#. odoo-javascript
-#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
-msgid ""
-"It seems that you didn't configure a down payment product in your point of "
-"sale. You can go to your point of sale settings to choose one."
-msgstr ""
-
-#. module: pos_sale
 #: model:ir.model,name:pos_sale.model_account_move
 msgid "Journal Entry"
 msgstr "日記賬記項"
@@ -247,12 +243,6 @@ msgid "Linked Sale Orders"
 msgstr "關聯銷售訂單"
 
 #. module: pos_sale
-#. odoo-javascript
-#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
-msgid "No down payment product"
-msgstr "無需首期付款產品"
-
-#. module: pos_sale
 #: model:ir.actions.act_window,name:pos_sale.pos_session_action_from_crm_team
 msgid "Open Sessions"
 msgstr "開啟營業點"
@@ -277,6 +267,18 @@ msgstr "POS 訂單"
 #: model:ir.model.fields.selection,name:pos_sale.selection__sale_report__state__paid
 msgid "Paid"
 msgstr "已付款"
+
+#. module: pos_sale
+#. odoo-python
+#: code:addons/pos_sale/models/pos_config.py:0
+msgid "Please set a Default Product on %s before opening a session."
+msgstr ""
+
+#. module: pos_sale
+#. odoo-python
+#: code:addons/pos_sale/models/pos_config.py:0
+msgid "Please set a Down Payment Product on %s before opening a session."
+msgstr ""
 
 #. module: pos_sale
 #: model:ir.model,name:pos_sale.model_pos_config
@@ -322,6 +324,12 @@ msgstr "已過帳"
 #: model:ir.model,name:pos_sale.model_product_template
 msgid "Product"
 msgstr "商品"
+
+#. module: pos_sale
+#. odoo-javascript
+#: code:addons/pos_sale/static/src/app/components/screens/product_screen/control_buttons/control_buttons.js:0
+msgid "Quotation / Order"
+msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
@@ -395,6 +403,12 @@ msgid ""
 "The rate of the currency to the currency of rate applicable at the date of "
 "the order"
 msgstr "貨幣匯率相對於訂單日期適用的匯率貨幣"
+
+#. module: pos_sale
+#. odoo-javascript
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
+msgid "There is nothing left to settle on this sale order."
+msgstr ""
 
 #. module: pos_sale
 #: model:ir.model.fields,help:pos_sale.field_pos_config__crm_team_id
@@ -474,3 +488,6 @@ msgstr "id"
 #: code:addons/pos_sale/static/src/app/components/orderline/orderline.xml:0
 msgid "x"
 msgstr ""
+
+#~ msgid "No down payment product"
+#~ msgstr "無需首期付款產品"

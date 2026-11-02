@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:36+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-10-08 13:33+0000\n"
 "Last-Translator: \"Anastasiia Koroleva (koan)\" <koan@odoo.com>\n"
 "Language-Team: Russian <https://translate.odoo.com/projects/odoo-s19-4/stock/"
@@ -430,8 +430,8 @@ msgstr ""
 "* Клиент: виртуальная локация, представляющая локацию назначения для "
 "товаров, отправляемых вашим клиентам\n"
 "* Потеря запасов: виртуальная локация, служащая в качестве аналога операций "
-"с запасами, выполняемых для корректировки уровня запасов (физические запасы)"
-"\n"
+"с запасами, выполняемых для корректировки уровня запасов (физические "
+"запасы)\n"
 "* Производство: виртуальная локация-аналог для производственных операций. То "
 "есть на этой локации потребляется компоненты и производится готовая "
 "продукция\n"
@@ -628,8 +628,8 @@ msgstr ""
 "                <t t-set=\"multiple_carrier_tracking\" t-"
 "value=\"object.get_multiple_carrier_tracking()\"/>\n"
 "                <t t-if=\"multiple_carrier_tracking\">\n"
-"                    <t t-foreach=\"multiple_carrier_tracking\" t-as=\"line\">"
-"\n"
+"                    <t t-foreach=\"multiple_carrier_tracking\" t-"
+"as=\"line\">\n"
 "                        <br/><a t-att-href=\"line[1]\" target=\"_blank\" t-"
 "out=\"line[0] or ''\"/>\n"
 "                    </t>\n"
@@ -1569,6 +1569,12 @@ msgstr "Спросить"
 
 #. module: stock
 #. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Assign"
+msgstr ""
+
+#. module: stock
+#. odoo-javascript
 #: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 msgid "Assign All"
 msgstr "Назначить все"
@@ -1582,6 +1588,12 @@ msgstr "Назначить владельца"
 #: model:ir.model.fields,field_description:stock.field_stock_request_count__user_id
 msgid "Assign to"
 msgstr "Назначить на"
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
+msgid "Assigned"
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_package__child_package_dest_ids
@@ -2930,8 +2942,8 @@ msgstr ""
 "Наименьшее количество упаковок: товары/партии, которые были размещены в "
 "упаковках с наименьшим количеством, будут перемещены в первую очередь.\n"
 "FEFO: товары/партии с ближайшей датой истечения срока годности будут "
-"перемещены в первую очередь (доступность этого метода зависит от настройки «"
-"Сроки годности»)."
+"перемещены в первую очередь (доступность этого метода зависит от настройки "
+"«Сроки годности»)."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move__delay_alert_date
@@ -3900,6 +3912,7 @@ msgid "Full Package Name"
 msgstr "Полное наименование упаковки"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Future Activities"
 msgstr "Планируемые действия"
@@ -3997,7 +4010,8 @@ msgstr "Приходная накладная"
 #. odoo-javascript
 #: code:addons/stock/static/src/client_actions/multi_print.js:0
 msgid "HTML reports cannot be auto-printed, skipping report: %s"
-msgstr "HTML-отчеты не могут быть автоматически напечатаны, пропуская отчет: %s"
+msgstr ""
+"HTML-отчеты не могут быть автоматически напечатаны, пропуская отчет: %s"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_type_form
@@ -4333,8 +4347,8 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_show_allocation_report
 msgid ""
-"If this checkbox is ticked, Odoo will automatically show the allocation "
-"report (if there are moves to allocate to) when validating."
+"If this checkbox is ticked, Odoo will show the allocation report (if there "
+"are moves to allocate to.)"
 msgstr ""
 
 #. module: stock
@@ -5156,6 +5170,7 @@ msgid "Late"
 msgstr "Просрочено"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Late Activities"
 msgstr "Поздние Мероприятия"
@@ -5798,6 +5813,7 @@ msgid "Multiple destinations"
 msgstr "Несколько локаций назначения"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "My Activities"
 msgstr "Мои активности"
@@ -8143,7 +8159,6 @@ msgstr "Резервные частичные упаковки"
 
 #. module: stock
 #. odoo-javascript
-#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 #: code:addons/stock/static/src/allocation_report/out_line/out_line.js:0
 msgid "Reserved"
 msgstr ""
@@ -8646,7 +8661,8 @@ msgstr "Оправить письмо"
 #: model:mail.template,description:stock.mail_template_data_delivery_confirmation
 msgid ""
 "Sent to the customers when orders are delivered, if the setting is enabled"
-msgstr "Отправляется клиентам при доставке заказов, если эта настройка включена"
+msgstr ""
+"Отправляется клиентам при доставке заказов, если эта настройка включена"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__barcode_separator
@@ -9905,8 +9921,8 @@ msgstr ""
 "позволяет создавать пополнение по запросу, привязанное к вашим заказам на "
 "продажу (например), как только они будут подтверждены. Заказы на закупку, "
 "производственные заказы и т. д. создаются автоматически в зависимости от "
-"установленного для товара способа пополнения (маршрут «Купить» или «"
-"Произвести»)."
+"установленного для товара способа пополнения (маршрут «Купить» или "
+"«Произвести»)."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -10028,8 +10044,8 @@ msgid ""
 "                to see all the past or future movements for the product."
 msgstr ""
 "Это меню показывает все операции с запасами \n"
-"                 для конкретного товара. Вы можете отфильтровать по товару, "
-"\n"
+"                 для конкретного товара. Вы можете отфильтровать по "
+"товару, \n"
 "                 чтобы увидеть все его перемещения."
 
 #. module: stock
@@ -10272,6 +10288,7 @@ msgid "Today"
 msgstr "Сегодня"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Today Activities"
 msgstr "Сегодняшние Дела"
@@ -10559,6 +10576,12 @@ msgstr ""
 #: model:ir.model.fields,help:stock.field_stock_picking__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr "Тип задачи-исключения в записи."
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Unassign"
+msgstr ""
 
 #. module: stock
 #. odoo-python
@@ -11062,7 +11085,8 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_route__package_type_selectable
 msgid "When checked, the route will be selectable on package types"
-msgstr "Если установлен флажок, маршрут можно будет выбирать для типов упаковки"
+msgstr ""
+"Если установлен флажок, маршрут можно будет выбирать для типов упаковки"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_route__product_categ_selectable

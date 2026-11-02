@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:36+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-08-31 16:38+0000\n"
 "Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -1000,6 +1000,11 @@ msgid "Hotel, plane ticket, taxi, etc."
 msgstr "ホテル、飛行機チケット、タクシーなど"
 
 #. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_account_tax__hr_expense_ids
+msgid "Hr Expense"
+msgstr ""
+
+#. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_res_config_settings__hr_expense_alias_domain_id
 msgid "Hr Expense Alias Domain"
 msgstr "人事経費エイリアスドメイン"
@@ -1237,7 +1242,8 @@ msgstr "マネジャー"
 msgid ""
 "Managers can approve the expense here, then an accountant can post the "
 "accounting entries."
-msgstr "マネジャーはここで経費を承認し、その後、会計担当者が会計仕訳を計上します。"
+msgstr ""
+"マネジャーはここで経費を承認し、その後、会計担当者が会計仕訳を計上します。"
 
 #. module: hr_expense
 #. odoo-javascript
@@ -1682,8 +1688,8 @@ msgid ""
 "don't <em>need to save</em> - Odoo will save eveyrthing for you when you "
 "navigate."
 msgstr ""
-"準備はいいですか？ここから手動で保存したり、変更を破棄することができます"
-"。<em>保存する必要</em>はありません。Odooがナビゲート時にすべて保存します。"
+"準備はいいですか？ここから手動で保存したり、変更を破棄することができます。"
+"<em>保存する必要</em>はありません。Odooがナビゲート時にすべて保存します。"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_refuse_wizard__reason
@@ -1827,11 +1833,10 @@ msgstr "続行するにはプロダクトを選択してください。"
 #: model:ir.model.fields,help:hr_expense.field_hr_employee__expense_manager_id
 msgid ""
 "Select the user responsible for approving \"Expenses\" of this employee.\n"
-"If empty, the approval is done by an Administrator or Approver (determined "
-"in settings/users)."
+"If empty, the approval is done by the department manager (if they are an "
+"expense approver), otherwise by the employee's manager. If there is none, "
+"the expense is auto-validated."
 msgstr ""
-"この従業員の「経費」の承認を担当するユーザを選択します。\n"
-"空の場合、承認は管理者または承認者（設定/ユーザで決定）が行います。"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__selectable_payment_method_line_ids
@@ -1848,9 +1853,9 @@ msgid ""
 "set it on the expense too."
 msgstr ""
 "領収書を添付してこのメールエイリアスにメールを送信すると、ワンクリックで費用"
-"が作成されます。メールの件名の最初の単語にプロダクトの内部参照番号または"
-"プロダクト名が含まれている場合、対応するプロダクトが自動的に設定されます。"
-"メールの件名に費用金額を入力すると、費用にもその金額が設定されます。"
+"が作成されます。メールの件名の最初の単語にプロダクトの内部参照番号またはプロ"
+"ダクト名が含まれている場合、対応するプロダクトが自動的に設定されます。メール"
+"の件名に費用金額を入力すると、費用にもその金額が設定されます。"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_res_config_settings__module_hr_expense_extract
@@ -2043,7 +2048,8 @@ msgstr "従業員の経費が作成される時に使われる会社のデフォ
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid "The current user has no related employee. Please, create one."
-msgstr "現ユーザには関連する従業員レコードがありません。従業員を作成してください。"
+msgstr ""
+"現ユーザには関連する従業員レコードがありません。従業員を作成してください。"
 
 #. module: hr_expense
 #. odoo-python
@@ -2067,9 +2073,8 @@ msgid ""
 "than some expenses of this report. Please verify this report does not "
 "contain duplicates."
 msgstr ""
-"次の承認済み経費は、この(経費)報告書内の一部の経費と、従業員・金額・"
-"プロダクト(費目)が似ています。この報告書に重複が含まれていないか確認してくだ"
-"さい。"
+"次の承認済み経費は、この(経費)報告書内の一部の経費と、従業員・金額・プロダク"
+"ト(費目)が似ています。この報告書に重複が含まれていないか確認してください。"
 
 #. module: hr_expense
 #. odoo-python
@@ -2317,13 +2322,13 @@ msgid ""
 "like allowances for mileage, per diem, "
 "accommodation                                             or meal."
 msgstr ""
-"経費プロダクトの原価が0より大きい場合、そのプロダクトを使用するユーザは"
-"                                             経費の金額を変更することができず"
-"、数量のみを変更することができます。"
-"                                             マイレージ、日当、宿泊費、"
-"                                             食事手当のように、会社から固定費"
-"で支給される経費カテゴリには、0以外の原価を"
-"                                             使用して下さい。"
+"経費プロダクトの原価が0より大きい場合、そのプロダクトを使用するユーザ"
+"は                                             経費の金額を変更することができ"
+"ず、数量のみを変更することができま"
+"す。                                             マイレージ、日当、宿泊"
+"費、                                             食事手当のように、会社から固"
+"定費で支給される経費カテゴリには、0以外の原価"
+"を                                             使用して下さい。"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__product_has_tax
@@ -2356,7 +2361,8 @@ msgstr "承認の経費のみ会計仕訳生成できます。"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid "You can't add an attachment to an expense once it has been approved."
-msgstr "経費が承認された後は、その経費に添付ファイルを追加することはできません。"
+msgstr ""
+"経費が承認された後は、その経費に添付ファイルを追加することはできません。"
 
 #. module: hr_expense
 #. odoo-python
@@ -2372,8 +2378,8 @@ msgid ""
 "You can't post simultaneously employee-paid expenses belonging to different "
 "companies"
 msgstr ""
-"異なる会社に属する従業員によって支払済の経費を同時に投稿することはできません"
-"。"
+"異なる会社に属する従業員によって支払済の経費を同時に投稿することはできませ"
+"ん。"
 
 #. module: hr_expense
 #. odoo-python
@@ -2458,6 +2464,7 @@ msgstr "この経費を編集する権限がありません。"
 #. module: hr_expense
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
+#: code:addons/hr_expense/wizard/hr_expense_post_wizard.py:0
 msgid "You don't have the access rights to modify this expense."
 msgstr "この経費を編集する権限がありません。"
 
@@ -2536,9 +2543,18 @@ msgstr "OCRを使用して請求書の写真からデータを入力"
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
 msgid "with the same category, date, amount, and employee already exists."
-msgstr "同じカテゴリ、日付、金額、および従業員を持つレコードがすでに存在します。"
+msgstr ""
+"同じカテゴリ、日付、金額、および従業員を持つレコードがすでに存在します。"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
 msgid "with the same receipt already exists."
 msgstr "同じ領収書が既に存在します。"
+
+#~ msgid ""
+#~ "Select the user responsible for approving \"Expenses\" of this employee.\n"
+#~ "If empty, the approval is done by an Administrator or Approver "
+#~ "(determined in settings/users)."
+#~ msgstr ""
+#~ "この従業員の「経費」の承認を担当するユーザを選択します。\n"
+#~ "空の場合、承認は管理者または承認者（設定/ユーザで決定）が行います。"

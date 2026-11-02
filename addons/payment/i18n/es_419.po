@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-10 17:38+0000\n"
+"POT-Creation-Date: 2026-10-30 17:38+0000\n"
 "PO-Revision-Date: 2026-10-21 22:00+0000\n"
 "Last-Translator: \"Fernanda Alvarez (mfar)\" <mfar@odoo.com>\n"
 "Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
@@ -62,10 +62,11 @@ msgid ""
 "transactions you intend to capture can only be captured in full. Handle the "
 "transactions individually to capture a partial amount.\"/>"
 msgstr ""
-"<i class=\"fa fa-info-circle oe_inline\" invisible=\"support_partial_capture "
-"!= 'full_only'\" title=\"Algunas de las transacciones que intenta capturar, "
-"solo se pueden capturar completas. Maneje las transacciones individualmente "
-"para capturar un importe parcial.\"/>"
+"<i class=\"fa fa-info-circle oe_inline\" "
+"invisible=\"support_partial_capture != 'full_only'\" title=\"Algunas de las "
+"transacciones que intenta capturar, solo se pueden capturar completas. "
+"Maneje las transacciones individualmente para capturar un importe parcial.\"/"
+">"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.token_form
@@ -1341,9 +1342,9 @@ msgid ""
 "queue payment data for processing, or pass payment_safe_write=True to the "
 "context after ensuring that the update can tolerate a rollback."
 msgstr ""
-"Las transacciones de pago no deben actualizarse de forma directa. Usa _record"
-"() para poner los datos del pago en la fila para su procesamiento o pasa "
-"payment_safe_write=True al contexto después de confirmar que la "
+"Las transacciones de pago no deben actualizarse de forma directa. Usa "
+"_record() para poner los datos del pago en la fila para su procesamiento o "
+"pasa payment_safe_write=True al contexto después de confirmar que la "
 "actualización admite una reversión."
 
 #. module: payment
@@ -1939,7 +1940,8 @@ msgstr "El proveedor ya tiene un método de pago con este código."
 #. odoo-python
 #: code:addons/payment/models/payment_transaction.py:0
 msgid "The provider must not be archived to make a request."
-msgstr "El proveedor no debe estar archivado para poder realizar una solicitud."
+msgstr ""
+"El proveedor no debe estar archivado para poder realizar una solicitud."
 
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_token__provider_ref
@@ -2111,6 +2113,18 @@ msgstr ""
 "con algunos proveedores de pago.\n"
 "                     Le recomendamos que configure un correo para este "
 "contacto."
+
+#. module: payment
+#. odoo-python
+#: code:addons/payment/controllers/portal.py:0
+msgid "This payment method is not available."
+msgstr ""
+
+#. module: payment
+#. odoo-python
+#: code:addons/payment/controllers/portal.py:0
+msgid "This payment provider is not available."
+msgstr ""
 
 #. module: payment
 #: model_terms:ir.actions.act_window,help:payment.action_payment_provider
@@ -2533,8 +2547,8 @@ msgstr "C.P."
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__partner_zip
-msgid "Zip"
-msgstr "Código postal"
+msgid "Zip Code"
+msgstr ""
 
 #. module: payment
 #. odoo-python
@@ -2571,3 +2585,6 @@ msgstr "transaction_id"
 #: model:ir.model,name:payment.model_ir_websocket
 msgid "websocket message handling"
 msgstr "gestión de mensajes de WebSocket"
+
+#~ msgid "Zip"
+#~ msgstr "Código postal"

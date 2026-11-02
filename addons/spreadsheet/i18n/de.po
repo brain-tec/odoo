@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:39+0000\n"
+"POT-Creation-Date: 2026-10-30 17:39+0000\n"
 "PO-Revision-Date: 2026-09-02 14:08+0000\n"
 "Last-Translator: \"Larissa Manderfeld (lman)\" <lman@odoo.com>\n"
 "Language-Team: German <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -79,8 +79,8 @@ msgstr "% der Zeilensumme"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "%(count)s matches in %(sheetName)s"
-msgstr "%(count)s Übereinstimmungen in %(sheetName)s"
+msgid "%(count)s matches in '%(sheetName)s'"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -91,8 +91,8 @@ msgstr "%(count)s Übereinstimmungen in allen Blättern"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "%(count)s matches in range %(range)s of %(sheetName)s"
-msgstr "%(count)s Übereinstimmungen im Bereich %(range)s von %(sheetName)s"
+msgid "%(count)s matches in range %(range)s of '%(sheetName)s'"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -398,8 +398,14 @@ msgstr "1 Spalte"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "1 match in %(sheetName)s"
-msgstr "1 Übereinstimmung in %(sheetName)s"
+msgid "1 is hidden"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "1 match in '%(sheetName)s'"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -410,8 +416,8 @@ msgstr "1 Übereinstimmung in allen Blättern"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "1 match in range %(range)s of %(sheetName)s"
-msgstr "1 Übereinstimmung im Bereich %(range)s von %(sheetName)s"
+msgid "1 match in range %(range)s of '%(sheetName)s'"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -811,7 +817,8 @@ msgstr "Buchhaltungsformat"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Accrued interest of security paying at maturity."
-msgstr "Aufgelaufene Zinsen für Wertpapiere, die bei Fälligkeit gezahlt werden."
+msgstr ""
+"Aufgelaufene Zinsen für Wertpapiere, die bei Fälligkeit gezahlt werden."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1241,7 +1248,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Any real value to calculate the hyperbolic cosine of."
-msgstr "Jeder reelle Wert, dessen hyperbolischer Kosinus berechnet werden kann."
+msgstr ""
+"Jeder reelle Wert, dessen hyperbolischer Kosinus berechnet werden kann."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1266,7 +1274,8 @@ msgstr "Jeder reelle Wert, dessen hyperbolischer Sinus berechnet werden kann."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Any real value to calculate the hyperbolic tangent of."
-msgstr "Jeder reelle Wert, dessen hyperbolischer Tangens berechnet werden kann."
+msgstr ""
+"Jeder reelle Wert, dessen hyperbolischer Tangens berechnet werden kann."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1969,6 +1978,13 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid ""
+"Cannot perform this action on merged cells. Unmerge the cells and try again."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Cannot remove duplicates for an unknown reason"
 msgstr "Duplikate können nicht ohne bekannten Grund entfernt werden."
 
@@ -2164,7 +2180,7 @@ msgstr "Informationen zum Diagramm"
 
 #. module: spreadsheet
 #. odoo-javascript
-#: code:addons/spreadsheet/static/src/chart/odoo_link/chart_menu.js:0
+#: code:addons/spreadsheet/static/src/chart/odoo_link/components/chart_menu.js:0
 msgid "Chart Odoo Link"
 msgstr "Odoo-Diagrammlink"
 
@@ -2541,7 +2557,8 @@ msgstr "Schnittpunkt berechnen"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Compute the Matthews correlation coefficient of a dataset."
-msgstr "Berechnen Sie den Matthews-Korrelationskoeffizienten eines Datensatzes."
+msgstr ""
+"Berechnen Sie den Matthews-Korrelationskoeffizienten eines Datensatzes."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2620,8 +2637,8 @@ msgstr "Verkettung von zwei Werten."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "Concise formatxA0(default)"
-msgstr "Kompaktes Format xA0 (Standard)"
+msgid "Concise format (default)"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -6784,6 +6801,12 @@ msgstr "Keine numerischen Werte zum Anzeigen."
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "No region is available"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 msgid "No results"
 msgstr "Keine Ergebnisse"
@@ -7823,6 +7846,12 @@ msgstr "Region"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "Region %(region)s is not available"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Reject the input"
 msgstr "Die Eingabe ablehnen"
 
@@ -7978,6 +8007,12 @@ msgstr "Elemente, die genau einmal vorkommen, zurückgeben"
 #: code:addons/spreadsheet/static/src/pivot/pivot_functions.js:0
 msgid "Return the current value of a spreadsheet filter."
 msgstr "Gibt den aktuellen Wert eines Tabellenkalkulationsfilters aus."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/pivot/pivot_functions.js:0
+msgid "Return the label of the current value of a spreadsheet filter."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -9844,6 +9879,12 @@ msgstr "Die Diagrammdefinition ist aus einem unbekannten Grund ungültig"
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "The chart is deactivated"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "The column index of the column to be returned."
 msgstr "Der Spaltenindex der zurückzugebenden Spalte."
@@ -11197,8 +11238,8 @@ msgid ""
 "The number of months before (negative) or after (positive) 'start_date' to "
 "calculate."
 msgstr ""
-"Die Anzahl der zu berechnenden Monate vor (negativ) oder nach (positiv) „"
-"start_date“."
+"Die Anzahl der zu berechnenden Monate vor (negativ) oder nach (positiv) "
+"„start_date“."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -11647,7 +11688,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "The pivot cannot be created because the dataset is missing."
-msgstr "Die Pivot-Tabelle kann nicht erstellt werden, weil der Datensatz fehlt."
+msgstr ""
+"Die Pivot-Tabelle kann nicht erstellt werden, weil der Datensatz fehlt."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -12057,7 +12099,8 @@ msgstr "Der Verweis auf die Zelle."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "The regular expression pattern to match against the text."
-msgstr "Das reguläre Ausdrucksmuster, das mit dem Text abgeglichen werden soll."
+msgstr ""
+"Das reguläre Ausdrucksmuster, das mit dem Text abgeglichen werden soll."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -12365,8 +12408,8 @@ msgid ""
 "The start_period (%(start)s) must be smaller or equal to the end_period (%"
 "(end)s)."
 msgstr ""
-"Der start_period (%(start)s) muss kleiner oder gleich dem end_period (%(end)"
-"s) sein."
+"Der start_period (%(start)s) muss kleiner oder gleich dem end_period (%"
+"(end)s) sein."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -12653,7 +12696,8 @@ msgstr "Die Maßeinheit, in die der Wert umgewandelt wird"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "The units of the desired fraction, e.g. 8 for 1/8ths or 32 for 1/32nds."
-msgstr "Die Einheiten des gewünschten Bruchs, z. B. 8 für 1/8 oder 32 für 1/32."
+msgstr ""
+"Die Einheiten des gewünschten Bruchs, z. B. 8 für 1/8 oder 32 für 1/32."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -12724,8 +12768,8 @@ msgid ""
 "The value for which to calculate the inverse cosine. Must be between -1 and "
 "1, inclusive."
 msgstr ""
-"Der Wert, für den der inverse Kosinus berechnet werden soll. Muss zwischen -"
-"1 und 1 liegen, einschließlich."
+"Der Wert, für den der inverse Kosinus berechnet werden soll. Muss zwischen "
+"-1 und 1 liegen, einschließlich."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -13179,7 +13223,8 @@ msgstr "Der Wert, der auf eine Anzahl von Stellen gerundet werden soll."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "The value to round to the next greatest odd number."
-msgstr "Der Wert, der auf die nächstgrößere ungerade Zahl gerundet werden soll."
+msgstr ""
+"Der Wert, der auf die nächstgrößere ungerade Zahl gerundet werden soll."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -13301,8 +13346,8 @@ msgstr "Der Wertebereich der vertikalen Achse ist ungültig"
 msgid ""
 "The weekend (%s) must be a string or a number in the range 1-7 or 11-17."
 msgstr ""
-"Das Wochenende (%s) muss eine Zeichenkette oder eine Nummer im Bereich von 1-"
-"7 oder 11-17 sein."
+"Das Wochenende (%s) muss eine Zeichenkette oder eine Nummer im Bereich von "
+"1-7 oder 11-17 sein."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -13468,11 +13513,9 @@ msgstr "Dieser Vorgang ist bei Mehrfachauswahlen nicht zulässig."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
-"This operation is not possible due to a merge. Please remove the merges "
-"first than try again."
+"This operation would cause tables to overlap. Move or remove the conflicting "
+"table and try again."
 msgstr ""
-"Dieser Vorgang ist aufgrund einer Zusammenführung nicht möglich. Bitte "
-"entfernen Sie zuerst die Zusammenführungen und versuchen Sie es dann erneut."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -14143,7 +14186,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Value nearest to a specific quartile of a dataset."
-msgstr "Wert, der einem bestimmten Quartil eines Datensatzes am nächsten liegt."
+msgstr ""
+"Wert, der einem bestimmten Quartil eines Datensatzes am nächsten liegt."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -14668,7 +14712,8 @@ msgstr "Welcher Quartilwert zurückgegeben werden soll."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Which quartile value, exclusive of 0 and 4, to return."
-msgstr "Welcher Quartilwert, ausschließlich 0 und 4, zurückgegeben werden soll."
+msgstr ""
+"Welcher Quartilwert, ausschließlich 0 und 4, zurückgegeben werden soll."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -14888,7 +14933,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "[[FUNCTION_NAME]] expects the weight to be positive or equal to 0."
-msgstr "[[FUNCTION_NAME]] erwartet, dass das Gewicht positiv oder gleich 0 ist."
+msgstr ""
+"[[FUNCTION_NAME]] erwartet, dass das Gewicht positiv oder gleich 0 ist."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -15268,3 +15314,26 @@ msgstr "morgen"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "yesterday"
 msgstr "gestern"
+
+#~ msgid "%(count)s matches in %(sheetName)s"
+#~ msgstr "%(count)s Übereinstimmungen in %(sheetName)s"
+
+#~ msgid "%(count)s matches in range %(range)s of %(sheetName)s"
+#~ msgstr "%(count)s Übereinstimmungen im Bereich %(range)s von %(sheetName)s"
+
+#~ msgid "1 match in %(sheetName)s"
+#~ msgstr "1 Übereinstimmung in %(sheetName)s"
+
+#~ msgid "1 match in range %(range)s of %(sheetName)s"
+#~ msgstr "1 Übereinstimmung im Bereich %(range)s von %(sheetName)s"
+
+#~ msgid "Concise formatxA0(default)"
+#~ msgstr "Kompaktes Format xA0 (Standard)"
+
+#~ msgid ""
+#~ "This operation is not possible due to a merge. Please remove the merges "
+#~ "first than try again."
+#~ msgstr ""
+#~ "Dieser Vorgang ist aufgrund einer Zusammenführung nicht möglich. Bitte "
+#~ "entfernen Sie zuerst die Zusammenführungen und versuchen Sie es dann "
+#~ "erneut."

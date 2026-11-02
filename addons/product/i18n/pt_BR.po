@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:37+0000\n"
+"POT-Creation-Date: 2026-10-30 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 17:04+0000\n"
 "Last-Translator: \"Maitê Dietze (madi)\" <madi@odoo.com>\n"
 "Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/odoo-"
@@ -239,8 +239,8 @@ msgid ""
 "<a href=\"/contactus\" class=\"mb-2 btn btn-primary "
 "o_translate_inline\">Contact Us</a>"
 msgstr ""
-"<a href=\"/contactus\" class=\"mb-2 btn btn-primary o_translate_inline\">"
-"Entre em contato</a>"
+"<a href=\"/contactus\" class=\"mb-2 btn btn-primary "
+"o_translate_inline\">Entre em contato</a>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
@@ -1574,7 +1574,8 @@ msgstr "Tipo de exibição"
 #: model:ir.model.fields,help:product.field_product_product__base_unit_count
 #: model:ir.model.fields,help:product.field_product_template__base_unit_count
 msgid "Display base unit price. Set to 0 to hide it for this product."
-msgstr "Exibir preço unitário base. Defina como 0 para ocultá-lo neste produto."
+msgstr ""
+"Exibir preço unitário base. Defina como 0 para ocultá-lo neste produto."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__base_unit_name
@@ -1855,8 +1856,8 @@ msgid ""
 "Otherwise, this includes goods stored in any Stock Location with 'internal' "
 "type."
 msgstr ""
-"Quantidade prevista (calculado como quantidade em mãos - saída + "
-"recebimento - quantidade a remover)\n"
+"Quantidade prevista (calculado como quantidade em mãos - saída + recebimento "
+"- quantidade a remover)\n"
 "Em um contexto com um único local de estoque, isso inclui mercadorias "
 "armazenadas neste local, ou qualquer um de seus secundários.\n"
 "Em um contexto com um único armazém, isso inclui mercadorias armazenadas no "
@@ -2908,8 +2909,8 @@ msgid ""
 "On the product %(product)s you cannot transform the attribute %"
 "(attribute_src)s into the attribute %(attribute_dest)s."
 msgstr ""
-"No produto %(product)s, você não pode transformar o atributo %(attribute_src)"
-"s em atributo %(attribute_dest)s."
+"No produto %(product)s, você não pode transformar o atributo %"
+"(attribute_src)s em atributo %(attribute_dest)s."
 
 #. module: product
 #. odoo-javascript
@@ -3098,7 +3099,8 @@ msgstr "Especifique o produto ao qual esta regra deverá ser aplicada"
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid ""
 "Please specify the product variant for which this rule should be applied"
-msgstr "Especifique a variante de produto à qual esta regra deverá ser aplicada"
+msgstr ""
+"Especifique a variante de produto à qual esta regra deverá ser aplicada"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_weight_in_lbs__1
@@ -3964,6 +3966,12 @@ msgid "Sony"
 msgstr "Sony"
 
 #. module: product
+#. odoo-python
+#: code:addons/product/report/product_pricelist_report.py:0
+msgid "Sorry, you are not allowed to access this document."
+msgstr ""
+
+#. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__categ_id
 msgid ""
 "Specify a product category if this rule only applies to products belonging "
@@ -4192,9 +4200,9 @@ msgid ""
 "is not equivalent to \"%(existing_values)s\" for \"%(external_id)s\", \"%"
 "(id)s\""
 msgstr ""
-"O produto existente tem um valor de atributo diferente. \"%(imported_values)"
-"s\" não é equivalente a \"%(existing_values)s\" para \"%(external_id)s\", \"%"
-"(id)s\""
+"O produto existente tem um valor de atributo diferente. \"%"
+"(imported_values)s\" não é equivalente a \"%(existing_values)s\" para \"%"
+"(external_id)s\", \"%(id)s\""
 
 #. module: product
 #: model_terms:product.template,website_description:product.product_product_4_product_template
@@ -4947,8 +4955,8 @@ msgid ""
 "You are about to add the value \"%(attribute_value)s\" to %(product_count)s "
 "products."
 msgstr ""
-"Você está prestes a agregar valor \"%(attribute_value)s\" a %(product_count)"
-"s produtos."
+"Você está prestes a agregar valor \"%(attribute_value)s\" a %"
+"(product_count)s produtos."
 
 #. module: product
 #. odoo-python
