@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-12 17:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
 "PO-Revision-Date: 2025-10-08 18:39+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -376,13 +376,6 @@ msgstr "Qo‘llab-quvvatlanmaydigan mamlakat"
 #, fuzzy
 msgid "Country-specific Registration Required"
 msgstr "Mamlakatga xos ro‘yxatdan o‘tish talab qilinadi"
-
-#. module: sms
-#. odoo-python
-#: code:addons/sms/tools/sms_api.py:0
-#, fuzzy
-msgid "Country-specific registration required."
-msgstr "Mamlakatga xos ro‘yxatdan o‘tish talab qilinadi."
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_account_code__create_uid
@@ -989,13 +982,6 @@ msgstr "Ro‘yxatdan o‘tkazish"
 #, fuzzy
 msgid "Register Account"
 msgstr "Hisobni ro‘yxatdan o‘tkazish"
-
-#. module: sms
-#. odoo-python
-#: code:addons/sms/tools/sms_api.py:0
-#, fuzzy
-msgid "Register now."
-msgstr "Hoziroq ro‘yxatdan o‘ting."
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_account_code_view_form
@@ -1903,3 +1889,11 @@ msgstr ""
 #, fuzzy
 msgid "record:"
 msgstr "yozuv:"
+
+#, fuzzy
+#~ msgid "Country-specific registration required."
+#~ msgstr "Mamlakatga xos ro‘yxatdan o‘tish talab qilinadi."
+
+#, fuzzy
+#~ msgid "Register now."
+#~ msgstr "Hoziroq ro‘yxatdan o‘ting."

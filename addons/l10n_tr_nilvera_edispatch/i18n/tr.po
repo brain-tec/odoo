@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-20 19:13+0000\n"
+"POT-Creation-Date: 2026-10-30 18:19+0000\n"
 "PO-Revision-Date: 2025-10-09 11:01+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -117,6 +117,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_tr_nilvera_edispatch/models/account_move_send.py:0
 msgid "Check data on Invoice(s)"
+msgstr ""
+
+#. module: l10n_tr_nilvera_edispatch
+#. odoo-python
+#: code:addons/l10n_tr_nilvera_edispatch/models/stock_picking.py:0
+msgid "Check tags on company"
 msgstr ""
 
 #. module: l10n_tr_nilvera_edispatch
@@ -395,6 +401,14 @@ msgstr "Plaka Numarası"
 
 #. module: l10n_tr_nilvera_edispatch
 #. odoo-python
+#: code:addons/l10n_tr_nilvera_edispatch/models/stock_picking.py:0
+msgid ""
+"Please ensure that your company contact has either the 'MERSISNO' or "
+"'TICARETSICILNO' tag with a value assigned."
+msgstr ""
+
+#. module: l10n_tr_nilvera_edispatch
+#. odoo-python
 #: code:addons/l10n_tr_nilvera_edispatch/models/account_move_send.py:0
 msgid ""
 "Please ensure the e-Dispatch Order field has all related orders before "
@@ -433,12 +447,6 @@ msgstr "Matbu Sevk İrsaliyesi Numarası"
 #: code:addons/l10n_tr_nilvera_edispatch/models/stock_picking.py:0
 msgid "Printed Delivery Note Number of 16 characters is required."
 msgstr "16 karakterli Matbu Sevk İrsaliyesi Numarası gereklidir."
-
-#. module: l10n_tr_nilvera_edispatch
-#. odoo-python
-#: code:addons/l10n_tr_nilvera_edispatch/models/res_partner.py:0
-msgid "Reference field must be set to the tax office name"
-msgstr ""
 
 #. module: l10n_tr_nilvera_edispatch
 #: model:ir.model.fields,field_description:l10n_tr_nilvera_edispatch.field_stock_picking__l10n_tr_nilvera_seller_supplier_id
@@ -644,6 +652,12 @@ msgstr "Araç Plakası zorunludur."
 #: code:addons/l10n_tr_nilvera_edispatch/models/stock_picking.py:0
 msgid "View %s"
 msgstr "%s'i Görüntüle"
+
+#. module: l10n_tr_nilvera_edispatch
+#. odoo-python
+#: code:addons/l10n_tr_nilvera_edispatch/models/stock_picking.py:0
+msgid "View Company"
+msgstr ""
 
 #. module: l10n_tr_nilvera_edispatch
 #. odoo-python

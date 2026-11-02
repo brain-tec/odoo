@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:36+0000\n"
 "PO-Revision-Date: 2025-10-08 18:37+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -6820,6 +6820,14 @@ msgstr "Sotilgan"
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/controllers/main.py:0
+msgid ""
+"Some products in your cart are not available for purchase in your country. "
+"Please remove them or contact us."
+msgstr ""
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
 #, fuzzy
 msgid "Sorry, we are unable to ship your order."
 msgstr "Kechirasiz, buyurtmangizni yetkazib bera olmaymiz."
@@ -7218,6 +7226,14 @@ msgstr ""
 
 #. module: website_sale
 #. odoo-python
+#: code:addons/website_sale/controllers/cart.py:0
+msgid ""
+"The number of selected combo items must match the number of available combo "
+"choices."
+msgstr ""
+
+#. module: website_sale
+#. odoo-python
 #: code:addons/website_sale/controllers/payment.py:0
 #, fuzzy
 msgid "The order has been cancelled."
@@ -7376,6 +7392,18 @@ msgstr "Bu mahsulot endi mavjud emas"
 #. odoo-python
 #: code:addons/website_sale/models/sale_order.py:0
 msgid "This product is not available (anymore) in this unit of measure."
+msgstr ""
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+msgid "This product is not available for purchase in your country."
+msgstr ""
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/cart.py:0
+msgid "This product is part of a combo and can't be updated individually."
 msgstr ""
 
 #. module: website_sale
@@ -8200,13 +8228,6 @@ msgid "Your payment has been authorized."
 msgstr "To‘lovingiz tasdiqlandi."
 
 #. module: website_sale
-#. odoo-javascript
-#: code:addons/website_sale/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.js:0
-#, fuzzy
-msgid "Your postal code"
-msgstr "Pochta indeksingiz"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.cart
 #, fuzzy
 msgid "Your previous cart has already been completed."
@@ -8222,6 +8243,12 @@ msgstr ""
 #, fuzzy
 msgid "Zip Prefix"
 msgstr "Indeks prefiksi"
+
+#. module: website_sale
+#. odoo-javascript
+#: code:addons/website_sale/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.js:0
+msgid "Zip or City"
+msgstr ""
 
 #. module: website_sale
 #. odoo-javascript
@@ -8502,3 +8529,7 @@ msgstr ""
 #, fuzzy
 msgid "{{0}} image"
 msgstr "{{0}} ta rasm"
+
+#, fuzzy
+#~ msgid "Your postal code"
+#~ msgstr "Pochta indeksingiz"

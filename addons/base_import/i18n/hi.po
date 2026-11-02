@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-20 09:01+0000\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
 "PO-Revision-Date: 2025-11-12 13:07+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Hindi <https://translate.odoo.com/projects/odoo-19/"
@@ -145,8 +145,8 @@ msgstr "कॉलम %(column)s में गलत मान हैं (मा�
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"Column %(column)s contains incorrect values. Error in line %(line)d: "
-"%(error)s"
+"Column %(column)s contains incorrect values. Error in line %(line)d: %"
+"(error)s"
 msgstr "कॉलम %(column)s में गलत मान हैं. लाइन %(line)d में गड़बड़ी: %(error)s"
 
 #. module: base_import
@@ -172,8 +172,8 @@ msgstr "टिप्पणियाँ"
 msgid ""
 "Could not retrieve URL: %(url)s [%(field_name)s: L%(line_number)d]: %(error)s"
 msgstr ""
-"यूआरएल वापस नहीं लाया जा सका: %(url)s [%(field_name)s: L%(line_number)d]: "
-"%(error)s"
+"यूआरएल वापस नहीं लाया जा सका: %(url)s [%(field_name)s: L%(line_number)d]: %"
+"(error)s"
 
 #. module: base_import
 #. odoo-javascript
@@ -297,12 +297,12 @@ msgstr "रिकॉर्ड इंपोर्ट करते समय ग�
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
 "Error while importing records: all rows should be of the same size, but the "
-"title row has %(title_row_entries)d entries while the first row has "
-"%(first_row_entries)d. You may need to change the separator character."
+"title row has %(title_row_entries)d entries while the first row has %"
+"(first_row_entries)d. You may need to change the separator character."
 msgstr ""
 "रिकॉर्ड इंपोर्ट करते समय गड़बड़ी: सभी पंक्तियों का आकार एक जैसा होना चाहिए, लेकिन टाइटल "
-"वाली पंक्ति में %(title_row_entries)d एंट्री हैं, जबकि पहली पंक्ति में "
-"%(first_row_entries)d एंट्री हैं. हो सकता है कि आपको सेपरेटर कैरेक्टर बदलना पड़े।"
+"वाली पंक्ति में %(title_row_entries)d एंट्री हैं, जबकि पहली पंक्ति में %"
+"(first_row_entries)d एंट्री हैं. हो सकता है कि आपको सेपरेटर कैरेक्टर बदलना पड़े।"
 
 #. module: base_import
 #. odoo-javascript
@@ -451,14 +451,6 @@ msgstr ""
 "दौरान सदस्यताएं सेट करेगी और नोटिफ़िकेशन भेजेगी, लेकिन इससे इंपोर्ट धीमा हो जाएगा।"
 
 #. module: base_import
-#. odoo-python
-#: code:addons/base_import/models/base_import.py:0
-msgid ""
-"Image size excessive, imported images must be smaller than 42 million pixel"
-msgstr ""
-"इमेज का साइज़ बहुत ज़्यादा है, इंपोर्ट की गई इमेज 42 मिलियन पिक्सल से छोटी होनी चाहिए"
-
-#. module: base_import
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.xml:0
 msgid "Import"
@@ -513,8 +505,8 @@ msgid ""
 "Invalid cell format at row %(row)s, column %(col)s: %(cell_value)s, with "
 "format: %(cell_format)s, as (%(format_type)s) formats are not supported."
 msgstr ""
-"पंक्ति %(row)s, कॉलम %(col)s में सेल फ़ॉर्मैट गलत है: %(cell_value)s, फ़ॉर्मैट के साथ: "
-"%(cell_format)s, क्योंकि (%(format_type)s) फ़ॉर्मैट समर्थित नहीं हैं।"
+"पंक्ति %(row)s, कॉलम %(col)s में सेल फ़ॉर्मैट गलत है: %(cell_value)s, फ़ॉर्मैट के साथ: %"
+"(cell_format)s, क्योंकि (%(format_type)s) फ़ॉर्मैट समर्थित नहीं हैं।"
 
 #. module: base_import
 #. odoo-python
@@ -991,3 +983,9 @@ msgstr "सेकंड"
 #: code:addons/base_import/models/base_import.py:0
 msgid "unknown error code %s"
 msgstr "अज्ञात गड़बड़ी कोड %s"
+
+#~ msgid ""
+#~ "Image size excessive, imported images must be smaller than 42 million "
+#~ "pixel"
+#~ msgstr ""
+#~ "इमेज का साइज़ बहुत ज़्यादा है, इंपोर्ट की गई इमेज 42 मिलियन पिक्सल से छोटी होनी चाहिए"

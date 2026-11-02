@@ -19,7 +19,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-07 17:37+0000\n"
+"POT-Creation-Date: 2026-10-30 17:36+0000\n"
 "PO-Revision-Date: 2026-08-31 09:09+0000\n"
 "Last-Translator: Nusara Boonma <nuboo@odoo.com>\n"
 "Language-Team: Thai <https://translate.odoo.com/projects/odoo-s19-2/website/"
@@ -249,12 +249,6 @@ msgstr "$ 32M"
 
 #. module: website
 #. odoo-python
-#: code:addons/website/models/ir_ui_view.py:0
-msgid "%(error)s (website: %(website_id)s)"
-msgstr ""
-
-#. module: website
-#. odoo-python
 #: code:addons/website/models/website_rewrite.py:0
 msgid "%(url)s not found"
 msgstr ""
@@ -313,6 +307,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.list_website_public_pages
 msgid "'. Showing results for '"
 msgstr "กำลังแสดงผลลัพธ์สำหรับ"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/snippets/s_searchbar/search_bar.js:0
+msgid "(%(count)s found)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -7001,6 +7001,12 @@ msgstr "โดนัท"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/options/popup_option_plugin.js:0
+msgid "Drag blocks here"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/js/tours/tour_utils.js:0
 msgid "Drag the <b>%s</b> block and drop it at the bottom of the page."
 msgstr "ลาก<b>%s</b>บล็อคแล้ววางไว้ที่ด้านล่างของหน้า"
@@ -7867,6 +7873,12 @@ msgstr "Extension View"
 #: model:ir.model.fields,field_description:website.field_website_page__xml_id
 msgid "External ID"
 msgstr "ไอดีจากภายนอก"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "External ID can not be loaded: %(error)s (website: %(website_id)s)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -8855,6 +8867,15 @@ msgstr "Google Map"
 #: model:ir.model.fields,field_description:website.field_website__google_maps_api_key
 msgid "Google Maps API Key"
 msgstr "Google Maps API Key"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/options/google_maps_option/google_maps_service.js:0
+#: code:addons/website/static/src/core/website_map_service.js:0
+msgid ""
+"Google Maps configuration has changed. Please reload the page for changes to "
+"take effect."
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -13661,8 +13682,8 @@ msgstr "ตัวอย่างข้อความ"
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/google_maps_option/google_maps_api_key_dialog.xml:0
-msgid "Places API"
-msgstr "API สถานที่"
+msgid "Places API (NEW)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -16519,9 +16540,23 @@ msgid "Template ID: %s"
 msgstr "ไอดีเทมเพลต: %s"
 
 #. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid ""
+"Template does not exist or has been deleted: %(error)s (website: %"
+"(website_id)s)"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.qweb_500
 msgid "Template fallback"
 msgstr "Template fallback"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "Template not found: '%(error)s' (website: %(website_id)s)"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega
@@ -16743,12 +16778,6 @@ msgstr ""
 #: code:addons/website/static/src/xml/website_form.xml:0
 msgid "The form has been sent successfully."
 msgstr "ส่งแบบฟอร์มเรียบร้อยแล้ว"
-
-#. module: website
-#. odoo-python
-#: code:addons/website/controllers/form.py:0
-msgid "The form's specified model does not exist"
-msgstr "ไม่มีโมเดลที่ระบุในแบบฟอร์ม"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_ir_actions_server__website_url
@@ -17097,6 +17126,13 @@ msgid ""
 "This font already exists, you can only add it as a local font to replace the "
 "server version."
 msgstr "ฟอนต์นี้มีอยู่แล้ว คุณสามารถเพิ่มเป็นฟอนต์ในเครื่องเพื่อแทนที่เวอร์ชันเซิร์ฟเวอร์เท่านั้น"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/controllers/form.py:0
+msgid ""
+"This form cannot be submitted. Please contact the website administrator."
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -18626,9 +18662,7 @@ msgstr ""
 msgid ""
 "We collaborate with trusted, high-quality partners to bring you reliable and "
 "top-notch products and services."
-msgstr ""
-"เราทำงานร่วมกับพาร์ทเนอร์ที่มีคุณภาพสูงและเชื่อถือได้เพื่อนำเสนอสินค้าและบริการที่เชื่อถือได้และชั้นยอด"
-"ให้กับคุณ"
+msgstr "เราทำงานร่วมกับพาร์ทเนอร์ที่มีคุณภาพสูงและเชื่อถือได้เพื่อนำเสนอสินค้าและบริการที่เชื่อถือได้และชั้นยอดให้กับคุณ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel_intro
@@ -19539,6 +19573,12 @@ msgstr ""
 #: code:addons/website/static/src/builder/plugins/form/form_option_plugin.js:0
 msgid "You cannot duplicate this field."
 msgstr "คุณไม่สามารถทำซ้ำช่องนี้ได้"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/options/card_image_option_plugin.js:0
+msgid "You cannot duplicate this image."
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -21155,6 +21195,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid "✽  What We Offer"
 msgstr ""
+
+#~ msgid "Places API"
+#~ msgstr "API สถานที่"
+
+#~ msgid "The form's specified model does not exist"
+#~ msgstr "ไม่มีโมเดลที่ระบุในแบบฟอร์ม"
 
 #~ msgid "Accounts are usable across all your multiple websites"
 #~ msgstr "บัญชีสามารถใช้งานได้ทั่วทั้งเว็บไซต์หลายแห่งของคุณ"

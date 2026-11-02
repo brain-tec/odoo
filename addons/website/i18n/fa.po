@@ -27,7 +27,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-07 17:37+0000\n"
+"POT-Creation-Date: 2026-10-30 17:36+0000\n"
 "PO-Revision-Date: 2026-04-13 19:32+0000\n"
 "Last-Translator: Odoo Translation Bot <c3p@odoo.com>\n"
 "Language-Team: Persian <https://translate.odoo.com/projects/odoo-s19-2/"
@@ -244,12 +244,6 @@ msgstr ""
 
 #. module: website
 #. odoo-python
-#: code:addons/website/models/ir_ui_view.py:0
-msgid "%(error)s (website: %(website_id)s)"
-msgstr ""
-
-#. module: website
-#. odoo-python
 #: code:addons/website/models/website_rewrite.py:0
 msgid "%(url)s not found"
 msgstr ""
@@ -309,6 +303,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.list_website_public_pages
 msgid "'. Showing results for '"
 msgstr "'. نمایش نتایج برای'"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/snippets/s_searchbar/search_bar.js:0
+msgid "(%(count)s found)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -6961,6 +6961,12 @@ msgstr "دونات"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/options/popup_option_plugin.js:0
+msgid "Drag blocks here"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/js/tours/tour_utils.js:0
 msgid "Drag the <b>%s</b> block and drop it at the bottom of the page."
 msgstr ""
@@ -7815,6 +7821,12 @@ msgstr "نمای گسترشی"
 #: model:ir.model.fields,field_description:website.field_website_page__xml_id
 msgid "External ID"
 msgstr "آیدی خارجی"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "External ID can not be loaded: %(error)s (website: %(website_id)s)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -8806,6 +8818,15 @@ msgstr "گوگل مپ"
 #: model:ir.model.fields,field_description:website.field_website__google_maps_api_key
 msgid "Google Maps API Key"
 msgstr "کلید API نقشه گوگل"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/options/google_maps_option/google_maps_service.js:0
+#: code:addons/website/static/src/core/website_map_service.js:0
+msgid ""
+"Google Maps configuration has changed. Please reload the page for changes to "
+"take effect."
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -13615,8 +13636,8 @@ msgstr "مکان‌نما"
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/google_maps_option/google_maps_api_key_dialog.xml:0
-msgid "Places API"
-msgstr "API مکان‌ها"
+msgid "Places API (NEW)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -16472,9 +16493,23 @@ msgid "Template ID: %s"
 msgstr "شناسه قالب: %s"
 
 #. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid ""
+"Template does not exist or has been deleted: %(error)s (website: %"
+"(website_id)s)"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.qweb_500
 msgid "Template fallback"
 msgstr "<div>قالب جایگزین</div>"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "Template not found: '%(error)s' (website: %(website_id)s)"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega
@@ -16693,12 +16728,6 @@ msgstr ""
 #: code:addons/website/static/src/xml/website_form.xml:0
 msgid "The form has been sent successfully."
 msgstr "فرم با موفقیت ارسال شد."
-
-#. module: website
-#. odoo-python
-#: code:addons/website/controllers/form.py:0
-msgid "The form's specified model does not exist"
-msgstr "مدل مشخص شده فرم وجود ندارد"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_ir_actions_server__website_url
@@ -17051,6 +17080,13 @@ msgid ""
 msgstr ""
 "این فونت از قبل وجود دارد، شما فقط می‌توانید آن را به عنوان یک فونت محلی "
 "اضافه کنید تا به جای نسخه سرور استفاده شود."
+
+#. module: website
+#. odoo-python
+#: code:addons/website/controllers/form.py:0
+msgid ""
+"This form cannot be submitted. Please contact the website administrator."
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -19477,6 +19513,12 @@ msgstr "شما نمی‌توانید این فیلد را تکرار کنید."
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/options/card_image_option_plugin.js:0
+msgid "You cannot duplicate this image."
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/facebook_option_plugin.js:0
 msgid "You didn't provide a valid Facebook link"
 msgstr "شما یک لینک معتبر فیسبوک ارائه ندادید"
@@ -20971,6 +21013,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid "✽  What We Offer"
 msgstr ""
+
+#~ msgid "Places API"
+#~ msgstr "API مکان‌ها"
+
+#~ msgid "The form's specified model does not exist"
+#~ msgstr "مدل مشخص شده فرم وجود ندارد"
 
 #~ msgid "Accounts are usable across all your multiple websites"
 #~ msgstr "حساب‌ها در تمامی وب‌سایت‌ های متعدد شما قابل استفاده هستند"

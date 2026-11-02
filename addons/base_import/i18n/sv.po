@@ -18,7 +18,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-20 09:01+0000\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
 "PO-Revision-Date: 2026-04-23 11:51+0000\n"
 "Last-Translator: Hanna Kharraziha <hakha@odoo.com>\n"
 "Language-Team: Swedish <https://translate.odoo.com/projects/odoo-s19-2/"
@@ -162,11 +162,11 @@ msgstr "Kolumn %(column)s innehåller inkorrekt värde (värde: %(value)s)"
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"Column %(column)s contains incorrect values. Error in line %(line)d: "
-"%(error)s"
+"Column %(column)s contains incorrect values. Error in line %(line)d: %"
+"(error)s"
 msgstr ""
-"Kolumn %(column)s innehåller inkorrekta värden. Fel på rad %(line)d: "
-"%(error)s"
+"Kolumn %(column)s innehåller inkorrekta värden. Fel på rad %(line)d: %"
+"(error)s"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__column_name
@@ -315,12 +315,12 @@ msgstr "Fel vid import av poster: Textavgränsare ska vara ett enda tecken."
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
 "Error while importing records: all rows should be of the same size, but the "
-"title row has %(title_row_entries)d entries while the first row has "
-"%(first_row_entries)d. You may need to change the separator character."
+"title row has %(title_row_entries)d entries while the first row has %"
+"(first_row_entries)d. You may need to change the separator character."
 msgstr ""
 "Fel vid import av poster: alla rader ska vara av samma storlek, men "
-"titelraden har %(title_row_entries)d poster medan den första raden har "
-"%(first_row_entries)d. Du kan behöva ändra tecknet för separator."
+"titelraden har %(title_row_entries)d poster medan den första raden har %"
+"(first_row_entries)d. Du kan behöva ändra tecknet för separator."
 
 #. module: base_import
 #. odoo-javascript
@@ -467,15 +467,6 @@ msgstr ""
 "Om modellen använder openchatter kommer historik-spårningen ange en "
 "prenumeration och skicka notiser under importen. Detta leder dock till en "
 "långsammare import."
-
-#. module: base_import
-#. odoo-python
-#: code:addons/base_import/models/base_import.py:0
-msgid ""
-"Image size excessive, imported images must be smaller than 42 million pixel"
-msgstr ""
-"För stor bildstorlek, importerade bilder måste vara mindre än 42 miljoner "
-"pixlar"
 
 #. module: base_import
 #. odoo-javascript
@@ -1012,3 +1003,10 @@ msgstr "sekunder"
 #: code:addons/base_import/models/base_import.py:0
 msgid "unknown error code %s"
 msgstr "okänd felkod %s"
+
+#~ msgid ""
+#~ "Image size excessive, imported images must be smaller than 42 million "
+#~ "pixel"
+#~ msgstr ""
+#~ "För stor bildstorlek, importerade bilder måste vara mindre än 42 miljoner "
+#~ "pixlar"
