@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~19.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 17:42+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-10-28 13:39+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Lao <https://translate.odoo.com/projects/odoo-s19-3/website/"
@@ -35,8 +35,8 @@ msgid ""
 "\" Outstanding service and results! <br/>They exceeded our expectations in "
 "every project. \""
 msgstr ""
-"\" ການບໍລິການ ແລະ ຜົນຮັບທີ່ໂດດເດັ່ນ! <br/>ພວກເຂົາເຮັດໄດ້ເກີນຄວາມຄາດຫວັງຂອງພວກເຮົາໃນທຸກໆໂຄງກາ"
-"ນ. \""
+"\" ການບໍລິການ ແລະ ຜົນຮັບທີ່ໂດດເດັ່ນ! <br/"
+">ພວກເຂົາເຮັດໄດ້ເກີນຄວາມຄາດຫວັງຂອງພວກເຮົາໃນທຸກໆໂຄງການ. \""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_quotes_carousel_compact
@@ -45,8 +45,8 @@ msgid ""
 "\" This company transformed our business. <br/>Their solutions are "
 "innovative and reliable. \""
 msgstr ""
-"\" ບໍລິສັດນີ້ໄດ້ປ່ຽນແປງທຸລະກິດຂອງພວກເຮົາ. <br/>ວິທີການແກ້ໄຂຂອງພວກເຂົາແມ່ນມີນະວັດຕະກຳ ແລະ ເຊື່ອຖືໄ"
-"ດ້. \""
+"\" ບໍລິສັດນີ້ໄດ້ປ່ຽນແປງທຸລະກິດຂອງພວກເຮົາ. <br/>ວິທີການແກ້ໄຂຂອງພວກເຂົາແມ່ນມີນະວັດຕະກຳ ແລະ "
+"ເຊື່ອຖືໄດ້. \""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_blockquote
@@ -55,8 +55,8 @@ msgid ""
 "\" Write a quote here from one of your customers. Quotes are a great way to "
 "build confidence in your products or services. \""
 msgstr ""
-"\" ຂຽນຄຳຍ້ອງຍໍຈາກລູກຄ້າຂອງທ່ານໃສ່ບ່ອນນີ້. ຄຳຍ້ອງຍໍແມ່ນວິທີທີ່ດີໃນການສ້າງຄວາມໝັ້ນໃຈໃນສິນຄ້າ ຫຼື ການບໍລິກ"
-"ານຂອງທ່ານ. \""
+"\" ຂຽນຄຳຍ້ອງຍໍຈາກລູກຄ້າຂອງທ່ານໃສ່ບ່ອນນີ້. ຄຳຍ້ອງຍໍແມ່ນວິທີທີ່ດີໃນການສ້າງຄວາມໝັ້ນໃຈໃນສິນຄ້າ ຫຼື "
+"ການບໍລິການຂອງທ່ານ. \""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -106,8 +106,8 @@ msgid ""
 "proficiency and meticulous approach greatly enhanced our project. I couldn’t "
 "be happier with the final product!\""
 msgstr ""
-"\"ການເຮັດວຽກກັບທີມງານນີ້ແມ່ນສະດວກສະບາຍຕັ້ງແຕ່ເລີ່ມຕົ້ນຈົນຈົບ. ຄວາມຊຳນານ ແລະ ຄວາມລະອຽດອ່ອນຂອງພ"
-"ວກເຂົາຊ່ວຍໃຫ້ໂຄງການຂອງພວກເຮົາດີຂຶ້ນຫຼາຍ. ຂ້ອຍມີຄວາມສຸກຫຼາຍກັບຜົນງານສຸດທ້າຍ!\""
+"\"ການເຮັດວຽກກັບທີມງານນີ້ແມ່ນສະດວກສະບາຍຕັ້ງແຕ່ເລີ່ມຕົ້ນຈົນຈົບ. ຄວາມຊຳນານ ແລະ "
+"ຄວາມລະອຽດອ່ອນຂອງພວກເຂົາຊ່ວຍໃຫ້ໂຄງການຂອງພວກເຮົາດີຂຶ້ນຫຼາຍ. ຂ້ອຍມີຄວາມສຸກຫຼາຍກັບຜົນງານສຸດທ້າຍ!\""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
@@ -115,8 +115,8 @@ msgid ""
 "\"Exceptional service and great communication throughout the entire process. "
 "They went above and beyond to ensure our project was a complete success.\""
 msgstr ""
-"\"ການບໍລິການທີ່ດີເລີດ ແລະ ການສື່ສານທີ່ດີຕະຫຼອດຂະບວນການ. ພວກເຂົາໄດ້ເຮັດວຽກຢ່າງເຕັມທີ່ເພື່ອຮັບປະກັນວ່າໂ"
-"ຄງການຂອງພວກເຮົາປະສົບຜົນສຳເລັດຢ່າງສົມບູນ.\""
+"\"ການບໍລິການທີ່ດີເລີດ ແລະ ການສື່ສານທີ່ດີຕະຫຼອດຂະບວນການ. "
+"ພວກເຂົາໄດ້ເຮັດວຽກຢ່າງເຕັມທີ່ເພື່ອຮັບປະກັນວ່າໂຄງການຂອງພວກເຮົາປະສົບຜົນສຳເລັດຢ່າງສົມບູນ.\""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
@@ -125,8 +125,8 @@ msgid ""
 "vision and turned it into something even better than we had imagined. Highly "
 "recommend!\""
 msgstr ""
-"\"ຕັ້ງແຕ່ການປະຊຸມຄັ້ງທຳອິດ, ມັນຊັດເຈນວ່າພວກເຮົາຢູ່ໃນມືຂອງມືອາຊີບ. ພວກເຂົາໄດ້ນຳເອົາວິໄສທັດຂອງພວກເຮົາ"
-"ໄປສ້າງເປັນສິ່ງທີ່ດີກວ່າທີ່ພວກເຮົາໄດ້ຈິນຕະນາການໄວ້. ແນະນຳຢ່າງຍິ່ງ!\""
+"\"ຕັ້ງແຕ່ການປະຊຸມຄັ້ງທຳອິດ, ມັນຊັດເຈນວ່າພວກເຮົາຢູ່ໃນມືຂອງມືອາຊີບ. "
+"ພວກເຂົາໄດ້ນຳເອົາວິໄສທັດຂອງພວກເຮົາໄປສ້າງເປັນສິ່ງທີ່ດີກວ່າທີ່ພວກເຮົາໄດ້ຈິນຕະນາການໄວ້. ແນະນຳຢ່າງຍິ່ງ!\""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
@@ -135,8 +135,9 @@ msgid ""
 "knowledge and focus on detail significantly benefited our project. I am "
 "extremely happy with the outcome!\""
 msgstr ""
-"\"ການເປັນຄູ່ຮ່ວມງານກັບທີມງານນີ້ແມ່ນງ່າຍດາຍຕັ້ງແຕ່ເລີ່ມຕົ້ນຈົນຈົບ. ຄວາມຮູ້ ແລະ ຄວາມໃສ່ໃຈໃນລາຍລະອຽດຂອ"
-"ງພວກເຂົາໃຫ້ປະໂຫຍດແກ່ໂຄງການຂອງພວກເຮົາຢ່າງມະຫາສານ. ຂ້ອຍມີຄວາມສຸກກັບຜົນຮັບຫຼາຍ!\""
+"\"ການເປັນຄູ່ຮ່ວມງານກັບທີມງານນີ້ແມ່ນງ່າຍດາຍຕັ້ງແຕ່ເລີ່ມຕົ້ນຈົນຈົບ. ຄວາມຮູ້ ແລະ "
+"ຄວາມໃສ່ໃຈໃນລາຍລະອຽດຂອງພວກເຂົາໃຫ້ປະໂຫຍດແກ່ໂຄງການຂອງພວກເຮົາຢ່າງມະຫາສານ. "
+"ຂ້ອຍມີຄວາມສຸກກັບຜົນຮັບຫຼາຍ!\""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
@@ -145,8 +146,8 @@ msgid ""
 "ideas to the table and delivered a final product that exceeded expectations."
 "\""
 msgstr ""
-"\"ທີມງານນີ້ເຂົ້າໃຈຄວາມໝາຍຂອງການເປັນຄູ່ຮ່ວມງານຢ່າງແທ້ຈິງ. ພວກເຂົານຳສະເໜີແນວຄິດໃໝ່ໆ ແລະ ສົ່ງມອບຜົນ"
-"ງານທີ່ເກີນຄວາມຄາດຫວັງ.\""
+"\"ທີມງານນີ້ເຂົ້າໃຈຄວາມໝາຍຂອງການເປັນຄູ່ຮ່ວມງານຢ່າງແທ້ຈິງ. ພວກເຂົານຳສະເໜີແນວຄິດໃໝ່ໆ ແລະ "
+"ສົ່ງມອບຜົນງານທີ່ເກີນຄວາມຄາດຫວັງ.\""
 
 #. module: website
 #. odoo-python
@@ -203,9 +204,9 @@ msgid ""
 "skills and commitment to quality had a major impact on our project. I am "
 "thrilled with the final results!\""
 msgstr ""
-"\"ການເຮັດວຽກກັບທີມງານນີ້ແມ່ນມີຄວາມຄ່ອງຕົວ ແລະ ມີປະສິດທິພາບໃນທຸກຂັ້ນຕອນ. ທັກສະ ແລະ ຄວາມມຸ່ງໝັ້ນຕໍ່ຄຸນ"
-"ນະພາບຂອງພວກເຂົາໄດ້ສົ່ງຜົນກະທົບຢ່າງຫຼວງຫຼາຍຕໍ່ໂຄງການຂອງພວກເຮົາ. ຂ້ອຍຮູ້ສຶກຕື່ນເຕັ້ນຫຼາຍກັບຜົນໄດ້ຮັບສຸດທ້າ"
-"ຍ!\""
+"\"ການເຮັດວຽກກັບທີມງານນີ້ແມ່ນມີຄວາມຄ່ອງຕົວ ແລະ ມີປະສິດທິພາບໃນທຸກຂັ້ນຕອນ. ທັກສະ ແລະ "
+"ຄວາມມຸ່ງໝັ້ນຕໍ່ຄຸນນະພາບຂອງພວກເຂົາໄດ້ສົ່ງຜົນກະທົບຢ່າງຫຼວງຫຼາຍຕໍ່ໂຄງການຂອງພວກເຮົາ. "
+"ຂ້ອຍຮູ້ສຶກຕື່ນເຕັ້ນຫຼາຍກັບຜົນໄດ້ຮັບສຸດທ້າຍ!\""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_banner
@@ -236,12 +237,6 @@ msgstr "# ຈຳນວນບລັອກ"
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
 msgid "$ 32M"
 msgstr "$ 32M"
-
-#. module: website
-#. odoo-python
-#: code:addons/website/models/ir_ui_view.py:0
-msgid "%(error)s (website: %(website_id)s)"
-msgstr "%(error)s (ເວັບໄຊ: %(website_id)s)"
 
 #. module: website
 #. odoo-python
@@ -309,8 +304,8 @@ msgid ""
 "'Alt tag' specifies an alternate text for an image, if the image cannot be "
 "displayed (slow connection, missing image, screen reader ...)."
 msgstr ""
-"'Alt tag' ກຳນົດຂໍ້ຄວາມສຳຮອງສຳລັບຮູບພາບ, ຫາກຮູບພາບບໍ່ສາມາດສະແດງຜົນໄດ້ (ການເຊື່ອມຕໍ່ຊ້າ, ຮູບພາບ"
-"ຫາຍໄປ, ເຄື່ອງອ່ານໜ້າຈໍ ...)."
+"'Alt tag' ກຳນົດຂໍ້ຄວາມສຳຮອງສຳລັບຮູບພາບ, ຫາກຮູບພາບບໍ່ສາມາດສະແດງຜົນໄດ້ (ການເຊື່ອມຕໍ່ຊ້າ, "
+"ຮູບພາບຫາຍໄປ, ເຄື່ອງອ່ານໜ້າຈໍ ...)."
 
 #. module: website
 #. odoo-javascript
@@ -666,8 +661,7 @@ msgstr "ຫຼາຍກວ່າ 50,000 ບໍລິສັດໄວ້ວາງ�
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
 msgid "50,000+ companies use our services <br/>to grow their businesses."
-msgstr ""
-"ຫຼາຍກວ່າ 50,000 ບໍລິສັດໃຊ້ບໍລິການຂອງພວກເຮົາ <br/>ເພື່ອຂະຫຍາຍທຸລະກິດຂອງພວກເຂົາ."
+msgstr "ຫຼາຍກວ່າ 50,000 ບໍລິສັດໃຊ້ບໍລິການຂອງພວກເຮົາ <br/>ເພື່ອຂະຫຍາຍທຸລະກິດຂອງພວກເຂົາ."
 
 #. module: website
 #. odoo-javascript
@@ -747,8 +741,8 @@ msgid ""
 "email\">info@yourcompany.example.com</a>"
 msgstr ""
 "<a class=\"o_translate_inline\" href=\"mail-"
-"to:info@yourcompany.example.com\" title=\"ສົ່ງອີເມວ\">"
-"info@yourcompany.example.com</a>"
+"to:info@yourcompany.example.com\" "
+"title=\"ສົ່ງອີເມວ\">info@yourcompany.example.com</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_call_to_action
@@ -756,8 +750,8 @@ msgid ""
 "<a class=\"o_translate_inline\" "
 "href=\"mailto:info@yourcompany.example.com\">info@yourcompany.example.com</a>"
 msgstr ""
-"<a class=\"o_translate_inline\" href=\"mailto:info@yourcompany.example.com\">"
-"info@yourcompany.example.com</a>"
+"<a class=\"o_translate_inline\" "
+"href=\"mailto:info@yourcompany.example.com\">info@yourcompany.example.com</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_contact_info
@@ -765,8 +759,8 @@ msgid ""
 "<a class=\"o_translate_inline\" href=\"tel:+1555-555-5556\" title=\"Call "
 "Customer Service\">+1555-555-5556</a>"
 msgstr ""
-"<a class=\"o_translate_inline\" href=\"tel:+1555-555-5556\" title=\"ໂທຫາບໍລິການ"
-"ລູກຄ້າ\">+1555-555-5556</a>"
+"<a class=\"o_translate_inline\" href=\"tel:+1555-555-5556\" "
+"title=\"ໂທຫາບໍລິການລູກຄ້າ\">+1555-555-5556</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_freegrid
@@ -774,8 +768,8 @@ msgid ""
 "<a href=\"#\" class=\"btn btn-primary btn-lg o_translate_inline\">Learn "
 "more</a>"
 msgstr ""
-"<a href=\"#\" class=\"btn btn-primary btn-lg o_translate_inline\">ຮຽນຮູ້ເພີ່ມເຕີ"
-"ມ</a>"
+"<a href=\"#\" class=\"btn btn-primary btn-lg "
+"o_translate_inline\">ຮຽນຮູ້ເພີ່ມເຕີມ</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_empowerment
@@ -796,8 +790,8 @@ msgid ""
 "<a href=\"#\" class=\"btn btn-primary o_translate_inline\" "
 "role=\"button\">More details</a>"
 msgstr ""
-"<a href=\"#\" class=\"btn btn-primary o_translate_inline\" role=\"button\">ລາ"
-"ຍລະອຽດເພີ່ມເຕີມ</a>"
+"<a href=\"#\" class=\"btn btn-primary o_translate_inline\" "
+"role=\"button\">ລາຍລະອຽດເພີ່ມເຕີມ</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_text_box
@@ -835,8 +829,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_banner_categories
 msgid "<a href=\"#\" class=\"o_translate_inline text-reset\">Shop all →</a>"
-msgstr ""
-"<a href=\"#\" class=\"o_translate_inline text-reset\">ເລືອກຊື້ທັງໝົດ →</a>"
+msgstr "<a href=\"#\" class=\"o_translate_inline text-reset\">ເລືອກຊື້ທັງໝົດ →</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_ecomm_categories_showcase
@@ -844,8 +837,8 @@ msgid ""
 "<a href=\"#\" role=\"button\" class=\"btn btn-secondary "
 "o_translate_inline\">View All</a>"
 msgstr ""
-"<a href=\"#\" role=\"button\" class=\"btn btn-secondary o_translate_inline\">"
-"ເບິ່ງທັງໝົດ</a>"
+"<a href=\"#\" role=\"button\" class=\"btn btn-secondary "
+"o_translate_inline\">ເບິ່ງທັງໝົດ</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
@@ -853,8 +846,8 @@ msgid ""
 "<a href=\"/\" class=\"btn btn-primary o_translate_inline\">Start your "
 "journey</a>"
 msgstr ""
-"<a href=\"/\" class=\"btn btn-primary o_translate_inline\">ເລີ່ມຕົ້ນການເດີນທາງຂອງທ່"
-"ານ</a>"
+"<a href=\"/\" class=\"btn btn-primary "
+"o_translate_inline\">ເລີ່ມຕົ້ນການເດີນທາງຂອງທ່ານ</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
@@ -862,8 +855,8 @@ msgid ""
 "<a href=\"/contactus\" class=\"btn btn-primary o_translate_inline\">Contact "
 "us</a>"
 msgstr ""
-"<a href=\"/contactus\" class=\"btn btn-primary o_translate_inline\">ຕິດຕໍ່ພວກເຮົ"
-"າ</a>"
+"<a href=\"/contactus\" class=\"btn btn-primary "
+"o_translate_inline\">ຕິດຕໍ່ພວກເຮົາ</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.footer_cookie_policy_link
@@ -926,8 +919,7 @@ msgstr "<b>ຄລິກ</b> ໃສ່ທາງເລືອກນີ້ເພື�
 msgid ""
 "<b>Customize</b> any block through this menu. Try to change the background "
 "color of this block."
-msgstr ""
-"<b>ປັບແຕ່ງ</b> ບລັອກໃດກໍ່ໄດ້ຜ່ານເມນູນີ້. ລອງປ່ຽນສີພື້ນຫຼັງຂອງບລັອກນີ້ເບິ່ງ."
+msgstr "<b>ປັບແຕ່ງ</b> ບລັອກໃດກໍ່ໄດ້ຜ່ານເມນູນີ້. ລອງປ່ຽນສີພື້ນຫຼັງຂອງບລັອກນີ້ເບິ່ງ."
 
 #. module: website
 #. odoo-javascript
@@ -935,8 +927,7 @@ msgstr ""
 msgid ""
 "<b>Customize</b> any block through this menu. Try to change the background "
 "image of this block."
-msgstr ""
-"<b>ປັບແຕ່ງ</b> ບລັອກໃດກໍ່ໄດ້ຜ່ານເມນູນີ້. ລອງປ່ຽນຮູບພື້ນຫຼັງຂອງບລັອກນີ້ເບິ່ງ."
+msgstr "<b>ປັບແຕ່ງ</b> ບລັອກໃດກໍ່ໄດ້ຜ່ານເມນູນີ້. ລອງປ່ຽນຮູບພື້ນຫຼັງຂອງບລັອກນີ້ເບິ່ງ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega
@@ -1028,9 +1019,9 @@ msgid ""
 "metrics of company achievements underscore our strategic prowess and "
 "dedication to driving sustainable business success."
 msgstr ""
-"<br/>ນັບແຕ່ການເຕີບໂຕຂອງລາຍໄດ້ ໄປຈົນເຖິງການຮັກສາລູກຄ້າ ແລະ ການຂະຫຍາຍຕະຫຼາດ, ຕົວຊີ້ວັດຜົນສຳເລັດ"
-"ທີ່ສຳຄັນຂອງບໍລິສັດພວກເຮົາໄດ້ເນັ້ນໜັກເຖິງຄວາມສາມາດທາງດ້ານຍຸດທະສາດ ແລະ ຄວາມຕັ້ງໃຈໃນການຂັບເຄື່ອນທຸລະ"
-"ກິດໃຫ້ປະສົບຜົນສຳເລັດຢ່າງຍືນຍົງ."
+"<br/>ນັບແຕ່ການເຕີບໂຕຂອງລາຍໄດ້ ໄປຈົນເຖິງການຮັກສາລູກຄ້າ ແລະ ການຂະຫຍາຍຕະຫຼາດ, "
+"ຕົວຊີ້ວັດຜົນສຳເລັດທີ່ສຳຄັນຂອງບໍລິສັດພວກເຮົາໄດ້ເນັ້ນໜັກເຖິງຄວາມສາມາດທາງດ້ານຍຸດທະສາດ ແລະ "
+"ຄວາມຕັ້ງໃຈໃນການຂັບເຄື່ອນທຸລະກິດໃຫ້ປະສົບຜົນສຳເລັດຢ່າງຍືນຍົງ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
@@ -1058,8 +1049,8 @@ msgid ""
 "<br/>Our product line offers a range of innovative solutions designed to "
 "meet your needs. Each product is crafted for quality and reliability."
 msgstr ""
-"<br/>ສາຍຜະລິດຕະພັນຂອງພວກເຮົານຳສະເໜີວິທີການແກ້ໄຂທີ່ມີນະວັດຕະກຳຫຼາກຫຼາຍ ເພື່ອຕອບສະໜອງຄວາມຕ້ອງກາ"
-"ນຂອງທ່ານ. ແຕ່ລະຜະລິດຕະພັນຖືກສ້າງຂຶ້ນດ້ວຍຄຸນນະພາບ ແລະ ຄວາມເຊື່ອຖືໄດ້."
+"<br/>ສາຍຜະລິດຕະພັນຂອງພວກເຮົານຳສະເໜີວິທີການແກ້ໄຂທີ່ມີນະວັດຕະກຳຫຼາກຫຼາຍ "
+"ເພື່ອຕອບສະໜອງຄວາມຕ້ອງການຂອງທ່ານ. ແຕ່ລະຜະລິດຕະພັນຖືກສ້າງຂຶ້ນດ້ວຍຄຸນນະພາບ ແລະ ຄວາມເຊື່ອຖືໄດ້."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_text_cover
@@ -1068,8 +1059,8 @@ msgid ""
 "the steps, including setup, inventory management, and payment processing.<br/"
 ">"
 msgstr ""
-"<br/>ຂາຍອອນລາຍໄດ້ງ່າຍໆດ້ວຍແພລດຟອມທີ່ໃຊ້ງານສະດວກ ເຊິ່ງຊ່ວຍໃຫ້ທຸກຂັ້ນຕອນເປັນເລື່ອງງ່າຍ, ລວມທັງການ"
-"ຕັ້ງຄ່າ, ການຈັດການສາງສິນຄ້າ, ແລະ ການຊຳລະເງິນ.<br/>"
+"<br/>ຂາຍອອນລາຍໄດ້ງ່າຍໆດ້ວຍແພລດຟອມທີ່ໃຊ້ງານສະດວກ ເຊິ່ງຊ່ວຍໃຫ້ທຸກຂັ້ນຕອນເປັນເລື່ອງງ່າຍ, "
+"ລວມທັງການຕັ້ງຄ່າ, ການຈັດການສາງສິນຄ້າ, ແລະ ການຊຳລະເງິນ.<br/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
@@ -1087,10 +1078,11 @@ msgid ""
 "preferences, adding any necessary payment information, and selecting the "
 "initial features or modules you wish to use."
 msgstr ""
-"<br/>ຂັ້ນຕອນທຳອິດໃນການເລີ່ມຕົ້ນໃຊ້ງານແມ່ນ <b>ການສ້າງບັນຊີ</b>. ນີ້ລວມເຖິງການລົງທະບຽນໃນແພລດຟອມ"
-"ຂອງພວກເຮົາໂດຍໃຊ້ທີ່ຢູ່ອີເມວ ຫຼື ບັນຊີສື່ສັງຄົມອອນລາຍຂອງທ່ານ. ເມື່ອທ່ານສ້າງບັນຊີແລ້ວ, ທ່ານຈະໄດ້ຮັບອີເມວຢືນ"
-"ຢັນພ້ອມລິ້ງເພື່ອເປີດໃຊ້ບັນຊີ. ຫຼັງຈາກເປີດໃຊ້, ທ່ານຈະຖືກແນະນຳໃຫ້ຕື່ມຂໍ້ມູນສ່ວນຕົວໃຫ້ສົມບູນ, ເຊິ່ງລວມເຖິງການຕັ້"
-"ງຄ່າສິ່ງທີ່ທ່ານມັກ, ເພີ່ມຂໍ້ມູນການຊຳລະເງິນທີ່ຈຳເປັນ, ແລະ ເລືອກຄຸນສົມບັດ ຫຼື ໂມດູນເລີ່ມຕົ້ນທີ່ທ່ານຕ້ອງການໃຊ້."
+"<br/>ຂັ້ນຕອນທຳອິດໃນການເລີ່ມຕົ້ນໃຊ້ງານແມ່ນ <b>ການສ້າງບັນຊີ</b>. "
+"ນີ້ລວມເຖິງການລົງທະບຽນໃນແພລດຟອມຂອງພວກເຮົາໂດຍໃຊ້ທີ່ຢູ່ອີເມວ ຫຼື ບັນຊີສື່ສັງຄົມອອນລາຍຂອງທ່ານ. "
+"ເມື່ອທ່ານສ້າງບັນຊີແລ້ວ, ທ່ານຈະໄດ້ຮັບອີເມວຢືນຢັນພ້ອມລິ້ງເພື່ອເປີດໃຊ້ບັນຊີ. ຫຼັງຈາກເປີດໃຊ້, "
+"ທ່ານຈະຖືກແນະນຳໃຫ້ຕື່ມຂໍ້ມູນສ່ວນຕົວໃຫ້ສົມບູນ, ເຊິ່ງລວມເຖິງການຕັ້ງຄ່າສິ່ງທີ່ທ່ານມັກ, "
+"ເພີ່ມຂໍ້ມູນການຊຳລະເງິນທີ່ຈຳເປັນ, ແລະ ເລືອກຄຸນສົມບັດ ຫຼື ໂມດູນເລີ່ມຕົ້ນທີ່ທ່ານຕ້ອງການໃຊ້."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -1100,10 +1092,11 @@ msgid ""
 "staying current with updates, you can take advantage of the latest tools and "
 "features, ensuring your business remains competitive and efficient."
 msgstr ""
-"<br/>ຜູ້ໃຊ້ສາມາດເຂົ້າຮ່ວມໃນໂຄງການທົດສອບລຸ້ນເບຕ້າ (Beta testing), ໂດຍການໃຫ້ຄຳຄິດເຫັນກ່ຽວກັບລຸ້ນ"
-"ທີ່ກຳລັງຈະອອກ ແລະ ມີສ່ວນຮ່ວມໃນການກຳນົດທິດທາງໃນອະນາຄົດຂອງແພລດຟອມ. ການຕິດຕາມການອັບເດດຢູ່ສະເ"
-"ໝີ ຈະຊ່ວຍໃຫ້ທ່ານສາມາດໃຊ້ປະໂຫຍດຈາກເຄື່ອງມື ແລະ ຄຸນສົມບັດຫຼ້າສຸດ, ເພື່ອຮັບປະກັນວ່າທຸລະກິດຂອງທ່ານຍັງຄົງມີ"
-"ຄວາມສາມາດໃນການແຂ່ງຂັນ ແລະ ມີປະສິດທິພາບ."
+"<br/>ຜູ້ໃຊ້ສາມາດເຂົ້າຮ່ວມໃນໂຄງການທົດສອບລຸ້ນເບຕ້າ (Beta testing), "
+"ໂດຍການໃຫ້ຄຳຄິດເຫັນກ່ຽວກັບລຸ້ນທີ່ກຳລັງຈະອອກ ແລະ "
+"ມີສ່ວນຮ່ວມໃນການກຳນົດທິດທາງໃນອະນາຄົດຂອງແພລດຟອມ. ການຕິດຕາມການອັບເດດຢູ່ສະເໝີ "
+"ຈະຊ່ວຍໃຫ້ທ່ານສາມາດໃຊ້ປະໂຫຍດຈາກເຄື່ອງມື ແລະ ຄຸນສົມບັດຫຼ້າສຸດ, "
+"ເພື່ອຮັບປະກັນວ່າທຸລະກິດຂອງທ່ານຍັງຄົງມີຄວາມສາມາດໃນການແຂ່ງຂັນ ແລະ ມີປະສິດທິພາບ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_boxed
@@ -1170,8 +1163,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid ""
 "<i class=\"fa fa-check text-success\" role=\"img\"/>  Access all modules"
-msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  ເຂົ້າເຖິງໄດ້ທຸກໂມດູນ"
+msgstr "<i class=\"fa fa-check text-success\" role=\"img\"/>  ເຂົ້າເຖິງໄດ້ທຸກໂມດູນ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
@@ -1198,15 +1190,13 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid "<i class=\"fa fa-check text-success\" role=\"img\"/>  Email support"
-msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  ການຊ່ວຍເຫຼືອທາງອີເມວ"
+msgstr "<i class=\"fa fa-check text-success\" role=\"img\"/>  ການຊ່ວຍເຫຼືອທາງອີເມວ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid ""
 "<i class=\"fa fa-check text-success\" role=\"img\"/>  Limited customization"
-msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  ການປັບແຕ່ງທີ່ຈຳກັດ"
+msgstr "<i class=\"fa fa-check text-success\" role=\"img\"/>  ການປັບແຕ່ງທີ່ຈຳກັດ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
@@ -1214,8 +1204,8 @@ msgid ""
 "<i class=\"fa fa-check text-success\" role=\"img\"/>  Sales &amp; marketing "
 "for 2"
 msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  ການຂາຍ &amp; ການຕະຫຼາດ ສ"
-"ຳລັບ 2 ທ່ານ"
+"<i class=\"fa fa-check text-success\" role=\"img\"/>  ການຂາຍ &amp; ການຕະຫຼາດ "
+"ສຳລັບ 2 ທ່ານ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
@@ -1228,8 +1218,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid ""
 "<i class=\"fa fa-check text-success\" role=\"img\"/>  Unlimited customization"
-msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  ການປັບແຕ່ງບໍ່ຈຳກັດ"
+msgstr "<i class=\"fa fa-check text-success\" role=\"img\"/>  ການປັບແຕ່ງບໍ່ຈຳກັດ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_inline_default_template
@@ -1315,8 +1304,8 @@ msgid ""
 "<i class=\"fa fa-fw o_button_icon fa-circle text-success\" "
 "title=\"Connected\"/>"
 msgstr ""
-"<i class=\"fa fa-fw o_button_icon fa-circle text-success\" title=\"ເຊື່ອມຕໍ່ແລ້"
-"ວ\"/>"
+"<i class=\"fa fa-fw o_button_icon fa-circle text-success\" "
+"title=\"ເຊື່ອມຕໍ່ແລ້ວ\"/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_pages_kanban_view
@@ -1452,8 +1441,8 @@ msgid ""
 "<i class=\"s_mega_menu_thumbnails_icon fa fa-shopping-basket me-2\"/> Pickup "
 "in store"
 msgstr ""
-"<i class=\"s_mega_menu_thumbnails_icon fa fa-shopping-basket me-2\"/> ຮັບສິນຄ້າຢູ່"
-"ຮ້ານ"
+"<i class=\"s_mega_menu_thumbnails_icon fa fa-shopping-basket me-2\"/> "
+"ຮັບສິນຄ້າຢູ່ຮ້ານ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
@@ -1495,8 +1484,8 @@ msgstr ""
 "                        ສົ່ງຄືນອອນລາຍພາຍໃນ 30 ວັນ\n"
 "                    </small>\n"
 "                    <small class=\"d-flex align-items-center\">\n"
-"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/>"
-"\n"
+"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/"
+">\n"
 "                        ການຈັດສົ່ງມາດຕະຖານ\n"
 "                    </small>"
 
@@ -1504,8 +1493,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid ""
 "<small class=\"text-center\">Instant setup, satisfied or reimbursed.</small>"
-msgstr ""
-"<small class=\"text-center\">ຕິດຕັ້ງທັນທີ, ພໍໃຈ ຫຼື ສົ່ງເງິນຄືນ.</small>"
+msgstr "<small class=\"text-center\">ຕິດຕັ້ງທັນທີ, ພໍໃຈ ຫຼື ສົ່ງເງິນຄືນ.</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_attributes_vertical
@@ -1557,8 +1545,8 @@ msgid ""
 "                                    </small>"
 msgstr ""
 "<small class=\"text-muted\">\n"
-"                                        ບລັອກການບໍລິການຈາກບຸກຄົນທີສາມທີ່ຕິດຕາມຜູ້ໃຊ້ (ເຊັ່"
-"ນ: YouTube, Google Maps, Facebook...) ເມື່ອຜູ້ໃຊ້ບໍ່ໄດ້ໃຫ້ການຍິນຍອມ.\n"
+"                                        ບລັອກການບໍລິການຈາກບຸກຄົນທີສາມທີ່ຕິດຕາມຜູ້ໃຊ້ "
+"(ເຊັ່ນ: YouTube, Google Maps, Facebook...) ເມື່ອຜູ້ໃຊ້ບໍ່ໄດ້ໃຫ້ການຍິນຍອມ.\n"
 "                                    </small>"
 
 #. module: website
@@ -1622,8 +1610,8 @@ msgid ""
 "<small class=\"text-muted\">Enjoy fast, free shipping on all orders, no "
 "minimum, no hidden fees.</small>"
 msgstr ""
-"<small class=\"text-muted\">ເພີດເພີນກັບການຈັດສົ່ງທີ່ໄວ ແລະ ຟຣີສຳລັບທຸກໆຄຳສັ່ງຊື້, ບໍ່ມີຂັ້ນຕ່ຳ, ບໍ່ມີ"
-"ຄ່າທຳນຽມແອບແຝງ.</small>"
+"<small class=\"text-muted\">ເພີດເພີນກັບການຈັດສົ່ງທີ່ໄວ ແລະ ຟຣີສຳລັບທຸກໆຄຳສັ່ງຊື້, ບໍ່ມີຂັ້ນຕ່ຳ, "
+"ບໍ່ມີຄ່າທຳນຽມແອບແຝງ.</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_attributes_horizontal
@@ -1631,8 +1619,9 @@ msgid ""
 "<small class=\"text-muted\">Every product is carefully tested to meet high "
 "standards of durability and performance.</small>"
 msgstr ""
-"<small class=\"text-muted\">ທຸກໆຜະລິດຕະພັນໄດ້ຮັບການທົດສອບຢ່າງລະອຽດເພື່ອໃຫ້ໄດ້ມາດຕະຖານສູງຂ"
-"ອງຄວາມທົນທານ ແລະ ປະສິດທິພາບ.</small>"
+"<small class=\"text-"
+"muted\">ທຸກໆຜະລິດຕະພັນໄດ້ຮັບການທົດສອບຢ່າງລະອຽດເພື່ອໃຫ້ໄດ້ມາດຕະຖານສູງຂອງຄວາມທົນທານ ແລະ "
+"ປະສິດທິພາບ.</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_attributes_horizontal
@@ -1640,8 +1629,8 @@ msgid ""
 "<small class=\"text-muted\">Free 30-day returns with quick refunds or easy "
 "exchanges and no stress.</small>"
 msgstr ""
-"<small class=\"text-muted\">ສົ່ງຄືນຟຣີພາຍໃນ 30 ວັນ ພ້ອມຄືນເງິນໄວ ຫຼື ປ່ຽນສິນຄ້າໄດ້ງ່າຍ ແລະ ບໍ່"
-"ມີຄວາມກັງວົນ.</small>"
+"<small class=\"text-muted\">ສົ່ງຄືນຟຣີພາຍໃນ 30 ວັນ ພ້ອມຄືນເງິນໄວ ຫຼື ປ່ຽນສິນຄ້າໄດ້ງ່າຍ ແລະ "
+"ບໍ່ມີຄວາມກັງວົນ.</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -1663,8 +1652,8 @@ msgid ""
 "<small id=\"emailHelp\" class=\"form-text text-muted\">Form field help text</"
 "small>"
 msgstr ""
-"<small id=\"emailHelp\" class=\"form-text text-muted\">ຂໍ້ຄວາມຊ່ວຍເຫຼືອໃນຊ່ອງແບບຟອ"
-"ມ</small>"
+"<small id=\"emailHelp\" class=\"form-text text-"
+"muted\">ຂໍ້ຄວາມຊ່ວຍເຫຼືອໃນຊ່ອງແບບຟອມ</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -1672,8 +1661,8 @@ msgid ""
 "<small id=\"emailHelp\" class=\"form-text text-muted\">We'll never share "
 "your email with anyone else.</small>"
 msgstr ""
-"<small id=\"emailHelp\" class=\"form-text text-muted\">ພວກເຮົາຈະບໍ່ເປີດເຜີຍອີເມວຂອງ"
-"ທ່ານໃຫ້ກັບໃຜ.</small>"
+"<small id=\"emailHelp\" class=\"form-text text-"
+"muted\">ພວກເຮົາຈະບໍ່ເປີດເຜີຍອີເມວຂອງທ່ານໃຫ້ກັບໃຜ.</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.header_text_element
@@ -1902,8 +1891,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_accordion
 msgid "<span class=\"flex-grow-1\">What is your return policy ?</span>"
-msgstr ""
-"<span class=\"flex-grow-1\">ນະໂຍບາຍການສົ່ງສິນຄ້າຄືນຂອງທ່ານແມ່ນຫຍັງ?</span>"
+msgstr "<span class=\"flex-grow-1\">ນະໂຍບາຍການສົ່ງສິນຄ້າຄືນຂອງທ່ານແມ່ນຫຍັງ?</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_accordion
@@ -1975,8 +1963,8 @@ msgid ""
 "                            </span>"
 msgstr ""
 "<span class=\"h3-fs\">\n"
-"                                \"ຄໍເລັກຊັນນີ້ປະສົມປະສານຝີມືລະດັບພຣີມຽມເຂົ້າກັບການອອກແບບທີ່ຢູ່"
-"ເໜືອກັບເວລາໄດ້ຢ່າງຊ່ຽວຊານ, ສ້າງຜົນງານທີ່ຍົກລະດັບພື້ນທີ່ພາຍໃນໃຫ້ສວຍງາມ.\"\n"
+"                                \"ຄໍເລັກຊັນນີ້ປະສົມປະສານຝີມືລະດັບພຣີມຽມເຂົ້າກັບການອອກແບບທີ່ຢູ່ເໜືອກັບເວລາໄດ້ຢ່າງຊ່ຽວຊານ, "
+"ສ້າງຜົນງານທີ່ຍົກລະດັບພື້ນທີ່ພາຍໃນໃຫ້ສວຍງາມ.\"\n"
 "                            </span>"
 
 #. module: website
@@ -2077,8 +2065,8 @@ msgid ""
 "<span class=\"o_footer_copyright_name me-2 small\">Copyright &amp;copy; "
 "Company name</span>"
 msgstr ""
-"<span class=\"o_footer_copyright_name me-2 small\">ສະຫງວນລິຂະສິດ &amp;copy; ຊື່ບໍລິ"
-"ສັດ</span>"
+"<span class=\"o_footer_copyright_name me-2 small\">ສະຫງວນລິຂະສິດ &amp;copy; "
+"ຊື່ບໍລິສັດ</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_links
@@ -2105,8 +2093,8 @@ msgid ""
 "                <span class=\"visually-hidden\">Loading...</span>\n"
 "            </span>"
 msgstr ""
-"<span class=\"o_search_spinner d-none spinner-border spinner-border-sm text-"
-"500\" style=\"--spinner-border-width: 0.1em;\" role=\"status\">\n"
+"<span class=\"o_search_spinner d-none spinner-border spinner-border-sm "
+"text-500\" style=\"--spinner-border-width: 0.1em;\" role=\"status\">\n"
 "                <span class=\"visually-hidden\">ກຳລັງໂຫຼດ...</span>\n"
 "            </span>"
 
@@ -2121,8 +2109,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_small-fs\">\n"
 "                                            <strong>Iris DOE</strong><br/>\n"
-"                                            <span class=\"text-muted\">ຜູ້ຈັດກາ"
-"ນ MyCompany</span>\n"
+"                                            <span class=\"text-"
+"muted\">ຜູ້ຈັດການ MyCompany</span>\n"
 "                                        </span>"
 
 #. module: website
@@ -2136,8 +2124,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_small-fs\">\n"
 "                                            <strong>Jane DOE</strong><br/>\n"
-"                                            <span class=\"text-muted\">CEO ຂອ"
-"ງ MyCompany</span>\n"
+"                                            <span class=\"text-muted\">CEO "
+"ຂອງ MyCompany</span>\n"
 "                                        </span>"
 
 #. module: website
@@ -2151,8 +2139,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_small-fs\">\n"
 "                                            <strong>John DOE</strong><br/>\n"
-"                                            <span class=\"text-muted\">CCO ຂອ"
-"ງ MyCompany</span>\n"
+"                                            <span class=\"text-muted\">CCO "
+"ຂອງ MyCompany</span>\n"
 "                                        </span>"
 
 #. module: website
@@ -2166,8 +2154,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_small-fs\">\n"
 "                                        ຜູ້ຊ່ຽວຊານດ້ານການອອກແບບເຟີນີເຈີ\n"
-"                                        <br/><br/><br/><br/><br/><br/><br/>"
-"<br/><br/><br/><br/>\n"
+"                                        <br/><br/><br/><br/><br/><br/><br/"
+"><br/><br/><br/><br/>\n"
 "                                    </span>"
 
 #. module: website
@@ -2229,8 +2217,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_small-fs\">\n"
 "                                    <strong>Paul Dawson</strong><br/>\n"
-"                                    <span class=\"text-muted\">ຊ່ຽວຊານດ້ານການອອ"
-"ກແບບເຟີນີເຈີ</span>\n"
+"                                    <span class=\"text-"
+"muted\">ຊ່ຽວຊານດ້ານການອອກແບບເຟີນີເຈີ</span>\n"
 "                                </span>"
 
 #. module: website
@@ -2345,8 +2333,8 @@ msgid ""
 "<span class=\"s_website_form_field_description small form-text text-"
 "muted\">We typically respond within 1-2 business days.</span>"
 msgstr ""
-"<span class=\"s_website_form_field_description small form-text text-muted\">ໂ"
-"ດຍປົກກະຕິ ພວກເຮົາຈະຕອບກັບພາຍໃນ 1-2 ມື້ເຮັດວຽກ.</span>"
+"<span class=\"s_website_form_field_description small form-text text-"
+"muted\">ໂດຍປົກກະຕິ ພວກເຮົາຈະຕອບກັບພາຍໃນ 1-2 ມື້ເຮັດວຽກ.</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
@@ -2473,8 +2461,8 @@ msgid ""
 "&gt;= 2\">Install multiple languages to enable translation across your "
 "website.</span>"
 msgstr ""
-"<span invisible=\"website_language_count &lt; 2\">ຜູ້ເຂົ້າຊົມເວັບໄຊຈະເຫັນເວີຊັນທີ່ກົງກັບພາ"
-"ສາຂອງບຣາວເຊີ, ຫຼື ເວີຊັນເລີ່ມຕົ້ນຫາກບໍ່ມີພາສານັ້ນ.</span>\n"
+"<span invisible=\"website_language_count &lt; "
+"2\">ຜູ້ເຂົ້າຊົມເວັບໄຊຈະເຫັນເວີຊັນທີ່ກົງກັບພາສາຂອງບຣາວເຊີ, ຫຼື ເວີຊັນເລີ່ມຕົ້ນຫາກບໍ່ມີພາສານັ້ນ.</span>\n"
 "                                <span invisible=\"website_language_count "
 "&gt;= 2\">ຕິດຕັ້ງຫຼາຍພາສາເພື່ອເປີດນຳໃຊ້ການແປທົ່ວທັງເວັບໄຊຂອງທ່ານ.</span>"
 
@@ -2491,8 +2479,8 @@ msgid ""
 msgstr ""
 "<span style=\"font-size: 10.75rem;\">\n"
 "                        <font class=\"text-gradient\" style=\"background-"
-"image: linear-gradient(0deg, var(--o-color-4) 25%, var(--o-color-5) 90%);\">"
-"\n"
+"image: linear-gradient(0deg, var(--o-color-4) 25%, var(--o-color-5) 90%);"
+"\">\n"
 "                            87%\n"
 "                        </font>\n"
 "                    </span>"
@@ -2775,8 +2763,8 @@ msgid ""
 "A CDN helps you serve your website’s content with high availability and high "
 "performance to any visitor wherever they are located."
 msgstr ""
-"ລະບົບ CDN ຊ່ວຍໃຫ້ທ່ານສົ່ງເນື້ອໃນເວັບໄຊຂອງທ່ານດ້ວຍຄວາມໄວ ແລະ ປະສິດທິພາບສູງ ໄປຫາຜູ້ເຂົ້າຊົມທຸກຄົນ ບໍ່ວ່"
-"າພວກເຂົາຈະຢູ່ໃສກໍ່ຕາມ."
+"ລະບົບ CDN ຊ່ວຍໃຫ້ທ່ານສົ່ງເນື້ອໃນເວັບໄຊຂອງທ່ານດ້ວຍຄວາມໄວ ແລະ ປະສິດທິພາບສູງ ໄປຫາຜູ້ເຂົ້າຊົມທຸກຄົນ "
+"ບໍ່ວ່າພວກເຂົາຈະຢູ່ໃສກໍ່ຕາມ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_chart
@@ -2816,8 +2804,8 @@ msgid ""
 "A card is a flexible and extensible content container. It includes colors "
 "and powerful display options."
 msgstr ""
-"ກາດ (Card) ແມ່ນອົງປະກອບໃສ່ເນື້ອໃນທີ່ປັບປ່ຽນ ແລະ ຂະຫຍາຍໄດ້. ມັນລວມມີການເລືອກສີ ແລະ ທາງເລືອກກາ"
-"ນສະແດງຜົນທີ່ຫຼາກຫຼາຍ."
+"ກາດ (Card) ແມ່ນອົງປະກອບໃສ່ເນື້ອໃນທີ່ປັບປ່ຽນ ແລະ ຂະຫຍາຍໄດ້. ມັນລວມມີການເລືອກສີ ແລະ "
+"ທາງເລືອກການສະແດງຜົນທີ່ຫຼາກຫຼາຍ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_card
@@ -2826,8 +2814,8 @@ msgid ""
 "for headers and footers, a wide variety of content, contextual background "
 "colors, and powerful display options."
 msgstr ""
-"ກາດ (Card) ແມ່ນອົງປະກອບໃສ່ເນື້ອໃນທີ່ປັບປ່ຽນ ແລະ ຂະຫຍາຍໄດ້. ມັນລວມມີທາງເລືອກສຳລັບສ່ວນຫົວ ແລະ ສ່"
-"ວນທ້າຍ, ເນື້ອໃນທີ່ຫຼາກຫຼາຍ, ສີພື້ນຫຼັງຕາມບໍລິບົດ, ແລະ ທາງເລືອກການສະແດງຜົນທີ່ຊົງພະລັງ."
+"ກາດ (Card) ແມ່ນອົງປະກອບໃສ່ເນື້ອໃນທີ່ປັບປ່ຽນ ແລະ ຂະຫຍາຍໄດ້. ມັນລວມມີທາງເລືອກສຳລັບສ່ວນຫົວ ແລະ "
+"ສ່ວນທ້າຍ, ເນື້ອໃນທີ່ຫຼາກຫຼາຍ, ສີພື້ນຫຼັງຕາມບໍລິບົດ, ແລະ ທາງເລືອກການສະແດງຜົນທີ່ຊົງພະລັງ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
@@ -2835,8 +2823,8 @@ msgid ""
 "A classic black tea blend infused with the aromatic essence of bergamot, "
 "offering a fragrant, citrusy flavor."
 msgstr ""
-"ຊາດຳແບບດັ້ງເດີມທີ່ປະສົມກັບກິ່ນຫອມຂອງໝາກກ້ຽງເບີກາມ໋ອດ (Bergamot), ໃຫ້ກິ່ນຫອມສົດຊື່ນແບບໝາກໄມ້ຕະກູນສົ້"
-"ມ."
+"ຊາດຳແບບດັ້ງເດີມທີ່ປະສົມກັບກິ່ນຫອມຂອງໝາກກ້ຽງເບີກາມ໋ອດ (Bergamot), "
+"ໃຫ້ກິ່ນຫອມສົດຊື່ນແບບໝາກໄມ້ຕະກູນສົ້ມ."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_ir_actions_server__website_published
@@ -2847,9 +2835,10 @@ msgid ""
 "field as True to allow users to run this action. If it is set to False the "
 "action cannot be run through the website."
 msgstr ""
-"ການເຮັດວຽກຂອງເຊີບເວີໂຄ້ດ (Code server action) ສາມາດສັ່ງງານໄດ້ຈາກເວັບໄຊ ໂດຍໃຊ້ຕົວຄວບຄຸມສະ"
-"ເພາະ. ທີ່ຢູ່ແມ່ນ <base>/website/action/<website_path>. ໃຫ້ຕັ້ງຊ່ອງຂໍ້ມູນນີ້ເປັນ True ເພື່ອອະນຸຍ"
-"າດໃຫ້ຜູ້ໃຊ້ສັ່ງງານໄດ້. ຖ້າຕັ້ງເປັນ False ຈະບໍ່ສາມາດສັ່ງງານຜ່ານເວັບໄຊໄດ້."
+"ການເຮັດວຽກຂອງເຊີບເວີໂຄ້ດ (Code server action) ສາມາດສັ່ງງານໄດ້ຈາກເວັບໄຊ "
+"ໂດຍໃຊ້ຕົວຄວບຄຸມສະເພາະ. ທີ່ຢູ່ແມ່ນ <base>/website/action/<website_path>. "
+"ໃຫ້ຕັ້ງຊ່ອງຂໍ້ມູນນີ້ເປັນ True ເພື່ອອະນຸຍາດໃຫ້ຜູ້ໃຊ້ສັ່ງງານໄດ້. ຖ້າຕັ້ງເປັນ False "
+"ຈະບໍ່ສາມາດສັ່ງງານຜ່ານເວັບໄຊໄດ້."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_color_blocks_2
@@ -2866,8 +2855,7 @@ msgstr "ຊຸດການແກ້ໄຂທີ່ດີເລີດ ເຊິ�
 msgid ""
 "A creamy, smooth cheesecake with a graham cracker crust, topped with a layer "
 "of fresh fruit or chocolate ganache."
-msgstr ""
-"ຊີສເຄັກເນື້ອລະອຽດນຸ່ມ ພ້ອມຖານແຄຣັກເກີກອບ, ແຕ່ງໜ້າດ້ວຍໝາກໄມ້ສົດ ຫຼື ຊັອກໂກແລັດການາຊ."
+msgstr "ຊີສເຄັກເນື້ອລະອຽດນຸ່ມ ພ້ອມຖານແຄຣັກເກີກອບ, ແຕ່ງໜ້າດ້ວຍໝາກໄມ້ສົດ ຫຼື ຊັອກໂກແລັດການາຊ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_catalog
@@ -2896,8 +2884,7 @@ msgstr ""
 msgid ""
 "A feature section allows you to clearly showcase the main benefits and "
 "unique aspects of your product."
-msgstr ""
-"ພາກສ່ວນຄຸນສົມບັດຊ່ວຍໃຫ້ທ່ານສາມາດສະແດງປະໂຫຍດຫຼັກ ແລະ ຈຸດເດັ່ນຂອງຜະລິດຕະພັນໄດ້ຢ່າງຊັດເຈນ."
+msgstr "ພາກສ່ວນຄຸນສົມບັດຊ່ວຍໃຫ້ທ່ານສາມາດສະແດງປະໂຫຍດຫຼັກ ແລະ ຈຸດເດັ່ນຂອງຜະລິດຕະພັນໄດ້ຢ່າງຊັດເຈນ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_showcase
@@ -2944,8 +2931,7 @@ msgstr "ເຄັກເນື້ອນຸ່ມສີແດງ ທີ່ມາ�
 #. module: website
 #: model:ir.model.fields,help:website.field_website_visitor__visit_count
 msgid "A new visit is considered if last connection was more than 8 hours ago."
-msgstr ""
-"ການເຂົ້າຊົມຄັ້ງໃໝ່ຈະຖືກນັບ ຖ້າການເຊື່ອມຕໍ່ຫຼ້າສຸດແມ່ນເກີນ 8 ຊົ່ວໂມງກ່ອນ."
+msgstr "ການເຂົ້າຊົມຄັ້ງໃໝ່ຈະຖືກນັບ ຖ້າການເຊື່ອມຕໍ່ຫຼ້າສຸດແມ່ນເກີນ 8 ຊົ່ວໂມງກ່ອນ."
 
 #. module: website
 #. odoo-python
@@ -2964,8 +2950,8 @@ msgid ""
 "A spiced cake loaded with grated carrots, nuts, and a hint of cinnamon, "
 "topped with a tangy cream cheese frosting."
 msgstr ""
-"ເຄັກລົດຊາດເຄື່ອງເທດ ທີ່ເຕັມໄປດ້ວຍແຄຣອດຂູດ, ໝາກໄມ້ເປືອກແຂງ, ແລະ ກິ່ນຫອມຂອງໄຄ, ແຕ່ງໜ້າດ້ວຍຄຣີມຊີສ"
-"ລົດຊາດສົ້ມອ່ອນໆ."
+"ເຄັກລົດຊາດເຄື່ອງເທດ ທີ່ເຕັມໄປດ້ວຍແຄຣອດຂູດ, ໝາກໄມ້ເປືອກແຂງ, ແລະ ກິ່ນຫອມຂອງໄຄ, "
+"ແຕ່ງໜ້າດ້ວຍຄຣີມຊີສລົດຊາດສົ້ມອ່ອນໆ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -2978,8 +2964,7 @@ msgstr "ລາຍການທີສາມ"
 msgid ""
 "A timeline is a graphical representation on which important events are "
 "marked."
-msgstr ""
-"ທາມລາຍ (Timeline) ແມ່ນການສະແດງຜົນດ້ວຍຮູບພາບ ເພື່ອບົ່ງບອກເຫດການທີ່ສຳຄັນຕ່າງໆ."
+msgstr "ທາມລາຍ (Timeline) ແມ່ນການສະແດງຜົນດ້ວຍຮູບພາບ ເພື່ອບົ່ງບອກເຫດການທີ່ສຳຄັນຕ່າງໆ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_timeline
@@ -2994,16 +2979,15 @@ msgid ""
 "A vibrant spot known for its expertly crafted coffee, sourced directly from "
 "farmers and roasted to perfection."
 msgstr ""
-"ສະຖານທີ່ທີ່ມີຊີວິດຊີວາ ເຊິ່ງມີຊື່ສຽງດ້ານກາເຟທີ່ເຮັດຢ່າງພິຖີພິຖັນ, ສົ່ງກົງຈາກຊາວກະສິກອນ ແລະ ຄົ້ວໃຫ້ໄດ້ຄຸນນະພາ"
-"ບດີເລີດ."
+"ສະຖານທີ່ທີ່ມີຊີວິດຊີວາ ເຊິ່ງມີຊື່ສຽງດ້ານກາເຟທີ່ເຮັດຢ່າງພິຖີພິຖັນ, ສົ່ງກົງຈາກຊາວກະສິກອນ ແລະ "
+"ຄົ້ວໃຫ້ໄດ້ຄຸນນະພາບດີເລີດ."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_visitor__is_connected
 msgid ""
 "A visitor is considered as connected if his last page view was within the "
 "last 5 minutes."
-msgstr ""
-"ຜູ້ເຂົ້າຊົມຈະຖືກຖືວ່າເຊື່ອມຕໍ່ຢູ່ ຖ້າການເຂົ້າເບິ່ງໜ້າເວັບຫຼ້າສຸດແມ່ນຢູ່ພາຍໃນ 5 ນາທີຜ່ານມາ."
+msgstr "ຜູ້ເຂົ້າຊົມຈະຖືກຖືວ່າເຊື່ອມຕໍ່ຢູ່ ຖ້າການເຂົ້າເບິ່ງໜ້າເວັບຫຼ້າສຸດແມ່ນຢູ່ພາຍໃນ 5 ນາທີຜ່ານມາ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
@@ -3106,8 +3090,8 @@ msgid ""
 "Achieve holistic health with personalized nutritional advice that "
 "complements your workouts, promoting overall well-being."
 msgstr ""
-"ບັນລຸສຸຂະພາບແບບອົງລວມດ້ວຍຄໍາແນະນໍາດ້ານໂພຊະນາການສ່ວນບຸກຄົນ ທີ່ສົ່ງເສີມການອອກກໍາລັງກາຍ ແລະ ສຸຂະພາບ"
-"ທີ່ດີໂດຍລວມ."
+"ບັນລຸສຸຂະພາບແບບອົງລວມດ້ວຍຄໍາແນະນໍາດ້ານໂພຊະນາການສ່ວນບຸກຄົນ ທີ່ສົ່ງເສີມການອອກກໍາລັງກາຍ ແລະ "
+"ສຸຂະພາບທີ່ດີໂດຍລວມ."
 
 #. module: website
 #. odoo-javascript
@@ -3190,8 +3174,8 @@ msgid ""
 "Add 3rd-party service domains <em>(\"www.example.com\" or \"example.com\")</"
 "em>, one per line."
 msgstr ""
-"ເພີ່ມໂດເມນບໍລິການຈາກພາຍນອກ <em>(\"www.example.com\" ຫຼື \"example.com\")</em>, ຫນຶ່ງໂ"
-"ດເມນຕໍ່ແຖວ."
+"ເພີ່ມໂດເມນບໍລິການຈາກພາຍນອກ <em>(\"www.example.com\" ຫຼື \"example.com\")</em>, "
+"ຫນຶ່ງໂດເມນຕໍ່ແຖວ."
 
 #. module: website
 #. odoo-javascript
@@ -3462,8 +3446,7 @@ msgstr ""
 msgid ""
 "Add this page to the \"+New\" page templates. It will be added to the "
 "\"Custom\" category."
-msgstr ""
-"ເພີ່ມໜ້ານີ້ເຂົ້າໃນແມ່ແບບໜ້າ \"+ໃໝ່\". ມັນຈະຖືກເພີ່ມເຂົ້າໃນໝວດໝູ່ \"ກຳນົດເອງ\"."
+msgstr "ເພີ່ມໜ້ານີ້ເຂົ້າໃນແມ່ແບບໜ້າ \"+ໃໝ່\". ມັນຈະຖືກເພີ່ມເຂົ້າໃນໝວດໝູ່ \"ກຳນົດເອງ\"."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.external_snippets
@@ -3495,8 +3478,8 @@ msgid ""
 "Add your own title or leave empty to use \"%(defaultTitle)s\". Your page "
 "title should contain max 65 characters."
 msgstr ""
-"ເພີ່ມຫົວຂໍ້ຂອງທ່ານເອງ ຫຼື ປະວ່າງໄວ້ເພື່ອໃຊ້ \"%(defaultTitle)s\". ຫົວຂໍ້ໜ້າຂອງທ່ານຄວນມີຄວາມຍາວສູງ"
-"ສຸດ 65 ຕົວອັກສອນ."
+"ເພີ່ມຫົວຂໍ້ຂອງທ່ານເອງ ຫຼື ປະວ່າງໄວ້ເພື່ອໃຊ້ \"%(defaultTitle)s\". "
+"ຫົວຂໍ້ໜ້າຂອງທ່ານຄວນມີຄວາມຍາວສູງສຸດ 65 ຕົວອັກສອນ."
 
 #. module: website
 #. odoo-javascript
@@ -3505,8 +3488,8 @@ msgid ""
 "Adding a language requires to leave the editor. This will save all your "
 "changes, are you sure you want to proceed?"
 msgstr ""
-"ການເພີ່ມພາສາຈໍາເປັນຕ້ອງອອກຈາກຕົວແກ້ໄຂ. ນີ້ຈະບັນທຶກການປ່ຽນແປງທັງໝົດຂອງທ່ານ, ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການດໍ"
-"າເນີນການຕໍ່?"
+"ການເພີ່ມພາສາຈໍາເປັນຕ້ອງອອກຈາກຕົວແກ້ໄຂ. ນີ້ຈະບັນທຶກການປ່ຽນແປງທັງໝົດຂອງທ່ານ, "
+"ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການດໍາເນີນການຕໍ່?"
 
 #. module: website
 #. odoo-javascript
@@ -3521,8 +3504,8 @@ msgid ""
 "documentation, video tutorials, and community forums where you can connect "
 "with other users and share insights."
 msgstr ""
-"ນອກຈາກນັ້ນ, ພວກເຮົາສະເໜີຖານຄວາມຮູ້ທີ່ຄົບຖ້ວນ, ລວມທັງເອກະສານລະອຽດ, ວິດີໂອສອນການໃຊ້ງານ ແລະ ຟໍຣໍ"
-"າຊຸມຊົນ ບ່ອນທີ່ທ່ານສາມາດເຊື່ອມຕໍ່ກັບຜູ້ໃຊ້ອື່ນໆ ແລະ ແບ່ງປັນຄວາມຮູ້."
+"ນອກຈາກນັ້ນ, ພວກເຮົາສະເໜີຖານຄວາມຮູ້ທີ່ຄົບຖ້ວນ, ລວມທັງເອກະສານລະອຽດ, ວິດີໂອສອນການໃຊ້ງານ ແລະ "
+"ຟໍຣໍາຊຸມຊົນ ບ່ອນທີ່ທ່ານສາມາດເຊື່ອມຕໍ່ກັບຜູ້ໃຊ້ອື່ນໆ ແລະ ແບ່ງປັນຄວາມຮູ້."
 
 #. module: website
 #. odoo-javascript
@@ -3573,8 +3556,8 @@ msgid ""
 "Adjust volume, skip tracks, answer calls, and activate voice assistants with "
 "a simple tap, keeping your hands free and your focus on what matters most."
 msgstr ""
-"ປັບລະດັບສຽງ, ຂ້າມແທຣັກ, ຮັບສາຍ ແລະ ເປີດໃຊ້ງານຜູ້ຊ່ວຍສຽງດ້ວຍການແຕະພຽງຄັ້ງດຽວ, ເຮັດໃຫ້ມືຂອງທ່ານຫ"
-"ວ່າງ ແລະ ສຸມໃສ່ສິ່ງທີ່ສຳຄັນທີ່ສຸດ."
+"ປັບລະດັບສຽງ, ຂ້າມແທຣັກ, ຮັບສາຍ ແລະ ເປີດໃຊ້ງານຜູ້ຊ່ວຍສຽງດ້ວຍການແຕະພຽງຄັ້ງດຽວ, "
+"ເຮັດໃຫ້ມືຂອງທ່ານຫວ່າງ ແລະ ສຸມໃສ່ສິ່ງທີ່ສຳຄັນທີ່ສຸດ."
 
 #. module: website
 #. odoo-javascript
@@ -3595,8 +3578,8 @@ msgid ""
 "Advanced solution for enterprises. Cutting-edge features and top-tier "
 "support for maximum performance."
 msgstr ""
-"ວິທີແກ້ໄຂຂັ້ນສູງສຳລັບອົງກອນຂະໜາດໃຫຍ່. ຄຸນສົມບັດທັນສະໄໝ ແລະ ການຊ່ວຍເຫຼືອລະດັບສູງສຸດ ເພື່ອປະສິດທິພາບສູງ"
-"ສຸດ."
+"ວິທີແກ້ໄຂຂັ້ນສູງສຳລັບອົງກອນຂະໜາດໃຫຍ່. ຄຸນສົມບັດທັນສະໄໝ ແລະ ການຊ່ວຍເຫຼືອລະດັບສູງສຸດ "
+"ເພື່ອປະສິດທິພາບສູງສຸດ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -3728,8 +3711,8 @@ msgid ""
 "do. She mentors 100+ in-house developers and looks after the community of "
 "thousands of developers."
 msgstr ""
-"Aline ເປັນໜຶ່ງໃນບຸກຄົນທີ່ໂດດເດັ່ນ ຜູ້ທີ່ເວົ້າໄດ້ເຕັມປາກວ່າຮັກໃນສິ່ງທີ່ຕົນເອງເຮັດ. ລາວເປັນທີ່ປຶກສາໃຫ້ນັກພັດທະນ"
-"າພາຍໃນຫຼາຍກວ່າ 100 ຄົນ ແລະ ເບິ່ງແຍງຊຸມຊົນນັກພັດທະນາອີກຫຼາຍພັນຄົນ."
+"Aline ເປັນໜຶ່ງໃນບຸກຄົນທີ່ໂດດເດັ່ນ ຜູ້ທີ່ເວົ້າໄດ້ເຕັມປາກວ່າຮັກໃນສິ່ງທີ່ຕົນເອງເຮັດ. "
+"ລາວເປັນທີ່ປຶກສາໃຫ້ນັກພັດທະນາພາຍໃນຫຼາຍກວ່າ 100 ຄົນ ແລະ ເບິ່ງແຍງຊຸມຊົນນັກພັດທະນາອີກຫຼາຍພັນຄົນ."
 
 #. module: website
 #. odoo-javascript
@@ -3852,8 +3835,8 @@ msgid ""
 "Although this Website may be linked to other websites, we are not, directly "
 "or indirectly, implying any approval."
 msgstr ""
-"ເຖິງແມ່ນວ່າເວັບໄຊນີ້ອາດຈະເຊື່ອມໂຍງກັບເວັບໄຊອື່ນໆ, ພວກເຮົາບໍ່ໄດ້ໝາຍເຖິງການຮັບຮອງໃດໆ ທັງທາງກົງ ຫຼື ທາ"
-"ງອ້ອມ."
+"ເຖິງແມ່ນວ່າເວັບໄຊນີ້ອາດຈະເຊື່ອມໂຍງກັບເວັບໄຊອື່ນໆ, ພວກເຮົາບໍ່ໄດ້ໝາຍເຖິງການຮັບຮອງໃດໆ ທັງທາງກົງ ຫຼື "
+"ທາງອ້ອມ."
 
 #. module: website
 #. odoo-javascript
@@ -3929,8 +3912,8 @@ msgid ""
 "Analyzing the numbers behind our success: <br class=\"d-none d-xxl-inline\"/"
 ">an in-depth look at the key metrics driving our company's achievements"
 msgstr ""
-"ການວິເຄາະຕົວເລກເບື້ອງຫຼັງຄວາມສໍາເລັດຂອງພວກເຮົາ: <br class=\"d-none d-xxl-inline\"/>ເບິ່ງ"
-"ລົງເລິກເຖິງຕົວຊີ້ວັດທີ່ສໍາຄັນທີ່ຂັບເຄື່ອນຜົນສໍາເລັດຂອງບໍລິສັດພວກເຮົາ"
+"ການວິເຄາະຕົວເລກເບື້ອງຫຼັງຄວາມສໍາເລັດຂອງພວກເຮົາ: <br class=\"d-none d-xxl-inline\"/"
+">ເບິ່ງລົງເລິກເຖິງຕົວຊີ້ວັດທີ່ສໍາຄັນທີ່ຂັບເຄື່ອນຜົນສໍາເລັດຂອງບໍລິສັດພວກເຮົາ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_showcase
@@ -4107,8 +4090,7 @@ msgstr "ທ່ານມີອາຍຸ 18 ປີຂຶ້ນໄປແລ້ວ�
 msgid ""
 "Are you sure you want to discard all your changes? Once you do, they're gone "
 "for good."
-msgstr ""
-"ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການຍົກເລີກການປ່ຽນແປງທັງໝົດ? ເມື່ອທ່ານເຮັດແລ້ວ, ພວກມັນຈະຫາຍໄປຖາວອນ."
+msgstr "ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການຍົກເລີກການປ່ຽນແປງທັງໝົດ? ເມື່ອທ່ານເຮັດແລ້ວ, ພວກມັນຈະຫາຍໄປຖາວອນ."
 
 #. module: website
 #. odoo-javascript
@@ -4129,15 +4111,14 @@ msgid ""
 "Artisanal espresso with a focus on direct trade and exceptional quality in a "
 "chic, comfortable setting."
 msgstr ""
-"ເອສເພຣັສໂຊທີ່ປຸງແຕ່ງຢ່າງພິຖີພິຖັນ ໂດຍເນັ້ນໃສ່ການຄ້າໂດຍກົງ ແລະ ຄຸນນະພາບທີ່ໂດດເດັ່ນ ໃນບັນຍາກາດທີ່ທັນສະໄ"
-"ໝ ແລະ ສະດວກສະບາຍ."
+"ເອສເພຣັສໂຊທີ່ປຸງແຕ່ງຢ່າງພິຖີພິຖັນ ໂດຍເນັ້ນໃສ່ການຄ້າໂດຍກົງ ແລະ ຄຸນນະພາບທີ່ໂດດເດັ່ນ "
+"ໃນບັນຍາກາດທີ່ທັນສະໄໝ ແລະ ສະດວກສະບາຍ."
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/countdown_option.xml:0
 msgid "As promised, we will offer 4 free tickets to our next summit."
-msgstr ""
-"ຕາມທີ່ສັນຍາໄວ້, ພວກເຮົາຈະມອບປີ້ຟຣີ 4 ໃບ ສໍາລັບການປະຊຸມສຸດຍອດຄັ້ງຕໍ່ໄປຂອງພວກເຮົາ."
+msgstr "ຕາມທີ່ສັນຍາໄວ້, ພວກເຮົາຈະມອບປີ້ຟຣີ 4 ໃບ ສໍາລັບການປະຊຸມສຸດຍອດຄັ້ງຕໍ່ໄປຂອງພວກເຮົາ."
 
 #. module: website
 #: model:ir.model,name:website.model_ir_asset
@@ -4540,8 +4521,7 @@ msgstr "ບລັອກໂດເມນຈາກພາຍນອກ"
 #: model:ir.model.fields,help:website.field_website__block_third_party_domains
 msgid ""
 "Block 3rd-party domains that may track users (YouTube, Google Maps, etc.)."
-msgstr ""
-"ບລັອກໂດເມນຈາກພາຍນອກທີ່ອາດຕິດຕາມຜູ້ໃຊ້ (YouTube, Google Maps, ແລະ ອື່ນໆ)."
+msgstr "ບລັອກໂດເມນຈາກພາຍນອກທີ່ອາດຕິດຕາມຜູ້ໃຊ້ (YouTube, Google Maps, ແລະ ອື່ນໆ)."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -4842,8 +4822,8 @@ msgid ""
 "But before deleting, make sure you update all links referring to it. That "
 "way, your customers won't bump into the not-so-famous 404 error page."
 msgstr ""
-"ແຕ່ກ່ອນທີ່ຈະລຶບ, ໃຫ້ແນ່ໃຈວ່າທ່ານອັບເດດລິ້ງທັງໝົດທີ່ອ້າງອີງເຖິງມັນ. ດ້ວຍວິທີນັ້ນ, ລູກຄ້າຂອງທ່ານຈະບໍ່ພົບກັບໜ້າຂໍ້ຜິ"
-"ດພາດ 404 ທີ່ບໍ່ພຶງປະສົງ."
+"ແຕ່ກ່ອນທີ່ຈະລຶບ, ໃຫ້ແນ່ໃຈວ່າທ່ານອັບເດດລິ້ງທັງໝົດທີ່ອ້າງອີງເຖິງມັນ. ດ້ວຍວິທີນັ້ນ, "
+"ລູກຄ້າຂອງທ່ານຈະບໍ່ພົບກັບໜ້າຂໍ້ຜິດພາດ 404 ທີ່ບໍ່ພຶງປະສົງ."
 
 #. module: website
 #. odoo-javascript
@@ -4852,8 +4832,8 @@ msgid ""
 "But before deleting, make sure you update all links referring to them. That "
 "way, your customers won't bump into the not-so-famous 404 error page."
 msgstr ""
-"ແຕ່ກ່ອນທີ່ຈະລຶບ, ໃຫ້ແນ່ໃຈວ່າທ່ານອັບເດດລິ້ງທັງໝົດທີ່ອ້າງອີງເຖິງພວກມັນ. ດ້ວຍວິທີນັ້ນ, ລູກຄ້າຂອງທ່ານຈະບໍ່ພົບກັບໜ້"
-"າຂໍ້ຜິດພາດ 404 ທີ່ບໍ່ພຶງປະສົງ."
+"ແຕ່ກ່ອນທີ່ຈະລຶບ, ໃຫ້ແນ່ໃຈວ່າທ່ານອັບເດດລິ້ງທັງໝົດທີ່ອ້າງອີງເຖິງພວກມັນ. ດ້ວຍວິທີນັ້ນ, "
+"ລູກຄ້າຂອງທ່ານຈະບໍ່ພົບກັບໜ້າຂໍ້ຜິດພາດ 404 ທີ່ບໍ່ພຶງປະສົງ."
 
 #. module: website
 #. odoo-javascript
@@ -4895,8 +4875,7 @@ msgstr "ຊື້ຕອນນີ້"
 msgid ""
 "By Crafting unique and compelling brand identities that leave a lasting "
 "impact."
-msgstr ""
-"ໂດຍການສ້າງເອກະລັກຂອງແບຣນທີ່ເປັນເອກະລັກ ແລະ ໂດດເດັ່ນ ທີ່ສ້າງຄວາມປະທັບໃຈທີ່ຍືນຍົງ."
+msgstr "ໂດຍການສ້າງເອກະລັກຂອງແບຣນທີ່ເປັນເອກະລັກ ແລະ ໂດດເດັ່ນ ທີ່ສ້າງຄວາມປະທັບໃຈທີ່ຍືນຍົງ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.view_edit_third_party_domains
@@ -4942,8 +4921,7 @@ msgstr "CTA, ປຸ່ມ, ການປະຕິບັດ, ການມີສ່
 msgid ""
 "CTA, button, btn, action, engagement, link, offer, appeal, call to action, "
 "prompt, interact, trigger"
-msgstr ""
-"CTA, ປຸ່ມ, ການປະຕິບັດ, ການມີສ່ວນຮ່ວມ, ລິ້ງ, ຂໍ້ສະເໜີ, ການຮຽກຮ້ອງໃຫ້ປະຕິບັດ, ຕົວຊັກຊວນ"
+msgstr "CTA, ປຸ່ມ, ການປະຕິບັດ, ການມີສ່ວນຮ່ວມ, ລິ້ງ, ຂໍ້ສະເໜີ, ການຮຽກຮ້ອງໃຫ້ປະຕິບັດ, ຕົວຊັກຊວນ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -4951,8 +4929,7 @@ msgid ""
 "CTA, button, btn, action, engagement, link, offer, appeal, call to action, "
 "prompt, interact, trigger, items, checklists, entries, sequences, bullets, "
 "points, list, group, benefits, features, advantages"
-msgstr ""
-"CTA, ປຸ່ມ, ການປະຕິບັດ, ການມີສ່ວນຮ່ວມ, ລິ້ງ, ຂໍ້ສະເໜີ, ລາຍການ, ຄຸນສົມບັດ, ຂໍ້ດີ"
+msgstr "CTA, ປຸ່ມ, ການປະຕິບັດ, ການມີສ່ວນຮ່ວມ, ລິ້ງ, ຂໍ້ສະເໜີ, ລາຍການ, ຄຸນສົມບັດ, ຂໍ້ດີ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -5018,8 +4995,7 @@ msgstr "ສາມາດເຜີຍແຜ່ໄດ້"
 msgid ""
 "Cannot apply this option on current text selection. Try clearing the format "
 "and try again."
-msgstr ""
-"ບໍ່ສາມາດນຳໃຊ້ຕົວເລືອກນີ້ໃສ່ຂໍ້ຄວາມທີ່ເລືອກໄວ້ໄດ້. ລອງລຶບຮູບແບບອອກ ແລ້ວລອງໃໝ່ອີກຄັ້ງ."
+msgstr "ບໍ່ສາມາດນຳໃຊ້ຕົວເລືອກນີ້ໃສ່ຂໍ້ຄວາມທີ່ເລືອກໄວ້ໄດ້. ລອງລຶບຮູບແບບອອກ ແລ້ວລອງໃໝ່ອີກຄັ້ງ."
 
 #. module: website
 #. odoo-python
@@ -5270,8 +5246,7 @@ msgstr "ປ່ຽນຕຳແໜ່ງປຸ່ມເມີນູ/ການຈ�
 msgid ""
 "Changing the color palette will reset all your color customizations, are you "
 "sure you want to proceed?"
-msgstr ""
-"ການປ່ຽນແຖບສີຈະລ້າງການກຳນົດຄ່າສີທັງໝົດຂອງທ່ານ, ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການດຳເນີນການຕໍ່?"
+msgstr "ການປ່ຽນແຖບສີຈະລ້າງການກຳນົດຄ່າສີທັງໝົດຂອງທ່ານ, ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການດຳເນີນການຕໍ່?"
 
 #. module: website
 #. odoo-javascript
@@ -5281,8 +5256,8 @@ msgid ""
 "changes, are you sure you want to proceed? Be careful that changing the "
 "theme will reset all your color customizations."
 msgstr ""
-"ການປ່ຽນຮູບແບບ (Theme) ຈຳເປັນຕ້ອງອອກຈາກຕົວແກ້ໄຂ. ນີ້ຈະບັນທຶກການປ່ຽນແປງທັງໝົດຂອງທ່ານ, ທ່ານແນ່ໃຈ"
-"ບໍ່ວ່າຕ້ອງການດຳເນີນການຕໍ່? ຂໍໃຫ້ລະວັງວ່າການປ່ຽນຮູບແບບຈະລ້າງການກຳນົດຄ່າສີທັງໝົດຂອງທ່ານ."
+"ການປ່ຽນຮູບແບບ (Theme) ຈຳເປັນຕ້ອງອອກຈາກຕົວແກ້ໄຂ. ນີ້ຈະບັນທຶກການປ່ຽນແປງທັງໝົດຂອງທ່ານ, "
+"ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການດຳເນີນການຕໍ່? ຂໍໃຫ້ລະວັງວ່າການປ່ຽນຮູບແບບຈະລ້າງການກຳນົດຄ່າສີທັງໝົດຂອງທ່ານ."
 
 #. module: website
 #. odoo-javascript
@@ -5296,8 +5271,7 @@ msgstr "ແຜນພູມ"
 msgid ""
 "Chat with us through or fill in this form to get information about anything "
 "related to Odoo apps, services, our company."
-msgstr ""
-"ແຊັດກັບພວກເຮົາ ຫຼື ຕື່ມຂໍ້ມູນໃນຟອມນີ້ເພື່ອຮັບຂໍ້ມູນກ່ຽວກັບແອັບ Odoo, ບໍລິການ ຫຼື ບໍລິສັດຂອງພວກເຮົາ."
+msgstr "ແຊັດກັບພວກເຮົາ ຫຼື ຕື່ມຂໍ້ມູນໃນຟອມນີ້ເພື່ອຮັບຂໍ້ມູນກ່ຽວກັບແອັບ Odoo, ບໍລິການ ຫຼື ບໍລິສັດຂອງພວກເຮົາ."
 
 #. module: website
 #: model:website.configurator.feature,description:website.feature_module_live_chat
@@ -5446,8 +5420,8 @@ msgid ""
 "Choose a vibrant image and write an inspiring paragraph about it. It does "
 "not have to be long, but it should reinforce your image."
 msgstr ""
-"ເລືອກຮູບພາບທີ່ສົດໃສ ແລະ ຂຽນຂໍ້ຄວາມທີ່ສ້າງແຮງບັນດານໃຈກ່ຽວກັບມັນ. ມັນບໍ່ຈໍາເປັນຕ້ອງຍາວ, ແຕ່ຄວນຊ່ວຍສົ່ງເ"
-"ສີມພາບລັກຂອງທ່ານ."
+"ເລືອກຮູບພາບທີ່ສົດໃສ ແລະ ຂຽນຂໍ້ຄວາມທີ່ສ້າງແຮງບັນດານໃຈກ່ຽວກັບມັນ. ມັນບໍ່ຈໍາເປັນຕ້ອງຍາວ, "
+"ແຕ່ຄວນຊ່ວຍສົ່ງເສີມພາບລັກຂອງທ່ານ."
 
 #. module: website
 #. odoo-javascript
@@ -5512,9 +5486,9 @@ msgid ""
 "elements right on the page, streamlining your workflow and maintaining "
 "control over your content."
 msgstr ""
-"ຄລິກ ແລະ ປ່ຽນເນື້ອຫາໂດຍກົງຈາກໜ້າເວັບ, ຫຼີກເວັ້ນຂັ້ນຕອນທີ່ຫຍຸ້ງຍາກໃນລະບົບຫຼັງບ້ານ. ເຄື່ອງມືນີ້ຊ່ວຍໃຫ້ອັບເດດ"
-"ຂໍ້ຄວາມ, ຮູບພາບ ແລະ ອົງປະກອບຕ່າງໆໃນໜ້າເວັບໄດ້ຢ່າງວ່ອງໄວ, ເຮັດໃຫ້ວຽກງານຂອງທ່ານສະດວກຂຶ້ນ ແລະ ຮັ"
-"ກສາການຄວບຄຸມເນື້ອຫາຂອງທ່ານ."
+"ຄລິກ ແລະ ປ່ຽນເນື້ອຫາໂດຍກົງຈາກໜ້າເວັບ, ຫຼີກເວັ້ນຂັ້ນຕອນທີ່ຫຍຸ້ງຍາກໃນລະບົບຫຼັງບ້ານ. "
+"ເຄື່ອງມືນີ້ຊ່ວຍໃຫ້ອັບເດດຂໍ້ຄວາມ, ຮູບພາບ ແລະ ອົງປະກອບຕ່າງໆໃນໜ້າເວັບໄດ້ຢ່າງວ່ອງໄວ, "
+"ເຮັດໃຫ້ວຽກງານຂອງທ່ານສະດວກຂຶ້ນ ແລະ ຮັກສາການຄວບຄຸມເນື້ອຫາຂອງທ່ານ."
 
 #. module: website
 #. odoo-javascript
@@ -5539,8 +5513,7 @@ msgstr "ຄລິກທີ່ \"ແກ້ໄຂ/ແປ\" ເພື່ອນຳ�
 msgid ""
 "Click on <b>\"Edit\"</b> in the right panel to replace this with your own "
 "HTML code"
-msgstr ""
-"ຄລິກທີ່ <b>\"ແກ້ໄຂ\"</b> ໃນແຖບດ້ານຂວາເພື່ອແທນທີ່ດ້ວຍລະຫັດ HTML ຂອງທ່ານເອງ"
+msgstr "ຄລິກທີ່ <b>\"ແກ້ໄຂ\"</b> ໃນແຖບດ້ານຂວາເພື່ອແທນທີ່ດ້ວຍລະຫັດ HTML ຂອງທ່ານເອງ"
 
 #. module: website
 #. odoo-javascript
@@ -5678,9 +5651,9 @@ msgid ""
 "resize and duplicate the blocks to create your own layout. Add images or "
 "icons to customize the blocks."
 msgstr ""
-"ບລັອກສີເປັນວິທີທີ່ງ່າຍ ແລະ ມີປະສິດທິພາບໃນການ <b>ນຳສະເໜີ ແລະ ເນັ້ນເນື້ອຫາຂອງທ່ານ</b>. ເລືອກຮູບພາ"
-"ບ ຫຼື ສີສຳລັບພື້ນຫຼັງ. ທ່ານຍັງສາມາດປັບຂະໜາດ ແລະ ເຮັດຊໍ້າບລັອກເພື່ອສ້າງຮູບແບບຂອງທ່ານເອງ. ເພີ່ມຮູບພາບ "
-"ຫຼື ໄອຄອນເພື່ອປັບແຕ່ງບລັອກ."
+"ບລັອກສີເປັນວິທີທີ່ງ່າຍ ແລະ ມີປະສິດທິພາບໃນການ <b>ນຳສະເໜີ ແລະ ເນັ້ນເນື້ອຫາຂອງທ່ານ</b>. "
+"ເລືອກຮູບພາບ ຫຼື ສີສຳລັບພື້ນຫຼັງ. ທ່ານຍັງສາມາດປັບຂະໜາດ ແລະ ເຮັດຊໍ້າບລັອກເພື່ອສ້າງຮູບແບບຂອງທ່ານເອງ. "
+"ເພີ່ມຮູບພາບ ຫຼື ໄອຄອນເພື່ອປັບແຕ່ງບລັອກ."
 
 #. module: website
 #. odoo-javascript
@@ -5721,8 +5694,7 @@ msgstr "ໄວໆນີ້"
 msgid ""
 "Comma-separated list of website type/purpose for which this feature should "
 "be pre-selected"
-msgstr ""
-"ລາຍການປະເພດ/ຈຸດປະສົງຂອງເວັບໄຊທ໌ ທີ່ຄວນເລືອກຄຸນສົມບັດນີ້ໄວ້ລ່ວງໜ້າ (ແຍກດ້ວຍຈຸດ)"
+msgstr "ລາຍການປະເພດ/ຈຸດປະສົງຂອງເວັບໄຊທ໌ ທີ່ຄວນເລືອກຄຸນສົມບັດນີ້ໄວ້ລ່ວງໜ້າ (ແຍກດ້ວຍຈຸດ)"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_masonry_block_default_template
@@ -5795,8 +5767,8 @@ msgid ""
 "Comprehensive tools for growing businesses. Optimize your processes and "
 "productivity across your team."
 msgstr ""
-"ເຄື່ອງມືຄົບວົງຈອນສຳລັບທຸລະກິດທີ່ກຳລັງເຕີບໃຫຍ່. ເພີ່ມປະສິດທິພາບຂະບວນການເຮັດວຽກ ແລະ ຜົນຜະລິດໃນທີມງານ"
-"ຂອງທ່ານ."
+"ເຄື່ອງມືຄົບວົງຈອນສຳລັບທຸລະກິດທີ່ກຳລັງເຕີບໃຫຍ່. ເພີ່ມປະສິດທິພາບຂະບວນການເຮັດວຽກ ແລະ "
+"ຜົນຜະລິດໃນທີມງານຂອງທ່ານ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_odoo_menu
@@ -5870,8 +5842,7 @@ msgstr "ຕົວເຊື່ອມຕໍ່"
 msgid ""
 "Consistent performance and uptime ensure efficient, reliable service with "
 "minimal interruptions and quick response times."
-msgstr ""
-"ປະສິດທິພາບທີ່ໝັ້ນຄົງ ແລະ ລະບົບທີ່ໃຊ້ງານໄດ້ຕະຫຼອດເວລາ ຮັບປະກັນການບໍລິການທີ່ເຊື່ອຖືໄດ້."
+msgstr "ປະສິດທິພາບທີ່ໝັ້ນຄົງ ແລະ ລະບົບທີ່ໃຊ້ງານໄດ້ຕະຫຼອດເວລາ ຮັບປະກັນການບໍລິການທີ່ເຊື່ອຖືໄດ້."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_landing_s_features
@@ -5939,8 +5910,7 @@ msgstr "ຕິດຕໍ່ພວກເຮົາ"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
 msgid "Contact us about anything related to our company or services."
-msgstr ""
-"ຕິດຕໍ່ພວກເຮົາກ່ຽວກັບເລື່ອງໃດກໍໄດ້ທີ່ກ່ຽວຂ້ອງກັບບໍລິສັດ ຫຼື ການບໍລິການຂອງພວກເຮົາ."
+msgstr "ຕິດຕໍ່ພວກເຮົາກ່ຽວກັບເລື່ອງໃດກໍໄດ້ທີ່ກ່ຽວຂ້ອງກັບບໍລິສັດ ຫຼື ການບໍລິການຂອງພວກເຮົາ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_contact
@@ -5958,8 +5928,8 @@ msgid ""
 "Contact us today to embark on your path to a healthier, more vibrant you. "
 "Your fitness journey begins here."
 msgstr ""
-"ຕິດຕໍ່ພວກເຮົາໃນມື້ນີ້ເພື່ອເລີ່ມຕົ້ນເສັ້ນທາງໄປສູ່ສຸຂະພາບທີ່ດີຂຶ້ນ ແລະ ສົດໃສກວ່າເກົ່າ. ການເລີ່ມຕົ້ນການອອກກຳລັງກາ"
-"ຍຂອງທ່ານເລີ່ມທີ່ນີ້."
+"ຕິດຕໍ່ພວກເຮົາໃນມື້ນີ້ເພື່ອເລີ່ມຕົ້ນເສັ້ນທາງໄປສູ່ສຸຂະພາບທີ່ດີຂຶ້ນ ແລະ ສົດໃສກວ່າເກົ່າ. "
+"ການເລີ່ມຕົ້ນການອອກກຳລັງກາຍຂອງທ່ານເລີ່ມທີ່ນີ້."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_visitor_view_search
@@ -6098,19 +6068,19 @@ msgid ""
 "data about site traffic and site interaction so that we can offer\n"
 "                            better site experiences and tools in the future."
 msgstr ""
-"ຄຸກກີ້ແມ່ນຂໍ້ຄວາມຂະໜາດນ້ອຍທີ່ສົ່ງໂດຍເຊີບເວີຂອງພວກເຮົາໄປຫາຄອມພິວເຕີ ຫຼື ອຸປະກອນຂອງທ່ານເມື່ອທ່ານເຂົ້າເຖິງ"
-"ການບໍລິການຂອງພວກເຮົາ.\n"
-"ພວກມັນຖືກເກັບໄວ້ໃນບຣາວເຊີຂອງທ່ານ ແລະ ສົ່ງຄືນໃຫ້ເຊີບເວີຂອງພວກເຮົາໃນພາຍຫຼັງ ເພື່ອໃຫ້ພວກເຮົາສາມາດສະ"
-"ໜອງເນື້ອຫາທີ່ກ່ຽວຂ້ອງໄດ້.\n"
+"ຄຸກກີ້ແມ່ນຂໍ້ຄວາມຂະໜາດນ້ອຍທີ່ສົ່ງໂດຍເຊີບເວີຂອງພວກເຮົາໄປຫາຄອມພິວເຕີ ຫຼື "
+"ອຸປະກອນຂອງທ່ານເມື່ອທ່ານເຂົ້າເຖິງການບໍລິການຂອງພວກເຮົາ.\n"
+"ພວກມັນຖືກເກັບໄວ້ໃນບຣາວເຊີຂອງທ່ານ ແລະ ສົ່ງຄືນໃຫ້ເຊີບເວີຂອງພວກເຮົາໃນພາຍຫຼັງ "
+"ເພື່ອໃຫ້ພວກເຮົາສາມາດສະໜອງເນື້ອຫາທີ່ກ່ຽວຂ້ອງໄດ້.\n"
 "ຫາກບໍ່ມີຄຸກກີ້, ການໃຊ້ເວັບຈະເປັນປະສົບການທີ່ຫຍຸ້ງຍາກຫຼາຍ.\n"
-"ພວກເຮົາໃຊ້ພວກມັນເພື່ອສະໜັບສະໜູນກິດຈະກຳຂອງທ່ານໃນເວັບໄຊທ໌ຂອງພວກເຮົາ. ຕົວຢ່າງ: ເຊດຊັນຂອງທ່ານ (ເພື່"
-"ອໃຫ້ທ່ານບໍ່ຕ້ອງເຂົ້າສູ່ລະບົບອີກຄັ້ງ) ຫຼື ກະຕ່າຊື້ເຄື່ອງຂອງທ່ານ.\n"
+"ພວກເຮົາໃຊ້ພວກມັນເພື່ອສະໜັບສະໜູນກິດຈະກຳຂອງທ່ານໃນເວັບໄຊທ໌ຂອງພວກເຮົາ. ຕົວຢ່າງ: ເຊດຊັນຂອງທ່ານ "
+"(ເພື່ອໃຫ້ທ່ານບໍ່ຕ້ອງເຂົ້າສູ່ລະບົບອີກຄັ້ງ) ຫຼື ກະຕ່າຊື້ເຄື່ອງຂອງທ່ານ.\n"
 "<br/>\n"
-"ຄຸກກີ້ຍັງຖືກໃຊ້ເພື່ອຊ່ວຍໃຫ້ພວກເຮົາເຂົ້າໃຈຄວາມມັກຂອງທ່ານໂດຍອີງໃສ່ກິດຈະກຳກ່ອນໜ້າ ຫຼື ປັດຈຸບັນຢູ່ໃນເວັບໄຊທ໌ຂອ"
-"ງພວກເຮົາ (ໜ້າທີ່ທ່ານໄດ້ເຂົ້າຊົມ), ພາສາ ແລະ ປະເທດຂອງທ່ານ, ເຊິ່ງຊ່ວຍໃຫ້ພວກເຮົາສາມາດສະໜອງການບໍລິກ"
-"ານທີ່ດີຂຶ້ນໃຫ້ແກ່ທ່ານ.\n"
-"ພວກເຮົາຍັງໃຊ້ຄຸກກີ້ເພື່ອຊ່ວຍພວກເຮົາລວບລວມຂໍ້ມູນສະຖິຕິກ່ຽວກັບການເຂົ້າຊົມເວັບໄຊທ໌ ແລະ ການໂຕ້ຕອບກັບເວັບໄຊ"
-"ທ໌ ເພື່ອໃຫ້ພວກເຮົາສາມາດສະເໜີປະສົບການ ແລະ ເຄື່ອງມືທີ່ດີຂຶ້ນໃນອະນາຄົດ."
+"ຄຸກກີ້ຍັງຖືກໃຊ້ເພື່ອຊ່ວຍໃຫ້ພວກເຮົາເຂົ້າໃຈຄວາມມັກຂອງທ່ານໂດຍອີງໃສ່ກິດຈະກຳກ່ອນໜ້າ ຫຼື "
+"ປັດຈຸບັນຢູ່ໃນເວັບໄຊທ໌ຂອງພວກເຮົາ (ໜ້າທີ່ທ່ານໄດ້ເຂົ້າຊົມ), ພາສາ ແລະ ປະເທດຂອງທ່ານ, "
+"ເຊິ່ງຊ່ວຍໃຫ້ພວກເຮົາສາມາດສະໜອງການບໍລິການທີ່ດີຂຶ້ນໃຫ້ແກ່ທ່ານ.\n"
+"ພວກເຮົາຍັງໃຊ້ຄຸກກີ້ເພື່ອຊ່ວຍພວກເຮົາລວບລວມຂໍ້ມູນສະຖິຕິກ່ຽວກັບການເຂົ້າຊົມເວັບໄຊທ໌ ແລະ "
+"ການໂຕ້ຕອບກັບເວັບໄຊທ໌ ເພື່ອໃຫ້ພວກເຮົາສາມາດສະເໜີປະສົບການ ແລະ ເຄື່ອງມືທີ່ດີຂຶ້ນໃນອະນາຄົດ."
 
 #. module: website
 #. odoo-javascript
@@ -6277,9 +6247,9 @@ msgid ""
 "levels. Combine headers, images, and text sections to build cohesive layouts "
 "quickly and efficiently."
 msgstr ""
-"ສ້າງໜ້າເວັບຕັ້ງແຕ່ເລີ່ມຕົ້ນໂດຍການລາກ ແລະ ວາງ Building blocks ທີ່ສາມາດປັບແຕ່ງໄດ້. ລະບົບນີ້ເຮັດໃຫ້ກ"
-"ານອອກແບບເວັບງ່າຍຂຶ້ນ, ເໝາະສົມກັບທຸກລະດັບທັກສະ. ສົມທົບສ່ວນຫົວ, ຮູບພາບ ແລະ ສ່ວນຂໍ້ຄວາມເພື່ອສ້າງຮູບແບ"
-"ບທີ່ສວຍງາມໄດ້ຢ່າງວ່ອງໄວ ແລະ ມີປະສິດທິພາບ."
+"ສ້າງໜ້າເວັບຕັ້ງແຕ່ເລີ່ມຕົ້ນໂດຍການລາກ ແລະ ວາງ Building blocks ທີ່ສາມາດປັບແຕ່ງໄດ້. "
+"ລະບົບນີ້ເຮັດໃຫ້ການອອກແບບເວັບງ່າຍຂຶ້ນ, ເໝາະສົມກັບທຸກລະດັບທັກສະ. ສົມທົບສ່ວນຫົວ, ຮູບພາບ ແລະ "
+"ສ່ວນຂໍ້ຄວາມເພື່ອສ້າງຮູບແບບທີ່ສວຍງາມໄດ້ຢ່າງວ່ອງໄວ ແລະ ມີປະສິດທິພາບ."
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_theme_ir_asset__create_uid
@@ -6312,8 +6282,8 @@ msgid ""
 "Created in 2021, the company is young and dynamic. Discover the composition "
 "of the team and their skills."
 msgstr ""
-"ບໍລິສັດສ້າງຕັ້ງຂຶ້ນໃນປີ 2021, ເປັນບໍລິສັດຮຸ່ນໃໝ່ທີ່ເຕັມໄປດ້ວຍພະລັງ. ເຮັດຄວາມຮູ້ຈັກກັບທີມງານ ແລະ ທັກສະຂອງພ"
-"ວກເຂົາ."
+"ບໍລິສັດສ້າງຕັ້ງຂຶ້ນໃນປີ 2021, ເປັນບໍລິສັດຮຸ່ນໃໝ່ທີ່ເຕັມໄປດ້ວຍພະລັງ. ເຮັດຄວາມຮູ້ຈັກກັບທີມງານ ແລະ "
+"ທັກສະຂອງພວກເຂົາ."
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_theme_ir_asset__create_date
@@ -6440,8 +6410,9 @@ msgid ""
 "Customer satisfaction is our priority. Our support team is always ready to "
 "assist, ensuring you have a smooth and successful experience."
 msgstr ""
-"ຄວາມເພິ່ງພໍໃຈຂອງລູກຄ້າແມ່ນບຸລິມະສິດຂອງພວກເຮົາ. ທີມງານຊ່ວຍເຫຼືອຂອງພວກເຮົາພ້ອມສະເໝີທີ່ຈະໃຫ້ການຊ່ວຍເຫຼື"
-"ອ, ເພື່ອຮັບປະກັນວ່າທ່ານຈະໄດ້ຮັບປະສົບການທີ່ສະດວກສະບາຍ ແລະ ປະສົບຜົນສຳເລັດ."
+"ຄວາມເພິ່ງພໍໃຈຂອງລູກຄ້າແມ່ນບຸລິມະສິດຂອງພວກເຮົາ. "
+"ທີມງານຊ່ວຍເຫຼືອຂອງພວກເຮົາພ້ອມສະເໝີທີ່ຈະໃຫ້ການຊ່ວຍເຫຼືອ, "
+"ເພື່ອຮັບປະກັນວ່າທ່ານຈະໄດ້ຮັບປະສົບການທີ່ສະດວກສະບາຍ ແລະ ປະສົບຜົນສຳເລັດ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_big_icons_subtitles
@@ -6509,8 +6480,7 @@ msgstr "ອັນຕະລາຍ"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
 msgid "Daniel ensures efficient daily operations and process optimization."
-msgstr ""
-"ທ່ານ Daniel ຮັບປະກັນການດຳເນີນງານປະຈຳວັນໃຫ້ມີປະສິດທິພາບ ແລະ ການປັບປຸງຂັ້ນຕອນໃຫ້ດີທີ່ສຸດ."
+msgstr "ທ່ານ Daniel ຮັບປະກັນການດຳເນີນງານປະຈຳວັນໃຫ້ມີປະສິດທິພາບ ແລະ ການປັບປຸງຂັ້ນຕອນໃຫ້ດີທີ່ສຸດ."
 
 #. module: website
 #. odoo-javascript
@@ -6721,16 +6691,15 @@ msgid ""
 "Delete the above image or replace it with a picture that illustrates your "
 "message. Click on the picture to change its <em>rounded corner</em> style."
 msgstr ""
-"ລຶບຮູບຂ້າງເທິງ ຫຼື ປ່ຽນແທນດ້ວຍຮູບທີ່ອະທິບາຍຂໍ້ຄວາມຂອງທ່ານ. ຄລິກທີ່ຮູບເພື່ອປ່ຽນຮູບແບບ <em>ມຸມມົນ</em> ຂ"
-"ອງມັນ."
+"ລຶບຮູບຂ້າງເທິງ ຫຼື ປ່ຽນແທນດ້ວຍຮູບທີ່ອະທິບາຍຂໍ້ຄວາມຂອງທ່ານ. ຄລິກທີ່ຮູບເພື່ອປ່ຽນຮູບແບບ <em>ມຸມມົນ</em> "
+"ຂອງມັນ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
 msgid ""
 "Delicate green tea scented with jasmine blossoms, providing a soothing and "
 "floral experience."
-msgstr ""
-"ຊາຂຽວທີ່ລະອຽດອ່ອນ ມີກິ່ນຫອມຂອງດອກມະລິ, ໃຫ້ປະສົບການທີ່ຜ່ອນຄາຍ ແລະ ມີກິ່ນຫອມຂອງດອກໄມ້."
+msgstr "ຊາຂຽວທີ່ລະອຽດອ່ອນ ມີກິ່ນຫອມຂອງດອກມະລິ, ໃຫ້ປະສົບການທີ່ຜ່ອນຄາຍ ແລະ ມີກິ່ນຫອມຂອງດອກໄມ້."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
@@ -6743,8 +6712,8 @@ msgid ""
 "Delivering tailored, innovative tools to help you overcome challenges and<br/"
 "> achieve your goals, ensuring your journey is fully supported."
 msgstr ""
-"ມອບເຄື່ອງມືນະວັດຕະກຳທີ່ຕອບໂຈທຍ໌ສະເພາະຕົວ ເພື່ອຊ່ວຍໃຫ້ທ່ານຜ່ານຜ່າສິ່ງທ້າທາຍ ແລະ<br/> ບັນລຸເປົ້າໝາຍຂອ"
-"ງທ່ານ, ພ້ອມຮັບປະກັນການສະໜັບສະໜູນຢ່າງເຕັມທີ່ໃນທຸກບາດກ້າວ."
+"ມອບເຄື່ອງມືນະວັດຕະກຳທີ່ຕອບໂຈທຍ໌ສະເພາະຕົວ ເພື່ອຊ່ວຍໃຫ້ທ່ານຜ່ານຜ່າສິ່ງທ້າທາຍ ແລະ<br/> "
+"ບັນລຸເປົ້າໝາຍຂອງທ່ານ, ພ້ອມຮັບປະກັນການສະໜັບສະໜູນຢ່າງເຕັມທີ່ໃນທຸກບາດກ້າວ."
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_controller_page__url_demo
@@ -6839,9 +6808,9 @@ msgid ""
 "customize and perfect for any web project, from corporate sites to personal "
 "blogs."
 msgstr ""
-"ອອກແບບແມ່ແບບ Odoo ໄດ້ຢ່າງງ່າຍດາຍດ້ວຍ HTML ທີ່ສະອາດ ແລະ Bootstrap CSS. ແມ່ແບບເຫຼົ່ານີ້ໃຫ້ການ"
-"ອອກແບບທີ່ຮອງຮັບທຸກໜ້າຈໍ, ເນັ້ນມືຖືເປັນຫຼັກ, ເຮັດໃຫ້ພວກມັນງ່າຍຕໍ່ການປັບແຕ່ງ ແລະ ເໝາະສຳລັບທຸກໂຄງການເວັ"
-"ບ, ຕັ້ງແຕ່ເວັບໄຊທ໌ບໍລິສັດໄປຈົນເຖິງບລັອກສ່ວນຕົວ."
+"ອອກແບບແມ່ແບບ Odoo ໄດ້ຢ່າງງ່າຍດາຍດ້ວຍ HTML ທີ່ສະອາດ ແລະ Bootstrap CSS. "
+"ແມ່ແບບເຫຼົ່ານີ້ໃຫ້ການອອກແບບທີ່ຮອງຮັບທຸກໜ້າຈໍ, ເນັ້ນມືຖືເປັນຫຼັກ, ເຮັດໃຫ້ພວກມັນງ່າຍຕໍ່ການປັບແຕ່ງ ແລະ "
+"ເໝາະສຳລັບທຸກໂຄງການເວັບ, ຕັ້ງແຕ່ເວັບໄຊທ໌ບໍລິສັດໄປຈົນເຖິງບລັອກສ່ວນຕົວ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_table_of_content
@@ -7035,8 +7004,7 @@ msgstr "ຄົ້ນຫາເພີ່ມເຕີມ"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_media_list
 msgid "Discover more <i class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
-msgstr ""
-"ຄົ້ນພົບເພີ່ມເຕີມ <i class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
+msgstr "ຄົ້ນພົບເພີ່ມເຕີມ <i class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_services_s_image_text
@@ -7044,8 +7012,8 @@ msgid ""
 "Discover our comprehensive marketing service designed to amplify your "
 "brand's reach and impact."
 msgstr ""
-"ຄົ້ນພົບບໍລິການການຕະຫຼາດທີ່ຄົບວົງຈອນຂອງພວກເຮົາ ທີ່ອອກແບບມາເພື່ອຂະຫຍາຍການເຂົ້າເຖິງ ແລະ ຜົນກະທົບຂອງແ"
-"ບຣນຂອງທ່ານ."
+"ຄົ້ນພົບບໍລິການການຕະຫຼາດທີ່ຄົບວົງຈອນຂອງພວກເຮົາ ທີ່ອອກແບບມາເພື່ອຂະຫຍາຍການເຂົ້າເຖິງ ແລະ "
+"ຜົນກະທົບຂອງແບຣນຂອງທ່ານ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_big_icons_subtitles
@@ -7319,16 +7287,14 @@ msgstr "ເຈາະເລິກເຖິງຄວາມສາມາດຂອງ
 msgid ""
 "Do not copy/paste code you do not understand, this could put your data at "
 "risk."
-msgstr ""
-"ຢ່າຄັດລອກ/ວາງລະຫັດທີ່ທ່ານບໍ່ເຂົ້າໃຈ, ນີ້ອາດຈະເຮັດໃຫ້ຂໍ້ມູນຂອງທ່ານມີຄວາມສ່ຽງ."
+msgstr "ຢ່າຄັດລອກ/ວາງລະຫັດທີ່ທ່ານບໍ່ເຂົ້າໃຈ, ນີ້ອາດຈະເຮັດໃຫ້ຂໍ້ມູນຂອງທ່ານມີຄວາມສ່ຽງ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
 msgid ""
 "Do you need specific information? Our specialists will help you with "
 "pleasure."
-msgstr ""
-"ທ່ານຕ້ອງການຂໍ້ມູນສະເພາະບໍ່? ຜູ້ຊ່ຽວຊານຂອງພວກເຮົາຈະຊ່ວຍທ່ານດ້ວຍຄວາມເຕັມໃຈ."
+msgstr "ທ່ານຕ້ອງການຂໍ້ມູນສະເພາະບໍ່? ຜູ້ຊ່ຽວຊານຂອງພວກເຮົາຈະຊ່ວຍທ່ານດ້ວຍຄວາມເຕັມໃຈ."
 
 #. module: website
 #. odoo-javascript
@@ -7549,8 +7515,9 @@ msgid ""
 "                        <br/>\n"
 "                        <br/>"
 msgstr ""
-"ແຕ່ລະລາຍການໃນຄໍເລັກຊັນຂອງພວກເຮົາໄດ້ຖືກຈັດເປັນກຸ່ມຕາມປະເພດ ເພື່ອໃຫ້ປະສົບການການເບິ່ງຂອງທ່ານສະດວກສ"
-"ະບາຍ. ລອງເບິ່ງ ແລະ ເຂົ້າສູ່ໂລກຕ່າງໆ ທີ່ພວກເຮົາໄດ້ຄັດສັນມາໃຫ້ທ່ານ.\n"
+"ແຕ່ລະລາຍການໃນຄໍເລັກຊັນຂອງພວກເຮົາໄດ້ຖືກຈັດເປັນກຸ່ມຕາມປະເພດ "
+"ເພື່ອໃຫ້ປະສົບການການເບິ່ງຂອງທ່ານສະດວກສະບາຍ. ລອງເບິ່ງ ແລະ ເຂົ້າສູ່ໂລກຕ່າງໆ "
+"ທີ່ພວກເຮົາໄດ້ຄັດສັນມາໃຫ້ທ່ານ.\n"
 "                        <br/>\n"
 "                        <br/>"
 
@@ -7561,8 +7528,8 @@ msgid ""
 "and we provide detailed release notes to keep you informed of new features "
 "and improvements."
 msgstr ""
-"ແຕ່ລະການອັບເດດໄດ້ຖືກທົດສອບຢ່າງລະອຽດເພື່ອຮັບປະກັນຄວາມເຂົ້າກັນໄດ້ ແລະ ຄວາມໜ້າເຊື່ອຖື, ແລະ ພວກເຮົາໄ"
-"ດ້ໃຫ້ລາຍລະອຽດການປ່ຽນແປງເພື່ອແຈ້ງໃຫ້ທ່ານຊາບກ່ຽວກັບຄຸນລັກສະນະໃໝ່ ແລະ ການປັບປຸງຕ່າງໆ."
+"ແຕ່ລະການອັບເດດໄດ້ຖືກທົດສອບຢ່າງລະອຽດເພື່ອຮັບປະກັນຄວາມເຂົ້າກັນໄດ້ ແລະ ຄວາມໜ້າເຊື່ອຖື, ແລະ "
+"ພວກເຮົາໄດ້ໃຫ້ລາຍລະອຽດການປ່ຽນແປງເພື່ອແຈ້ງໃຫ້ທ່ານຊາບກ່ຽວກັບຄຸນລັກສະນະໃໝ່ ແລະ ການປັບປຸງຕ່າງໆ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
@@ -7604,8 +7571,7 @@ msgstr "ຫູຟັງໄຮ້ສາຍ EchoTunes"
 msgid ""
 "EchoTunes comes with customizable ear tip sizes that provide a secure and "
 "comfortable fit."
-msgstr ""
-"EchoTunes ມາພ້ອມກັບຂະໜາດຈຸກຫູຟັງທີ່ສາມາດປັບແຕ່ງໄດ້ ເຊິ່ງໃຫ້ຄວາມແໜ້ນໜາ ແລະ ໃສ່ສະບາຍ."
+msgstr "EchoTunes ມາພ້ອມກັບຂະໜາດຈຸກຫູຟັງທີ່ສາມາດປັບແຕ່ງໄດ້ ເຊິ່ງໃຫ້ຄວາມແໜ້ນໜາ ແລະ ໃສ່ສະບາຍ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cards_grid
@@ -7761,8 +7727,8 @@ msgid ""
 "Elevate your living space with furniture that blends modern aesthetics and "
 "classic charm, crafted to bring both comfort and style to your home."
 msgstr ""
-"ຍົກລະດັບພື້ນທີ່ຢູ່ອາໄສຂອງທ່ານດ້ວຍເຟີນິເຈີທີ່ປະສົມປະສານຄວາມງາມທັນສະໄໝ ແລະ ສະເໜ່ຄລາດສິກ, ສ້າງຂຶ້ນເພື່ອມ"
-"ອບທັງຄວາມສະດວກສະບາຍ ແລະ ຄວາມສວຍງາມໃຫ້ແກ່ເຮືອນຂອງທ່ານ."
+"ຍົກລະດັບພື້ນທີ່ຢູ່ອາໄສຂອງທ່ານດ້ວຍເຟີນິເຈີທີ່ປະສົມປະສານຄວາມງາມທັນສະໄໝ ແລະ ສະເໜ່ຄລາດສິກ, "
+"ສ້າງຂຶ້ນເພື່ອມອບທັງຄວາມສະດວກສະບາຍ ແລະ ຄວາມສວຍງາມໃຫ້ແກ່ເຮືອນຂອງທ່ານ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_bento_grid
@@ -7785,8 +7751,8 @@ msgid ""
 msgstr ""
 "ຍົກລະດັບພື້ນທີ່ການຢູ່ອາໄສຂອງທ່ານດ້ວຍເຟີນີເຈີທີ່ປະສົມປະສານຄວາມສວຍງາມທັນສະໄໝ ແລະ ສະເໜ່ແບບຄລາສສິກ, "
 "ສ້າງສັນມາເພື່ອມອບທັງຄວາມສະບາຍ ແລະ ຮູບແບບໃຫ້ກັບເຮືອນຂອງທ່ານ.\n"
-"                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"
-"<br/><br/><br/><br/><br/>"
+"                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/"
+"><br/><br/><br/><br/><br/>"
 
 #. module: website
 #. odoo-javascript
@@ -7810,8 +7776,9 @@ msgid ""
 "beginnings. What started as a simple idea in a garage has evolved into an "
 "innovative force in the industry."
 msgstr ""
-"ເລີ່ມຕົ້ນການເດີນທາງຜ່ານການເວລາ ໃນຂະນະທີ່ພວກເຮົາແບ່ງປັນເລື່ອງລາວຂອງຈຸດເລີ່ມຕົ້ນທີ່ລຽບງ່າຍຂອງພວກເຮົ"
-"າ. ສິ່ງທີ່ເລີ່ມຕົ້ນຈາກຄວາມຄິດງ່າຍໆໃນໂຮງລົດ ໄດ້ພັດທະນາກາຍເປັນກຳລັງແຫ່ງນະວັດຕະກຳໃນອຸດສາຫະກຳ."
+"ເລີ່ມຕົ້ນການເດີນທາງຜ່ານການເວລາ "
+"ໃນຂະນະທີ່ພວກເຮົາແບ່ງປັນເລື່ອງລາວຂອງຈຸດເລີ່ມຕົ້ນທີ່ລຽບງ່າຍຂອງພວກເຮົາ. "
+"ສິ່ງທີ່ເລີ່ມຕົ້ນຈາກຄວາມຄິດງ່າຍໆໃນໂຮງລົດ ໄດ້ພັດທະນາກາຍເປັນກຳລັງແຫ່ງນະວັດຕະກຳໃນອຸດສາຫະກຳ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -7834,8 +7801,8 @@ msgid ""
 "Empowering teams to collaborate and innovate, creating impactful solutions "
 "that drive business growth and deliver lasting value."
 msgstr ""
-"ເສີມສ້າງຄວາມສາມາດໃຫ້ທີມງານໃນການຮ່ວມມື ແລະ ສ້າງນະວັດຕະກຳ, ສ້າງວິທີແກ້ໄຂທີ່ມີປະສິດທິພາບເພື່ອຊຸກຍູ້ການ"
-"ເຕີບໂຕຂອງທຸລະກິດ ແລະ ມອບຄຸນຄ່າທີ່ຍືນຍົງ."
+"ເສີມສ້າງຄວາມສາມາດໃຫ້ທີມງານໃນການຮ່ວມມື ແລະ ສ້າງນະວັດຕະກຳ, "
+"ສ້າງວິທີແກ້ໄຂທີ່ມີປະສິດທິພາບເພື່ອຊຸກຍູ້ການເຕີບໂຕຂອງທຸລະກິດ ແລະ ມອບຄຸນຄ່າທີ່ຍືນຍົງ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_landing_s_features
@@ -7911,14 +7878,13 @@ msgid ""
 "Enhance your experience with our user-focused designs, ensuring you get the "
 "best value.<br/>"
 msgstr ""
-"ຍົກລະດັບປະສົບການຂອງທ່ານດ້ວຍການອອກແບບທີ່ເນັ້ນຜູ້ໃຊ້ເປັນຫຼັກ, ເພື່ອຮັບປະກັນວ່າທ່ານຈະໄດ້ຮັບຄຸນຄ່າທີ່ດີທີ່ສຸ"
-"ດ.<br/>"
+"ຍົກລະດັບປະສົບການຂອງທ່ານດ້ວຍການອອກແບບທີ່ເນັ້ນຜູ້ໃຊ້ເປັນຫຼັກ, ເພື່ອຮັບປະກັນວ່າທ່ານຈະໄດ້ຮັບຄຸນຄ່າທີ່ດີທີ່ສຸດ."
+"<br/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_bento_grid_avatars
 msgid "Enjoy 30% on all our wooden desks and elevate your workspace."
-msgstr ""
-"ເພີດເພີນກັບສ່ວນຫຼຸດ 30% ສຳລັບໂຕະໄມ້ທຸກລຸ້ນ ແລະ ຍົກລະດັບພື້ນທີ່ເຮັດວຽກຂອງທ່ານ."
+msgstr "ເພີດເພີນກັບສ່ວນຫຼຸດ 30% ສຳລັບໂຕະໄມ້ທຸກລຸ້ນ ແລະ ຍົກລະດັບພື້ນທີ່ເຮັດວຽກຂອງທ່ານ."
 
 #. module: website
 #. odoo-javascript
@@ -7986,8 +7952,7 @@ msgstr "ວັນທີ ຫຼື ເວລາທີ່ປ້ອນບໍ່ຖ�
 #: code:addons/website/static/src/builder/plugins/form/form_option_plugin.js:0
 msgid ""
 "Entered date or time is not correct! It must be after %(start)s (%(format)s)."
-msgstr ""
-"ວັນທີ ຫຼື ເວລາທີ່ປ້ອນບໍ່ຖືກຕ້ອງ! ມັນຈະຕ້ອງແມ່ນຫຼັງຈາກ %(start)s (%(format)s)."
+msgstr "ວັນທີ ຫຼື ເວລາທີ່ປ້ອນບໍ່ຖືກຕ້ອງ! ມັນຈະຕ້ອງແມ່ນຫຼັງຈາກ %(start)s (%(format)s)."
 
 #. module: website
 #. odoo-javascript
@@ -7995,8 +7960,7 @@ msgstr ""
 msgid ""
 "Entered date or time is not correct! It must be after or equal to %(start)s "
 "(%(format)s)."
-msgstr ""
-"ວັນທີ ຫຼື ເວລາທີ່ປ້ອນບໍ່ຖືກຕ້ອງ! ມັນຈະຕ້ອງແມ່ນຫຼັງຈາກ ຫຼື ເທົ່າກັບ %(start)s (%(format)s)."
+msgstr "ວັນທີ ຫຼື ເວລາທີ່ປ້ອນບໍ່ຖືກຕ້ອງ! ມັນຈະຕ້ອງແມ່ນຫຼັງຈາກ ຫຼື ເທົ່າກັບ %(start)s (%(format)s)."
 
 #. module: website
 #. odoo-javascript
@@ -8004,8 +7968,7 @@ msgstr ""
 msgid ""
 "Entered date or time is not correct! It must be before %(start)s (%"
 "(format)s)."
-msgstr ""
-"ວັນທີ ຫຼື ເວລາທີ່ປ້ອນບໍ່ຖືກຕ້ອງ! ມັນຈະຕ້ອງແມ່ນກ່ອນ %(start)s (%(format)s)."
+msgstr "ວັນທີ ຫຼື ເວລາທີ່ປ້ອນບໍ່ຖືກຕ້ອງ! ມັນຈະຕ້ອງແມ່ນກ່ອນ %(start)s (%(format)s)."
 
 #. module: website
 #. odoo-javascript
@@ -8013,8 +7976,7 @@ msgstr ""
 msgid ""
 "Entered date or time is not correct! It must be before or equal to %(start)s "
 "(%(format)s)."
-msgstr ""
-"ວັນທີ ຫຼື ເວລາທີ່ປ້ອນບໍ່ຖືກຕ້ອງ! ມັນຈະຕ້ອງແມ່ນກ່ອນ ຫຼື ເທົ່າກັບ %(start)s (%(format)s)."
+msgstr "ວັນທີ ຫຼື ເວລາທີ່ປ້ອນບໍ່ຖືກຕ້ອງ! ມັນຈະຕ້ອງແມ່ນກ່ອນ ຫຼື ເທົ່າກັບ %(start)s (%(format)s)."
 
 #. module: website
 #. odoo-javascript
@@ -8030,8 +7992,7 @@ msgstr ""
 #: code:addons/website/static/src/builder/plugins/form/form_option_plugin.js:0
 msgid ""
 "Entered date or time is not correct! It must not be %(start)s (%(format)s)."
-msgstr ""
-"ວັນທີ ຫຼື ເວລາທີ່ປ້ອນບໍ່ຖືກຕ້ອງ! ມັນຈະຕ້ອງບໍ່ແມ່ນ %(start)s (%(format)s)."
+msgstr "ວັນທີ ຫຼື ເວລາທີ່ປ້ອນບໍ່ຖືກຕ້ອງ! ມັນຈະຕ້ອງບໍ່ແມ່ນ %(start)s (%(format)s)."
 
 #. module: website
 #. odoo-javascript
@@ -8116,8 +8077,8 @@ msgid ""
 "Every groundbreaking innovation, whether meticulously engineered or born "
 "from spontaneous creativity, contains stories waiting to be discovered."
 msgstr ""
-"ທຸກນະວັດຕະກຳທີ່ລ້ຳສະໄໝ, ບໍ່ວ່າຈະຖືກສ້າງຂຶ້ນຢ່າງລະອຽດ ຫຼື ເກີດຈາກຄວາມຄິດສ້າງສັນ, ລ້ວນແຕ່ມີເລື່ອງລາວທີ່ລໍຖ້"
-"າການຄົ້ນພົບ."
+"ທຸກນະວັດຕະກຳທີ່ລ້ຳສະໄໝ, ບໍ່ວ່າຈະຖືກສ້າງຂຶ້ນຢ່າງລະອຽດ ຫຼື ເກີດຈາກຄວາມຄິດສ້າງສັນ, "
+"ລ້ວນແຕ່ມີເລື່ອງລາວທີ່ລໍຖ້າການຄົ້ນພົບ."
 
 #. module: website
 #. odoo-javascript
@@ -8173,8 +8134,8 @@ msgid ""
 "Experience a digital transformation like never before with our range of "
 "innovative solutions, designed to illuminate your brand's potential."
 msgstr ""
-"ສຳຜັດກັບການປ່ຽນແປງທາງດິຈິຕອນຢ່າງທີ່ບໍ່ເຄີຍມີມາກ່ອນດ້ວຍວິທີແກ້ໄຂນະວັດຕະກຳທີ່ຫຼາກຫຼາຍຂອງພວກເຮົາ, ເຊິ່ງອອ"
-"ກແບບມາເພື່ອສ່ອງແສງໃຫ້ເຫັນທ່າແຮງຂອງແບຣນຂອງທ່ານ."
+"ສຳຜັດກັບການປ່ຽນແປງທາງດິຈິຕອນຢ່າງທີ່ບໍ່ເຄີຍມີມາກ່ອນດ້ວຍວິທີແກ້ໄຂນະວັດຕະກຳທີ່ຫຼາກຫຼາຍຂອງພວກເຮົາ, "
+"ເຊິ່ງອອກແບບມາເພື່ອສ່ອງແສງໃຫ້ເຫັນທ່າແຮງຂອງແບຣນຂອງທ່ານ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_striped_top
@@ -8187,8 +8148,8 @@ msgid ""
 "Experience the power of our software without breaking the bank – choose a "
 "plan that suits you best and start unlocking its full potential today."
 msgstr ""
-"ສຳຜັດກັບປະສິດທິພາບຂອງຊອບແວຂອງພວກເຮົາໃນລາຄາທີ່ປະຢັດ – ເລືອກແຜນທີ່ເໝາະສົມກັບທ່ານທີ່ສຸດ ແລະ ເລີ່ມປົດ"
-"ປ່ອຍທ່າແຮງທັງໝົດໄດ້ໃນມື້ນີ້."
+"ສຳຜັດກັບປະສິດທິພາບຂອງຊອບແວຂອງພວກເຮົາໃນລາຄາທີ່ປະຢັດ – ເລືອກແຜນທີ່ເໝາະສົມກັບທ່ານທີ່ສຸດ ແລະ "
+"ເລີ່ມປົດປ່ອຍທ່າແຮງທັງໝົດໄດ້ໃນມື້ນີ້."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_picture
@@ -8223,8 +8184,8 @@ msgid ""
 "functional teams and delivering successful outcomes with a strategic "
 "approach."
 msgstr ""
-"ມີປະສົບການໃນການບໍລິຫານໂຄງການທີ່ມີປະສິດທິພາບ, ຊ່ຽວຊານໃນການນຳພາທີມງານຂ້າມສາຍງານ ແລະ ສ້າງຜົນສຳ"
-"ເລັດດ້ວຍແນວທາງທາງກົນລະຍຸດ."
+"ມີປະສົບການໃນການບໍລິຫານໂຄງການທີ່ມີປະສິດທິພາບ, ຊ່ຽວຊານໃນການນຳພາທີມງານຂ້າມສາຍງານ ແລະ "
+"ສ້າງຜົນສຳເລັດດ້ວຍແນວທາງທາງກົນລະຍຸດ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
@@ -8250,8 +8211,8 @@ msgid ""
 "Explain the benefits you offer. <br/>Don't write about products or services "
 "here, write about solutions."
 msgstr ""
-"ອະທິບາຍຜົນປະໂຫຍດທີ່ທ່ານສະເໜີ. <br/>ຢ່າຂຽນກ່ຽວກັບຜະລິດຕະພັນ ຫຼື ການບໍລິການຢູ່ບ່ອນນີ້, ໃຫ້ຂຽນກ່ຽວກັບວິທີ"
-"ການແກ້ໄຂ."
+"ອະທິບາຍຜົນປະໂຫຍດທີ່ທ່ານສະເໜີ. <br/>ຢ່າຂຽນກ່ຽວກັບຜະລິດຕະພັນ ຫຼື ການບໍລິການຢູ່ບ່ອນນີ້, "
+"ໃຫ້ຂຽນກ່ຽວກັບວິທີການແກ້ໄຂ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_links
@@ -8275,9 +8236,9 @@ msgid ""
 "achieve excellence, we focus on what truly matters to our customers. <br/"
 "><br/> Begin by identifying their needs and exceed their expectations."
 msgstr ""
-"ສຳຫຼວດເບິ່ງວ່າວິທີແກ້ໄຂທີ່ທັນສະໄໝຂອງພວກເຮົາກຳນົດມາດຕະຖານອຸດສາຫະກຳຄືນໃໝ່ແນວໃດ. ເພື່ອບັນລຸຄວາມເປັນເ"
-"ລີດ, ພວກເຮົາເນັ້ນໃສ່ສິ່ງທີ່ສຳຄັນແທ້ໆສຳລັບລູກຄ້າຂອງພວກເຮົາ. <br/><br/> ເລີ່ມຕົ້ນໂດຍການລະບຸຄວາມຕ້ອງກ"
-"ານຂອງພວກເຂົາ ແລະ ເຮັດໃຫ້ໄດ້ເກີນຄວາມຄາດຫວັງ."
+"ສຳຫຼວດເບິ່ງວ່າວິທີແກ້ໄຂທີ່ທັນສະໄໝຂອງພວກເຮົາກຳນົດມາດຕະຖານອຸດສາຫະກຳຄືນໃໝ່ແນວໃດ. "
+"ເພື່ອບັນລຸຄວາມເປັນເລີດ, ພວກເຮົາເນັ້ນໃສ່ສິ່ງທີ່ສຳຄັນແທ້ໆສຳລັບລູກຄ້າຂອງພວກເຮົາ. <br/><br/> "
+"ເລີ່ມຕົ້ນໂດຍການລະບຸຄວາມຕ້ອງການຂອງພວກເຂົາ ແລະ ເຮັດໃຫ້ໄດ້ເກີນຄວາມຄາດຫວັງ."
 
 #. module: website
 #. odoo-javascript
@@ -8293,16 +8254,15 @@ msgid ""
 "capture the essence of our craftsmanship, innovation, and dedication to "
 "excellence."
 msgstr ""
-"ສຳຫຼວດຄັງຮູບທີ່ໜ້າສົນໃຈຂອງພວກເຮົາ, ການເດີນທາງດ້ວຍພາບທີ່ສະແດງເຖິງຜົນງານທີ່ດີທີ່ສຸດ ແລະ ໂຄງການສ້າງສັນ"
-"ຂອງພວກເຮົາ. ດື່ມດ່ຳໄປກັບຄໍເລັກຊັນຮູບພາບທີ່ຖ່າຍທອດເນື້ອແທ້ຂອງຝີມື, ນະວັດຕະກຳ, ແລະ ຄວາມຕັ້ງໃຈສູ່ຄວາມເ"
-"ປັນເລີດຂອງພວກເຮົາ."
+"ສຳຫຼວດຄັງຮູບທີ່ໜ້າສົນໃຈຂອງພວກເຮົາ, ການເດີນທາງດ້ວຍພາບທີ່ສະແດງເຖິງຜົນງານທີ່ດີທີ່ສຸດ ແລະ "
+"ໂຄງການສ້າງສັນຂອງພວກເຮົາ. ດື່ມດ່ຳໄປກັບຄໍເລັກຊັນຮູບພາບທີ່ຖ່າຍທອດເນື້ອແທ້ຂອງຝີມື, ນະວັດຕະກຳ, ແລະ "
+"ຄວາມຕັ້ງໃຈສູ່ຄວາມເປັນເລີດຂອງພວກເຮົາ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
 msgid ""
 "Explore our curated selection of coffee, tea, and more. Delight in every sip!"
-msgstr ""
-"ສຳຫຼວດລາຍການກາເຟ, ຊາ, ແລະ ອື່ນໆ ທີ່ພວກເຮົາຄັດສັນມາ. ເພີດເພີນໄປກັບທຸກໆຈອກ!"
+msgstr "ສຳຫຼວດລາຍການກາເຟ, ຊາ, ແລະ ອື່ນໆ ທີ່ພວກເຮົາຄັດສັນມາ. ເພີດເພີນໄປກັບທຸກໆຈອກ!"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_banner_product
@@ -8334,6 +8294,12 @@ msgstr "ມຸມມອງສ່ວນຂະຫຍາຍ"
 #: model:ir.model.fields,field_description:website.field_website_page__xml_id
 msgid "External ID"
 msgstr "ໄອດີພາຍນອກ"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "External ID can not be loaded: %(error)s (website: %(website_id)s)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -8871,8 +8837,8 @@ msgid ""
 "Form action label. Ex: crm.lead could be 'Send an e-mail' and project.issue "
 "could be 'Create an Issue'."
 msgstr ""
-"ປ້າຍຊື່ການປະຕິບັດຂອງແບບຟອມ. ຕົວຢ່າງ: crm.lead ສາມາດເປັນ 'ສົ່ງອີເມລ' ແລະ project.issue ສາ"
-"ມາດເປັນ 'ສ້າງບັນຫາ'."
+"ປ້າຍຊື່ການປະຕິບັດຂອງແບບຟອມ. ຕົວຢ່າງ: crm.lead ສາມາດເປັນ 'ສົ່ງອີເມລ' ແລະ project.issue "
+"ສາມາດເປັນ 'ສ້າງບັນຫາ'."
 
 #. module: website
 #. odoo-javascript
@@ -8903,8 +8869,7 @@ msgid ""
 "strategies."
 msgstr ""
 "ຜູ້ກໍ່ຕັ້ງ ແລະ ຫົວໜ້າຝ່າຍວິໄສທັດ, Tony ແມ່ນກຳລັງຂັບເຄື່ອນທີ່ຢູ່ເບື້ອງຫຼັງຂອງບໍລິສັດ. ເພົາມັກ\n"
-"                                ທີ່ຊິໄດ້ລົງມືເຮັດດ້ວຍຕົນເອງໂດຍການເຂົ້າຮ່ວມໃນການພັດທະນາຊອບແ"
-"ວ,\n"
+"                                ທີ່ຊິໄດ້ລົງມືເຮັດດ້ວຍຕົນເອງໂດຍການເຂົ້າຮ່ວມໃນການພັດທະນາຊອບແວ,\n"
 "                                ການຕະຫຼາດ, ແລະ ກົນລະຍຸດປະສົບການລູກຄ້າ."
 
 #. module: website
@@ -8914,8 +8879,8 @@ msgid ""
 "He loves to keep his hands full by participating in the development of the "
 "software, marketing, and customer experience strategies."
 msgstr ""
-"ຜູ້ກໍ່ຕັ້ງ ແລະ ຫົວໜ້າຝ່າຍວິໄສທັດ, Tony ຄືແຮງຜັກດັນຫຼັກຂອງບໍລິສັດ. ເຂົາມັກທີ່ຈະມີສ່ວນຮ່ວມໃນການພັດທະນາຊອບແ"
-"ວ, ການຕະຫຼາດ ແລະ ກົນລະຍຸດປະສົບການຂອງລູກຄ້າ."
+"ຜູ້ກໍ່ຕັ້ງ ແລະ ຫົວໜ້າຝ່າຍວິໄສທັດ, Tony ຄືແຮງຜັກດັນຫຼັກຂອງບໍລິສັດ. "
+"ເຂົາມັກທີ່ຈະມີສ່ວນຮ່ວມໃນການພັດທະນາຊອບແວ, ການຕະຫຼາດ ແລະ ກົນລະຍຸດປະສົບການຂອງລູກຄ້າ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_team_s_media_list
@@ -8924,8 +8889,8 @@ msgid ""
 "hands full by participating in the development of the software, marketing, "
 "and UX strategies."
 msgstr ""
-"ຜູ້ກໍ່ຕັ້ງ, Tony ຄືແຮງຜັກດັນຫຼັກຂອງບໍລິສັດ. ເຂົາມັກທີ່ຈະມີສ່ວນຮ່ວມໃນການພັດທະນາຊອບແວ, ການຕະຫຼາດ ແລະ ກົ"
-"ນລະຍຸດ UX."
+"ຜູ້ກໍ່ຕັ້ງ, Tony ຄືແຮງຜັກດັນຫຼັກຂອງບໍລິສັດ. ເຂົາມັກທີ່ຈະມີສ່ວນຮ່ວມໃນການພັດທະນາຊອບແວ, ການຕະຫຼາດ ແລະ "
+"ກົນລະຍຸດ UX."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_team_s_image_text
@@ -8934,8 +8899,8 @@ msgid ""
 "hands full by participating in the development of the software, marketing, "
 "and customer experience."
 msgstr ""
-"ຜູ້ກໍ່ຕັ້ງ, Tony ຄືແຮງຜັກດັນຫຼັກຂອງບໍລິສັດ. ເຂົາມັກທີ່ຈະມີສ່ວນຮ່ວມໃນການພັດທະນາຊອບແວ, ການຕະຫຼາດ ແລະ ປ"
-"ະສົບການຂອງລູກຄ້າ."
+"ຜູ້ກໍ່ຕັ້ງ, Tony ຄືແຮງຜັກດັນຫຼັກຂອງບໍລິສັດ. ເຂົາມັກທີ່ຈະມີສ່ວນຮ່ວມໃນການພັດທະນາຊອບແວ, ການຕະຫຼາດ ແລະ "
+"ປະສົບການຂອງລູກຄ້າ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_tabs_images
@@ -8991,8 +8956,8 @@ msgid ""
 "From SEO to social media, we create campaigns that not only get you noticed "
 "but also drive engagement and conversions."
 msgstr ""
-"ຕັ້ງແຕ່ SEO ຈົນເຖິງສື່ສັງຄົມອອນລາຍ, ພວກເຮົາສ້າງແຄມເປນທີ່ບໍ່ພຽງແຕ່ເຮັດໃຫ້ທ່ານເປັນທີ່ຮູ້ຈັກ ແຕ່ຍັງຊ່ວຍເພີ່ມກາ"
-"ນມີສ່ວນຮ່ວມ ແລະ ການປ່ຽນເປັນຍອດຂາຍ."
+"ຕັ້ງແຕ່ SEO ຈົນເຖິງສື່ສັງຄົມອອນລາຍ, ພວກເຮົາສ້າງແຄມເປນທີ່ບໍ່ພຽງແຕ່ເຮັດໃຫ້ທ່ານເປັນທີ່ຮູ້ຈັກ "
+"ແຕ່ຍັງຊ່ວຍເພີ່ມການມີສ່ວນຮ່ວມ ແລະ ການປ່ຽນເປັນຍອດຂາຍ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
@@ -9013,17 +8978,16 @@ msgid ""
 "digital landscape, we'll guide you through a strategic process that ensures "
 "your brand remains relevant and resonates with your audience."
 msgstr ""
-"ຕັ້ງແຕ່ການຟື້ນຟູເອກະລັກທາງສາຍຕາ ໄປຈົນເຖິງການປັບປ່ຽນການສື່ສານຂອງທ່ານໃຫ້ເຂົ້າກັບຍຸກດິຈິຕອນ, ພວກເຮົາຈະ"
-"ນຳພາທ່ານຜ່ານຂະບວນການທາງກົນລະຍຸດເພື່ອໃຫ້ແນ່ໃຈວ່າແບຣນຂອງທ່ານຍັງຄົງທັນສະໄໝ ແລະ ເຂົ້າເຖິງກຸ່ມເປົ້າໝາ"
-"ຍ."
+"ຕັ້ງແຕ່ການຟື້ນຟູເອກະລັກທາງສາຍຕາ ໄປຈົນເຖິງການປັບປ່ຽນການສື່ສານຂອງທ່ານໃຫ້ເຂົ້າກັບຍຸກດິຈິຕອນ, "
+"ພວກເຮົາຈະນຳພາທ່ານຜ່ານຂະບວນການທາງກົນລະຍຸດເພື່ອໃຫ້ແນ່ໃຈວ່າແບຣນຂອງທ່ານຍັງຄົງທັນສະໄໝ ແລະ "
+"ເຂົ້າເຖິງກຸ່ມເປົ້າໝາຍ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
 msgid ""
 "From seminars to team building activities, we offer a wide choice of events "
 "to organize."
-msgstr ""
-"ຕັ້ງແຕ່ການສຳມະນາໄປຈົນເຖິງກິດຈະກຳສ້າງທີມ, ພວກເຮົາມີທາງເລືອກໃນການຈັດງານທີ່ຫຼາກຫຼາຍ."
+msgstr "ຕັ້ງແຕ່ການສຳມະນາໄປຈົນເຖິງກິດຈະກຳສ້າງທີມ, ພວກເຮົາມີທາງເລືອກໃນການຈັດງານທີ່ຫຼາກຫຼາຍ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cards_soft
@@ -9032,8 +8996,8 @@ msgid ""
 "way, ensuring you feel confident in your choices and that your project is a "
 "success."
 msgstr ""
-"ຕັ້ງແຕ່ຂັ້ນຕອນເລີ່ມຕົ້ນຈົນເຖິງການສຳເລັດ, ພວກເຮົາໃຫ້ການສະໜັບສະໜູນໃນທຸກໆຂັ້ນຕອນ ເພື່ອໃຫ້ທ່ານໝັ້ນໃຈໃນການຕັ"
-"ດສິນໃຈ ແລະ ເພື່ອໃຫ້ໂຄງການຂອງທ່ານປະສົບຄວາມສຳເລັດ."
+"ຕັ້ງແຕ່ຂັ້ນຕອນເລີ່ມຕົ້ນຈົນເຖິງການສຳເລັດ, ພວກເຮົາໃຫ້ການສະໜັບສະໜູນໃນທຸກໆຂັ້ນຕອນ "
+"ເພື່ອໃຫ້ທ່ານໝັ້ນໃຈໃນການຕັດສິນໃຈ ແລະ ເພື່ອໃຫ້ໂຄງການຂອງທ່ານປະສົບຄວາມສຳເລັດ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_about_s_features
@@ -9161,8 +9125,8 @@ msgid ""
 "Get in touch with your customers to provide them with better service. You "
 "can modify the form fields to gather more precise information."
 msgstr ""
-"ຕິດຕໍ່ພົວພັນກັບລູກຄ້າຂອງທ່ານເພື່ອໃຫ້ບໍລິການທີ່ດີຂຶ້ນ. ທ່ານສາມາດດັດແກ້ຊ່ອງຂໍ້ມູນໃນແບບຟອມເພື່ອເກັບກຳຂໍ້ມູນທີ່ຊັດເຈ"
-"ນຍິ່ງຂຶ້ນ."
+"ຕິດຕໍ່ພົວພັນກັບລູກຄ້າຂອງທ່ານເພື່ອໃຫ້ບໍລິການທີ່ດີຂຶ້ນ. "
+"ທ່ານສາມາດດັດແກ້ຊ່ອງຂໍ້ມູນໃນແບບຟອມເພື່ອເກັບກຳຂໍ້ມູນທີ່ຊັດເຈນຍິ່ງຂຶ້ນ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_striped_center_top
@@ -9191,8 +9155,8 @@ msgid ""
 "Getting started with our product is a breeze, thanks to our well-structured "
 "and comprehensive onboarding process."
 msgstr ""
-"ການເລີ່ມຕົ້ນນຳໃຊ້ສິນຄ້າຂອງພວກເຮົາແມ່ນງ່າຍດາຍຫຼາຍ, ຍ້ອນຂະບວນການແນະນຳການນຳໃຊ້ທີ່ມີໂຄງສ້າງດີ ແລະ ຄົ"
-"ບຖ້ວນ."
+"ການເລີ່ມຕົ້ນນຳໃຊ້ສິນຄ້າຂອງພວກເຮົາແມ່ນງ່າຍດາຍຫຼາຍ, ຍ້ອນຂະບວນການແນະນຳການນຳໃຊ້ທີ່ມີໂຄງສ້າງດີ ແລະ "
+"ຄົບຖ້ວນ."
 
 #. module: website
 #. odoo-javascript
@@ -9279,8 +9243,8 @@ msgid ""
 "customers. Simple words communicate better than big words and pompous "
 "language."
 msgstr ""
-"ການຂຽນຂໍ້ຄວາມທີ່ດີເລີ່ມຕົ້ນດ້ວຍການເຂົ້າໃຈວ່າສິນຄ້າ ຫຼື ບໍລິການຂອງທ່ານຊ່ວຍລູກຄ້າໄດ້ແນວໃດ. ຄຳສັບທີ່ງ່າຍດາຍສື່"
-"ສານໄດ້ດີກວ່າຄຳສັບທີ່ສັບສົນ ແລະ ຫຍຸ້ງຍາກ."
+"ການຂຽນຂໍ້ຄວາມທີ່ດີເລີ່ມຕົ້ນດ້ວຍການເຂົ້າໃຈວ່າສິນຄ້າ ຫຼື ບໍລິການຂອງທ່ານຊ່ວຍລູກຄ້າໄດ້ແນວໃດ. "
+"ຄຳສັບທີ່ງ່າຍດາຍສື່ສານໄດ້ດີກວ່າຄຳສັບທີ່ສັບສົນ ແລະ ຫຍຸ້ງຍາກ."
 
 #. module: website
 #. odoo-javascript
@@ -9329,8 +9293,7 @@ msgstr "ລະຫັດ Google Maps API"
 msgid ""
 "Google Maps configuration has changed. Please reload the page for changes to "
 "take effect."
-msgstr ""
-"ການກຳນົດຄ່າ Google Maps ມີການປ່ຽນແປງ. ກະລຸນາໂຫຼດໜ້າເວັບໃໝ່ເພື່ອໃຫ້ການປ່ຽນແປງມີຜົນ."
+msgstr "ການກຳນົດຄ່າ Google Maps ມີການປ່ຽນແປງ. ກະລຸນາໂຫຼດໜ້າເວັບໃໝ່ເພື່ອໃຫ້ການປ່ຽນແປງມີຜົນ."
 
 #. module: website
 #. odoo-javascript
@@ -9381,9 +9344,9 @@ msgid ""
 "story will sound fake and lack emotion. No one will be interested. Write for "
 "one person. If it’s genuine for the one, it’s genuine for the rest."
 msgstr ""
-"ເລື່ອງລາວທີ່ດີແມ່ນ <b>ສຳລັບທຸກຄົນ</b> ເຖິງແມ່ນວ່າຈະຂຽນ <b>ສຳລັບຄົນພຽງຄົນດຽວ</b> ກໍຕາມ. ຖ້າທ່ານພ"
-"ະຍາຍາມຂຽນໂດຍຄຳນຶງເຖິງຜູ້ອ່ານກຸ່ມກວ້າງທົ່ວໄປ, ເລື່ອງລາວຂອງທ່ານຈະຟັງເບິ່ງບໍ່ຈິງໃຈ ແລະ ຂາດອາລົມ. ຈະບໍ່"
-"ມີໃຜສົນໃຈ. ຈົ່ງຂຽນເພື່ອຄົນໆດຽວ. ຖ້າມັນຈິງໃຈຕໍ່ຄົນໆໜຶ່ງ, ມັນກໍຈະຈິງໃຈຕໍ່ຄົນອື່ນໆເຊັ່ນກັນ."
+"ເລື່ອງລາວທີ່ດີແມ່ນ <b>ສຳລັບທຸກຄົນ</b> ເຖິງແມ່ນວ່າຈະຂຽນ <b>ສຳລັບຄົນພຽງຄົນດຽວ</b> ກໍຕາມ. "
+"ຖ້າທ່ານພະຍາຍາມຂຽນໂດຍຄຳນຶງເຖິງຜູ້ອ່ານກຸ່ມກວ້າງທົ່ວໄປ, ເລື່ອງລາວຂອງທ່ານຈະຟັງເບິ່ງບໍ່ຈິງໃຈ ແລະ "
+"ຂາດອາລົມ. ຈະບໍ່ມີໃຜສົນໃຈ. ຈົ່ງຂຽນເພື່ອຄົນໆດຽວ. ຖ້າມັນຈິງໃຈຕໍ່ຄົນໆໜຶ່ງ, ມັນກໍຈະຈິງໃຈຕໍ່ຄົນອື່ນໆເຊັ່ນກັນ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_text_block
@@ -9394,10 +9357,10 @@ msgid ""
 "quirks like word choices or phrases. Write from your point of view, not from "
 "someone else's experience."
 msgstr ""
-"ເລື່ອງລາວທີ່ດີຕ້ອງມີ <b>ເອກະລັກສະເພາະຕົວ</b>. ລອງເລົ່າເລື່ອງທີ່ດີເຊິ່ງສະແດງເຖິງບຸກຄະລິກກະພາບ. ການຂ"
-"ຽນເລື່ອງທີ່ມີເອກະລັກໃຫ້ແກ່ລູກຄ້າກຸ່ມເປົ້າໝາຍ ຈະຊ່ວຍສ້າງສາຍພົວພັນໄດ້ດີ. ສິ່ງນີ້ສະແດງອອກຜ່ານລາຍລະອຽດເລັກໆ"
-"ນ້ອຍໆ ເຊັ່ນ: ການເລືອກໃຊ້ຄຳສັບ ຫຼື ສຳນວນ. ຈົ່ງຂຽນຈາກມຸມມອງຂອງທ່ານເອງ, ບໍ່ແມ່ນຈາກປະສົບການຂອງຄົນອື່"
-"ນ."
+"ເລື່ອງລາວທີ່ດີຕ້ອງມີ <b>ເອກະລັກສະເພາະຕົວ</b>. ລອງເລົ່າເລື່ອງທີ່ດີເຊິ່ງສະແດງເຖິງບຸກຄະລິກກະພາບ. "
+"ການຂຽນເລື່ອງທີ່ມີເອກະລັກໃຫ້ແກ່ລູກຄ້າກຸ່ມເປົ້າໝາຍ ຈະຊ່ວຍສ້າງສາຍພົວພັນໄດ້ດີ. "
+"ສິ່ງນີ້ສະແດງອອກຜ່ານລາຍລະອຽດເລັກໆນ້ອຍໆ ເຊັ່ນ: ການເລືອກໃຊ້ຄຳສັບ ຫຼື ສຳນວນ. "
+"ຈົ່ງຂຽນຈາກມຸມມອງຂອງທ່ານເອງ, ບໍ່ແມ່ນຈາກປະສົບການຂອງຄົນອື່ນ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_masonry_block_default_template
@@ -9438,8 +9401,8 @@ msgid ""
 "Growth capability is a system's ability to scale and adapt, meeting "
 "increasing demands and evolving needs for long-term success."
 msgstr ""
-"ຄວາມສາມາດໃນການເຕີບໂຕແມ່ນຄວາມສາມາດຂອງລະບົບໃນການຂະຫຍາຍ ແລະ ປັບຕົວ, ເພື່ອຕອບສະໜອງຄວາມຕ້ອ"
-"ງການທີ່ເພີ່ມຂຶ້ນ ແລະ ຄວາມຕ້ອງການທີ່ປ່ຽນແປງເພື່ອຄວາມສຳເລັດໃນໄລຍະຍາວ."
+"ຄວາມສາມາດໃນການເຕີບໂຕແມ່ນຄວາມສາມາດຂອງລະບົບໃນການຂະຫຍາຍ ແລະ ປັບຕົວ, "
+"ເພື່ອຕອບສະໜອງຄວາມຕ້ອງການທີ່ເພີ່ມຂຶ້ນ ແລະ ຄວາມຕ້ອງການທີ່ປ່ຽນແປງເພື່ອຄວາມສຳເລັດໃນໄລຍະຍາວ."
 
 #. module: website
 #. odoo-javascript
@@ -9663,8 +9626,8 @@ msgid ""
 "Herbal tea made from dried chamomile flowers, known for its calming "
 "properties and gentle, apple-like flavor."
 msgstr ""
-"ຊາສະໝຸນໄພທີ່ເຮັດຈາກດອກຄາໂມໄມແຫ້ງ, ມີຊື່ສຽງໃນດ້ານການຊ່ວຍໃຫ້ຜ່ອນຄາຍ ແລະ ມີລົດຊາດທີ່ອ່ອນໂຍນຄ້າຍຄືໝາ"
-"ກແອັບເປິ້ນ."
+"ຊາສະໝຸນໄພທີ່ເຮັດຈາກດອກຄາໂມໄມແຫ້ງ, ມີຊື່ສຽງໃນດ້ານການຊ່ວຍໃຫ້ຜ່ອນຄາຍ ແລະ "
+"ມີລົດຊາດທີ່ອ່ອນໂຍນຄ້າຍຄືໝາກແອັບເປິ້ນ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_collapse
@@ -9682,8 +9645,7 @@ msgstr "ນີ້ແມ່ນພາບປະກອບເພື່ອຊ່ວຍ
 msgid ""
 "Here is an overview of the cookies that may be stored on your device when "
 "you visit our website:"
-msgstr ""
-"ນີ້ແມ່ນພາບລວມຂອງຄຸກກີ້ທີ່ອາດຖືກບັນທຶກໄວ້ໃນອຸປະກອນຂອງທ່ານ ເມື່ອທ່ານເຂົ້າຊົມເວັບໄຊຂອງພວກເຮົາ:"
+msgstr "ນີ້ແມ່ນພາບລວມຂອງຄຸກກີ້ທີ່ອາດຖືກບັນທຶກໄວ້ໃນອຸປະກອນຂອງທ່ານ ເມື່ອທ່ານເຂົ້າຊົມເວັບໄຊຂອງພວກເຮົາ:"
 
 #. module: website
 #. odoo-javascript
@@ -9780,15 +9742,13 @@ msgstr "ຈຸດເດັ່ນຂອງຄຸນລັກສະນະທີ່
 msgid ""
 "Hint: How to use Google Map on your website (Contact Us page and as a "
 "snippet)"
-msgstr ""
-"ຄຳແນະນຳ: ວິທີໃຊ້ Google Map ໃນເວັບໄຊຂອງທ່ານ (ໃນໜ້າຕິດຕໍ່ພວກເຮົາ ແລະ ເປັນ snippet)"
+msgstr "ຄຳແນະນຳ: ວິທີໃຊ້ Google Map ໃນເວັບໄຊຂອງທ່ານ (ໃນໜ້າຕິດຕໍ່ພວກເຮົາ ແລະ ເປັນ snippet)"
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/components/dialog/edit_menu.xml:0
 msgid "Hint: Type '/' to search an existing page and '#' to link to an anchor."
-msgstr ""
-"ຄຳແນະນຳ: ພິມ '/' ເພື່ອຄົ້ນຫາໜ້າທີ່ມີຢູ່ ແລະ '#' ເພື່ອເຊື່ອມຕໍ່ກັບ anchor."
+msgstr "ຄຳແນະນຳ: ພິມ '/' ເພື່ອຄົ້ນຫາໜ້າທີ່ມີຢູ່ ແລະ '#' ເພື່ອເຊື່ອມຕໍ່ກັບ anchor."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega_cards
@@ -9941,6 +9901,12 @@ msgstr "ຂ້ອຍເຫັນດີ"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/form/utils.js:0
+msgid "I agree to the"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/components/dialog/page_properties.xml:0
 msgid "I am sure about this."
 msgstr "ຂ້ອຍໝັ້ນໃຈກ່ຽວກັບເລື່ອງນີ້."
@@ -9958,8 +9924,8 @@ msgid ""
 "skills, coupled with effective communication, enable me to lead cross-"
 "functional teams to success."
 msgstr ""
-"ຂ້ອຍເປັນນັກພັດທະນາແບບ fullstack ທີ່ມີປະສົບການດ້ານການບໍລິຫານ. ທັກສະການວິເຄາະຂອງຂ້ອຍ ບວກກັບການ"
-"ສື່ສານທີ່ມີປະສິດທິພາບ ຊ່ວຍໃຫ້ຂ້ອຍສາມາດນຳພາທີມງານທີ່ຫຼາກຫຼາຍໄປສູ່ຄວາມສຳເລັດໄດ້."
+"ຂ້ອຍເປັນນັກພັດທະນາແບບ fullstack ທີ່ມີປະສົບການດ້ານການບໍລິຫານ. ທັກສະການວິເຄາະຂອງຂ້ອຍ "
+"ບວກກັບການສື່ສານທີ່ມີປະສິດທິພາບ ຊ່ວຍໃຫ້ຂ້ອຍສາມາດນຳພາທີມງານທີ່ຫຼາກຫຼາຍໄປສູ່ຄວາມສຳເລັດໄດ້."
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_base_language_install__id
@@ -10065,8 +10031,8 @@ msgid ""
 "Ideal for newcomers. Essential features to kickstart sales and marketing. "
 "Perfect for small teams."
 msgstr ""
-"ເໝາະສຳລັບຜູ້ເລີ່ມຕົ້ນໃໝ່. ຄຸນສົມບັດທີ່ຈຳເປັນເພື່ອເລີ່ມຕົ້ນການຂາຍ ແລະ ການຕະຫຼາດ. ເໝາະສົມຢ່າງຍິ່ງສຳລັບທີມງ"
-"ານຂະໜາດນ້ອຍ."
+"ເໝາະສຳລັບຜູ້ເລີ່ມຕົ້ນໃໝ່. ຄຸນສົມບັດທີ່ຈຳເປັນເພື່ອເລີ່ມຕົ້ນການຂາຍ ແລະ ການຕະຫຼາດ. "
+"ເໝາະສົມຢ່າງຍິ່ງສຳລັບທີມງານຂະໜາດນ້ອຍ."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website__specific_user_account
@@ -10089,8 +10055,7 @@ msgstr "ຖ້າຕັ້ງຄ່າໄວ້, ຈະເພີ່ມເມນ�
 #: model:ir.model.fields,help:website.field_website__social_default_image
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "If set, replaces the website logo as the default social share image."
-msgstr ""
-"ຖ້າຕັ້ງຄ່າໄວ້, ຈະໃຊ້ແທນໂລໂກ້ເວັບໄຊ ເປັນຮູບພາບເລີ່ມຕົ້ນໃນການແຊຣ໌ລົງໂຊຊຽວ."
+msgstr "ຖ້າຕັ້ງຄ່າໄວ້, ຈະໃຊ້ແທນໂລໂກ້ເວັບໄຊ ເປັນຮູບພາບເລີ່ມຕົ້ນໃນການແຊຣ໌ລົງໂຊຊຽວ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.qweb_500
@@ -10098,8 +10063,8 @@ msgid ""
 "If this error is caused by a change of yours in the templates, you have the "
 "possibility to reset the template to its <strong>factory settings</strong>."
 msgstr ""
-"ຖ້າຂໍ້ຜິດພາດນີ້ເກີດຈາກການປ່ຽນແປງຂອງທ່ານໃນແມ່ແບບ, ທ່ານສາມາດຕັ້ງຄ່າແມ່ແບບໃໝ່ໃຫ້ເປັນ <strong>ຄ່າເລີ່ມ"
-"ຕົ້ນຈາກໂຮງງານ</strong> ໄດ້."
+"ຖ້າຂໍ້ຜິດພາດນີ້ເກີດຈາກການປ່ຽນແປງຂອງທ່ານໃນແມ່ແບບ, ທ່ານສາມາດຕັ້ງຄ່າແມ່ແບບໃໝ່ໃຫ້ເປັນ "
+"<strong>ຄ່າເລີ່ມຕົ້ນຈາກໂຮງງານ</strong> ໄດ້."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_controller_page__group_ids
@@ -10132,8 +10097,8 @@ msgid ""
 "If you don't write one, the description will be generated by the search "
 "engines based on the content of your page."
 msgstr ""
-"ຖ້າທ່ານບໍ່ຂຽນຄຳອະທິບາຍ, ເຄື່ອງມືຄົ້ນຫາ (search engines) ຈະສ້າງມັນໃຫ້ໂດຍອີງຕາມເນື້ອໃນຂອງໜ້າເວັບຂ"
-"ອງທ່ານ."
+"ຖ້າທ່ານບໍ່ຂຽນຄຳອະທິບາຍ, ເຄື່ອງມືຄົ້ນຫາ (search engines) "
+"ຈະສ້າງມັນໃຫ້ໂດຍອີງຕາມເນື້ອໃນຂອງໜ້າເວັບຂອງທ່ານ."
 
 #. module: website
 #. odoo-javascript
@@ -10333,8 +10298,7 @@ msgstr "ນຳເຂົ້າແມ່ແບບສຳລັບການປ່ຽ
 msgid ""
 "Improve navigation and hierarchy of site by adding parent page in "
 "breadcrumbs format."
-msgstr ""
-"ປັບປຸງການນຳທາງ ແລະ ລຳດັບຊັ້ນຂອງເວັບໄຊຕ໌ ໂດຍການເພີ່ມໜ້າຫຼັກໃນຮູບແບບ breadcrumbs."
+msgstr "ປັບປຸງການນຳທາງ ແລະ ລຳດັບຊັ້ນຂອງເວັບໄຊຕ໌ ໂດຍການເພີ່ມໜ້າຫຼັກໃນຮູບແບບ breadcrumbs."
 
 #. module: website
 #. odoo-javascript
@@ -10607,9 +10571,10 @@ msgid ""
 "format documents in real time. No coding knowledge is needed, making content "
 "creation straightforward and enjoyable for everyone."
 msgstr ""
-"ໃສ່ຮູບແບບຂໍ້ຄວາມ ເຊັ່ນ ຫົວຂໍ້, ໂຕເຂັ້ມ, ໂຕອຽງ, ລາຍການ ແລະ ຕົວອັກສອນ ດ້ວຍຕົວແກ້ໄຂ WYSIWYG ທີ່ງ່າຍ"
-"ດາຍ. ມັນມີຄວາມຢືດຢຸ່ນ ແລະ ໃຊ້ງ່າຍ ຊ່ວຍໃຫ້ທ່ານອອກແບບ ແລະ ຈັດຮູບແບບເອກະສານໄດ້ໃນເວລາຈິງ. ບໍ່ຈຳເປັ"
-"ນຕ້ອງມີຄວາມຮູ້ດ້ານການຂຽນໂປຣແກຣມ ເຮັດໃຫ້ການສ້າງເນື້ອໃນເປັນເລື່ອງງ່າຍ ແລະ ໜ້າສົນໃຈສຳລັບທຸກຄົນ."
+"ໃສ່ຮູບແບບຂໍ້ຄວາມ ເຊັ່ນ ຫົວຂໍ້, ໂຕເຂັ້ມ, ໂຕອຽງ, ລາຍການ ແລະ ຕົວອັກສອນ ດ້ວຍຕົວແກ້ໄຂ WYSIWYG "
+"ທີ່ງ່າຍດາຍ. ມັນມີຄວາມຢືດຢຸ່ນ ແລະ ໃຊ້ງ່າຍ ຊ່ວຍໃຫ້ທ່ານອອກແບບ ແລະ ຈັດຮູບແບບເອກະສານໄດ້ໃນເວລາຈິງ. "
+"ບໍ່ຈຳເປັນຕ້ອງມີຄວາມຮູ້ດ້ານການຂຽນໂປຣແກຣມ ເຮັດໃຫ້ການສ້າງເນື້ອໃນເປັນເລື່ອງງ່າຍ ແລະ "
+"ໜ້າສົນໃຈສຳລັບທຸກຄົນ."
 
 #. module: website
 #. odoo-javascript
@@ -10830,9 +10795,9 @@ msgid ""
 "numbers and improves them. She is determined to drive success and delivers "
 "her professional acumen to bring the company to the next level."
 msgstr ""
-"Iris, ດ້ວຍປະສົບການລະດັບສາກົນຂອງລາວ, ຊ່ວຍໃຫ້ພວກເຮົາເຂົ້າໃຈຕົວເລກໄດ້ງ່າຍຂຶ້ນ ແລະ ປັບປຸງຕົວເລກເຫຼົ່າ"
-"ນັ້ນໃຫ້ດີຂຶ້ນ. ລາວມີຄວາມມຸ່ງໝັ້ນທີ່ຈະຂັບເຄື່ອນຄວາມສຳເລັດ ແລະ ໃຊ້ຄວາມຊ່ຽວຊານດ້ານວິຊາຊີບເພື່ອນຳພາໂຄງການ"
-"ໄປສູ່ອີກລະດັບໜຶ່ງ."
+"Iris, ດ້ວຍປະສົບການລະດັບສາກົນຂອງລາວ, ຊ່ວຍໃຫ້ພວກເຮົາເຂົ້າໃຈຕົວເລກໄດ້ງ່າຍຂຶ້ນ ແລະ "
+"ປັບປຸງຕົວເລກເຫຼົ່ານັ້ນໃຫ້ດີຂຶ້ນ. ລາວມີຄວາມມຸ່ງໝັ້ນທີ່ຈະຂັບເຄື່ອນຄວາມສຳເລັດ ແລະ "
+"ໃຊ້ຄວາມຊ່ຽວຊານດ້ານວິຊາຊີບເພື່ອນຳພາໂຄງການໄປສູ່ອີກລະດັບໜຶ່ງ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_page_properties_base_view_form
@@ -11072,8 +11037,8 @@ msgid ""
 "It's time to elevate your fitness journey with coaching that's as unique as "
 "you are. Choose your path, embrace the guidance, and transform your life."
 msgstr ""
-"ເຖິງເວລາແລ້ວທີ່ຈະຍົກລະດັບການອອກກຳລັງກາຍຂອງທ່ານດ້ວຍການແນະນຳທີ່ເປັນເອກະລັກຄືກັນກັບຕົວທ່ານ. ເລືອກເສັ້"
-"ນທາງຂອງທ່ານ, ນ້ອມຮັບຄຳແນະນຳ ແລະ ປ່ຽນແປງຊີວິດຂອງທ່ານ."
+"ເຖິງເວລາແລ້ວທີ່ຈະຍົກລະດັບການອອກກຳລັງກາຍຂອງທ່ານດ້ວຍການແນະນຳທີ່ເປັນເອກະລັກຄືກັນກັບຕົວທ່ານ. "
+"ເລືອກເສັ້ນທາງຂອງທ່ານ, ນ້ອມຮັບຄຳແນະນຳ ແລະ ປ່ຽນແປງຊີວິດຂອງທ່ານ."
 
 #. module: website
 #. odoo-javascript
@@ -11102,8 +11067,7 @@ msgstr "ເສື້ອກັນໜາວ"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
 msgid "James leads the tech strategy and innovation efforts at the company."
-msgstr ""
-"James ເປັນຜູ້ນຳພາດ້ານກົນລະຍຸດເຕັກໂນໂລຊີ ແລະ ການປະດິດສ້າງຢູ່ພາຍໃນບໍລິສັດ."
+msgstr "James ເປັນຜູ້ນຳພາດ້ານກົນລະຍຸດເຕັກໂນໂລຊີ ແລະ ການປະດິດສ້າງຢູ່ພາຍໃນບໍລິສັດ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
@@ -11148,8 +11112,8 @@ msgid ""
 "Join us for a remarkable dining experience that blends exquisite flavors "
 "with a warm ambiance."
 msgstr ""
-"ຮ່ວມກັບພວກເຮົາເພື່ອປະສົບການການຮັບປະທານອາຫານທີ່ໂດດເດັ່ນ ເຊິ່ງປະສົມປະສານລົດຊາດທີ່ດີເລີດເຂົ້າກັບບັນຍາກາ"
-"ດທີ່ອົບອຸ່ນ."
+"ຮ່ວມກັບພວກເຮົາເພື່ອປະສົບການການຮັບປະທານອາຫານທີ່ໂດດເດັ່ນ "
+"ເຊິ່ງປະສົມປະສານລົດຊາດທີ່ດີເລີດເຂົ້າກັບບັນຍາກາດທີ່ອົບອຸ່ນ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_floating_blocks
@@ -11500,8 +11464,7 @@ msgstr "ເປີດຕົວງານກິດຈະກຳ, ເເລີ່ມ�
 msgid ""
 "Layers of pasta, rich meat ragu, béchamel sauce, and melted mozzarella, "
 "baked to perfection."
-msgstr ""
-"ຊັ້ນຂອງພັດສະຕ້າ, ຊອດຊີ້ນທີ່ເຂັ້ມຂຸ້ນ, ເບຊາເມລຊອດ, ແລະ ມົສຊາເຣລລາຊີສ, ອົບໃຫ້ສຸກໄດ້ທີ່."
+msgstr "ຊັ້ນຂອງພັດສະຕ້າ, ຊອດຊີ້ນທີ່ເຂັ້ມຂຸ້ນ, ເບຊາເມລຊອດ, ແລະ ມົສຊາເຣລລາຊີສ, ອົບໃຫ້ສຸກໄດ້ທີ່."
 
 #. module: website
 #. odoo-javascript
@@ -11630,8 +11593,8 @@ msgid ""
 "digital landscape. Reach out today and let's build something extraordinary "
 "together."
 msgstr ""
-"ມາຮ່ວມມືກັນເພື່ອສ້າງການແກ້ໄຂບັນຫາທີ່ສ້າງສັນ ແລະ ໂດດເດັ່ນໃນໂລກດິຈິຕອນ. ຕິດຕໍ່ພວກເຮົາໃນມື້ນີ້ ແລະ ມາສ້າງ"
-"ສິ່ງທີ່ພິເສດຮ່ວມກັນ."
+"ມາຮ່ວມມືກັນເພື່ອສ້າງການແກ້ໄຂບັນຫາທີ່ສ້າງສັນ ແລະ ໂດດເດັ່ນໃນໂລກດິຈິຕອນ. ຕິດຕໍ່ພວກເຮົາໃນມື້ນີ້ ແລະ "
+"ມາສ້າງສິ່ງທີ່ພິເສດຮ່ວມກັນ."
 
 #. module: website
 #. odoo-javascript
@@ -11656,8 +11619,8 @@ msgid ""
 "Let's turn your vision into reality. Contact us today to set your brand on "
 "the path to digital excellence with us."
 msgstr ""
-"ມາປ່ຽນວິໄສທັດຂອງທ່ານໃຫ້ເປັນຈິງ. ຕິດຕໍ່ພວກເຮົາໃນມື້ນີ້ເພື່ອພາແບຣນຂອງທ່ານໄປສູ່ຄວາມເປັນເລີດທາງດ້ານດິຈິຕອນ"
-"ຮ່ວມກັບພວກເຮົາ."
+"ມາປ່ຽນວິໄສທັດຂອງທ່ານໃຫ້ເປັນຈິງ. "
+"ຕິດຕໍ່ພວກເຮົາໃນມື້ນີ້ເພື່ອພາແບຣນຂອງທ່ານໄປສູ່ຄວາມເປັນເລີດທາງດ້ານດິຈິຕອນຮ່ວມກັບພວກເຮົາ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_opening_hours
@@ -11799,8 +11762,8 @@ msgid ""
 "Listing your product pricing helps potential customers quickly determine if "
 "it fits their budget and needs."
 msgstr ""
-"ການສະແດງລາຄາຜະລິດຕະພັນຂອງທ່ານຊ່ວຍໃຫ້ລູກຄ້າທີ່ຄາດຫວັງສາມາດຕັດສິນໃຈໄດ້ຢ່າງວ່ອງໄວວ່າມັນເໝາະສົມກັບງົບ"
-"ປະມານ ແລະ ຄວາມຕ້ອງການຂອງພວກເຂົາຫຼືບໍ່."
+"ການສະແດງລາຄາຜະລິດຕະພັນຂອງທ່ານຊ່ວຍໃຫ້ລູກຄ້າທີ່ຄາດຫວັງສາມາດຕັດສິນໃຈໄດ້ຢ່າງວ່ອງໄວວ່າມັນເໝາະສົມກັບງົບປະມານ "
+"ແລະ ຄວາມຕ້ອງການຂອງພວກເຂົາຫຼືບໍ່."
 
 #. module: website
 #. odoo-javascript
@@ -11875,8 +11838,8 @@ msgid ""
 "                                        It's just one of the ways we support "
 "our members."
 msgstr ""
-"ກຳລັງຊອກຫາວິທີທີ່ງ່າຍ ແລະ ວ່ອງໄວໃນການຈັດການຄຳສັ່ງຊື້ຊ້ຳບໍ?<br/> ນີ້ແມ່ນພຽງແຕ່ວິທີໜຶ່ງທີ່ພວກເຮົາຊ່ວຍເຫຼືອສ"
-"ະມາຊິກຂອງພວກເຮົາ."
+"ກຳລັງຊອກຫາວິທີທີ່ງ່າຍ ແລະ ວ່ອງໄວໃນການຈັດການຄຳສັ່ງຊື້ຊ້ຳບໍ?<br/> "
+"ນີ້ແມ່ນພຽງແຕ່ວິທີໜຶ່ງທີ່ພວກເຮົາຊ່ວຍເຫຼືອສະມາຊິກຂອງພວກເຮົາ."
 
 #. module: website
 #. odoo-javascript
@@ -11890,8 +11853,8 @@ msgid ""
 "Made from ethically sourced wood and premium textiles, our furniture is as "
 "kind to the planet as it is to your living space."
 msgstr ""
-"ຜະລິດຈາກໄມ້ທີ່ມາຈາກແຫຼ່ງທີ່ຖືກຕ້ອງຕາມຈັນຍາບັນ ແລະ ຜ້າຄຸນນະພາບສູງ, ເຟີນີເຈີຂອງພວກເຮົາເປັນມິດຕໍ່ໂລກ ເຊັ່"
-"ນດຽວກັບທີ່ເໝາະສົມກັບພື້ນທີ່ຢູ່ອາໄສຂອງທ່ານ."
+"ຜະລິດຈາກໄມ້ທີ່ມາຈາກແຫຼ່ງທີ່ຖືກຕ້ອງຕາມຈັນຍາບັນ ແລະ ຜ້າຄຸນນະພາບສູງ, ເຟີນີເຈີຂອງພວກເຮົາເປັນມິດຕໍ່ໂລກ "
+"ເຊັ່ນດຽວກັບທີ່ເໝາະສົມກັບພື້ນທີ່ຢູ່ອາໄສຂອງທ່ານ."
 
 #. module: website
 #. odoo-javascript
@@ -11923,8 +11886,8 @@ msgid ""
 "Make sure to wait if errors keep being shown: sometimes enabling an API "
 "allows to use it immediately but Google keeps triggering errors for a while"
 msgstr ""
-"ກະລຸນາລໍຖ້າຖ້າຫາກຍັງມີຂໍ້ຜິດພາດສະແດງຂຶ້ນ: ບາງຄັ້ງການເປີດໃຊ້ API ອາດໃຊ້ງານໄດ້ທັນທີ ແຕ່ Google ອາດຈ"
-"ະຍັງແຈ້ງຂໍ້ຜິດພາດຢູ່ໄລຍະໜຶ່ງ"
+"ກະລຸນາລໍຖ້າຖ້າຫາກຍັງມີຂໍ້ຜິດພາດສະແດງຂຶ້ນ: ບາງຄັ້ງການເປີດໃຊ້ API ອາດໃຊ້ງານໄດ້ທັນທີ ແຕ່ Google "
+"ອາດຈະຍັງແຈ້ງຂໍ້ຜິດພາດຢູ່ໄລຍະໜຶ່ງ"
 
 #. module: website
 #. odoo-javascript
@@ -12040,8 +12003,8 @@ msgid ""
 "Mastering frontend craftsmanship with expertise in HTML, CSS, and JavaScript "
 "to craft captivating and responsive user experiences."
 msgstr ""
-"ມີຄວາມຊ່ຽວຊານໃນການພັດທະນາ Frontend ດ້ວຍ HTML, CSS ແລະ JavaScript ເພື່ອສ້າງປະສົບການຜູ້ໃຊ້"
-"ທີ່ໜ້າສົນໃຈ ແລະ ຮອງຮັບທຸກອຸປະກອນ."
+"ມີຄວາມຊ່ຽວຊານໃນການພັດທະນາ Frontend ດ້ວຍ HTML, CSS ແລະ JavaScript "
+"ເພື່ອສ້າງປະສົບການຜູ້ໃຊ້ທີ່ໜ້າສົນໃຈ ແລະ ຮອງຮັບທຸກອຸປະກອນ."
 
 #. module: website
 #. odoo-javascript
@@ -12507,9 +12470,9 @@ msgid ""
 "push notification. If they have completed one of your forms, you can send "
 "them an SMS, or call them right away while they are browsing your website."
 msgstr ""
-"ຕິດຕາມຜູ້ເຂົ້າຊົມຂອງທ່ານໃນຂະນະທີ່ພວກເຂົາກຳລັງເບິ່ງເວັບໄຊດ້ວຍແອັບ Odoo Social. ຕິດຕໍ່ພົວພັນກັບພວກເຂົາ"
-"ໄດ້ພຽງແຕ່ຄລິກດຽວໂດຍໃຊ້ Live Chat ຫຼື ການແຈ້ງເຕືອນ. ຖ້າພວກເຂົາຕື່ມຟອມແລ້ວ, ທ່ານສາມາດສົ່ງ SMS "
-"ຫຼື ໂທຫາພວກເຂົາໄດ້ທັນທີ."
+"ຕິດຕາມຜູ້ເຂົ້າຊົມຂອງທ່ານໃນຂະນະທີ່ພວກເຂົາກຳລັງເບິ່ງເວັບໄຊດ້ວຍແອັບ Odoo Social. "
+"ຕິດຕໍ່ພົວພັນກັບພວກເຂົາໄດ້ພຽງແຕ່ຄລິກດຽວໂດຍໃຊ້ Live Chat ຫຼື ການແຈ້ງເຕືອນ. ຖ້າພວກເຂົາຕື່ມຟອມແລ້ວ, "
+"ທ່ານສາມາດສົ່ງ SMS ຫຼື ໂທຫາພວກເຂົາໄດ້ທັນທີ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_odoo_menu
@@ -12543,8 +12506,7 @@ msgstr "ມີຫຼາຍກວ່າ 90 ຮູບຊົງ ແລະ ສີຂ
 #. odoo-javascript
 #: code:addons/website/static/src/components/dialog/seo.xml:0
 msgid "Most searched topics related to your keyword, ordered by importance"
-msgstr ""
-"ຫົວຂໍ້ທີ່ຖືກຄົ້ນຫາຫຼາຍທີ່ສຸດທີ່ກ່ຽວຂ້ອງກັບຄຳສຳຄັນຂອງທ່ານ, ຈັດລຳດັບຕາມຄວາມສຳຄັນ"
+msgstr "ຫົວຂໍ້ທີ່ຖືກຄົ້ນຫາຫຼາຍທີ່ສຸດທີ່ກ່ຽວຂ້ອງກັບຄຳສຳຄັນຂອງທ່ານ, ຈັດລຳດັບຕາມຄວາມສຳຄັນ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -12861,9 +12823,9 @@ msgid ""
 "will help you configure essential settings such as language, time zone, and "
 "notifications."
 msgstr ""
-"ຕໍ່ໄປ, ທ່ານຈະໄດ້ພົບກັບ <b>ຕົວຊ່ວຍການຕັ້ງຄ່າ</b> ຂອງພວກເຮົາ ເຊິ່ງຖືກອອກແບບມາເພື່ອແນະນຳທ່ານຜ່ານການ"
-"ຕັ້ງຄ່າພື້ນຖານຂອງລະບົບ. ຕົວຊ່ວຍນີ້ຈະຊ່ວຍໃຫ້ທ່ານຕັ້ງຄ່າທີ່ຈຳເປັນ ເຊັ່ນ: ພາສາ, ເຂດເວລາ ແລະ ການແຈ້ງເຕືອ"
-"ນ."
+"ຕໍ່ໄປ, ທ່ານຈະໄດ້ພົບກັບ <b>ຕົວຊ່ວຍການຕັ້ງຄ່າ</b> ຂອງພວກເຮົາ "
+"ເຊິ່ງຖືກອອກແບບມາເພື່ອແນະນຳທ່ານຜ່ານການຕັ້ງຄ່າພື້ນຖານຂອງລະບົບ. ຕົວຊ່ວຍນີ້ຈະຊ່ວຍໃຫ້ທ່ານຕັ້ງຄ່າທີ່ຈຳເປັນ "
+"ເຊັ່ນ: ພາສາ, ເຂດເວລາ ແລະ ການແຈ້ງເຕືອນ."
 
 #. module: website
 #. odoo-javascript
@@ -13016,8 +12978,8 @@ msgid ""
 "Not only can you search for royalty-free illustrations, their colors are "
 "also converted so that they always fit your Theme."
 msgstr ""
-"ນອກຈາກທ່ານສາມາດຄົ້ນຫາພາບປະກອບທີ່ບໍ່ມີລິຂະສິດແລ້ວ, ສີຂອງພວກມັນຍັງຖືກປ່ຽນໃຫ້ເຂົ້າກັບ Theme ຂອງທ່ານສະ"
-"ເໝີ."
+"ນອກຈາກທ່ານສາມາດຄົ້ນຫາພາບປະກອບທີ່ບໍ່ມີລິຂະສິດແລ້ວ, ສີຂອງພວກມັນຍັງຖືກປ່ຽນໃຫ້ເຂົ້າກັບ Theme "
+"ຂອງທ່ານສະເໝີ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_pages_view_search
@@ -13035,8 +12997,8 @@ msgid ""
 "Note that some third-party services may install additional cookies on your "
 "browser in order to identify you."
 msgstr ""
-"ກະລຸນາຮັບຊາບວ່າ ບໍລິການຈາກພາຍນອກບາງບໍລິການອາດຕິດຕັ້ງຄຸກກີ້ເພີ່ມເຕີມໃນບຣາວເຊີຂອງທ່ານ ເພື່ອລະບຸຕົວຕົນຂ"
-"ອງທ່ານ."
+"ກະລຸນາຮັບຊາບວ່າ ບໍລິການຈາກພາຍນອກບາງບໍລິການອາດຕິດຕັ້ງຄຸກກີ້ເພີ່ມເຕີມໃນບຣາວເຊີຂອງທ່ານ "
+"ເພື່ອລະບຸຕົວຕົນຂອງທ່ານ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_menus_form_view
@@ -13044,8 +13006,8 @@ msgid ""
 "Note that the \"Website / Editor and Designer\" group is implicitly added "
 "when saving if any group is specified."
 msgstr ""
-"ໝາຍເຫດ: ກຸ່ມ \"Website / Editor and Designer\" ຈະຖືກເພີ່ມໂດຍອັດຕະໂນມັດເມື່ອມີການກຳນົດກຸ່ມໃ"
-"ດໜຶ່ງ."
+"ໝາຍເຫດ: ກຸ່ມ \"Website / Editor and Designer\" "
+"ຈະຖືກເພີ່ມໂດຍອັດຕະໂນມັດເມື່ອມີການກຳນົດກຸ່ມໃດໜຶ່ງ."
 
 #. module: website
 #. odoo-javascript
@@ -13060,8 +13022,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.show_website_info
 msgid "Note: To hide this page, uncheck it from the Style tab in edit mode."
-msgstr ""
-"ໝາຍເຫດ: ເພື່ອເຊື່ອງໜ້ານີ້, ໃຫ້ຍົກເລີກການໝາຍເລືອກໃນແຖບຮູບແບບ (Style) ໃນໂໝດແກ້ໄຂ."
+msgstr "ໝາຍເຫດ: ເພື່ອເຊື່ອງໜ້ານີ້, ໃຫ້ຍົກເລີກການໝາຍເລືອກໃນແຖບຮູບແບບ (Style) ໃນໂໝດແກ້ໄຂ."
 
 #. module: website
 #. odoo-javascript
@@ -13448,8 +13409,8 @@ msgid ""
 "Organizing and presenting key information effectively increases the "
 "likelihood of turning your visitors into customers."
 msgstr ""
-"ການຈັດລະບຽບ ແລະ ການນຳສະເໜີຂໍ້ມູນທີ່ສຳຄັນຢ່າງມີປະສິດທິພາບ ຈະຊ່ວຍເພີ່ມໂອກາດໃນການປ່ຽນຜູ້ເຂົ້າຊົມໃຫ້ເປັນ"
-"ລູກຄ້າ."
+"ການຈັດລະບຽບ ແລະ ການນຳສະເໜີຂໍ້ມູນທີ່ສຳຄັນຢ່າງມີປະສິດທິພາບ "
+"ຈະຊ່ວຍເພີ່ມໂອກາດໃນການປ່ຽນຜູ້ເຂົ້າຊົມໃຫ້ເປັນລູກຄ້າ."
 
 #. module: website
 #. odoo-javascript
@@ -13481,8 +13442,8 @@ msgid ""
 "Our Coaching combines personalized fitness plans with mindfulness practices, "
 "ensuring you achieve harmony in your body and peace in your mind."
 msgstr ""
-"ການຝຶກສອນຂອງພວກເຮົາລວມເອົາແຜນການອອກກຳລັງກາຍສ່ວນບຸກຄົນກັບການຝຶກສະມາທິ, ເພື່ອໃຫ້ແນ່ໃຈວ່າທ່ານຈະບັ"
-"ນລຸຄວາມສົມດຸນຂອງຮ່າງກາຍ ແລະ ຄວາມສະຫງົບຂອງຈິດໃຈ."
+"ການຝຶກສອນຂອງພວກເຮົາລວມເອົາແຜນການອອກກຳລັງກາຍສ່ວນບຸກຄົນກັບການຝຶກສະມາທິ, "
+"ເພື່ອໃຫ້ແນ່ໃຈວ່າທ່ານຈະບັນລຸຄວາມສົມດຸນຂອງຮ່າງກາຍ ແລະ ຄວາມສະຫງົບຂອງຈິດໃຈ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_links
@@ -13564,9 +13525,10 @@ msgid ""
 "support. We tailor our services to fit the unique needs of businesses across "
 "various sectors, helping them grow and succeed in a competitive market."
 msgstr ""
-"ບໍລິສັດຂອງພວກເຮົາມີຄວາມຊ່ຽວຊານດ້ານການໃຫ້ຄຳປຶກສາ, ການພັດທະນາສິນຄ້າ ແລະ ການບໍລິການຊ່ວຍເຫຼືອລູກຄ້"
-"າ. ພວກເຮົາປັບແຕ່ງການບໍລິການໃຫ້ຕອບໂຈດຄວາມຕ້ອງການສະເພາະຂອງທຸລະກິດໃນຫຼາຍຂະແໜງການ ເພື່ອຊ່ວຍໃຫ້ທຸ"
-"ລະກິດເຕີບໃຫຍ່ ແລະ ປະສົບຜົນສຳເລັດ."
+"ບໍລິສັດຂອງພວກເຮົາມີຄວາມຊ່ຽວຊານດ້ານການໃຫ້ຄຳປຶກສາ, ການພັດທະນາສິນຄ້າ ແລະ "
+"ການບໍລິການຊ່ວຍເຫຼືອລູກຄ້າ. "
+"ພວກເຮົາປັບແຕ່ງການບໍລິການໃຫ້ຕອບໂຈດຄວາມຕ້ອງການສະເພາະຂອງທຸລະກິດໃນຫຼາຍຂະແໜງການ "
+"ເພື່ອຊ່ວຍໃຫ້ທຸລະກິດເຕີບໃຫຍ່ ແລະ ປະສົບຜົນສຳເລັດ."
 
 #. module: website
 #. odoo-javascript
@@ -13581,8 +13543,9 @@ msgid ""
 "innovative solutions that make your project stand out while maintaining a "
 "balance between originality and functionality."
 msgstr ""
-"ຄວາມຄິດສ້າງສັນຂອງພວກເຮົາຢູ່ແຖວໜ້າຂອງທຸກໆຢ່າງທີ່ພວກເຮົາເຮັດ, ສົ່ງມອບວິທີແກ້ໄຂທີ່ສ້າງສັນທີ່ເຮັດໃຫ້ໂຄງການຂ"
-"ອງທ່ານໂດດເດັ່ນ ໃນຂະນະທີ່ຮັກສາຄວາມສົມດຸນລະຫວ່າງຄວາມເປັນເອກະລັກ ແລະ ການນຳໃຊ້ຕົວຈິງ."
+"ຄວາມຄິດສ້າງສັນຂອງພວກເຮົາຢູ່ແຖວໜ້າຂອງທຸກໆຢ່າງທີ່ພວກເຮົາເຮັດ, "
+"ສົ່ງມອບວິທີແກ້ໄຂທີ່ສ້າງສັນທີ່ເຮັດໃຫ້ໂຄງການຂອງທ່ານໂດດເດັ່ນ "
+"ໃນຂະນະທີ່ຮັກສາຄວາມສົມດຸນລະຫວ່າງຄວາມເປັນເອກະລັກ ແລະ ການນຳໃຊ້ຕົວຈິງ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_table_of_content
@@ -13595,8 +13558,8 @@ msgid ""
 msgstr ""
 "ຄຸນສົມບັດການອອກແບບຂອງພວກເຮົາມີເຄື່ອງມືທີ່ຫຼາກຫຼາຍເພື່ອສ້າງເວັບໄຊທີ່ສວຍງາມ. ນຳໃຊ້ເຄື່ອງມືແກ້ໄຂ "
 "WYSIWYG, ບລັອກສ້າງແບບລາກແລ້ວວາງ, ແລະ ເທັມເພລດທີ່ອີງໃສ່ Bootstrap ເພື່ອການປັບແຕ່ງທີ່ງ່າຍດາຍ. "
-"ດ້ວຍຫົວຂໍ້ (Themes) ທີ່ເປັນມືອາຊີບ ແລະ ລະບົບທີ່ໃຊ້ງານງ່າຍ, ທ່ານສາມາດອອກແບບໄດ້ຢ່າງສະດວກ ແລະ ຊັດເ"
-"ຈນ, ເພື່ອຮັບປະກັນຜົນໄດ້ຮັບທີ່ສົມບູນແບບ ແລະ ຮອງຮັບການສະແດງຜົນໃນທຸກໜ້າຈໍ."
+"ດ້ວຍຫົວຂໍ້ (Themes) ທີ່ເປັນມືອາຊີບ ແລະ ລະບົບທີ່ໃຊ້ງານງ່າຍ, ທ່ານສາມາດອອກແບບໄດ້ຢ່າງສະດວກ ແລະ "
+"ຊັດເຈນ, ເພື່ອຮັບປະກັນຜົນໄດ້ຮັບທີ່ສົມບູນແບບ ແລະ ຮອງຮັບການສະແດງຜົນໃນທຸກໜ້າຈໍ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -13605,8 +13568,8 @@ msgid ""
 "security, and functionality, ensuring it remains at the cutting edge of "
 "innovation."
 msgstr ""
-"ທີມງານພັດທະນາຂອງພວກເຮົາເຮັດວຽກຢ່າງບໍ່ຮູ້ອິດເມື່ອຍເພື່ອເພີ່ມປະສິດທິພາບ, ຄວາມປອດໄພ, ແລະ ການເຮັດວຽກ"
-"ຂອງແພລດຟອມ, ເພື່ອຮັບປະກັນວ່າມັນຍັງຄົງຢູ່ແຖວໜ້າຂອງນະວັດຕະກຳ."
+"ທີມງານພັດທະນາຂອງພວກເຮົາເຮັດວຽກຢ່າງບໍ່ຮູ້ອິດເມື່ອຍເພື່ອເພີ່ມປະສິດທິພາບ, ຄວາມປອດໄພ, ແລະ "
+"ການເຮັດວຽກຂອງແພລດຟອມ, ເພື່ອຮັບປະກັນວ່າມັນຍັງຄົງຢູ່ແຖວໜ້າຂອງນະວັດຕະກຳ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_landing_2_s_three_columns
@@ -13614,8 +13577,8 @@ msgid ""
 "Our experienced fitness coaches design workouts that align with your goals, "
 "fitness level, and preferences."
 msgstr ""
-"ຄູຝຶກອອກກຳລັງກາຍທີ່ມີປະສົບການຂອງພວກເຮົາອອກແບບການອອກກຳລັງກາຍໃຫ້ສອດຄ່ອງກັບເປົ້າໝາຍ, ລະດັບຄວາມແ"
-"ຂງແຮງ, ແລະ ຄວາມມັກຂອງທ່ານ."
+"ຄູຝຶກອອກກຳລັງກາຍທີ່ມີປະສົບການຂອງພວກເຮົາອອກແບບການອອກກຳລັງກາຍໃຫ້ສອດຄ່ອງກັບເປົ້າໝາຍ, "
+"ລະດັບຄວາມແຂງແຮງ, ແລະ ຄວາມມັກຂອງທ່ານ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_list
@@ -13630,9 +13593,10 @@ msgid ""
 "complete. With tooltips and contextual help, users quickly become "
 "productive, enjoying a smooth and efficient experience."
 msgstr ""
-"ລະບົບທີ່ໃຊ້ງານງ່າຍຂອງພວກເຮົາຮັບປະກັນການທ່ອງເວັບທີ່ສະດວກສຳລັບຜູ້ໃຊ້ທຸກລະດັບ. ອິນເຕີເຟສທີ່ສະອາດ ແລະ ກ"
-"ານຈັດລະບົບທີ່ມີເຫດຜົນເຮັດໃຫ້ວຽກງານຕ່າງໆສຳເລັດໄດ້ງ່າຍ. ດ້ວຍຄຳແນະນຳ (tooltips) ແລະ ການຊ່ວຍເຫຼືອ"
-"ຕາມບໍລິບົດ, ຜູ້ໃຊ້ຈະສາມາດເຮັດວຽກໄດ້ຢ່າງໄວວາ, ເພີດເພີນກັບປະສົບການທີ່ລຽບງ່າຍ ແລະ ມີປະສິດທິພາບ."
+"ລະບົບທີ່ໃຊ້ງານງ່າຍຂອງພວກເຮົາຮັບປະກັນການທ່ອງເວັບທີ່ສະດວກສຳລັບຜູ້ໃຊ້ທຸກລະດັບ. ອິນເຕີເຟສທີ່ສະອາດ ແລະ "
+"ການຈັດລະບົບທີ່ມີເຫດຜົນເຮັດໃຫ້ວຽກງານຕ່າງໆສຳເລັດໄດ້ງ່າຍ. ດ້ວຍຄຳແນະນຳ (tooltips) ແລະ "
+"ການຊ່ວຍເຫຼືອຕາມບໍລິບົດ, ຜູ້ໃຊ້ຈະສາມາດເຮັດວຽກໄດ້ຢ່າງໄວວາ, ເພີດເພີນກັບປະສົບການທີ່ລຽບງ່າຍ ແລະ "
+"ມີປະສິດທິພາບ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
@@ -13641,9 +13605,9 @@ msgid ""
 "expansion, highlight our strategic prowess and commitment to sustainable "
 "business success."
 msgstr ""
-"ຕົວຊີ້ວັດຫຼັກຂອງພວກເຮົາ, ນັບຕັ້ງແຕ່ການເຕີບໂຕຂອງລາຍໄດ້ໄປຈົນເຖິງການຮັກສາລູກຄ້າ ແລະ ການຂະຫຍາຍຕະຫຼາ"
-"ດ, ສະແດງໃຫ້ເຫັນເຖິງຄວາມສາມາດທາງດ້ານຍຸດທະສາດ ແລະ ຄວາມມຸ່ງໝັ້ນຂອງພວກເຮົາຕໍ່ກັບຄວາມສຳເລັດຂອງທຸລ"
-"ະກິດທີ່ຍືນຍົງ."
+"ຕົວຊີ້ວັດຫຼັກຂອງພວກເຮົາ, ນັບຕັ້ງແຕ່ການເຕີບໂຕຂອງລາຍໄດ້ໄປຈົນເຖິງການຮັກສາລູກຄ້າ ແລະ "
+"ການຂະຫຍາຍຕະຫຼາດ, ສະແດງໃຫ້ເຫັນເຖິງຄວາມສາມາດທາງດ້ານຍຸດທະສາດ ແລະ "
+"ຄວາມມຸ່ງໝັ້ນຂອງພວກເຮົາຕໍ່ກັບຄວາມສຳເລັດຂອງທຸລະກິດທີ່ຍືນຍົງ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_dynamic_snippet_template
@@ -13657,8 +13621,9 @@ msgid ""
 "driven by a relentless pursuit of innovation and a commitment to exceeding "
 "expectations."
 msgstr ""
-"ພັນທະກິດຂອງພວກເຮົາແມ່ນເພື່ອສ້າງປະສົບການທີ່ມີການປ່ຽນແປງ ແລະ ສົ່ງເສີມການເຕີບໂຕ, ໂດຍໄດ້ຮັບການຂັບເຄື່ອ"
-"ນຈາກການສະແຫວງຫານະວັດຕະກຳຢ່າງບໍ່ຢຸດຢັ້ງ ແລະ ຄວາມມຸ່ງໝັ້ນທີ່ຈະເຮັດໃຫ້ເກີນຄວາມຄາດຫວັງ."
+"ພັນທະກິດຂອງພວກເຮົາແມ່ນເພື່ອສ້າງປະສົບການທີ່ມີການປ່ຽນແປງ ແລະ ສົ່ງເສີມການເຕີບໂຕ, "
+"ໂດຍໄດ້ຮັບການຂັບເຄື່ອນຈາກການສະແຫວງຫານະວັດຕະກຳຢ່າງບໍ່ຢຸດຢັ້ງ ແລະ "
+"ຄວາມມຸ່ງໝັ້ນທີ່ຈະເຮັດໃຫ້ເກີນຄວາມຄາດຫວັງ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_process_steps
@@ -13671,8 +13636,8 @@ msgid ""
 "Our products are designed for small to medium size companies willing to "
 "optimize their performance."
 msgstr ""
-"ຜະລິດຕະພັນຂອງພວກເຮົາຖືກອອກແບບມາສຳລັບບໍລິສັດຂະໜາດນ້ອຍຫາຂະໜາດກາງ ທີ່ຕ້ອງການເພີ່ມປະສິດທິພາບໃນການ"
-"ເຮັດວຽກຂອງພວກເຂົາ."
+"ຜະລິດຕະພັນຂອງພວກເຮົາຖືກອອກແບບມາສຳລັບບໍລິສັດຂະໜາດນ້ອຍຫາຂະໜາດກາງ "
+"ທີ່ຕ້ອງການເພີ່ມປະສິດທິພາບໃນການເຮັດວຽກຂອງພວກເຂົາ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_services_s_image_text_2nd
@@ -13681,8 +13646,9 @@ msgid ""
 "industry knowledge to analyze your current strategies, identify "
 "opportunities, and formulate data-driven recommendations."
 msgstr ""
-"ທີ່ປຶກສາທີ່ມີປະສົບການຂອງພວກເຮົາໃຫ້ຄຳແນະນຳທີ່ປັບແຕ່ງສະເພາະ, ໂດຍນຳໃຊ້ຄວາມຮູ້ອັນເລິກເຊິ່ງໃນອຸດສາຫະກຳເ"
-"ພື່ອວິເຄາະຍຸດທະສາດປັດຈຸບັນຂອງທ່ານ, ກຳນົດໂອກາດ, ແລະ ສ້າງຂໍ້ສະເໜີແນະທີ່ອີງໃສ່ຂໍ້ມູນ."
+"ທີ່ປຶກສາທີ່ມີປະສົບການຂອງພວກເຮົາໃຫ້ຄຳແນະນຳທີ່ປັບແຕ່ງສະເພາະ, "
+"ໂດຍນຳໃຊ້ຄວາມຮູ້ອັນເລິກເຊິ່ງໃນອຸດສາຫະກຳເພື່ອວິເຄາະຍຸດທະສາດປັດຈຸບັນຂອງທ່ານ, ກຳນົດໂອກາດ, ແລະ "
+"ສ້າງຂໍ້ສະເໜີແນະທີ່ອີງໃສ່ຂໍ້ມູນ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_big_icons_subtitles
@@ -13693,8 +13659,7 @@ msgstr "ງານສຳມະນາ ແລະ ການຝຶກອົບຮົ�
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_age_verification_popup
 msgid "Our services are available only to adults of legal age."
-msgstr ""
-"ການບໍລິການຂອງພວກເຮົາສະຫງວນໄວ້ສະເພາະຜູ້ໃຫຍ່ທີ່ບັນລຸນິຕິພາວະຕາມກົດໝາຍເທົ່ານັ້ນ."
+msgstr "ການບໍລິການຂອງພວກເຮົາສະຫງວນໄວ້ສະເພາະຜູ້ໃຫຍ່ທີ່ບັນລຸນິຕິພາວະຕາມກົດໝາຍເທົ່ານັ້ນ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cards_soft
@@ -13703,8 +13668,9 @@ msgid ""
 "of the highest quality, bringing lasting value to your investment and "
 "ultimate customer satisfaction."
 msgstr ""
-"ການບໍລິການຂອງພວກເຮົາຖືກສ້າງຂຶ້ນເພື່ອຄວາມຍືນຍົງ, ຮັບປະກັນວ່າທຸກວິທີແກ້ໄຂທີ່ພວກເຮົາສະໜອງໃຫ້ແມ່ນມີຄຸນນະພາ"
-"ບສູງສຸດ, ນຳມາມູນຄ່າທີ່ຍືນຍົງໃຫ້ກັບການລົງທຶນຂອງທ່ານ ແລະ ຄວາມພໍໃຈສູງສຸດຂອງລູກຄ້າ."
+"ການບໍລິການຂອງພວກເຮົາຖືກສ້າງຂຶ້ນເພື່ອຄວາມຍືນຍົງ, "
+"ຮັບປະກັນວ່າທຸກວິທີແກ້ໄຂທີ່ພວກເຮົາສະໜອງໃຫ້ແມ່ນມີຄຸນນະພາບສູງສຸດ, "
+"ນຳມາມູນຄ່າທີ່ຍືນຍົງໃຫ້ກັບການລົງທຶນຂອງທ່ານ ແລະ ຄວາມພໍໃຈສູງສຸດຂອງລູກຄ້າ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_pricing_s_text_block_2nd
@@ -13714,9 +13680,10 @@ msgid ""
 "to businesses of all sizes, we offer pricing options that provide "
 "exceptional value without compromising on features or performance."
 msgstr ""
-"ແຜນຊອບແວຂອງພວກເຮົາຖືກອອກແບບມາເພື່ອຕອບສະໜອງຄວາມຕ້ອງການທີ່ຫຼາກຫຼາຍ, ຮັບປະກັນວ່າທ່ານຈະພົບສິ່ງທີ່ເໝ"
-"າະສົມທີ່ສຸດສຳລັບຄວາມຕ້ອງການຂອງທ່ານ. ຕັ້ງແຕ່ຜູ້ໃຊ້ທົ່ວໄປໄປຈົນເຖິງທຸລະກິດທຸກຂະໜາດ, ພວກເຮົາສະເໜີທາງເລືອ"
-"ກລາຄາທີ່ໃຫ້ຄຸນຄ່າພິເສດໂດຍບໍ່ຫຼຸດຜ່ອນຄຸນສົມບັດ ຫຼື ປະສິດທິພາບ."
+"ແຜນຊອບແວຂອງພວກເຮົາຖືກອອກແບບມາເພື່ອຕອບສະໜອງຄວາມຕ້ອງການທີ່ຫຼາກຫຼາຍ, "
+"ຮັບປະກັນວ່າທ່ານຈະພົບສິ່ງທີ່ເໝາະສົມທີ່ສຸດສຳລັບຄວາມຕ້ອງການຂອງທ່ານ. "
+"ຕັ້ງແຕ່ຜູ້ໃຊ້ທົ່ວໄປໄປຈົນເຖິງທຸລະກິດທຸກຂະໜາດ, "
+"ພວກເຮົາສະເໜີທາງເລືອກລາຄາທີ່ໃຫ້ຄຸນຄ່າພິເສດໂດຍບໍ່ຫຼຸດຜ່ອນຄຸນສົມບັດ ຫຼື ປະສິດທິພາບ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_discovery
@@ -13729,8 +13696,8 @@ msgid ""
 "Our support team is available 24/7 to assist with any inquiries or issues, "
 "ensuring you get help whenever you need it."
 msgstr ""
-"ທີມງານຊ່ວຍເຫຼືອຂອງພວກເຮົາມີໃຫ້ບໍລິການຕະຫຼອດ 24 ຊົ່ວໂມງ ເພື່ອຊ່ວຍເຫຼືອທຸກການສອບຖາມ ຫຼື ບັນຫາ, ເພື່ອໃຫ້"
-"ແນ່ໃຈວ່າທ່ານຈະໄດ້ຮັບຄວາມຊ່ວຍເຫຼືອທຸກຄັ້ງທີ່ທ່ານຕ້ອງການ."
+"ທີມງານຊ່ວຍເຫຼືອຂອງພວກເຮົາມີໃຫ້ບໍລິການຕະຫຼອດ 24 ຊົ່ວໂມງ ເພື່ອຊ່ວຍເຫຼືອທຸກການສອບຖາມ ຫຼື ບັນຫາ, "
+"ເພື່ອໃຫ້ແນ່ໃຈວ່າທ່ານຈະໄດ້ຮັບຄວາມຊ່ວຍເຫຼືອທຸກຄັ້ງທີ່ທ່ານຕ້ອງການ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -13738,8 +13705,8 @@ msgid ""
 "Our support team is available 24/7 to assist with any issues or questions "
 "you may have, ensuring that help is always within reach."
 msgstr ""
-"ທີມງານຊ່ວຍເຫຼືອຂອງພວກເຮົາມີໃຫ້ບໍລິການຕະຫຼອດ 24 ຊົ່ວໂມງ ເພື່ອຊ່ວຍເຫຼືອໃນທຸກບັນຫາ ຫຼື ຄຳຖາມທີ່ທ່ານອາດຈະ"
-"ມີ, ຮັບປະກັນວ່າຄວາມຊ່ວຍເຫຼືອຈະຢູ່ໃກ້ຕົວທ່ານສະເໝີ."
+"ທີມງານຊ່ວຍເຫຼືອຂອງພວກເຮົາມີໃຫ້ບໍລິການຕະຫຼອດ 24 ຊົ່ວໂມງ ເພື່ອຊ່ວຍເຫຼືອໃນທຸກບັນຫາ ຫຼື "
+"ຄຳຖາມທີ່ທ່ານອາດຈະມີ, ຮັບປະກັນວ່າຄວາມຊ່ວຍເຫຼືອຈະຢູ່ໃກ້ຕົວທ່ານສະເໝີ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_shapes
@@ -13769,9 +13736,9 @@ msgid ""
 "providing exceptional service. They reflect our dedication to integrity, "
 "collaboration, and client satisfaction."
 msgstr ""
-"ຄ່ານິຍົມຂອງພວກເຮົາກຳນົດວັດທະນະທຳຂອງພວກເຮົາ, ມີອິດທິພົນຕໍ່ການຕັດສິນໃຈ, ແລະ ແນະນຳພວກເຮົາໃນການໃຫ້"
-"ບໍລິການທີ່ໂດດເດັ່ນ. ພວກມັນສະທ້ອນໃຫ້ເຫັນເຖິງຄວາມອຸທິດຕົນຕໍ່ຄວາມຊື່ສັດ, ການຮ່ວມມື, ແລະ ຄວາມພໍໃຈຂອງລູກຄ້"
-"າ."
+"ຄ່ານິຍົມຂອງພວກເຮົາກຳນົດວັດທະນະທຳຂອງພວກເຮົາ, ມີອິດທິພົນຕໍ່ການຕັດສິນໃຈ, ແລະ "
+"ແນະນຳພວກເຮົາໃນການໃຫ້ບໍລິການທີ່ໂດດເດັ່ນ. ພວກມັນສະທ້ອນໃຫ້ເຫັນເຖິງຄວາມອຸທິດຕົນຕໍ່ຄວາມຊື່ສັດ, "
+"ການຮ່ວມມື, ແລະ ຄວາມພໍໃຈຂອງລູກຄ້າ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
@@ -13780,8 +13747,8 @@ msgid ""
 "Our website is designed for easy navigation, allowing you to find the "
 "information you need quickly and efficiently."
 msgstr ""
-"ເວັບໄຊຂອງພວກເຮົາຖືກອອກແບບມາໃຫ້ໃຊ້ງານງ່າຍ, ຊ່ວຍໃຫ້ທ່ານຊອກຫາຂໍ້ມູນທີ່ຕ້ອງການໄດ້ຢ່າງວ່ອງໄວ ແລະ ມີປະ"
-"ສິດທິພາບ."
+"ເວັບໄຊຂອງພວກເຮົາຖືກອອກແບບມາໃຫ້ໃຊ້ງານງ່າຍ, ຊ່ວຍໃຫ້ທ່ານຊອກຫາຂໍ້ມູນທີ່ຕ້ອງການໄດ້ຢ່າງວ່ອງໄວ ແລະ "
+"ມີປະສິດທິພາບ."
 
 #. module: website
 #. odoo-javascript
@@ -13944,8 +13911,7 @@ msgstr "ໝວດໝູ່ໜ້າ"
 msgid ""
 "Page code used to tell IAP website_service for which page a snippet list "
 "should be generated"
-msgstr ""
-"ລະຫັດໜ້າທີ່ໃຊ້ເພື່ອບອກ IAP website_service ວ່າຄວນສ້າງລາຍການ snippet ສຳລັບໜ້າໃດ"
+msgstr "ລະຫັດໜ້າທີ່ໃຊ້ເພື່ອບອກ IAP website_service ວ່າຄວນສ້າງລາຍການ snippet ສຳລັບໜ້າໃດ"
 
 #. module: website
 #. odoo-javascript
@@ -14018,8 +13984,8 @@ msgid ""
 "Paragraph with <strong>bold</strong>, <span class=\"text-muted\">muted</"
 "span> and <em>italic</em> texts"
 msgstr ""
-"ຫຍໍ້ໜ້າທີ່ມີຂໍ້ຄວາມ <strong>ຕົວເຂັ້ມ</strong>, <span class=\"text-muted\">ຕົວຈາງ</span> ແ"
-"ລະ <em>ຕົວອຽງ</em>"
+"ຫຍໍ້ໜ້າທີ່ມີຂໍ້ຄວາມ <strong>ຕົວເຂັ້ມ</strong>, <span class=\"text-muted\">ຕົວຈາງ</span> "
+"ແລະ <em>ຕົວອຽງ</em>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
@@ -14535,8 +14501,8 @@ msgid ""
 "Proficient in backend development, specializing in Python, Django, and "
 "database management to create efficient and scalable solutions."
 msgstr ""
-"ມີຄວາມຊຳນານໃນການພັດທະນາ backend, ໂດຍສະເພາະແມ່ນ Python, Django, ແລະ ການຈັດການຖານຂໍ້ມູ"
-"ນເພື່ອສ້າງວິທີແກ້ໄຂທີ່ມີປະສິດທິພາບ ແລະ ຮອງຮັບການຂະຫຍາຍຕົວ."
+"ມີຄວາມຊຳນານໃນການພັດທະນາ backend, ໂດຍສະເພາະແມ່ນ Python, Django, ແລະ "
+"ການຈັດການຖານຂໍ້ມູນເພື່ອສ້າງວິທີແກ້ໄຂທີ່ມີປະສິດທິພາບ ແລະ ຮອງຮັບການຂະຫຍາຍຕົວ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_tabs
@@ -14895,8 +14861,8 @@ msgid ""
 "Ready to embark on your auditory adventure? Order your EchoTunes Wireless "
 "Earbuds today and let the symphony begin."
 msgstr ""
-"ພ້ອມແລ້ວບໍ່ທີ່ຈະເລີ່ມຕົ້ນການຜະຈົນໄພທາງສຽງຂອງທ່ານ? ສັ່ງຊື້ຫູຟັງໄຮ້ສາຍ EchoTunes ຂອງທ່ານມື້ນີ້ ແລະ ໃຫ້ສຽ"
-"ງເພງເລີ່ມຕົ້ນຂຶ້ນ."
+"ພ້ອມແລ້ວບໍ່ທີ່ຈະເລີ່ມຕົ້ນການຜະຈົນໄພທາງສຽງຂອງທ່ານ? ສັ່ງຊື້ຫູຟັງໄຮ້ສາຍ EchoTunes ຂອງທ່ານມື້ນີ້ ແລະ "
+"ໃຫ້ສຽງເພງເລີ່ມຕົ້ນຂຶ້ນ."
 
 #. module: website
 #. odoo-javascript
@@ -15259,8 +15225,7 @@ msgstr "ຊັບພະຍາກອນ"
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.cookies_bar.xml:0
 msgid "Respecting your privacy is our priority."
-msgstr ""
-"ການເຄົາລົບຄວາມເປັນສ່ວນຕົວຂອງທ່ານຄືສິ່ງທີ່ພວກເຮົາໃຫ້ຄວາມສຳຄັນເປັນອັນດັບທຳອິດ."
+msgstr "ການເຄົາລົບຄວາມເປັນສ່ວນຕົວຂອງທ່ານຄືສິ່ງທີ່ພວກເຮົາໃຫ້ຄວາມສຳຄັນເປັນອັນດັບທຳອິດ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega
@@ -15415,8 +15380,8 @@ msgid ""
 "Robots.txt: This file tells to search engine crawlers which pages or files "
 "they can or can't request from your site."
 msgstr ""
-"Robots.txt: ໄຟລ໌ນີ້ບອກເຄື່ອງມືຄົ້ນຫາວ່າໜ້າໃດ ຫຼື ໄຟລ໌ໃດທີ່ພວກເຂົາສາມາດ ຫຼື ບໍ່ສາມາດຮ້ອງຂໍຈາກເວັບໄຊຂອ"
-"ງທ່ານ."
+"Robots.txt: ໄຟລ໌ນີ້ບອກເຄື່ອງມືຄົ້ນຫາວ່າໜ້າໃດ ຫຼື ໄຟລ໌ໃດທີ່ພວກເຂົາສາມາດ ຫຼື "
+"ບໍ່ສາມາດຮ້ອງຂໍຈາກເວັບໄຊຂອງທ່ານ."
 
 #. module: website
 #. odoo-javascript
@@ -15432,8 +15397,8 @@ msgid ""
 "Round-the-clock assistance is available, ensuring issues are resolved "
 "quickly, keeping your operations running smoothly."
 msgstr ""
-"ມີຄວາມຊ່ວຍເຫຼືອຕະຫຼອດ 24 ຊົ່ວໂມງ, ຮັບປະກັນວ່າບັນຫາຈະຖືກແກ້ໄຂຢ່າງໄວວາ, ເພື່ອໃຫ້ການດຳເນີນງານຂອງທ່າ"
-"ນເປັນໄປຢ່າງລຽບງ່າຍ."
+"ມີຄວາມຊ່ວຍເຫຼືອຕະຫຼອດ 24 ຊົ່ວໂມງ, ຮັບປະກັນວ່າບັນຫາຈະຖືກແກ້ໄຂຢ່າງໄວວາ, "
+"ເພື່ອໃຫ້ການດຳເນີນງານຂອງທ່ານເປັນໄປຢ່າງລຽບງ່າຍ."
 
 #. module: website
 #. odoo-javascript
@@ -15721,8 +15686,8 @@ msgid ""
 "picture, in just a few clicks."
 msgstr ""
 "ຄົ້ນຫາໃນກ່ອງໂຕ້ຕອບສື່ເມື່ອທ່ານຕ້ອງການຮູບພາບເພື່ອປະກອບເວັບໄຊຂອງທ່ານ. ການເຊື່ອມຕໍ່ຂອງ Odoo ກັບ "
-"Unsplash, ເຊິ່ງມີຮູບພາບຄຸນນະພາບສູງ ແລະ ບໍ່ມີລິຂະສິດຫຼາຍລ້ານຮູບ, ເຮັດໃຫ້ທ່ານສາມາດໄດ້ຮູບພາບທີ່ສົມບູນແບ"
-"ບໄດ້ໃນພຽງແຕ່ບໍ່ກີ່ຄລິກ."
+"Unsplash, ເຊິ່ງມີຮູບພາບຄຸນນະພາບສູງ ແລະ ບໍ່ມີລິຂະສິດຫຼາຍລ້ານຮູບ, "
+"ເຮັດໃຫ້ທ່ານສາມາດໄດ້ຮູບພາບທີ່ສົມບູນແບບໄດ້ໃນພຽງແຕ່ບໍ່ກີ່ຄລິກ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_searchbar
@@ -16039,8 +16004,7 @@ msgstr "ຕັ້ງຄ່າຟໍຣຳ (Forum) ໃໝ່"
 msgid ""
 "Set your website's name and favicon, displayed in the browser tab next to "
 "the page title."
-msgstr ""
-"ຕັ້ງຊື່ເວັບໄຊ ແລະ ໄອຄອນ favicon ຂອງທ່ານ, ເຊິ່ງຈະສະແດງໃນແຖບບຣາວເຊີຂ້າງຫົວຂໍ້ໜ້າ."
+msgstr "ຕັ້ງຊື່ເວັບໄຊ ແລະ ໄອຄອນ favicon ຂອງທ່ານ, ເຊິ່ງຈະສະແດງໃນແຖບບຣາວເຊີຂ້າງຫົວຂໍ້ໜ້າ."
 
 #. module: website
 #. odoo-javascript
@@ -16316,8 +16280,7 @@ msgstr "ເຂົ້າສູ່ລະບົບ"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega_columns
 msgid "Sign up to receive the best promotions, our events and personal advice."
-msgstr ""
-"ລົງທະບຽນເພື່ອຮັບໂປຣໂມຊັນພິເສດສຸດ, ຂ່າວສານງານກິດຈະກຳ ແລະ ຄຳແນະນຳສະເພາະສຳລັບທ່ານ."
+msgstr "ລົງທະບຽນເພື່ອຮັບໂປຣໂມຊັນພິເສດສຸດ, ຂ່າວສານງານກິດຈະກຳ ແລະ ຄຳແນະນຳສະເພາະສຳລັບທ່ານ."
 
 #. module: website
 #: model:ir.model.fields.selection,name:website.selection__ir_ui_view__visibility__connected
@@ -16340,8 +16303,8 @@ msgid ""
 "Simple forms. Natural textures. Timeless design. Crafted to bring calm and "
 "clarity to your space."
 msgstr ""
-"ຮູບແບບທີ່ງ່າຍດາຍ. ພື້ນຜິວແບບທຳມະຊາດ. ການອອກແບບທີ່ຢູ່ເໜືອກິດຈະການ. ສ້າງຂຶ້ນເພື່ອມອບຄວາມສະຫງົບ ແລ"
-"ະ ຄວາມຊັດເຈນໃຫ້ກັບພື້ນທີ່ຂອງທ່ານ."
+"ຮູບແບບທີ່ງ່າຍດາຍ. ພື້ນຜິວແບບທຳມະຊາດ. ການອອກແບບທີ່ຢູ່ເໜືອກິດຈະການ. ສ້າງຂຶ້ນເພື່ອມອບຄວາມສະຫງົບ "
+"ແລະ ຄວາມຊັດເຈນໃຫ້ກັບພື້ນທີ່ຂອງທ່ານ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_banner_product
@@ -16350,8 +16313,8 @@ msgid ""
 "Simple forms. Natural textures. Timeless design. Explore our new furniture "
 "collection—crafted to bring calm and clarity to your space."
 msgstr ""
-"ຮູບແບບທີ່ງ່າຍດາຍ. ພື້ນຜິວແບບທຳມະຊາດ. ການອອກແບບທີ່ຢູ່ເໜືອກິດຈະການ. ຄົ້ນຫາຄໍເລັກຊັນເຟີນີເຈີໃໝ່ຂອງພວກເ"
-"ຮົາ—ທີ່ສ້າງຂຶ້ນເພື່ອມອບຄວາມສະຫງົບ ແລະ ຄວາມຊັດເຈນໃຫ້ກັບພື້ນທີ່ຂອງທ່ານ."
+"ຮູບແບບທີ່ງ່າຍດາຍ. ພື້ນຜິວແບບທຳມະຊາດ. ການອອກແບບທີ່ຢູ່ເໜືອກິດຈະການ. "
+"ຄົ້ນຫາຄໍເລັກຊັນເຟີນີເຈີໃໝ່ຂອງພວກເຮົາ—ທີ່ສ້າງຂຶ້ນເພື່ອມອບຄວາມສະຫງົບ ແລະ ຄວາມຊັດເຈນໃຫ້ກັບພື້ນທີ່ຂອງທ່ານ."
 
 #. module: website
 #. odoo-javascript
@@ -16430,8 +16393,8 @@ msgid ""
 "Sleek, minimalist space offering meticulously brewed coffee and espresso "
 "drinks using freshly roasted beans."
 msgstr ""
-"ພື້ນທີ່ທີ່ທັນສະໄໝ, ແບບມິນິມອລ ໃຫ້ບໍລິການກາເຟ ແລະ ເອສເປຣສໂຊ ທີ່ຜ່ານການຊົງຢ່າງພິຖີພິຖັນ ໂດຍໃຊ້ແກ່ນກາເຟ"
-"ຂົ້ວໃໝ່."
+"ພື້ນທີ່ທີ່ທັນສະໄໝ, ແບບມິນິມອລ ໃຫ້ບໍລິການກາເຟ ແລະ ເອສເປຣສໂຊ ທີ່ຜ່ານການຊົງຢ່າງພິຖີພິຖັນ "
+"ໂດຍໃຊ້ແກ່ນກາເຟຂົ້ວໃໝ່."
 
 #. module: website
 #. odoo-javascript
@@ -16528,8 +16491,8 @@ msgid ""
 "Small text. Lorem <b>ipsum dolor sit amet</b>, consectetur adipiscing elit. "
 "<i>Integer posuere erat a ante</i>."
 msgstr ""
-"ຂໍ້ຄວາມນ້ອຍ. Lorem <b>ipsum dolor sit amet</b>, consectetur adipiscing elit. <i>"
-"Integer posuere erat a ante</i>."
+"ຂໍ້ຄວາມນ້ອຍ. Lorem <b>ipsum dolor sit amet</b>, consectetur adipiscing elit. "
+"<i>Integer posuere erat a ante</i>."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_odoo_menu
@@ -16577,8 +16540,7 @@ msgstr "ໂຊຟາທີ່ສ້າງມາເພື່ອຄວາມທົ
 msgid ""
 "Soft, sweet dough rolled with cinnamon and sugar, topped with a rich cream "
 "cheese frosting."
-msgstr ""
-"ແປ້ງທີ່ນຸ່ມ ແລະ ຫວານ ມ້ວນດ້ວຍອົບເຊີຍ ແລະ ນ້ຳຕານ, ໂຮຍໜ້າດ້ວຍຄຣີມຊີສທີ່ເຂັ້ມຂຸ້ນ."
+msgstr "ແປ້ງທີ່ນຸ່ມ ແລະ ຫວານ ມ້ວນດ້ວຍອົບເຊີຍ ແລະ ນ້ຳຕານ, ໂຮຍໜ້າດ້ວຍຄຣີມຊີສທີ່ເຂັ້ມຂຸ້ນ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -16638,8 +16600,8 @@ msgid ""
 "talks on various topics. Stay on top of the latest business management "
 "trends &amp; technologies"
 msgstr ""
-"ວິທະຍາກອນຈາກທົ່ວທຸກມຸມໂລກຈະມາຮ່ວມກັບຊ່ຽວຊານຂອງພວກເຮົາ ເພື່ອບັນຍາຍທີ່ສ້າງແຮງບັນດານໃຈໃນຫົວຂໍ້ຕ່າງ"
-"ໆ. ຕິດຕາມທ່າອ່ຽງ ແລະ ເຕັກໂນໂລຊີການຈັດການທຸລະກິດຫຼ້າສຸດ"
+"ວິທະຍາກອນຈາກທົ່ວທຸກມຸມໂລກຈະມາຮ່ວມກັບຊ່ຽວຊານຂອງພວກເຮົາ "
+"ເພື່ອບັນຍາຍທີ່ສ້າງແຮງບັນດານໃຈໃນຫົວຂໍ້ຕ່າງໆ. ຕິດຕາມທ່າອ່ຽງ ແລະ ເຕັກໂນໂລຊີການຈັດການທຸລະກິດຫຼ້າສຸດ"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website__specific_user_account
@@ -16755,8 +16717,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_tabs
 #: model_terms:ir.ui.view,arch_db:website.s_text_image
 msgid "Start with the customer – find out what they want and give it to them."
-msgstr ""
-"ເລີ່ມຕົ້ນທີ່ລູກຄ້າ – ຊອກຫາສິ່ງທີ່ເຂົາເຈົ້າຕ້ອງການ ແລະ ຕອບສະໜອງໃຫ້ເຂົາເຈົ້າ."
+msgstr "ເລີ່ມຕົ້ນທີ່ລູກຄ້າ – ຊອກຫາສິ່ງທີ່ເຂົາເຈົ້າຕ້ອງການ ແລະ ຕອບສະໜອງໃຫ້ເຂົາເຈົ້າ."
 
 #. module: website
 #. odoo-javascript
@@ -16783,8 +16744,9 @@ msgid ""
 "innovative force. Our journey, born in a garage, reflects the power of "
 "passion and hard work."
 msgstr ""
-"ກ້າວເຂົ້າສູ່ອະດີດຂອງພວກເຮົາ ແລະ ເຫັນການປ່ຽນແປງຂອງແນວຄິດທີ່ງ່າຍດາຍໄປສູ່ພະລັງແຫ່ງນະວັດຕະກຳ. ການເດີ"
-"ນທາງຂອງພວກເຮົາ, ທີ່ເລີ່ມຕົ້ນໃນໂຮງລົດ, ສະທ້ອນໃຫ້ເຫັນເຖິງພະລັງຂອງຄວາມມັກ ແລະ ຄວາມພະຍາຍາມ."
+"ກ້າວເຂົ້າສູ່ອະດີດຂອງພວກເຮົາ ແລະ ເຫັນການປ່ຽນແປງຂອງແນວຄິດທີ່ງ່າຍດາຍໄປສູ່ພະລັງແຫ່ງນະວັດຕະກຳ. "
+"ການເດີນທາງຂອງພວກເຮົາ, ທີ່ເລີ່ມຕົ້ນໃນໂຮງລົດ, ສະທ້ອນໃຫ້ເຫັນເຖິງພະລັງຂອງຄວາມມັກ ແລະ "
+"ຄວາມພະຍາຍາມ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_split_intro
@@ -16793,8 +16755,9 @@ msgid ""
 "unique needs of your business. Don’t let outdated processes hold you back "
 "any longer."
 msgstr ""
-"ກ້າວສູ່ອະນາຄົດດ້ວຍນະວັດຕະກຳຂອງພວກເຮົາ ທີ່ຖືກອອກແບບມາເພື່ອຕອບສະໜອງຄວາມຕ້ອງການສະເພາະຂອງທຸລະກິດ"
-"ທ່ານ. ຢ່າປ່ອຍໃຫ້ຂະບວນການທີ່ຫຼ້າສະໄໝມາຂັດຂວາງທ່ານອີກຕໍ່ໄປ."
+"ກ້າວສູ່ອະນາຄົດດ້ວຍນະວັດຕະກຳຂອງພວກເຮົາ "
+"ທີ່ຖືກອອກແບບມາເພື່ອຕອບສະໜອງຄວາມຕ້ອງການສະເພາະຂອງທຸລະກິດທ່ານ. "
+"ຢ່າປ່ອຍໃຫ້ຂະບວນການທີ່ຫຼ້າສະໄໝມາຂັດຂວາງທ່ານອີກຕໍ່ໄປ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -16815,8 +16778,7 @@ msgstr "ຕູ້ເກັບເຄື່ອງ"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
 msgid "Storytelling is powerful.<br/> It draws readers in and engages them."
-msgstr ""
-"ການເລົ່າເລື່ອງມີພະລັງ.<br/> ມັນດຶງດູດຜູ້ອ່ານ ແລະ ເຮັດໃຫ້ພວກເຂົາມີສ່ວນຮ່ວມ."
+msgstr "ການເລົ່າເລື່ອງມີພະລັງ.<br/> ມັນດຶງດູດຜູ້ອ່ານ ແລະ ເຮັດໃຫ້ພວກເຂົາມີສ່ວນຮ່ວມ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_services_s_image_text
@@ -17181,6 +17143,12 @@ msgid "Template fallback"
 msgstr "ເທມເພລດສຳຮອງ"
 
 #. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "Template not found: '%(error)s' (website: %(website_id)s)"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega_columns
 msgid "Terms and Conditions"
@@ -17327,8 +17295,9 @@ msgid ""
 "accessibility and SEO. If you select this option, the image will be hidden "
 "from screen readers and not considered for your SEO."
 msgstr ""
-"ຄຸນລັກສະນະ alt ແມ່ນໃຊ້ເພື່ອອະທິບາຍຮູບພາບ, ເພີ່ມປະສິດທິພາບທັງການເຂົ້າເຖິງ ແລະ SEO. ຖ້າທ່ານເລືອກຕົວ"
-"ເລືອກນີ້, ຮູບພາບຈະຖືກເຊື່ອງຈາກເຄື່ອງອ່ານໜ້າຈໍ ແລະ ຈະບໍ່ຖືກນຳມາພິຈາລະນາສຳລັບ SEO ຂອງທ່ານ."
+"ຄຸນລັກສະນະ alt ແມ່ນໃຊ້ເພື່ອອະທິບາຍຮູບພາບ, ເພີ່ມປະສິດທິພາບທັງການເຂົ້າເຖິງ ແລະ SEO. "
+"ຖ້າທ່ານເລືອກຕົວເລືອກນີ້, ຮູບພາບຈະຖືກເຊື່ອງຈາກເຄື່ອງອ່ານໜ້າຈໍ ແລະ ຈະບໍ່ຖືກນຳມາພິຈາລະນາສຳລັບ SEO "
+"ຂອງທ່ານ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_landing_s_showcase
@@ -17337,8 +17306,8 @@ msgid ""
 "battery life that lasts up to 17h, you can enjoy your favorite tunes without "
 "interruption."
 msgstr ""
-"ເຄສຊາດຂະໜາດນ້ອຍໃຫ້ຄວາມສະດວກໃນການຊາດລະຫວ່າງເດີນທາງ ດ້ວຍອາຍຸແບັດເຕີຣີທີ່ໃຊ້ໄດ້ດົນເຖິງ 17 ຊົ່ວໂມ"
-"ງ, ທ່ານສາມາດເພີດເພີນກັບເພງທີ່ທ່ານມັກໄດ້ໂດຍບໍ່ມີການລົບກວນ."
+"ເຄສຊາດຂະໜາດນ້ອຍໃຫ້ຄວາມສະດວກໃນການຊາດລະຫວ່າງເດີນທາງ ດ້ວຍອາຍຸແບັດເຕີຣີທີ່ໃຊ້ໄດ້ດົນເຖິງ 17 "
+"ຊົ່ວໂມງ, ທ່ານສາມາດເພີດເພີນກັບເພງທີ່ທ່ານມັກໄດ້ໂດຍບໍ່ມີການລົບກວນ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -17363,16 +17332,14 @@ msgstr ""
 msgid ""
 "The description will be generated by social media based on page content "
 "unless you specify one."
-msgstr ""
-"ຄຳອະທິບາຍຈະຖືກສ້າງຂຶ້ນໂດຍສື່ສັງຄົມອອນລາຍໂດຍອີງຕາມເນື້ອໃນຂອງໜ້າ ເວັ້ນເສຍແຕ່ທ່ານຈະລະບຸໄວ້."
+msgstr "ຄຳອະທິບາຍຈະຖືກສ້າງຂຶ້ນໂດຍສື່ສັງຄົມອອນລາຍໂດຍອີງຕາມເນື້ອໃນຂອງໜ້າ ເວັ້ນເສຍແຕ່ທ່ານຈະລະບຸໄວ້."
 
 #. module: website
 #. odoo-python
 #: code:addons/website/models/website.py:0
 msgid ""
 "The domain path cannot contain relative path segments like '/./' or '/../'."
-msgstr ""
-"ເສັ້ນທາງໂດເມນບໍ່ສາມາດມີສ່ວນຂອງເສັ້ນທາງທີ່ກ່ຽວຂ້ອງເຊັ່ນ '/./' ຫຼື '/../'."
+msgstr "ເສັ້ນທາງໂດເມນບໍ່ສາມາດມີສ່ວນຂອງເສັ້ນທາງທີ່ກ່ຽວຂ້ອງເຊັ່ນ '/./' ຫຼື '/../'."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_striped
@@ -17465,8 +17432,8 @@ msgid ""
 "The intuitive design ensures smooth navigation, enhancing user experience "
 "without needing technical expertise."
 msgstr ""
-"ການອອກແບບທີ່ເຂົ້າໃຈງ່າຍ ຮັບປະກັນການນຳທາງທີ່ສະດວກສະບາຍ, ເພີ່ມປະສົບການຜູ້ໃຊ້ໂດຍບໍ່ຈຳເປັນຕ້ອງມີຄວາມຊ່"
-"ຽວຊານທາງດ້ານເຕັກນິກ."
+"ການອອກແບບທີ່ເຂົ້າໃຈງ່າຍ ຮັບປະກັນການນຳທາງທີ່ສະດວກສະບາຍ, "
+"ເພີ່ມປະສົບການຜູ້ໃຊ້ໂດຍບໍ່ຈຳເປັນຕ້ອງມີຄວາມຊ່ຽວຊານທາງດ້ານເຕັກນິກ."
 
 #. module: website
 #. odoo-javascript
@@ -17534,8 +17501,8 @@ msgid ""
 "page\" has been deleted. Please contact your administrator to restore it or "
 "reinstall the website module."
 msgstr ""
-"ການກະທຳທີ່ກຳນົດເວລາ \"Website Publish Mixin: Publish scheduled website page\" ຖືກ"
-"ລຶບແລ້ວ. ກະລຸນາຕິດຕໍ່ຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານເພື່ອຄືນຄ່າ ຫຼື ຕິດຕັ້ງໂມດູນເວັບໄຊຄືນໃໝ່."
+"ການກະທຳທີ່ກຳນົດເວລາ \"Website Publish Mixin: Publish scheduled website page\" "
+"ຖືກລຶບແລ້ວ. ກະລຸນາຕິດຕໍ່ຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານເພື່ອຄືນຄ່າ ຫຼື ຕິດຕັ້ງໂມດູນເວັບໄຊຄືນໃໝ່."
 
 #. module: website
 #. odoo-javascript
@@ -17558,14 +17525,12 @@ msgstr "ທີມງານ"
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid ""
 "The website will not work properly if you reject or discard those cookies."
-msgstr ""
-"ເວັບໄຊຈະບໍ່ສາມາດເຮັດວຽກໄດ້ຢ່າງຖືກຕ້ອງ ຫາກທ່ານປະຕິເສດ ຫຼື ລຶບຄຸກກີ້ເຫຼົ່ານີ້."
+msgstr "ເວັບໄຊຈະບໍ່ສາມາດເຮັດວຽກໄດ້ຢ່າງຖືກຕ້ອງ ຫາກທ່ານປະຕິເສດ ຫຼື ລຶບຄຸກກີ້ເຫຼົ່ານີ້."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid "The website will still work if you reject or discard those cookies."
-msgstr ""
-"ເວັບໄຊຍັງຄົງເຮັດວຽກໄດ້ຕາມປົກກະຕິ ເຖິງແມ່ນວ່າທ່ານຈະປະຕິເສດ ຫຼື ລຶບຄຸກກີ້ເຫຼົ່ານີ້ກໍຕາມ."
+msgstr "ເວັບໄຊຍັງຄົງເຮັດວຽກໄດ້ຕາມປົກກະຕິ ເຖິງແມ່ນວ່າທ່ານຈະປະຕິເສດ ຫຼື ລຶບຄຸກກີ້ເຫຼົ່ານີ້ກໍຕາມ."
 
 #. module: website
 #. odoo-javascript
@@ -17696,9 +17661,9 @@ msgid ""
 "nutrition guidance, and expert coaching. Elevate your fitness level and "
 "achieve feats you never thought possible."
 msgstr ""
-"ໂປຣແກຣມການຝຶກສອນນີ້ສະເໜີການອອກກຳລັງກາຍທີ່ເນັ້ນຄວາມແຂງແຮງເປັນພິເສດ, ຄຳແນະນຳດ້ານໂພຊະນາການ ແ"
-"ລະ ການຝຶກສອນຈາກຜູ້ຊ່ຽວຊານ. ຍົກລະດັບຄວາມຟິດຂອງທ່ານ ແລະ ບັນລຸຜົນສຳເລັດທີ່ທ່ານບໍ່ເຄີຍຄິດວ່າມັນຈະເປັນໄປ"
-"ໄດ້."
+"ໂປຣແກຣມການຝຶກສອນນີ້ສະເໜີການອອກກຳລັງກາຍທີ່ເນັ້ນຄວາມແຂງແຮງເປັນພິເສດ, ຄຳແນະນຳດ້ານໂພຊະນາການ "
+"ແລະ ການຝຶກສອນຈາກຜູ້ຊ່ຽວຊານ. ຍົກລະດັບຄວາມຟິດຂອງທ່ານ ແລະ "
+"ບັນລຸຜົນສຳເລັດທີ່ທ່ານບໍ່ເຄີຍຄິດວ່າມັນຈະເປັນໄປໄດ້."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_res_config_settings__favicon
@@ -17739,8 +17704,8 @@ msgid ""
 "if in dev-xml mode."
 msgstr ""
 "ຟິວນີ້ຄວນຖືກນຳໃຊ້ເມື່ອເຂົ້າເຖິງໂຄງສ້າງມຸມມອງ (view arch). ມັນຈະມີການແປພາສາ.\n"
-"                               ໝາຍເຫດ ມັນຈະອ່ານຈາກ `arch_db` ຫຼື `arch_fs` ຫາກຢູ່ໃນ"
-"ໂໝດ dev-xml."
+"                               ໝາຍເຫດ ມັນຈະອ່ານຈາກ `arch_db` ຫຼື `arch_fs` "
+"ຫາກຢູ່ໃນໂໝດ dev-xml."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_controller_page__arch_db
@@ -17757,8 +17722,8 @@ msgid ""
 "to (soft) reset a broken view."
 msgstr ""
 "ຟິວນີ້ຈະບັນທຶກ `arch_db` ປັດຈຸບັນກ່ອນທີ່ຈະຂຽນທັບ.\n"
-"                                                                         ມີປະໂ"
-"ຫຍດໃນການຣີເຊັດ (soft reset) ມຸມມອງທີ່ເພ."
+"                                                                         ມີປະໂຫຍດໃນການຣີເຊັດ "
+"(soft reset) ມຸມມອງທີ່ເພ."
 
 #. module: website
 #. odoo-javascript
@@ -17766,8 +17731,7 @@ msgstr ""
 msgid ""
 "This font already exists, you can only add it as a local font to replace the "
 "server version."
-msgstr ""
-"ຟອນນີ້ມີຢູ່ແລ້ວ, ທ່ານສາມາດເພີ່ມມັນເປັນຟອນທ້ອງຖິ່ນເພື່ອແທນທີ່ເວີຊັນຂອງເຊີເວີເທົ່ານັ້ນ."
+msgstr "ຟອນນີ້ມີຢູ່ແລ້ວ, ທ່ານສາມາດເພີ່ມມັນເປັນຟອນທ້ອງຖິ່ນເພື່ອແທນທີ່ເວີຊັນຂອງເຊີເວີເທົ່ານັ້ນ."
 
 #. module: website
 #. odoo-python
@@ -17815,8 +17779,8 @@ msgid ""
 "This is a wider card with supporting text below as a natural lead-in to "
 "additional content. This content is a little bit longer."
 msgstr ""
-"ນີ້ແມ່ນບັດທີ່ມີຄວາມກວ້າງກວ່າ ພ້ອມດ້ວຍຂໍ້ຄວາມສະໜັບສະໜູນດ້ານລຸ່ມ ເພື່ອນຳເຂົ້າສູ່ເນື້ອໃນເພີ່ມເຕີມ. ເນື້ອໃນນີ້ຈະຍາ"
-"ວກວ່າໜ້ອຍໜຶ່ງ."
+"ນີ້ແມ່ນບັດທີ່ມີຄວາມກວ້າງກວ່າ ພ້ອມດ້ວຍຂໍ້ຄວາມສະໜັບສະໜູນດ້ານລຸ່ມ ເພື່ອນຳເຂົ້າສູ່ເນື້ອໃນເພີ່ມເຕີມ. "
+"ເນື້ອໃນນີ້ຈະຍາວກວ່າໜ້ອຍໜຶ່ງ."
 
 #. module: website
 #: model:ir.ui.view,website_meta_description:website.contactus
@@ -17858,8 +17822,7 @@ msgstr "ໜ້ານີ້ຍັງບໍ່ທັນມີເທື່ອ. ທ�
 msgid ""
 "This page may be corrupted if you save these changes. Are you sure you want "
 "to continue?"
-msgstr ""
-"ໜ້ານີ້ອາດຈະເສຍຫາຍ ຖ້າທ່ານບັນທຶກການປ່ຽນແປງເຫຼົ່ານີ້. ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການສືບຕໍ່?"
+msgstr "ໜ້ານີ້ອາດຈະເສຍຫາຍ ຖ້າທ່ານບັນທຶກການປ່ຽນແປງເຫຼົ່ານີ້. ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການສືບຕໍ່?"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.view_website_rewrite_form
@@ -17895,8 +17858,8 @@ msgid ""
 "This value will be escaped to be compliant with all major browsers and used "
 "in url. Keep it empty to use the default name of the record."
 msgstr ""
-"ຄ່ານີ້ຈະຖືກແປງເພື່ອໃຫ້ຮອງຮັບກັບບຣາວເຊີຫຼັກທັງໝົດ ແລະ ຖືກນຳໃຊ້ໃນ URL. ປະວ່າງໄວ້ເພື່ອໃຊ້ຊື່ເລີ່ມຕົ້ນຂອງບັນທຶ"
-"ກ."
+"ຄ່ານີ້ຈະຖືກແປງເພື່ອໃຫ້ຮອງຮັບກັບບຣາວເຊີຫຼັກທັງໝົດ ແລະ ຖືກນຳໃຊ້ໃນ URL. "
+"ປະວ່າງໄວ້ເພື່ອໃຊ້ຊື່ເລີ່ມຕົ້ນຂອງບັນທຶກ."
 
 #. module: website
 #. odoo-javascript
@@ -18015,8 +17978,7 @@ msgstr "ຄຳແນະນຳ: ເພີ່ມຮູບຊົງເພື່ອ�
 #: model:digest.tip,name:website.digest_tip_website_0
 #: model_terms:digest.tip,tip_description:website.digest_tip_website_0
 msgid "Tip: Engage with visitors to convert them into leads"
-msgstr ""
-"ຄຳແນະນຳ: ມີສ່ວນຮ່ວມກັບຜູ້ເຂົ້າຊົມເພື່ອປ່ຽນພວກເຂົາໃຫ້ເປັນລູກຄ້າທີ່ມຸ່ງຫວັງ"
+msgstr "ຄຳແນະນຳ: ມີສ່ວນຮ່ວມກັບຜູ້ເຂົ້າຊົມເພື່ອປ່ຽນພວກເຂົາໃຫ້ເປັນລູກຄ້າທີ່ມຸ່ງຫວັງ"
 
 #. module: website
 #. odoo-javascript
@@ -18084,8 +18046,8 @@ msgid ""
 "right icon of each block. Then, duplicate one of the columns to create a new "
 "one as a copy."
 msgstr ""
-"ເພື່ອເພີ່ມຖັນທີສີ່, ໃຫ້ຫຼຸດຂະໜາດຂອງສາມຖັນນີ້ລົງໂດຍໃຊ້ໄອຄອນທາງຂວາຂອງແຕ່ລະບລັອກ. ຈາກນັ້ນ, ໃຫ້ສຳເນົາຖັນ"
-"ໃດໜຶ່ງເພື່ອສ້າງຖັນໃໝ່."
+"ເພື່ອເພີ່ມຖັນທີສີ່, ໃຫ້ຫຼຸດຂະໜາດຂອງສາມຖັນນີ້ລົງໂດຍໃຊ້ໄອຄອນທາງຂວາຂອງແຕ່ລະບລັອກ. ຈາກນັ້ນ, "
+"ໃຫ້ສຳເນົາຖັນໃດໜຶ່ງເພື່ອສ້າງຖັນໃໝ່."
 
 #. module: website
 #. odoo-javascript
@@ -18093,8 +18055,7 @@ msgstr ""
 msgid ""
 "To add your page to this category, open the page properties: \"Site -> "
 "Properties\"."
-msgstr ""
-"ເພື່ອເພີ່ມໜ້າຂອງທ່ານໃສ່ໃນໝວດໝູ່ນີ້, ໃຫ້ເປີດຄຸນສົມບັດຂອງໜ້າ: \"ເວັບໄຊ -> ຄຸນສົມບັດ\"."
+msgstr "ເພື່ອເພີ່ມໜ້າຂອງທ່ານໃສ່ໃນໝວດໝູ່ນີ້, ໃຫ້ເປີດຄຸນສົມບັດຂອງໜ້າ: \"ເວັບໄຊ -> ຄຸນສົມບັດ\"."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_tabs
@@ -18115,16 +18076,15 @@ msgid ""
 "will recommend you the best keywords to target. Then adapt your title and "
 "description accordingly to boost your traffic."
 msgstr ""
-"ເພື່ອໃຫ້ໄດ້ຜູ້ເຂົ້າຊົມຫຼາຍຂຶ້ນ, ທ່ານຄວນກຳນົດຄຳຫຼັກທີ່ຖືກຄົ້ນຫາເລື້ອຍໆໃນ Google. ດ້ວຍເຄື່ອງມື SEO ທີ່ມີມາໃ"
-"ຫ້, ເມື່ອທ່ານກຳນົດຄຳຫຼັກສອງສາມຄຳ, Odoo ຈະແນະນຳຄຳຫຼັກທີ່ດີທີ່ສຸດໃຫ້ທ່ານ. ຈາກນັ້ນໃຫ້ປັບຫົວຂໍ້ ແລະ ຄຳອະທິ"
-"ບາຍຂອງທ່ານຕາມນັ້ນເພື່ອເພີ່ມຈຳນວນຜູ້ເຂົ້າຊົມ."
+"ເພື່ອໃຫ້ໄດ້ຜູ້ເຂົ້າຊົມຫຼາຍຂຶ້ນ, ທ່ານຄວນກຳນົດຄຳຫຼັກທີ່ຖືກຄົ້ນຫາເລື້ອຍໆໃນ Google. ດ້ວຍເຄື່ອງມື SEO "
+"ທີ່ມີມາໃຫ້, ເມື່ອທ່ານກຳນົດຄຳຫຼັກສອງສາມຄຳ, Odoo ຈະແນະນຳຄຳຫຼັກທີ່ດີທີ່ສຸດໃຫ້ທ່ານ. ຈາກນັ້ນໃຫ້ປັບຫົວຂໍ້ ແລະ "
+"ຄຳອະທິບາຍຂອງທ່ານຕາມນັ້ນເພື່ອເພີ່ມຈຳນວນຜູ້ເຂົ້າຊົມ."
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.cookies_warning.xml:0
 msgid "To see the interactive content, you need to accept optional cookies."
-msgstr ""
-"ເພື່ອເບິ່ງເນື້ອໃນທີ່ມີການໂຕ້ຕອບ, ທ່ານຈຳເປັນຕ້ອງຍອມຮັບຄຸກກີ້ທີ່ເປັນທາງເລືອກ."
+msgstr "ເພື່ອເບິ່ງເນື້ອໃນທີ່ມີການໂຕ້ຕອບ, ທ່ານຈຳເປັນຕ້ອງຍອມຮັບຄຸກກີ້ທີ່ເປັນທາງເລືອກ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -18312,9 +18272,9 @@ msgid ""
 "meets functionality. Elevate your space with pieces that blend style and "
 "comfort seamlessly."
 msgstr ""
-"ປ່ຽນສະພາບແວດລ້ອມຂອງທ່ານດ້ວຍຄໍເລັກຊັນການອອກແບບໃໝ່ຂອງພວກເຮົາ, ບ່ອນທີ່ຄວາມສະຫງ່າງາມມາພ້ອມກັບການ"
-"ໃຊ້ງານ. ຍົກລະດັບພື້ນທີ່ຂອງທ່ານດ້ວຍເຄື່ອງຕົກແຕ່ງທີ່ປະສົມປະສານຮູບແບບ ແລະ ຄວາມສະດວກສະບາຍເຂົ້າກັນຢ່າງລົ"
-"ງຕົວ."
+"ປ່ຽນສະພາບແວດລ້ອມຂອງທ່ານດ້ວຍຄໍເລັກຊັນການອອກແບບໃໝ່ຂອງພວກເຮົາ, "
+"ບ່ອນທີ່ຄວາມສະຫງ່າງາມມາພ້ອມກັບການໃຊ້ງານ. ຍົກລະດັບພື້ນທີ່ຂອງທ່ານດ້ວຍເຄື່ອງຕົກແຕ່ງທີ່ປະສົມປະສານຮູບແບບ "
+"ແລະ ຄວາມສະດວກສະບາຍເຂົ້າກັນຢ່າງລົງຕົວ."
 
 #. module: website
 #. odoo-javascript
@@ -18438,8 +18398,7 @@ msgstr "ປະເພດ"
 msgid ""
 "Type '<i class=\"confirm_word\">yes</i>' in the box below if you want to "
 "confirm."
-msgstr ""
-"ພິມ '<i class=\"confirm_word\">yes</i>' ໃນຊ່ອງດ້ານລຸ່ມ ຖ້າທ່ານຕ້ອງການຢືນຢັນ."
+msgstr "ພິມ '<i class=\"confirm_word\">yes</i>' ໃນຊ່ອງດ້ານລຸ່ມ ຖ້າທ່ານຕ້ອງການຢືນຢັນ."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_rewrite__redirect_type
@@ -18741,8 +18700,8 @@ msgid ""
 "Use this snippet to presents your content in a slideshow-like format. Don't "
 "write about products or services here, write about solutions."
 msgstr ""
-"ໃຊ້ສະນິບເປັດນີ້ເພື່ອສະແດງເນື້ອໃນຂອງທ່ານໃນຮູບແບບສະໄລ້ໂຊ. ຢ່າຂຽນກ່ຽວກັບຜະລິດຕະພັນ ຫຼື ບໍລິການຢູ່ທີ່ນີ້, ໃຫ້"
-"ຂຽນກ່ຽວກັບວິທີການແກ້ໄຂບັນຫາ."
+"ໃຊ້ສະນິບເປັດນີ້ເພື່ອສະແດງເນື້ອໃນຂອງທ່ານໃນຮູບແບບສະໄລ້ໂຊ. ຢ່າຂຽນກ່ຽວກັບຜະລິດຕະພັນ ຫຼື ບໍລິການຢູ່ທີ່ນີ້, "
+"ໃຫ້ຂຽນກ່ຽວກັບວິທີການແກ້ໄຂບັນຫາ."
 
 #. module: website
 #. odoo-javascript
@@ -18795,8 +18754,8 @@ msgid ""
 "campaign that brought you to the website."
 msgstr ""
 "ໃຊ້ເພື່ອເກັບກຳຂໍ້ມູນກ່ຽວກັບການໂຕ້ຕອບຂອງທ່ານກັບເວັບໄຊ, ໜ້າທີ່ທ່ານໄດ້ເບິ່ງ,\n"
-"                                                ແລະ ແຄມເປນການຕະຫຼາດໃດໜຶ່ງທີ່ນຳທ່ານມ"
-"າທີ່ເວັບໄຊນີ້."
+"                                                ແລະ "
+"ແຄມເປນການຕະຫຼາດໃດໜຶ່ງທີ່ນຳທ່ານມາທີ່ເວັບໄຊນີ້."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
@@ -18808,8 +18767,8 @@ msgid ""
 "reporting on ad campaign performance."
 msgstr ""
 "ໃຊ້ເພື່ອເຮັດໃຫ້ການໂຄສະນາດຶງດູດຜູ້ໃຊ້ຫຼາຍຂຶ້ນ ແລະ ມີຄຸນຄ່າຫຼາຍຂຶ້ນສຳລັບຜູ້ເຜີຍແຜ່ ແລະ ຜູ້ໂຄສະນາ,\n"
-"                                                ເຊັ່ນ: ການສະແດງໂຄສະນາທີ່ກ່ຽວຂ້ອງຫຼາຍ"
-"ຂຶ້ນ ຫຼື ເພື່ອປັບປຸງການລາຍງານຜົນການເຮັດວຽກຂອງແຄມເປນໂຄສະນາ."
+"                                                ເຊັ່ນ: "
+"ການສະແດງໂຄສະນາທີ່ກ່ຽວຂ້ອງຫຼາຍຂຶ້ນ ຫຼື ເພື່ອປັບປຸງການລາຍງານຜົນການເຮັດວຽກຂອງແຄມເປນໂຄສະນາ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.footer_custom
@@ -19175,8 +19134,7 @@ msgstr "ລໍຖ້າໃຫ້ຜູ້ເຂົ້າຊົມເຂົ້າ
 msgid ""
 "Wait for visitors to come to your website to see their history and engage "
 "with them."
-msgstr ""
-"ລໍຖ້າໃຫ້ຜູ້ເຂົ້າຊົມເຂົ້າມາໃນເວັບໄຊເພື່ອເບິ່ງປະຫວັດ ແລະ ຕິດຕໍ່ກັບພວກເຂົາ."
+msgstr "ລໍຖ້າໃຫ້ຜູ້ເຂົ້າຊົມເຂົ້າມາໃນເວັບໄຊເພື່ອເບິ່ງປະຫວັດ ແລະ ຕິດຕໍ່ກັບພວກເຂົາ."
 
 #. module: website
 #. odoo-javascript
@@ -19233,8 +19191,8 @@ msgid ""
 "We also provide regular updates and new features based on user feedback, "
 "ensuring that our platform continues to evolve to meet your needs."
 msgstr ""
-"ພວກເຮົາຍັງມີການອັບເດດ ແລະ ເພີ່ມຟີເຈີໃໝ່ໆຢູ່ສະເໝີຕາມຄຳຄິດເຫັນຂອງຜູ້ໃຊ້, ເພື່ອຮັບປະກັນວ່າລະບົບຂອງພວກເຮົ"
-"າພັດທະນາໃຫ້ຕອບໂຈດຄວາມຕ້ອງການຂອງທ່ານ."
+"ພວກເຮົາຍັງມີການອັບເດດ ແລະ ເພີ່ມຟີເຈີໃໝ່ໆຢູ່ສະເໝີຕາມຄຳຄິດເຫັນຂອງຜູ້ໃຊ້, "
+"ເພື່ອຮັບປະກັນວ່າລະບົບຂອງພວກເຮົາພັດທະນາໃຫ້ຕອບໂຈດຄວາມຕ້ອງການຂອງທ່ານ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega_cards
@@ -19251,8 +19209,8 @@ msgid ""
 "through disruptive products. We build great products to solve your business "
 "problems."
 msgstr ""
-"ພວກເຮົາແມ່ນທີມງານທີ່ມີຄວາມມຸ່ງໝັ້ນ ເພື່ອປັບປຸງຊີວິດຂອງທຸກຄົນ. ພວກເຮົາສ້າງຜະລິດຕະພັນທີ່ດີເພື່ອແກ້ໄຂບັນຫາທຸລະ"
-"ກິດຂອງທ່ານ."
+"ພວກເຮົາແມ່ນທີມງານທີ່ມີຄວາມມຸ່ງໝັ້ນ ເພື່ອປັບປຸງຊີວິດຂອງທຸກຄົນ. "
+"ພວກເຮົາສ້າງຜະລິດຕະພັນທີ່ດີເພື່ອແກ້ໄຂບັນຫາທຸລະກິດຂອງທ່ານ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.footer_custom
@@ -19265,8 +19223,9 @@ msgid ""
 msgstr ""
 "ພວກເຮົາແມ່ນທີມງານທີ່ມີຄວາມມຸ່ງໝັ້ນ ໂດຍມີເປົ້າໝາຍເພື່ອປັບປຸງຊີວິດຂອງທຸກຄົນໃຫ້ດີຂຶ້ນ ຜ່ານຜະລິດຕະພັນທີ່ສ້າງສັນ. "
 "ພວກເຮົາສ້າງຜະລິດຕະພັນທີ່ດີເລີດ ເພື່ອແກ້ໄຂບັນຫາທາງທຸລະກິດຂອງທ່ານ.\n"
-"                            <br/><br/>ຜະລິດຕະພັນຂອງພວກເຮົາຖືກອອກແບບມາສຳລັບບໍລິສັດຂະໜາ"
-"ດນ້ອຍຫາຂະໜາດກາງ ທີ່ຕ້ອງການເພີ່ມປະສິດທິພາບໃນການເຮັດວຽກ."
+"                            <br/><br/"
+">ຜະລິດຕະພັນຂອງພວກເຮົາຖືກອອກແບບມາສຳລັບບໍລິສັດຂະໜາດນ້ອຍຫາຂະໜາດກາງ "
+"ທີ່ຕ້ອງການເພີ່ມປະສິດທິພາບໃນການເຮັດວຽກ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_descriptive
@@ -19276,9 +19235,11 @@ msgid ""
 "problems. Our products are designed for small to medium size companies "
 "willing to optimize their performance."
 msgstr ""
-"ພວກເຮົາແມ່ນທີມງານທີ່ມີຄວາມມຸ່ງໝັ້ນ ໂດຍມີເປົ້າໝາຍໃນການປັບປຸງຊີວິດຂອງທຸກຄົນໃຫ້ດີຂຶ້ນຜ່ານຜະລິດຕະພັນທີ່ມີນະວັດຕ"
-"ະກຳ. ພວກເຮົາສ້າງຜະລິດຕະພັນທີ່ດີເລີດເພື່ອແກ້ໄຂບັນຫາທຸລະກິດຂອງທ່ານ. ຜະລິດຕະພັນຂອງພວກເຮົາຖືກອອກແບບມ"
-"າສຳລັບບໍລິສັດຂະໜາດນ້ອຍ ຫາ ຂະໜາດກາງ ທີ່ຕ້ອງການເພີ່ມປະສິດທິພາບການເຮັດວຽກ."
+"ພວກເຮົາແມ່ນທີມງານທີ່ມີຄວາມມຸ່ງໝັ້ນ "
+"ໂດຍມີເປົ້າໝາຍໃນການປັບປຸງຊີວິດຂອງທຸກຄົນໃຫ້ດີຂຶ້ນຜ່ານຜະລິດຕະພັນທີ່ມີນະວັດຕະກຳ. "
+"ພວກເຮົາສ້າງຜະລິດຕະພັນທີ່ດີເລີດເພື່ອແກ້ໄຂບັນຫາທຸລະກິດຂອງທ່ານ. "
+"ຜະລິດຕະພັນຂອງພວກເຮົາຖືກອອກແບບມາສຳລັບບໍລິສັດຂະໜາດນ້ອຍ ຫາ ຂະໜາດກາງ "
+"ທີ່ຕ້ອງການເພີ່ມປະສິດທິພາບການເຮັດວຽກ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_headline
@@ -19286,8 +19247,8 @@ msgid ""
 "We are a team of passionate people whose goal is to improve everyone's life. "
 "Our services are designed for small to medium size companies."
 msgstr ""
-"ພວກເຮົາແມ່ນທີມງານທີ່ມຸ່ງໝັ້ນປັບປຸງຊີວິດຂອງທຸກຄົນ. ການບໍລິການຂອງພວກເຮົາຖືກອອກແບບມາສຳລັບບໍລິສັດຂະໜາດນ້ອ"
-"ຍຫາຂະໜາດກາງ."
+"ພວກເຮົາແມ່ນທີມງານທີ່ມຸ່ງໝັ້ນປັບປຸງຊີວິດຂອງທຸກຄົນ. "
+"ການບໍລິການຂອງພວກເຮົາຖືກອອກແບບມາສຳລັບບໍລິສັດຂະໜາດນ້ອຍຫາຂະໜາດກາງ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_progress_bar
@@ -19300,8 +19261,8 @@ msgid ""
 "We are committed to continuous improvement, regularly releasing updates and "
 "new features based on user feedback and technological advancements."
 msgstr ""
-"ພວກເຮົາມຸ່ງໝັ້ນທີ່ຈະພັດທະນາຢ່າງຕໍ່ເນື່ອງ, ອັບເດດຟີເຈີໃໝ່ໆຕາມຄຳຄິດເຫັນຂອງຜູ້ໃຊ້ ແລະ ຄວາມກ້າວໜ້າທາງເຕັກໂ"
-"ນໂລຊີ."
+"ພວກເຮົາມຸ່ງໝັ້ນທີ່ຈະພັດທະນາຢ່າງຕໍ່ເນື່ອງ, ອັບເດດຟີເຈີໃໝ່ໆຕາມຄຳຄິດເຫັນຂອງຜູ້ໃຊ້ ແລະ "
+"ຄວາມກ້າວໜ້າທາງເຕັກໂນໂລຊີ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -19309,8 +19270,8 @@ msgid ""
 "We are committed to providing exceptional support and resources to help you "
 "succeed with our platform."
 msgstr ""
-"ພວກເຮົາມຸ່ງໝັ້ນທີ່ຈະໃຫ້ການຊ່ວຍເຫຼືອ ແລະ ຊັບພະຍາກອນທີ່ດີເລີດເພື່ອຊ່ວຍໃຫ້ທ່ານປະສົບຜົນສຳເລັດໃນລະບົບຂອງພວກ"
-"ເຮົາ."
+"ພວກເຮົາມຸ່ງໝັ້ນທີ່ຈະໃຫ້ການຊ່ວຍເຫຼືອ ແລະ "
+"ຊັບພະຍາກອນທີ່ດີເລີດເພື່ອຊ່ວຍໃຫ້ທ່ານປະສົບຜົນສຳເລັດໃນລະບົບຂອງພວກເຮົາ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_references_grid
@@ -19325,8 +19286,8 @@ msgid ""
 "understanding your fitness aspirations, your current lifestyle, and any "
 "challenges you face."
 msgstr ""
-"ພວກເຮົາເຊື່ອວ່າເສັ້ນທາງສຸຂະພາບຂອງແຕ່ລະຄົນແມ່ນແຕກຕ່າງກັນ. ວິທີການຂອງພວກເຮົາເລີ່ມຕົ້ນຈາກການເຂົ້າໃຈເປົ້"
-"າໝາຍ, ຮູບແບບການໃຊ້ຊີວິດ ແລະ ສິ່ງທ້າທາຍຂອງທ່ານ."
+"ພວກເຮົາເຊື່ອວ່າເສັ້ນທາງສຸຂະພາບຂອງແຕ່ລະຄົນແມ່ນແຕກຕ່າງກັນ. "
+"ວິທີການຂອງພວກເຮົາເລີ່ມຕົ້ນຈາກການເຂົ້າໃຈເປົ້າໝາຍ, ຮູບແບບການໃຊ້ຊີວິດ ແລະ ສິ່ງທ້າທາຍຂອງທ່ານ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
@@ -19335,8 +19296,8 @@ msgid ""
 "We collaborate with trusted, high-quality partners to bring you reliable and "
 "top-notch products and services."
 msgstr ""
-"ພວກເຮົາຮ່ວມມືກັບຄູ່ຄ້າທີ່ໜ້າເຊື່ອຖື ແລະ ມີຄຸນນະພາບສູງ ເພື່ອມອບສິນຄ້າ ແລະ ການບໍລິການທີ່ດີເດັ່ນ ແລະ ໄວ້ວາງໃ"
-"ຈໄດ້ໃຫ້ແກ່ທ່ານ."
+"ພວກເຮົາຮ່ວມມືກັບຄູ່ຄ້າທີ່ໜ້າເຊື່ອຖື ແລະ ມີຄຸນນະພາບສູງ ເພື່ອມອບສິນຄ້າ ແລະ ການບໍລິການທີ່ດີເດັ່ນ ແລະ "
+"ໄວ້ວາງໃຈໄດ້ໃຫ້ແກ່ທ່ານ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel_intro
@@ -19345,8 +19306,8 @@ msgid ""
 "success, ensuring sustainable growth and competitive advantage in a dynamic "
 "market."
 msgstr ""
-"ພວກເຮົາປະສົມປະສານຄວາມຮູ້ທາງກົນລະຍຸດ ແລະ ວິທີການໃໝ່ໆເພື່ອຂັບເຄື່ອນທຸລະກິດ, ຮັບປະກັນການເຕີບໂຕທີ່ຍືນຍົງ"
-"ໃນຕະຫຼາດ."
+"ພວກເຮົາປະສົມປະສານຄວາມຮູ້ທາງກົນລະຍຸດ ແລະ ວິທີການໃໝ່ໆເພື່ອຂັບເຄື່ອນທຸລະກິດ, "
+"ຮັບປະກັນການເຕີບໂຕທີ່ຍືນຍົງໃນຕະຫຼາດ."
 
 #. module: website
 #. odoo-javascript
@@ -19361,8 +19322,8 @@ msgid ""
 "We deliver personalized solutions, ensuring that every customer receives top-"
 "tier service tailored to their needs."
 msgstr ""
-"ພວກເຮົາມອບວິທີແກ້ໄຂສະເພາະບຸກຄົນ, ຮັບປະກັນວ່າລູກຄ້າທຸກຄົນຈະໄດ້ຮັບການບໍລິການຊັ້ນເລີດທີ່ປັບໃຫ້ເໝາະກັບຄວາມ"
-"ຕ້ອງການຂອງພວກເຂົາ."
+"ພວກເຮົາມອບວິທີແກ້ໄຂສະເພາະບຸກຄົນ, "
+"ຮັບປະກັນວ່າລູກຄ້າທຸກຄົນຈະໄດ້ຮັບການບໍລິການຊັ້ນເລີດທີ່ປັບໃຫ້ເໝາະກັບຄວາມຕ້ອງການຂອງພວກເຂົາ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_striped_center_top
@@ -19370,8 +19331,8 @@ msgid ""
 "We deliver seamless, innovative solutions that not only meet your needs but "
 "exceed expectations, driving meaningful results and lasting success."
 msgstr ""
-"ພວກເຮົາມອບວິທີແກ້ໄຂທີ່ທັນສະໄໝ ເຊິ່ງບໍ່ພຽງແຕ່ຕອບໂຈດຄວາມຕ້ອງການ ແຕ່ຍັງເກີນຄວາມຄາດໝາຍ ເພື່ອຜົນສຳເລັດ"
-"ທີ່ຍືນຍົງ."
+"ພວກເຮົາມອບວິທີແກ້ໄຂທີ່ທັນສະໄໝ ເຊິ່ງບໍ່ພຽງແຕ່ຕອບໂຈດຄວາມຕ້ອງການ ແຕ່ຍັງເກີນຄວາມຄາດໝາຍ "
+"ເພື່ອຜົນສຳເລັດທີ່ຍືນຍົງ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
@@ -19390,8 +19351,7 @@ msgstr "ພວກເຮົາພົບລິ້ງເຫຼົ່ານີ້:"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cards_soft
 msgid "We make every moment count with solutions designed just for you."
-msgstr ""
-"ພວກເຮົາເຮັດໃຫ້ທຸກຊ່ວງເວລາມີຄ່າດ້ວຍວິທີແກ້ໄຂທີ່ອອກແບບມາເພື່ອທ່ານໂດຍສະເພາະ."
+msgstr "ພວກເຮົາເຮັດໃຫ້ທຸກຊ່ວງເວລາມີຄ່າດ້ວຍວິທີແກ້ໄຂທີ່ອອກແບບມາເພື່ອທ່ານໂດຍສະເພາະ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
@@ -19399,8 +19359,8 @@ msgid ""
 "We may not be able to provide the best service to you if you reject those "
 "cookies, but the website will work."
 msgstr ""
-"ພວກເຮົາອາດບໍ່ສາມາດໃຫ້ບໍລິການທີ່ດີທີ່ສຸດແກ່ທ່ານໄດ້ ຫາກທ່ານປະຕິເສດຄຸກກີ້ເຫຼົ່ານັ້ນ, ແຕ່ເວັບໄຊຍັງຄົງສາມາດໃຊ້ງາ"
-"ນໄດ້."
+"ພວກເຮົາອາດບໍ່ສາມາດໃຫ້ບໍລິການທີ່ດີທີ່ສຸດແກ່ທ່ານໄດ້ ຫາກທ່ານປະຕິເສດຄຸກກີ້ເຫຼົ່ານັ້ນ, "
+"ແຕ່ເວັບໄຊຍັງຄົງສາມາດໃຊ້ງານໄດ້."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_landing_2_s_three_columns
@@ -19418,9 +19378,9 @@ msgid ""
 "Refunds are processed within 5-7 business days of receiving the returned "
 "item."
 msgstr ""
-"ພວກເຮົາມີນໂຍບາຍຮັບສົ່ງສິນຄ້າຄືນພາຍໃນ 30 ວັນສຳລັບທຸກສິນຄ້າ. ສິນຄ້າຕ້ອງຢູ່ໃນສະພາບເດີມ, ບໍ່ຜ່ານການໃຊ້ງາ"
-"ນ, ແລະ ມີໃບຮັບເງິນ ຫຼື ຫຼັກຖານການສັ່ງຊື້. ການສົ່ງເງິນຄືນຈະດຳເນີນການພາຍໃນ 5-7 ວັນລັດຖະການ ຫຼັງຈາກໄ"
-"ດ້ຮັບສິນຄ້າຄືນ."
+"ພວກເຮົາມີນໂຍບາຍຮັບສົ່ງສິນຄ້າຄືນພາຍໃນ 30 ວັນສຳລັບທຸກສິນຄ້າ. ສິນຄ້າຕ້ອງຢູ່ໃນສະພາບເດີມ, "
+"ບໍ່ຜ່ານການໃຊ້ງານ, ແລະ ມີໃບຮັບເງິນ ຫຼື ຫຼັກຖານການສັ່ງຊື້. ການສົ່ງເງິນຄືນຈະດຳເນີນການພາຍໃນ 5-7 "
+"ວັນລັດຖະການ ຫຼັງຈາກໄດ້ຮັບສິນຄ້າຄືນ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cards_grid
@@ -19430,8 +19390,8 @@ msgid ""
 "We offer cutting-edge products and services to tackle modern challenges. "
 "Leveraging the latest technology, we help you achieve your goals."
 msgstr ""
-"ພວກເຮົາມອບຜະລິດຕະພັນ ແລະ ການບໍລິການທີ່ທັນສະໄໝເພື່ອຮັບມືກັບສິ່ງທ້າທາຍໃໝ່ໆ ໂດຍການໃຊ້ເຕັກໂນໂລຊີລ່າສຸດເ"
-"ພື່ອຊ່ວຍໃຫ້ທ່ານບັນລຸເປົ້າໝາຍ."
+"ພວກເຮົາມອບຜະລິດຕະພັນ ແລະ ການບໍລິການທີ່ທັນສະໄໝເພື່ອຮັບມືກັບສິ່ງທ້າທາຍໃໝ່ໆ "
+"ໂດຍການໃຊ້ເຕັກໂນໂລຊີລ່າສຸດເພື່ອຊ່ວຍໃຫ້ທ່ານບັນລຸເປົ້າໝາຍ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
@@ -19450,8 +19410,8 @@ msgid ""
 "We provide 24/7 support through various channels, including live chat, "
 "email, and phone, to assist with any queries."
 msgstr ""
-"ພວກເຮົາໃຫ້ການຊ່ວຍເຫຼືອຕະຫຼອດ 24/7 ຜ່ານຫຼາຍຊ່ອງທາງ, ລວມທັງລະບົບສົນທະນາສົດ, ອີເມວ ແລະ ໂທລະສັ"
-"ບ, ເພື່ອຊ່ວຍຕອບທຸກຂໍ້ສົງໄສ."
+"ພວກເຮົາໃຫ້ການຊ່ວຍເຫຼືອຕະຫຼອດ 24/7 ຜ່ານຫຼາຍຊ່ອງທາງ, ລວມທັງລະບົບສົນທະນາສົດ, ອີເມວ ແລະ "
+"ໂທລະສັບ, ເພື່ອຊ່ວຍຕອບທຸກຂໍ້ສົງໄສ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cards_grid
@@ -19460,8 +19420,8 @@ msgid ""
 "We provide personalized solutions to meet your unique needs. Our team works "
 "with you to ensure optimal results from start to finish."
 msgstr ""
-"ພວກເຮົາໃຫ້ບໍລິການທີ່ປັບແຕ່ງໃຫ້ເໝາະກັບຄວາມຕ້ອງການຂອງທ່ານ. ທີມງານຂອງພວກເຮົາຈະຮ່ວມເຮັດວຽກກັບທ່ານເພື່"
-"ອໃຫ້ໄດ້ຜົນລັດທີ່ດີທີ່ສຸດ."
+"ພວກເຮົາໃຫ້ບໍລິການທີ່ປັບແຕ່ງໃຫ້ເໝາະກັບຄວາມຕ້ອງການຂອງທ່ານ. "
+"ທີມງານຂອງພວກເຮົາຈະຮ່ວມເຮັດວຽກກັບທ່ານເພື່ອໃຫ້ໄດ້ຜົນລັດທີ່ດີທີ່ສຸດ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
@@ -19469,8 +19429,8 @@ msgid ""
 "We provide transparent pricing that offers great value, ensuring you always "
 "get the best deal without hidden costs."
 msgstr ""
-"ພວກເຮົາສະເໜີລາຄາທີ່ໂປ່ງໃສ ແລະ ມີຄຸນຄ່າສູງ, ເພື່ອໃຫ້ແນ່ໃຈວ່າທ່ານຈະໄດ້ຮັບຂໍ້ສະເໜີທີ່ດີທີ່ສຸດສະເໝີ ໂດຍບໍ່ມີຄ່າໃ"
-"ຊ້ຈ່າຍແຝງ."
+"ພວກເຮົາສະເໜີລາຄາທີ່ໂປ່ງໃສ ແລະ ມີຄຸນຄ່າສູງ, ເພື່ອໃຫ້ແນ່ໃຈວ່າທ່ານຈະໄດ້ຮັບຂໍ້ສະເໜີທີ່ດີທີ່ສຸດສະເໝີ "
+"ໂດຍບໍ່ມີຄ່າໃຊ້ຈ່າຍແຝງ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -19479,8 +19439,8 @@ msgid ""
 "new to our platform, so we have designed a step-by-step guide to walk you "
 "through every stage, ensuring that you can hit the ground running.<br/>"
 msgstr ""
-"ພວກເຮົາເຂົ້າໃຈວ່າການເລີ່ມຕົ້ນອາດຈະຍາກ, ດັ່ງນັ້ນພວກເຮົາຈຶ່ງໄດ້ອອກແບບຄູ່ມືການໃຊ້ງານແບບເທື່ອລະຂັ້ນຕອນເພື່ອ"
-"ຊ່ວຍໃຫ້ທ່ານເລີ່ມຕົ້ນໄດ້ຢ່າງງ່າຍດາຍ.<br/>"
+"ພວກເຮົາເຂົ້າໃຈວ່າການເລີ່ມຕົ້ນອາດຈະຍາກ, "
+"ດັ່ງນັ້ນພວກເຮົາຈຶ່ງໄດ້ອອກແບບຄູ່ມືການໃຊ້ງານແບບເທື່ອລະຂັ້ນຕອນເພື່ອຊ່ວຍໃຫ້ທ່ານເລີ່ມຕົ້ນໄດ້ຢ່າງງ່າຍດາຍ.<br/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
@@ -19489,8 +19449,8 @@ msgid ""
 "content. You have full control over your choices and can update your "
 "preferences at any time."
 msgstr ""
-"ພວກເຮົາໃຊ້ຄຸກກີ້ເພື່ອຍົກລະດັບປະສົບການຂອງທ່ານໃນເວັບໄຊ ແລະ ປັບແຕ່ງເນື້ອຫາໃຫ້ເໝາະສົມກັບທ່ານ. ທ່ານມີສິດຄ"
-"ວບຄຸມການເລືອກຂອງທ່ານຢ່າງເຕັມສ່ວນ ແລະ ສາມາດອັບເດດການຕັ້ງຄ່າໄດ້ທຸກເວລາ."
+"ພວກເຮົາໃຊ້ຄຸກກີ້ເພື່ອຍົກລະດັບປະສົບການຂອງທ່ານໃນເວັບໄຊ ແລະ ປັບແຕ່ງເນື້ອຫາໃຫ້ເໝາະສົມກັບທ່ານ. "
+"ທ່ານມີສິດຄວບຄຸມການເລືອກຂອງທ່ານຢ່າງເຕັມສ່ວນ ແລະ ສາມາດອັບເດດການຕັ້ງຄ່າໄດ້ທຸກເວລາ."
 
 #. module: website
 #. odoo-javascript
@@ -19499,15 +19459,14 @@ msgid ""
 "We use cookies to provide improved experience on this website. You can learn "
 "more about our cookies and how we use them in our"
 msgstr ""
-"ພວກເຮົາໃຊ້ຄຸກກີ້ເພື່ອເພີ່ມປະສິດທິພາບການໃຊ້ງານເວັບໄຊ. ທ່ານສາມາດສຶກສາເພີ່ມເຕີມກ່ຽວກັບຄຸກກີ້ຂອງພວກເຮົາໄດ້"
-"ທີ່"
+"ພວກເຮົາໃຊ້ຄຸກກີ້ເພື່ອເພີ່ມປະສິດທິພາບການໃຊ້ງານເວັບໄຊ. "
+"ທ່ານສາມາດສຶກສາເພີ່ມເຕີມກ່ຽວກັບຄຸກກີ້ຂອງພວກເຮົາໄດ້ທີ່"
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.cookies_bar.xml:0
 msgid "We use cookies to provide you a better user experience on this website."
-msgstr ""
-"ພວກເຮົາໃຊ້ຄຸກກີ້ເພື່ອມອບປະສົບການການໃຊ້ງານທີ່ດີກວ່າໃຫ້ແກ່ທ່ານໃນເວັບໄຊນີ້."
+msgstr "ພວກເຮົາໃຊ້ຄຸກກີ້ເພື່ອມອບປະສົບການການໃຊ້ງານທີ່ດີກວ່າໃຫ້ແກ່ທ່ານໃນເວັບໄຊນີ້."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_contact_info
@@ -19517,9 +19476,9 @@ msgid ""
 "provided. Our team is here to help and will respond as soon as possible. "
 "Thank you for getting in touch!"
 msgstr ""
-"ພວກເຮົາຢາກໄດ້ຍິນຈາກທ່ານ! ຫາກທ່ານມີຄຳຖາມ, ຄຳຄິດເຫັນ ຫຼື ຕ້ອງການຄວາມຊ່ວຍເຫຼືອ, ກະລຸນາຕິດຕໍ່ຫາພວກເ"
-"ຮົາໄດ້ຕາມລາຍລະອຽດການຕິດຕໍ່ທີ່ໃຫ້ໄວ້. ທີມງານຂອງພວກເຮົາພ້ອມທີ່ຈະຊ່ວຍເຫຼືອ ແລະ ຈະຕອບກັບໂດຍໄວທີ່ສຸດ. ຂ"
-"ອບໃຈທີ່ຕິດຕໍ່ຫາພວກເຮົາ!"
+"ພວກເຮົາຢາກໄດ້ຍິນຈາກທ່ານ! ຫາກທ່ານມີຄຳຖາມ, ຄຳຄິດເຫັນ ຫຼື ຕ້ອງການຄວາມຊ່ວຍເຫຼືອ, "
+"ກະລຸນາຕິດຕໍ່ຫາພວກເຮົາໄດ້ຕາມລາຍລະອຽດການຕິດຕໍ່ທີ່ໃຫ້ໄວ້. ທີມງານຂອງພວກເຮົາພ້ອມທີ່ຈະຊ່ວຍເຫຼືອ ແລະ "
+"ຈະຕອບກັບໂດຍໄວທີ່ສຸດ. ຂອບໃຈທີ່ຕິດຕໍ່ຫາພວກເຮົາ!"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_info
@@ -19529,9 +19488,9 @@ msgid ""
 "aim to respond to all inquiries within 24 hours. Thank you for getting in "
 "touch!"
 msgstr ""
-"ພວກເຮົາພ້ອມຮັບຟັງທ່ານສະເໝີ! ບໍ່ວ່າທ່ານຈະມີຄຳຖາມ, ຂໍ້ສະເໜີແນະ ຫຼື ຕ້ອງການຄວາມຊ່ວຍເຫຼືອ, ທີມງານຂອງພວ"
-"ກເຮົາພ້ອມໃຫ້ບໍລິການ. ພຽງແຕ່ກອກແບບຟອມລຸ່ມນີ້, ພວກເຮົາຕັ້ງໃຈຕອບກັບທຸກຄຳຖາມພາຍໃນ 24 ຊົ່ວໂມງ. ຂໍຂອບ"
-"ໃຈທີ່ຕິດຕໍ່ຫາພວກເຮົາ!"
+"ພວກເຮົາພ້ອມຮັບຟັງທ່ານສະເໝີ! ບໍ່ວ່າທ່ານຈະມີຄຳຖາມ, ຂໍ້ສະເໜີແນະ ຫຼື ຕ້ອງການຄວາມຊ່ວຍເຫຼືອ, "
+"ທີມງານຂອງພວກເຮົາພ້ອມໃຫ້ບໍລິການ. ພຽງແຕ່ກອກແບບຟອມລຸ່ມນີ້, ພວກເຮົາຕັ້ງໃຈຕອບກັບທຸກຄຳຖາມພາຍໃນ 24 "
+"ຊົ່ວໂມງ. ຂໍຂອບໃຈທີ່ຕິດຕໍ່ຫາພວກເຮົາ!"
 
 #. module: website
 #. odoo-javascript
@@ -19911,8 +19870,8 @@ msgid ""
 "support, we're committed to helping you achieve lasting results that align "
 "with your aspirations."
 msgstr ""
-"ຍິນດີຕ້ອນຮັບສູ່ການບໍລິການຝຶກສອນຟິດເນັດແບບຄົບວົງຈອນ, ດ້ວຍການອອກກຳລັງກາຍ ແລະ ແຜນໂພຊະນາການທີ່ປັບແຕ່"
-"ງມາເພື່ອທ່ານ."
+"ຍິນດີຕ້ອນຮັບສູ່ການບໍລິການຝຶກສອນຟິດເນັດແບບຄົບວົງຈອນ, ດ້ວຍການອອກກຳລັງກາຍ ແລະ "
+"ແຜນໂພຊະນາການທີ່ປັບແຕ່ງມາເພື່ອທ່ານ."
 
 #. module: website
 #. odoo-javascript
@@ -20042,8 +20001,8 @@ msgid ""
 "With extensive experience and deep industry knowledge, we provide insights "
 "and solutions that keep you ahead of the curve."
 msgstr ""
-"ດ້ວຍປະສົບການທີ່ຍາວນານ ແລະ ຄວາມຮູ້ທີ່ເລິກເຊິ່ງ, ພວກເຮົາໃຫ້ຄຳແນະນຳ ແລະ ວິທີແກ້ໄຂທີ່ຊ່ວຍໃຫ້ທ່ານນຳໜ້າສະ"
-"ເໝີ."
+"ດ້ວຍປະສົບການທີ່ຍາວນານ ແລະ ຄວາມຮູ້ທີ່ເລິກເຊິ່ງ, ພວກເຮົາໃຫ້ຄຳແນະນຳ ແລະ "
+"ວິທີແກ້ໄຂທີ່ຊ່ວຍໃຫ້ທ່ານນຳໜ້າສະເໝີ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_services_0_s_three_columns
@@ -20110,8 +20069,8 @@ msgid ""
 "Write one or two paragraphs describing your product or services. To be "
 "successful your content needs to be useful to your readers."
 msgstr ""
-"ຂຽນໜຶ່ງ ຫຼື ສອງວັກຕອນເພື່ອອະທິບາຍສິນຄ້າ ຫຼື ການບໍລິການຂອງທ່ານ. ເນື້ອຫາຂອງທ່ານຕ້ອງມີປະໂຫຍດຕໍ່ຜູ້ອ່ານເພື່ອ"
-"ໃຫ້ປະສົບຜົນສຳເລັດ."
+"ຂຽນໜຶ່ງ ຫຼື ສອງວັກຕອນເພື່ອອະທິບາຍສິນຄ້າ ຫຼື ການບໍລິການຂອງທ່ານ. "
+"ເນື້ອຫາຂອງທ່ານຕ້ອງມີປະໂຫຍດຕໍ່ຜູ້ອ່ານເພື່ອໃຫ້ປະສົບຜົນສຳເລັດ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_freegrid
@@ -20120,8 +20079,8 @@ msgid ""
 "successful your content needs to be useful to your readers. Start with the "
 "customer – find out what they want and give it to them."
 msgstr ""
-"ຂຽນອະທິບາຍຜະລິດຕະພັນ ຫຼື ການບໍລິການ. ເລີ່ມຕົ້ນຈາກລູກຄ້າ – ຊອກຫາສິ່ງທີ່ພວກເຂົາຕ້ອງການ ແລະ ມອບສິ່ງນັ້ນ"
-"ໃຫ້ພວກເຂົາ."
+"ຂຽນອະທິບາຍຜະລິດຕະພັນ ຫຼື ການບໍລິການ. ເລີ່ມຕົ້ນຈາກລູກຄ້າ – ຊອກຫາສິ່ງທີ່ພວກເຂົາຕ້ອງການ ແລະ "
+"ມອບສິ່ງນັ້ນໃຫ້ພວກເຂົາ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_closer_look
@@ -20225,8 +20184,7 @@ msgstr "ທ່ານບໍ່ສາມາດມີຜູ້ໃຊ້ສອງຄ
 #. odoo-python
 #: code:addons/website/models/website_snippet_filter.py:0
 msgid "You can only use template prefixed by dynamic_filter_template_ "
-msgstr ""
-"ທ່ານສາມາດໃຊ້ໄດ້ສະເພາະເທມເພລັດທີ່ຂຶ້ນຕົ້ນດ້ວຍ dynamic_filter_template_ ເທົ່ານັ້ນ"
+msgstr "ທ່ານສາມາດໃຊ້ໄດ້ສະເພາະເທມເພລັດທີ່ຂຶ້ນຕົ້ນດ້ວຍ dynamic_filter_template_ ເທົ່ານັ້ນ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_accordion
@@ -20237,8 +20195,8 @@ msgid ""
 "inquiries or issues."
 msgstr ""
 "ທ່ານສາມາດຕິດຕໍ່ທີມງານຊ່ວຍເຫຼືອລູກຄ້າໄດ້ໂດຍການສົ່ງອີເມວຫາ info@yourcompany.example.com, ໂທ "
-"+1 555-555-5556, ຫຼື ໃຊ້ລະບົບສົນທະນາສົດໃນເວັບໄຊຂອງພວກເຮົາ. ທີມງານພ້ອມໃຫ້ບໍລິການຕະຫຼອດ 24 ຊົ່ວ"
-"ໂມງ ເພື່ອຊ່ວຍເຫຼືອທຸກຂໍ້ສົງໄສ."
+"+1 555-555-5556, ຫຼື ໃຊ້ລະບົບສົນທະນາສົດໃນເວັບໄຊຂອງພວກເຮົາ. ທີມງານພ້ອມໃຫ້ບໍລິການຕະຫຼອດ 24 "
+"ຊົ່ວໂມງ ເພື່ອຊ່ວຍເຫຼືອທຸກຂໍ້ສົງໄສ."
 
 #. module: website
 #. odoo-python
@@ -20303,8 +20261,7 @@ msgstr "ທ່ານບໍ່ມີສິດເຂົ້າເຖິງແດຊ
 msgid ""
 "You have hidden this page from search results. It won't be indexed by search "
 "engines."
-msgstr ""
-"ທ່ານໄດ້ເຊື່ອງໜ້ານີ້ຈາກການຄົ້ນຫາ. ມັນຈະບໍ່ຖືກເກັບຂໍ້ມູນໂດຍ Search Engines."
+msgstr "ທ່ານໄດ້ເຊື່ອງໜ້ານີ້ຈາກການຄົ້ນຫາ. ມັນຈະບໍ່ຖືກເກັບຂໍ້ມູນໂດຍ Search Engines."
 
 #. module: website
 #. odoo-javascript
@@ -20322,10 +20279,10 @@ msgid ""
 "if you reject or discard those cookies."
 msgstr ""
 "ທ່ານສາມາດເລືອກບໍ່ໃຊ້ຄຸກກີ້ຂອງບຸກຄົນທີສາມໄດ້ທີ່ <a class=\"o_translate_inline\" "
-"href=\"https://optout.networkadvertising.org/?c=1\" rel=\"nofollow\">ໜ້າການຍົກເ"
-"ລີກ Network Advertising Initiative</a>.\n"
-"                                                ເວັບໄຊຍັງຄົງສາມາດໃຊ້ງານໄດ້ ຫາກທ່ານປ"
-"ະຕິເສດຄຸກກີ້ເຫຼົ່ານັ້ນ."
+"href=\"https://optout.networkadvertising.org/?c=1\" "
+"rel=\"nofollow\">ໜ້າການຍົກເລີກ Network Advertising Initiative</a>.\n"
+"                                                ເວັບໄຊຍັງຄົງສາມາດໃຊ້ງານໄດ້ "
+"ຫາກທ່ານປະຕິເສດຄຸກກີ້ເຫຼົ່ານັ້ນ."
 
 #. module: website
 #. odoo-javascript
@@ -20364,8 +20321,8 @@ msgid ""
 "Your Dynamic Snippet will be displayed here... This message is displayed "
 "because you did not provide enough options to retrieve its content.<br/>"
 msgstr ""
-"Dynamic Snippet ຂອງທ່ານຈະສະແດງຢູ່ນີ້... ຂໍ້ຄວາມນີ້ສະແດງຂຶ້ນເນື່ອງຈາກທ່ານບໍ່ໄດ້ກຳນົດຕົວເລືອກພຽງພໍເພື່"
-"ອດຶງຂໍ້ມູນເນື້ອຫາ.<br/>"
+"Dynamic Snippet ຂອງທ່ານຈະສະແດງຢູ່ນີ້... "
+"ຂໍ້ຄວາມນີ້ສະແດງຂຶ້ນເນື່ອງຈາກທ່ານບໍ່ໄດ້ກຳນົດຕົວເລືອກພຽງພໍເພື່ອດຶງຂໍ້ມູນເນື້ອຫາ.<br/>"
 
 #. module: website
 #. odoo-javascript
@@ -20437,8 +20394,8 @@ msgid ""
 "Your brand is your story. We help you tell it through cohesive visual "
 "identity and messaging that resonates with your audience."
 msgstr ""
-"ແບຣນຂອງທ່ານຄືເລື່ອງລາວຂອງທ່ານ. ພວກເຮົາຊ່ວຍທ່ານເລົ່າເລື່ອງນັ້ນຜ່ານພາບລັກສະນະ ແລະ ຂໍ້ຄວາມທີ່ເຂົ້າເຖິງກຸ່"
-"ມເປົ້າໝາຍ."
+"ແບຣນຂອງທ່ານຄືເລື່ອງລາວຂອງທ່ານ. ພວກເຮົາຊ່ວຍທ່ານເລົ່າເລື່ອງນັ້ນຜ່ານພາບລັກສະນະ ແລະ "
+"ຂໍ້ຄວາມທີ່ເຂົ້າເຖິງກຸ່ມເປົ້າໝາຍ."
 
 #. module: website
 #. odoo-javascript
@@ -20453,16 +20410,15 @@ msgid ""
 "Your data is protected by advanced encryption and security protocols, "
 "keeping your personal information safe."
 msgstr ""
-"ຂໍ້ມູນຂອງທ່ານໄດ້ຮັບການປົກປ້ອງດ້ວຍການເຂົ້າລະຫັດຂັ້ນສູງ ແລະ ໂປຣໂຕຄໍຄວາມປອດໄພ, ເພື່ອຮັກສາຂໍ້ມູນສ່ວນຕົວຂອ"
-"ງທ່ານໃຫ້ປອດໄພສະເໝີ."
+"ຂໍ້ມູນຂອງທ່ານໄດ້ຮັບການປົກປ້ອງດ້ວຍການເຂົ້າລະຫັດຂັ້ນສູງ ແລະ ໂປຣໂຕຄໍຄວາມປອດໄພ, "
+"ເພື່ອຮັກສາຂໍ້ມູນສ່ວນຕົວຂອງທ່ານໃຫ້ປອດໄພສະເໝີ."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid ""
 "Your experience may be degraded if you discard those cookies, but the "
 "website will still work."
-msgstr ""
-"ປະສົບການນຳໃຊ້ອາດຫຼຸດລົງຫາກທ່ານລຶບຄຸກກີ້ເຫຼົ່ານັ້ນ, ແຕ່ເວັບໄຊຍັງຄົງເຮັດວຽກໄດ້."
+msgstr "ປະສົບການນຳໃຊ້ອາດຫຼຸດລົງຫາກທ່ານລຶບຄຸກກີ້ເຫຼົ່ານັ້ນ, ແຕ່ເວັບໄຊຍັງຄົງເຮັດວຽກໄດ້."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cover
@@ -20497,8 +20453,7 @@ msgstr "ຊື່ຫົວຂໍ້ພາກສ່ວນຂອງທ່ານ"
 msgid ""
 "Your upload is too large for the server to accept. Please choose smaller "
 "files."
-msgstr ""
-"ໄຟລ໌ທີ່ທ່ານອັບໂຫຼດໃຫຍ່ເກີນໄປສຳລັບເຊີບເວີ. ກະລຸນາເລືອກໄຟລ໌ທີ່ມີຂະໜາດນ້ອຍກວ່າ."
+msgstr "ໄຟລ໌ທີ່ທ່ານອັບໂຫຼດໃຫຍ່ເກີນໄປສຳລັບເຊີບເວີ. ກະລຸນາເລືອກໄຟລ໌ທີ່ມີຂະໜາດນ້ອຍກວ່າ."
 
 #. module: website
 #. odoo-javascript
@@ -21782,3 +21737,6 @@ msgstr "✽  ພິຊຊ່າ"
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid "✽  What We Offer"
 msgstr "✽ ສິ່ງທີ່ພວກເຮົາສະເໜີ"
+
+#~ msgid "%(error)s (website: %(website_id)s)"
+#~ msgstr "%(error)s (ເວັບໄຊ: %(website_id)s)"

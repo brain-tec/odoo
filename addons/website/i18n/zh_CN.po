@@ -23,7 +23,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 17:42+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-10-28 16:41+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
@@ -244,12 +244,6 @@ msgstr "区块数量"
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
 msgid "$ 32M"
 msgstr "$ 32M"
-
-#. module: website
-#. odoo-python
-#: code:addons/website/models/ir_ui_view.py:0
-msgid "%(error)s (website: %(website_id)s)"
-msgstr "%(error)s（网站：%(website_id)s）"
 
 #. module: website
 #. odoo-python
@@ -959,8 +953,8 @@ msgid ""
 "<b>My Company</b><br/>8000 Marina Blvd, Suite 300 <br/> Brisbane CA 94005 "
 "<br/>United States"
 msgstr ""
-"<b>My Company</b><br/>8000 Marina Blvd, Suite 300 <br/>Brisbane CA 94005 "
-"<br/>United States"
+"<b>My Company</b><br/>8000 Marina Blvd, Suite 300 <br/>Brisbane CA 94005 <br/"
+">United States"
 
 #. module: website
 #. odoo-javascript
@@ -1992,8 +1986,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
 "rounded-circle pe-none\" contenteditable=\"false\"/>\n"
-"                        <small class=\"text-muted\">2024 年 4 月 3 日</small>"
-"\n"
+"                        <small class=\"text-muted\">2024 年 4 月 3 日</"
+"small>\n"
 "                        <strong>自定义报告的新仪表板功能</strong>"
 
 #. module: website
@@ -2098,8 +2092,8 @@ msgid ""
 "                <span class=\"visually-hidden\">Loading...</span>\n"
 "            </span>"
 msgstr ""
-"<span class=\"o_search_spinner d-none spinner-border spinner-border-sm text-"
-"500\" style=\"--spinner-border-width: 0.1em;\" role=\"status\">\n"
+"<span class=\"o_search_spinner d-none spinner-border spinner-border-sm "
+"text-500\" style=\"--spinner-border-width: 0.1em;\" role=\"status\">\n"
 "                <span class=\"visually-hidden\">正在加载...</span>\n"
 "            </span>"
 
@@ -2114,8 +2108,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_small-fs\">\n"
 "                                            <strong>Iris DOE</strong><br/>\n"
-"                                            <span class=\"text-muted\">"
-"MyCompany 经理</span>\n"
+"                                            <span class=\"text-"
+"muted\">MyCompany 经理</span>\n"
 "                                        </span>"
 
 #. module: website
@@ -2129,8 +2123,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_small-fs\">\n"
 "                                            <strong>Jane DOE</strong><br/>\n"
-"                                            <span class=\"text-muted\">"
-"MyCompany CEO</span>\n"
+"                                            <span class=\"text-"
+"muted\">MyCompany CEO</span>\n"
 "                                        </span>"
 
 #. module: website
@@ -2144,8 +2138,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_small-fs\">\n"
 "                                            <strong>John DOE</strong><br/>\n"
-"                                            <span class=\"text-muted\">"
-"MyCompany 首席商务官</span>\n"
+"                                            <span class=\"text-"
+"muted\">MyCompany 首席商务官</span>\n"
 "                                        </span>"
 
 #. module: website
@@ -2175,8 +2169,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_small-fs\">\n"
 "                                    <strong>Iris DOE</strong><br/>\n"
-"                                    <span class=\"text-muted\">MyCompany 经"
-"理</span>\n"
+"                                    <span class=\"text-muted\">MyCompany 经理"
+"</span>\n"
 "                                </span>"
 
 #. module: website
@@ -6431,8 +6425,8 @@ msgid ""
 "Geneva Avenue. Head toward Executive Park Blvd, where bike racks are "
 "available at 250 Executive Park Blvd, Suite 3400."
 msgstr ""
-"骑行者可从市中心沿海湾小径向南骑行，经由日内瓦大道通行。前往行政公园大道方向"
-"，250 号行政公园大道 3400 室设有自行车停放架。"
+"骑行者可从市中心沿海湾小径向南骑行，经由日内瓦大道通行。前往行政公园大道方"
+"向，250 号行政公园大道 3400 室设有自行车停放架。"
 
 #. module: website
 #. odoo-javascript
@@ -7216,8 +7210,8 @@ msgid ""
 "Display a customizable cookies bar on your website. Please ensure your site "
 "is GDPR-compliant (e.g. Google Fonts usage)."
 msgstr ""
-"在您的网站上显示可自定义的 Cookie 提示栏。请确保您的网站符合 GDPR 合规要求（"
-"例如 Google 字体的使用）。"
+"在您的网站上显示可自定义的 Cookie 提示栏。请确保您的网站符合 GDPR 合规要求"
+"（例如 Google 字体的使用）。"
 
 #. module: website
 #. odoo-python
@@ -7957,7 +7951,8 @@ msgstr "输入的日期或时间不正确！必须早于或等于 %(start)s（%(
 msgid ""
 "Entered date or time is not correct! It must be within %(start)s and %(end)s "
 "(%(format)s)."
-msgstr "输入的日期或时间不正确！必须介于%(start)s 与 %(end)s（%(format)s）之间。"
+msgstr ""
+"输入的日期或时间不正确！必须介于%(start)s 与 %(end)s（%(format)s）之间。"
 
 #. module: website
 #. odoo-javascript
@@ -7972,7 +7967,8 @@ msgstr "输入的日期或时间不正确！不得为 %(start)s（%(format)s）�
 msgid ""
 "Entered date or time is not correct! It must not be within %(start)s and %"
 "(end)s (%(format)s)."
-msgstr "输入的日期或时间不正确！不得处于%(start)s至 %(end)s（%(format)s）区间内。"
+msgstr ""
+"输入的日期或时间不正确！不得处于%(start)s至 %(end)s（%(format)s）区间内。"
 
 #. module: website
 #. odoo-javascript
@@ -8259,6 +8255,12 @@ msgstr "扩展视图"
 #: model:ir.model.fields,field_description:website.field_website_page__xml_id
 msgid "External ID"
 msgstr "外部 ID"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "External ID can not be loaded: %(error)s (website: %(website_id)s)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -9848,6 +9850,12 @@ msgstr "混合动力"
 #: model_terms:ir.ui.view,arch_db:website.cookies_bar
 msgid "I agree"
 msgstr "同意"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/form/utils.js:0
+msgid "I agree to the"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -11816,8 +11824,8 @@ msgid ""
 "Make sure to wait if errors keep being shown: sometimes enabling an API "
 "allows to use it immediately but Google keeps triggering errors for a while"
 msgstr ""
-"若持续报错请耐心等待：部分API启用后虽可即刻使用，但谷歌端可能仍会短暂持续报错"
-"。"
+"若持续报错请耐心等待：部分API启用后虽可即刻使用，但谷歌端可能仍会短暂持续报"
+"错。"
 
 #. module: website
 #. odoo-javascript
@@ -16205,8 +16213,8 @@ msgid ""
 "Simple forms. Natural textures. Timeless design. Crafted to bring calm and "
 "clarity to your space."
 msgstr ""
-"简约造型、天然质感、经典永不过时的设计。精心打造，为您的空间带来宁静与通透感"
-"。"
+"简约造型、天然质感、经典永不过时的设计。精心打造，为您的空间带来宁静与通透"
+"感。"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_banner_product
@@ -16921,8 +16929,8 @@ msgid ""
 "Bayview and get off at Executive Park. The building at 250 Executive Park "
 "Blvd, Suite 3400, is just a short walk from the stop."
 msgstr ""
-"乘坐 BART 至巴尔博亚公园站（Balboa Park Station）。从那里搭乘开往湾景（"
-"Bayview）方向的 29 路公交，在行政公园（Executive Park）下车。行政公园大道 "
+"乘坐 BART 至巴尔博亚公园站（Balboa Park Station）。从那里搭乘开往湾景"
+"（Bayview）方向的 29 路公交，在行政公园（Executive Park）下车。行政公园大道 "
 "250 号 3400 室距车站仅几步之遥。"
 
 #. module: website
@@ -17036,6 +17044,12 @@ msgstr "模板标识：%s"
 #: model_terms:ir.ui.view,arch_db:website.qweb_500
 msgid "Template fallback"
 msgstr "模板回滚"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "Template not found: '%(error)s' (website: %(website_id)s)"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega
@@ -20178,8 +20192,8 @@ msgid ""
 "Your Dynamic Snippet will be displayed here... This message is displayed "
 "because you did not provide enough options to retrieve its content.<br/>"
 msgstr ""
-"您的动态代码片段将显示在此处……显示此消息是因为您未提供足够的选项来检索其内容"
-"。<br/>"
+"您的动态代码片段将显示在此处……显示此消息是因为您未提供足够的选项来检索其内"
+"容。<br/>"
 
 #. module: website
 #. odoo-javascript
@@ -20617,7 +20631,8 @@ msgstr "内容、段落、文章、正文、描述、信息"
 msgid ""
 "content, picture, photo, connection, cover, shape, background, image, "
 "headings, hero, light, experience, parallax"
-msgstr "内容、图片、照片、连接、封面、形状、背景、图像、标题、主图、光线、体验、视差"
+msgstr ""
+"内容、图片、照片、连接、封面、形状、背景、图像、标题、主图、光线、体验、视差"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21172,7 +21187,8 @@ msgstr ""
 msgid ""
 "images, pictures, photos, illustrations, media, visual, slider, tabs, "
 "switch, tabbed, sections, navigation"
-msgstr "图片、图片、照片、插图、媒体、视觉、滑块、标签页、切换、标签式、区块、导航"
+msgstr ""
+"图片、图片、照片、插图、媒体、视觉、滑块、标签页、切换、标签式、区块、导航"
 
 #. module: website
 #. odoo-javascript
@@ -21538,8 +21554,8 @@ msgid ""
 "shop, cart, product, categories, ecommerce, e-commerce, cards, trendy, "
 "column, layouts, picture, photo, illustration, media, visual"
 msgstr ""
-"商店、购物车、产品、分类、电子商务、卡片、时尚、专栏、布局、图片、照片、插图"
-"、媒体、视觉"
+"商店、购物车、产品、分类、电子商务、卡片、时尚、专栏、布局、图片、照片、插"
+"图、媒体、视觉"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21731,6 +21747,9 @@ msgstr "✽  披萨"
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid "✽  What We Offer"
 msgstr "✽  我们提供的岗位"
+
+#~ msgid "%(error)s (website: %(website_id)s)"
+#~ msgstr "%(error)s（网站：%(website_id)s）"
 
 #~ msgid "Accounts are usable across all your multiple websites"
 #~ msgstr "帐户可以在您所有的多个网站上使用"

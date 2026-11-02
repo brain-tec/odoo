@@ -29,7 +29,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 17:42+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-10-28 10:49+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Bulgarian <https://translate.odoo.com/projects/odoo-s19-3/"
@@ -269,12 +269,6 @@ msgstr "$ 32 млн"
 
 #. module: website
 #. odoo-python
-#: code:addons/website/models/ir_ui_view.py:0
-msgid "%(error)s (website: %(website_id)s)"
-msgstr "%(error)s (уебсайт: %(website_id)s)"
-
-#. module: website
-#. odoo-python
 #: code:addons/website/models/website_rewrite.py:0
 msgid "%(url)s not found"
 msgstr ""
@@ -340,8 +334,8 @@ msgid ""
 "displayed (slow connection, missing image, screen reader ...)."
 msgstr ""
 "'Alt таг' указва алтернативен текст за изображение, ако изображението не "
-"може да бъде показано (бавна връзка, липсващо изображение, екранен четец ...)"
-"."
+"може да бъде показано (бавна връзка, липсващо изображение, екранен "
+"четец ...)."
 
 #. module: website
 #. odoo-javascript
@@ -713,7 +707,8 @@ msgstr "5x"
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
 msgid ""
 "75% of clients have been using the service for over a decade consistently."
-msgstr "75% от клиентите използват услугата непрекъснато повече от десетилетие."
+msgstr ""
+"75% от клиентите използват услугата непрекъснато повече от десетилетие."
 
 #. module: website
 #. odoo-javascript
@@ -780,8 +775,8 @@ msgid ""
 "email\">info@yourcompany.example.com</a>"
 msgstr ""
 "<a class=\"o_translate_inline\" href=\"mail-"
-"to:info@yourcompany.example.com\" title=\"Изпратете имейл\">"
-"info@yourcompany.example.com</a>"
+"to:info@yourcompany.example.com\" title=\"Изпратете "
+"имейл\">info@yourcompany.example.com</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_call_to_action
@@ -789,8 +784,8 @@ msgid ""
 "<a class=\"o_translate_inline\" "
 "href=\"mailto:info@yourcompany.example.com\">info@yourcompany.example.com</a>"
 msgstr ""
-"<a class=\"o_translate_inline\" href=\"mailto:info@yourcompany.example.com\">"
-"info@yourcompany.example.com</a>"
+"<a class=\"o_translate_inline\" "
+"href=\"mailto:info@yourcompany.example.com\">info@yourcompany.example.com</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_contact_info
@@ -818,8 +813,8 @@ msgid ""
 "                        <a href=\"#\" class=\"btn btn-secondary mb-2 "
 "o_translate_inline\">Learn more</a>"
 msgstr ""
-"<a href=\"#\" class=\"btn btn-primary mb-2 o_translate_inline\">Започнете</a>"
-"\n"
+"<a href=\"#\" class=\"btn btn-primary mb-2 o_translate_inline\">Започнете</"
+"a>\n"
 "                        <a href=\"#\" class=\"btn btn-secondary mb-2 "
 "o_translate_inline\">Научете повече</a>"
 
@@ -829,8 +824,8 @@ msgid ""
 "<a href=\"#\" class=\"btn btn-primary o_translate_inline\" "
 "role=\"button\">More details</a>"
 msgstr ""
-"<a href=\"#\" class=\"btn btn-primary o_translate_inline\" role=\"button\">"
-"Повече подробности</a>"
+"<a href=\"#\" class=\"btn btn-primary o_translate_inline\" "
+"role=\"button\">Повече подробности</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_text_box
@@ -879,8 +874,8 @@ msgid ""
 "<a href=\"#\" role=\"button\" class=\"btn btn-secondary "
 "o_translate_inline\">View All</a>"
 msgstr ""
-"<a href=\"#\" role=\"button\" class=\"btn btn-secondary o_translate_inline\">"
-"Вижте всички</a>"
+"<a href=\"#\" role=\"button\" class=\"btn btn-secondary "
+"o_translate_inline\">Вижте всички</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
@@ -1212,8 +1207,8 @@ msgstr "<i class=\"fa fa-2x fa-arrow-right text-primary\" title=\"URL\"/>"
 msgid ""
 "<i class=\"fa fa-check text-success\" role=\"img\"/>  24/7 toll-free support"
 msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  Безплатна поддръжка 24/"
-"7"
+"<i class=\"fa fa-check text-success\" role=\"img\"/>  Безплатна поддръжка "
+"24/7"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
@@ -1369,8 +1364,8 @@ msgid ""
 "<i class=\"fa fa-fw o_button_icon fa-circle text-success\" "
 "title=\"Connected\"/>"
 msgstr ""
-"<i class=\"fa fa-fw o_button_icon fa-circle text-success\" "
-"title=\"Свързан\"/>"
+"<i class=\"fa fa-fw o_button_icon fa-circle text-success\" title=\"Свързан\"/"
+">"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_pages_kanban_view
@@ -1553,8 +1548,8 @@ msgstr ""
 "                        Онлайн връщане до 30 дни\n"
 "                    </small>\n"
 "                    <small class=\"d-flex align-items-center\">\n"
-"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/>"
-"\n"
+"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/"
+">\n"
 "                        Стандартна доставка\n"
 "                    </small>"
 
@@ -2219,8 +2214,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_small-fs\">\n"
 "                                        Специалист по дизайн на мебели\n"
-"                                        <br/><br/><br/><br/><br/><br/><br/>"
-"<br/><br/><br/><br/>\n"
+"                                        <br/><br/><br/><br/><br/><br/><br/"
+"><br/><br/><br/><br/>\n"
 "                                    </span>"
 
 #. module: website
@@ -2508,8 +2503,8 @@ msgid ""
 msgstr ""
 "<span style=\"font-size: 10.75rem;\">\n"
 "                        <font class=\"text-gradient\" style=\"background-"
-"image: linear-gradient(0deg, var(--o-color-4) 25%, var(--o-color-5) 90%);\">"
-"\n"
+"image: linear-gradient(0deg, var(--o-color-4) 25%, var(--o-color-5) 90%);"
+"\">\n"
 "                            87%\n"
 "                        </font>\n"
 "                    </span>"
@@ -3227,8 +3222,8 @@ msgid ""
 "Add 3rd-party service domains <em>(\"www.example.com\" or \"example.com\")</"
 "em>, one per line."
 msgstr ""
-"Добавете домейни на услуги от трети страни <em>(„www.example.com“ или „"
-"example.com“)</em>, по един на ред."
+"Добавете домейни на услуги от трети страни <em>(„www.example.com“ или "
+"„example.com“)</em>, по един на ред."
 
 #. module: website
 #. odoo-javascript
@@ -3973,9 +3968,9 @@ msgid ""
 "Analyzing the numbers behind our success: <br class=\"d-none d-xxl-inline\"/"
 ">an in-depth look at the key metrics driving our company's achievements"
 msgstr ""
-"Анализ на числата зад нашия успех: <br class=\"d-none d-xxl-inline\"/>"
-"задълбочен поглед върху ключовите показатели, движещи постиженията на нашата "
-"компания"
+"Анализ на числата зад нашия успех: <br class=\"d-none d-xxl-inline\"/"
+">задълбочен поглед върху ключовите показатели, движещи постиженията на "
+"нашата компания"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_showcase
@@ -6598,7 +6593,8 @@ msgstr "Опасност"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
 msgid "Daniel ensures efficient daily operations and process optimization."
-msgstr "Даниел осигурява ефективна ежедневна работа и оптимизация на процесите."
+msgstr ""
+"Даниел осигурява ефективна ежедневна работа и оптимизация на процесите."
 
 #. module: website
 #. odoo-javascript
@@ -6810,8 +6806,8 @@ msgid ""
 "message. Click on the picture to change its <em>rounded corner</em> style."
 msgstr ""
 "Изтрийте изображението по-горе или го заменете със снимка, която илюстрира "
-"вашето послание. Щракнете върху снимката, за да промените стила на <em>"
-"заоблените ъгли</em>."
+"вашето послание. Щракнете върху снимката, за да промените стила на "
+"<em>заоблените ъгли</em>."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
@@ -6942,8 +6938,8 @@ msgid ""
 "Design is the intermediary between <strong>information</strong> and "
 "<strong>understanding</strong>"
 msgstr ""
-"Дизайнът е посредникът между <strong>информация</strong> и <strong>"
-"разбиране</strong>"
+"Дизайнът е посредникът между <strong>информация</strong> и "
+"<strong>разбиране</strong>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_headline
@@ -7880,8 +7876,8 @@ msgstr ""
 "Издигнете жилищното си пространство с мебели, които съчетават модерна "
 "естетика и класически чар, изработени да внесат както комфорт, така и стил в "
 "дома ви.\n"
-"                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"
-"<br/><br/><br/><br/><br/>"
+"                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/"
+"><br/><br/><br/><br/><br/>"
 
 #. module: website
 #. odoo-javascript
@@ -8136,8 +8132,8 @@ msgstr ""
 msgid ""
 "Entered date or time is not correct! It must not be %(start)s (%(format)s)."
 msgstr ""
-"Въведената дата или час не е правилна! Не трябва да бъде %(start)s (%(format)"
-"s)."
+"Въведената дата или час не е правилна! Не трябва да бъде %(start)s (%"
+"(format)s)."
 
 #. module: website
 #. odoo-javascript
@@ -8446,6 +8442,12 @@ msgstr "Extension View"
 #: model:ir.model.fields,field_description:website.field_website_page__xml_id
 msgid "External ID"
 msgstr "Външна ИН"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "External ID can not be loaded: %(error)s (website: %(website_id)s)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -9907,8 +9909,8 @@ msgid ""
 "Hint: How to use Google Map on your website (Contact Us page and as a "
 "snippet)"
 msgstr ""
-"Подсказка: Как да използвате Google Карта на вашия уебсайт (страница „"
-"Контакти“ и като блок)"
+"Подсказка: Как да използвате Google Карта на вашия уебсайт (страница "
+"„Контакти“ и като блок)"
 
 #. module: website
 #. odoo-javascript
@@ -10066,6 +10068,12 @@ msgstr "Хибрид"
 #: model_terms:ir.ui.view,arch_db:website.cookies_bar
 msgid "I agree"
 msgstr "Съгласен съм"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/form/utils.js:0
+msgid "I agree to the"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -10511,7 +10519,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_accordion_image
 #: model_terms:ir.ui.view,arch_db:website.s_faq_list
 msgid "In this section, you can address common questions efficiently."
-msgstr "В този раздел можете ефективно да отговорите на често задавани въпроси."
+msgstr ""
+"В този раздел можете ефективно да отговорите на често задавани въпроси."
 
 #. module: website
 #. odoo-javascript
@@ -17376,6 +17385,12 @@ msgid "Template fallback"
 msgstr "Оттегляне на шаблон"
 
 #. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "Template not found: '%(error)s' (website: %(website_id)s)"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega_columns
 msgid "Terms and Conditions"
@@ -17963,8 +17978,8 @@ msgid ""
 "to (soft) reset a broken view."
 msgstr ""
 "Това поле ще запази текущия `arch_db` преди да пише върху него.\n"
-"                                                                         "
-"Полезно за (мек) ресет на повреден изглед."
+"                                                                         Полезно "
+"за (мек) ресет на повреден изглед."
 
 #. module: website
 #. odoo-javascript
@@ -20531,8 +20546,8 @@ msgid ""
 "menu for new websites (e.g., /shop, /event, ...)."
 msgstr ""
 "Не можете да изтриете това меню на уебсайта, тъй като то служи като "
-"родителско меню по подразбиране за нови уебсайтове (напр. /shop, /event, ...)"
-"."
+"родителско меню по подразбиране за нови уебсайтове (напр. /shop, /"
+"event, ...)."
 
 #. module: website
 #. odoo-javascript
@@ -20556,7 +20571,8 @@ msgstr "Не предоставихте валиден линк към Facebook"
 #. odoo-javascript
 #: code:addons/website/static/src/client_actions/website_preview/new_content_systray_item.xml:0
 msgid "You do not have the necessary permissions to create new content pages."
-msgstr "Нямате необходимите права за създаване на нови страници със съдържание."
+msgstr ""
+"Нямате необходимите права за създаване на нови страници със съдържание."
 
 #. module: website
 #. odoo-python
@@ -20602,9 +20618,9 @@ msgid ""
 "if you reject or discard those cookies."
 msgstr ""
 "Можете да откажете използването на бисквитки от трета страна, като посетите "
-"<a class=\"o_translate_inline\" href=\"https://optout.networkadvertising.org/"
-"?c=1\" rel=\"nofollow\">страницата за отказ на Network Advertising "
-"Initiative</a>.\n"
+"<a class=\"o_translate_inline\" href=\"https://"
+"optout.networkadvertising.org/?c=1\" rel=\"nofollow\">страницата за отказ на "
+"Network Advertising Initiative</a>.\n"
 "                                                Уебсайтът ще продължи да "
 "работи, ако отхвърлите или изтриете тези бисквитки."
 
@@ -22288,3 +22304,6 @@ msgstr "✽ Пици"
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid "✽  What We Offer"
 msgstr "✽ Какво предлагаме"
+
+#~ msgid "%(error)s (website: %(website_id)s)"
+#~ msgstr "%(error)s (уебсайт: %(website_id)s)"
