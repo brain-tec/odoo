@@ -34,7 +34,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-30 00:49+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-09-11 14:23+0000\n"
 "Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
 "Language-Team: Finnish <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -662,7 +662,8 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_describing_benefits
 msgid "<span class=\"display-3-fs\">Discover our main three benefits</span>"
-msgstr "<span class=\"display-3-fs\">Tutustu kolmeen tärkeimpään etuumme</span>"
+msgstr ""
+"<span class=\"display-3-fs\">Tutustu kolmeen tärkeimpään etuumme</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_describing_benefits
@@ -726,7 +727,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
 msgid ""
 "<span class=\"fa fa-check text-success\" role=\"img\"/>  Account management"
-msgstr "<span class=\"fa fa-check text-success\" role=\"img\"/>  Tilin hallinta"
+msgstr ""
+"<span class=\"fa fa-check text-success\" role=\"img\"/>  Tilin hallinta"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
@@ -740,7 +742,8 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
 msgid "<span class=\"fa fa-check text-success\" role=\"img\"/>  Email support"
-msgstr "<span class=\"fa fa-check text-success\" role=\"img\"/>  Sähköpostituki"
+msgstr ""
+"<span class=\"fa fa-check text-success\" role=\"img\"/>  Sähköpostituki"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
@@ -780,8 +783,8 @@ msgid ""
 "<span class=\"fa fa-fw fa-shopping-cart\" contenteditable=\"false\"/>  Huge "
 "holiday sale savings. Don't miss out."
 msgstr ""
-"<span class=\"fa fa-fw fa-shopping-cart\" contenteditable=\"false\"/>  "
-"Valtavat lomakauden alennukset. Älä missaa tätä tilaisuutta."
+"<span class=\"fa fa-fw fa-shopping-cart\" contenteditable=\"false\"/"
+">  Valtavat lomakauden alennukset. Älä missaa tätä tilaisuutta."
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_special_offer_cta
@@ -789,9 +792,9 @@ msgid ""
 "<span class=\"fa fa-fw fa-tag\" contenteditable=\"false\"/>  <strong>Special "
 "Offers</strong>. Complimentary care packs included with every sofa."
 msgstr ""
-"<span class=\"fa fa-fw fa-tag\" contenteditable=\"false\"/>  <strong>"
-"Erityistarjoukset</strong>. Ilmaiset hoitopaketit sisältyvät jokaiseen "
-"sohvaan."
+"<span class=\"fa fa-fw fa-tag\" contenteditable=\"false\"/"
+">  <strong>Erityistarjoukset</strong>. Ilmaiset hoitopaketit sisältyvät "
+"jokaiseen sohvaan."
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_kanban
@@ -826,7 +829,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
 msgid ""
 "<span class=\"fa fa-times text-danger\" role=\"img\"/>  No customization"
-msgstr "<span class=\"fa fa-times text-danger\" role=\"img\"/>  Ei räätälöintiä"
+msgstr ""
+"<span class=\"fa fa-times text-danger\" role=\"img\"/>  Ei räätälöintiä"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
@@ -1124,8 +1128,8 @@ msgid ""
 "Technical Officer</span>"
 msgstr ""
 "<strong>James Carter</strong><br/>\n"
-"                                    <span class=\"text-muted\">"
-"Teknologiajohtaja</span>"
+"                                    <span class=\"text-"
+"muted\">Teknologiajohtaja</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_customer_quote
@@ -1140,8 +1144,8 @@ msgid ""
 "Financial Officer</span>"
 msgstr ""
 "<strong>Jody Roberts</strong><br/>\n"
-"                                    <span class=\"text-muted\">"
-"Talousjohtaja</span>"
+"                                    <span class=\"text-"
+"muted\">Talousjohtaja</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_content_card_4
@@ -1154,8 +1158,8 @@ msgid ""
 "<strong>John DOE</strong><br/><span class=\"h6-fs\"><font "
 "class=\"text-600\">CEO of MyCompany</font></span>"
 msgstr ""
-"<strong>John DOE</strong><br/><span class=\"h6-fs\"><font class=\"text-600\">"
-"Yritykseni toimitusjohtaja</font></span>"
+"<strong>John DOE</strong><br/><span class=\"h6-fs\"><font "
+"class=\"text-600\">Yritykseni toimitusjohtaja</font></span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_schedule
@@ -1177,8 +1181,8 @@ msgid ""
 "product, inspiring a deeper connection beyond simple features."
 msgstr ""
 "<strong>Korvaa tämä lohko tuotteesi aidolla, ainutlaatuisella tarinalla.</"
-"strong> Keskity persoonallisuuden luomaan uniikkiin kipinään. <strong>"
-"Kirjoita tiiviisti ja tarkasti. Anna brändisi äänen loistaa</strong> "
+"strong> Keskity persoonallisuuden luomaan uniikkiin kipinään. "
+"<strong>Kirjoita tiiviisti ja tarkasti. Anna brändisi äänen loistaa</strong> "
 "ainutlaatuisten valintojen kautta. Tämä selittää tuotteen <em>syvimmän "
 "olemuksen</em> sekä inspiroi pelkkiä ominaisuuksia merkityksellisempään "
 "yhteyteen."
@@ -1213,8 +1217,8 @@ msgid ""
 "Director</span>"
 msgstr ""
 "<strong>Sullivan Mitchell</strong><br/>\n"
-"                                    <span class=\"text-muted\">"
-"Markkinointijohtaja</span>"
+"                                    <span class=\"text-"
+"muted\">Markkinointijohtaja</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_schedule
@@ -1625,8 +1629,8 @@ msgid ""
 "visible in any case to allow leads and partners to re-subscribe."
 msgstr ""
 "Anna vastaanottajan hallita itse mustalla listalla oloaan tilauksen "
-"peruuttamissivun kautta. Jos vaihtoehto on aktiivinen, 'Mustalle listalle' -"
-"painike on piilotettu tilauksen peruutussivulla. Tule takaisin -painike on "
+"peruuttamissivun kautta. Jos vaihtoehto on aktiivinen, 'Mustalle listalle' "
+"-painike on piilotettu tilauksen peruutussivulla. Tule takaisin -painike on "
 "aina näkyvissä, jotta liidit ja partnerit voivat tilata uudelleen."
 
 #. module: mass_mailing
@@ -1804,7 +1808,8 @@ msgstr "Postituslistojen perusteella"
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_content_card_7
 msgid "Be the first to find out all the latest new, products and trends."
-msgstr "Saa ensimmäisenä tietoa uusimmista uutisista, tuotteista ja trendeistä."
+msgstr ""
+"Saa ensimmäisenä tietoa uusimmista uutisista, tuotteista ja trendeistä."
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_membership_advertisement
@@ -2173,8 +2178,8 @@ msgstr ""
 msgid ""
 "Cannot set an owner on '%(server)s': it is used by mailing '%(mailing)s'."
 msgstr ""
-"Palvelimelle '%(server)s' ei voi määrittää omistajaa: se on '%(mailing)s' -"
-"postituksen käytössä."
+"Palvelimelle '%(server)s' ei voi määrittää omistajaa: se on '%(mailing)s' "
+"-postituksen käytössä."
 
 #. module: mass_mailing
 #. odoo-python
@@ -2277,8 +2282,8 @@ msgid ""
 "Classic pizza with fresh mozzarella, San Marzano tomatoes, and basil leaves, "
 "drizzled with extra virgin olive oil."
 msgstr ""
-"Klassinen pizza, jonka päällä on tuoretta mozzarellaa, San Marzano -"
-"tomaatteja ja basilikanlehtiä, viimeisteltynä ekstra-neitsytoliiviöljyllä."
+"Klassinen pizza, jonka päällä on tuoretta mozzarellaa, San Marzano "
+"-tomaatteja ja basilikanlehtiä, viimeisteltynä ekstra-neitsytoliiviöljyllä."
 
 #. module: mass_mailing
 #. odoo-javascript
@@ -4583,8 +4588,8 @@ msgid ""
 "\">Customer Service</span>"
 msgstr ""
 "Michael Fletcher<br/>\n"
-"                  <span style=\"font-size: 12px; font-weight: bolder;\">"
-"Asiakaspalvelu</span>"
+"                  <span style=\"font-size: 12px; font-weight: bolder;"
+"\">Asiakaspalvelu</span>"
 
 #. module: mass_mailing
 #: model:ir.model.fields.selection,name:mass_mailing.selection__mailing_trace__failure_type__mail_email_missing
@@ -5673,8 +5678,8 @@ msgid ""
 "Savor our fresh, local cuisine with a modern twist.<br/>Deliciously crafted "
 "for every taste!"
 msgstr ""
-"Nauti tuoreesta, paikallisesta keittiöstämme, jossa on moderni twisti.<br/>"
-"Herkullisesti valmistettu jokaiseen makuun!"
+"Nauti tuoreesta, paikallisesta keittiöstämme, jossa on moderni twisti.<br/"
+">Herkullisesti valmistettu jokaiseen makuun!"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_features_column
@@ -6333,19 +6338,6 @@ msgstr "Testijäljet"
 #. module: mass_mailing
 #. odoo-python
 #: code:addons/mass_mailing/wizard/mailing_mailing_test.py:0
-msgid ""
-"Test email sent to %(success)s recipient(s), could not send to %(failed)s."
-msgstr ""
-
-#. module: mass_mailing
-#. odoo-python
-#: code:addons/mass_mailing/wizard/mailing_mailing_test.py:0
-msgid "Test email sent to %(success)s recipient(s)."
-msgstr ""
-
-#. module: mass_mailing
-#. odoo-python
-#: code:addons/mass_mailing/wizard/mailing_mailing_test.py:0
 msgid "Test mailing could not be sent to %s:"
 msgstr "Testipostia ei voitu lähettää osoitteeseen %s:"
 
@@ -6611,6 +6603,12 @@ msgstr "Otsikko + Sivuteksti"
 #. odoo-javascript
 #: code:addons/mass_mailing/static/src/builder/options/social_media_option.xml:0
 msgid "Title Position"
+msgstr ""
+
+#. module: mass_mailing
+#. odoo-javascript
+#: code:addons/mass_mailing/static/src/components/mailing_preview_iframe/mass_mailing_preview_record_field.xml:0
+msgid "To"
 msgstr ""
 
 #. module: mass_mailing

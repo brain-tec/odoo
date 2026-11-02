@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-10 17:38+0000\n"
+"POT-Creation-Date: 2026-10-30 17:38+0000\n"
 "PO-Revision-Date: 2026-09-16 06:20+0000\n"
 "Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -44,8 +44,8 @@ msgid ""
 "first."
 msgstr ""
 "<i class=\"fa fa-exclamation-triangle\"/> これらのプロパティは\n"
-"                                この支払に関してプロバイダとOdooとの統一の"
-"ビヘイビアと\n"
+"                                この支払に関してプロバイダとOdooとの統一のビ"
+"ヘイビアと\n"
 "一致するよう定義されます。 変更によりエラーが発生する可能性があり、\n"
 "                                まずはテストデータベースでテストされる必要が"
 "あります。"
@@ -65,10 +65,10 @@ msgid ""
 "transactions you intend to capture can only be captured in full. Handle the "
 "transactions individually to capture a partial amount.\"/>"
 msgstr ""
-"<i class=\"fa fa-info-circle oe_inline\" invisible=\"support_partial_capture "
-"!= 'full_only'\" title=\"Some of the transactions you intend to capture can "
-"only be captured in full. Handle the transactions individually to capture a "
-"partial amount.\"/>"
+"<i class=\"fa fa-info-circle oe_inline\" "
+"invisible=\"support_partial_capture != 'full_only'\" title=\"Some of the "
+"transactions you intend to capture can only be captured in full. Handle the "
+"transactions individually to capture a partial amount.\"/>"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.token_form
@@ -157,8 +157,8 @@ msgid ""
 "                    the capture is still pending after a few minutes."
 msgstr ""
 "<strong>警告！</strong>部分確定は保留中です。処理されるまで\n"
-"                    しばらくお待ち下さい。数分経っても確定が保留中の場合は"
-"、\n"
+"                    しばらくお待ち下さい。数分経っても確定が保留中の場合"
+"は、\n"
 "                    決済プロバイダ設定を確認して下さい。"
 
 #. module: payment
@@ -314,7 +314,8 @@ msgstr "この決済方法を本当に削除しますか？"
 msgid ""
 "Are you sure you want to void the authorized transaction? This action can't "
 "be undone."
-msgstr "承認済みの取引を無効にしてよろしいですか?この操作は取り消すことができません。"
+msgstr ""
+"承認済みの取引を無効にしてよろしいですか?この操作は取り消すことができません。"
 
 #. module: payment
 #: model:payment.provider,name:payment.payment_provider_asiapay
@@ -408,8 +409,9 @@ msgid ""
 "you want to charge your customers cards only when you are sure you can ship "
 "the goods to them."
 msgstr ""
-"配送完了時に、Odooから決済金額を確定(キャプチャ_します。商品の発送が確実にな"
-"ったタイミングで顧客のカードに課金したい場合に、この設定を使用してください。"
+"配送完了時に、Odooから決済金額を確定(キャプチャ_します。商品の発送が確実に"
+"なったタイミングで顧客のカードに課金したい場合に、この設定を使用してくださ"
+"い。"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__child_transaction_ids
@@ -1338,8 +1340,8 @@ msgid ""
 "context after ensuring that the update can tolerate a rollback."
 msgstr ""
 "支払取引を直接更新しないでください。_record() を使用して支払いデータを処理"
-"キューに入れるか、ロールバックに耐えうる更新であることを確認した上で、"
-"コンテキストに payment_safe_write=True を渡してください。"
+"キューに入れるか、ロールバックに耐えうる更新であることを確認した上で、コンテ"
+"キストに payment_safe_write=True を渡してください。"
 
 #. module: payment
 #: model:ir.actions.server,name:payment.cron_post_process_payment_tx_ir_actions_server
@@ -1746,7 +1748,8 @@ msgstr ""
 msgid ""
 "The currencies available with this payment provider. Leave empty not to "
 "restrict any."
-msgstr "この決済プロバイダーで利用可能な通貨。制限しない場合は空のままにします。"
+msgstr ""
+"この決済プロバイダーで利用可能な通貨。制限しない場合は空のままにします。"
 
 #. module: payment
 #. odoo-python
@@ -1912,8 +1915,8 @@ msgstr "このプロバイダーには、このコードの支払方法がすで
 #: code:addons/payment/models/payment_transaction.py:0
 msgid "The provider must not be archived to make a request."
 msgstr ""
-"リクエストを実行するには、プロバイダーがアーカイブされていない必要があります"
-"。"
+"リクエストを実行するには、プロバイダーがアーカイブされていない必要がありま"
+"す。"
 
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_token__provider_ref
@@ -1934,7 +1937,8 @@ msgstr "この支払方法に対応しているプロバイダー。"
 #. odoo-python
 #: code:addons/payment/models/payment_transaction.py:0
 msgid "The refund %(ref)s of %(formatted_amount)s has been initiated."
-msgstr "返金%(ref)s ：金額%(formatted_amount)s について、手続きを開始しました。"
+msgstr ""
+"返金%(ref)s ：金額%(formatted_amount)s について、手続きを開始しました。"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_method__image_payment_form
@@ -1977,8 +1981,8 @@ msgid ""
 "The template rendering a form submitted to redirect the user when making a "
 "payment"
 msgstr ""
-"支払時にユーザをリダイレクトするために送信されたフォームをレンダリングする"
-"テンプレート"
+"支払時にユーザをリダイレクトするために送信されたフォームをレンダリングするテ"
+"ンプレート"
 
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_provider__express_checkout_form_view_id
@@ -1996,7 +2000,8 @@ msgstr "直接支払時にインライン決済フォームをレンダリング
 msgid ""
 "The template rendering the inline payment form when making a payment by "
 "token."
-msgstr "トークンによる決済時にインライン支払いフォームをレンダリングするテンプレート"
+msgstr ""
+"トークンによる決済時にインライン支払いフォームをレンダリングするテンプレート"
 
 #. module: payment
 #. odoo-python
@@ -2031,7 +2036,8 @@ msgstr "支払うものはありません。"
 msgid ""
 "This action will also archive %s tokens that are registered with this "
 "payment method."
-msgstr "このアクションは、この支払方法に登録されている%sトークンもアーカイブします。"
+msgstr ""
+"このアクションは、この支払方法に登録されている%sトークンもアーカイブします。"
 
 #. module: payment
 #. odoo-python
@@ -2062,9 +2068,9 @@ msgid ""
 "checkout enables customers to pay with Google Pay and Apple Pay from which "
 "address information is collected at payment."
 msgstr ""
-"これは、顧客がエクスプレス支払方法を使用できるかどうかを制御します。"
-"エクスプレスチェックアウトは、Google PayやApple Payでの支払を可能にし、支払時"
-"に住所情報が収集されます。"
+"これは、顧客がエクスプレス支払方法を使用できるかどうかを制御します。エクスプ"
+"レスチェックアウトは、Google PayやApple Payでの支払を可能にし、支払時に住所情"
+"報が収集されます。"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_link_wizard_view_form
@@ -2076,6 +2082,18 @@ msgstr ""
 "この取引先にはEメールがないため、一部の支払プロバイダで問題が発生する可能性が"
 "あります。\n"
 "　　　　この取引先にEメールを設定することをお勧めします。"
+
+#. module: payment
+#. odoo-python
+#: code:addons/payment/controllers/portal.py:0
+msgid "This payment method is not available."
+msgstr ""
+
+#. module: payment
+#. odoo-python
+#: code:addons/payment/controllers/portal.py:0
+msgid "This payment provider is not available."
+msgstr ""
 
 #. module: payment
 #: model_terms:ir.actions.act_window,help:payment.action_payment_provider
@@ -2230,8 +2248,8 @@ msgid ""
 "Whether the provider is visible on the website or not. Tokens remain "
 "functional but are only visible on manage forms."
 msgstr ""
-"プロバイダがウェブサイトに表示されるかどうか。トークンの機能は維持されますが"
-"、管理フォームでのみ表示されます。"
+"プロバイダがウェブサイトに表示されるかどうか。トークンの機能は維持されます"
+"が、管理フォームでのみ表示されます。"
 
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_transaction__is_live
@@ -2264,8 +2282,8 @@ msgid ""
 "You can't unarchive tokens linked to inactive payment methods or archived "
 "providers."
 msgstr ""
-"無効な決済方法やアーカイブされたプロバイダーにリンクされているトークンの"
-"アーカイブを解除することはできません。"
+"無効な決済方法やアーカイブされたプロバイダーにリンクされているトークンのアー"
+"カイブを解除することはできません。"
 
 #. module: payment
 #. odoo-python
@@ -2493,8 +2511,8 @@ msgstr "郵便番号"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__partner_zip
-msgid "Zip"
-msgstr "郵便番号"
+msgid "Zip Code"
+msgstr ""
 
 #. module: payment
 #. odoo-python
@@ -2531,3 +2549,6 @@ msgstr "transaction_id"
 #: model:ir.model,name:payment.model_ir_websocket
 msgid "websocket message handling"
 msgstr "WebSocketメッセージ処理"
+
+#~ msgid "Zip"
+#~ msgstr "郵便番号"

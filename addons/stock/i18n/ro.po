@@ -18,7 +18,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:36+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 21:18+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Romanian <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -1304,7 +1304,8 @@ msgstr "Toate depozitele"
 msgid ""
 "All our contractual relations will be governed exclusively by United States "
 "law."
-msgstr "Toate relațiile contractuale vor fi reglementate exclusiv de legea SUA."
+msgstr ""
+"Toate relațiile contractuale vor fi reglementate exclusiv de legea SUA."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move__returned_move_ids
@@ -1523,6 +1524,12 @@ msgstr "Întreabă"
 
 #. module: stock
 #. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Assign"
+msgstr ""
+
+#. module: stock
+#. odoo-javascript
 #: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 msgid "Assign All"
 msgstr "Alocă tot"
@@ -1536,6 +1543,12 @@ msgstr "Alocare proprietar"
 #: model:ir.model.fields,field_description:stock.field_stock_request_count__user_id
 msgid "Assign to"
 msgstr "Alocat la"
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
+msgid "Assigned"
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_package__child_package_dest_ids
@@ -3408,8 +3421,8 @@ msgid ""
 "Due to receipts scheduled in the future, you might end up with "
 "excessive stock . Check the Forecasted Report  before reordering"
 msgstr ""
-"Datorită recepțiilor programate în viitor, este posibil să aveți un stoc "
-"excesiv. Verificați Raportul Estimat  înainte de a comandare"
+"Datorită recepțiilor programate în viitor, este posibil să aveți un "
+"stoc excesiv. Verificați Raportul Estimat  înainte de a comandare"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move__procurement_values
@@ -3852,6 +3865,7 @@ msgid "Full Package Name"
 msgstr "Nume pachet complet"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Future Activities"
 msgstr "Activități viitoare"
@@ -4286,8 +4300,8 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_show_allocation_report
 msgid ""
-"If this checkbox is ticked, Odoo will automatically show the allocation "
-"report (if there are moves to allocate to) when validating."
+"If this checkbox is ticked, Odoo will show the allocation report (if there "
+"are moves to allocate to.)"
 msgstr ""
 
 #. module: stock
@@ -5103,6 +5117,7 @@ msgid "Late"
 msgstr "Întârziat"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Late Activities"
 msgstr "Activități întârziate"
@@ -5747,6 +5762,7 @@ msgid "Multiple destinations"
 msgstr "Destinații multiple"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "My Activities"
 msgstr "Activitățile mele"
@@ -6959,7 +6975,8 @@ msgstr "Problemă de planificare"
 #. odoo-python
 #: code:addons/stock/models/stock_warehouse.py:0
 msgid "Please contact your administrator to configure your warehouse."
-msgstr "Vă rugăm să contactați administratorul pentru a vă configura depozitul."
+msgstr ""
+"Vă rugăm să contactați administratorul pentru a vă configura depozitul."
 
 #. module: stock
 #. odoo-python
@@ -8099,7 +8116,6 @@ msgstr "Rezervă ambalajele parțiale"
 
 #. module: stock
 #. odoo-javascript
-#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 #: code:addons/stock/static/src/allocation_report/out_line/out_line.js:0
 msgid "Reserved"
 msgstr ""
@@ -8584,7 +8600,8 @@ msgstr "Selecție nesuportată."
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Sell and purchase products in different units of measure or packagings"
-msgstr "Vindeți și cumpărați produse în unități de măsură sau ambalaje diferite"
+msgstr ""
+"Vindeți și cumpărați produse în unități de măsură sau ambalaje diferite"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -8674,8 +8691,9 @@ msgid ""
 "\n"
 "Please correct this to prevent inconsistent data."
 msgstr ""
-"Numărul de serie (%(serial_number)s) nu este localizat în %(source_location)"
-"s, dar este localizat în locație (locuri): %(other_locations)s."
+"Numărul de serie (%(serial_number)s) nu este localizat în %"
+"(source_location)s, dar este localizat în locație (locuri): %"
+"(other_locations)s."
 
 #. module: stock
 #. odoo-python
@@ -8686,8 +8704,9 @@ msgid ""
 "\n"
 "Source location for this move will be changed to %(recommended_location)s"
 msgstr ""
-"Numărul de serie (%(serial_number)s) nu este localizat în %(source_location)"
-"s, dar este localizat în locație (locuri): %(other_locations)s.\n"
+"Numărul de serie (%(serial_number)s) nu este localizat în %"
+"(source_location)s, dar este localizat în locație (locuri): %"
+"(other_locations)s.\n"
 "Locația sursă pentru acest transfer va fi schimbată în %"
 "(recommended_location)s"
 
@@ -9532,8 +9551,8 @@ msgid ""
 "With 'Automatic No Step Added', the location is replaced in the original "
 "move."
 msgstr ""
-"Valoarea „Operare manuală” va crea o mutare a stocului după cea curentă. Cu „"
-"Automat fără pas adăugat”, locația este înlocuită în mutarea inițială."
+"Valoarea „Operare manuală” va crea o mutare a stocului după cea curentă. Cu "
+"„Automat fără pas adăugat”, locația este înlocuită în mutarea inițială."
 
 #. module: stock
 #. odoo-python
@@ -9870,8 +9889,8 @@ msgstr ""
 "produselor pentru a genera reaprovizionare la cerere legată de comenzile "
 "dvs. de vânzare (de exemplu) imediat ce acestea sunt confirmate, cu un link "
 "direct. Comenzile de achiziție, comenzile de fabricație etc. sunt declanșate "
-"pe baza modului de reaprovizionare setat pe produs (ruta Cumpără sau Fabrică)"
-"."
+"pe baza modului de reaprovizionare setat pe produs (ruta Cumpără sau "
+"Fabrică)."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -10114,7 +10133,8 @@ msgstr ""
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.inventory_warning_reset_view
 msgid "This will discard all unapplied counts, do you want to proceed?"
-msgstr "Acest lucru va anula toate numărările neaplicate, doriți să continuați?"
+msgstr ""
+"Acest lucru va anula toate numărările neaplicate, doriți să continuați?"
 
 #. module: stock
 #. odoo-python
@@ -10241,6 +10261,7 @@ msgid "Today"
 msgstr "Astăzi"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Today Activities"
 msgstr "Activitățile de astăzi"
@@ -10369,8 +10390,8 @@ msgid ""
 msgstr ""
 "Urmăriți următoarele date pe loturi și numere de serie: cel mai bun înainte, "
 "eliminare, sfârșitul vieții, alertă. Astfel de date sunt setate automat la "
-"crearea numărului de lot / serie pe baza valorilor setate pe produs (în zile)"
-"."
+"crearea numărului de lot / serie pe baza valorilor setate pe produs (în "
+"zile)."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -10530,6 +10551,12 @@ msgstr ""
 #: model:ir.model.fields,help:stock.field_stock_picking__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr "Tipul activității de excepție din înregistrare."
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Unassign"
+msgstr ""
 
 #. module: stock
 #. odoo-python
@@ -11053,9 +11080,9 @@ msgid ""
 "b> are created from <b>%(source_location)s</b> to fulfill the need. %"
 "(suffix)s"
 msgstr ""
-"Când produsele sunt necesare în <b>%(destination)s</b>, <br> <b>%(operation)"
-"s</b> sunt create din <b>%(source_location)s</b> pentru a acoperi necesarul. "
-"%(suffix)s"
+"Când produsele sunt necesare în <b>%(destination)s</b>, <br> <b>%"
+"(operation)s</b> sunt create din <b>%(source_location)s</b> pentru a acoperi "
+"necesarul. %(suffix)s"
 
 #. module: stock
 #. odoo-python
@@ -11366,8 +11393,8 @@ msgstr "Nu puteți modifica Data programată la un transfer anulat."
 #: code:addons/stock/models/stock_move.py:0
 msgid "You cannot change the UoM for a stock move that has been set to 'Done'."
 msgstr ""
-"Nu puteți modifica UM pentru o mutare a stocului care a fost setată pe „"
-"Terminat”."
+"Nu puteți modifica UM pentru o mutare a stocului care a fost setată pe "
+"„Terminat”."
 
 #. module: stock
 #. odoo-python
@@ -11432,8 +11459,8 @@ msgstr "Nu puteți împărți o mutare ciornă. Trebuie confirmată mai întâi.
 #: code:addons/stock/models/stock_move.py:0
 msgid "You cannot split a stock move that has been set to 'Done' or 'Cancel'."
 msgstr ""
-"Nu puteți împărți o mutare a stocului care a fost setată ca „Efectuat\" sau „"
-"Anulat\"."
+"Nu puteți împărți o mutare a stocului care a fost setată ca „Efectuat\" sau "
+"„Anulat\"."
 
 #. module: stock
 #. odoo-python
@@ -11442,8 +11469,8 @@ msgid ""
 "You cannot take products from or deliver products to a location of type "
 "\"view\" (%s)."
 msgstr ""
-"Nu puteți prelua produse sau livra produse într-o locație de tip „vizualizare"
-"” (%s)."
+"Nu puteți prelua produse sau livra produse într-o locație de tip "
+"„vizualizare” (%s)."
 
 #. module: stock
 #. odoo-python

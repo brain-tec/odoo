@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-09-29 09:25+0000\n"
 "Last-Translator: Bren Driesen <brdri@odoo.com>\n"
 "Language-Team: Dutch <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -330,8 +330,8 @@ msgid ""
 "            "
 msgstr ""
 "<div>\n"
-"                    Beste <b><t t-out=\"object.env.context.get('manager')\"/>"
-"</b>,\n"
+"                    Beste <b><t t-out=\"object.env.context.get('manager')\"/"
+"></b>,\n"
 "                    <br/><br/>\n"
 "                    <p>Ik vraag verlof aan. Het zou fijn zijn als je de "
 "aanvraag zo snel mogelijk kunt accepteren!</p>\n"
@@ -395,8 +395,8 @@ msgid ""
 "= 'hour'\">Hours</span>"
 msgstr ""
 "<span class=\"ml8\" invisible=\"unit_of_measure == 'hour'\">Dagen</span>\n"
-"                            <span class=\"ml8\" invisible=\"unit_of_measure "
-"!= 'hour'\">Uren</span>"
+"                            <span class=\"ml8\" invisible=\"unit_of_measure !"
+"= 'hour'\">Uren</span>"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_kanban
@@ -608,6 +608,11 @@ msgstr ""
 "\n"
 "    Versies:\n"
 "    %(versions)s"
+
+#. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
+msgid "A supporting document is required for this type of time off."
+msgstr ""
 
 #. module: hr_holidays
 #. odoo-python
@@ -1278,23 +1283,22 @@ msgid "Both Approved and Confirmed"
 msgstr "Beide bevestigd en goedgekeurd"
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__manager
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__manager
-msgid "By Employee's Approver"
-msgstr "Door de verlofgoedkeurder ingesteld bij de werknemer"
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__hr
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__hr
+msgid "By HR Responsible"
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__both
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__both
-msgid "By Employee's Approver and Time Off Officer"
+msgid "By HR Responsible and Time Off Approver"
 msgstr ""
-"Door de verlofgoedkeurder ingesteld bij de werknemer en de verlofbeheerder"
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__hr
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__hr
-msgid "By Time Off Officer"
-msgstr "Door de verlofbeheerder"
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__manager
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__manager
+msgid "By Time Off Approver"
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__count_days_as__calendar
@@ -1426,10 +1430,10 @@ msgid ""
 "in the future. Please review this employee's leaves and adjust their "
 "allocation accordingly."
 msgstr ""
-"Het wijzigen van dit werkschema heeft tot gevolg dat de betrokken werknemer"
-"(s) niet genoeg verlofdagen toegewezen krijgen om de reeds opgenomen "
-"verlofdagen in de toekomst op te vangen. Controleer de verlofdagen van deze "
-"werknemer en pas de toewijzing dienovereenkomstig aan."
+"Het wijzigen van dit werkschema heeft tot gevolg dat de betrokken "
+"werknemer(s) niet genoeg verlofdagen toegewezen krijgen om de reeds "
+"opgenomen verlofdagen in de toekomst op te vangen. Controleer de verlofdagen "
+"van deze werknemer en pas de toewijzing dienovereenkomstig aan."
 
 #. module: hr_holidays
 #: model_terms:ir.actions.act_window,help:hr_holidays.action_hr_leave_report
@@ -1908,8 +1912,8 @@ msgid ""
 "Due to a change in global time offs, %s extra day(s) have been taken from "
 "your allocation. Please review this leave if you need it to be changed."
 msgstr ""
-"Als gevolg van een wijziging in de globale verlofdagen, zijn er %s extra dag"
-"(en) uit je toewijzing gehaald. Controleer dit verlof als je het wilt "
+"Als gevolg van een wijziging in de globale verlofdagen, zijn er %s extra "
+"dag(en) uit je toewijzing gehaald. Controleer dit verlof als je het wilt "
 "wijzigen."
 
 #. module: hr_holidays
@@ -2329,9 +2333,9 @@ msgid ""
 "{{ object.work_entry_type_id.name }} from {{ object.request_date_from }} to "
 "{{ object.request_date_to }}"
 msgstr ""
-"Ik vraag {{ object.duration_display }} van {{ "
-"object.work_entry_type_id.name }} van {{ object.request_date_from }} tot en "
-"met {{ object.request_date_to }}"
+"Ik vraag {{ object.duration_display }} van "
+"{{ object.work_entry_type_id.name }} van {{ object.request_date_from }} tot "
+"en met {{ object.request_date_to }}"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_calendar_event__id
@@ -2430,6 +2434,14 @@ msgid ""
 msgstr ""
 "Als het actief veld uitstaat, kun je het resource record verbergen zonder "
 "deze te verwijderen."
+
+#. module: hr_holidays
+#: model:ir.model.fields,help:hr_holidays.field_hr_work_entry_type__create_calendar_meeting
+msgid ""
+"If this field is checked, every leave request of this type will have a "
+"corresponding entry in the calendar application. There will be no entry if "
+"this stays unchecked."
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_work_entry_type__count_days_as
@@ -3319,6 +3331,8 @@ msgstr "Wizardregel Voorbeeld Feestdagen"
 
 #. module: hr_holidays
 #. odoo-javascript
+#. odoo-python
+#: code:addons/hr_holidays/models/resource_calendar.py:0
 #: code:addons/hr_holidays/static/src/views/calendar/calendar_side_panel/calendar_side_panel.xml:0
 #: model:ir.actions.act_window,name:hr_holidays.open_view_public_holiday
 #: model:ir.actions.act_window,name:hr_holidays.resource_calendar_global_leaves_action_from_calendar
@@ -4381,7 +4395,8 @@ msgstr "Verlof van mensen waar je manager van bent"
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 msgid "Time off request must be confirmed or validated in order to refuse it."
-msgstr "Verlofaanvraag moet bevestigd of goedgekeurd worden om het te weigeren."
+msgstr ""
+"Verlofaanvraag moet bevestigd of goedgekeurd worden om het te weigeren."
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report_calendar__tz
@@ -5307,12 +5322,14 @@ msgstr "bijv. anciënniteitsplan, PTO, RTT, ..."
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form_manager
 msgid "e.g. Time Type (From validity start to validity end / no limit)"
-msgstr "b.v. Tijdtype (Van begin geldigheid tot einde geldigheid / geen limiet)"
+msgstr ""
+"b.v. Tijdtype (Van begin geldigheid tot einde geldigheid / geen limiet)"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form
 msgid "e.g. Time type (From validity start to validity end / no limit)"
-msgstr "b.v. Tijdtype (Van begin geldigheid tot einde geldigheid / geen limiet)"
+msgstr ""
+"b.v. Tijdtype (Van begin geldigheid tot einde geldigheid / geen limiet)"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
@@ -5503,6 +5520,16 @@ msgstr "bevestigen"
 #: code:addons/hr_holidays/static/src/components/accrual_level/accrual_levels.js:0
 msgid "year(s)"
 msgstr "jaar"
+
+#~ msgid "By Employee's Approver"
+#~ msgstr "Door de verlofgoedkeurder ingesteld bij de werknemer"
+
+#~ msgid "By Employee's Approver and Time Off Officer"
+#~ msgstr ""
+#~ "Door de verlofgoedkeurder ingesteld bij de werknemer en de verlofbeheerder"
+
+#~ msgid "By Time Off Officer"
+#~ msgstr "Door de verlofbeheerder"
 
 #~ msgid "(s)"
 #~ msgstr "(s)"

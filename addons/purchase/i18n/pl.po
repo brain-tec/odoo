@@ -41,8 +41,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-30 00:49+0000\n"
-"PO-Revision-Date: 2026-08-31 20:20+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-29 11:39+0000\n"
 "Last-Translator: \"Marta (wacm)\" <wacm@odoo.com>\n"
 "Language-Team: Polish <https://translate.odoo.com/projects/odoo-s19-4/"
 "purchase/pl/>\n"
@@ -206,8 +206,8 @@ msgstr ""
 "        </t>\n"
 "        jest oczekiwana dnia \n"
 "        <t t-if=\"object.date_planned\">\n"
-"            <span style=\"font-weight:bold;\" t-out=\"format_date"
-"(object.date_planned) or ''\">05/05/2021</span>.\n"
+"            <span style=\"font-weight:bold;\" t-"
+"out=\"format_date(object.date_planned) or ''\">05/05/2021</span>.\n"
 "        </t>\n"
 "         <t t-else=\"\">\n"
 "            <span style=\"font-weight:bold;\">nieokreślono</span>.\n"
@@ -282,11 +282,12 @@ msgstr ""
 "        W załączniku jest zamówienie <span style=\"font-weight:bold;\" t-"
 "out=\"object.name or ''\">P00015</span>\n"
 "        <t t-if=\"object.partner_ref\">\n"
-"            z numerem referencyjnym: <t t-out=\"object.partner_ref or ''\">"
-"REF_XXX</t>\n"
+"            z numerem referencyjnym: <t t-out=\"object.partner_ref or "
+"''\">REF_XXX</t>\n"
 "        </t>\n"
-"        na kwotę <span style=\"font-weight:bold;\" t-out=\"format_amount"
-"(object.amount_total, object.currency_id) or ''\">$ 10.00</span>\n"
+"        na kwotę <span style=\"font-weight:bold;\" t-"
+"out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
+"10.00</span>\n"
 "        od <t t-out=\"object.company_id.name or ''\">YourCompany</t>. \n"
 "        <br/><br/>\n"
 "        <t t-if=\"object.date_planned\">\n"
@@ -351,8 +352,8 @@ msgstr ""
 "        W załączniku znajdziesz zapytanie ofertowe <span style=\"font-"
 "weight:bold;\" t-out=\"object.name or ''\">P00015</span>\n"
 "        <t t-if=\"object.partner_ref\">\n"
-"            o numerze referencyjnym: <t t-out=\"object.partner_ref or ''\">"
-"REF_XXX</t>\n"
+"            o numerze referencyjnym: <t t-out=\"object.partner_ref or "
+"''\">REF_XXX</t>\n"
 "        </t>\n"
 "        od <t t-out=\"object.company_id.name or ''\">YourCompany</t>.\n"
 "        <br/><br/>\n"
@@ -390,8 +391,8 @@ msgid ""
 "Waiting for Bill</span>"
 msgstr ""
 "<i class=\"fa fa-fw fa-file-text\" role=\"img\" aria-label=\"Oczekuje na "
-"fakturę\" title=\"Oczekuje na fakturę\"/><span class=\"d-none d-md-inline\">"
-"Oczekuje na fakturę</span>"
+"fakturę\" title=\"Oczekuje na fakturę\"/><span class=\"d-none d-md-"
+"inline\">Oczekuje na fakturę</span>"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_orders
@@ -452,8 +453,8 @@ msgid ""
 "                        <span class=\"o_form_label\" invisible=\"state in "
 "('draft', 'sent')\">Purchase Order</span>"
 msgstr ""
-"<span class=\"o_form_label\" invisible=\"state not in ('draft', 'sent')\">"
-"Zapytanie ofertowe </span>\n"
+"<span class=\"o_form_label\" invisible=\"state not in ('draft', 'sent')"
+"\">Zapytanie ofertowe </span>\n"
 "                        <span class=\"o_form_label\" invisible=\"state in "
 "('draft', 'sent')\">Zamówienie zakupu </span>"
 
@@ -489,8 +490,8 @@ msgstr "<span invisible=\"not receipt_reminder_email\">dzień(dni) przed</span>"
 #: model_terms:web_tour.tour,rainbow_man_message:purchase.purchase_tour
 msgid "<span><b>Good job!</b> You went through all steps of this tour.</span>"
 msgstr ""
-"<span><b>Dobra robota!</b> Przeszedłeś przez wszystkie kroki tego "
-"samouczka.</span>"
+"<span><b>Dobra robota!</b> Przeszedłeś przez wszystkie kroki tego samouczka."
+"</span>"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_portal_content
@@ -936,8 +937,8 @@ msgid ""
 "been used for this product, the change of unit of measure can not be done.If "
 "you want to change it, please archive the product and create a new one."
 msgstr ""
-"Ponieważ dla tego produktu zostały już użyte inne jednostki miary niż %(uom)"
-"s (np. %(problem_uom)s), zmiana jednostki miary nie jest możliwa. Jeśli "
+"Ponieważ dla tego produktu zostały już użyte inne jednostki miary niż %"
+"(uom)s (np. %(problem_uom)s), zmiana jednostki miary nie jest możliwa. Jeśli "
 "chcesz ją zmienić, zarchiwizuj produkt i utwórz nowy."
 
 #. module: purchase
@@ -1569,7 +1570,8 @@ msgstr "Ikona Font awesome np. fa-tasks"
 #. module: purchase
 #: model:ir.model.constraint,message:purchase.constraint_purchase_order_line_non_accountable_null_fields
 msgid "Forbidden values on non-accountable purchase order line"
-msgstr "Niedozwolone wartości w wierszu zamówienia niepodlegającego rozliczeniu"
+msgstr ""
+"Niedozwolone wartości w wierszu zamówienia niepodlegającego rozliczeniu"
 
 #. module: purchase
 #. odoo-python
@@ -2680,6 +2682,7 @@ msgstr "Liczba zamówień zakupu"
 #: model:ir.actions.act_window,name:purchase.action_purchase_history
 #: model:ir.model,name:purchase.model_purchase_order_line
 #: model:ir.model.fields,field_description:purchase.field_account_move_line__purchase_line_id
+#: model:ir.model.fields,field_description:purchase.field_account_tax__purchase_order_line_ids
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_line_form2
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_line_view_form_invoice
@@ -3104,9 +3107,9 @@ msgid ""
 "RFQ."
 msgstr ""
 "Zresetuj do dzisiejszej daty, aby ponownie obliczyć przewidywany termin "
-"dostawy na podstawie dostępnego czasu realizacji"
-"                                     oraz wcześniejszych informacji "
-"zawartych w zapytaniu ofertowym."
+"dostawy na podstawie dostępnego czasu "
+"realizacji                                     oraz wcześniejszych "
+"informacji zawartych w zapytaniu ofertowym."
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__activity_user_id
@@ -3516,6 +3519,13 @@ msgstr "Zaktualizowano zamówioną ilość i cenę jednostkową."
 #: model_terms:ir.ui.view,arch_db:purchase.track_po_line_template
 msgid "The ordered quantity has been updated."
 msgstr "Zamówiona ilość została zaktualizowana."
+
+#. module: purchase
+#. odoo-python
+#: code:addons/purchase/models/res_partner.py:0
+msgid "The partner cannot be deleted because it is used as a dropship address"
+msgstr ""
+"Partnera nie można usunąć, ponieważ jest używany jako adres dropshippingowy"
 
 #. module: purchase
 #: model_terms:ir.actions.act_window,help:purchase.act_res_partner_2_purchase_order

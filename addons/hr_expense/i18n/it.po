@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:36+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-10-23 14:33+0000\n"
 "Last-Translator: \"Marianna Ciofani (cima)\" <cima@odoo.com>\n"
 "Language-Team: Italian <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -108,7 +108,8 @@ msgstr "1 %(exp_cur)s = %(rate)s %(comp_cur)s"
 #. odoo-javascript
 #: code:addons/hr_expense/static/src/js/tours/hr_expense.js:0
 msgid "<b>Wasting time recording your receipts?</b> Let’s try a better way."
-msgstr "<b>Perdi tempo a registrare le ricevute?</b> Proviamo un modo migliore."
+msgstr ""
+"<b>Perdi tempo a registrare le ricevute?</b> Proviamo un modo migliore."
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
@@ -1003,6 +1004,11 @@ msgid "Hotel, plane ticket, taxi, etc."
 msgstr "Hotel, biglietto aereo, taxi, ecc."
 
 #. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_account_tax__hr_expense_ids
+msgid "Hr Expense"
+msgstr ""
+
+#. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_res_config_settings__hr_expense_alias_domain_id
 msgid "Hr Expense Alias Domain"
 msgstr "Dominio alias spese HR"
@@ -1838,13 +1844,10 @@ msgstr "Seleziona un prodotto per proseguire."
 #: model:ir.model.fields,help:hr_expense.field_hr_employee__expense_manager_id
 msgid ""
 "Select the user responsible for approving \"Expenses\" of this employee.\n"
-"If empty, the approval is done by an Administrator or Approver (determined "
-"in settings/users)."
+"If empty, the approval is done by the department manager (if they are an "
+"expense approver), otherwise by the employee's manager. If there is none, "
+"the expense is auto-validated."
 msgstr ""
-"Selezionare l'utente responsabile dell'approvazione delle spese del "
-"dipendente.\n"
-"Se vuoto, l'approvazione viene effettuata da un amministratore o da un "
-"approvatore (stabilito in Impostazioni/Utenti)."
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__selectable_payment_method_line_ids
@@ -2416,7 +2419,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid "You cannot cancel an expense linked to a posted journal entry"
-msgstr "Impossibile annullare una spesa collegata a una registrazione contabile"
+msgstr ""
+"Impossibile annullare una spesa collegata a una registrazione contabile"
 
 #. module: hr_expense
 #. odoo-python
@@ -2490,6 +2494,7 @@ msgstr "Non hai i diritti per modificare la spesa."
 #. module: hr_expense
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
+#: code:addons/hr_expense/wizard/hr_expense_post_wizard.py:0
 msgid "You don't have the access rights to modify this expense."
 msgstr ""
 "Non disponi dei diritti di accesso necessari per modificare questa nota "
@@ -2577,3 +2582,13 @@ msgstr "con la stessa categoria, data, importo e dipendente già esistente."
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
 msgid "with the same receipt already exists."
 msgstr "con la stessa ricevuta esiste già."
+
+#~ msgid ""
+#~ "Select the user responsible for approving \"Expenses\" of this employee.\n"
+#~ "If empty, the approval is done by an Administrator or Approver "
+#~ "(determined in settings/users)."
+#~ msgstr ""
+#~ "Selezionare l'utente responsabile dell'approvazione delle spese del "
+#~ "dipendente.\n"
+#~ "Se vuoto, l'approvazione viene effettuata da un amministratore o da un "
+#~ "approvatore (stabilito in Impostazioni/Utenti)."

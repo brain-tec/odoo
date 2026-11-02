@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:37+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-09-29 14:30+0000\n"
 "Last-Translator: \"Ujjawal Pathak (pauj)\" <pauj@odoo.com>\n"
 "Language-Team: Hindi <https://translate.odoo.com/projects/odoo-s19-4/account/"
@@ -214,8 +214,8 @@ msgid ""
 "%(order)s - %(order_line)s; %(qty_invoiced)s invoiced, %(qty_delivered)s "
 "delivered at %(unit_price)s"
 msgstr ""
-"%(order)s - %(order_line)s; %(qty_invoiced)s इनवॉइस किए गए, %(qty_delivered)"
-"s डिलीवर किए गए %(unit_price)s पर"
+"%(order)s - %(order_line)s; %(qty_invoiced)s इनवॉइस किए गए, %"
+"(qty_delivered)s डिलीवर किए गए %(unit_price)s पर"
 
 #. module: account
 #. odoo-python
@@ -364,10 +364,10 @@ msgid ""
 msgstr ""
 "- अगर आपकी कीमतें टैक्स-रहित हैं, तो प्रति टैक्स राउंडिंग की सलाह दी जाती है. यह राउंडिंग "
 "की गलतियों को कम करता है, क्योंकि यह पहले सभी बिना राउंड किए टैक्स को जोड़ता है और केवल "
-"आखिरी कुल टैक्स को एक बार राउंड करता है.\\n"
-"                                                                                                                                                                                - "
-"अगर आपकी कीमतें टैक्स-सहित हैं, तो प्रति लाइन राउंडिंग की सलाह दी जाती है. इससे सबटोटल "
-"का जोड़ टैक्स सहित कुल राशि के बराबर रहता है।"
+"आखिरी कुल टैक्स को एक बार राउंड करता है."
+"\\n                                                                                                                                                                                "
+"- अगर आपकी कीमतें टैक्स-सहित हैं, तो प्रति लाइन राउंडिंग की सलाह दी जाती है. इससे "
+"सबटोटल का जोड़ टैक्स सहित कुल राशि के बराबर रहता है।"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_bank_statement_kanban
@@ -578,8 +578,8 @@ msgstr ""
 "Freeman</t>,\n"
 "                </t>\n"
 "                <br/><br/>\n"
-"                यह रहा आपका <t t-out=\"object.company_id.name or ''\">"
-"YourCompany</t> की ओर से <span style=\"font-weight:bold;\" t-"
+"                यह रहा आपका <t t-out=\"object.company_id.name or "
+"''\">YourCompany</t> की ओर से <span style=\"font-weight:bold;\" t-"
 "out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
 "143,750.00</span> की रकम का\n"
 "                <t t-if=\"object.name\">\n"
@@ -706,8 +706,9 @@ msgstr ""
 "        <t t-if=\"object.invoice_origin\">\n"
 "            है (रेफ़रेंस: <t t-out=\"object.invoice_origin or ''\">SUB003</t>)\n"
 "        </t>\n"
-"        जिसकी राशि <span style=\"font-weight:bold;\" t-out=\"format_amount"
-"(object.amount_total, object.currency_id) or ''\">$ 143,750.00</span> है\n"
+"        जिसकी राशि <span style=\"font-weight:bold;\" t-"
+"out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
+"143,750.00</span> है\n"
 "        और यह <t t-out=\"object.company_id.name or ''\">YourCompany</t> की "
 "तरफ़ से है.\n"
 "        <t t-if=\"object.payment_state in ('paid', 'in_payment')\">\n"
@@ -729,9 +730,9 @@ msgstr ""
 "        <t t-if=\"hasattr(object, 'display_timesheet_portal_link') and "
 "object.display_timesheet_portal_link\">\n"
 "            <br/><br/>\n"
-"            पीएस: आप <a t-att-href=\"'/my/"
-"timesheets?search_in=invoice&amp;search=%s' % object.name\">पोर्टल</a> से अपनी "
-"टाइमशीट की समीक्षा कर सकते हैं.\n"
+"            पीएस: आप <a t-att-href=\"'/my/timesheets?"
+"search_in=invoice&amp;search=%s' % object.name\">पोर्टल</a> से अपनी टाइमशीट की "
+"समीक्षा कर सकते हैं.\n"
 "        </t>\n"
 "        <br/><br/>\n"
 "        अगर कोई भी सवाल हो, तो बेझिझक हमसे संपर्क करें.\n"
@@ -829,8 +830,9 @@ msgstr ""
 "        <t t-if=\"object.invoice_origin\">\n"
 "            है (रेफ़रेंस: <t t-out=\"object.invoice_origin or ''\">SUB003</t>)\n"
 "        </t>\n"
-"        जिसकी राशि <span style=\"font-weight:bold;\" t-out=\"format_amount"
-"(object.amount_total, object.currency_id) or ''\">$ 143,750.00</span> है\n"
+"        जिसकी राशि <span style=\"font-weight:bold;\" t-"
+"out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
+"143,750.00</span> है\n"
 "        और यह <t t-out=\"object.company_id.name or ''\">YourCompany</t> की "
 "तरफ़ से है.\n"
 "        <t t-if=\"object.payment_state in ('paid', 'in_payment')\">\n"
@@ -839,9 +841,9 @@ msgstr ""
 "        <t t-if=\"hasattr(object, 'display_timesheet_portal_link') and "
 "object.display_timesheet_portal_link\">\n"
 "            <br/><br/>\n"
-"            पीएस: आप <a t-att-href=\"'/my/"
-"timesheets?search_in=invoice&amp;search=%s' % object.name\">पोर्टल</a> से अपनी "
-"टाइमशीट की समीक्षा कर सकते हैं.\n"
+"            पीएस: आप <a t-att-href=\"'/my/timesheets?"
+"search_in=invoice&amp;search=%s' % object.name\">पोर्टल</a> से अपनी टाइमशीट की "
+"समीक्षा कर सकते हैं.\n"
 "        </t>\n"
 "        <br/><br/>\n"
 "        अगर कोई भी सवाल हो, तो बेझिझक हमसे संपर्क करें.\n"
@@ -917,8 +919,9 @@ msgstr ""
 "        <t t-if=\"object.invoice_origin\">\n"
 "            (रेफ़रंस: <t t-out=\"object.invoice_origin or ''\">SUB003</t>)\n"
 "        </t>\n"
-"        इसकी राशि <span style=\"font-weight:bold;\" t-out=\"format_amount"
-"(object.amount_total, object.currency_id) or ''\">$ 143,750.00</span> है जो\n"
+"        इसकी राशि <span style=\"font-weight:bold;\" t-"
+"out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
+"143,750.00</span> है जो\n"
 "         <t t-out=\"object.company_id.name or ''\">आपकी कंपनी</t> की तरफ़ से "
 "है.\n"
 "        <br/><br/>\n"
@@ -960,15 +963,16 @@ msgid ""
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        नमस्ते <t t-out=\"object.partner_id.name or ''\">Azure Interior</t>"
-"<br/><br/>\n"
+"        नमस्ते <t t-out=\"object.partner_id.name or ''\">Azure Interior</t><br/"
+"><br/>\n"
 "        आपकी पेमेंट के लिए धन्यवाद.\n"
-"        यह रहा आपकी पेमेंट रसीद <span style=\"font-weight:bold;\" t-out=\""
-"(object.name or '').replace('/','-') or ''\">BNK1-2021-05-0002</span> जिसकी "
-"राशि\n"
-"         <span style=\"font-weight:bold;\" t-out=\"format_amount"
-"(object.amount, object.currency_id) or ''\">$ 10.00</span> है जो <t t-"
-"out=\"object.company_id.name or ''\">YourCompany</t> की तरफ़ से है.\n"
+"        यह रहा आपकी पेमेंट रसीद <span style=\"font-weight:bold;\" t-"
+"out=\"(object.name or '').replace('/','-') or ''\">BNK1-2021-05-0002</span> "
+"जिसकी राशि\n"
+"         <span style=\"font-weight:bold;\" t-"
+"out=\"format_amount(object.amount, object.currency_id) or ''\">$ 10.00</"
+"span> है जो <t t-out=\"object.company_id.name or ''\">YourCompany</t> की तरफ़ "
+"से है.\n"
 "        <br/><br/>\n"
 "        अगर आपका कोई सवाल है, तो बेझिझक हमसे संपर्क करें.\n"
 "        <br/><br/>\n"
@@ -1172,8 +1176,8 @@ msgid ""
 "<span class=\"o_form_label oe_inline\" invisible=\"amount_type == "
 "'fixed'\">%</span>"
 msgstr ""
-"<span class=\"o_form_label oe_inline\" invisible=\"amount_type == 'fixed'\">"
-"%</span>"
+"<span class=\"o_form_label oe_inline\" invisible=\"amount_type == "
+"'fixed'\">%</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_form
@@ -1195,12 +1199,10 @@ msgid ""
 "<span class=\"o_stat_text\" invisible=\"move_type != 'out_refund'\">Invoice</"
 "span>\n"
 "                                <span class=\"o_stat_text\" "
-"invisible=\"move_type != 'in_refund'\">Vendor Bill</span>"
-msgstr ""
-"<span class=\"o_stat_text\" invisible=\"move_type != 'out_refund'\">इनवॉइस</"
-"span>\n"
+"invisible=\"move_type != 'in_refund'\">Vendor Bill</span>\n"
 "                                <span class=\"o_stat_text\" "
-"invisible=\"move_type != 'in_refund'\">वेंडर बिल</span>"
+"invisible=\"move_type != 'entry'\">Journal Entry</span>"
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_lock_exception_form
@@ -1262,16 +1264,12 @@ msgid "<span class=\"o_stat_text\">Invoiced</span>"
 msgstr "<span class=\"o_stat_text\">इनवॉइस बनाया गया</span>"
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
-msgid "<span class=\"o_stat_text\">Journal Entries</span>"
-msgstr "<span class=\"o_stat_text\">जनरल एंट्री</span>"
-
-#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
 msgid "<span class=\"o_stat_text\">Journal Entry</span>"
 msgstr "<span class=\"o_stat_text\">जनरल एंट्री</span>"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 #, fuzzy
 msgid "<span class=\"o_stat_text\">Journal Items</span>"
@@ -1354,8 +1352,8 @@ msgid ""
 "<span invisible=\"name or name_placeholder or "
 "document_sequence_editable\">Draft</span>"
 msgstr ""
-"<span invisible=\"name or name_placeholder or document_sequence_editable\">"
-"ड्राफ़्ट</span>"
+"<span invisible=\"name or name_placeholder or "
+"document_sequence_editable\">ड्राफ़्ट</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.autopost_bills_wizard
@@ -1848,8 +1846,8 @@ msgstr ""
 "<div style=\"margin: 0px; padding: 0px; font-family:Verdana, Arial,sans-"
 "serif; color: #454748;\">\n"
 "    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-"
-"top: 16px; background-color: #F1F1F1; width: 100%; border-"
-"collapse:separate;\">\n"
+"top: 16px; background-color: #F1F1F1; width: 100%; border-collapse:separate;"
+"\">\n"
 "        <tr>\n"
 "            <td align=\"center\">\n"
 "                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
@@ -1870,8 +1868,8 @@ msgstr ""
 "                                    <td align=\"right\" style=\"padding-"
 "right: 16px;\">\n"
 "                                        <img alt=\"Odoo\" src=\"/web/static/"
-"img/logo_inverse_white_206px.png\" style=\"height: 2em; object-fit: "
-"contain;\" class=\"align-baseline w-auto\"/>\n"
+"img/logo_inverse_white_206px.png\" style=\"height: 2em; object-fit: contain;"
+"\" class=\"align-baseline w-auto\"/>\n"
 "                                    </td>\n"
 "                                </tr>\n"
 "                            </table>\n"
@@ -1921,11 +1919,11 @@ msgstr ""
 "                                                    <span style=\"font-"
 "weight:bold;\">वेंडर:</span> <t t-out=\"inv.partner_id.name\"/><br/>\n"
 "                                                </t>\n"
-"                                                <t t-if=\"inv.amount_total\">"
-"\n"
+"                                                <t t-"
+"if=\"inv.amount_total\">\n"
 "                                                    <span style=\"font-"
-"weight:bold;\">राशि:</span> <t t-out=\"inv.amount_total\" t-options=\""
-"{'widget': 'monetary', 'display_currency': inv.currency_id or "
+"weight:bold;\">राशि:</span> <t t-out=\"inv.amount_total\" t-"
+"options=\"{'widget': 'monetary', 'display_currency': inv.currency_id or "
 "object.company_id.currency_id}\"/><br/>\n"
 "                                                </t>\n"
 "                                                <t t-"
@@ -1940,11 +1938,11 @@ msgstr ""
 "padding-top: 24px;\">\n"
 "                                            <a t-if=\"invoice_count != 1\" t-"
 "attf-href=\"/odoo/accounting/action-"
-"account.action_account_moves_email_preview?active_ids={{ "
-"invoice_preview_ids }}\" target=\"_blank\" t-attf-style=\"padding: 12px "
-"24px; font-size: 14px; font-weight: bold; color: #FFFFFF; text-decoration: "
-"none !important; background-color: #008384; border-radius:3px; display: "
-"inline-block;\">\n"
+"account.action_account_moves_email_preview?"
+"active_ids={{ invoice_preview_ids }}\" target=\"_blank\" t-attf-"
+"style=\"padding: 12px 24px; font-size: 14px; font-weight: bold; color: "
+"#FFFFFF; text-decoration: none !important; background-color: #008384; border-"
+"radius:3px; display: inline-block;\">\n"
 "                                               इनवॉइस देखें\n"
 "                                            </a>\n"
 "                                            <a t-else=\"\" t-attf-href=\"/"
@@ -2300,8 +2298,7 @@ msgstr ""
 #: code:addons/account/models/partner.py:0
 #, fuzzy
 msgid "A fiscal position with a foreign Tax ID already exists in this country."
-msgstr ""
-"इस देश में एक विदेशी टैक्स आईडी के साथ एक वित्तीय स्थिति पहले से ही मौजूद है।"
+msgstr "इस देश में एक विदेशी टैक्स आईडी के साथ एक वित्तीय स्थिति पहले से ही मौजूद है।"
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_move_journal_line
@@ -2332,8 +2329,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "A line of this move is using a archived account, you cannot post it."
-msgstr ""
-"इस एंट्री में एक बंद खाते इस्तेमाल हो रहा है, इसलिए आप इसे भेज नहीं सकते।"
+msgstr "इस एंट्री में एक बंद खाते इस्तेमाल हो रहा है, इसलिए आप इसे भेज नहीं सकते।"
 
 #. module: account
 #. odoo-python
@@ -2364,8 +2360,7 @@ msgstr ""
 msgid ""
 "A payment with an outstanding account cannot be confirmed without having a "
 "journal entry."
-msgstr ""
-"बकाया पेमेंट को तब तक कन्फ़र्म नहीं कर सकते जब तक उसकी जर्नल एंट्री न बन जाए।"
+msgstr "बकाया पेमेंट को तब तक कन्फ़र्म नहीं कर सकते जब तक उसकी जर्नल एंट्री न बन जाए।"
 
 #. module: account
 #: model:ir.model.constraint,message:account.constraint_account_report_line_code_uniq
@@ -2481,16 +2476,14 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_move_line.py:0
 msgid "Account '%s' is of payable type, but is used in a sale operation."
-msgstr ""
-"'%s' खाता पैसे चुकाने के लिए है, लेकिन इसे सेल में इस्तेमाल किया जा रहा है।"
+msgstr "'%s' खाता पैसे चुकाने के लिए है, लेकिन इसे सेल में इस्तेमाल किया जा रहा है।"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_move_line.py:0
 msgid ""
 "Account '%s' is of receivable type, but is used in a purchase operation."
-msgstr ""
-"'%s' खाता पैसे चुकाने के लिए है, लेकिन इसे परचेज़ में इस्तेमाल किया जा रहा है।"
+msgstr "'%s' खाता पैसे चुकाने के लिए है, लेकिन इसे परचेज़ में इस्तेमाल किया जा रहा है।"
 
 #. module: account
 #. odoo-python
@@ -2621,6 +2614,11 @@ msgid "Account Move Count"
 msgstr "अकाउंट मूव काउंट"
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_tax__account_move_line_ids
+msgid "Account Move Line"
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__name
 #: model:ir.model.fields,field_description:account.field_account_move_line__account_name
 #: model_terms:ir.ui.view,arch_db:account.view_account_form
@@ -2670,6 +2668,11 @@ msgstr "अकाउंट रिसिएबल"
 #: model:ir.model.fields,field_description:account.field_res_users__property_account_receivable_active
 msgid "Account Receivable Active"
 msgstr "पैसे पाने वाला खाता ऐक्टिव है"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_tax__account_reconcile_model_line_ids
+msgid "Account Reconcile Model Line"
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__account_root_id
@@ -2737,6 +2740,7 @@ msgstr ""
 "में किया जाता है।"
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_accrued_orders_wizard__account_types
 #: model:ir.model.fields,field_description:account.field_account_report__filter_account_type
 msgid "Account Types"
 msgstr "अकाउंट टाइप"
@@ -2752,8 +2756,7 @@ msgstr "खाते का कोड शुरूआती दो अंक"
 msgid ""
 "Account codes must be unique. You can't create accounts with these duplicate "
 "codes: %s"
-msgstr ""
-"हर खाते का कोड अलग होना चाहिए. आप इन मिलते-जुलते कोड से खाते नहीं बना सकते: %s"
+msgstr "हर खाते का कोड अलग होना चाहिए. आप इन मिलते-जुलते कोड से खाते नहीं बना सकते: %s"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_config_settings__account_journal_early_pay_discount_loss_account_id
@@ -2862,8 +2865,7 @@ msgstr "एंट्रीज़ के साथ खाता"
 msgid ""
 "Account: Post draft entries with auto_post enabled and accounting date up to "
 "today"
-msgstr ""
-"खाता: आज तक की ड्राफ़्ट एंट्रीज़ को  auto_post सुविधा चालू करके पोस्ट कर दें"
+msgstr "खाता: आज तक की ड्राफ़्ट एंट्रीज़ को  auto_post सुविधा चालू करके पोस्ट कर दें"
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_accounting
@@ -3025,43 +3027,43 @@ msgstr "भविष्य में मिलने वाली कुल र�
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_depreciation_buildings
-msgid "Accumulated Amortization - Buildings"
-msgstr "समय के साथ घटी कुल कीमत - बिल्डिंग"
+msgid "Accumulated Depreciation - Buildings"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_depreciation_furniture
-msgid "Accumulated Amortization - Furniture & Fixtures"
-msgstr "समय के साथ घटी कुल कीमत - फर्नीचर और फिक्चर"
+msgid "Accumulated Depreciation - Furniture & Fixtures"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_depreciation_improvements
-msgid "Accumulated Amortization - Improvements"
-msgstr "समय के साथ घटी कुल कीमत - सुधार"
+msgid "Accumulated Depreciation - Improvements"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_depreciation_machines
-msgid "Accumulated Amortization - Machines & Tools"
-msgstr "समय के साथ घटी कुल कीमत - मशीन और टूल"
+msgid "Accumulated Depreciation - Machines & Tools"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_depreciation_other_property
-msgid "Accumulated Amortization - Other Property"
-msgstr "समय के साथ घटी कुल कीमत - अन्य प्रॉपर्टी"
+msgid "Accumulated Depreciation - Other Property"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_depreciation_technology
-msgid "Accumulated Amortization - Technology"
-msgstr "समय के साथ घटी कुल कीमत - टेक्नोलॉजी"
+msgid "Accumulated Depreciation - Technology"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_depreciation_vehicles
-msgid "Accumulated Amortization - Vehicles"
-msgstr "समय के साथ घटी कुल कीमत - गाड़ियां"
+msgid "Accumulated Depreciation - Vehicles"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_acc_depreciation
-msgid "Accumulated Depreciation"
-msgstr "समय के साथ घटी कुल कीमत"
+msgid "Accumulated Depreciation Misc"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.21_retained_earnings
@@ -3292,8 +3294,7 @@ msgstr "सूचना देने के लिए कॉन्टैक्�
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Add your terms & conditions at the bottom of invoices/orders/quotations"
-msgstr ""
-"अपने इनवॉइस/ऑर्डर/कोटेशन के सबसे नीचे, अपनी कंपनी के नियम और शर्तें जोड़ें"
+msgstr "अपने इनवॉइस/ऑर्डर/कोटेशन के सबसे नीचे, अपनी कंपनी के नियम और शर्तें जोड़ें"
 
 #. module: account
 #. odoo-javascript
@@ -3357,15 +3358,13 @@ msgstr "एंट्री ओरिजिन मूव्स की संख�
 #. odoo-python
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 msgid "Adjusting Entry {link} {percent}%% of {amount} recognized from {date}"
-msgstr ""
-"समायोजन एंट्री {link}: {amount} का {percent}% हिस्सा {date} से जोड़ा गया"
+msgstr "समायोजन एंट्री {link}: {amount} का {percent}% हिस्सा {date} से जोड़ा गया"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 msgid "Adjusting Entry {link} {percent}%% of {amount} recognized on {new_date}"
-msgstr ""
-"समायोजन एंट्री {link}: {amount} का {percent}% हिस्सा {date} से जोड़ा गया"
+msgstr "समायोजन एंट्री {link}: {amount} का {percent}% हिस्सा {date} से जोड़ा गया"
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_administration_fees
@@ -3469,8 +3468,7 @@ msgstr "सभी बैंक और कैश जर्न"
 #: model:account.account,description:account.22_account_account_us_office_services
 msgid ""
 "All expenses made for your office or workplace that are not material goods"
-msgstr ""
-"ऑफ़िस के वे खर्चे जो सामान खरीदने पर नहीं, बल्कि सर्विस और सुविधाओं पर होते हैं"
+msgstr "ऑफ़िस के वे खर्चे जो सामान खरीदने पर नहीं, बल्कि सर्विस और सुविधाओं पर होते हैं"
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_professional_insurance
@@ -3530,8 +3528,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,help:account.field_account_secure_entries_wizard__unreconciled_bank_statement_line_ids
 msgid "All unreconciled bank statement lines before the selected date."
-msgstr ""
-"चुनी हुई तारीख से पहले की सभी बैंक स्टेटमेंट एंट्रीज़ जिनका अभी तक मिलान नहीं हुआ है।"
+msgstr "चुनी हुई तारीख से पहले की सभी बैंक स्टेटमेंट एंट्रीज़ जिनका अभी तक मिलान नहीं हुआ है।"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report__allow_foreign_vat
@@ -3619,8 +3616,7 @@ msgstr "हमेशा अनफोल्ड किया हुआ"
 msgid ""
 "Always positive amount concerned by this matching expressed in the company "
 "currency."
-msgstr ""
-"मिलान में इस्तेमाल होने वाली रकम हमेशा कंपनी की मुद्रा में और सकारात्मक होगी।"
+msgstr "मिलान में इस्तेमाल होने वाली रकम हमेशा कंपनी की मुद्रा में और सकारात्मक होगी।"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_partial_reconcile__credit_amount_currency
@@ -3927,8 +3923,7 @@ msgstr ""
 msgid ""
 "Any entry up to and including that date will be postponed to a later time, "
 "in accordance with its journal's sequence."
-msgstr ""
-"उस तारीख तक की कोई भी एंट्री बाद में कर दी जाएगी, जर्नल के क्रम के हिसाब से।"
+msgstr "उस तारीख तक की कोई भी एंट्री बाद में कर दी जाएगी, जर्नल के क्रम के हिसाब से।"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_company__tax_lock_date
@@ -3994,8 +3989,7 @@ msgstr "अप्लाई करें"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Apply VAT of the EU country to which goods and services are delivered."
-msgstr ""
-"उस यूरोपीय संघ के देश का वैट लागू करें, जहां सामान या सेवाएं दी जाती हैं।"
+msgstr "उस यूरोपीय संघ के देश का वैट लागू करें, जहां सामान या सेवाएं दी जाती हैं।"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_fiscal_position__country_group_id
@@ -4381,8 +4375,20 @@ msgstr "बिल पर वापस जाएं"
 #. module: account
 #. odoo-javascript
 #: code:addons/account/static/src/components/product_catalog/kanban_controller.js:0
+msgid "Back to Credit Note"
+msgstr ""
+
+#. module: account
+#. odoo-javascript
+#: code:addons/account/static/src/components/product_catalog/kanban_controller.js:0
 msgid "Back to Invoice"
 msgstr "इनवॉइस पर जाएं"
+
+#. module: account
+#. odoo-javascript
+#: code:addons/account/static/src/components/product_catalog/kanban_controller.js:0
+msgid "Back to Refund"
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -4426,7 +4432,7 @@ msgstr "बैलेंस प्रतिशत 0 नहीं हो सकत
 #: code:addons/account/models/account_journal.py:0
 #: code:addons/account/models/chart_template.py:0
 #: model:account.account,name:account.21_bank_journal_default_account_163
-#: model:account.account,name:account.22_bank_journal_default_account_296
+#: model:account.account,name:account.22_bank_journal_default_account_297
 #: model:account.journal,name:account.21_bank
 #: model:account.journal,name:account.22_bank
 #: model:ir.model.fields,field_description:account.field_res_partner__bank_account_count
@@ -4697,6 +4703,8 @@ msgid "Banks"
 msgstr "बैंक"
 
 #. module: account
+#. odoo-javascript
+#: code:addons/account/static/src/components/many2x_tax_tags/tax_tag_popover.xml:0
 #: model:ir.model.fields.selection,name:account.selection__account_tax_repartition_line__repartition_type__base
 msgid "Base"
 msgstr "बेस"
@@ -5079,8 +5087,7 @@ msgstr "ग्रुप पेमेंट हो सकता है"
 #. odoo-python
 #: code:addons/account/models/company.py:0
 msgid "Can't disable restricted audit trail: forced by localization."
-msgstr ""
-"ऑडिट ट्रेल को बंद नहीं किया जा सकता है: स्थानीय नियमों की वजह से ज़रूरी है"
+msgstr "ऑडिट ट्रेल को बंद नहीं किया जा सकता है: स्थानीय नियमों की वजह से ज़रूरी है"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
@@ -5177,8 +5184,7 @@ msgstr ""
 #: code:addons/account/models/account_report.py:0
 msgid ""
 "Cannot get aggregation details from a line not using 'aggregation' engine"
-msgstr ""
-"जो लाइनें 'एग्रीगेशन' सिस्टम का उपयोग नहीं करतीं, उनसे कुल जानकारी नहीं मिल सकती"
+msgstr "जो लाइनें 'एग्रीगेशन' सिस्टम का उपयोग नहीं करतीं, उनसे कुल जानकारी नहीं मिल सकती"
 
 #. module: account
 #. odoo-python
@@ -5209,7 +5215,7 @@ msgstr "आगे ले जाएं"
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_journal.py:0
-#: model:account.account,name:account.21_cash_journal_default_account_306
+#: model:account.account,name:account.21_cash_journal_default_account_307
 #: model:ir.model.fields.selection,name:account.selection__account_journal__type__cash
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
@@ -5222,12 +5228,12 @@ msgid "Cash Account"
 msgstr "कैश अकाउंट"
 
 #. module: account
-#: model:account.account,name:account.21_cash_journal_default_account_303
+#: model:account.account,name:account.21_cash_journal_default_account_304
 msgid "Cash Bakery"
 msgstr "कैश बेकरी"
 
 #. module: account
-#: model:account.account,name:account.21_cash_journal_default_account_305
+#: model:account.account,name:account.21_cash_journal_default_account_306
 msgid "Cash Bar"
 msgstr "कैश बार"
 
@@ -5269,7 +5275,7 @@ msgid "Cash Basis Transition Account"
 msgstr "कैश बेसिस ट्रांज़िशन अकाउंट"
 
 #. module: account
-#: model:account.account,name:account.21_cash_journal_default_account_302
+#: model:account.account,name:account.21_cash_journal_default_account_303
 msgid "Cash Clothes Shop"
 msgstr "कैश क्लोद शॉप"
 
@@ -5331,7 +5337,7 @@ msgid "Cash Discount Write-Off Loss Account"
 msgstr "कैश डिस्काउंट राइट-ऑफ़ लॉस अकाउंट"
 
 #. module: account
-#: model:account.account,name:account.21_cash_journal_default_account_301
+#: model:account.account,name:account.21_cash_journal_default_account_302
 msgid "Cash Furn. Shop"
 msgstr "कैश फर्नीचर शऑप"
 
@@ -5342,7 +5348,7 @@ msgid "Cash Registers"
 msgstr "कैश रजिस्टर"
 
 #. module: account
-#: model:account.account,name:account.21_cash_journal_default_account_304
+#: model:account.account,name:account.21_cash_journal_default_account_305
 msgid "Cash Restaurant"
 msgstr "कैश रेस्टोरेंट"
 
@@ -5908,8 +5914,7 @@ msgstr "अपने बैंक से जुड़ें. इनवॉइस 
 #. odoo-python
 #: code:addons/account/wizard/account_payment_register.py:0
 msgid "Consider paying in %(btn_start)sinstallments%(btn_end)s instead."
-msgstr ""
-"%(btn_end)s किस्तों की बजाय %(btn_start)s किस्त में भुगतान करने के बारे में सोचें।"
+msgstr "%(btn_end)s किस्तों की बजाय %(btn_start)s किस्त में भुगतान करने के बारे में सोचें।"
 
 #. module: account
 #. odoo-python
@@ -5928,6 +5933,7 @@ msgstr ""
 "पर विचार करें।"
 
 #. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_report__availability_condition__consolidation
 #: model_terms:ir.ui.view,arch_db:account.view_account_form
 #, fuzzy
 msgid "Consolidation"
@@ -5961,15 +5967,14 @@ msgid ""
 "Contains either the section name or error message, depending on the line "
 "type."
 msgstr ""
-"लाइन किस तरह की है, उसके हिसाब से इसमें उस हिस्से का नाम होगा या फिर कोई गलती का संदेश"
-"।"
+"लाइन किस तरह की है, उसके हिसाब से इसमें उस हिस्से का नाम होगा या फिर कोई गलती का "
+"संदेश।"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/wizard/account_merge_wizard.py:0
 msgid "Contains hashed entries, but %s also has hashed entries."
-msgstr ""
-"इसमें कुछ कोड वाली एंट्रीज़ हैं, लेकिन %s में भी वैसी ही कोड वाली एंट्रीज़ हैं।"
+msgstr "इसमें कुछ कोड वाली एंट्रीज़ हैं, लेकिन %s में भी वैसी ही कोड वाली एंट्रीज़ हैं।"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_send_wizard__body
@@ -6045,8 +6050,7 @@ msgstr "रेवेन्यू की लागत"
 #: model:account.account,description:account.22_account_account_us_postage
 msgid ""
 "Costs for shipping products or materials to customers or receiving inventory."
-msgstr ""
-"कस्टमर को सामान भेजने या नया स्टॉक मंगाने में लगने वाला भाड़ा या डिलीवरी खर्च।"
+msgstr "कस्टमर को सामान भेजने या नया स्टॉक मंगाने में लगने वाला भाड़ा या डिलीवरी खर्च।"
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_disposal_fees
@@ -6333,8 +6337,7 @@ msgstr "इनवॉइस/बिल बनाएं"
 msgid ""
 "Create invoices, register payments and keep track of the discussions with "
 "your customers."
-msgstr ""
-"इनवॉइस बनाएं, पेमेंट रजिस्टर करें और अपने ग्राहकों से हुई बातचीत का पूरा रिकॉर्ड रखें।"
+msgstr "इनवॉइस बनाएं, पेमेंट रजिस्टर करें और अपने ग्राहकों से हुई बातचीत का पूरा रिकॉर्ड रखें।"
 
 #. module: account
 #. odoo-javascript
@@ -6519,21 +6522,16 @@ msgid "Credit Move"
 msgstr "क्रेडिट मूव"
 
 #. module: account
+#. odoo-javascript
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
+#: code:addons/account/static/src/components/many2x_tax_tags/tax_tag_popover.js:0
 #: model:ir.model.fields.selection,name:account.selection__account_payment__reconciled_invoices_type__credit_note
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "Credit Note"
 msgstr "क्रेडिट नोट"
-
-#. module: account
-#. odoo-javascript
-#: code:addons/account/static/src/components/many2x_tax_tags/tax_tag_popover.xml:0
-#, fuzzy
-msgid "Credit Note :"
-msgstr "क्रेडिट नोट :"
 
 #. module: account
 #. odoo-python
@@ -6584,8 +6582,7 @@ msgstr "क्रेडिट कार्ड"
 #. module: account
 #: model:ir.model.fields,help:account.field_account_move_line__matched_credit_ids
 msgid "Credit journal items that are matched with this journal item."
-msgstr ""
-"यह उन क्रेडिट जर्नल एंट्रीज़ को दिखाता है जो इस जर्नल एंट्री से मिलती-जुलती हैं।"
+msgstr "यह उन क्रेडिट जर्नल एंट्रीज़ को दिखाता है जो इस जर्नल एंट्री से मिलती-जुलती हैं।"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_partner__credit_limit
@@ -6605,43 +6602,39 @@ msgstr "खाते का कुल इकट्ठा बैलेंस।"
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_depreciation_buildings
-msgid "Cumulative amortization recorded for building assets."
-msgstr "इमारतों से जुड़ी संपत्तियों पर अब तक इकट्ठा हुई कुल मूल्यह्रास राशि।"
+msgid "Cumulative depreciation recorded for building assets."
+msgstr ""
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_depreciation_technology
-msgid "Cumulative amortization recorded for capitalized technology assets."
+msgid "Cumulative depreciation recorded for capitalized technology assets."
 msgstr ""
-"कैपिटलाइज्ड टेक्नोलॉजी संपत्तियों पर अब तक इकट्ठा हुई कुल मूल्यह्रास राशि।"
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_depreciation_furniture
-msgid "Cumulative amortization recorded for furniture and fixture assets."
+msgid "Cumulative depreciation recorded for furniture and fixture assets."
 msgstr ""
-"फ़र्नीचर और फिक्स्चर से जुड़ी संपत्तियों पर अब तक इकट्ठा हुई कुल मूल्यह्रास राशि।"
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_depreciation_improvements
 msgid ""
-"Cumulative amortization recorded for leasehold or property improvements."
+"Cumulative depreciation recorded for leasehold or property improvements."
 msgstr ""
-"लीज पर ली गई जगह या संपत्ति में किए गए सुधारों पर अब तक इकट्ठा हुई कुल मूल्यह्रास राशि।"
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_depreciation_machines
-msgid "Cumulative amortization recorded for machinery and tool assets."
+msgid "Cumulative depreciation recorded for machinery and tool assets."
 msgstr ""
-"मशीनरी और औजारों से जुड़ी संपत्तियों पर अब तक इकट्ठा हुई कुल मूल्यह्रास राशि।"
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_depreciation_other_property
-msgid "Cumulative amortization recorded for other depreciable property assets."
-msgstr "अन्य डिप्रेशिएबल संपत्तियों पर अब तक इकट्ठा हुई कुल मूल्यह्रास राशि।"
+msgid "Cumulative depreciation recorded for other depreciable property assets."
+msgstr ""
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_depreciation_vehicles
-msgid "Cumulative amortization recorded for vehicle assets."
-msgstr "वाहनों से जुड़ी संपत्तियों पर अब तक इकट्ठा हुई कुल मूल्यह्रास राशि।"
+msgid "Cumulative depreciation recorded for vehicle assets."
+msgstr ""
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_retained_earnings
@@ -7109,8 +7102,7 @@ msgstr "डेबिट मूव"
 #. module: account
 #: model:ir.model.fields,help:account.field_account_move_line__matched_debit_ids
 msgid "Debit journal items that are matched with this journal item."
-msgstr ""
-"यह उन डेबिट जर्नल एंट्रीज़ को दिखाता है जो इस जर्नल एंट्री से मिलती-जुलती हैं।"
+msgstr "यह उन डेबिट जर्नल एंट्रीज़ को दिखाता है जो इस जर्नल एंट्री से मिलती-जुलती हैं।"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__res_company__fiscalyear_last_month__12
@@ -7311,14 +7303,12 @@ msgstr "सेटिंग में जाकर डिफ़ॉल्ट स�
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Define the smallest coinage of the currency used to pay by cash"
-msgstr ""
-"कैश पेमेंट में जिस करेंसी का सबसे छोटी ईकाई इस्तेमाल होता है, उसे तय करें"
+msgstr "कैश पेमेंट में जिस करेंसी का सबसे छोटी ईकाई इस्तेमाल होता है, उसे तय करें"
 
 #. module: account
 #: model:onboarding.onboarding.step,description:account.onboarding_onboarding_step_fiscal_year
 msgid "Define your fiscal years & tax returns periodicity."
-msgstr ""
-"बताएं कि आपका वित्तीय साल कब शुरू और खत्म होता है और टैक्स कब-कब जमा करना है।"
+msgstr "बताएं कि आपका वित्तीय साल कब शुरू और खत्म होता है और टैक्स कब-कब जमा करना है।"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__bank_statements_source
@@ -7347,8 +7337,7 @@ msgstr "परिभाषा"
 #: model:ir.model.fields,field_description:account.field_res_partner__trust
 #: model:ir.model.fields,field_description:account.field_res_users__trust
 msgid "Degree of trust you have in this debtor"
-msgstr ""
-"यह बताता है कि आपको इस देनदार पर कितना भरोसा है कि वह आपके पैसे चुका देगा"
+msgstr "यह बताता है कि आपको इस देनदार पर कितना भरोसा है कि वह आपके पैसे चुका देगा"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_term_line__delay_type
@@ -7412,6 +7401,11 @@ msgid "Depreciation"
 msgstr "मूल्यह्रास"
 
 #. module: account
+#: model:account.account,name:account.22_account_account_us_deprec_amort_expense
+msgid "Depreciation & Amortization Expense"
+msgstr ""
+
+#. module: account
 #: model:account.account,name:account.22_account_account_us_expense_buildings
 msgid "Depreciation Expense - Buildings"
 msgstr "अवमूल्यन का खर्च - बिल्डिंग"
@@ -7450,6 +7444,7 @@ msgstr "मूल्यह्रास व्यय - गाड़ियां"
 #: model:ir.model.fields,field_description:account.field_account_account__description
 #: model:ir.model.fields,field_description:account.field_account_tax__description
 #: model_terms:ir.ui.view,arch_db:account.view_account_form
+#: model_terms:ir.ui.view,arch_db:account.view_message_tree_audit_log
 #: model_terms:ir.ui.view,arch_db:account.view_message_tree_audit_log_search
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "Description"
@@ -7458,8 +7453,7 @@ msgstr "विवरण"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_payment_term_form
 msgid "Description on invoice (e.g. Payment terms: 30 days after invoice date)"
-msgstr ""
-"इनवॉइस पर लिखी जानकारी (जैसे, पेमेंट की शर्तें: बिल की तारीख से 30 दिनों के भीतर)"
+msgstr "इनवॉइस पर लिखी जानकारी (जैसे, पेमेंट की शर्तें: बिल की तारीख से 30 दिनों के भीतर)"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_term__note
@@ -7493,8 +7487,7 @@ msgstr ""
 msgid ""
 "Determines whether the price you use on the product and invoices includes "
 "this tax."
-msgstr ""
-"यह तय करता है कि प्रॉडक्ट की कीमत और इनवॉइस में यह टैक्स जुड़ा हुआ है या नहीं।"
+msgstr "यह तय करता है कि प्रॉडक्ट की कीमत और इनवॉइस में यह टैक्स जुड़ा हुआ है या नहीं।"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_register__writeoff_account_id
@@ -8184,8 +8177,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,help:account.field_account_tax_repartition_line__tag_ids_domain
 msgid "Dynamic domain used for the tag that can be set on tax"
-msgstr ""
-"यह टैक्स पर लगाए जाने वाले टैग के लिए इस्तेमाल होने वाला डाइनैमिक डोमेन है"
+msgstr "यह टैक्स पर लगाए जाने वाले टैग के लिए इस्तेमाल होने वाला डाइनैमिक डोमेन है"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_partner_view_tree
@@ -8286,8 +8278,7 @@ msgstr "शुरूआती पेमेंट के लिए छूटछ"
 #: model:ir.model.fields,help:account.field_account_bank_statement_line__tax_totals
 #: model:ir.model.fields,help:account.field_account_move__tax_totals
 msgid "Edit Tax amounts if you encounter rounding issues."
-msgstr ""
-"अगर टैक्स के पैसे को राउंड ऑफ़ करने में दिक्कत हो, तो टैक्स अमाउंट में बदलाव करें।"
+msgstr "अगर टैक्स के पैसे को राउंड ऑफ़ करने में दिक्कत हो, तो टैक्स अमाउंट में बदलाव करें।"
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_training
@@ -8329,11 +8320,9 @@ msgstr "ईमेल टेम्प्लेट"
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__incoming_einvoice_notification_email
 msgid ""
-"Email addresses that will receive copy for sent and received invoices. "
-"Separate entries with ';'."
+"Email addresses that should receive invoices copy/return reminders. Separate "
+"entries with ';'."
 msgstr ""
-"वे ईमेल पते जिन पर भेजे गए और मिले हुए इनवॉइस की कॉपी जाएगी. ईमेल आईडी को अलग करने के "
-"लिए बीच में ';' का इस्तेमाल करें।"
 
 #. module: account
 #. odoo-javascript
@@ -8370,8 +8359,7 @@ msgstr "कर्मचारियों का कमीशन और बो�
 #. module: account
 #: model:account.account,description:account.22_account_account_us_healthcare
 msgid "Employees medical, dental, and vision benefits"
-msgstr ""
-"कर्मचारियों को मिलने वाले मेडिकल, डेंटल और आंखों के इलाज से जुड़े फ़ायदे"
+msgstr "कर्मचारियों को मिलने वाले मेडिकल, डेंटल और आंखों के इलाज से जुड़े फ़ायदे"
 
 #. module: account
 #: model:account.account,name:account.21_employer_payroll_taxes
@@ -8384,8 +8372,7 @@ msgstr "एम्प्लॉयर पेरोल टैक्स"
 msgid ""
 "Employer contributions to state (SUI) or federal unemployment insurance "
 "programs"
-msgstr ""
-"स्टेट (SUI) या फ़ेडरल बेरोज़गारी बीमा के लिए एम्प्लॉयर की ओर से दी जाने वाली रकम"
+msgstr "स्टेट (SUI) या फ़ेडरल बेरोज़गारी बीमा के लिए एम्प्लॉयर की ओर से दी जाने वाली रकम"
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_payroll_tax
@@ -8568,16 +8555,6 @@ msgstr "इक्विटी"
 #: code:addons/account/models/account_document_import_mixin.py:0
 msgid "Error importing attachment %(filename)s:"
 msgstr "%(filename)s अटैचमेंट इंपोर्ट करने में गड़बड़ी:"
-
-#. module: account
-#. odoo-python
-#: code:addons/account/controllers/download_docs.py:0
-msgid ""
-"Error while creating XML:\n"
-"- %s"
-msgstr ""
-"XML बनाने में कोई गड़बड़ी हुई:\n"
-"- %s"
 
 #. module: account
 #. odoo-python
@@ -8769,8 +8746,7 @@ msgstr "कंपनी की कारों और ट्रकों की 
 msgid ""
 "Expenses made for the repair and maintenance of laptops, peripherals, and "
 "computing equipment"
-msgstr ""
-"लैपटॉप, पेरिफेरल, और कंप्यूटिंग उपकरणों की मरम्मत और रखरखाव के लिए किए गए खर्च"
+msgstr "लैपटॉप, पेरिफेरल, और कंप्यूटिंग उपकरणों की मरम्मत और रखरखाव के लिए किए गए खर्च"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_lock_exception__state__expired
@@ -9004,6 +8980,11 @@ msgid "Fiscal Country Code"
 msgstr "वित्तीय देश का कोड"
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_tax__company_country_code
+msgid "Fiscal Country Code of the Company"
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_term__fiscal_country_codes
 #: model:ir.model.fields,field_description:account.field_product_product__fiscal_country_codes
 #: model:ir.model.fields,field_description:account.field_product_template__fiscal_country_codes
@@ -9226,8 +9207,7 @@ msgstr "एंट्री को अपने-आप पोस्ट करन�
 #. module: account
 #: model:ir.model.constraint,message:account.constraint_account_move_line_check_non_accountable_fields_null
 msgid "Forbidden balance or account on non-accountable line"
-msgstr ""
-"जो लाइन हिसाब-किताब के लिए नहीं है, उस पर बैलेंस या खाता नहीं होना चाहिए"
+msgstr "जो लाइन हिसाब-किताब के लिए नहीं है, उस पर बैलेंस या खाता नहीं होना चाहिए"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_validate_account_move__force_post
@@ -10576,16 +10556,14 @@ msgstr ""
 #: model:ir.model.fields,help:account.field_res_config_settings__transfer_account_id
 msgid ""
 "Intermediary account used when moving from a liquidity account to another."
-msgstr ""
-"जब एक बैंक खाते से दूसरे में पैसा जाता है, तो बीच में इस्तेमाल होने वाला खाता।"
+msgstr "जब एक बैंक खाते से दूसरे में पैसा जाता है, तो बीच में इस्तेमाल होने वाला खाता।"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_company__transfer_account_id
 msgid ""
 "Intermediary account used when moving money from a liquidity account to "
 "another"
-msgstr ""
-"जब एक बैंक खाते से दूसरे में पैसा जाता है, तो बीच में इस्तेमाल होने वाला खाता."
+msgstr "जब एक बैंक खाते से दूसरे में पैसा जाता है, तो बीच में इस्तेमाल होने वाला खाता."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__internal_group
@@ -10761,6 +10739,7 @@ msgstr "इन्वेस्टिंग और एक्स्ट्राआ�
 #. odoo-javascript
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
+#: code:addons/account/static/src/components/many2x_tax_tags/tax_tag_popover.js:0
 #: code:addons/account/static/src/components/receipt_selector/receipt_selector.js:0
 #: model:ir.model.fields.selection,name:account.selection__account_analytic_applicability__business_domain__invoice
 #: model:ir.model.fields.selection,name:account.selection__account_payment__reconciled_invoices_type__invoice
@@ -10776,12 +10755,6 @@ msgstr "बीजक"
 #: model_terms:ir.ui.view,arch_db:account.portal_my_invoices
 msgid "Invoice #"
 msgstr "इनवॉइस #"
-
-#. module: account
-#. odoo-javascript
-#: code:addons/account/static/src/components/many2x_tax_tags/tax_tag_popover.xml:0
-msgid "Invoice :"
-msgstr ""
 
 #. module: account
 #: model:ir.ui.menu,name:account.menu_action_account_invoice_report_all
@@ -10928,8 +10901,7 @@ msgstr ""
 msgid ""
 "Invoice and credit note distribution should each contain exactly one line "
 "for the base."
-msgstr ""
-"इनवॉइस और क्रेडिट नोट, दोनों में 'आधार' के लिए सिर्फ़ एक ही लाइन होनी चाहिए।"
+msgstr "इनवॉइस और क्रेडिट नोट, दोनों में 'आधार' के लिए सिर्फ़ एक ही लाइन होनी चाहिए।"
 
 #. module: account
 #. odoo-python
@@ -10938,8 +10910,8 @@ msgid ""
 "Invoice and credit note distribution should have a total factor (+) equals "
 "to 100."
 msgstr ""
-"इनवॉइस और क्रेडिट नोट के डिस्ट्रीब्यूशन में जो कुल 'फैक्टर' है, वह 100% के बराबर होना चाहिए"
-"।"
+"इनवॉइस और क्रेडिट नोट के डिस्ट्रीब्यूशन में जो कुल 'फैक्टर' है, वह 100% के बराबर होना "
+"चाहिए।"
 
 #. module: account
 #. odoo-python
@@ -10973,6 +10945,12 @@ msgid ""
 "Invoice and credit note repartition should have at least one tax repartition "
 "line."
 msgstr "इनवॉइस और क्रेडिट नोट में टैक्स बंटवारे की कम से कम एक लाइन होनी चाहिए।"
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_send.py:0
+msgid "Invoice generated but not sent."
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -11115,8 +11093,7 @@ msgstr "इनवॉइस जिनकी पुष्टि करनी ह�
 #: model:ir.model.fields,help:account.field_account_payment__reconciled_bill_ids
 #: model:ir.model.fields,help:account.field_account_payment__reconciled_invoice_ids
 msgid "Invoices whose journal items have been reconciled with these payments."
-msgstr ""
-"ऐसे इनवॉइस जिनके जर्नल आइटम, इन पेमेंट के साथ 'रिकंसाइल' (मिलान) हो चुकी हैं।"
+msgstr "ऐसे इनवॉइस जिनके जर्नल आइटम, इन पेमेंट के साथ 'रिकंसाइल' (मिलान) हो चुकी हैं।"
 
 #. module: account
 #: model:res.groups,comment:account.group_account_invoice
@@ -11626,8 +11603,7 @@ msgstr "खुला रखें"
 #: model:ir.model.fields,help:account.field_product_template__property_account_income_id
 msgid ""
 "Keep this field empty to use the default value from the product category."
-msgstr ""
-"इस फ़ील्ड को खाली छोड़ने पर, प्रॉडक्ट कैटेगरी वाला वैल्यू अपने-आप आ जाएगा।"
+msgstr "इस फ़ील्ड को खाली छोड़ने पर, प्रॉडक्ट कैटेगरी वाला वैल्यू अपने-आप आ जाएगा।"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_product_product__property_account_expense_id
@@ -11673,6 +11649,12 @@ msgstr "इनवॉइस पर लेबल"
 #: model_terms:ir.ui.view,arch_db:account.view_tax_group_form
 msgid "Label on PoS Receipts"
 msgstr "पीओएस रसीद पर लेबल"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_bank_statement_line__sanitize_payment_reference
+#: model:ir.model.fields,field_description:account.field_account_move__sanitize_payment_reference
+msgid "Label sanitize"
+msgstr ""
 
 #. module: account
 #: model:account.account,name:account.22_account_account_us_land
@@ -11904,8 +11886,7 @@ msgstr "कम पेमेंट"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "Let artificial intelligence scan your bill. Pay easily."
-msgstr ""
-"आर्टिफ़िशियल इंटेलिजेंस को आपका बिल स्कैन करने दें. आसानी से पेमेंट करें।"
+msgstr "आर्टिफ़िशियल इंटेलिजेंस को आपका बिल स्कैन करने दें. आसानी से पेमेंट करें।"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -12591,8 +12572,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_partial_reconcile.py:0
 msgid "Missing foreign currencies on partials having ids: %s"
-msgstr ""
-"कुछ अधूरे भुगतानों (जिनकी आईडी %s है) में विदेशी मुद्रा की जानकारी नहीं मिल रही है"
+msgstr "कुछ अधूरे भुगतानों (जिनकी आईडी %s है) में विदेशी मुद्रा की जानकारी नहीं मिल रही है"
 
 #. module: account
 #: model:ir.model.constraint,message:account.constraint_account_move_line_check_accountable_required_fields
@@ -13043,6 +13023,14 @@ msgid "No possible action found with the selected lines."
 msgstr "जो लाइनें चुनी हैं, उन पर कोई काम नहीं कर सकते।"
 
 #. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_send.py:0
+msgid ""
+"No valid sending method could be applied, so this invoice was not sent "
+"automatically. Please configure a sending method and send it manually."
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax__non_deductible_amount
 msgid "Non Deductible Amount"
 msgstr ""
@@ -13168,8 +13156,8 @@ msgid ""
 "Note that the easiest way to create a credit note is to do it directly\n"
 "                from the customer invoice."
 msgstr ""
-"ध्यान दें कि क्रेडिट नोट बनाने का सबसे आसान तरीका है कि उसे सीधा ग्राहक के इनवॉइस से बनाएं"
-"।"
+"ध्यान दें कि क्रेडिट नोट बनाने का सबसे आसान तरीका है कि उसे सीधा ग्राहक के इनवॉइस से "
+"बनाएं।"
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_move_in_refund_type
@@ -13452,13 +13440,18 @@ msgstr "एक या इससे ज़्यादा इनवॉइस क�
 #. odoo-python
 #: code:addons/account/models/account_move_line.py:0
 msgid "One or more lines require a 100% analytic distribution."
-msgstr ""
-"एक या एक से ज़्यादा लाइनें ऐसी हैं जिनके लिए '100% विश्लेषणात्मक वितरण' ज़रूरी है।"
+msgstr "एक या एक से ज़्यादा लाइनें ऐसी हैं जिनके लिए '100% विश्लेषणात्मक वितरण' ज़रूरी है।"
 
 #. module: account
 #: model:ir.ui.menu,name:account.root_payment_menu
 msgid "Online Payments"
 msgstr "ऑनलाइन पेमेंट"
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/partner.py:0
+msgid "Only Accounting managers can create foreign taxes."
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report__only_tax_exigible
@@ -13504,8 +13497,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "Only posted/cancelled journal entries can be reset to draft."
-msgstr ""
-"सिर्फ़ पोस्ट या रद्द की गई जर्नल एंट्रीज़ ही ड्रॉफ़्ट के लिए रीसेट की जा सकती हैं।"
+msgstr "सिर्फ़ पोस्ट या रद्द की गई जर्नल एंट्रीज़ ही ड्रॉफ़्ट के लिए रीसेट की जा सकती हैं।"
 
 #. module: account
 #. odoo-python
@@ -13825,6 +13817,11 @@ msgstr "ओवरड्यू"
 #: model:ir.model.fields.selection,name:account.selection__account_payment_register__installments_mode__overdue
 msgid "Overdue Amount"
 msgstr "ओवरड्यू अमाउंट"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.res_partner_view_search
+msgid "Overdue Invoices"
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -14430,8 +14427,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_register_form
 msgid ""
 "Payments related to partners with no bank account specified will be skipped."
-msgstr ""
-"जिन पार्टनर के बैंक खाते की जानकारी नहीं है, उनके पेमेंट छोड़ दिए जाएंगे।"
+msgstr "जिन पार्टनर के बैंक खाते की जानकारी नहीं है, उनके पेमेंट छोड़ दिए जाएंगे।"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_bank_statement_line__reconciled_payment_ids
@@ -14593,8 +14589,7 @@ msgstr "प्लेन टेक्स्ट"
 #. odoo-python
 #: code:addons/account/models/company.py:0
 msgid "Please contact your accountant to print the Hash integrity result."
-msgstr ""
-"हैश इंटीग्रिटी का रिजल्ट प्रिंट करवाने के लिए अपने अकाउंटेंट से संपर्क करें।"
+msgstr "हैश इंटीग्रिटी का रिजल्ट प्रिंट करवाने के लिए अपने अकाउंटेंट से संपर्क करें।"
 
 #. module: account
 #. odoo-python
@@ -15074,6 +15069,7 @@ msgid "Purchase Lock date"
 msgstr "परचेज़  लॉक डेट"
 
 #. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_invoice_report__move_type__in_receipt
 #: model:ir.model.fields.selection,name:account.selection__account_move__move_type__in_receipt
 msgid "Purchase Receipt"
 msgstr "परचेज़ रसदी"
@@ -15292,8 +15288,7 @@ msgstr "मान्यता की तारीख"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "Recompute all taxes and accounts based on this fiscal position"
-msgstr ""
-"इस नई वित्तीय स्थिति के हिसाब से सारे टैक्स और हिसाब-किताब फिर से जोड़ें."
+msgstr "इस नई वित्तीय स्थिति के हिसाब से सारे टैक्स और हिसाब-किताब फिर से जोड़ें."
 
 #. module: account
 #. odoo-python
@@ -15728,6 +15723,11 @@ msgid "Restrictive Audit Trail"
 msgstr "प्रतिबंधित ऑडिट ट्रेल"
 
 #. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_account__account_type__equity_retained
+msgid "Retained Earnings"
+msgstr ""
+
+#. module: account
 #: model:account.account,description:account.22_account_account_us_pension
 msgid "Retirement plans costs (401K match)"
 msgstr ""
@@ -15758,6 +15758,11 @@ msgid "Reversal Date"
 msgstr "एंट्री को कैंसिल करने की तारीख"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_move_form
+msgid "Reversal Entries"
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__reversal_move_ids
 #: model:ir.model.fields,field_description:account.field_account_move__reversal_move_ids
 msgid "Reversal Move"
@@ -15778,8 +15783,7 @@ msgstr "एंट्री को कैंसिल करने की ता�
 #. odoo-python
 #: code:addons/account/wizard/accrued_orders.py:0
 msgid "Reversal date must be posterior to date."
-msgstr ""
-"लेन-देन को रद्द करने की तारीख, मूल लेन-देन की तारीख के बाद की होनी चाहिए।"
+msgstr "लेन-देन को रद्द करने की तारीख, मूल लेन-देन की तारीख के बाद की होनी चाहिए।"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__reversed_entry_id
@@ -16076,6 +16080,7 @@ msgid "Sales Lock Date"
 msgstr "सेल्स लॉक डेट"
 
 #. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_invoice_report__move_type__out_receipt
 #: model:ir.model.fields.selection,name:account.selection__account_move__move_type__out_receipt
 msgid "Sales Receipt"
 msgstr "सेल्स रसीद"
@@ -16151,8 +16156,7 @@ msgstr "सहेज"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Save this page and come back here to set up the feature."
-msgstr ""
-"इस पेज को सेव करें और फिर इस सुविधा को सेट करने के लिए बाद में यहीं लौटकर आएं।"
+msgstr "इस पेज को सेव करें और फिर इस सुविधा को सेट करने के लिए बाद में यहीं लौटकर आएं।"
 
 #. module: account
 #. odoo-python
@@ -16294,8 +16298,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/wizard/account_secure_entries_wizard.py:0
 msgid "Securing these entries will create at least one gap in the sequence."
-msgstr ""
-"इन एंट्रीज़ को सुरक्षित करने पर, क्रम में कम से कम एक खाली जगह छूट जाएगी।"
+msgstr "इन एंट्रीज़ को सुरक्षित करने पर, क्रम में कम से कम एक खाली जगह छूट जाएगी।"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__access_token
@@ -16700,14 +16703,12 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__active
 msgid "Set active to false to hide the Journal without removing it."
-msgstr ""
-"'ऐक्टिव' सेटिंग को 'गलत' कर दें, ताकि जर्नल दिखे नहीं, लेकिन पूरी तरह से मिटे नहीं।"
+msgstr "'ऐक्टिव' सेटिंग को 'गलत' कर दें, ताकि जर्नल दिखे नहीं, लेकिन पूरी तरह से मिटे नहीं।"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_tax__active
 msgid "Set active to false to hide the tax without removing it."
-msgstr ""
-"'ऐक्टिव' सेटिंग को 'गलत' कर दें, ताकि टैक्स दिखे नहीं, लेकिन पूरी तरह से मिटे नहीं।"
+msgstr "'ऐक्टिव' सेटिंग को 'गलत' कर दें, ताकि टैक्स दिखे नहीं, लेकिन पूरी तरह से मिटे नहीं।"
 
 #. module: account
 #: model:onboarding.onboarding.step,button_text:account.onboarding_onboarding_step_sales_tax
@@ -17352,6 +17353,8 @@ msgid "Target Line"
 msgstr "टागरेट लाइन"
 
 #. module: account
+#. odoo-javascript
+#: code:addons/account/static/src/components/many2x_tax_tags/tax_tag_popover.xml:0
 #: model:account.report.column,name:account.generic_tax_report_account_tax_column_tax
 #: model:account.report.column,name:account.generic_tax_report_column_tax
 #: model:account.report.column,name:account.generic_tax_report_tax_account_column_tax
@@ -17766,8 +17769,7 @@ msgstr "टैक्स कैलकुलेशन राउंडिंग म
 msgid ""
 "Tax current account used as a counterpart to the Tax Closing Entry when in "
 "favor of the authorities."
-msgstr ""
-"इस प्रॉडक्ट से संबंधित मूल कीमत और टैक्स की एंट्रीज़ पर लगाए जाने वाले टैग।"
+msgstr "इस प्रॉडक्ट से संबंधित मूल कीमत और टैक्स की एंट्रीज़ पर लगाए जाने वाले टैग।"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_tax_group__tax_receivable_account_id
@@ -17857,8 +17859,7 @@ msgstr "इनवॉइस पर टैक्स की रकम आपकी 
 msgid ""
 "Taxes exigible on payment and on invoice cannot be mixed on the same journal "
 "item if they share some tag."
-msgstr ""
-"अगर पेमेंट और इनवॉइस के टैक्स में एक ही टैग है, तो उन्हें एक ही एंट्री में नहीं डाल सकते।"
+msgstr "अगर पेमेंट और इनवॉइस के टैक्स में एक ही टैग है, तो उन्हें एक ही एंट्री में नहीं डाल सकते।"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__display_invoice_tax_company_currency
@@ -17871,8 +17872,7 @@ msgstr "कंपनी की करेंसी में टैक्स"
 msgid ""
 "Taxes, fiscal positions, chart of accounts & legal statements for your "
 "country"
-msgstr ""
-"आपके देश के लिए टैक्स, वित्तीय स्थितियां, खातों की सूची और कानूनी जानकारी"
+msgstr "आपके देश के लिए टैक्स, वित्तीय स्थितियां, खातों की सूची और कानूनी जानकारी"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_company__account_enabled_tax_country_ids
@@ -17938,8 +17938,8 @@ msgstr ""
 "इस सेटिंग में एक नियम (regex) होता है जिसमें 'प्रीफिक्स1', 'साल', 'प्रीफिक्स2', "
 "'महीना', 'प्रीफिक्स3', 'अनुक्रम संख्या', और 'सफिक्स' जैसे हिस्से हो सकते हैं. \n"
 "'प्रीफिक्स' वाले हिस्से साल, महीने और असली बढ़ती हुई संख्या के बीच अलग करने वाले होते हैं.\n"
-"जैसे: ^(?P<prefix1>.*?)(?P<year>\\d{4})(?P<prefix2>\\D*?)(?P<month>\\d{2})"
-"(?P<prefix3>\\D+?)(?P<seq>\\d+)(?P<suffix>\\D*?)$"
+"जैसे: ^(?P<prefix1>.*?)(?P<year>\\d{4})(?P<prefix2>\\D*?)(?P<month>\\d{2})(?"
+"P<prefix3>\\D+?)(?P<seq>\\d+)(?P<suffix>\\D*?)$"
 
 #. module: account
 #: model:account.account,description:account.22_account_account_us_technology
@@ -18084,8 +18084,8 @@ msgid ""
 "To maintain date-based sequences, select entries and use the resequence "
 "option from the actions menu, available in developer mode."
 msgstr ""
-"आपके द्वारा डाली गई तारीख़ %(date_field)s (%(date)s) मौजूदा क्रम संख्या (%(sequence)"
-"s) से मेल नहीं खा रही है. आगे बढ़ने के लिए क्रम संख्या को हटा दें. \n"
+"आपके द्वारा डाली गई तारीख़ %(date_field)s (%(date)s) मौजूदा क्रम संख्या (%"
+"(sequence)s) से मेल नहीं खा रही है. आगे बढ़ने के लिए क्रम संख्या को हटा दें. \n"
 "अगर आप चाहते हैं कि क्रम संख्या तारीख़ के अनुसार बनी रहे, तो आपको डेवलपर मोड में जाकर "
 "एंट्रीज़ को चुनना होगा और फिर 'एक्शन' मेन्यू से 'रीसीक्वेंस' (क्रम फिर से सेट करें) का विकल्प "
 "इस्तेमाल करना होगा।"
@@ -18115,8 +18115,7 @@ msgstr ""
 msgid ""
 "The Availability is set to 'Country Matches' but the field Country is not "
 "set."
-msgstr ""
-"'उपलब्धता' का विकल्प 'देश के अनुसार' चुना गया है, लेकिन 'देश' वाला फ़ील्ड खाली है।"
+msgstr "'उपलब्धता' का विकल्प 'देश के अनुसार' चुना गया है, लेकिन 'देश' वाला फ़ील्ड खाली है।"
 
 #. module: account
 #. odoo-python
@@ -18183,6 +18182,7 @@ msgstr ""
 #: model:ir.model.fields,help:account.field_account_payment_register__country_code
 #: model:ir.model.fields,help:account.field_account_secure_entries_wizard__country_code
 #: model:ir.model.fields,help:account.field_account_setup_bank_manual_config__country_code
+#: model:ir.model.fields,help:account.field_account_tax__company_country_code
 #: model:ir.model.fields,help:account.field_account_tax__country_code
 #: model:ir.model.fields,help:account.field_account_tax_group__country_code
 #: model:ir.model.fields,help:account.field_base_document_layout__country_code
@@ -18224,7 +18224,8 @@ msgstr "खाता %(name)s (%(code)s) संग्रहित कर दि�
 #. odoo-python
 #: code:addons/account/models/account_account.py:0
 msgid ""
-"The account code can only contain alphanumeric characters, dots, and dashes."
+"The account code can only contain alphanumeric characters, dots, and dashes. "
+"(account code: %s)"
 msgstr ""
 
 #. module: account
@@ -18267,8 +18268,7 @@ msgstr ""
 msgid ""
 "The amount expressed in an optional other currency if it is a multi-currency "
 "entry."
-msgstr ""
-"अगर यह एंट्री कई करेंसी में है, तो यह वह राशि है जिसे दूसरी करेंसी में दिखाया गया है।"
+msgstr "अगर यह एंट्री कई करेंसी में है, तो यह वह राशि है जिसे दूसरी करेंसी में दिखाया गया है।"
 
 #. module: account
 #: model:ir.model.constraint,message:account.constraint_account_move_line_check_amount_currency_balance_sign
@@ -18382,16 +18382,14 @@ msgstr "यह कोड और पेमेंट का तरीका पह
 msgid ""
 "The combination of reference model and reference type on the journal is not "
 "implemented"
-msgstr ""
-"आपने जर्नल में जो रेफ़रंस मॉडल और रेफ़रंस टाइप चुने हैं, वह अभी काम नहीं करेगा."
+msgstr "आपने जर्नल में जो रेफ़रंस मॉडल और रेफ़रंस टाइप चुने हैं, वह अभी काम नहीं करेगा."
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/partner.py:0
 msgid ""
 "The commercial partner has been updated for all related accounting entries."
-msgstr ""
-"ग्राहक/सप्लायर की जानकारी से जुड़ी हुई सभी अकाउंटिंग एंट्रीज़ में बदल दी गई है।"
+msgstr "ग्राहक/सप्लायर की जानकारी से जुड़ी हुई सभी अकाउंटिंग एंट्रीज़ में बदल दी गई है।"
 
 #. module: account
 #. odoo-python
@@ -18606,8 +18604,7 @@ msgstr "रिपोर्ट की हर लाइन का लेबल अ
 msgid ""
 "The field 'Vendor' is required, please complete it to validate the Vendor "
 "Bill."
-msgstr ""
-"वेंडर की बिल की पुष्टि करने के लिए, 'ग्राहक' वाला फ़ील्ड भरना ज़रूरी है।"
+msgstr "वेंडर की बिल की पुष्टि करने के लिए, 'ग्राहक' वाला फ़ील्ड भरना ज़रूरी है।"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_partner__property_account_position_id
@@ -18683,8 +18680,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_journal.py:0
 msgid "The holder of a journal's bank account must be the company (%s)."
-msgstr ""
-"जर्नल में इस्तेमाल हो रहे बैंक अकाउंट का मालिक आपकी कंपनी (%s) ही होनी चाहिए।"
+msgstr "जर्नल में इस्तेमाल हो रहे बैंक अकाउंट का मालिक आपकी कंपनी (%s) ही होनी चाहिए।"
 
 #. module: account
 #. odoo-python
@@ -18725,8 +18721,7 @@ msgstr "यह टैक्स कैश बेसिस जर्नल एं�
 #. odoo-python
 #: code:addons/account/models/account_journal.py:0
 msgid "The journal in which to upload the invoice is not specified. "
-msgstr ""
-"इनवॉइस अपलोड करने के लिए कौन सा जर्नल इस्तेमाल करना है, यह बताया नहीं गया है. "
+msgstr "इनवॉइस अपलोड करने के लिए कौन सा जर्नल इस्तेमाल करना है, यह बताया नहीं गया है. "
 
 #. module: account
 #. odoo-python
@@ -18738,8 +18733,7 @@ msgstr "जर्नल की यह एंट्री गलत अकाउ�
 #: model:ir.model.fields,help:account.field_account_financial_year_op__fiscalyear_last_day
 #: model:ir.model.fields,help:account.field_account_financial_year_op__fiscalyear_last_month
 msgid "The last day of the month will be used if the chosen day doesn't exist."
-msgstr ""
-"अगर चुनी हुई तारीख उस महीने में नहीं है, तो महीने की आखिरी तारीख मानी जाएगी।"
+msgstr "अगर चुनी हुई तारीख उस महीने में नहीं है, तो महीने की आखिरी तारीख मानी जाएगी।"
 
 #. module: account
 #. odoo-python
@@ -18789,16 +18783,14 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/partner.py:0
 msgid "The partner cannot be deleted because it is used in Accounting"
-msgstr ""
-"इस पार्टनर को हटा नहीं सकते, क्योंकि इसका अकाउंटिंग में इस्तेमाल हो चुका है"
+msgstr "इस पार्टनर को हटा नहीं सकते, क्योंकि इसका अकाउंटिंग में इस्तेमाल हो चुका है"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_journal.py:0
 msgid ""
 "The partners of the journal's company and the related bank account mismatch."
-msgstr ""
-"जर्नल में जो कंपनी और पार्टनर हैं, वे बैंक खाते की जानकारी से मेल नहीं खा रहे।"
+msgstr "जर्नल में जो कंपनी और पार्टनर हैं, वे बैंक खाते की जानकारी से मेल नहीं खा रहे।"
 
 #. module: account
 #: model:ir.model.constraint,message:account.constraint_account_payment_check_amount_not_negative
@@ -18930,8 +18922,7 @@ msgstr ""
 #: model:ir.model.fields,help:account.field_account_move_line__amount_residual
 msgid ""
 "The residual amount on a journal item expressed in the company currency."
-msgstr ""
-"जर्नल आइटम पर जो बची हुई रकम है, उसे कंपनी की अपनी करेंसी में दिखाया गया है।"
+msgstr "जर्नल आइटम पर जो बची हुई रकम है, उसे कंपनी की अपनी करेंसी में दिखाया गया है।"
 
 #. module: account
 #. odoo-python
@@ -19414,8 +19405,7 @@ msgstr "इसका इस्तेमाल सिर्फ़ जर्नल
 msgid ""
 "This document is protected by a hash. Therefore, you cannot edit the "
 "following fields: %s."
-msgstr ""
-"यह दस्तावेज़ 'हैश' से सुरक्षित है. इस वजह से आप इन हिस्सों %s को बदल नहीं सकते।"
+msgstr "यह दस्तावेज़ 'हैश' से सुरक्षित है. इस वजह से आप इन हिस्सों %s को बदल नहीं सकते।"
 
 #. module: account
 #. odoo-python
@@ -19473,8 +19463,7 @@ msgstr ""
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
-msgid ""
-"This entry has been reviewed, You need the bookkeeper role to change it."
+msgid "This entry has been reviewed by accountants, only them can edit it now."
 msgstr ""
 
 #. module: account
@@ -19673,8 +19662,7 @@ msgstr ""
 #: model:digest.tip,name:account.digest_tip_account_1
 #: model_terms:digest.tip,tip_description:account.digest_tip_account_1
 msgid "Tip: Stop chasing the Documents you need"
-msgstr ""
-"सलाह: जिन दस्तावेज़ की आपको ज़रूरत है, उन्हें बार-बार ढूंढने की चिंता न करें"
+msgstr "सलाह: जिन दस्तावेज़ की आपको ज़रूरत है, उन्हें बार-बार ढूंढने की चिंता न करें"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__destination_account_id
@@ -19741,8 +19729,8 @@ msgid ""
 "in order to validate it."
 msgstr ""
 "%(method_name)s का इस्तेमाल करके पेमेंट रिकॉर्ड करने के लिए, जिस बैंक अकाउंट में पैसा जा "
-"रहा है, उसे मैन्युअल तौर पर वेरिफ़ाई करना होगा. इसे वेरिफ़ाई करने के लिए आपको %(partner)"
-"s के पार्टनर बैंक अकाउंट में जाना होगा।"
+"रहा है, उसे मैन्युअल तौर पर वेरिफ़ाई करना होगा. इसे वेरिफ़ाई करने के लिए आपको %"
+"(partner)s के पार्टनर बैंक अकाउंट में जाना होगा।"
 
 #. module: account
 #. odoo-python
@@ -20568,8 +20556,7 @@ msgstr "यह राशि की करेंसी दर्शाने व�
 msgid ""
 "Utility field to express whether the journal item is subject to storno "
 "accounting"
-msgstr ""
-"यह फ़ील्ड बताता है कि जर्नल एंट्री पर 'स्टोर्नो अकाउंटिंग' लागू होती है या नहीं"
+msgstr "यह फ़ील्ड बताता है कि जर्नल एंट्री पर 'स्टोर्नो अकाउंटिंग' लागू होती है या नहीं"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_lock_exception_form
@@ -20833,8 +20820,7 @@ msgstr "चेतावनी"
 msgid ""
 "We can't leave this document without any company. Please select a company "
 "for this document."
-msgstr ""
-"यह दस्तावेज़ बिना किसी कंपनी के नहीं रखा जा सकता. इसके लिए एक कंपनी चुनें।"
+msgstr "यह दस्तावेज़ बिना किसी कंपनी के नहीं रखा जा सकता. इसके लिए एक कंपनी चुनें।"
 
 #. module: account
 #. odoo-python
@@ -20885,8 +20871,7 @@ msgstr "आप जब इसे चुनेंगे, 0 वैल्यू इ�
 #: model:ir.model.fields,help:account.field_account_report_expression__blank_if_zero
 msgid ""
 "When checked, 0 values will not show when displaying this expression's value."
-msgstr ""
-"आप जब इसे चुनेंगे, एक्सप्रेशन की वैल्यू दिखाते समय 0 वैल्यू नहीं दिखेगी।"
+msgstr "आप जब इसे चुनेंगे, एक्सप्रेशन की वैल्यू दिखाते समय 0 वैल्यू नहीं दिखेगी।"
 
 #. module: account
 #. odoo-python
@@ -20943,8 +20928,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account/static/src/js/tours/account.js:0
 msgid "Write a customer name to <b>create one</b> or <b>see suggestions</b>."
-msgstr ""
-"<b>नया ग्राहक बनाने</b> के लिए या <b>सुझाव देखने</b> के लिए ग्राहक का नाम लिखें।"
+msgstr "<b>नया ग्राहक बनाने</b> के लिए या <b>सुझाव देखने</b> के लिए ग्राहक का नाम लिखें।"
 
 #. module: account
 #. odoo-javascript
@@ -21019,16 +21003,10 @@ msgid ""
 "You can not archive a journal containing draft journal entries.\n"
 "\n"
 "To proceed:\n"
-"1/ click on the top-right button 'Journal Entries' from this journal form\n"
-"2/ then filter on 'Draft' entries\n"
+"1/ go to Accounting > Accounting > Journal Entries\n"
+"2/ filter on this journal and on 'Unposted' entries\n"
 "3/ select them all and post or delete them through the action menu"
 msgstr ""
-"आप ऐसे जर्नल को आर्काइव नहीं कर सकते जिसमें अभी ड्राफ्ट जर्नल एंट्रीज़ हों. \n"
-"\n"
-"ऐसा करने के लिए, आपको पहले:\n"
-"1/ इस जर्नल फ़ॉर्म में ऊपर-दाएं दिए गए 'जर्नल एंट्रीज़' बटन पर क्लिक करना होगा\n"
-"2/ फिर, केवल 'ड्राफ्ट' एंट्रीज़ को फ़िल्टर करके देखना होगा\n"
-"3/ उन सभी को चुनकर, 'ऐक्शन' मेन्यू से उन्हें या तो 'पोस्ट' कर दें या 'डिलीट' कर दें"
 
 #. module: account
 #. odoo-python
@@ -21064,15 +21042,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "You can only register payment for posted journal entries."
-msgstr ""
-"आप सिर्फ़ उन जर्नल एंट्रीज़ के लिए पेमेंट रिकॉर्ड कर सकते हैं जो 'फाइनल' हो चुकी हैं।"
+msgstr "आप सिर्फ़ उन जर्नल एंट्रीज़ के लिए पेमेंट रिकॉर्ड कर सकते हैं जो 'फाइनल' हो चुकी हैं।"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "You can only request a cancellation for invoice sent to the government."
-msgstr ""
-"आप सिर्फ़ उन इनवॉइस को रद्द करने का अनुरोध कर सकते हैं जो सरकार को भेजे गए हैं।"
+msgstr "आप सिर्फ़ उन इनवॉइस को रद्द करने का अनुरोध कर सकते हैं जो सरकार को भेजे गए हैं।"
 
 #. module: account
 #. odoo-python
@@ -21150,8 +21126,7 @@ msgstr ""
 msgid ""
 "You can't create a new statement line without a suspense account set on the "
 "%s journal."
-msgstr ""
-"आप नई स्टेटमेंट लाइन नहीं बना सकते, अगर %s जर्नल में 'सस्पेंस अकाउंट' सेट नहीं है।"
+msgstr "आप नई स्टेटमेंट लाइन नहीं बना सकते, अगर %s जर्नल में 'सस्पेंस अकाउंट' सेट नहीं है।"
 
 #. module: account
 #. odoo-python
@@ -21198,8 +21173,8 @@ msgid ""
 "You can't have two payment method lines of the same payment type (%"
 "(payment_type)s) and with the same name (%(name)s) on a single journal."
 msgstr ""
-"आप एक जर्नल में एक ही तरह के पेमेंट (%(payment_type)s) के लिए और एक ही नाम (%(name)"
-"s) वाली दो अलग-अलग पेमेंट मेथड लाइनें नहीं बना सकते"
+"आप एक जर्नल में एक ही तरह के पेमेंट (%(payment_type)s) के लिए और एक ही नाम (%"
+"(name)s) वाली दो अलग-अलग पेमेंट मेथड लाइनें नहीं बना सकते"
 
 #. module: account
 #. odoo-python
@@ -21238,6 +21213,14 @@ msgid ""
 msgstr ""
 "आप इनबाउंड और आउटबाउंड दोनों तरह के लेन-देन या स्टॉक मूवमेंट के लिए पेमेंट रिकॉर्ड नहीं कर "
 "सकते।"
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+msgid ""
+"You can't reset to draft those journal entries. You need to request a "
+"cancellation instead."
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -21327,8 +21310,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_move_line.py:0
 msgid "You cannot delete a tax line as it would impact the tax report"
-msgstr ""
-"आप टैक्स लाइन को नहीं मिटा सकते, क्योंकि ऐसा करने से टैक्स रिपोर्ट पर असर पड़ेगा"
+msgstr "आप टैक्स लाइन को नहीं मिटा सकते, क्योंकि ऐसा करने से टैक्स रिपोर्ट पर असर पड़ेगा"
 
 #. module: account
 #. odoo-python
@@ -21368,8 +21350,7 @@ msgstr ""
 #: code:addons/account/models/mail_template.py:0
 msgid ""
 "You cannot delete this mail template, it is used in the invoice sending flow."
-msgstr ""
-"आप यह ईमेल टेम्पलेट नहीं मिटा सकते, क्योंकि इसका इस्तेमाल इनवॉइस भेजने में हो रहा है।"
+msgstr "आप यह ईमेल टेम्पलेट नहीं मिटा सकते, क्योंकि इसका इस्तेमाल इनवॉइस भेजने में हो रहा है।"
 
 #. module: account
 #. odoo-python
@@ -21496,10 +21477,10 @@ msgstr ""
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
-msgid "You cannot modify the following readonly fields on a posted move: %s"
+msgid ""
+"You cannot modify the following readonly fields on the posted move %(move)s: "
+"%(fields)s"
 msgstr ""
-"आप 'फाइनल' हो चुकी एंट्री में, %s नाम के उन बॉक्सों को नहीं बदल सकते जिन्हें सिर्फ़ देखा जा "
-"सकता है."
 
 #. module: account
 #. odoo-python
@@ -21575,8 +21556,7 @@ msgstr ""
 msgid ""
 "You cannot remove/deactivate the accounts \"%s\" which are set on a tax "
 "repartition line."
-msgstr ""
-"आप उन खातों \"%s\" को हटा या बंद नहीं सकते जो टैक्स बांटने के लिए इस्तेमाल हुए हैं।"
+msgstr "आप उन खातों \"%s\" को हटा या बंद नहीं सकते जो टैक्स बांटने के लिए इस्तेमाल हुए हैं।"
 
 #. module: account
 #. odoo-python
@@ -21611,8 +21591,7 @@ msgstr "आप 'एक्सचेंज डिफरेंस' से जुड
 #: code:addons/account/models/account_lock_exception.py:0
 msgid ""
 "You cannot revoke Lock Date Exceptions. Ask someone with the 'Adviser' role."
-msgstr ""
-"आप 'लॉक डेट एक्सेप्शन' को वापस नहीं ले सकते. इसके लिए 'एडवाइजर' से पूछें।"
+msgstr "आप 'लॉक डेट एक्सेप्शन' को वापस नहीं ले सकते. इसके लिए 'एडवाइजर' से पूछें।"
 
 #. module: account
 #. odoo-python
@@ -21675,8 +21654,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "You cannot validate a document with an inactive currency: %s"
-msgstr ""
-"आप उस दस्तावेज़ की पुष्टि नहीं कर सकते जिसमें ऐसी करेंसी है जो अब चालू नहीं है: %s"
+msgstr "आप उस दस्तावेज़ की पुष्टि नहीं कर सकते जिसमें ऐसी करेंसी है जो अब चालू नहीं है: %s"
 
 #. module: account
 #. odoo-python
@@ -22379,8 +22357,8 @@ msgid ""
 "{amount} ({debit_credit}) from <strong>{account_source_name}</strong> were "
 "transferred to <strong>{account_target_name}</strong> by {link}"
 msgstr ""
-"<strong>{account_source_name}</strong> से {amount} ({debit_credit})  <strong>"
-"{account_target_name}</strong> में {link} के ज़रिए ट्रांसफ़र किए गए"
+"<strong>{account_source_name}</strong> से {amount} ({debit_credit})  "
+"<strong>{account_target_name}</strong> में {link} के ज़रिए ट्रांसफ़र किए गए"
 
 #. module: account
 #. odoo-python
@@ -22411,8 +22389,7 @@ msgstr "{{ object.company_id.name }} इनवॉइस (Ref {{ object.name or '
 #: model:mail.template,subject:account.mail_template_data_payment_receipt
 msgid ""
 "{{ object.company_id.name }} Payment Receipt (Ref {{ object.name or 'n/a' }})"
-msgstr ""
-"{{ object.company_id.name }} पेमेंट रसीद (Ref {{ object.name or 'n/a' }})"
+msgstr "{{ object.company_id.name }} पेमेंट रसीद (Ref {{ object.name or 'n/a' }})"
 
 #. module: account
 #: model:mail.template,subject:account.email_template_edi_self_billing_credit_note
@@ -22427,6 +22404,108 @@ msgid ""
 "{{ object.company_id.name }} Self-billing invoice (Ref {{ object.name or 'n/"
 "a' }})"
 msgstr ""
+
+#, fuzzy
+#~ msgid "Credit Note :"
+#~ msgstr "क्रेडिट नोट :"
+
+#~ msgid ""
+#~ "Email addresses that will receive copy for sent and received invoices. "
+#~ "Separate entries with ';'."
+#~ msgstr ""
+#~ "वे ईमेल पते जिन पर भेजे गए और मिले हुए इनवॉइस की कॉपी जाएगी. ईमेल आईडी को अलग करने "
+#~ "के लिए बीच में ';' का इस्तेमाल करें।"
+
+#~ msgid ""
+#~ "<span class=\"o_stat_text\" invisible=\"move_type != "
+#~ "'out_refund'\">Invoice</span>\n"
+#~ "                                <span class=\"o_stat_text\" "
+#~ "invisible=\"move_type != 'in_refund'\">Vendor Bill</span>"
+#~ msgstr ""
+#~ "<span class=\"o_stat_text\" invisible=\"move_type != "
+#~ "'out_refund'\">इनवॉइस</span>\n"
+#~ "                                <span class=\"o_stat_text\" "
+#~ "invisible=\"move_type != 'in_refund'\">वेंडर बिल</span>"
+
+#~ msgid "<span class=\"o_stat_text\">Journal Entries</span>"
+#~ msgstr "<span class=\"o_stat_text\">जनरल एंट्री</span>"
+
+#~ msgid "Accumulated Amortization - Buildings"
+#~ msgstr "समय के साथ घटी कुल कीमत - बिल्डिंग"
+
+#~ msgid "Accumulated Amortization - Furniture & Fixtures"
+#~ msgstr "समय के साथ घटी कुल कीमत - फर्नीचर और फिक्चर"
+
+#~ msgid "Accumulated Amortization - Improvements"
+#~ msgstr "समय के साथ घटी कुल कीमत - सुधार"
+
+#~ msgid "Accumulated Amortization - Machines & Tools"
+#~ msgstr "समय के साथ घटी कुल कीमत - मशीन और टूल"
+
+#~ msgid "Accumulated Amortization - Other Property"
+#~ msgstr "समय के साथ घटी कुल कीमत - अन्य प्रॉपर्टी"
+
+#~ msgid "Accumulated Amortization - Technology"
+#~ msgstr "समय के साथ घटी कुल कीमत - टेक्नोलॉजी"
+
+#~ msgid "Accumulated Amortization - Vehicles"
+#~ msgstr "समय के साथ घटी कुल कीमत - गाड़ियां"
+
+#~ msgid "Accumulated Depreciation"
+#~ msgstr "समय के साथ घटी कुल कीमत"
+
+#~ msgid "Cumulative amortization recorded for building assets."
+#~ msgstr "इमारतों से जुड़ी संपत्तियों पर अब तक इकट्ठा हुई कुल मूल्यह्रास राशि।"
+
+#~ msgid "Cumulative amortization recorded for capitalized technology assets."
+#~ msgstr "कैपिटलाइज्ड टेक्नोलॉजी संपत्तियों पर अब तक इकट्ठा हुई कुल मूल्यह्रास राशि।"
+
+#~ msgid "Cumulative amortization recorded for furniture and fixture assets."
+#~ msgstr "फ़र्नीचर और फिक्स्चर से जुड़ी संपत्तियों पर अब तक इकट्ठा हुई कुल मूल्यह्रास राशि।"
+
+#~ msgid ""
+#~ "Cumulative amortization recorded for leasehold or property improvements."
+#~ msgstr ""
+#~ "लीज पर ली गई जगह या संपत्ति में किए गए सुधारों पर अब तक इकट्ठा हुई कुल मूल्यह्रास "
+#~ "राशि।"
+
+#~ msgid "Cumulative amortization recorded for machinery and tool assets."
+#~ msgstr "मशीनरी और औजारों से जुड़ी संपत्तियों पर अब तक इकट्ठा हुई कुल मूल्यह्रास राशि।"
+
+#~ msgid ""
+#~ "Cumulative amortization recorded for other depreciable property assets."
+#~ msgstr "अन्य डिप्रेशिएबल संपत्तियों पर अब तक इकट्ठा हुई कुल मूल्यह्रास राशि।"
+
+#~ msgid "Cumulative amortization recorded for vehicle assets."
+#~ msgstr "वाहनों से जुड़ी संपत्तियों पर अब तक इकट्ठा हुई कुल मूल्यह्रास राशि।"
+
+#~ msgid ""
+#~ "Error while creating XML:\n"
+#~ "- %s"
+#~ msgstr ""
+#~ "XML बनाने में कोई गड़बड़ी हुई:\n"
+#~ "- %s"
+
+#~ msgid ""
+#~ "You can not archive a journal containing draft journal entries.\n"
+#~ "\n"
+#~ "To proceed:\n"
+#~ "1/ click on the top-right button 'Journal Entries' from this journal "
+#~ "form\n"
+#~ "2/ then filter on 'Draft' entries\n"
+#~ "3/ select them all and post or delete them through the action menu"
+#~ msgstr ""
+#~ "आप ऐसे जर्नल को आर्काइव नहीं कर सकते जिसमें अभी ड्राफ्ट जर्नल एंट्रीज़ हों. \n"
+#~ "\n"
+#~ "ऐसा करने के लिए, आपको पहले:\n"
+#~ "1/ इस जर्नल फ़ॉर्म में ऊपर-दाएं दिए गए 'जर्नल एंट्रीज़' बटन पर क्लिक करना होगा\n"
+#~ "2/ फिर, केवल 'ड्राफ्ट' एंट्रीज़ को फ़िल्टर करके देखना होगा\n"
+#~ "3/ उन सभी को चुनकर, 'ऐक्शन' मेन्यू से उन्हें या तो 'पोस्ट' कर दें या 'डिलीट' कर दें"
+
+#~ msgid "You cannot modify the following readonly fields on a posted move: %s"
+#~ msgstr ""
+#~ "आप 'फाइनल' हो चुकी एंट्री में, %s नाम के उन बॉक्सों को नहीं बदल सकते जिन्हें सिर्फ़ देखा "
+#~ "जा सकता है."
 
 #~ msgid "PEPPOL Electronic Invoicing"
 #~ msgstr "PEPPOL इलेक्ट्रॉनिक इनवॉइसिंग"

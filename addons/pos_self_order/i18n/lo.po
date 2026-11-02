@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.4a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-10 17:38+0000\n"
+"POT-Creation-Date: 2026-10-30 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 19:13+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Lao <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -74,7 +74,9 @@ msgid ""
 "                    <div>Thank you,</div>\n"
 "                    <br/>\n"
 "                    <div t-if=\"object.state == 'paid'\">\n"
-"                        <div>Attached, you will find your receipt</div>\n"
+"                        <div>You can download your receipt <a t-attf-"
+"href=\"{{ object.get_base_url() }}/pos-self-order/receipt/{{ object.id }}?"
+"access_token={{ object.access_token }}\">here</a></div>\n"
 "                        <br/>\n"
 "                    </div>\n"
 "                    <t t-out=\"store_name\">Store name</t>\n"
@@ -108,7 +110,9 @@ msgid ""
 "                    <div>Thank you,</div>\n"
 "                    <br/>\n"
 "                    <div t-if=\"object.state == 'paid'\">\n"
-"                        <div>Attached, you will find your receipt</div>\n"
+"                        <div>You can download your receipt <a t-attf-"
+"href=\"{{ object.get_base_url() }}/pos-self-order/receipt/{{ object.id }}?"
+"access_token={{ object.access_token }}\">here</a></div>\n"
 "                        <br/>\n"
 "                    </div>\n"
 "                    <t t-out=\"store_name\">Store name</t>\n"
@@ -149,6 +153,7 @@ msgstr ""
 #. module: pos_self_order
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.js:0
+#: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.xml:0
 msgid "Add an order note"
 msgstr ""
 
@@ -824,7 +829,32 @@ msgstr ""
 #. module: pos_self_order
 #. odoo-python
 #: code:addons/pos_self_order/models/pos_order.py:0
+msgid "Invalid combo line"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-python
+#: code:addons/pos_self_order/models/pos_order.py:0
 msgid "Invalid preset"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-python
+#: code:addons/pos_self_order/models/pos_order.py:0
+msgid "Invalid product attribute"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-python
+#: code:addons/pos_self_order/controllers/orders.py:0
+#: code:addons/pos_self_order/models/pos_order.py:0
+msgid "Invalid product configuration"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-python
+#: code:addons/pos_self_order/models/pos_order.py:0
+msgid "Invalid quantity"
 msgstr ""
 
 #. module: pos_self_order
@@ -852,6 +882,14 @@ msgstr ""
 #: model:ir.model.fields.selection,name:pos_self_order.selection__pos_config__self_ordering_mode__kiosk
 #: model_terms:ir.ui.view,arch_db:pos_self_order.pos_self_order_search_view
 msgid "Kiosk"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-javascript
+#. odoo-python
+#: code:addons/pos_self_order/receipt/pos_order_receipt.py:0
+#: code:addons/pos_self_order/static/src/overrides/utils/printer/generate_printer_data.js:0
+msgid "Kiosk Order"
 msgstr ""
 
 #. module: pos_self_order
@@ -1086,6 +1124,12 @@ msgstr ""
 
 #. module: pos_self_order
 #. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.xml:0
+msgid "Order note"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/services/self_order_service.js:0
 msgid "Orders not found on server"
 msgstr ""
@@ -1250,6 +1294,18 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/preset_info_popup/preset_info_popup.xml:0
 msgid "Powered by Google"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-python
+#: code:addons/pos_self_order/models/pos_order.py:0
+msgid "Preset is not available in self-ordering"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-python
+#: code:addons/pos_self_order/models/pos_order.py:0
+msgid "Preset is not available in this configuration"
 msgstr ""
 
 #. module: pos_self_order
@@ -1430,7 +1486,6 @@ msgstr ""
 #. module: pos_self_order
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/preset_info_popup/preset_info_popup.js:0
-#: code:addons/pos_self_order/static/src/app/components/slots_popup/slots_popup.xml:0
 #: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.js:0
 msgid "Select a hour"
 msgstr ""
@@ -1439,6 +1494,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.js:0
 msgid "Select a table"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/components/slots_popup/slots_popup.xml:0
+msgid "Select an hour"
 msgstr ""
 
 #. module: pos_self_order
@@ -1462,8 +1523,11 @@ msgid "Selection"
 msgstr ""
 
 #. module: pos_self_order
+#. odoo-javascript
 #. odoo-python
 #: code:addons/pos_self_order/models/pos_config.py:0
+#: code:addons/pos_self_order/receipt/pos_order_receipt.py:0
+#: code:addons/pos_self_order/static/src/overrides/utils/printer/generate_printer_data.js:0
 msgid "Self Order"
 msgstr ""
 
@@ -1543,7 +1607,7 @@ msgstr ""
 #. module: pos_self_order
 #: model:mail.template,description:pos_self_order.delivery_email_template
 #: model:mail.template,description:pos_self_order.takeout_email_template
-msgid "Sent to customers with the receipt in attachment"
+msgid "Sent to customers with a link to download their receipt"
 msgstr ""
 
 #. module: pos_self_order
@@ -1630,9 +1694,11 @@ msgid "Table Stand Number"
 msgstr ""
 
 #. module: pos_self_order
-#: model_terms:ir.ui.view,arch_db:pos_self_order.pos_order_change_receipt
-#: model_terms:ir.ui.view,arch_db:pos_self_order.pos_order_receipt_header
-msgid "Table Tracker:"
+#. odoo-javascript
+#. odoo-python
+#: code:addons/pos_self_order/receipt/pos_order_receipt.py:0
+#: code:addons/pos_self_order/static/src/overrides/utils/printer/generate_printer_data.js:0
+msgid "Table Tracker %s"
 msgstr ""
 
 #. module: pos_self_order
@@ -1678,13 +1744,23 @@ msgstr ""
 #. odoo-python
 #: code:addons/pos_self_order/models/pos_preset.py:0
 msgid ""
-"The delivery address could not be geolocated. Please enter a valid address."
+"The delivery address could not be geolocated. Please check the address. If "
+"the address is valid, your geolocation service may be unavailable or unable "
+"to resolve it"
 msgstr ""
 
 #. module: pos_self_order
 #. odoo-python
 #: code:addons/pos_self_order/models/pos_order.py:0
 msgid "The mail template with xmlid %s has been deleted."
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-python
+#: code:addons/pos_self_order/models/pos_order.py:0
+msgid ""
+"The order ID isn't linked to the order UUID. This is a sign of a tampered "
+"payload."
 msgstr ""
 
 #. module: pos_self_order

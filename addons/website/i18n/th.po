@@ -19,7 +19,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:37+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-09-08 04:11+0000\n"
 "Last-Translator: Nusara Boonma <nuboo@odoo.com>\n"
 "Language-Team: Thai <https://translate.odoo.com/projects/odoo-s19-4/website/"
@@ -37,8 +37,7 @@ msgstr ""
 msgid ""
 "\" A trusted partner for growth. <br/>Professional, efficient, and always "
 "ahead of the curve. \""
-msgstr ""
-"“พาร์ทเนอร์ที่เชื่อถือได้สำหรับการเติบโต <br/>เป็นมืออาชีพ มีประสิทธิภาพ และก้าวล้ำเสมอ”"
+msgstr "“พาร์ทเนอร์ที่เชื่อถือได้สำหรับการเติบโต <br/>เป็นมืออาชีพ มีประสิทธิภาพ และก้าวล้ำเสมอ”"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_quotes_carousel_compact
@@ -54,8 +53,7 @@ msgstr "\" บริการและผลลัพธ์ที่โดดเ
 msgid ""
 "\" This company transformed our business. <br/>Their solutions are "
 "innovative and reliable. \""
-msgstr ""
-"“บริษัทนี้เปลี่ยนแปลงธุรกิจของเรา <br/>โซลูชันของพวกเขาเป็นนวัตกรรมและเชื่อถือได้”"
+msgstr "“บริษัทนี้เปลี่ยนแปลงธุรกิจของเรา <br/>โซลูชันของพวกเขาเป็นนวัตกรรมและเชื่อถือได้”"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_blockquote
@@ -64,8 +62,8 @@ msgid ""
 "\" Write a quote here from one of your customers. Quotes are a great way to "
 "build confidence in your products or services. \""
 msgstr ""
-"“เขียนคำพูดจากลูกค้าของคุณที่นี่ การเขียนคำพูดเป็นวิธีที่ดีเยี่ยมในการสร้างความเชื่อมั่นในผลิตภัณฑ์หรือบริ"
-"การของคุณ”"
+"“เขียนคำพูดจากลูกค้าของคุณที่นี่ "
+"การเขียนคำพูดเป็นวิธีที่ดีเยี่ยมในการสร้างความเชื่อมั่นในผลิตภัณฑ์หรือบริการของคุณ”"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -115,8 +113,9 @@ msgid ""
 "proficiency and meticulous approach greatly enhanced our project. I couldn’t "
 "be happier with the final product!\""
 msgstr ""
-"\"การทำงานร่วมกับทีมนี้เป็นเรื่องง่ายตั้งแต่ต้นจนจบ ทีมมีความเชี่ยวชาญและใส่ใจในรายละเอียดอย่างมา"
-"ก ทำให้โปรเจกต์ของเราดีขึ้นอย่างเห็นได้ชัด เรารู้สึกพอใจกับผลงานสุดท้ายมาก\""
+"\"การทำงานร่วมกับทีมนี้เป็นเรื่องง่ายตั้งแต่ต้นจนจบ "
+"ทีมมีความเชี่ยวชาญและใส่ใจในรายละเอียดอย่างมาก ทำให้โปรเจกต์ของเราดีขึ้นอย่างเห็นได้ชัด "
+"เรารู้สึกพอใจกับผลงานสุดท้ายมาก\""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
@@ -124,8 +123,8 @@ msgid ""
 "\"Exceptional service and great communication throughout the entire process. "
 "They went above and beyond to ensure our project was a complete success.\""
 msgstr ""
-"“บริการยอดเยี่ยมและสื่อสารได้ดีเยี่ยมตลอดทั้งกระบวนการ พวกเขาใส่ใจเกินความคาดหมายเพื่อให้แน่ใจ"
-"ว่าทุกอย่างในโปรเจกต์ของเราประสบความสำเร็จอย่างสมบูรณ์”"
+"“บริการยอดเยี่ยมและสื่อสารได้ดีเยี่ยมตลอดทั้งกระบวนการ "
+"พวกเขาใส่ใจเกินความคาดหมายเพื่อให้แน่ใจว่าทุกอย่างในโปรเจกต์ของเราประสบความสำเร็จอย่างสมบูรณ์”"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
@@ -134,8 +133,8 @@ msgid ""
 "vision and turned it into something even better than we had imagined. Highly "
 "recommend!\""
 msgstr ""
-"ตั้งแต่การพบกันครั้งแรก เห็นได้ชัดว่าเราสามารถไว้ใจได้ พวกเขารับวิสัยทัศน์ของเราและทำให้มันดีขึ้นกว่"
-"าที่เราจินตนาการไว้"
+"ตั้งแต่การพบกันครั้งแรก เห็นได้ชัดว่าเราสามารถไว้ใจได้ "
+"พวกเขารับวิสัยทัศน์ของเราและทำให้มันดีขึ้นกว่าที่เราจินตนาการไว้"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
@@ -144,8 +143,9 @@ msgid ""
 "knowledge and focus on detail significantly benefited our project. I am "
 "extremely happy with the outcome!\""
 msgstr ""
-"“การร่วมงานกับทีมนี้เป็นเรื่องง่ายตั้งแต่ต้นจนจบ ความรู้และความใส่ใจในรายละเอียดของพวกเขาช่วยให้"
-"โปรเจกต์ของเราประสบความสำเร็จอย่างมาก ผมพอใจกับผลลัพธ์ครับ”"
+"“การร่วมงานกับทีมนี้เป็นเรื่องง่ายตั้งแต่ต้นจนจบ "
+"ความรู้และความใส่ใจในรายละเอียดของพวกเขาช่วยให้โปรเจกต์ของเราประสบความสำเร็จอย่างมาก "
+"ผมพอใจกับผลลัพธ์ครับ”"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
@@ -154,8 +154,8 @@ msgid ""
 "ideas to the table and delivered a final product that exceeded expectations."
 "\""
 msgstr ""
-"\"ทีมนี้เข้าใจความหมายของคำว่า ‘พาร์ทเนอร์’ อย่างแท้จริง พวกเขานำเสนอไอเดียใหม่ๆ และส่งมอบ"
-"ผลงานสุดท้ายที่เหนือความคาดหมาย\""
+"\"ทีมนี้เข้าใจความหมายของคำว่า ‘พาร์ทเนอร์’ อย่างแท้จริง พวกเขานำเสนอไอเดียใหม่ๆ "
+"และส่งมอบผลงานสุดท้ายที่เหนือความคาดหมาย\""
 
 #. module: website
 #. odoo-python
@@ -171,8 +171,8 @@ msgid ""
 "\"Homepage URL\" field in the website settings or the page properties on any "
 "custom page."
 msgstr ""
-"\"URL ไปยัง\" ไม่สามารถตั้งค่าเป็น \"/\" หากต้องการเปลี่ยนเนื้อหาหน้าแรก ให้ใช้ฟิลด์ \"URL หน้"
-"าแรก\" ในการตั้งค่าเว็บไซต์หรือคุณสมบัติของเพจบนเพจที่กำหนดเอง"
+"\"URL ไปยัง\" ไม่สามารถตั้งค่าเป็น \"/\" หากต้องการเปลี่ยนเนื้อหาหน้าแรก ให้ใช้ฟิลด์ \"URL "
+"หน้าแรก\" ในการตั้งค่าเว็บไซต์หรือคุณสมบัติของเพจบนเพจที่กำหนดเอง"
 
 #. module: website
 #. odoo-python
@@ -212,8 +212,9 @@ msgid ""
 "skills and commitment to quality had a major impact on our project. I am "
 "thrilled with the final results!\""
 msgstr ""
-"\"การทำงานร่วมกับทีมนี้เป็นไปอย่างราบรื่นและมีประสิทธิภาพในทุกขั้นตอน ทักษะและความมุ่งมั่นในคุณภาพ"
-"ของพวกเขาส่งผลอย่างมากต่อโปรเจกต์ของเรา ฉันรู้สึกประทับใจกับผลลัพธ์สุดท้ายเป็นอย่างยิ่ง!\""
+"\"การทำงานร่วมกับทีมนี้เป็นไปอย่างราบรื่นและมีประสิทธิภาพในทุกขั้นตอน "
+"ทักษะและความมุ่งมั่นในคุณภาพของพวกเขาส่งผลอย่างมากต่อโปรเจกต์ของเรา "
+"ฉันรู้สึกประทับใจกับผลลัพธ์สุดท้ายเป็นอย่างยิ่ง!\""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_banner
@@ -221,8 +222,8 @@ msgid ""
 "\"Write a quote here from one of your customers. Quotes are a great way to "
 "build confidence in your products.\""
 msgstr ""
-"“เขียนใบเสนอราคาจากลูกค้าของคุณที่นี่ ใบเสนอราคาเป็นวิธีที่ดีเยี่ยมในการสร้างความเชื่อมั่นในผลิตภัณฑ์"
-"ของคุณ”"
+"“เขียนใบเสนอราคาจากลูกค้าของคุณที่นี่ "
+"ใบเสนอราคาเป็นวิธีที่ดีเยี่ยมในการสร้างความเชื่อมั่นในผลิตภัณฑ์ของคุณ”"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_visitor__page_count
@@ -245,12 +246,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
 msgid "$ 32M"
 msgstr "$ 32M"
-
-#. module: website
-#. odoo-python
-#: code:addons/website/models/ir_ui_view.py:0
-msgid "%(error)s (website: %(website_id)s)"
-msgstr ""
 
 #. module: website
 #. odoo-python
@@ -642,8 +637,7 @@ msgstr "50 ม."
 msgid ""
 "50,000+ companies run Odoo <br class=\"d-none d-lg-inline\"/>to grow their "
 "businesses."
-msgstr ""
-"บริษัทมากกว่า 50,000 แห่งใช้ซอฟต์แวร์ของ Odoo เพื่อต่อยอดธุรกิจของพวกเขา"
+msgstr "บริษัทมากกว่า 50,000 แห่งใช้ซอฟต์แวร์ของ Odoo เพื่อต่อยอดธุรกิจของพวกเขา"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_call_to_action
@@ -903,9 +897,8 @@ msgid ""
 "metrics of company achievements underscore our strategic prowess and "
 "dedication to driving sustainable business success."
 msgstr ""
-"<br/>ตั้งแต่การเติบโตของรายได้ไปจนถึงการรักษาลูกค้าและการขยายตลาด ตัวชี้วัดหลักในความสำเร็จข"
-"องบริษัทของเราเน้นย้ำถึงความสามารถเชิงกลยุทธ์และความมุ่งมั่นของเราในการขับเคลื่อนความสำเร็จทา"
-"งธุรกิจที่ยั่งยืน"
+"<br/>ตั้งแต่การเติบโตของรายได้ไปจนถึงการรักษาลูกค้าและการขยายตลาด "
+"ตัวชี้วัดหลักในความสำเร็จของบริษัทของเราเน้นย้ำถึงความสามารถเชิงกลยุทธ์และความมุ่งมั่นของเราในการขับเคลื่อนความสำเร็จทางธุรกิจที่ยั่งยืน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
@@ -933,8 +926,8 @@ msgid ""
 "<br/>Our product line offers a range of innovative solutions designed to "
 "meet your needs. Each product is crafted for quality and reliability."
 msgstr ""
-"<br/>ผลิตภัณฑ์ของเรามีโซลูชันนวัตกรรมมากมายที่ออกแบบมาเพื่อตอบสนองความต้องการของคุณ ผลิตภัณฑ์"
-"แต่ละชิ้นได้รับการออกแบบมาอย่างมีคุณภาพและเชื่อถือได้"
+"<br/>ผลิตภัณฑ์ของเรามีโซลูชันนวัตกรรมมากมายที่ออกแบบมาเพื่อตอบสนองความต้องการของคุณ "
+"ผลิตภัณฑ์แต่ละชิ้นได้รับการออกแบบมาอย่างมีคุณภาพและเชื่อถือได้"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_text_cover
@@ -943,8 +936,8 @@ msgid ""
 "the steps, including setup, inventory management, and payment processing.<br/"
 ">"
 msgstr ""
-"<br/>ขายออนไลน์ได้อย่างง่ายดายด้วยแพลตฟอร์มที่ใช้งานง่ายซึ่งช่วยลดขั้นตอนต่างๆ รวมไปถึงการตั้งค่"
-"า การจัดการคลังสินค้า และการประมวลผลการชำระเงิน<br/>"
+"<br/>ขายออนไลน์ได้อย่างง่ายดายด้วยแพลตฟอร์มที่ใช้งานง่ายซึ่งช่วยลดขั้นตอนต่างๆ "
+"รวมไปถึงการตั้งค่า การจัดการคลังสินค้า และการประมวลผลการชำระเงิน<br/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
@@ -962,11 +955,11 @@ msgid ""
 "preferences, adding any necessary payment information, and selecting the "
 "initial features or modules you wish to use."
 msgstr ""
-"<br/>ขั้นตอนแรกในกระบวนการเริ่มต้นใช้งานคือ<b>การสร้างบัญชี</b> ซึ่งเกี่ยวข้องกับการลงทะเบียนบ"
-"นแพลตฟอร์มของเราโดยใช้ที่อยู่อีเมลหรือบัญชีโซเชียลมีเดียของคุณ เมื่อคุณสร้างบัญชีแล้ว คุณจะได้รับอีเมล"
-"ยืนยันพร้อมลิงก์เพื่อเปิดใช้งานบัญชีของคุณ เมื่อเปิดใช้งานแล้ว คุณจะได้รับแจ้งให้กรอกข้อมูลโปรไฟล์ของคุ"
-"ณ ซึ่งรวมถึงการตั้งค่าการเพิ่มข้อมูลการชำระเงินที่จำเป็น และเลือกฟีเจอร์หรือโมดูลเริ่มต้นที่คุณต้องการใ"
-"ช้"
+"<br/>ขั้นตอนแรกในกระบวนการเริ่มต้นใช้งานคือ<b>การสร้างบัญชี</b> "
+"ซึ่งเกี่ยวข้องกับการลงทะเบียนบนแพลตฟอร์มของเราโดยใช้ที่อยู่อีเมลหรือบัญชีโซเชียลมีเดียของคุณ "
+"เมื่อคุณสร้างบัญชีแล้ว คุณจะได้รับอีเมลยืนยันพร้อมลิงก์เพื่อเปิดใช้งานบัญชีของคุณ เมื่อเปิดใช้งานแล้ว "
+"คุณจะได้รับแจ้งให้กรอกข้อมูลโปรไฟล์ของคุณ ซึ่งรวมถึงการตั้งค่าการเพิ่มข้อมูลการชำระเงินที่จำเป็น "
+"และเลือกฟีเจอร์หรือโมดูลเริ่มต้นที่คุณต้องการใช้"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -977,9 +970,9 @@ msgid ""
 "features, ensuring your business remains competitive and efficient."
 msgstr ""
 "<br/>ผู้ใช้สามารถเข้าร่วมโปรแกรมทดสอบเบต้า โดยให้ข้อเสนอแนะเกี่ยวกับการเปิดตัวที่กำลังจะมาถึง "
-"และมีอิทธิพลต่อทิศทางในอนาคตของแพลตฟอร์ม การติดตามการอัปเดตล่าสุดจะช่วยให้คุณใช้ประโยชน์จากเ"
-"ครื่องมือและฟีเจอร์ล่าสุด ทำให้มั่นใจได้ว่าธุรกิจของคุณจะยังคงมีขีดความสามารถในการแข่งขันและมีประสิ"
-"ทธิภาพ"
+"และมีอิทธิพลต่อทิศทางในอนาคตของแพลตฟอร์ม "
+"การติดตามการอัปเดตล่าสุดจะช่วยให้คุณใช้ประโยชน์จากเครื่องมือและฟีเจอร์ล่าสุด "
+"ทำให้มั่นใจได้ว่าธุรกิจของคุณจะยังคงมีขีดความสามารถในการแข่งขันและมีประสิทธิภาพ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_boxed
@@ -1034,15 +1027,14 @@ msgstr ""
 msgid ""
 "<i class=\"fa fa-check text-success\" role=\"img\"/>  24/7 toll-free support"
 msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  บริการช่วยเหลือฟรีตลอด 24 ชั่"
-"วโมงทุกวัน"
+"<i class=\"fa fa-check text-success\" role=\"img\"/>  บริการช่วยเหลือฟรีตลอด 24 "
+"ชั่วโมงทุกวัน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid ""
 "<i class=\"fa fa-check text-success\" role=\"img\"/>  Access all modules"
-msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  เข้าถึงโมดูลทั้งหมด"
+msgstr "<i class=\"fa fa-check text-success\" role=\"img\"/>  เข้าถึงโมดูลทั้งหมด"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
@@ -1083,8 +1075,8 @@ msgid ""
 "<i class=\"fa fa-check text-success\" role=\"img\"/>  Sales &amp; marketing "
 "for 2"
 msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  การขาย &amp; การตลาดสำห"
-"รับทั้งคู่"
+"<i class=\"fa fa-check text-success\" role=\"img\"/>  การขาย &amp; "
+"การตลาดสำหรับทั้งคู่"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
@@ -1190,8 +1182,8 @@ msgid ""
 "<i class=\"fa fa-fw o_button_icon fa-circle text-success\" "
 "title=\"Connected\"/>"
 msgstr ""
-"<i class=\"fa fa-fw o_button_icon fa-circle text-success\" title=\"เชื่อมต่อแล้"
-"ว\"/>"
+"<i class=\"fa fa-fw o_button_icon fa-circle text-success\" "
+"title=\"เชื่อมต่อแล้ว\"/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_pages_kanban_view
@@ -1321,8 +1313,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
 msgid ""
 "<i class=\"s_mega_menu_thumbnails_icon fa fa-comments me-2\"/> Contact us"
-msgstr ""
-"<i class=\"s_mega_menu_thumbnails_icon fa fa-comments me-2\"/> ติดต่อเรา"
+msgstr "<i class=\"s_mega_menu_thumbnails_icon fa fa-comments me-2\"/> ติดต่อเรา"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
@@ -1335,8 +1326,8 @@ msgid ""
 "<i class=\"s_mega_menu_thumbnails_icon fa fa-shopping-basket me-2\"/> Pickup "
 "in store"
 msgstr ""
-"<i class=\"s_mega_menu_thumbnails_icon fa fa-shopping-basket me-2\"/> รับของที่ร้"
-"าน"
+"<i class=\"s_mega_menu_thumbnails_icon fa fa-shopping-basket me-2\"/> "
+"รับของที่ร้าน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
@@ -1378,8 +1369,8 @@ msgstr ""
 "                        การคืนสินค้าออนไลน์ภายใน 30 วัน\n"
 "                    </small>\n"
 "                    <small class=\"d-flex align-items-center\">\n"
-"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/>"
-"\n"
+"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/"
+">\n"
 "                        จัดส่งแบบมาตรฐาน\n"
 "                    </small>"
 
@@ -1387,8 +1378,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid ""
 "<small class=\"text-center\">Instant setup, satisfied or reimbursed.</small>"
-msgstr ""
-"<small class=\"text-center\">ติดตั้งง่ายทันใจ ไม่พอใจยินดีคืนเงิน</small>"
+msgstr "<small class=\"text-center\">ติดตั้งง่ายทันใจ ไม่พอใจยินดีคืนเงิน</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_attributes_vertical
@@ -1526,8 +1516,8 @@ msgid ""
 "<small id=\"emailHelp\" class=\"form-text text-muted\">Form field help text</"
 "small>"
 msgstr ""
-"<small id=\"emailHelp\" class=\"form-text text-muted\">ข้อความช่วยเหลือช่องแบบฟอร์"
-"ม</small>"
+"<small id=\"emailHelp\" class=\"form-text text-"
+"muted\">ข้อความช่วยเหลือช่องแบบฟอร์ม</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -1535,8 +1525,8 @@ msgid ""
 "<small id=\"emailHelp\" class=\"form-text text-muted\">We'll never share "
 "your email with anyone else.</small>"
 msgstr ""
-"<small id=\"emailHelp\" class=\"form-text text-muted\">เราจะไม่เปิดเผยอีเมลของคุณ"
-"กับคนอื่น</small>"
+"<small id=\"emailHelp\" class=\"form-text text-"
+"muted\">เราจะไม่เปิดเผยอีเมลของคุณกับคนอื่น</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.header_text_element
@@ -1759,8 +1749,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_accordion
 msgid "<span class=\"flex-grow-1\">How can I contact customer support ?</span>"
-msgstr ""
-"<span class=\"flex-grow-1\">ฉันสามารถติดต่อฝ่ายสนับสนุนลูกค้าได้อย่างไร</span>"
+msgstr "<span class=\"flex-grow-1\">ฉันสามารถติดต่อฝ่ายสนับสนุนลูกค้าได้อย่างไร</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_accordion
@@ -2107,8 +2096,8 @@ msgid ""
 "<span class=\"s_website_form_field_description small form-text text-"
 "muted\">We typically respond within 1-2 business days.</span>"
 msgstr ""
-"<span class=\"s_website_form_field_description small form-text text-muted\">เ"
-"ราจะตอบกลับภายใน 1-2 วันทำการ</span>"
+"<span class=\"s_website_form_field_description small form-text text-"
+"muted\">เราจะตอบกลับภายใน 1-2 วันทำการ</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
@@ -2566,8 +2555,8 @@ msgid ""
 "A CDN helps you serve your website’s content with high availability and high "
 "performance to any visitor wherever they are located."
 msgstr ""
-"CDN ช่วยให้คุณแสดงเนื้อหาเว็บไซต์ของคุณได้อย่างทรงประสิทธิภาพและยังออนไลน์เกือบตลอดเวลา แก่ผู้เ"
-"ข้าชมทุกที่ที่พวกเขาอยู่"
+"CDN ช่วยให้คุณแสดงเนื้อหาเว็บไซต์ของคุณได้อย่างทรงประสิทธิภาพและยังออนไลน์เกือบตลอดเวลา "
+"แก่ผู้เข้าชมทุกที่ที่พวกเขาอยู่"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_chart
@@ -2600,8 +2589,7 @@ msgstr ""
 msgid ""
 "A buttery, flaky pastry with a golden-brown crust, perfect for breakfast or "
 "a light snack."
-msgstr ""
-"ขนมอบกรอบเนยที่มีเปลือกสีน้ำตาลทอง เหมาะสำหรับเป็นอาหารเช้าหรือของว่างเบาๆ"
+msgstr "ขนมอบกรอบเนยที่มีเปลือกสีน้ำตาลทอง เหมาะสำหรับเป็นอาหารเช้าหรือของว่างเบาๆ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel_cards
@@ -2625,8 +2613,7 @@ msgstr ""
 msgid ""
 "A classic black tea blend infused with the aromatic essence of bergamot, "
 "offering a fragrant, citrusy flavor."
-msgstr ""
-"การผสมผสานชาดำคลาสสิกเข้ากับกลิ่นหอมของมะกรูด มอบกลิ่นหอมสดชื่นแบบซิตรัส"
+msgstr "การผสมผสานชาดำคลาสสิกเข้ากับกลิ่นหอมของมะกรูด มอบกลิ่นหอมสดชื่นแบบซิตรัส"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_ir_actions_server__website_published
@@ -2637,9 +2624,9 @@ msgid ""
 "field as True to allow users to run this action. If it is set to False the "
 "action cannot be run through the website."
 msgstr ""
-"สามารถดำเนินการโค้ดเซิร์ฟเวอร์ได้จากเว็บไซต์ โดยใช้คอนโทรลเลอร์เฉพาะ ที่อยู่คือ <base>/เว็บไซ"
-"ต์/การกระทำ/<website_path>ตั้งค่าฟิลด์นี้เป็น จริง เพื่อให้ผู้ใช้เรียกใช้การดำเนินการนี้ได้ หากตั้งค่า"
-"เป็น \"เท็จ\" การดำเนินการจะไม่สามารถดำเนินการผ่านเว็บไซต์ได้"
+"สามารถดำเนินการโค้ดเซิร์ฟเวอร์ได้จากเว็บไซต์ โดยใช้คอนโทรลเลอร์เฉพาะ ที่อยู่คือ <base>/"
+"เว็บไซต์/การกระทำ/<website_path>ตั้งค่าฟิลด์นี้เป็น จริง เพื่อให้ผู้ใช้เรียกใช้การดำเนินการนี้ได้ "
+"หากตั้งค่าเป็น \"เท็จ\" การดำเนินการจะไม่สามารถดำเนินการผ่านเว็บไซต์ได้"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_color_blocks_2
@@ -2656,16 +2643,14 @@ msgstr "กลุ่มโซลูชั่นอันน่าทึ่งท
 msgid ""
 "A creamy, smooth cheesecake with a graham cracker crust, topped with a layer "
 "of fresh fruit or chocolate ganache."
-msgstr ""
-"ชีสเค้กเนื้อครีมเนียนนุ่มพร้อมเปลือกแครกเกอร์เกรแฮม ราดด้วยกานาชผลไม้สดหรือช็อกโกแลต"
+msgstr "ชีสเค้กเนื้อครีมเนียนนุ่มพร้อมเปลือกแครกเกอร์เกรแฮม ราดด้วยกานาชผลไม้สดหรือช็อกโกแลต"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_catalog
 msgid ""
 "A crusty loaf with a chewy interior, made with a naturally fermented "
 "sourdough starter for a tangy flavor."
-msgstr ""
-"ขนมปังกรอบกรุบกรอบเคี้ยวเพลิน ทำจากแป้งหมักตามธรรมชาติเพื่อให้มีรสชาติเปรี้ยว"
+msgstr "ขนมปังกรอบกรุบกรอบเคี้ยวเพลิน ทำจากแป้งหมักตามธรรมชาติเพื่อให้มีรสชาติเปรี้ยว"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_freegrid
@@ -2678,24 +2663,22 @@ msgid ""
 "A delicious mix of four toppings: mushrooms, artichokes, ham, and olives, "
 "all on a bed of mozzarella and tomato sauce."
 msgstr ""
-"การผสมผสานรสชาติอันแสนอร่อยของท็อปปิ้งสี่ชนิดอย่างเช่น เห็ด อาติโช๊ค แฮม และมะกอก ราดบนมอสซ"
-"าเรลลาและซอสมะเขือเทศ"
+"การผสมผสานรสชาติอันแสนอร่อยของท็อปปิ้งสี่ชนิดอย่างเช่น เห็ด อาติโช๊ค แฮม และมะกอก "
+"ราดบนมอสซาเรลลาและซอสมะเขือเทศ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_showcase
 msgid ""
 "A feature section allows you to clearly showcase the main benefits and "
 "unique aspects of your product."
-msgstr ""
-"ส่วนฟีเจอร์ช่วยให้คุณสามารถแสดงประโยชน์หลักและลักษณะเฉพาะของผลิตภัณฑ์ได้อย่างชัดเจน"
+msgstr "ส่วนฟีเจอร์ช่วยให้คุณสามารถแสดงประโยชน์หลักและลักษณะเฉพาะของผลิตภัณฑ์ได้อย่างชัดเจน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_showcase
 msgid ""
 "A features section highlights your product’s key attributes, engaging "
 "visitors and boosting conversions."
-msgstr ""
-"ส่วนฟีเจอร์จะเน้นคุณลักษณะหลักของผลิตภัณฑ์ของคุณ ช่วยดึงดูดผู้เยี่ยมชม และเพิ่มอัตราการแปลง"
+msgstr "ส่วนฟีเจอร์จะเน้นคุณลักษณะหลักของผลิตภัณฑ์ของคุณ ช่วยดึงดูดผู้เยี่ยมชม และเพิ่มอัตราการแปลง"
 
 #. module: website
 #. odoo-javascript
@@ -2734,8 +2717,7 @@ msgstr "เค้กสีแดงชุ่มฉ่ำพร้อมครี
 #. module: website
 #: model:ir.model.fields,help:website.field_website_visitor__visit_count
 msgid "A new visit is considered if last connection was more than 8 hours ago."
-msgstr ""
-"การเข้าชมครั้งใหม่จะได้รับการพิจารณาหากการเชื่อมต่อครั้งล่าสุดนานกว่า 8 ชั่วโมงที่แล้ว"
+msgstr "การเข้าชมครั้งใหม่จะได้รับการพิจารณาหากการเชื่อมต่อครั้งล่าสุดนานกว่า 8 ชั่วโมงที่แล้ว"
 
 #. module: website
 #. odoo-python
@@ -2753,8 +2735,7 @@ msgstr "รายการที่สอง"
 msgid ""
 "A spiced cake loaded with grated carrots, nuts, and a hint of cinnamon, "
 "topped with a tangy cream cheese frosting."
-msgstr ""
-"เค้กเครื่องเทศที่มีแครอทขูด ถั่ว และอบเชยเล็กน้อย ราดด้วยครีมชีสฟรอสติ้งรสเปรี้ยว"
+msgstr "เค้กเครื่องเทศที่มีแครอทขูด ถั่ว และอบเชยเล็กน้อย ราดด้วยครีมชีสฟรอสติ้งรสเปรี้ยว"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -2791,12 +2772,17 @@ msgstr ""
 msgid ""
 "A visitor is considered as connected if his last page view was within the "
 "last 5 minutes."
-msgstr ""
-"ผู้เข้าชมจะถือว่าเชื่อมต่อหากการดูหน้าเว็บครั้งสุดท้ายของเขาเกิดขึ้นภายใน 5 นาทีที่ผ่านมา"
+msgstr "ผู้เข้าชมจะถือว่าเชื่อมต่อหากการดูหน้าเว็บครั้งสุดท้ายของเขาเกิดขึ้นภายใน 5 นาทีที่ผ่านมา"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
 msgid "ACME Corp"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
+msgid "AI recommended"
 msgstr ""
 
 #. module: website
@@ -2884,8 +2870,8 @@ msgstr "ภาพแอกคอร์เดียน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
-msgid "Accounts are usable across all your multiple websites"
-msgstr "บัญชีสามารถใช้งานได้ทั่วทั้งเว็บไซต์หลายแห่งของคุณ"
+msgid "Accounts created on this website are usable across all other websites"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -2968,8 +2954,8 @@ msgid ""
 "Add 3rd-party service domains <em>(\"www.example.com\" or \"example.com\")</"
 "em>, one per line."
 msgstr ""
-"เพิ่มโดเมนบริการบุคคลที่สาม <em> (\"www.example.com\" หรือ \"example.com\")</em> หนึ่ง"
-"โดเมนต่อบรรทัด"
+"เพิ่มโดเมนบริการบุคคลที่สาม <em> (\"www.example.com\" หรือ \"example.com\")</em> "
+"หนึ่งโดเมนต่อบรรทัด"
 
 #. module: website
 #. odoo-javascript
@@ -3253,8 +3239,7 @@ msgstr ""
 msgid ""
 "Add this page to the \"+New\" page templates. It will be added to the "
 "\"Custom\" category."
-msgstr ""
-"เพิ่มหน้านี้ในเทมเพลตเพจ \"+สร้าง\" มันจะถูกเพิ่มเข้าไปในหมวดหมู่ \"กำหนดเอง\""
+msgstr "เพิ่มหน้านี้ในเทมเพลตเพจ \"+สร้าง\" มันจะถูกเพิ่มเข้าไปในหมวดหมู่ \"กำหนดเอง\""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.external_snippets
@@ -3294,8 +3279,8 @@ msgid ""
 "Adding a language requires to leave the editor. This will save all your "
 "changes, are you sure you want to proceed?"
 msgstr ""
-"การเพิ่มภาษาจำเป็นต้องออกจากตัวแก้ไข การดำเนินการนี้จะบันทึกการเปลี่ยนแปลงทั้งหมดของคุณ คุณแน่ใ"
-"จหรือไม่ว่าต้องการดำเนินการต่อ?"
+"การเพิ่มภาษาจำเป็นต้องออกจากตัวแก้ไข การดำเนินการนี้จะบันทึกการเปลี่ยนแปลงทั้งหมดของคุณ "
+"คุณแน่ใจหรือไม่ว่าต้องการดำเนินการต่อ?"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -3304,8 +3289,8 @@ msgid ""
 "documentation, video tutorials, and community forums where you can connect "
 "with other users and share insights."
 msgstr ""
-"นอกจากนี้ เรายังเสนอคลังข้อมูลพื้นฐานที่ครอบคลุม รวมถึงเอกสารโดยละเอียด วิดีโอแนะนำ และฟอรัมค"
-"อมมูนิตี้ที่คุณสามารถเชื่อมต่อกับผู้ใช้รายอื่นและแชร์ข้อมูลเชิงลึกได้"
+"นอกจากนี้ เรายังเสนอคลังข้อมูลพื้นฐานที่ครอบคลุม รวมถึงเอกสารโดยละเอียด วิดีโอแนะนำ "
+"และฟอรัมคอมมูนิตี้ที่คุณสามารถเชื่อมต่อกับผู้ใช้รายอื่นและแชร์ข้อมูลเชิงลึกได้"
 
 #. module: website
 #. odoo-javascript
@@ -3368,8 +3353,7 @@ msgstr ""
 msgid ""
 "Advanced solution for enterprises. Cutting-edge features and top-tier "
 "support for maximum performance."
-msgstr ""
-"โซลูชันขั้นสูงสำหรับองค์กร ฟีเจอร์ที่ล้ำสมัยและการสนับสนุนชั้นยอดเพื่อประสิทธิภาพสูงสุด"
+msgstr "โซลูชันขั้นสูงสำหรับองค์กร ฟีเจอร์ที่ล้ำสมัยและการสนับสนุนชั้นยอดเพื่อประสิทธิภาพสูงสุด"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -3499,8 +3483,8 @@ msgid ""
 "do. She mentors 100+ in-house developers and looks after the community of "
 "thousands of developers."
 msgstr ""
-"Aline เป็นหนึ่งในบุคคลต้นแบบสำคัญของผู้คนที่สามารถพูดได้ว่าเธอรักในสิ่งที่เธอทำอย่างแท้จริง เธอให้ค"
-"ำปรึกษานักพัฒนาภายในองค์กรมากกว่า 100 รายและดูแลชุมชนนักพัฒนาหลายพันคน"
+"Aline เป็นหนึ่งในบุคคลต้นแบบสำคัญของผู้คนที่สามารถพูดได้ว่าเธอรักในสิ่งที่เธอทำอย่างแท้จริง "
+"เธอให้คำปรึกษานักพัฒนาภายในองค์กรมากกว่า 100 รายและดูแลชุมชนนักพัฒนาหลายพันคน"
 
 #. module: website
 #. odoo-javascript
@@ -3613,8 +3597,7 @@ msgstr ""
 msgid ""
 "Although this Website may be linked to other websites, we are not, directly "
 "or indirectly, implying any approval."
-msgstr ""
-"แม้ว่าเว็บไซต์นี้อาจเชื่อมโยงกับเว็บไซต์อื่น แต่เราไม่ได้แสดงว่ามีการอนุมัติโดยตรงหรือโดยอ้อม"
+msgstr "แม้ว่าเว็บไซต์นี้อาจเชื่อมโยงกับเว็บไซต์อื่น แต่เราไม่ได้แสดงว่ามีการอนุมัติโดยตรงหรือโดยอ้อม"
 
 #. module: website
 #. odoo-javascript
@@ -3635,6 +3618,18 @@ msgstr "ขีดเส้นใต้เสมอ"
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_showcase
 msgid "Amazing pages"
 msgstr "เพจที่น่าตื่นตาตื่นใจ"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Amber"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Amethyst"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
@@ -3681,8 +3676,8 @@ msgid ""
 "Analyzing the numbers behind our success: <br class=\"d-none d-xxl-inline\"/"
 ">an in-depth look at the key metrics driving our company's achievements"
 msgstr ""
-"การวิเคราะห์ตัวเลขเบื้องหลังความสำเร็จของเรา: <br class=\"d-none d-xxl-inline\"/>การ"
-"มองเชิงลึกเกี่ยวกับตัวชี้วัดหลักที่ขับเคลื่อนความสำเร็จของบริษัทเรา"
+"การวิเคราะห์ตัวเลขเบื้องหลังความสำเร็จของเรา: <br class=\"d-none d-xxl-inline\"/"
+">การมองเชิงลึกเกี่ยวกับตัวชี้วัดหลักที่ขับเคลื่อนความสำเร็จของบริษัทเรา"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_showcase
@@ -3690,8 +3685,8 @@ msgid ""
 "Analyzing the numbers behind our success: an in-depth look at the key "
 "metrics driving our company's achievements."
 msgstr ""
-"วิเคราะห์ตัวเลขเบื้องหลังความสำเร็จของเรา: การพิจารณาแบบเจาะลึกตัวชี้วัดหลักที่ผลักดันความสำเร็จ"
-"ของบริษัทของเรา"
+"วิเคราะห์ตัวเลขเบื้องหลังความสำเร็จของเรา: "
+"การพิจารณาแบบเจาะลึกตัวชี้วัดหลักที่ผลักดันความสำเร็จของบริษัทของเรา"
 
 #. module: website
 #. odoo-javascript
@@ -3896,8 +3891,7 @@ msgstr "ลูกศร"
 msgid ""
 "Artisanal espresso with a focus on direct trade and exceptional quality in a "
 "chic, comfortable setting."
-msgstr ""
-"เอสเพรสโซ่สูตรพิเศษที่เน้นด้านการขายและมีคุณภาพที่โดดเด่นในบรรยากาศสุดชิคและสะดวกสบาย"
+msgstr "เอสเพรสโซ่สูตรพิเศษที่เน้นด้านการขายและมีคุณภาพที่โดดเด่นในบรรยากาศสุดชิคและสะดวกสบาย"
 
 #. module: website
 #. odoo-javascript
@@ -3932,6 +3926,12 @@ msgid "At The End"
 msgstr "ในตอนจบ"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/form/form_field_option.js:0
+msgid "At least one of these words should match"
+msgstr ""
+
+#. module: website
 #: model:ir.model,name:website.model_ir_attachment
 msgid "Attachment"
 msgstr "การแนบ"
@@ -3948,6 +3948,12 @@ msgid "Audios"
 msgstr ""
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Aurora"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid ""
 "Authenticate users, protect user data and allow the website to deliver the "
@@ -3956,8 +3962,8 @@ msgid ""
 "content of their cart, or allowing file uploads."
 msgstr ""
 "ตรวจสอบผู้ใช้ ปกป้องข้อมูลผู้ใช้ และอนุญาตให้เว็บไซต์ให้บริการตามที่ผู้ใช้คาดหวัง\n"
-"                                                เช่น การรักษาเนื้อหาในรถเข็น หรือกา"
-"รอนุญาตให้อัปโหลดไฟล์"
+"                                                เช่น การรักษาเนื้อหาในรถเข็น "
+"หรือการอนุญาตให้อัปโหลดไฟล์"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.theme_view_search
@@ -3981,12 +3987,6 @@ msgstr "กลุ่มที่ได้รับอนุญาต"
 #: code:addons/website/static/src/builder/plugins/theme/theme_font_weight_option.xml:0
 msgid "Auto"
 msgstr "ออโต้"
-
-#. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/builder/plugins/theme/theme_font_weight_option.xml:0
-msgid "Auto means it will inherit the parent value"
-msgstr ""
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_partner__publish_on
@@ -4237,8 +4237,8 @@ msgid ""
 "Benefit from tax-free shopping, simplifying your purchase and enhancing your "
 "savings without any extra costs."
 msgstr ""
-"รับประโยชน์จากการช้อปปิ้งปลอดภาษี ทำให้การจับจ่ายของคุณง่ายขึ้น และเพิ่มเงินออมของคุณโดยไม่มีค่าใ"
-"ช้จ่ายเพิ่มเติม"
+"รับประโยชน์จากการช้อปปิ้งปลอดภาษี ทำให้การจับจ่ายของคุณง่ายขึ้น "
+"และเพิ่มเงินออมของคุณโดยไม่มีค่าใช้จ่ายเพิ่มเติม"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -4394,6 +4394,12 @@ msgstr "บล็อก"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Bloom"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/social_media_option_plugin.js:0
 msgid "Bluesky"
 msgstr ""
@@ -4407,6 +4413,12 @@ msgstr ""
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Blush"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/header/header_navigation_option.xml:0
 #: code:addons/website/static/src/builder/plugins/theme/theme_font_weight_option.xml:0
 #: code:addons/website/static/src/builder/plugins/theme/theme_tab_plugin.js:0
@@ -4416,8 +4428,7 @@ msgstr "ตัวหนา"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_showcase
 msgid "Boost your pipeline with an increase in potential leads."
-msgstr ""
-"เพิ่มประสิทธิภาพให้กับกระบวนการของคุณด้วยการเพิ่มจำนวนลูกค้าเป้าหมายที่มีศักยภาพ"
+msgstr "เพิ่มประสิทธิภาพให้กับกระบวนการของคุณด้วยการเพิ่มจำนวนลูกค้าเป้าหมายที่มีศักยภาพ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_showcase
@@ -4613,6 +4624,12 @@ msgstr ""
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Bronze"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
 msgid "Build my website"
 msgstr "สร้างเว็บไซต์ของฉัน"
@@ -4655,6 +4672,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:website.field_theme_ir_asset__bundle
 msgid "Bundle"
 msgstr "กลุ่ม"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Burgundy"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -4736,8 +4759,8 @@ msgid ""
 "CTA, button, btn, action, engagement, link, offer, appeal, call to action, "
 "prompt, interact, trigger"
 msgstr ""
-"CTA, ปุ่ม, btn, การดำเนินการ, การมีส่วนร่วม, ลิงก์, ข้อเสนอ, การอุทธรณ์, การเรียกร้องให้ดำเ"
-"นินการ, แจ้งเตือน, โต้ตอบ, ทริกเกอร์"
+"CTA, ปุ่ม, btn, การดำเนินการ, การมีส่วนร่วม, ลิงก์, ข้อเสนอ, การอุทธรณ์, "
+"การเรียกร้องให้ดำเนินการ, แจ้งเตือน, โต้ตอบ, ทริกเกอร์"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -4746,9 +4769,9 @@ msgid ""
 "prompt, interact, trigger, items, checklists, entries, sequences, bullets, "
 "points, list, group, benefits, features, advantages"
 msgstr ""
-"CTA, ปุ่ม, btn, การดำเนินการ, การมีส่วนร่วม, ลิงก์, ข้อเสนอ, การอุทธรณ์, การเรียกร้องให้ดำเ"
-"นินการ, กระตุ้น, โต้ตอบ, ทริกเกอร์, รายการ, รายการตรวจสอบ, รายการ, ลำดับ, หัวข้อย่อย, จุ"
-"ด, รายการ, กลุ่ม, ประโยชน์, ฟีเจอร์, ข้อได้เปรียบ"
+"CTA, ปุ่ม, btn, การดำเนินการ, การมีส่วนร่วม, ลิงก์, ข้อเสนอ, การอุทธรณ์, "
+"การเรียกร้องให้ดำเนินการ, กระตุ้น, โต้ตอบ, ทริกเกอร์, รายการ, รายการตรวจสอบ, รายการ, "
+"ลำดับ, หัวข้อย่อย, จุด, รายการ, กลุ่ม, ประโยชน์, ฟีเจอร์, ข้อได้เปรียบ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -4756,8 +4779,8 @@ msgid ""
 "CTA, button, btn, action, engagement, link, offer, appeal, call to action, "
 "prompt, interact, trigger, mockup"
 msgstr ""
-"CTA, ปุ่ม, btn, การดำเนินการ, การมีส่วนร่วม, ลิงก์, ข้อเสนอ, การอุทธรณ์, การเรียกร้องให้ดำเ"
-"นินการ, แจ้งเตือน, โต้ตอบ, ทริกเกอร์, โมเดล"
+"CTA, ปุ่ม, btn, การดำเนินการ, การมีส่วนร่วม, ลิงก์, ข้อเสนอ, การอุทธรณ์, "
+"การเรียกร้องให้ดำเนินการ, แจ้งเตือน, โต้ตอบ, ทริกเกอร์, โมเดล"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -4765,8 +4788,8 @@ msgid ""
 "CTA, button, btn, action, engagement, link, offer, appeal, call to action, "
 "prompt, interact, trigger, mockups"
 msgstr ""
-"CTA, ปุ่ม, btn, การดำเนินการ, การมีส่วนร่วม, ลิงก์, ข้อเสนอ, การอุทธรณ์, การเรียกร้องให้ดำเ"
-"นินการ, แจ้งเตือน, โต้ตอบ, ทริกเกอร์, โมเดลจำลอง"
+"CTA, ปุ่ม, btn, การดำเนินการ, การมีส่วนร่วม, ลิงก์, ข้อเสนอ, การอุทธรณ์, "
+"การเรียกร้องให้ดำเนินการ, แจ้งเตือน, โต้ตอบ, ทริกเกอร์, โมเดลจำลอง"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -4821,12 +4844,17 @@ msgstr "สามารถเผยแพร่"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Candy"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/animate_option_plugin.js:0
 msgid ""
 "Cannot apply this option on current text selection. Try clearing the format "
 "and try again."
-msgstr ""
-"ไม่สามารถใช้ตัวเลือกนี้กับการเลือกข้อความปัจจุบัน ลองล้างรูปแบบแล้วลองอีกครั้ง"
+msgstr "ไม่สามารถใช้ตัวเลือกนี้กับการเลือกข้อความปัจจุบัน ลองล้างรูปแบบแล้วลองอีกครั้ง"
 
 #. module: website
 #. odoo-python
@@ -5073,8 +5101,7 @@ msgstr ""
 msgid ""
 "Changing the color palette will reset all your color customizations, are you "
 "sure you want to proceed?"
-msgstr ""
-"การเปลี่ยนจานสีจะตั้งค่าการปรับแต่งสีทั้งหมดของคุณ คุณแน่ใจหรือไม่ว่าต้องการดำเนินการต่อ?"
+msgstr "การเปลี่ยนจานสีจะตั้งค่าการปรับแต่งสีทั้งหมดของคุณ คุณแน่ใจหรือไม่ว่าต้องการดำเนินการต่อ?"
 
 #. module: website
 #. odoo-javascript
@@ -5085,8 +5112,8 @@ msgid ""
 "theme will reset all your color customizations."
 msgstr ""
 "การเปลี่ยนธีมจำเป็นต้องออกจากหมวดการแก้ไข การดำเนินการนี้จะบันทึกการเปลี่ยนแปลงทั้งหมดของคุณ "
-"คุณแน่ใจหรือไม่ว่าต้องการดำเนินการต่อ? โปรดระวังว่าการเปลี่ยนธีมจะเปลี่ยนการตั้งค่าและการปรับแต่ง"
-"สีทั้งหมดของคุณ"
+"คุณแน่ใจหรือไม่ว่าต้องการดำเนินการต่อ? "
+"โปรดระวังว่าการเปลี่ยนธีมจะเปลี่ยนการตั้งค่าและการปรับแต่งสีทั้งหมดของคุณ"
 
 #. module: website
 #. odoo-javascript
@@ -5113,8 +5140,8 @@ msgid ""
 "Chat with us through or fill in this form to get information about anything "
 "related to Odoo apps, services, our company."
 msgstr ""
-"แชทกับเราหรือกรอกแบบฟอร์มนี้เพื่อรับข้อมูลเกี่ยวกับอะไรก็ได้ที่เกี่ยวข้องกับแอป Odoo บริการ และบริษัท"
-"ของเรา"
+"แชทกับเราหรือกรอกแบบฟอร์มนี้เพื่อรับข้อมูลเกี่ยวกับอะไรก็ได้ที่เกี่ยวข้องกับแอป Odoo บริการ "
+"และบริษัทของเรา"
 
 #. module: website
 #: model:website.configurator.feature,description:website.feature_module_live_chat
@@ -5258,19 +5285,13 @@ msgid "Children"
 msgstr "เด็ก ๆ"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
-msgid "Choose a preset palette"
-msgstr ""
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_frame
 msgid ""
 "Choose a vibrant image and write an inspiring paragraph about it. It does "
 "not have to be long, but it should reinforce your image."
 msgstr ""
-"เลือกภาพที่มีชีวิตชีวาและเขียนย่อหน้าที่สร้างแรงบันดาลใจเกี่ยวกับภาพนั้น ไม่จำเป็นต้องยาว แต่ควรเสริม"
-"สร้างภาพลักษณ์ที่ดีของคุณ"
+"เลือกภาพที่มีชีวิตชีวาและเขียนย่อหน้าที่สร้างแรงบันดาลใจเกี่ยวกับภาพนั้น ไม่จำเป็นต้องยาว "
+"แต่ควรเสริมสร้างภาพลักษณ์ที่ดีของคุณ"
 
 #. module: website
 #. odoo-javascript
@@ -5304,6 +5325,12 @@ msgid "Circle"
 msgstr "วงกลม"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Citron"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_manifesto
 msgid "Clarity"
 msgstr ""
@@ -5326,8 +5353,14 @@ msgid ""
 "Classic pizza with fresh mozzarella, San Marzano tomatoes, and basil leaves, "
 "drizzled with extra virgin olive oil."
 msgstr ""
-"พิซซ่าคลาสสิกพร้อมชีสมอสซาเรลลาสด มะเขือเทศซานมาร์ซาโน และใบโหระพา ราดด้วยน้ำมันมะกอกบริ"
-"สุทธิ์พิเศษ"
+"พิซซ่าคลาสสิกพร้อมชีสมอสซาเรลลาสด มะเขือเทศซานมาร์ซาโน และใบโหระพา "
+"ราดด้วยน้ำมันมะกอกบริสุทธิ์พิเศษ"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Clay"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -5360,9 +5393,9 @@ msgid ""
 "elements right on the page, streamlining your workflow and maintaining "
 "control over your content."
 msgstr ""
-"คลิกและเปลี่ยนแปลงเนื้อหาโดยตรงจากส่วนหน้า หลีกเลี่ยงกระบวนการที่ซับซ้อนในส่วนหลัง เครื่องมือนี้ช่ว"
-"ยให้สามารถอัปเดตข้อความ รูปภาพ และองค์ประกอบต่างๆ บนหน้าได้อย่างรวดเร็ว ทำให้เวิร์กโฟลว์ของ"
-"คุณราบรื่นขึ้นและควบคุมเนื้อหาของคุณต่อไปได้"
+"คลิกและเปลี่ยนแปลงเนื้อหาโดยตรงจากส่วนหน้า หลีกเลี่ยงกระบวนการที่ซับซ้อนในส่วนหลัง "
+"เครื่องมือนี้ช่วยให้สามารถอัปเดตข้อความ รูปภาพ และองค์ประกอบต่างๆ บนหน้าได้อย่างรวดเร็ว "
+"ทำให้เวิร์กโฟลว์ของคุณราบรื่นขึ้นและควบคุมเนื้อหาของคุณต่อไปได้"
 
 #. module: website
 #. odoo-javascript
@@ -5446,6 +5479,18 @@ msgstr "ใกล้ขึ้น"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Coast"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Cobalt"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/embed_code_option.xml:0
 #: code:addons/website/static/src/builder/plugins/options/footer_copyright_option.xml:0
 #: code:addons/website/static/src/builder/plugins/options/language_selector_option.xml:0
@@ -5520,9 +5565,10 @@ msgid ""
 "resize and duplicate the blocks to create your own layout. Add images or "
 "icons to customize the blocks."
 msgstr ""
-"บล็อกสีเป็นวิธีที่ง่ายและมีประสิทธิภาพในการ <b>นำเสนอและเน้นเนื้อหาของคุณ</b>เลือกรูปภาพหรือสีสำ"
-"หรับพื้นหลัง คุณยังสามารถปรับขนาดและสร้างบล็อกซ้ำเพื่อสร้างเค้าโครงของคุณเองได้ ทั้งยังสามารถเพิ่ม"
-"รูปภาพหรือไอคอนเพื่อปรับแต่งบล็อก"
+"บล็อกสีเป็นวิธีที่ง่ายและมีประสิทธิภาพในการ <b>นำเสนอและเน้นเนื้อหาของคุณ</"
+"b>เลือกรูปภาพหรือสีสำหรับพื้นหลัง "
+"คุณยังสามารถปรับขนาดและสร้างบล็อกซ้ำเพื่อสร้างเค้าโครงของคุณเองได้ "
+"ทั้งยังสามารถเพิ่มรูปภาพหรือไอคอนเพื่อปรับแต่งบล็อก"
 
 #. module: website
 #. odoo-javascript
@@ -5559,8 +5605,7 @@ msgstr ""
 msgid ""
 "Comma-separated list of website type/purpose for which this feature should "
 "be pre-selected"
-msgstr ""
-"รายการประเภทเว็บไซต์/วัตถุประสงค์ที่คั่นด้วยเครื่องหมายจุลภาคที่ควรเลือกฟีเจอร์นี้ล่วงหน้า"
+msgstr "รายการประเภทเว็บไซต์/วัตถุประสงค์ที่คั่นด้วยเครื่องหมายจุลภาคที่ควรเลือกฟีเจอร์นี้ล่วงหน้า"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_masonry_block_default_template
@@ -5704,9 +5749,7 @@ msgstr "ตัวเชื่อมต่อ"
 msgid ""
 "Consistent performance and uptime ensure efficient, reliable service with "
 "minimal interruptions and quick response times."
-msgstr ""
-"ประสิทธิภาพและเวลาทำงานที่สม่ำเสมอช่วยให้แน่ใจว่าบริการมีประสิทธิภาพและเชื่อถือได้โดยมีการหยุดชะ"
-"งักน้อยที่สุดและมีเวลาตอบสนองที่รวดเร็ว"
+msgstr "ประสิทธิภาพและเวลาทำงานที่สม่ำเสมอช่วยให้แน่ใจว่าบริการมีประสิทธิภาพและเชื่อถือได้โดยมีการหยุดชะงักน้อยที่สุดและมีเวลาตอบสนองที่รวดเร็ว"
 
 #. module: website
 #. odoo-javascript
@@ -5875,6 +5918,12 @@ msgstr "หน้าควบคุม"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/theme/theme_font_weight_option.xml:0
+msgid "Controls the text's font weight. \"Auto\" inherits the parent value"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/xml/website.cookies_bar.xml:0
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid "Cookie Policy"
@@ -5936,20 +5985,19 @@ msgid ""
 "data about site traffic and site interaction so that we can offer\n"
 "                            better site experiences and tools in the future."
 msgstr ""
-"คุกกี้คือข้อความขนาดเล็กที่เซิร์ฟเวอร์ของเราส่งไปยังคอมพิวเตอร์หรืออุปกรณ์ของคุณเมื่อคุณเข้าถึงบริการข"
-"องเรา\n"
-"                            สิ่งเหล่านี้จะถูกเก็บไว้ในเบราว์เซอร์ของคุณ และส่งกลับไปยังเซิร์ฟ"
-"เวอร์ของเราในภายหลัง เพื่อให้เราสามารถจัดหาเนื้อหาตามบริบทได้\n"
+"คุกกี้คือข้อความขนาดเล็กที่เซิร์ฟเวอร์ของเราส่งไปยังคอมพิวเตอร์หรืออุปกรณ์ของคุณเมื่อคุณเข้าถึงบริการของเรา\n"
+"                            สิ่งเหล่านี้จะถูกเก็บไว้ในเบราว์เซอร์ของคุณ "
+"และส่งกลับไปยังเซิร์ฟเวอร์ของเราในภายหลัง เพื่อให้เราสามารถจัดหาเนื้อหาตามบริบทได้\n"
 "                            หากไม่มีคุกกี้ การใช้เว็บจะเป็นประสบการณ์ที่น่าผิดหวังมากขึ้น\n"
-"                            เราใช้คุกกี้เพื่อสนับสนุนกิจกรรมของคุณบนเว็บไซต์ของเรา ตัวอย่าง"
-"เช่น เซสชั่นของคุณเพื่อที่คุณจะได้ไม่ต้องเข้าสู่ระบบอีกครั้ง หรือรถเข็นสินค้าของคุณ\n"
+"                            เราใช้คุกกี้เพื่อสนับสนุนกิจกรรมของคุณบนเว็บไซต์ของเรา "
+"ตัวอย่างเช่น เซสชั่นของคุณเพื่อที่คุณจะได้ไม่ต้องเข้าสู่ระบบอีกครั้ง หรือรถเข็นสินค้าของคุณ\n"
 "                            <br/>\n"
-"                            คุกกี้ยังใช้เพื่อช่วยให้เราเข้าใจการตั้งค่าของคุณตามกิจกรรมก่อนหน้"
-"าหรือปัจจุบันบนเว็บไซต์ของเรา (หน้าที่คุณมีการ\n"
-"                            เยี่ยมชม) ภาษาและประเทศของคุณ ซึ่งช่วยให้เราสามารถให้บริกา"
-"รที่ดีขึ้นแก่คุณได้\n"
-"                            เรายังใช้คุกกี้เพื่อช่วยเรารวบรวมข้อมูลโดยรวมเกี่ยวกับการเข้าชม"
-"เว็บไซต์และการโต้ตอบต่าง ๆ เพื่อให้เราสามารถนำเสนอ\n"
+"                            คุกกี้ยังใช้เพื่อช่วยให้เราเข้าใจการตั้งค่าของคุณตามกิจกรรมก่อนหน้าหรือปัจจุบันบนเว็บไซต์ของเรา "
+"(หน้าที่คุณมีการ\n"
+"                            เยี่ยมชม) ภาษาและประเทศของคุณ "
+"ซึ่งช่วยให้เราสามารถให้บริการที่ดีขึ้นแก่คุณได้\n"
+"                            เรายังใช้คุกกี้เพื่อช่วยเรารวบรวมข้อมูลโดยรวมเกี่ยวกับการเข้าชมเว็บไซต์และการโต้ตอบต่าง "
+"ๆ เพื่อให้เราสามารถนำเสนอ\n"
 "                            ประสบการณ์เว็บไซต์และเครื่องมือที่ดียิ่งขึ้นในอนาคต"
 
 #. module: website
@@ -5967,6 +6015,12 @@ msgstr "ลิขสิทธิ์"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.footer_copyright_company_name
 msgid "Copyright &amp;copy;"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Coral"
 msgstr ""
 
 #. module: website
@@ -6116,9 +6170,9 @@ msgid ""
 "levels. Combine headers, images, and text sections to build cohesive layouts "
 "quickly and efficiently."
 msgstr ""
-"สร้างหน้าใหม่ด้วยการลากและวางบล็อกการสร้างที่ปรับแต่งได้ ระบบนี้ทำให้การออกแบบเว็บง่ายขึ้น ทำให้"
-"ทุกระดับทักษะสามารถเข้าถึงได้ รวมส่วนหัว รูปภาพ และส่วนข้อความเข้าด้วยกันเพื่อสร้างเลย์เอาต์ที่เชื่อ"
-"มโยงกันได้อย่างรวดเร็วและมีประสิทธิภาพ"
+"สร้างหน้าใหม่ด้วยการลากและวางบล็อกการสร้างที่ปรับแต่งได้ ระบบนี้ทำให้การออกแบบเว็บง่ายขึ้น "
+"ทำให้ทุกระดับทักษะสามารถเข้าถึงได้ รวมส่วนหัว รูปภาพ "
+"และส่วนข้อความเข้าด้วยกันเพื่อสร้างเลย์เอาต์ที่เชื่อมโยงกันได้อย่างรวดเร็วและมีประสิทธิภาพ"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_theme_ir_asset__create_uid
@@ -6150,8 +6204,8 @@ msgid ""
 "Created in 2021, the company is young and dynamic. Discover the composition "
 "of the team and their skills."
 msgstr ""
-"ก่อตั้งขึ้นในปี 2021 บริษัทยังใหม่และมีพลังในการขับเคลื่อนสูง ค้นพบองค์ประกอบของทีมและทักษะของพวก"
-"เขา"
+"ก่อตั้งขึ้นในปี 2021 บริษัทยังใหม่และมีพลังในการขับเคลื่อนสูง "
+"ค้นพบองค์ประกอบของทีมและทักษะของพวกเขา"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_theme_ir_asset__create_date
@@ -6177,6 +6231,12 @@ msgstr "สร้างเมื่อ"
 #: model_terms:ir.ui.view,arch_db:website.s_carousel_intro
 msgid "Creating solutions that drive growth and long-term value."
 msgstr "สร้างสรรค์โซลูชั่นที่ขับเคลื่อนการเติบโตและมูลค่าในระยะยาว"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Crimson"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_catalog
@@ -6270,8 +6330,8 @@ msgid ""
 "Customer satisfaction is our priority. Our support team is always ready to "
 "assist, ensuring you have a smooth and successful experience."
 msgstr ""
-"ความพึงพอใจของลูกค้าคือสิ่งสำคัญที่สุดสำหรับเรา ทีมสนับสนุนของเราพร้อมให้ความช่วยเหลือเสมอ เพื่อใ"
-"ห้แน่ใจว่าคุณจะได้รับประสบการณ์ที่ราบรื่นและประสบความสำเร็จ"
+"ความพึงพอใจของลูกค้าคือสิ่งสำคัญที่สุดสำหรับเรา ทีมสนับสนุนของเราพร้อมให้ความช่วยเหลือเสมอ "
+"เพื่อให้แน่ใจว่าคุณจะได้รับประสบการณ์ที่ราบรื่นและประสบความสำเร็จ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_big_icons_subtitles
@@ -6299,6 +6359,12 @@ msgstr "เครื่องมือปรับแต่ง"
 #: model:ir.model.fields,field_description:website.field_theme_ir_ui_view__customize_show
 msgid "Customize Show"
 msgstr "ปรับแต่งการแสดง"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Cyan"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
@@ -6336,8 +6402,7 @@ msgstr "อันตราย"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
 msgid "Daniel ensures efficient daily operations and process optimization."
-msgstr ""
-"ดาเนียลดูแลให้การดำเนินงานประจำวันมีประสิทธิภาพและเพิ่มประสิทธิภาพกระบวนการ"
+msgstr "ดาเนียลดูแลให้การดำเนินงานประจำวันมีประสิทธิภาพและเพิ่มประสิทธิภาพกระบวนการ"
 
 #. module: website
 #. odoo-javascript
@@ -6520,7 +6585,7 @@ msgstr "การป้อนข้อมูลการเปลี่ยนช
 #. module: website
 #. odoo-python
 #: code:addons/website/models/website.py:0
-msgid "Default website changed"
+msgid "Default website changed to %(default_website_name)s."
 msgstr ""
 
 #. module: website
@@ -6686,9 +6751,9 @@ msgid ""
 "customize and perfect for any web project, from corporate sites to personal "
 "blogs."
 msgstr ""
-"ออกแบบเทมเพลต Odoo ได้อย่างง่ายดายด้วย HTML และ Bootstrap CSS ที่สะอาดตา เทมเพลตเหล่"
-"านี้มีการออกแบบที่ตอบสนองและเน้นอุปกรณ์เคลื่อนที่เป็นหลัก ทำให้ปรับแต่งได้ง่ายและเหมาะสำหรับโปรเจ็"
-"กต์เว็บทุกประเภท ตั้งแต่ไซต์ขององค์กรไปจนถึงบล็อกส่วนตัว"
+"ออกแบบเทมเพลต Odoo ได้อย่างง่ายดายด้วย HTML และ Bootstrap CSS ที่สะอาดตา "
+"เทมเพลตเหล่านี้มีการออกแบบที่ตอบสนองและเน้นอุปกรณ์เคลื่อนที่เป็นหลัก "
+"ทำให้ปรับแต่งได้ง่ายและเหมาะสำหรับโปรเจ็กต์เว็บทุกประเภท ตั้งแต่ไซต์ขององค์กรไปจนถึงบล็อกส่วนตัว"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_table_of_content
@@ -7154,8 +7219,7 @@ msgstr ""
 msgid ""
 "Do not copy/paste code you do not understand, this could put your data at "
 "risk."
-msgstr ""
-"อย่าคัดลอก/วางโค้ดที่คุณไม่เข้าใจ เพราะอาจทำให้ข้อมูลของคุณมีความเสี่ยงได้"
+msgstr "อย่าคัดลอก/วางโค้ดที่คุณไม่เข้าใจ เพราะอาจทำให้ข้อมูลของคุณมีความเสี่ยงได้"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
@@ -7265,6 +7329,12 @@ msgstr "ดับเบิลคลิกที่ไอคอนเพื่อ
 #: code:addons/website/static/src/builder/plugins/options/chart_option.xml:0
 msgid "Doughnut"
 msgstr "โดนัท"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/options/popup_option_plugin.js:0
+msgid "Drag blocks here"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -7390,8 +7460,8 @@ msgid ""
 "and we provide detailed release notes to keep you informed of new features "
 "and improvements."
 msgstr ""
-"การอัปเดตแต่ละครั้งจะได้รับการทดสอบอย่างละเอียดเพื่อรับประกันความเข้ากันได้และความน่าเชื่อถือ แล"
-"ะเราได้จัดทำบันทึกย่อการเผยแพร่โดยละเอียดเพื่อให้คุณทราบถึงฟีเจอร์และการปรับปรุงใหม่ๆ"
+"การอัปเดตแต่ละครั้งจะได้รับการทดสอบอย่างละเอียดเพื่อรับประกันความเข้ากันได้และความน่าเชื่อถือ "
+"และเราได้จัดทำบันทึกย่อการเผยแพร่โดยละเอียดเพื่อให้คุณทราบถึงฟีเจอร์และการปรับปรุงใหม่ๆ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
@@ -7566,6 +7636,12 @@ msgid "Either action_server_id or filter_id must be provided."
 msgstr "ต้องระบุ action_server_id หรือ filter_id"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Electric"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_odoo_menu
 msgid "Electronics"
 msgstr "อิเล็กทรอนิกส์"
@@ -7589,8 +7665,8 @@ msgid ""
 "classic charm, crafted to bring both comfort and style to your home.\n"
 "                        <br/><br/><br/><br/><br/><br/>"
 msgstr ""
-"เติมเต็มพื้นที่อยู่อาศัยของคุณด้วยเฟอร์นิเจอร์ที่ผสมผสานดีไซน์ทันสมัยเข้ากับเสน่ห์คลาสสิก ผลิตขึ้นอย่างประ"
-"ณีตเพื่อมอบทั้งความสบายและสไตล์ให้กับบ้านของคุณ\n"
+"เติมเต็มพื้นที่อยู่อาศัยของคุณด้วยเฟอร์นิเจอร์ที่ผสมผสานดีไซน์ทันสมัยเข้ากับเสน่ห์คลาสสิก "
+"ผลิตขึ้นอย่างประณีตเพื่อมอบทั้งความสบายและสไตล์ให้กับบ้านของคุณ\n"
 "   <br/><br/><br/><br/><br/><br/>"
 
 #. module: website
@@ -7601,10 +7677,10 @@ msgid ""
 "                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/"
 "><br/><br/><br/><br/><br/>"
 msgstr ""
-"ยกระดับพื้นที่อยู่อาศัยของคุณด้วยเฟอร์นิเจอร์ที่ผสมผสานความทันสมัยและเสน่ห์คลาสสิก ผลิตอย่างพิถีพิถันเพื่"
-"อมอบทั้งความสบายและสไตล์ให้กับบ้านของคุณ\n"
-"                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"
-"<br/><br/><br/><br/><br/>"
+"ยกระดับพื้นที่อยู่อาศัยของคุณด้วยเฟอร์นิเจอร์ที่ผสมผสานความทันสมัยและเสน่ห์คลาสสิก "
+"ผลิตอย่างพิถีพิถันเพื่อมอบทั้งความสบายและสไตล์ให้กับบ้านของคุณ\n"
+"                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/"
+"><br/><br/><br/><br/><br/>"
 
 #. module: website
 #. odoo-javascript
@@ -7632,6 +7708,18 @@ msgid "Embed Code"
 msgstr "ฝังโค้ด"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Ember"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Emerald"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
 msgid "Emily manages talent acquisition and workplace culture."
 msgstr ""
@@ -7647,8 +7735,8 @@ msgid ""
 "Empowering teams to collaborate and innovate, creating impactful solutions "
 "that drive business growth and deliver lasting value."
 msgstr ""
-"เสริมสร้างพลังให้ทีมงานทำงานร่วมกันและสร้างสรรค์นวัตกรรม สร้างสรรค์โซลูชันที่มีประสิทธิภาพซึ่งขับเค"
-"ลื่อนการเติบโตทางธุรกิจและส่งมอบมูลค่าที่ยั่งยืน"
+"เสริมสร้างพลังให้ทีมงานทำงานร่วมกันและสร้างสรรค์นวัตกรรม "
+"สร้างสรรค์โซลูชันที่มีประสิทธิภาพซึ่งขับเคลื่อนการเติบโตทางธุรกิจและส่งมอบมูลค่าที่ยั่งยืน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_hexagonal
@@ -7719,8 +7807,8 @@ msgid ""
 "Enhance your experience with our user-focused designs, ensuring you get the "
 "best value.<br/>"
 msgstr ""
-"ปรับปรุงประสบการณ์ของคุณด้วยการออกแบบที่เน้นผู้ใช้ของเรา เพื่อให้แน่ใจว่าคุณจะได้รับคุณค่าที่ดีที่สุ"
-"ด<br/>"
+"ปรับปรุงประสบการณ์ของคุณด้วยการออกแบบที่เน้นผู้ใช้ของเรา "
+"เพื่อให้แน่ใจว่าคุณจะได้รับคุณค่าที่ดีที่สุด<br/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_bento_grid_avatars
@@ -8004,8 +8092,9 @@ msgid ""
 "enhancing<br/>technology with this latest innovation, crafted to elevate "
 "every athlete's journey."
 msgstr ""
-"สัมผัสกับความสะดวกสบายที่ไม่มีใครเทียบได้ ดีไซน์ล้ำสมัย<br/> และเทคโนโลยีช่วยเพิ่มประสิทธิภาพด้วย"
-"นวัตกรรมล่าสุดนี้ ซึ่งออกแบบมาเพื่อยกระดับการเดินทางของนักกีฬาทุกคน"
+"สัมผัสกับความสะดวกสบายที่ไม่มีใครเทียบได้ ดีไซน์ล้ำสมัย<br/> "
+"และเทคโนโลยีช่วยเพิ่มประสิทธิภาพด้วยนวัตกรรมล่าสุดนี้ "
+"ซึ่งออกแบบมาเพื่อยกระดับการเดินทางของนักกีฬาทุกคน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_framed_intro
@@ -8066,8 +8155,8 @@ msgid ""
 "><br/> Begin by identifying their needs and exceed their expectations."
 msgstr ""
 "ค้นพบว่าโซลูชันที่ทันสมัยของเราช่วยกำหนดมาตรฐานอุตสาหกรรมใหม่ได้อย่างไร เพื่อประสบความสำเร็จ "
-"เราจึงโฟกัสไปที่สิ่งที่สำคัญอย่างแท้จริงสำหรับลูกค้าของเรา <br/><br/> เริ่มด้วยการระบุความต้องการ"
-"ของลูกค้าและลงมือทำให้เต็มที่"
+"เราจึงโฟกัสไปที่สิ่งที่สำคัญอย่างแท้จริงสำหรับลูกค้าของเรา <br/><br/> "
+"เริ่มด้วยการระบุความต้องการของลูกค้าและลงมือทำให้เต็มที่"
 
 #. module: website
 #. odoo-javascript
@@ -8079,8 +8168,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
 msgid ""
 "Explore our curated selection of coffee, tea, and more. Delight in every sip!"
-msgstr ""
-"สำรวจตัวเลือกกาแฟ ชา และอื่นๆ อีกมากมายที่เราคัดสรรมาให้คุณ ชื่นใจทุกครั้งที่ดื่ม!"
+msgstr "สำรวจตัวเลือกกาแฟ ชา และอื่นๆ อีกมากมายที่เราคัดสรรมาให้คุณ ชื่นใจทุกครั้งที่ดื่ม!"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_banner_product
@@ -8112,6 +8200,12 @@ msgstr "Extension View"
 #: model:ir.model.fields,field_description:website.field_website_page__xml_id
 msgid "External ID"
 msgstr "ไอดีจากภายนอก"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "External ID can not be loaded: %(error)s (website: %(website_id)s)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -8349,8 +8443,8 @@ msgid ""
 "reset broken views or to read arch from file in dev-xml mode."
 msgstr ""
 "ไฟล์จากแหล่งที่มาของมุมมอง\n"
-"                                                          ซึ่งมีประโยชน์ในการรีเซ็ต"
-"มุมมองที่เสียหายแบบ Hard หรือเพื่ออ่านไฟล์ arch ในโหมด dev-xml"
+"                                                          ซึ่งมีประโยชน์ในการรีเซ็ตมุมมองที่เสียหายแบบ "
+"Hard หรือเพื่ออ่านไฟล์ arch ในโหมด dev-xml"
 
 #. module: website
 #: model:ir.model,name:website.model_ir_binary
@@ -8418,17 +8512,15 @@ msgid ""
 "Find all information about our deliveries, express deliveries and all you "
 "need to know to return a product."
 msgstr ""
-"ค้นหาข้อมูลทั้งหมดเกี่ยวกับการจัดส่งของเรา การจัดส่งด่วน และทุกสิ่งที่คุณจำเป็นต้องรู้เมื่อต้องการส่งคืนสิ"
-"นค้า"
+"ค้นหาข้อมูลทั้งหมดเกี่ยวกับการจัดส่งของเรา การจัดส่งด่วน "
+"และทุกสิ่งที่คุณจำเป็นต้องรู้เมื่อต้องการส่งคืนสินค้า"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
 msgid ""
 "Find out how we were able helping them and set in place solutions adapted to "
 "their needs."
-msgstr ""
-"ค้นหาว่าเราสามารถช่วยเหลือพวกเขาได้อย่างไรและสามารถสร้างโซลูชันให้เข้ากับความต้องการของพวก"
-"เขาได้อย่างไร"
+msgstr "ค้นหาว่าเราสามารถช่วยเหลือพวกเขาได้อย่างไรและสามารถสร้างโซลูชันให้เข้ากับความต้องการของพวกเขาได้อย่างไร"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_big_icons_subtitles
@@ -8658,6 +8750,12 @@ msgid "Footer Visible"
 msgstr "มองเห็นส่วนท้าย"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Forest"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 #: model_terms:ir.ui.view,arch_db:website.s_form_aside
 #: model_terms:ir.ui.view,arch_db:website.s_title_form
@@ -8804,8 +8902,8 @@ msgid ""
 "way, ensuring you feel confident in your choices and that your project is a "
 "success."
 msgstr ""
-"เราให้การสนับสนุนทุกขั้นตอนตั้งแต่ขั้นเริ่มต้นจนถึงการเสร็จสมบูรณ์ เพื่อให้คุณมั่นใจและโปรเจ็กต์ของคุณปร"
-"ะสบความสำเร็จ"
+"เราให้การสนับสนุนทุกขั้นตอนตั้งแต่ขั้นเริ่มต้นจนถึงการเสร็จสมบูรณ์ "
+"เพื่อให้คุณมั่นใจและโปรเจ็กต์ของคุณประสบความสำเร็จ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_references_social
@@ -8938,8 +9036,8 @@ msgid ""
 "Get in touch with your customers to provide them with better service. You "
 "can modify the form fields to gather more precise information."
 msgstr ""
-"ติดต่อกับลูกค้าของคุณเพื่อมอบบริการที่ดีขึ้นให้กับพวกเขา คุณสามารถปรับเปลี่ยนช่องข้อมูลในแบบฟอร์มเพื่อร"
-"วบรวมข้อมูลที่แม่นยำยิ่งขึ้น"
+"ติดต่อกับลูกค้าของคุณเพื่อมอบบริการที่ดีขึ้นให้กับพวกเขา "
+"คุณสามารถปรับเปลี่ยนช่องข้อมูลในแบบฟอร์มเพื่อรวบรวมข้อมูลที่แม่นยำยิ่งขึ้น"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_striped_center_top
@@ -8977,8 +9075,7 @@ msgstr "เริ่มต้นใช้งาน"
 msgid ""
 "Getting started with our product is a breeze, thanks to our well-structured "
 "and comprehensive onboarding process."
-msgstr ""
-"การเริ่มต้นใช้งานผลิตภัณฑ์ของเราเป็นเรื่องง่ายด้วยขั้นตอนการเริ่มต้นใช้งานที่มีโครงสร้างดีและครอบคลุม"
+msgstr "การเริ่มต้นใช้งานผลิตภัณฑ์ของเราเป็นเรื่องง่ายด้วยขั้นตอนการเริ่มต้นใช้งานที่มีโครงสร้างดีและครอบคลุม"
 
 #. module: website
 #. odoo-javascript
@@ -9013,6 +9110,12 @@ msgstr ""
 #: code:addons/website/static/src/components/views/theme_preview.xml:0
 msgid "Go Back"
 msgstr "กลับไป"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/interactions/website_auth_form.js:0
+msgid "Go back to the homepage"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -9054,8 +9157,8 @@ msgid ""
 "customers. Simple words communicate better than big words and pompous "
 "language."
 msgstr ""
-"สำเนาที่ดีเริ่มต้นด้วยการทำความเข้าใจว่าผลิตภัณฑ์หรือบริการของคุณว่าสามารถช่วยลูกค้าได้อย่างไร คำง่"
-"าย ๆ สามารถสื่อสารได้ดีกว่าคำที่ใหญ่โตและภาษาที่เข้าใจยาก"
+"สำเนาที่ดีเริ่มต้นด้วยการทำความเข้าใจว่าผลิตภัณฑ์หรือบริการของคุณว่าสามารถช่วยลูกค้าได้อย่างไร "
+"คำง่าย ๆ สามารถสื่อสารได้ดีกว่าคำที่ใหญ่โตและภาษาที่เข้าใจยาก"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
@@ -9093,6 +9196,15 @@ msgstr "Google Maps API Key"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/options/google_maps_option/google_maps_service.js:0
+#: code:addons/website/static/src/core/website_map_service.js:0
+msgid ""
+"Google Maps configuration has changed. Please reload the page for changes to "
+"take effect."
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/social_media_option_plugin.js:0
 #: model_terms:ir.ui.view,arch_db:website.s_cta_mobile
 msgid "Google Play"
@@ -9119,6 +9231,12 @@ msgstr ""
 #: model:ir.model.fields,help:website.field_website__google_search_console
 msgid "Google key, or Enable to access first reply"
 msgstr "Google คีย์ หรือเปิดใช้งานเพื่อเข้าถึงการตอบกลับครั้งแรก"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Graphite"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -9174,6 +9292,12 @@ msgid "Groups"
 msgstr "กลุ่ม"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Grove"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_services_pack
 msgid "Grow qualified leads with content, SEO, and paid acquisition."
 msgstr ""
@@ -9185,8 +9309,8 @@ msgid ""
 "Growth capability is a system's ability to scale and adapt, meeting "
 "increasing demands and evolving needs for long-term success."
 msgstr ""
-"ความสามารถในการเติบโตคือความสามารถของระบบในการขยายและปรับตัว ตอบสนองความต้องการที่เพิ่"
-"มขึ้นและความต้องการที่เปลี่ยนแปลงไปเพื่อความสำเร็จในระยะยาว"
+"ความสามารถในการเติบโตคือความสามารถของระบบในการขยายและปรับตัว "
+"ตอบสนองความต้องการที่เพิ่มขึ้นและความต้องการที่เปลี่ยนแปลงไปเพื่อความสำเร็จในระยะยาว"
 
 #. module: website
 #. odoo-javascript
@@ -9252,6 +9376,11 @@ msgstr "สุขสันต์วันครบรอบ Odoo!"
 #: model_terms:ir.ui.view,arch_db:website.s_avatars
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_lite
 msgid "Happy customers"
+msgstr ""
+
+#. module: website
+#: model:ir.model.fields,field_description:website.field_res_config_settings__has_cookie_policy
+msgid "Has Cookie Policy"
 msgstr ""
 
 #. module: website
@@ -9411,8 +9540,7 @@ msgstr ""
 msgid ""
 "Herbal tea made from dried chamomile flowers, known for its calming "
 "properties and gentle, apple-like flavor."
-msgstr ""
-"ชาสมุนไพรที่ทำจากดอกคาโมมายล์แห้งซึ่งมีคุณสมบัติช่วยให้สงบและมีกลิ่นคล้ายแอปเปิลอ่อนๆ"
+msgstr "ชาสมุนไพรที่ทำจากดอกคาโมมายล์แห้งซึ่งมีคุณสมบัติช่วยให้สงบและมีกลิ่นคล้ายแอปเปิลอ่อนๆ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_collapse
@@ -9430,8 +9558,7 @@ msgstr "นี่คือภาพที่ใช้เพื่อช่วย
 msgid ""
 "Here is an overview of the cookies that may be stored on your device when "
 "you visit our website:"
-msgstr ""
-"นี่คือภาพรวมของคุกกี้ที่อาจจัดเก็บไว้ในอุปกรณ์ของคุณเมื่อคุณเยี่ยมชมเว็บไซต์ของเรา:"
+msgstr "นี่คือภาพรวมของคุกกี้ที่อาจจัดเก็บไว้ในอุปกรณ์ของคุณเมื่อคุณเยี่ยมชมเว็บไซต์ของเรา:"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -9562,8 +9689,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/components/dialog/edit_menu.xml:0
 msgid "Hint: Type '/' to search an existing page and '#' to link to an anchor."
-msgstr ""
-"Hint: พิมพ์ '/' เพื่อค้นหาหน้าที่มีอยู่และ '#' เพื่อเชื่อมต่อไปยัง Anchor"
+msgstr "Hint: พิมพ์ '/' เพื่อค้นหาหน้าที่มีอยู่และ '#' เพื่อเชื่อมต่อไปยัง Anchor"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega_cards
@@ -9723,6 +9849,12 @@ msgstr "ฉันเห็นด้วย"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/form/utils.js:0
+msgid "I agree to the"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/components/dialog/page_properties.xml:0
 msgid "I am sure about this."
 msgstr "ฉันแน่ใจเกี่ยวกับเรื่องนี้"
@@ -9861,16 +9993,14 @@ msgstr "หากตั้งค่าไว้ เมนูเว็บไซ�
 #: model:ir.model.fields,help:website.field_website_configurator_feature__menu_company
 msgid ""
 "If set, add the menu as a second level menu, as a child of \"Company\" menu."
-msgstr ""
-"หากตั้งค่าไว้ สามารถเพิ่มเมนูเป็นเมนูระดับที่สองหรือเมนูลูกของเมนู \"บริษัท\""
+msgstr "หากตั้งค่าไว้ สามารถเพิ่มเมนูเป็นเมนูระดับที่สองหรือเมนูลูกของเมนู \"บริษัท\""
 
 #. module: website
 #: model:ir.model.fields,help:website.field_res_config_settings__social_default_image
 #: model:ir.model.fields,help:website.field_website__social_default_image
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "If set, replaces the website logo as the default social share image."
-msgstr ""
-"หากตั้งค่าไว้ สามารถแทนที่โลโก้ของเว็บไซต์เป็นรูปภาพเริ่มต้นสำหรับแชร์บนโซเชียล"
+msgstr "หากตั้งค่าไว้ สามารถแทนที่โลโก้ของเว็บไซต์เป็นรูปภาพเริ่มต้นสำหรับแชร์บนโซเชียล"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.qweb_500
@@ -9878,8 +10008,8 @@ msgid ""
 "If this error is caused by a change of yours in the templates, you have the "
 "possibility to reset the template to its <strong>factory settings</strong>."
 msgstr ""
-"หากข้อผิดพลาดนี้เกิดจากการที่คุณเปลี่ยนเทมเพลต คุณสามารถตั้งค่าเทมเพลตใหม่เป็น <strong>การตั้งค่"
-"าโรงงาน</strong>"
+"หากข้อผิดพลาดนี้เกิดจากการที่คุณเปลี่ยนเทมเพลต คุณสามารถตั้งค่าเทมเพลตใหม่เป็น "
+"<strong>การตั้งค่าโรงงาน</strong>"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_controller_page__group_ids
@@ -10405,9 +10535,9 @@ msgid ""
 "creation straightforward and enjoyable for everyone."
 msgstr ""
 "แทรกสไตล์ข้อความ เช่น ส่วนหัว ตัวหนา ตัวเอียง รายการ และแบบอักษรด้วยโปรแกรมแก้ไข "
-"WYSIWYG ที่เรียบง่าย มีความยืดหยุ่นและใช้งานง่าย ช่วยให้คุณออกแบบและจัดรูปแบบเอกสารได้แบบเรียล"
-"ไทม์ ไม่จำเป็นต้องมีความรู้ด้านการเขียนโค้ด ทำให้การสร้างเนื้อหาเป็นเรื่องง่ายและสนุกสนานสำหรับทุก"
-"คน"
+"WYSIWYG ที่เรียบง่าย มีความยืดหยุ่นและใช้งานง่าย "
+"ช่วยให้คุณออกแบบและจัดรูปแบบเอกสารได้แบบเรียลไทม์ ไม่จำเป็นต้องมีความรู้ด้านการเขียนโค้ด "
+"ทำให้การสร้างเนื้อหาเป็นเรื่องง่ายและสนุกสนานสำหรับทุกคน"
 
 #. module: website
 #. odoo-javascript
@@ -10494,6 +10624,30 @@ msgstr "ธีมที่ติดตั้งแล้ว"
 #: code:addons/website/static/src/client_actions/website_preview/new_content_systray_item.js:0
 msgid "Installing \"%s\""
 msgstr "กำลังติดตั้ง \"%s\""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Installing Blog..."
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Installing Events..."
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Installing eCommerce..."
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Installing eLearning..."
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_services_pack
@@ -10597,6 +10751,12 @@ msgid "Inverted colors"
 msgstr ""
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Iris"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_card
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_grid
@@ -10617,9 +10777,9 @@ msgid ""
 "numbers and improves them. She is determined to drive success and delivers "
 "her professional acumen to bring the company to the next level."
 msgstr ""
-"ด้วยประสบการณ์ระดับนานาชาติของ Iris ช่วยให้เราเข้าใจตัวเลขและปรับปรุงตัวเลขเหล่านี้ได้อย่างง่า"
-"ยดาย เธอมุ่งมั่นที่จะขับเคลื่อนความสำเร็จและมอบความเฉียบแหลมในอาชีพของเธอเพื่อนำพาบริษัทให้ก้าว"
-"ไปอีกขั้น"
+"ด้วยประสบการณ์ระดับนานาชาติของ Iris "
+"ช่วยให้เราเข้าใจตัวเลขและปรับปรุงตัวเลขเหล่านี้ได้อย่างง่ายดาย "
+"เธอมุ่งมั่นที่จะขับเคลื่อนความสำเร็จและมอบความเฉียบแหลมในอาชีพของเธอเพื่อนำพาบริษัทให้ก้าวไปอีกขั้น"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_page_properties_base_view_form
@@ -10844,8 +11004,7 @@ msgstr ""
 msgid ""
 "It captures your visitors' attention and helps them quickly understand the "
 "value of your product."
-msgstr ""
-"มันดึงดูดความสนใจของผู้เยี่ยมชมและช่วยให้พวกเขาเข้าใจมูลค่าของผลิตภัณฑ์ของคุณได้อย่างรวดเร็ว"
+msgstr "มันดึงดูดความสนใจของผู้เยี่ยมชมและช่วยให้พวกเขาเข้าใจมูลค่าของผลิตภัณฑ์ของคุณได้อย่างรวดเร็ว"
 
 #. module: website
 #. odoo-javascript
@@ -10879,8 +11038,7 @@ msgstr "เสื้อแจ็กเกต"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
 msgid "James leads the tech strategy and innovation efforts at the company."
-msgstr ""
-"James เป็นผู้นำด้านกลยุทธ์ด้านเทคโนโลยีและความพยายามด้านนวัตกรรมในบริษัท"
+msgstr "James เป็นผู้นำด้านกลยุทธ์ด้านเทคโนโลยีและความพยายามด้านนวัตกรรมในบริษัท"
 
 #. module: website
 #. odoo-javascript
@@ -11087,6 +11245,12 @@ msgstr ""
 #: code:addons/website/static/src/builder/plugins/form/form_option.xml:0
 msgid "Labels Width"
 msgstr "ความกว้างป้าย"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Lagoon"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_ecomm_categories_showcase
@@ -11349,8 +11513,7 @@ msgstr "เรียนรู้เกี่ยวกับการตัดส
 msgid ""
 "Learn how to quickly set up and start using our services with our step-by-"
 "step onboarding process."
-msgstr ""
-"เรียนรู้วิธีตั้งค่าและเริ่มใช้บริการของเราอย่างรวดเร็วด้วยขั้นตอนการเริ่มต้นใช้งานแบบทีละขั้นตอน"
+msgstr "เรียนรู้วิธีตั้งค่าและเริ่มใช้บริการของเราอย่างรวดเร็วด้วยขั้นตอนการเริ่มต้นใช้งานแบบทีละขั้นตอน"
 
 #. module: website
 #. odoo-javascript
@@ -11456,6 +11619,12 @@ msgstr "อ่อน"
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/theme/theme_colors_option.xml:0
 msgid "Light & Dark"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Lilac"
 msgstr ""
 
 #. module: website
@@ -11574,9 +11743,7 @@ msgstr ""
 msgid ""
 "Listing your product pricing helps potential customers quickly determine if "
 "it fits their budget and needs."
-msgstr ""
-"การระบุราคาสินค้าของคุณช่วยให้ลูกค้าเป้าหมายสามารถตัดสินใจได้อย่างรวดเร็วว่าตรงตามงบประมาณแล"
-"ะความต้องการของพวกเขาหรือไม่"
+msgstr "การระบุราคาสินค้าของคุณช่วยให้ลูกค้าเป้าหมายสามารถตัดสินใจได้อย่างรวดเร็วว่าตรงตามงบประมาณและความต้องการของพวกเขาหรือไม่"
 
 #. module: website
 #. odoo-javascript
@@ -11631,6 +11798,12 @@ msgid "Logo"
 msgstr "โลโก้"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
+msgid "Logo colors"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_centered
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega_links
@@ -11670,6 +11843,12 @@ msgstr ""
 #: code:addons/website/static/src/builder/plugins/options/cover_properties_option.xml:0
 msgid "Low"
 msgstr "ต่ำ"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Luna"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_bento_grid_avatars
@@ -12053,6 +12232,12 @@ msgstr "ตัวช่วยผสานพาร์ทเนอร์"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Merlot"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/countdown_option.xml:0
 msgid "Message + Timer"
 msgstr ""
@@ -12107,8 +12292,9 @@ msgid ""
 "Commercial Director in the software industry, Mich has helped the company to "
 "get where it is today. Mich is among the best minds."
 msgstr ""
-"Mich ชอบความท้าทาย และด้วยประสบการณ์หลายปีในตำแหน่งผู้อำนวยการฝ่ายการค้าในอุตสาหกรรมซอฟ"
-"ต์แวร์ เขาได้ช่วยให้บริษัทไปถึงจุดที่เป็นอยู่ในปัจจุบัน Mich เป็นหนึ่งในแรงขับเคลื่อนที่ดีที่สุด"
+"Mich ชอบความท้าทาย "
+"และด้วยประสบการณ์หลายปีในตำแหน่งผู้อำนวยการฝ่ายการค้าในอุตสาหกรรมซอฟต์แวร์ "
+"เขาได้ช่วยให้บริษัทไปถึงจุดที่เป็นอยู่ในปัจจุบัน Mich เป็นหนึ่งในแรงขับเคลื่อนที่ดีที่สุด"
 
 #. module: website
 #. odoo-javascript
@@ -12117,6 +12303,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.template_header_sales_two
 msgid "Middle"
 msgstr "ตรงกลาง"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Midnight"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -12159,6 +12351,18 @@ msgstr "มินิมอลลิส"
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/age_verification_popup_option.xml:0
 msgid "Minimum Age"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Mink"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Mint"
 msgstr ""
 
 #. module: website
@@ -12288,10 +12492,10 @@ msgid ""
 "push notification. If they have completed one of your forms, you can send "
 "them an SMS, or call them right away while they are browsing your website."
 msgstr ""
-"ตรวจสอบผู้เยี่ยมชมของคุณในขณะที่พวกเขากำลังเรียกดูเว็บไซต์ของคุณด้วยแอป Odoo Social มีส่วนร่วม"
-"กับพวกเขาด้วยการคลิกเพียงครั้งเดียวโดยส่งคำขอไลฟ์แชทหรือการแจ้งเตือนแบบพุช หากพวกเขากรอกแบ"
-"บฟอร์มของคุณเรียบร้อยแล้ว คุณสามารถส่ง SMS หรือโทรหาพวกเขาได้ทันทีในขณะที่พวกเขากำลังเรียกดูเ"
-"ว็บไซต์ของคุณ"
+"ตรวจสอบผู้เยี่ยมชมของคุณในขณะที่พวกเขากำลังเรียกดูเว็บไซต์ของคุณด้วยแอป Odoo Social "
+"มีส่วนร่วมกับพวกเขาด้วยการคลิกเพียงครั้งเดียวโดยส่งคำขอไลฟ์แชทหรือการแจ้งเตือนแบบพุช "
+"หากพวกเขากรอกแบบฟอร์มของคุณเรียบร้อยแล้ว คุณสามารถส่ง SMS "
+"หรือโทรหาพวกเขาได้ทันทีในขณะที่พวกเขากำลังเรียกดูเว็บไซต์ของคุณ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_odoo_menu
@@ -12326,8 +12530,7 @@ msgstr "มีรูปร่างมากกว่า 90 แบบสีต�
 #. odoo-javascript
 #: code:addons/website/static/src/components/dialog/seo.xml:0
 msgid "Most searched topics related to your keyword, ordered by importance"
-msgstr ""
-"หัวข้อที่ค้นหามากที่สุดที่เกี่ยวข้องกับคำสำคัญของคุณ ซึ่งเรียงลำดับตามความสำคัญ"
+msgstr "หัวข้อที่ค้นหามากที่สุดที่เกี่ยวข้องกับคำสำคัญของคุณ ซึ่งเรียงลำดับตามความสำคัญ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -12516,6 +12719,12 @@ msgid ""
 msgstr "ต้องการรับสินค้าที่ร้านของเรา? ค้นพบร้านที่ใกล้คุณที่สุด"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Neon"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_odoo_menu
 msgid "Networks"
 msgstr "เครือข่าย"
@@ -12633,7 +12842,6 @@ msgstr "การแจ้งเตือนจดหมายข่าวทา
 
 #. module: website
 #. odoo-javascript
-#: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
 #: code:addons/website/static/src/snippets/s_dynamic_snippet_carousel/000.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Next"
@@ -12667,9 +12875,9 @@ msgid ""
 "will help you configure essential settings such as language, time zone, and "
 "notifications."
 msgstr ""
-"ขั้นต่อไป คุณจะพบกับ<b>ตัวช่วยการตั้งค่า</b>ของเรา ซึ่งออกแบบมาเพื่อแนะนำคุณเกี่ยวกับการกำหนดค่า"
-"พื้นฐานของแพลตฟอร์ม ตัวช่วยนี้จะช่วยคุณกำหนดค่าการตั้งค่าที่จำเป็น เช่น ภาษา เขตเวลา และการแจ้ง"
-"เตือน"
+"ขั้นต่อไป คุณจะพบกับ<b>ตัวช่วยการตั้งค่า</b>ของเรา "
+"ซึ่งออกแบบมาเพื่อแนะนำคุณเกี่ยวกับการกำหนดค่าพื้นฐานของแพลตฟอร์ม "
+"ตัวช่วยนี้จะช่วยคุณกำหนดค่าการตั้งค่าที่จำเป็น เช่น ภาษา เขตเวลา และการแจ้งเตือน"
 
 #. module: website
 #. odoo-javascript
@@ -12827,8 +13035,8 @@ msgid ""
 "Not only can you search for royalty-free illustrations, their colors are "
 "also converted so that they always fit your Theme."
 msgstr ""
-"ไม่เพียงแต่คุณสามารถค้นหาภาพประกอบที่ปลอดค่าลิขสิทธิ์ได้เท่านั้น แต่ยังสามารถเปลี่ยนสีเพื่อให้เข้ากับธีม"
-"ของคุณได้เสมอ"
+"ไม่เพียงแต่คุณสามารถค้นหาภาพประกอบที่ปลอดค่าลิขสิทธิ์ได้เท่านั้น "
+"แต่ยังสามารถเปลี่ยนสีเพื่อให้เข้ากับธีมของคุณได้เสมอ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_pages_view_search
@@ -12850,9 +13058,7 @@ msgstr ""
 msgid ""
 "Note that some third-party services may install additional cookies on your "
 "browser in order to identify you."
-msgstr ""
-"โปรดทราบว่าบริการบุคคลที่สามบางบริการอาจจำเป็นต้องติดตั้งคุกกี้เพิ่มเติมบนเบราว์เซอร์ของคุณเพื่อระบุ"
-"ตัวตนของคุณก่อน"
+msgstr "โปรดทราบว่าบริการบุคคลที่สามบางบริการอาจจำเป็นต้องติดตั้งคุกกี้เพิ่มเติมบนเบราว์เซอร์ของคุณเพื่อระบุตัวตนของคุณก่อน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_menus_form_view
@@ -12860,8 +13066,8 @@ msgid ""
 "Note that the \"Website / Editor and Designer\" group is implicitly added "
 "when saving if any group is specified."
 msgstr ""
-"โปรดทราบว่ากลุ่ม \"เว็บไซต์ / ผู้แก้ไขและนักออกแบบ\" จะถูกเพิ่มโดยปริยายเมื่อบันทึกหากมีการระบุก"
-"ลุ่มใดๆ"
+"โปรดทราบว่ากลุ่ม \"เว็บไซต์ / ผู้แก้ไขและนักออกแบบ\" "
+"จะถูกเพิ่มโดยปริยายเมื่อบันทึกหากมีการระบุกลุ่มใดๆ"
 
 #. module: website
 #. odoo-javascript
@@ -13275,6 +13481,12 @@ msgstr ""
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Orbit"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/avatars_option.xml:0
 msgid "Order"
 msgstr ""
@@ -13300,9 +13512,7 @@ msgstr ""
 msgid ""
 "Organizing and presenting key information effectively increases the "
 "likelihood of turning your visitors into customers."
-msgstr ""
-"การจัดระเบียบและนำเสนอข้อมูลสำคัญอย่างมีประสิทธิภาพจะช่วยเพิ่มโอกาสในการเปลี่ยนผู้เยี่ยมชมให้กลา"
-"ยเป็นลูกค้า"
+msgstr "การจัดระเบียบและนำเสนอข้อมูลสำคัญอย่างมีประสิทธิภาพจะช่วยเพิ่มโอกาสในการเปลี่ยนผู้เยี่ยมชมให้กลายเป็นลูกค้า"
 
 #. module: website
 #. odoo-javascript
@@ -13386,9 +13596,9 @@ msgid ""
 "support. We tailor our services to fit the unique needs of businesses across "
 "various sectors, helping them grow and succeed in a competitive market."
 msgstr ""
-"บริษัทของเรามีความเชี่ยวชาญด้านการให้คำปรึกษา การพัฒนาผลิตภัณฑ์ และการสนับสนุนลูกค้า เราปรับแต่"
-"งบริการให้ตรงกับความต้องการเฉพาะของธุรกิจในหลากหลายภาคส่วน ช่วยให้ธุรกิจเติบโตและประสบควา"
-"มสำเร็จในตลาดที่มีการแข่งขันสูง"
+"บริษัทของเรามีความเชี่ยวชาญด้านการให้คำปรึกษา การพัฒนาผลิตภัณฑ์ และการสนับสนุนลูกค้า "
+"เราปรับแต่งบริการให้ตรงกับความต้องการเฉพาะของธุรกิจในหลากหลายภาคส่วน "
+"ช่วยให้ธุรกิจเติบโตและประสบความสำเร็จในตลาดที่มีการแข่งขันสูง"
 
 #. module: website
 #. odoo-javascript
@@ -13404,8 +13614,9 @@ msgid ""
 "innovative solutions that make your project stand out while maintaining a "
 "balance between originality and functionality."
 msgstr ""
-"ความคิดสร้างสรรค์ของเราเป็นสิ่งสำคัญที่สุดในทุกสิ่งที่เราทำ โดยการนำเสนอโซลูชันนวัตกรรมที่ทำให้โปร"
-"เจ็กต์ของคุณโดดเด่น พร้อมรักษาสมดุลระหว่างความคิดริเริ่มและการใช้งาน"
+"ความคิดสร้างสรรค์ของเราเป็นสิ่งสำคัญที่สุดในทุกสิ่งที่เราทำ "
+"โดยการนำเสนอโซลูชันนวัตกรรมที่ทำให้โปรเจ็กต์ของคุณโดดเด่น "
+"พร้อมรักษาสมดุลระหว่างความคิดริเริ่มและการใช้งาน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_table_of_content
@@ -13417,9 +13628,9 @@ msgid ""
 "ensuring a polished, responsive result."
 msgstr ""
 "ฟีเจอร์การออกแบบของเรามีเครื่องมือมากมายสำหรับการสร้างเว็บไซต์ที่สวยงาม ใช้โปรแกรมแก้ไข "
-"WYSIWYG บล็อกการสร้างแบบลากและวาง และเทมเพลตที่ใช้ Bootstrap เพื่อปรับแต่งได้อย่างง่ายดา"
-"ย ด้วยธีมระดับมืออาชีพและระบบที่ใช้งานง่าย คุณสามารถออกแบบได้อย่างง่ายดายและแม่นยำ รับประกันผ"
-"ลลัพธ์ที่สวยงามและตอบสนองได้ดี"
+"WYSIWYG บล็อกการสร้างแบบลากและวาง และเทมเพลตที่ใช้ Bootstrap "
+"เพื่อปรับแต่งได้อย่างง่ายดาย ด้วยธีมระดับมืออาชีพและระบบที่ใช้งานง่าย "
+"คุณสามารถออกแบบได้อย่างง่ายดายและแม่นยำ รับประกันผลลัพธ์ที่สวยงามและตอบสนองได้ดี"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -13428,8 +13639,8 @@ msgid ""
 "security, and functionality, ensuring it remains at the cutting edge of "
 "innovation."
 msgstr ""
-"ทีมพัฒนาของเราทำงานอย่างหนักเพื่อเพิ่มประสิทธิภาพ ความปลอดภัย และการทำงานของแพลตฟอร์ม เพื่อ"
-"ให้มั่นใจว่าแพลตฟอร์มจะอยู่แถวหน้าของนวัตกรรม"
+"ทีมพัฒนาของเราทำงานอย่างหนักเพื่อเพิ่มประสิทธิภาพ ความปลอดภัย และการทำงานของแพลตฟอร์ม "
+"เพื่อให้มั่นใจว่าแพลตฟอร์มจะอยู่แถวหน้าของนวัตกรรม"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_manifesto
@@ -13449,9 +13660,9 @@ msgid ""
 "complete. With tooltips and contextual help, users quickly become "
 "productive, enjoying a smooth and efficient experience."
 msgstr ""
-"ระบบที่ใช้งานง่ายของเราช่วยให้ผู้ใช้ทุกระดับทักษะสามารถใช้งานได้อย่างง่ายดาย อินเทอร์เฟซที่สะอาดต"
-"าและการจัดระเบียบแบบลอจิคัลทำให้ทำงานต่างๆ ได้อย่างง่ายดาย ด้วยคำแนะนำและความช่วยเหลือตาม"
-"บริบท ผู้ใช้จึงสามารถทำงานได้อย่างมีประสิทธิภาพและราบรื่น"
+"ระบบที่ใช้งานง่ายของเราช่วยให้ผู้ใช้ทุกระดับทักษะสามารถใช้งานได้อย่างง่ายดาย "
+"อินเทอร์เฟซที่สะอาดตาและการจัดระเบียบแบบลอจิคัลทำให้ทำงานต่างๆ ได้อย่างง่ายดาย "
+"ด้วยคำแนะนำและความช่วยเหลือตามบริบท ผู้ใช้จึงสามารถทำงานได้อย่างมีประสิทธิภาพและราบรื่น"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
@@ -13460,8 +13671,8 @@ msgid ""
 "expansion, highlight our strategic prowess and commitment to sustainable "
 "business success."
 msgstr ""
-"ตัวชี้วัดหลักของเรา ตั้งแต่การเติบโตของรายได้ไปจนถึงการรักษาลูกค้าและการขยายตลาด เน้นย้ำถึงควา"
-"มสามารถเชิงกลยุทธ์และความมุ่งมั่นของเราในการประสบความสำเร็จทางธุรกิจอย่างยั่งยืน"
+"ตัวชี้วัดหลักของเรา ตั้งแต่การเติบโตของรายได้ไปจนถึงการรักษาลูกค้าและการขยายตลาด "
+"เน้นย้ำถึงความสามารถเชิงกลยุทธ์และความมุ่งมั่นของเราในการประสบความสำเร็จทางธุรกิจอย่างยั่งยืน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_dynamic_snippet_template
@@ -13478,9 +13689,7 @@ msgstr ""
 msgid ""
 "Our products are designed for small to medium size companies willing to "
 "optimize their performance."
-msgstr ""
-"ผลิตภัณฑ์ของเราได้รับการออกแบบมาสำหรับบริษัทขนาดเล็กถึงขนาดกลางที่ต้องการเพิ่มประสิทธิภาพการทำ"
-"งานของพวกเขา"
+msgstr "ผลิตภัณฑ์ของเราได้รับการออกแบบมาสำหรับบริษัทขนาดเล็กถึงขนาดกลางที่ต้องการเพิ่มประสิทธิภาพการทำงานของพวกเขา"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_big_icons_subtitles
@@ -13501,8 +13710,8 @@ msgid ""
 "of the highest quality, bringing lasting value to your investment and "
 "ultimate customer satisfaction."
 msgstr ""
-"บริการของเราสร้างมาเพื่อให้ใช้ได้ตลอดไป โดยรับประกันว่าโซลูชั่นทุกชิ้นที่เรามอบให้มีคุณภาพสูงสุด มอบ"
-"มูลค่าที่ยั่งยืนให้กับการลงทุนของคุณและความพึงพอใจสูงสุดของลูกค้า"
+"บริการของเราสร้างมาเพื่อให้ใช้ได้ตลอดไป โดยรับประกันว่าโซลูชั่นทุกชิ้นที่เรามอบให้มีคุณภาพสูงสุด "
+"มอบมูลค่าที่ยั่งยืนให้กับการลงทุนของคุณและความพึงพอใจสูงสุดของลูกค้า"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_discovery
@@ -13540,8 +13749,8 @@ msgid ""
 "Our support team is available 24/7 to assist with any inquiries or issues, "
 "ensuring you get help whenever you need it."
 msgstr ""
-"ทีมสนับสนุนของเราพร้อมให้บริการตลอด 24 ชั่วโมง เพื่อช่วยเหลือในกรณีที่มีคำถามหรือปัญหาใดๆ เพื่อให้"
-"แน่ใจว่าคุณจะได้รับความช่วยเหลือเมื่อใดก็ตามที่คุณต้องการ"
+"ทีมสนับสนุนของเราพร้อมให้บริการตลอด 24 ชั่วโมง เพื่อช่วยเหลือในกรณีที่มีคำถามหรือปัญหาใดๆ "
+"เพื่อให้แน่ใจว่าคุณจะได้รับความช่วยเหลือเมื่อใดก็ตามที่คุณต้องการ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -13549,8 +13758,9 @@ msgid ""
 "Our support team is available 24/7 to assist with any issues or questions "
 "you may have, ensuring that help is always within reach."
 msgstr ""
-"ทีมสนับสนุนของเราพร้อมให้บริการตลอด 24 ชั่วโมงทุกวันเพื่อช่วยเหลือเกี่ยวกับปัญหาหรือคำถามที่คุณอาจ"
-"มี เพื่อให้แน่ใจว่าคุณจะได้รับความช่วยเหลืออยู่เสมอ"
+"ทีมสนับสนุนของเราพร้อมให้บริการตลอด 24 "
+"ชั่วโมงทุกวันเพื่อช่วยเหลือเกี่ยวกับปัญหาหรือคำถามที่คุณอาจมี "
+"เพื่อให้แน่ใจว่าคุณจะได้รับความช่วยเหลืออยู่เสมอ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_shapes
@@ -13587,9 +13797,7 @@ msgstr ""
 msgid ""
 "Our website is designed for easy navigation, allowing you to find the "
 "information you need quickly and efficiently."
-msgstr ""
-"เว็บไซต์ของเราได้รับการออกแบบมาเพื่อให้ใช้งานและค้นหาข้อมูลที่ต้องการได้อย่างรวดเร็วและมีประสิทธิ"
-"ภาพ"
+msgstr "เว็บไซต์ของเราได้รับการออกแบบมาเพื่อให้ใช้งานและค้นหาข้อมูลที่ต้องการได้อย่างรวดเร็วและมีประสิทธิภาพ"
 
 #. module: website
 #. odoo-javascript
@@ -13998,6 +14206,12 @@ msgstr "ปุ่มขอบมน"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Pine"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/social_media_option_plugin.js:0
 #: model_terms:ir.ui.view,arch_db:website.s_share
 msgid "Pinterest"
@@ -14014,8 +14228,8 @@ msgstr "ตัวอย่างข้อความ"
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/google_maps_option/google_maps_api_key_dialog.xml:0
-msgid "Places API"
-msgstr "API สถานที่"
+msgid "Places API (NEW)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -14067,6 +14281,12 @@ msgstr "กรุณากรอกแบบฟอร์มให้ถูกต
 msgid ""
 "Please fill in the form correctly. The file “%(fileName)s” is too large. "
 "(Maximum %(max)s MB)"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Plum"
 msgstr ""
 
 #. module: website
@@ -14270,6 +14490,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/countdown_option.xml:0
 #: code:addons/website/static/src/builder/plugins/options/header/header_font_option.xml:0
+#: code:addons/website/static/src/builder/plugins/theme/theme_colors_option.xml:0
 msgid "Primary"
 msgstr "หลัก"
 
@@ -15269,8 +15490,14 @@ msgid ""
 "Robots.txt: This file tells to search engine crawlers which pages or files "
 "they can or can't request from your site."
 msgstr ""
-"Robots.txt: ไฟล์นี้จะแจ้งให้โปรแกรมรวบรวมข้อมูลของเครื่องมือค้นหาทราบว่าหน้าเว็บหรือไฟล์ใดที่พว"
-"กเขาสามารถหรือไม่สามารถขอจากเว็บไซต์ของคุณได้"
+"Robots.txt: "
+"ไฟล์นี้จะแจ้งให้โปรแกรมรวบรวมข้อมูลของเครื่องมือค้นหาทราบว่าหน้าเว็บหรือไฟล์ใดที่พวกเขาสามารถหรือไม่สามารถขอจากเว็บไซต์ของคุณได้"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Rose"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -15286,8 +15513,8 @@ msgid ""
 "Round-the-clock assistance is available, ensuring issues are resolved "
 "quickly, keeping your operations running smoothly."
 msgstr ""
-"มีบริการช่วยเหลือตลอด 24 ชั่วโมง เพื่อให้แน่ใจว่าปัญหาต่างๆ ได้รับการแก้ไขอย่างรวดเร็ว และทำให้ก"
-"ารดำเนินงานของคุณราบรื่น"
+"มีบริการช่วยเหลือตลอด 24 ชั่วโมง เพื่อให้แน่ใจว่าปัญหาต่างๆ ได้รับการแก้ไขอย่างรวดเร็ว "
+"และทำให้การดำเนินงานของคุณราบรื่น"
 
 #. module: website
 #. odoo-javascript
@@ -15345,6 +15572,12 @@ msgstr ""
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Ruby"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/components/resource_editor/resource_editor.js:0
 msgid "SCSS file: %s"
 msgstr "ไฟล์ SCSS : %s"
@@ -15381,6 +15614,18 @@ msgstr "ปรับ SEO ให้เหมาะสม"
 #. odoo-javascript
 #: code:addons/website/static/src/components/dialog/seo.js:0
 msgid "SVG images are not supported. Please select a PNG, JPG, WEBP, or GIF"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Saffron"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Sage"
 msgstr ""
 
 #. module: website
@@ -15558,6 +15803,12 @@ msgstr ""
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Seafoam"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/js/backend/view_hierarchy/hierarchy_navbar.xml:0
 #: code:addons/website/static/src/snippets/s_searchbar/000.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -15609,8 +15860,8 @@ msgid ""
 "picture, in just a few clicks."
 msgstr ""
 "ค้นหาในสื่อการสนทนาเมื่อคุณต้องการรูปภาพเพื่อแสดงเว็บไซต์ของคุณ การผสานการทำงานระหว่าง "
-"Odoo กับ Unsplash ซึ่งประกอบด้วยภาพถ่ายคุณภาพสูงปลอดค่าลิขสิทธิ์นับล้านรายการ ซึ่งช่วยให้คุณได้ภา"
-"พที่สมบูรณ์แบบด้วยการคลิกเพียงไม่กี่ครั้ง"
+"Odoo กับ Unsplash ซึ่งประกอบด้วยภาพถ่ายคุณภาพสูงปลอดค่าลิขสิทธิ์นับล้านรายการ "
+"ซึ่งช่วยให้คุณได้ภาพที่สมบูรณ์แบบด้วยการคลิกเพียงไม่กี่ครั้ง"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_searchbar
@@ -15622,6 +15873,11 @@ msgstr "ค้นหาบนเว็บไซต์ของเรา"
 #: code:addons/website/static/src/builder/plugins/options/searchbar_option.xml:0
 msgid "Search within"
 msgstr "ค้นหาใน"
+
+#. module: website
+#: model_terms:ir.ui.view,arch_db:website.website_search_box_input
+msgid "Search..."
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -15671,6 +15927,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/countdown_option.xml:0
 #: code:addons/website/static/src/builder/plugins/options/header/header_font_option.xml:0
+#: code:addons/website/static/src/builder/plugins/theme/theme_colors_option.xml:0
 msgid "Secondary"
 msgstr "รอง"
 
@@ -16343,6 +16600,12 @@ msgid "Skip and start from scratch"
 msgstr "ข้ามแล้วเริ่มใหม่ตั้งแต่ต้น"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Slate"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_list
 msgid "Sleek"
 msgstr "ทันสมัย"
@@ -16564,8 +16827,7 @@ msgstr ""
 msgid ""
 "Some quick example text to build on the card title and make up the bulk of "
 "the card's content."
-msgstr ""
-"ข้อความตัวอย่างสั้นๆ เพื่อสร้างชื่อการ์ดและประกอบเป็นเนื้อหาจำนวนมากในการ์ด"
+msgstr "ข้อความตัวอย่างสั้นๆ เพื่อสร้างชื่อการ์ดและประกอบเป็นเนื้อหาจำนวนมากในการ์ด"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -16632,8 +16894,8 @@ msgid ""
 "talks on various topics. Stay on top of the latest business management "
 "trends &amp; technologies"
 msgstr ""
-"วิทยากรจากทั่วทุกมุมโลกจะเข้าร่วมกับผู้เชี่ยวชาญของเราในการบรรยายที่สร้างแรงบันดาลใจในหัวข้อต่า"
-"ง ๆ ติดตามแนวทางการจัดการธุรกิจและเทคโนโลยีล่าสุด"
+"วิทยากรจากทั่วทุกมุมโลกจะเข้าร่วมกับผู้เชี่ยวชาญของเราในการบรรยายที่สร้างแรงบันดาลใจในหัวข้อต่าง "
+"ๆ ติดตามแนวทางการจัดการธุรกิจและเทคโนโลยีล่าสุด"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website__specific_user_account
@@ -16658,8 +16920,8 @@ msgid ""
 "Speed and efficiency ensure tasks are completed quickly and resources are "
 "used optimally, enhancing productivity and satisfaction."
 msgstr ""
-"ความเร็วและประสิทธิภาพช่วยให้มั่นใจว่างานจะเสร็จสิ้นอย่างรวดเร็วและทรัพยากรจะถูกใช้อย่างเหมาะส"
-"ม ส่งผลให้ผลผลิตและความพึงพอใจเพิ่มขึ้น"
+"ความเร็วและประสิทธิภาพช่วยให้มั่นใจว่างานจะเสร็จสิ้นอย่างรวดเร็วและทรัพยากรจะถูกใช้อย่างเหมาะสม "
+"ส่งผลให้ผลผลิตและความพึงพอใจเพิ่มขึ้น"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
@@ -16779,6 +17041,12 @@ msgid ""
 msgstr "ติดตามข่าวสารล่าสุดของเราและค้นพบสิ่งที่จะเกิดขึ้นในสัปดาห์หน้า"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Steel"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_picture
 msgid "Step Up Your Game"
 msgstr ""
@@ -16801,6 +17069,12 @@ msgstr "สถานะ"
 #: code:addons/website/static/src/builder/plugins/options/table_of_content_option.xml:0
 msgid "Sticky"
 msgstr "ติด"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Stone"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
@@ -17057,8 +17331,8 @@ msgid ""
 "Tailor the platform to your needs, offering flexibility and control over "
 "your user experience."
 msgstr ""
-"ปรับแต่งแพลตฟอร์มให้เหมาะกับความต้องการของคุณ พร้อมมอบความยืดหยุ่นและการควบคุมประสบการณ์ผู้ใ"
-"ช้ของคุณ"
+"ปรับแต่งแพลตฟอร์มให้เหมาะกับความต้องการของคุณ "
+"พร้อมมอบความยืดหยุ่นและการควบคุมประสบการณ์ผู้ใช้ของคุณ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cards_grid
@@ -17182,6 +17456,12 @@ msgid "Template fallback"
 msgstr "Template fallback"
 
 #. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "Template not found: '%(error)s' (website: %(website_id)s)"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_utility_1_s_title_split
 msgid "Terms &amp; Conditions"
 msgstr ""
@@ -17202,6 +17482,12 @@ msgstr "เงื่อนไขการให้บริการ"
 #: model_terms:ir.ui.view,arch_db:website.template_footer_contact
 msgid "Terms of Services"
 msgstr "ข้อกำหนดการให้บริการ"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Terra"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -17343,8 +17629,9 @@ msgid ""
 "accessibility and SEO. If you select this option, the image will be hidden "
 "from screen readers and not considered for your SEO."
 msgstr ""
-"แอตทริบิวต์ alt ใช้สำหรับอธิบายภาพ เพื่อเพิ่มประสิทธิภาพทั้งด้านการเข้าถึงและ SEO หากคุณเลือกตัวเ"
-"ลือกนี้ ภาพดังกล่าวจะไม่แสดงให้โปรแกรมอ่านหน้าจอเห็น และจะไม่ถูกนำไปพิจารณาในด้าน SEO ด้วย"
+"แอตทริบิวต์ alt ใช้สำหรับอธิบายภาพ เพื่อเพิ่มประสิทธิภาพทั้งด้านการเข้าถึงและ SEO "
+"หากคุณเลือกตัวเลือกนี้ ภาพดังกล่าวจะไม่แสดงให้โปรแกรมอ่านหน้าจอเห็น "
+"และจะไม่ถูกนำไปพิจารณาในด้าน SEO ด้วย"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -17369,8 +17656,7 @@ msgstr ""
 msgid ""
 "The description will be generated by social media based on page content "
 "unless you specify one."
-msgstr ""
-"คำอธิบายจะถูกสร้างขึ้นโดยสื่อออนไลน์ตามเนื้อหาของหน้า เว้นแต่ว่าคุณจะระบุไว้"
+msgstr "คำอธิบายจะถูกสร้างขึ้นโดยสื่อออนไลน์ตามเนื้อหาของหน้า เว้นแต่ว่าคุณจะระบุไว้"
 
 #. module: website
 #. odoo-python
@@ -17428,12 +17714,6 @@ msgid "The form has been sent successfully."
 msgstr ""
 
 #. module: website
-#. odoo-python
-#: code:addons/website/controllers/form.py:0
-msgid "The form's specified model does not exist"
-msgstr "ไม่มีโมเดลที่ระบุในแบบฟอร์ม"
-
-#. module: website
 #: model:ir.model.fields,help:website.field_ir_actions_server__website_url
 #: model:ir.model.fields,help:website.field_ir_cron__website_url
 msgid "The full URL to access the server action through the website."
@@ -17481,8 +17761,8 @@ msgid ""
 "The intuitive design ensures smooth navigation, enhancing user experience "
 "without needing technical expertise."
 msgstr ""
-"การออกแบบที่ใช้งานง่ายช่วยให้การนำทางราบรื่น ช่วยเพิ่มประสบการณ์ของผู้ใช้โดยไม่ต้องมีความเชี่ยวชา"
-"ญด้านเทคนิค"
+"การออกแบบที่ใช้งานง่ายช่วยให้การนำทางราบรื่น "
+"ช่วยเพิ่มประสบการณ์ของผู้ใช้โดยไม่ต้องมีความเชี่ยวชาญด้านเทคนิค"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_snippet_filter__limit
@@ -17535,22 +17815,6 @@ msgstr "ชื่อนี้ใช้เพื่อสร้าง URL แล�
 #: model:ir.model.fields,help:website.field_website_controller_page__name_slugified
 msgid "The name of the page usable in a URL"
 msgstr "ชื่อของเพจที่ใช้ใน URL"
-
-#. module: website
-#. odoo-python
-#: code:addons/website/models/website.py:0
-msgid "The new default website is %(default_website_name)s."
-msgstr ""
-
-#. module: website
-#. odoo-python
-#: code:addons/website/models/website.py:0
-msgid ""
-"The new default website is %(default_website_name)s. The following default "
-"settings were copied from the old default website to the new one: %"
-"(transferred_settings)s. Note that these settings are still present on the "
-"old default website."
-msgstr ""
 
 #. module: website
 #. odoo-python
@@ -17806,8 +18070,7 @@ msgid ""
 "to (soft) reset a broken view."
 msgstr ""
 "ฟิลด์นี้จะบันทึก \"arch_db\" ปัจจุบันก่อนที่จะเขียนลงไป\n"
-"                                                                         มีประ"
-"โยชน์ในการรีเซ็ตมุมมองที่เสียหายแบบซอฟต์"
+"                                                                         มีประโยชน์ในการรีเซ็ตมุมมองที่เสียหายแบบซอฟต์"
 
 #. module: website
 #. odoo-javascript
@@ -17815,13 +18078,19 @@ msgstr ""
 msgid ""
 "This font already exists, you can only add it as a local font to replace the "
 "server version."
-msgstr ""
-"ฟอนต์นี้มีอยู่แล้ว คุณสามารถเพิ่มเป็นฟอนต์ในเครื่องเพื่อแทนที่เวอร์ชันเซิร์ฟเวอร์เท่านั้น"
+msgstr "ฟอนต์นี้มีอยู่แล้ว คุณสามารถเพิ่มเป็นฟอนต์ในเครื่องเพื่อแทนที่เวอร์ชันเซิร์ฟเวอร์เท่านั้น"
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/theme/theme_font_weight_option.js:0
 msgid "This font is missing font weight"
+msgstr ""
+
+#. module: website
+#. odoo-python
+#: code:addons/website/controllers/form.py:0
+msgid ""
+"This form cannot be submitted. Please contact the website administrator."
 msgstr ""
 
 #. module: website
@@ -17849,8 +18118,8 @@ msgid ""
 "This is a simple hero unit, a simple jumbotron-style component for calling "
 "extra attention to featured content or information."
 msgstr ""
-"นี่คือ Hero unit และองค์ประกอบสไตล์จอแสดงภาพขนาดใหญ่ที่เรียบง่ายเพื่อทำให้เนื้อหาหรือข้อมูลนั้นโด"
-"ดเด่นดึงดูดความสนใจมากยิ่งขึ้น"
+"นี่คือ Hero unit "
+"และองค์ประกอบสไตล์จอแสดงภาพขนาดใหญ่ที่เรียบง่ายเพื่อทำให้เนื้อหาหรือข้อมูลนั้นโดดเด่นดึงดูดความสนใจมากยิ่งขึ้น"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_key_images
@@ -17863,8 +18132,8 @@ msgid ""
 "This is a wider card with supporting text below as a natural lead-in to "
 "additional content. This content is a little bit longer."
 msgstr ""
-"นี่คือการ์ดที่กว้างขึ้นซึ่งมีข้อความสนับสนุนด้านล่างเพื่อนำไปสู่เนื้อหาเพิ่มเติมอย่างเป็นธรรมชาติ เนื้อหานี้จะ"
-"ยาวขึ้นเล็กน้อย"
+"นี่คือการ์ดที่กว้างขึ้นซึ่งมีข้อความสนับสนุนด้านล่างเพื่อนำไปสู่เนื้อหาเพิ่มเติมอย่างเป็นธรรมชาติ "
+"เนื้อหานี้จะยาวขึ้นเล็กน้อย"
 
 #. module: website
 #: model:ir.ui.view,website_meta_description:website.contactus
@@ -17950,8 +18219,8 @@ msgid ""
 "This value will be escaped to be compliant with all major browsers and used "
 "in url. Keep it empty to use the default name of the record."
 msgstr ""
-"ค่านี้จะถูกหลีกเลี่ยงเพื่อให้สอดคล้องกับเบราว์เซอร์หลักทั้งหมดและใช้ใน URL เว้นว่างไว้เพื่อใช้ชื่อเริ่มต้น"
-"ของการบันทึก"
+"ค่านี้จะถูกหลีกเลี่ยงเพื่อให้สอดคล้องกับเบราว์เซอร์หลักทั้งหมดและใช้ใน URL "
+"เว้นว่างไว้เพื่อใช้ชื่อเริ่มต้นของการบันทึก"
 
 #. module: website
 #. odoo-javascript
@@ -17976,8 +18245,7 @@ msgstr ""
 msgid ""
 "Those services will be blocked on your website for users until they accept "
 "optional cookies."
-msgstr ""
-"บริการเหล่านั้นจะถูกบล็อคบนเว็บไซต์ของคุณสำหรับผู้ใช้จนกว่าพวกเขาจะยอมรับคุกกี้ที่เป็นทางเลือก"
+msgstr "บริการเหล่านั้นจะถูกบล็อคบนเว็บไซต์ของคุณสำหรับผู้ใช้จนกว่าพวกเขาจะยอมรับคุกกี้ที่เป็นทางเลือก"
 
 #. module: website
 #. odoo-javascript
@@ -18000,6 +18268,12 @@ msgstr "พาร์ทเนอร์ที่เฟื่องฟูมาต
 #: code:addons/website/static/src/builder/plugins/options/mega_menu_option.xml:0
 msgid "Thumbnails"
 msgstr "Thumbnails"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Tide"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -18144,8 +18418,8 @@ msgid ""
 "right icon of each block. Then, duplicate one of the columns to create a new "
 "one as a copy."
 msgstr ""
-"หากต้องการเพิ่มคอลัมน์ที่สี่ ให้ลดขนาดของคอลัมน์ทั้งสามโดยใช้ไอคอนด้านขวาของแต่ละบล็อก จากนั้น ทำ"
-"ซ้ำคอลัมน์ใดคอลัมน์หนึ่งเพื่อสร้างคอลัมน์ใหม่ในรูปแบบสำเนา"
+"หากต้องการเพิ่มคอลัมน์ที่สี่ ให้ลดขนาดของคอลัมน์ทั้งสามโดยใช้ไอคอนด้านขวาของแต่ละบล็อก จากนั้น "
+"ทำซ้ำคอลัมน์ใดคอลัมน์หนึ่งเพื่อสร้างคอลัมน์ใหม่ในรูปแบบสำเนา"
 
 #. module: website
 #. odoo-javascript
@@ -18158,8 +18432,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_tabs
 msgid "To be successful your content needs to be useful to your readers."
-msgstr ""
-"การจะประสบความสำเร็จได้นั้น เนื้อหาของคุณต้องเป็นประโยชน์ต่อผู้อ่านของคุณ"
+msgstr "การจะประสบความสำเร็จได้นั้น เนื้อหาของคุณต้องเป็นประโยชน์ต่อผู้อ่านของคุณ"
 
 #. module: website
 #. odoo-javascript
@@ -18176,8 +18449,8 @@ msgid ""
 "description accordingly to boost your traffic."
 msgstr ""
 "เพื่อให้มีผู้เข้าชมมากขึ้น คุณควรกำหนดเป้าหมายของคำสำคัญที่มักถูกค้นหาใน Google ด้วยเครื่องมือ "
-"SEO ที่มีในตัว เมื่อคุณกำหนดคำสำคัญเพียงสองสามคำแล้ว Odoo จะแนะนำคำสำคัญที่ดีที่สุดอื่น ๆ ให้คุณเพื่"
-"อกำหนดเป้าหมาย จากนั้นปรับชื่อและคำอธิบายของคุณให้เหมาะสมเพื่อเพิ่มจำนวนการเข้าชม"
+"SEO ที่มีในตัว เมื่อคุณกำหนดคำสำคัญเพียงสองสามคำแล้ว Odoo จะแนะนำคำสำคัญที่ดีที่สุดอื่น ๆ "
+"ให้คุณเพื่อกำหนดเป้าหมาย จากนั้นปรับชื่อและคำอธิบายของคุณให้เหมาะสมเพื่อเพิ่มจำนวนการเข้าชม"
 
 #. module: website
 #. odoo-javascript
@@ -18192,8 +18465,9 @@ msgid ""
 "list view and click on 'Portal Access Management' option in the dropdown "
 "menu *Action*."
 msgstr ""
-"หากต้องการส่งคำเชิญในโหมด B2B ให้เปิดรายชื่อผู้ติดต่อหรือเลือกหลายรายการในมุมมองรายการแล้วคลิ"
-"กตัวเลือก 'จัดการการเข้าถึงพอร์ทัล' ในเมนูดรอปดาวน์ *การดำเนินการ*"
+"หากต้องการส่งคำเชิญในโหมด B2B "
+"ให้เปิดรายชื่อผู้ติดต่อหรือเลือกหลายรายการในมุมมองรายการแล้วคลิกตัวเลือก "
+"'จัดการการเข้าถึงพอร์ทัล' ในเมนูดรอปดาวน์ *การดำเนินการ*"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -18360,8 +18634,8 @@ msgid ""
 "meets functionality. Elevate your space with pieces that blend style and "
 "comfort seamlessly."
 msgstr ""
-"ปรับเปลี่ยนสภาพแวดล้อมของคุณด้วยคอลเลกชันดีไซน์ใหม่ของเราที่ผสมผสานความสง่างามเข้ากับการใช้งา"
-"น ยกระดับพื้นที่ของคุณด้วยชิ้นงานที่ผสมผสานสไตล์และความสบายได้อย่างลงตัว"
+"ปรับเปลี่ยนสภาพแวดล้อมของคุณด้วยคอลเลกชันดีไซน์ใหม่ของเราที่ผสมผสานความสง่างามเข้ากับการใช้งาน "
+"ยกระดับพื้นที่ของคุณด้วยชิ้นงานที่ผสมผสานสไตล์และความสบายได้อย่างลงตัว"
 
 #. module: website
 #. odoo-javascript
@@ -18497,8 +18771,7 @@ msgstr "ประเภท"
 msgid ""
 "Type '<i class=\"confirm_word\">yes</i>' in the box below if you want to "
 "confirm."
-msgstr ""
-"พิมพ์'<i class=\"confirm_word\">ใช้</i>' ในกล่องด้านล่างหากคุณต้องการยืนยัน."
+msgstr "พิมพ์'<i class=\"confirm_word\">ใช้</i>' ในกล่องด้านล่างหากคุณต้องการยืนยัน."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_rewrite__redirect_type
@@ -18518,13 +18791,13 @@ msgstr ""
 "ประเภทของการเปลี่ยนเส้นทาง / เขียนใหม่:\n"
 "\n"
 "         301 ย้ายอย่างถาวร: เบราว์เซอร์จะเก็บ URL ใหม่ไว้ในแคช\n"
-"         302 ย้ายชั่วคราว: เบราว์เซอร์จะไม่เก็บไว้ในแคชและ url ใหม่และถามอีกครั้งในครั้งต่อไ"
-"ปที่ URL ใหม่\n"
-"         404 ไม่พบ: หากคุณต้องการลบเพจ / ตัวควบคุมเฉพาะ (เช่นติดตั้งอีคอมเมิร์ซ แต่คุณไม่ต้อง"
-"การ / ซื้อสินค้าบนเว็บไซต์ใดเว็บไซต์หนึ่ง)\n"
-"         308 เปลี่ยนเส้นทาง / เขียนใหม่: หากคุณต้องการเปลี่ยนชื่อแผงควบคุมด้วย url ใหม่ (เช่"
-"น: / shop -> / garden - ทั้งสอง url จะเข้าถึงได้ แต่ / shop จะถูกเปลี่ยนเส้นทางไปที่ / "
-"garden โดยอัตโนมัติ)\n"
+"         302 ย้ายชั่วคราว: เบราว์เซอร์จะไม่เก็บไว้ในแคชและ url "
+"ใหม่และถามอีกครั้งในครั้งต่อไปที่ URL ใหม่\n"
+"         404 ไม่พบ: หากคุณต้องการลบเพจ / ตัวควบคุมเฉพาะ (เช่นติดตั้งอีคอมเมิร์ซ "
+"แต่คุณไม่ต้องการ / ซื้อสินค้าบนเว็บไซต์ใดเว็บไซต์หนึ่ง)\n"
+"         308 เปลี่ยนเส้นทาง / เขียนใหม่: หากคุณต้องการเปลี่ยนชื่อแผงควบคุมด้วย url ใหม่ "
+"(เช่น: / shop -> / garden - ทั้งสอง url จะเข้าถึงได้ แต่ / shop "
+"จะถูกเปลี่ยนเส้นทางไปที่ / garden โดยอัตโนมัติ)\n"
 "    "
 
 #. module: website
@@ -18692,6 +18965,12 @@ msgstr ""
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
+msgid "Upload your"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/form/form_option.xml:0
 #: model:ir.model.fields,field_description:website.field_theme_ir_attachment__url
 #: model:ir.model.fields,field_description:website.field_theme_website_menu__url
@@ -18774,8 +19053,7 @@ msgstr ""
 msgid ""
 "Use this component for creating a list of featured elements to which you "
 "want to bring attention."
-msgstr ""
-"ใช้องค์ประกอบนี้เพื่อสร้างรายการองค์ประกอบของฟีเจอร์ที่คุณต้องการทำให้โดดเด่นขึ้น"
+msgstr "ใช้องค์ประกอบนี้เพื่อสร้างรายการองค์ประกอบของฟีเจอร์ที่คุณต้องการทำให้โดดเด่นขึ้น"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_references
@@ -18789,8 +19067,9 @@ msgid ""
 "or right-aligned image alongside textual content. Duplicate the element to "
 "create a list that fits your needs."
 msgstr ""
-"ใช้ snippet นี้เพื่อสร้างส่วนประกอบประเภทต่าง ๆ ที่จัดอยู่ในด้านซ้ายหรือขวาของรูปภาพควบคู่ไปกับเนื้"
-"อหาที่เป็นข้อความ ทำซ้ำองค์ประกอบเพื่อสร้างรายการที่ตรงกับความต้องการของคุณ"
+"ใช้ snippet นี้เพื่อสร้างส่วนประกอบประเภทต่าง ๆ "
+"ที่จัดอยู่ในด้านซ้ายหรือขวาของรูปภาพควบคู่ไปกับเนื้อหาที่เป็นข้อความ "
+"ทำซ้ำองค์ประกอบเพื่อสร้างรายการที่ตรงกับความต้องการของคุณ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
@@ -18798,8 +19077,8 @@ msgid ""
 "Use this snippet to presents your content in a slideshow-like format. Don't "
 "write about products or services here, write about solutions."
 msgstr ""
-"ใช้ snippet เพื่อนำเสนอเนื้อหาของคุณในรูปแบบที่เหมือนงานนำเสนอภาพนิ่ง อย่าเขียนเกี่ยวกับผลิตภัณฑ์"
-"หรือบริการที่นี่ เขียนเกี่ยวกับโซลูชัน"
+"ใช้ snippet เพื่อนำเสนอเนื้อหาของคุณในรูปแบบที่เหมือนงานนำเสนอภาพนิ่ง "
+"อย่าเขียนเกี่ยวกับผลิตภัณฑ์หรือบริการที่นี่ เขียนเกี่ยวกับโซลูชัน"
 
 #. module: website
 #. odoo-javascript
@@ -18807,12 +19086,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.theme_view_kanban
 msgid "Use this theme"
 msgstr "ใช้ธีมนี้"
-
-#. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
-msgid "Use your"
-msgstr ""
 
 #. module: website
 #: model:ir.model.fields,help:website.field_ir_model__website_form_key
@@ -18858,8 +19131,8 @@ msgid ""
 "campaign that brought you to the website."
 msgstr ""
 "ใช้เพื่อรวบรวมข้อมูลเกี่ยวกับการโต้ตอบของคุณกับเว็บไซต์ หน้าที่คุณเข้าชม\n"
-"                                                และแคมเปญการตลาดเฉพาะใด ๆ ที่นำ"
-"คุณมาที่เว็บไซต์"
+"                                                และแคมเปญการตลาดเฉพาะใด ๆ "
+"ที่นำคุณมาที่เว็บไซต์"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
@@ -18871,9 +19144,9 @@ msgid ""
 "reporting on ad campaign performance."
 msgstr ""
 "ใช้เพื่อทำให้โฆษณามีส่วนร่วมกับผู้ใช้มากขึ้นและมีคุณค่ามากขึ้นสำหรับผู้เผยแพร่และนักโฆษณา\n"
-"                                                เช่น การแสดงโฆษณาที่เกี่ยวข้องมากขึ้น"
-"เมื่อคุณเยี่ยมชมเว็บไซต์อื่น ๆ ที่แสดงโฆษณา หรือเพื่อปรับปรุงการรายงานเกี่ยวกับประสิทธิภาพของแคมเป"
-"ญโฆษณา"
+"                                                เช่น "
+"การแสดงโฆษณาที่เกี่ยวข้องมากขึ้นเมื่อคุณเยี่ยมชมเว็บไซต์อื่น ๆ ที่แสดงโฆษณา "
+"หรือเพื่อปรับปรุงการรายงานเกี่ยวกับประสิทธิภาพของแคมเปญโฆษณา"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.footer_custom
@@ -18954,6 +19227,12 @@ msgstr "ค่า"
 msgid ""
 "Value of this field does not lie within character limit.(Min: %(minChars)s, "
 "Max: %(maxChars)s)"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Velvet"
 msgstr ""
 
 #. module: website
@@ -19068,6 +19347,12 @@ msgstr "มุมมองโดยใช้สำเนาของฉัน"
 #: model:ir.model.fields,field_description:website.field_website_page__inherit_children_ids
 msgid "Views which inherit from this one"
 msgstr "มุมมองที่สืบทอดมาจากมุมมองนี้"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Violet"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -19296,8 +19581,8 @@ msgid ""
 "We also provide regular updates and new features based on user feedback, "
 "ensuring that our platform continues to evolve to meet your needs."
 msgstr ""
-"นอกจากนี้ เรายังมอบการอัปเดตเป็นประจำและฟีเจอร์ใหม่ๆ ตามความคิดเห็นของผู้ใช้ เพื่อให้แน่ใจว่าแพ"
-"ลตฟอร์มของเราจะพัฒนาอย่างต่อเนื่องเพื่อตอบสนองความต้องการของคุณ"
+"นอกจากนี้ เรายังมอบการอัปเดตเป็นประจำและฟีเจอร์ใหม่ๆ ตามความคิดเห็นของผู้ใช้ "
+"เพื่อให้แน่ใจว่าแพลตฟอร์มของเราจะพัฒนาอย่างต่อเนื่องเพื่อตอบสนองความต้องการของคุณ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega_cards
@@ -19313,8 +19598,8 @@ msgid ""
 "through disruptive products. We build great products to solve your business "
 "problems."
 msgstr ""
-"พวกเราคือทีมงานที่มุ่งมั่นและมีเป้าหมายที่จะปรับปรุงคุณภาพชีวิตของทุกคนผ่านผลิตภัณฑ์ที่สร้างสรรค์ เราสร้"
-"างผลิตภัณฑ์ที่ยอดเยี่ยมเพื่อแก้ไขปัญหาด้านธุรกิจของคุณ"
+"พวกเราคือทีมงานที่มุ่งมั่นและมีเป้าหมายที่จะปรับปรุงคุณภาพชีวิตของทุกคนผ่านผลิตภัณฑ์ที่สร้างสรรค์ "
+"เราสร้างผลิตภัณฑ์ที่ยอดเยี่ยมเพื่อแก้ไขปัญหาด้านธุรกิจของคุณ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.footer_custom
@@ -19327,8 +19612,8 @@ msgid ""
 msgstr ""
 "เราเป็นทีมที่มีความกระตือรือร้นและมีเป้าหมายเพื่อปรับปรุงชีวิตของทุกคนผ่านสินค้าที่จะสั่นสะเทือนวงการ "
 "เราสร้างผลิตภัณฑ์ที่ยอดเยี่ยมเพื่อแก้ปัญหาธุรกิจของคุณ\n"
-"                            <br/><br/> สินค้าของเราได้รับการออกแบบสำหรับบริษัทขนาดเล็"
-"กถึงขนาดกลางที่ต้องการเพิ่มประสิทธิภาพการทำงาน"
+"                            <br/><br/"
+"> สินค้าของเราได้รับการออกแบบสำหรับบริษัทขนาดเล็กถึงขนาดกลางที่ต้องการเพิ่มประสิทธิภาพการทำงาน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_descriptive
@@ -19339,8 +19624,8 @@ msgid ""
 "willing to optimize their performance."
 msgstr ""
 "เราเป็นทีมที่มีความกระตือรือร้นและมีเป้าหมายเพื่อปรับปรุงชีวิตของทุกคนผ่านสินค้าที่จะสั่นสะเทือนวงการ "
-"เราสร้างผลิตภัณฑ์ที่ยอดเยี่ยมเพื่อแก้ปัญหาธุรกิจของคุณ สินค้าของเราได้รับการออกแบบสำหรับบริษัทขนาดเ"
-"ล็กถึงขนาดกลางที่ต้องการเพิ่มประสิทธิภาพการทำงาน"
+"เราสร้างผลิตภัณฑ์ที่ยอดเยี่ยมเพื่อแก้ปัญหาธุรกิจของคุณ "
+"สินค้าของเราได้รับการออกแบบสำหรับบริษัทขนาดเล็กถึงขนาดกลางที่ต้องการเพิ่มประสิทธิภาพการทำงาน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_headline
@@ -19360,17 +19645,15 @@ msgid ""
 "We are committed to continuous improvement, regularly releasing updates and "
 "new features based on user feedback and technological advancements."
 msgstr ""
-"เราให้ความมุ่งมั่นที่จะปรับปรุงอย่างต่อเนื่องโดยปล่อยอัปเดตและฟีเจอร์ใหม่ๆ เป็นประจำตามความคิดเห็น"
-"ของผู้ใช้และความก้าวหน้าทางเทคโนโลยี"
+"เราให้ความมุ่งมั่นที่จะปรับปรุงอย่างต่อเนื่องโดยปล่อยอัปเดตและฟีเจอร์ใหม่ๆ "
+"เป็นประจำตามความคิดเห็นของผู้ใช้และความก้าวหน้าทางเทคโนโลยี"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
 msgid ""
 "We are committed to providing exceptional support and resources to help you "
 "succeed with our platform."
-msgstr ""
-"เรามุ่งมั่นที่จะให้การสนับสนุนและทรัพยากรที่ยอดเยี่ยมเพื่อช่วยให้คุณประสบความสำเร็จในการใช้แพลตฟอร์"
-"มของเรา"
+msgstr "เรามุ่งมั่นที่จะให้การสนับสนุนและทรัพยากรที่ยอดเยี่ยมเพื่อช่วยให้คุณประสบความสำเร็จในการใช้แพลตฟอร์มของเรา"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_references_grid
@@ -19402,9 +19685,7 @@ msgstr ""
 msgid ""
 "We collaborate with trusted, high-quality partners to bring you reliable and "
 "top-notch products and services."
-msgstr ""
-"เราทำงานร่วมกับพาร์ทเนอร์ที่มีคุณภาพสูงและเชื่อถือได้เพื่อนำเสนอสินค้าและบริการที่เชื่อถือได้และชั้นยอด"
-"ให้กับคุณ"
+msgstr "เราทำงานร่วมกับพาร์ทเนอร์ที่มีคุณภาพสูงและเชื่อถือได้เพื่อนำเสนอสินค้าและบริการที่เชื่อถือได้และชั้นยอดให้กับคุณ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel_intro
@@ -19413,8 +19694,8 @@ msgid ""
 "success, ensuring sustainable growth and competitive advantage in a dynamic "
 "market."
 msgstr ""
-"เราผสมผสานข้อมูลเชิงลึกเชิงกลยุทธ์และโซลูชันนวัตกรรมเพื่อขับเคลื่อนความสำเร็จทางธุรกิจ มั่นใจถึงกา"
-"รเติบโตอย่างยั่งยืนและความได้เปรียบทางการแข่งขันในตลาดที่มีการเปลี่ยนแปลงตลอดเวลา"
+"เราผสมผสานข้อมูลเชิงลึกเชิงกลยุทธ์และโซลูชันนวัตกรรมเพื่อขับเคลื่อนความสำเร็จทางธุรกิจ "
+"มั่นใจถึงการเติบโตอย่างยั่งยืนและความได้เปรียบทางการแข่งขันในตลาดที่มีการเปลี่ยนแปลงตลอดเวลา"
 
 #. module: website
 #. odoo-javascript
@@ -19428,9 +19709,7 @@ msgstr ""
 msgid ""
 "We deliver personalized solutions, ensuring that every customer receives top-"
 "tier service tailored to their needs."
-msgstr ""
-"เรามอบโซลูชันเฉพาะบุคคลเพื่อให้แน่ใจว่าลูกค้าแต่ละรายจะได้รับบริการชั้นยอดที่ปรับให้เหมาะกับความต้อ"
-"งการของพวกเขา"
+msgstr "เรามอบโซลูชันเฉพาะบุคคลเพื่อให้แน่ใจว่าลูกค้าแต่ละรายจะได้รับบริการชั้นยอดที่ปรับให้เหมาะกับความต้องการของพวกเขา"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features_cards
@@ -19446,8 +19725,9 @@ msgid ""
 "We deliver seamless, innovative solutions that not only meet your needs but "
 "exceed expectations, driving meaningful results and lasting success."
 msgstr ""
-"เราส่งมอบโซลูชั่นที่ราบรื่นและสร้างสรรค์ ไม่เพียงแต่ตอบโจทย์ความต้องการของคุณเท่านั้นแต่ยังเกินความ"
-"คาดหมาย ซึ่งส่งผลให้ได้ผลลัพธ์ที่มีความหมายและความสำเร็จที่ยั่งยืน"
+"เราส่งมอบโซลูชั่นที่ราบรื่นและสร้างสรรค์ "
+"ไม่เพียงแต่ตอบโจทย์ความต้องการของคุณเท่านั้นแต่ยังเกินความคาดหมาย "
+"ซึ่งส่งผลให้ได้ผลลัพธ์ที่มีความหมายและความสำเร็จที่ยั่งยืน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
@@ -19502,9 +19782,9 @@ msgid ""
 "Refunds are processed within 5-7 business days of receiving the returned "
 "item."
 msgstr ""
-"เราเสนอนโยบายการคืนสินค้าภายใน 30 วันสำหรับผลิตภัณฑ์ทั้งหมด สินค้าจะต้องอยู่ในสภาพเดิม ไม่เคยใ"
-"ช้งาน และมีใบเสร็จหรือหลักฐานการซื้อ การคืนเงินจะดำเนินการภายใน 5-7 วันทำการหลังจากได้รับสิน"
-"ค้าที่ส่งคืน"
+"เราเสนอนโยบายการคืนสินค้าภายใน 30 วันสำหรับผลิตภัณฑ์ทั้งหมด สินค้าจะต้องอยู่ในสภาพเดิม "
+"ไม่เคยใช้งาน และมีใบเสร็จหรือหลักฐานการซื้อ การคืนเงินจะดำเนินการภายใน 5-7 "
+"วันทำการหลังจากได้รับสินค้าที่ส่งคืน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_services_grid
@@ -19520,8 +19800,8 @@ msgid ""
 "We offer cutting-edge products and services to tackle modern challenges. "
 "Leveraging the latest technology, we help you achieve your goals."
 msgstr ""
-"เรานำเสนอผลิตภัณฑ์และบริการล้ำสมัยเพื่อรับมือกับความท้าทายในยุคใหม่ โดยใช้เทคโนโลยีล่าสุดเพื่อช่วย"
-"ให้คุณประสบความสำเร็จ"
+"เรานำเสนอผลิตภัณฑ์และบริการล้ำสมัยเพื่อรับมือกับความท้าทายในยุคใหม่ "
+"โดยใช้เทคโนโลยีล่าสุดเพื่อช่วยให้คุณประสบความสำเร็จ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
@@ -19547,8 +19827,8 @@ msgid ""
 "We provide 24/7 support through various channels, including live chat, "
 "email, and phone, to assist with any queries."
 msgstr ""
-"เราให้การสนับสนุนตลอด 24 ชั่วโมง ผ่านช่องทางต่างๆ เช่น ไลฟ์แชท อีเมล และโทรศัพท์ เพื่อช่วยเหลื"
-"อเกี่ยวกับคำถามต่างๆ"
+"เราให้การสนับสนุนตลอด 24 ชั่วโมง ผ่านช่องทางต่างๆ เช่น ไลฟ์แชท อีเมล และโทรศัพท์ "
+"เพื่อช่วยเหลือเกี่ยวกับคำถามต่างๆ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cards_grid
@@ -19557,8 +19837,8 @@ msgid ""
 "We provide personalized solutions to meet your unique needs. Our team works "
 "with you to ensure optimal results from start to finish."
 msgstr ""
-"เราจัดเตรียมโซลูชันเฉพาะบุคคลเพื่อตอบสนองความต้องการเฉพาะของคุณ ทีมงานของเราทำงานร่วมกับคุ"
-"ณเพื่อให้แน่ใจว่าจะได้รับผลลัพธ์ที่ดีที่สุดตั้งแต่ต้นจนจบ"
+"เราจัดเตรียมโซลูชันเฉพาะบุคคลเพื่อตอบสนองความต้องการเฉพาะของคุณ "
+"ทีมงานของเราทำงานร่วมกับคุณเพื่อให้แน่ใจว่าจะได้รับผลลัพธ์ที่ดีที่สุดตั้งแต่ต้นจนจบ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
@@ -19566,8 +19846,8 @@ msgid ""
 "We provide transparent pricing that offers great value, ensuring you always "
 "get the best deal without hidden costs."
 msgstr ""
-"เราเสนอราคาที่โปร่งใสซึ่งมอบความคุ้มค่าสูงสุด เพื่อให้มั่นใจว่าคุณจะได้รับข้อเสนอที่ดีที่สุดเสมอโดยไม่มีค่"
-"าใช้จ่ายแอบแฝง"
+"เราเสนอราคาที่โปร่งใสซึ่งมอบความคุ้มค่าสูงสุด "
+"เพื่อให้มั่นใจว่าคุณจะได้รับข้อเสนอที่ดีที่สุดเสมอโดยไม่มีค่าใช้จ่ายแอบแฝง"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_showcase_square
@@ -19590,9 +19870,10 @@ msgid ""
 "new to our platform, so we have designed a step-by-step guide to walk you "
 "through every stage, ensuring that you can hit the ground running.<br/>"
 msgstr ""
-"เราเข้าใจดีว่าการตั้งค่าเบื้องต้นอาจเป็นเรื่องน่ากังวล โดยเฉพาะหากคุณเป็นผู้ใช้ใหม่ต่อแพลตฟอร์มของเ"
-"รา ดังนั้น เราจึงได้ออกแบบคู่มือทีละขั้นตอนเพื่อพาคุณผ่านแต่ละขั้นตอน เพื่อให้มั่นใจว่าคุณจะเริ่มต้นได้อย่า"
-"งรวดเร็ว<br/>"
+"เราเข้าใจดีว่าการตั้งค่าเบื้องต้นอาจเป็นเรื่องน่ากังวล "
+"โดยเฉพาะหากคุณเป็นผู้ใช้ใหม่ต่อแพลตฟอร์มของเรา ดังนั้น "
+"เราจึงได้ออกแบบคู่มือทีละขั้นตอนเพื่อพาคุณผ่านแต่ละขั้นตอน "
+"เพื่อให้มั่นใจว่าคุณจะเริ่มต้นได้อย่างรวดเร็ว<br/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_banner_contained
@@ -19632,9 +19913,9 @@ msgid ""
 "provided. Our team is here to help and will respond as soon as possible. "
 "Thank you for getting in touch!"
 msgstr ""
-"เราอยากฟังความคิดเห็นของคุณ! หากคุณมีคำถาม ข้อเสนอแนะ หรือต้องการความช่วยเหลือ โปรดติดต่อเ"
-"ราโดยใช้รายละเอียดการติดต่อที่ให้ไว้ ทีมงานของเรายินดีให้ความช่วยเหลือและจะตอบกลับโดยเร็วที่สุด "
-"ขอบคุณที่ติดต่อเรา!"
+"เราอยากฟังความคิดเห็นของคุณ! หากคุณมีคำถาม ข้อเสนอแนะ หรือต้องการความช่วยเหลือ "
+"โปรดติดต่อเราโดยใช้รายละเอียดการติดต่อที่ให้ไว้ "
+"ทีมงานของเรายินดีให้ความช่วยเหลือและจะตอบกลับโดยเร็วที่สุด ขอบคุณที่ติดต่อเรา!"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_info
@@ -19644,9 +19925,9 @@ msgid ""
 "aim to respond to all inquiries within 24 hours. Thank you for getting in "
 "touch!"
 msgstr ""
-"เรายินดีรับฟังทุกความคิดเห็นจากคุณ ไม่ว่าคุณจะมีคำถาม ข้อเสนอแนะ หรืออยากขอความช่วยเหลือ ทีมงา"
-"นของเราพร้อมดูแลคุณเสมอ เพียงกรอกแบบฟอร์มด้านล่าง แล้วเราจะพยายามติดต่อกลับภายใน 24 ชั่วโม"
-"ง ขอบคุณที่ไว้วางใจและติดต่อมาหาเรา!"
+"เรายินดีรับฟังทุกความคิดเห็นจากคุณ ไม่ว่าคุณจะมีคำถาม ข้อเสนอแนะ หรืออยากขอความช่วยเหลือ "
+"ทีมงานของเราพร้อมดูแลคุณเสมอ เพียงกรอกแบบฟอร์มด้านล่าง แล้วเราจะพยายามติดต่อกลับภายใน 24 "
+"ชั่วโมง ขอบคุณที่ไว้วางใจและติดต่อมาหาเรา!"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_launch_countdown
@@ -20017,6 +20298,22 @@ msgstr "เว็บไซต์ที่จะแปล"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/theme/theme_font_weight_option.js:0
+msgid ""
+"Weight for \"Bold\" in the text toolbar. Unless Font Weight is \"Auto\", "
+"only equal or heavier values are available."
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/theme/theme_font_weight_option.xml:0
+msgid ""
+"Weight for \"Light\" in the text toolbar. Unless Font Weight is \"Auto\", "
+"only equal or lighter values are available."
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/client_actions/website_preview/website_builder_action.xml:0
 msgid "Welcome to your"
 msgstr ""
@@ -20026,8 +20323,7 @@ msgstr ""
 msgid ""
 "We’re committed to providing prompt and effective solutions to ensure your "
 "satisfaction."
-msgstr ""
-"เรามุ่งมั่นที่จะมอบโซลูชั่นที่รวดเร็วและมีประสิทธิภาพเพื่อรับประกันความพึงพอใจของคุณ"
+msgstr "เรามุ่งมั่นที่จะมอบโซลูชั่นที่รวดเร็วและมีประสิทธิภาพเพื่อรับประกันความพึงพอใจของคุณ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
@@ -20135,8 +20431,8 @@ msgid ""
 "With extensive experience and deep industry knowledge, we provide insights "
 "and solutions that keep you ahead of the curve."
 msgstr ""
-"ด้วยประสบการณ์อันกว้างขวางและความรู้เชิงลึกเกี่ยวกับอุตสาหกรรม เราจึงมอบข้อมูลเชิงลึกและโซลูชันที่"
-"ช่วยให้คุณก้าวล้ำนำหน้าผู้อื่น"
+"ด้วยประสบการณ์อันกว้างขวางและความรู้เชิงลึกเกี่ยวกับอุตสาหกรรม "
+"เราจึงมอบข้อมูลเชิงลึกและโซลูชันที่ช่วยให้คุณก้าวล้ำนำหน้าผู้อื่น"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_menus_logos
@@ -20197,8 +20493,8 @@ msgid ""
 "Write one or two paragraphs describing your product or services. To be "
 "successful your content needs to be useful to your readers."
 msgstr ""
-"เขียนหนึ่งหรือสองย่อหน้าเพื่ออธิบายผลิตภัณฑ์หรือบริการ เพื่อให้คุณประสบความสำเร็จเนื้อหาจะต้องเป็นปร"
-"ะโยชน์ต่อผู้อ่านของคุณ"
+"เขียนหนึ่งหรือสองย่อหน้าเพื่ออธิบายผลิตภัณฑ์หรือบริการ "
+"เพื่อให้คุณประสบความสำเร็จเนื้อหาจะต้องเป็นประโยชน์ต่อผู้อ่านของคุณ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_freegrid
@@ -20207,8 +20503,9 @@ msgid ""
 "successful your content needs to be useful to your readers. Start with the "
 "customer – find out what they want and give it to them."
 msgstr ""
-"เขียนหนึ่งถึงสองย่อหน้าเพื่ออธิบายผลิตภัณฑ์หรือบริการของคุณ หากต้องการให้ประสบความสำเร็จ เนื้อหาข"
-"องคุณจะต้องมีประโยชน์ต่อผู้อ่าน เริ่มจากลูกค้า ค้นหาว่าพวกเขาต้องการอะไรแล้วมอบสิ่งนั้นให้กับพวกเขา"
+"เขียนหนึ่งถึงสองย่อหน้าเพื่ออธิบายผลิตภัณฑ์หรือบริการของคุณ หากต้องการให้ประสบความสำเร็จ "
+"เนื้อหาของคุณจะต้องมีประโยชน์ต่อผู้อ่าน เริ่มจากลูกค้า "
+"ค้นหาว่าพวกเขาต้องการอะไรแล้วมอบสิ่งนั้นให้กับพวกเขา"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_closer_look
@@ -20219,8 +20516,8 @@ msgid ""
 "feature.<br/> To be successful your content needs to be useful to your "
 "readers."
 msgstr ""
-"เขียนหนึ่งหรือสองย่อหน้าเพื่ออธิบายผลิตภัณฑ์ บริการ หรือคุณลักษณะเฉพาะของคุณ<br/>เพื่อให้คุณประสบค"
-"วามสำเร็จเนื้อหาจะต้องเป็นประโยชน์ต่อผู้อ่านของคุณ"
+"เขียนหนึ่งหรือสองย่อหน้าเพื่ออธิบายผลิตภัณฑ์ บริการ หรือคุณลักษณะเฉพาะของคุณ<br/"
+">เพื่อให้คุณประสบความสำเร็จเนื้อหาจะต้องเป็นประโยชน์ต่อผู้อ่านของคุณ"
 
 #. module: website
 #. odoo-javascript
@@ -20296,8 +20593,8 @@ msgid ""
 "your browser's Help menu to learn the correct way to modify your cookies."
 msgstr ""
 "คุณสามารถเลือกให้คอมพิวเตอร์เตือนคุณทุกครั้งที่มีการส่งคุกกี้ หรือคุณสามารถเลือกที่จะปิดคุกกี้ทั้งหมดได้\n"
-"                            แต่ละเบราว์เซอร์จะแตกต่างกันเล็กน้อย ดังนั้นให้ดูที่เมนูวิธีใช้ของเ"
-"บราว์เซอร์เพื่อเรียนรู้วิธีแก้ไขคุกกี้ที่ถูกต้อง"
+"                            แต่ละเบราว์เซอร์จะแตกต่างกันเล็กน้อย "
+"ดังนั้นให้ดูที่เมนูวิธีใช้ของเบราว์เซอร์เพื่อเรียนรู้วิธีแก้ไขคุกกี้ที่ถูกต้อง"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features_grid
@@ -20325,9 +20622,9 @@ msgid ""
 "chat on our website. Our dedicated team is available 24/7 to assist with any "
 "inquiries or issues."
 msgstr ""
-"คุณสามารถติดต่อทีมสนับสนุนลูกค้าของเราได้โดยส่งอีเมลไปที่ info@yourcompany.example.com โทร"
-"ไปที่ +1 555-555-5556 หรือใช้ไลฟ์แชทบนเว็บไซต์ของเรา ทีมงานเฉพาะของเราพร้อมให้บริการตลอ"
-"ด 24 ชั่วโมงทุกวันเพื่อช่วยเหลือเกี่ยวกับคำถามหรือปัญหาต่างๆ"
+"คุณสามารถติดต่อทีมสนับสนุนลูกค้าของเราได้โดยส่งอีเมลไปที่ info@yourcompany.example.com "
+"โทรไปที่ +1 555-555-5556 หรือใช้ไลฟ์แชทบนเว็บไซต์ของเรา "
+"ทีมงานเฉพาะของเราพร้อมให้บริการตลอด 24 ชั่วโมงทุกวันเพื่อช่วยเหลือเกี่ยวกับคำถามหรือปัญหาต่างๆ"
 
 #. module: website
 #. odoo-python
@@ -20351,6 +20648,12 @@ msgstr ""
 #: code:addons/website/static/src/builder/plugins/form/form_option_plugin.js:0
 msgid "You cannot duplicate this field."
 msgstr "คุณไม่สามารถทำซ้ำช่องนี้ได้"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/options/card_image_option_plugin.js:0
+msgid "You cannot duplicate this image."
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -20391,6 +20694,13 @@ msgid "You don't have the necessary access rights to access this dashboard."
 msgstr ""
 
 #. module: website
+#. odoo-python
+#: code:addons/website/models/website.py:0
+msgid ""
+"You don't have the necessary access rights to use the website configurator."
+msgstr ""
+
+#. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/components/dialog/seo.xml:0
 msgid ""
@@ -20414,8 +20724,8 @@ msgid ""
 "if you reject or discard those cookies."
 msgstr ""
 "คุณสามารถเลือกไม่อนุญาตให้บุคคลที่สามใช้คุกกี้ได้โดยไปที่ หน้ายกเลิกการใช้คุกกี้ของ <a "
-"class=\"o_translate_inline\" href=\"https://optout.networkadvertising.org/"
-"?c=1\" rel=\"nofollow\">Network Advertising Initiative</a>\n"
+"class=\"o_translate_inline\" href=\"https://optout.networkadvertising.org/?"
+"c=1\" rel=\"nofollow\">Network Advertising Initiative</a>\n"
 "                เว็บไซต์จะยังคงทำงานได้ตามปกติ แม้ว่าคุณจะปฏิเสธหรือไม่รับคุกกี้เหล่านั้น"
 
 #. module: website
@@ -20534,17 +20844,14 @@ msgstr ""
 msgid ""
 "Your data is protected by advanced encryption and security protocols, "
 "keeping your personal information safe."
-msgstr ""
-"ข้อมูลของคุณได้รับการปกป้องด้วยการเข้ารหัสขั้นสูงและโปรโตคอลความปลอดภัยเพื่อรักษาข้อมูลส่วนบุคคลข"
-"องคุณให้ปลอดภัย"
+msgstr "ข้อมูลของคุณได้รับการปกป้องด้วยการเข้ารหัสขั้นสูงและโปรโตคอลความปลอดภัยเพื่อรักษาข้อมูลส่วนบุคคลของคุณให้ปลอดภัย"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid ""
 "Your experience may be degraded if you discard those cookies, but the "
 "website will still work."
-msgstr ""
-"ประสบการณ์ของคุณอาจลดลงหากคุณละทิ้งคุกกี้เหล่านั้น แต่เว็บไซต์จะยังคงทำงานอยู่"
+msgstr "ประสบการณ์ของคุณอาจลดลงหากคุณละทิ้งคุกกี้เหล่านั้น แต่เว็บไซต์จะยังคงทำงานอยู่"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cover
@@ -20803,8 +21110,8 @@ msgid ""
 "cite, slogan, tagline, mantra, catchphrase, statements, sayings, comments, "
 "mission, citations, maxim, quotes, principle, ethos, values"
 msgstr ""
-"อ้างอิง สโลแกน สโลแกน คำขวัญ คำคม วลีเด็ด ถ้อยแถลง คำพูด คำวิจารณ์ ภารกิจ การอ้างอิง คำค"
-"ม หลักการ จรรยาบรรณ ค่านิยม"
+"อ้างอิง สโลแกน สโลแกน คำขวัญ คำคม วลีเด็ด ถ้อยแถลง คำพูด คำวิจารณ์ ภารกิจ การอ้างอิง "
+"คำคม หลักการ จรรยาบรรณ ค่านิยม"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -20812,8 +21119,8 @@ msgid ""
 "cite, testimonials, endorsements, reviews, feedback, statements, references, "
 "sayings, comments, appreciations, citations"
 msgstr ""
-"อ้างอิง คำรับรอง การรับรอง บทวิจารณ์ ข้อเสนอแนะ คำชี้แจง การอ้างอิง คำพูด ความคิดเห็น การชื่น"
-"ชม การอ้างอิง"
+"อ้างอิง คำรับรอง การรับรอง บทวิจารณ์ ข้อเสนอแนะ คำชี้แจง การอ้างอิง คำพูด ความคิดเห็น "
+"การชื่นชม การอ้างอิง"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -20835,12 +21142,6 @@ msgid "color"
 msgstr "สี"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
-msgid "colors"
-msgstr ""
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "columns, containers, layouts, large, panels, modules"
 msgstr "คอลัมน์, คอนเทนเนอร์, เลย์เอาต์, แผง, โมดูลขนาดใหญ่"
@@ -20852,8 +21153,8 @@ msgid ""
 "visuals, portfolio, arrangement, collection, visual-grid, split, alignment, "
 "added value"
 msgstr ""
-"คอลัมน์, แกลลอรี่, รูปภาพ, ภาพถ่าย, สื่อ, ข้อความ, เนื้อหา, อัลบั้ม, โชว์เคส, ภาพ, พอร์ตโฟลิโ"
-"อ, การจัดเรียง, คอลเลกชัน, ตารางภาพ, การแยก, การจัดตำแหน่ง, มูลค่าเพิ่ม"
+"คอลัมน์, แกลลอรี่, รูปภาพ, ภาพถ่าย, สื่อ, ข้อความ, เนื้อหา, อัลบั้ม, โชว์เคส, ภาพ, "
+"พอร์ตโฟลิโอ, การจัดเรียง, คอลเลกชัน, ตารางภาพ, การแยก, การจัดตำแหน่ง, มูลค่าเพิ่ม"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -20874,8 +21175,8 @@ msgid ""
 "collapsible, hide-show, movement, information, image, picture, photo, "
 "illustration, media, visual"
 msgstr ""
-"คำตอบทั่วไป คำถามทั่วไป คำถามที่พบบ่อย QA ยุบ ขยายได้ สลับ พับได้ ซ่อน-แสดง การเคลื่อนไหว ข้อ"
-"มูล รูปภาพ รูปถ่าย ภาพประกอบ สื่อ ภาพ"
+"คำตอบทั่วไป คำถามทั่วไป คำถามที่พบบ่อย QA ยุบ ขยายได้ สลับ พับได้ ซ่อน-แสดง การเคลื่อนไหว "
+"ข้อมูล รูปภาพ รูปถ่าย ภาพประกอบ สื่อ ภาพ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -20910,8 +21211,8 @@ msgid ""
 "registration, request, image, picture, photo, illustration, media, visual, "
 "company, organization, address, phone, email, location, get-in-touch"
 msgstr ""
-"ติดต่อ รวบรวม การส่ง การป้อนข้อมูล ฟิลด์ แบบสอบถาม แบบสำรวจ การลงทะเบียน คำขอ รูปภาพ รูป"
-"ถ่าย ภาพประกอบ สื่อ ภาพ บริษัท องค์กร ที่อยู่ โทรศัพท์ อีเมล ที่ตั้ง ติดต่อเรา"
+"ติดต่อ รวบรวม การส่ง การป้อนข้อมูล ฟิลด์ แบบสอบถาม แบบสำรวจ การลงทะเบียน คำขอ รูปภาพ "
+"รูปถ่าย ภาพประกอบ สื่อ ภาพ บริษัท องค์กร ที่อยู่ โทรศัพท์ อีเมล ที่ตั้ง ติดต่อเรา"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -20946,8 +21247,8 @@ msgid ""
 "content, picture, photo, illustration, media, visual, article, story, "
 "combination, engage, call to action, cta, box, showcase"
 msgstr ""
-"เนื้อหา รูปภาพ รูปถ่าย ภาพประกอบ สื่อ ภาพ บทความ เรื่องราว การรวมกัน ดึงดูด กระตุ้นการดำเนิน"
-"การ cta กล่อง โชว์เคส"
+"เนื้อหา รูปภาพ รูปถ่าย ภาพประกอบ สื่อ ภาพ บทความ เรื่องราว การรวมกัน ดึงดูด "
+"กระตุ้นการดำเนินการ cta กล่อง โชว์เคส"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -20963,8 +21264,8 @@ msgid ""
 "content, picture, photo, illustration, media, visual, article, story, "
 "combination, more, hexagon, geometric"
 msgstr ""
-"เนื้อหา รูปภาพ ภาพถ่าย ภาพประกอบ สื่อ ภาพ บทความ เรื่องราว การรวมกัน เพิ่มเติม หกเหลี่ยม เร"
-"ขาคณิต"
+"เนื้อหา รูปภาพ ภาพถ่าย ภาพประกอบ สื่อ ภาพ บทความ เรื่องราว การรวมกัน เพิ่มเติม หกเหลี่ยม "
+"เรขาคณิต"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -20987,8 +21288,8 @@ msgid ""
 "content, picture, photo, illustration, media, visual, article, story, "
 "combination, trendy, pattern, design"
 msgstr ""
-"เนื้อหา ภาพ ภาพถ่าย ภาพประกอบ สื่อ ภาพ บทความ เรื่องราว การรวมกัน ทันสมัย รูปแบบ การออกแ"
-"บบ"
+"เนื้อหา ภาพ ภาพถ่าย ภาพประกอบ สื่อ ภาพ บทความ เรื่องราว การรวมกัน ทันสมัย รูปแบบ "
+"การออกแบบ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -20996,8 +21297,8 @@ msgid ""
 "content, picture, photo, illustration, media, visual, article, story, "
 "combination, trendy, pattern, design, shape, geometric, patterned"
 msgstr ""
-"เนื้อหา ภาพ ภาพถ่าย ภาพประกอบ สื่อ ภาพ บทความ เรื่องราว การรวมกัน ทันสมัย ลวดลาย การออก"
-"แบบ รูปทรง เรขาคณิต ลวดลาย"
+"เนื้อหา ภาพ ภาพถ่าย ภาพประกอบ สื่อ ภาพ บทความ เรื่องราว การรวมกัน ทันสมัย ลวดลาย "
+"การออกแบบ รูปทรง เรขาคณิต ลวดลาย"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21005,8 +21306,8 @@ msgid ""
 "content, picture, photo, illustration, media, visual, article, story, "
 "combination, trendy, pattern, design, shape, geometric, patterned, contrast"
 msgstr ""
-"เนื้อหา รูปภาพ ภาพถ่าย ภาพประกอบ สื่อ ภาพ บทความ เรื่องราว การผสมผสาน ทันสมัย ลวดลาย กา"
-"รออกแบบ รูปทรง เรขาคณิต ลวดลาย ความแตกต่าง"
+"เนื้อหา รูปภาพ ภาพถ่าย ภาพประกอบ สื่อ ภาพ บทความ เรื่องราว การผสมผสาน ทันสมัย ลวดลาย "
+"การออกแบบ รูปทรง เรขาคณิต ลวดลาย ความแตกต่าง"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21015,9 +21316,9 @@ msgid ""
 "combination, trendy, pattern, design, shape, geometric, patterned, contrast, "
 "collage, arrangement, gallery, creative, mosaic"
 msgstr ""
-"เนื้อหา รูปภาพ ภาพถ่าย ภาพประกอบ สื่อ ภาพ บทความ เรื่องราว การผสมผสาน ทันสมัย รูปแบบ การ"
-"ออกแบบ รูปทรง เรขาคณิต ลวดลาย ความแตกต่าง ภาพตัดปะ การจัดเรียง แกลเลอรี สร้างสรรค์ โมเ"
-"สก"
+"เนื้อหา รูปภาพ ภาพถ่าย ภาพประกอบ สื่อ ภาพ บทความ เรื่องราว การผสมผสาน ทันสมัย รูปแบบ "
+"การออกแบบ รูปทรง เรขาคณิต ลวดลาย ความแตกต่าง ภาพตัดปะ การจัดเรียง แกลเลอรี สร้างสรรค์ "
+"โมเสก"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21025,8 +21326,8 @@ msgid ""
 "content, picture, photo, illustration, media, visual, focus, in-depth, "
 "analysis, more, contact, detailed, mockup, explore, insight"
 msgstr ""
-"เนื้อหา รูปภาพ ภาพถ่าย ภาพประกอบ สื่อ ภาพ โฟกัส เจาะลึก วิเคราะห์ เพิ่มเติม ติดต่อ รายละเอีย"
-"ด โมเดล สำรวจ ข้อมูลเชิงลึก"
+"เนื้อหา รูปภาพ ภาพถ่าย ภาพประกอบ สื่อ ภาพ โฟกัส เจาะลึก วิเคราะห์ เพิ่มเติม ติดต่อ "
+"รายละเอียด โมเดล สำรวจ ข้อมูลเชิงลึก"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21048,8 +21349,8 @@ msgid ""
 "customers, clients, sponsors, partners, supporters, case-studies, "
 "collaborators, associations, associates, testimonials, endorsements"
 msgstr ""
-"ลูกค้า ไคลเอ็นต์ สปอนเซอร์ พาร์ทเนอร์ ผู้สนับสนุน กรณีศึกษา ผู้ร่วมมือ สมาคม ผู้ร่วมงาน คำรับรอง ก"
-"ารรับรอง"
+"ลูกค้า ไคลเอ็นต์ สปอนเซอร์ พาร์ทเนอร์ ผู้สนับสนุน กรณีศึกษา ผู้ร่วมมือ สมาคม ผู้ร่วมงาน คำรับรอง "
+"การรับรอง"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21057,8 +21358,8 @@ msgid ""
 "customers, clients, sponsors, partners, supporters, case-studies, "
 "collaborators, associations, associates, testimonials, endorsements, social"
 msgstr ""
-"ลูกค้า ไคลเอ็นต์ สปอนเซอร์ พาร์ทเนอร์ ผู้สนับสนุน กรณีศึกษา ผู้ร่วมมือ สมาคม ผู้ร่วมงาน คำรับรอง ก"
-"ารรับรอง สังคม"
+"ลูกค้า ไคลเอ็นต์ สปอนเซอร์ พาร์ทเนอร์ ผู้สนับสนุน กรณีศึกษา ผู้ร่วมมือ สมาคม ผู้ร่วมงาน คำรับรอง "
+"การรับรอง สังคม"
 
 #. module: website
 #. odoo-javascript
@@ -21079,8 +21380,8 @@ msgid ""
 "content, picture, photo, illustration, media, visual, article, story, "
 "combination, showcase, announcement, reveal"
 msgstr ""
-"คำอธิบาย คอนเทนเนอร์ เค้าโครง โครงสร้าง หลายคอลัมน์ โมดูล กล่อง เนื้อหา รูปภาพ รูปถ่าย ภาพ"
-"ประกอบ สื่อ ภาพ บทความ เรื่องราว การรวมกัน จัดแสดง ประกาศ เปิดเผย"
+"คำอธิบาย คอนเทนเนอร์ เค้าโครง โครงสร้าง หลายคอลัมน์ โมดูล กล่อง เนื้อหา รูปภาพ รูปถ่าย "
+"ภาพประกอบ สื่อ ภาพ บทความ เรื่องราว การรวมกัน จัดแสดง ประกาศ เปิดเผย"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21090,9 +21391,9 @@ msgid ""
 "combination, showcase, announcement, reveal, trendy, design, shape, "
 "geometric, engage, call to action, cta, button"
 msgstr ""
-"คำอธิบาย คอนเทนเนอร์ เค้าโครง โครงสร้าง หลายคอลัมน์ โมดูล กล่อง เนื้อหา รูปภาพ รูปถ่าย ภาพ"
-"ประกอบ สื่อ ภาพ บทความ เรื่องราว การรวมกัน โชว์เคส ประกาศ เปิดเผย ทันสมัย การออกแบบ รูป"
-"ทรง เรขาคณิต เอนเกจ คำกระตุ้นการตัดสินใจ ปุ่ม cta"
+"คำอธิบาย คอนเทนเนอร์ เค้าโครง โครงสร้าง หลายคอลัมน์ โมดูล กล่อง เนื้อหา รูปภาพ รูปถ่าย "
+"ภาพประกอบ สื่อ ภาพ บทความ เรื่องราว การรวมกัน โชว์เคส ประกาศ เปิดเผย ทันสมัย "
+"การออกแบบ รูปทรง เรขาคณิต เอนเกจ คำกระตุ้นการตัดสินใจ ปุ่ม cta"
 
 #. module: website
 #. odoo-javascript
@@ -21194,9 +21495,9 @@ msgid ""
 "mixed, collection, stacking, visual-grid, showcase, visuals, portfolio, "
 "thumbnails, engage, call to action, cta, showcase"
 msgstr ""
-"สี่ส่วน คอลัมน์ ตาราง การแบ่ง แบ่งส่วน รูปภาพ ภาพประกอบ สื่อ รูปถ่าย ไทล์ การจัดเรียง แกลเลอ"
-"รี ตารางรูปภาพ ผสม คอลเลกชัน การซ้อน ตารางภาพ โชว์เคส ภาพกราฟิก พอร์ตโฟลิโอ ภาพขนาดย่"
-"อ เอนเกจ คำกระตุ้นการตัดสินใจ cta โชว์เคส"
+"สี่ส่วน คอลัมน์ ตาราง การแบ่ง แบ่งส่วน รูปภาพ ภาพประกอบ สื่อ รูปถ่าย ไทล์ การจัดเรียง "
+"แกลเลอรี ตารางรูปภาพ ผสม คอลเลกชัน การซ้อน ตารางภาพ โชว์เคส ภาพกราฟิก พอร์ตโฟลิโอ "
+"ภาพขนาดย่อ เอนเกจ คำกระตุ้นการตัดสินใจ cta โชว์เคส"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.brand_promotion
@@ -21214,8 +21515,8 @@ msgid ""
 "gallery, carousel, pictures, photos, album, showcase, visuals, portfolio, "
 "thumbnails, slideshow"
 msgstr ""
-"แกลเลอรี่, ภาพหมุน, รูปภาพ, รูปถ่าย, อัลบั้ม, โชว์เคส, ภาพประกอบ, ผลงาน, ภาพขนาดย่อ, สไล"
-"ด์โชว์"
+"แกลเลอรี่, ภาพหมุน, รูปภาพ, รูปถ่าย, อัลบั้ม, โชว์เคส, ภาพประกอบ, ผลงาน, ภาพขนาดย่อ, "
+"สไลด์โชว์"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21223,8 +21524,8 @@ msgid ""
 "gallery, carousel, slider, slideshow, picture, photo, image-slider, "
 "rotating, swipe, transition, media-carousel, movement"
 msgstr ""
-"แกลเลอรี่, ภาพหมุน, สไลเดอร์, สไลด์โชว์, รูปภาพ, รูปถ่าย, สไลเดอร์รูปภาพ, การหมุน, การปั"
-"ด, การเปลี่ยนภาพ, ภาพหมุน, การเคลื่อนไหว"
+"แกลเลอรี่, ภาพหมุน, สไลเดอร์, สไลด์โชว์, รูปภาพ, รูปถ่าย, สไลเดอร์รูปภาพ, การหมุน, "
+"การปัด, การเปลี่ยนภาพ, ภาพหมุน, การเคลื่อนไหว"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21245,8 +21546,8 @@ msgid ""
 "graph, table, diagram, pie, plot, bar, metrics, figures, data-visualization, "
 "statistics, stats, analytics, infographic, skills, report"
 msgstr ""
-"กราฟ ตาราง ไดอะแกรม วงกลม พล็อต แท่ง เมตริก ตัวเลข การแสดงข้อมูลด้วยภาพ สถิติ สถิติเชิงวิเ"
-"คราะห์ อินโฟกราฟิก ทักษะ รายงาน"
+"กราฟ ตาราง ไดอะแกรม วงกลม พล็อต แท่ง เมตริก ตัวเลข การแสดงข้อมูลด้วยภาพ สถิติ "
+"สถิติเชิงวิเคราะห์ อินโฟกราฟิก ทักษะ รายงาน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21254,8 +21555,8 @@ msgid ""
 "grid, gallery, pictures, photos, album, showcase, visuals, portfolio, "
 "mosaic, collage, arrangement, collection, visual-grid"
 msgstr ""
-"ตาราง, แกลอรี่, รูปภาพ, รูปถ่าย, อัลบั้ม, โชว์เคส, ภาพ, ผลงาน, โมเสก, คอลลาจ, การจัดเรีย"
-"ง, คอลเลกชัน, ตารางภาพ"
+"ตาราง, แกลอรี่, รูปภาพ, รูปถ่าย, อัลบั้ม, โชว์เคส, ภาพ, ผลงาน, โมเสก, คอลลาจ, "
+"การจัดเรียง, คอลเลกชัน, ตารางภาพ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21264,8 +21565,8 @@ msgid ""
 "visuals, portfolio, mosaic, collage, arrangement, collection, visual-grid, "
 "split, alignment"
 msgstr ""
-"ตาราง แกลอรี่ รูปภาพ รูปถ่าย สื่อ ข้อความ เนื้อหา อัลบั้ม โชว์เคส ภาพ แฟ้มผลงาน โมเสก ภาพตัดป"
-"ะ การจัดเรียง คอลเลกชัน ตารางภาพ แยก การจัดตำแหน่ง"
+"ตาราง แกลอรี่ รูปภาพ รูปถ่าย สื่อ ข้อความ เนื้อหา อัลบั้ม โชว์เคส ภาพ แฟ้มผลงาน โมเสก "
+"ภาพตัดปะ การจัดเรียง คอลเลกชัน ตารางภาพ แยก การจัดตำแหน่ง"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21273,16 +21574,15 @@ msgid ""
 "header, introduction, home, content, introduction, overview, spotlight, "
 "presentation, welcome, context, description, primary, highlight, lead"
 msgstr ""
-"ส่วนหัว บทนำ หน้าแรก เนื้อหา บทนำ ภาพรวม จุดสนใจ การนำเสนอ ยินดีต้อนรับ บริบท คำอธิบาย หลั"
-"ก ไฮไลท์ นำ"
+"ส่วนหัว บทนำ หน้าแรก เนื้อหา บทนำ ภาพรวม จุดสนใจ การนำเสนอ ยินดีต้อนรับ บริบท คำอธิบาย "
+"หลัก ไฮไลท์ นำ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
 "heading, h1, headline, header, main, top, caption, introductory, principal, "
 "key"
-msgstr ""
-"หัวเรื่อง, h1, หัวเรื่อง, ส่วนหัว, หลัก, ด้านบน, คำบรรยาย, บทนำ, หลักการ, คีย์"
+msgstr "หัวเรื่อง, h1, หัวเรื่อง, ส่วนหัว, หลัก, ด้านบน, คำบรรยาย, บทนำ, หลักการ, คีย์"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21298,16 +21598,15 @@ msgid ""
 "article, combination, trendy, pattern, design, bold, impactful, vibrant, "
 "standout"
 msgstr ""
-"หัวเรื่อง, ส่วนหัว, เนื้อหา, รูปภาพ, ภาพถ่าย, ภาพประกอบ, สื่อ, ภาพ, บทความ, การรวมกัน, ทัน"
-"สมัย, รูปแบบ, การออกแบบ, โดดเด่น, มีพลัง, สดใส"
+"หัวเรื่อง, ส่วนหัว, เนื้อหา, รูปภาพ, ภาพถ่าย, ภาพประกอบ, สื่อ, ภาพ, บทความ, การรวมกัน, "
+"ทันสมัย, รูปแบบ, การออกแบบ, โดดเด่น, มีพลัง, สดใส"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
 "headline, header, content, picture, photo, illustration, media, visual, "
 "combination"
-msgstr ""
-"หัวเรื่อง, ส่วนหัว, เนื้อหา, รูปภาพ, ภาพถ่าย, ภาพประกอบ, สื่อ, ภาพ, การรวมกัน"
+msgstr "หัวเรื่อง, ส่วนหัว, เนื้อหา, รูปภาพ, ภาพถ่าย, ภาพประกอบ, สื่อ, ภาพ, การรวมกัน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_contact
@@ -21364,8 +21663,8 @@ msgid ""
 "hero, jumbotron, headline, header, branding, intro, home, showcase, "
 "spotlight, lead, welcome, announcement, splash, top, main"
 msgstr ""
-"ฮีโร่ จัมโบทรอน พาดหัวข่าว ส่วนหัว การสร้างแบรนด์ บทนำ หน้าแรก โชว์เคส สปอตไลท์ นำหน้า ยินดี"
-"ต้อนรับ ประกาศ สแปลช ด้านบน หลัก"
+"ฮีโร่ จัมโบทรอน พาดหัวข่าว ส่วนหัว การสร้างแบรนด์ บทนำ หน้าแรก โชว์เคส สปอตไลท์ นำหน้า "
+"ยินดีต้อนรับ ประกาศ สแปลช ด้านบน หลัก"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21373,16 +21672,15 @@ msgid ""
 "hero, jumbotron, headline, header, branding, intro, home, showcase, "
 "spotlight, main, landing, presentation, top, splash, parallax"
 msgstr ""
-"ฮีโร่ จอแสดงภาพขนาดใหญ่ พาดหัวข่าว ส่วนหัว การสร้างแบรนด์ บทนำ หน้าแรก การจัดแสดง สปอตไล"
-"ท์ หลัก แลนดิ้ง การนำเสนอ ด้านบน สแปลช พารัลแลกซ์"
+"ฮีโร่ จอแสดงภาพขนาดใหญ่ พาดหัวข่าว ส่วนหัว การสร้างแบรนด์ บทนำ หน้าแรก การจัดแสดง "
+"สปอตไลท์ หลัก แลนดิ้ง การนำเสนอ ด้านบน สแปลช พารัลแลกซ์"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
 "hero, jumbotron, headline, header, intro, home, content, description, "
 "primary, highlight, lead"
-msgstr ""
-"ฮีโร่ จัมโบทรอน หัวเรื่อง ส่วนหัว บทนำ หน้าแรก เนื้อหา คำอธิบาย หลัก ไฮไลท์ นำ"
+msgstr "ฮีโร่ จัมโบทรอน หัวเรื่อง ส่วนหัว บทนำ หน้าแรก เนื้อหา คำอธิบาย หลัก ไฮไลท์ นำ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21399,8 +21697,8 @@ msgid ""
 "introduction, overview, spotlight, presentation, welcome, context, "
 "description, primary, highlight, lead"
 msgstr ""
-"ฮีโร่ จัมโบทรอน หัวเรื่อง ส่วนหัว บทนำ หน้าแรก เนื้อหา บทนำ ภาพรวม จุดสนใจ การนำเสนอ ยินดีต้"
-"อนรับ บริบท คำอธิบาย หลัก ไฮไลท์ ลูกค้าเป้าหมาย"
+"ฮีโร่ จัมโบทรอน หัวเรื่อง ส่วนหัว บทนำ หน้าแรก เนื้อหา บทนำ ภาพรวม จุดสนใจ การนำเสนอ "
+"ยินดีต้อนรับ บริบท คำอธิบาย หลัก ไฮไลท์ ลูกค้าเป้าหมาย"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21409,8 +21707,8 @@ msgid ""
 "introduction, overview, spotlight, presentation, welcome, context, "
 "description, primary, highlight, lead, CTA, promote, promotion"
 msgstr ""
-"ฮีโร่ จัมโบทรอน หัวเรื่อง ส่วนหัว บทนำ หน้าแรก เนื้อหา บทนำ ภาพรวม จุดสนใจ การนำเสนอ ยินดีต้"
-"อนรับ บริบท คำอธิบาย หลัก ไฮไลท์ นำหน้า CTA ส่งเสริม การส่งเสริมการขาย"
+"ฮีโร่ จัมโบทรอน หัวเรื่อง ส่วนหัว บทนำ หน้าแรก เนื้อหา บทนำ ภาพรวม จุดสนใจ การนำเสนอ "
+"ยินดีต้อนรับ บริบท คำอธิบาย หลัก ไฮไลท์ นำหน้า CTA ส่งเสริม การส่งเสริมการขาย"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21419,8 +21717,8 @@ msgid ""
 "introduction, overview, spotlight, presentation, welcome, context, "
 "description, primary, highlight, lead, discover, exploration, reveal"
 msgstr ""
-"ฮีโร่ จัมโบทรอน หัวเรื่อง ส่วนหัว บทนำ หน้าแรก เนื้อหา บทนำ ภาพรวม จุดสนใจ การนำเสนอ ยินดีต้"
-"อนรับ บริบท คำอธิบาย หลัก ไฮไลท์ นำ ค้นพบ การสำรวจ เปิดเผย"
+"ฮีโร่ จัมโบทรอน หัวเรื่อง ส่วนหัว บทนำ หน้าแรก เนื้อหา บทนำ ภาพรวม จุดสนใจ การนำเสนอ "
+"ยินดีต้อนรับ บริบท คำอธิบาย หลัก ไฮไลท์ นำ ค้นพบ การสำรวจ เปิดเผย"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21430,9 +21728,9 @@ msgid ""
 "description, primary, highlight, lead, journey, skills, expertises, experts, "
 "accomplishments, knowledge"
 msgstr ""
-"ฮีโร่ จัมโบ้ทรอน หัวเรื่อง ส่วนหัว บทนำ หน้าแรก เนื้อหา บทนำ ภาพรวม จุดสนใจ การนำเสนอ ยินดีต้"
-"อนรับ บริบท คำอธิบาย หลัก ไฮไลท์ นำทาง การเดินทาง ทักษะ ความเชี่ยวชาญ ผู้เชี่ยวชาญ ความสำเ"
-"ร็จ ความรู้"
+"ฮีโร่ จัมโบ้ทรอน หัวเรื่อง ส่วนหัว บทนำ หน้าแรก เนื้อหา บทนำ ภาพรวม จุดสนใจ การนำเสนอ "
+"ยินดีต้อนรับ บริบท คำอธิบาย หลัก ไฮไลท์ นำทาง การเดินทาง ทักษะ ความเชี่ยวชาญ ผู้เชี่ยวชาญ "
+"ความสำเร็จ ความรู้"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21441,8 +21739,8 @@ msgid ""
 "photo, illustration, media, visual, article, combination, trendy, pattern, "
 "design"
 msgstr ""
-"ฮีโร่ จัมโบทรอน หัวเรื่อง ส่วนหัว บทนำ บ้าน เนื้อหา ภาพ ภาพถ่าย ภาพประกอบ สื่อ ภาพ บทความ ก"
-"ารรวมกัน ทันสมัย รูปแบบ การออกแบบ"
+"ฮีโร่ จัมโบทรอน หัวเรื่อง ส่วนหัว บทนำ บ้าน เนื้อหา ภาพ ภาพถ่าย ภาพประกอบ สื่อ ภาพ บทความ "
+"การรวมกัน ทันสมัย รูปแบบ การออกแบบ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21451,8 +21749,8 @@ msgid ""
 "photo, illustration, media, visual, article, combination, trendy, pattern, "
 "design, centered"
 msgstr ""
-"ฮีโร่ จัมโบ้ทรอน หัวเรื่อง ส่วนหัว บทนำ บ้าน เนื้อหา ภาพ ภาพถ่าย ภาพประกอบ สื่อ ภาพ บทความ ก"
-"ารรวมกัน ทันสมัย รูปแบบ การออกแบบ ตรงกลาง"
+"ฮีโร่ จัมโบ้ทรอน หัวเรื่อง ส่วนหัว บทนำ บ้าน เนื้อหา ภาพ ภาพถ่าย ภาพประกอบ สื่อ ภาพ บทความ "
+"การรวมกัน ทันสมัย รูปแบบ การออกแบบ ตรงกลาง"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21505,8 +21803,8 @@ msgid ""
 "history, story, events, milestones, chronology, sequence, progression, "
 "achievements, changelog, updates, announcements, recent, latest"
 msgstr ""
-"ประวัติศาสตร์ เรื่องราว กิจกรรม เหตุการณ์สำคัญ ลำดับเหตุการณ์ ลำดับเหตุการณ์ ความก้าวหน้า ความ"
-"สำเร็จ บันทึกการเปลี่ยนแปลง การอัปเดต ประกาศ ล่าสุด ล่าสุด"
+"ประวัติศาสตร์ เรื่องราว กิจกรรม เหตุการณ์สำคัญ ลำดับเหตุการณ์ ลำดับเหตุการณ์ ความก้าวหน้า "
+"ความสำเร็จ บันทึกการเปลี่ยนแปลง การอัปเดต ประกาศ ล่าสุด ล่าสุด"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21592,8 +21890,8 @@ msgid ""
 "journey, exploration, travel, outdoor, excitement, quest, start, onboarding, "
 "discovery, thrill"
 msgstr ""
-"การเดินทาง การสำรวจ การเดินทาง กลางแจ้ง ความตื่นเต้น การแสวงหา การเริ่มต้น การเรียนรู้ กา"
-"รค้นพบ ความตื่นเต้น"
+"การเดินทาง การสำรวจ การเดินทาง กลางแจ้ง ความตื่นเต้น การแสวงหา การเริ่มต้น การเรียนรู้ "
+"การค้นพบ ความตื่นเต้น"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -21620,8 +21918,8 @@ msgid ""
 "masonry, grid, column, pictures, photos, album, showcase, visuals, "
 "portfolio, mosaic, collage, arrangement, collection, visual-grid"
 msgstr ""
-"งานก่ออิฐ ตาราง เสา รูปภาพ อัลบั้ม โชว์เคส ภาพกราฟิก พอร์ตโฟลิโอ โมเสก คอลลาจ การจัดเรีย"
-"ง คอลเลกชัน ตารางภาพ"
+"งานก่ออิฐ ตาราง เสา รูปภาพ อัลบั้ม โชว์เคส ภาพกราฟิก พอร์ตโฟลิโอ โมเสก คอลลาจ "
+"การจัดเรียง คอลเลกชัน ตารางภาพ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21629,8 +21927,8 @@ msgid ""
 "menu, pricing, shop, table, cart, product, cost, charges, fees, rates, "
 "prices, expenses"
 msgstr ""
-"เมนู, ราคา, ร้านค้า, โต๊ะ, รถเข็น, สินค้า, ต้นทุน, ค่าบริการ, ค่าธรรมเนียม, อัตรา, ราคา, ค่า"
-"ใช้จ่าย"
+"เมนู, ราคา, ร้านค้า, โต๊ะ, รถเข็น, สินค้า, ต้นทุน, ค่าบริการ, ค่าธรรมเนียม, อัตรา, ราคา, "
+"ค่าใช้จ่าย"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21673,7 +21971,6 @@ msgstr ""
 
 #. module: website
 #. odoo-javascript
-#: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
 #: code:addons/website/static/src/components/dialog/add_page_dialog.xml:0
 msgid "or"
 msgstr ""
@@ -21689,8 +21986,7 @@ msgstr ""
 msgid ""
 "organization, company, people, column, members, staffs, profiles, bios, "
 "roles, personnel, crew"
-msgstr ""
-"องค์กร บริษัท คน คอลัมน์ สมาชิก พนักงาน โปรไฟล์ ชีวประวัติ บทบาท บุคลากร พนักงาน"
+msgstr "องค์กร บริษัท คน คอลัมน์ สมาชิก พนักงาน โปรไฟล์ ชีวประวัติ บทบาท บุคลากร พนักงาน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21713,8 +22009,8 @@ msgid ""
 "organization, company, people, members, staffs, profiles, bios, roles, "
 "personnel, crew, patterned, trendy, social"
 msgstr ""
-"องค์กร บริษัท ผู้คน สมาชิก พนักงาน โปรไฟล์ ชีวประวัติ บทบาท บุคลากร ลูกเรือ รูปแบบ ทันสมัย สังค"
-"ม"
+"องค์กร บริษัท ผู้คน สมาชิก พนักงาน โปรไฟล์ ชีวประวัติ บทบาท บุคลากร ลูกเรือ รูปแบบ ทันสมัย "
+"สังคม"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21789,8 +22085,7 @@ msgstr ""
 msgid ""
 "process, progression, guide, workflow, sequence, instructions, stages, "
 "procedure, roadmap"
-msgstr ""
-"กระบวนการ ความก้าวหน้า คำแนะนำ เวิร์กโฟลว์ ลำดับ คำแนะนำ ขั้นตอน ขั้นตอน แผนงาน"
+msgstr "กระบวนการ ความก้าวหน้า คำแนะนำ เวิร์กโฟลว์ ลำดับ คำแนะนำ ขั้นตอน ขั้นตอน แผนงาน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21839,8 +22134,8 @@ msgid ""
 "functionalities, exhibit, details, capabilities, attributes, promotion, "
 "presentation, demo, feature"
 msgstr ""
-"โปรโมชั่น คุณลักษณะ คุณภาพ จุดเด่น ข้อมูลจำเพาะ ข้อดี ฟังก์ชัน การจัดแสดง รายละเอียด ความสามา"
-"รถ คุณลักษณะ การส่งเสริมการขาย การนำเสนอ การสาธิต ฟีเจอร์"
+"โปรโมชั่น คุณลักษณะ คุณภาพ จุดเด่น ข้อมูลจำเพาะ ข้อดี ฟังก์ชัน การจัดแสดง รายละเอียด "
+"ความสามารถ คุณลักษณะ การส่งเสริมการขาย การนำเสนอ การสาธิต ฟีเจอร์"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21849,8 +22144,8 @@ msgid ""
 "functionalities, features, exhibit, details, capabilities, attributes, "
 "promotion, headline, content, overview, spotlight"
 msgstr ""
-"การส่งเสริมการขาย คุณลักษณะ คุณภาพ จุดเด่น ข้อมูลจำเพาะ ข้อดี ฟังก์ชัน คุณสมบัติ การจัดแสดง ราย"
-"ละเอียด ความสามารถ คุณลักษณะ การส่งเสริมการขาย หัวเรื่อง เนื้อหา ภาพรวม จุดสนใจ"
+"การส่งเสริมการขาย คุณลักษณะ คุณภาพ จุดเด่น ข้อมูลจำเพาะ ข้อดี ฟังก์ชัน คุณสมบัติ การจัดแสดง "
+"รายละเอียด ความสามารถ คุณลักษณะ การส่งเสริมการขาย หัวเรื่อง เนื้อหา ภาพรวม จุดสนใจ"
 
 #. module: website
 #. odoo-javascript
@@ -21902,8 +22197,8 @@ msgid ""
 "reveal, showcase, launch, presentation, announcement, content, picture, "
 "photo, illustration, media, visual, article, combination"
 msgstr ""
-"เปิดเผย, จัดแสดง, เปิดตัว, การนำเสนอ, ประกาศ, เนื้อหา, รูปภาพ, ภาพถ่าย, ภาพประกอบ, สื่"
-"อ, ภาพ, บทความ, การรวมกัน"
+"เปิดเผย, จัดแสดง, เปิดตัว, การนำเสนอ, ประกาศ, เนื้อหา, รูปภาพ, ภาพถ่าย, ภาพประกอบ, "
+"สื่อ, ภาพ, บทความ, การรวมกัน"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21911,8 +22206,8 @@ msgid ""
 "reveal, showcase, launch, presentation, announcement, content, picture, "
 "photo, illustration, media, visual, combination"
 msgstr ""
-"เปิดเผย, จัดแสดง, เปิดตัว, การนำเสนอ, ประกาศ, เนื้อหา, รูปภาพ, ภาพถ่าย, ภาพประกอบ, สื่"
-"อ, ภาพ, การรวมกัน"
+"เปิดเผย, จัดแสดง, เปิดตัว, การนำเสนอ, ประกาศ, เนื้อหา, รูปภาพ, ภาพถ่าย, ภาพประกอบ, "
+"สื่อ, ภาพ, การรวมกัน"
 
 #. module: website
 #. odoo-javascript
@@ -22010,9 +22305,9 @@ msgid ""
 "performance, achievements, benchmarks, milestones, indicators, data, "
 "measurements, reports, trends, results, analytics, summaries, summary"
 msgstr ""
-"สถิติ, สถิติ, KPI, เมตริก, แดชบอร์ด, การวิเคราะห์, ไฮไลท์, ตัวเลข, ประสิทธิภาพ, ความสำเร็"
-"จ, เกณฑ์มาตรฐาน, เหตุการณ์สำคัญ, ตัวบ่งชี้, ข้อมูล, การวัดผล, รายงาน, แนวโน้ม, ผลลัพธ์, การ"
-"วิเคราะห์, สรุป, สรุปย่อ"
+"สถิติ, สถิติ, KPI, เมตริก, แดชบอร์ด, การวิเคราะห์, ไฮไลท์, ตัวเลข, ประสิทธิภาพ, "
+"ความสำเร็จ, เกณฑ์มาตรฐาน, เหตุการณ์สำคัญ, ตัวบ่งชี้, ข้อมูล, การวัดผล, รายงาน, แนวโน้ม, "
+"ผลลัพธ์, การวิเคราะห์, สรุป, สรุปย่อ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -22021,8 +22316,8 @@ msgid ""
 "skills, achievements, benchmarks, milestones, indicators, data, "
 "measurements, reports, trends, results"
 msgstr ""
-"สถิติ สถิติ KPI เมตริก แผงข้อมูล การวิเคราะห์ ไฮไลท์ ตัวเลข ทักษะ ความสำเร็จ เกณฑ์มาตรฐาน เ"
-"หตุการณ์สำคัญ ตัวบ่งชี้ ข้อมูล การวัด รายงาน แนวโน้ม ผลลัพธ์"
+"สถิติ สถิติ KPI เมตริก แผงข้อมูล การวิเคราะห์ ไฮไลท์ ตัวเลข ทักษะ ความสำเร็จ เกณฑ์มาตรฐาน "
+"เหตุการณ์สำคัญ ตัวบ่งชี้ ข้อมูล การวัด รายงาน แนวโน้ม ผลลัพธ์"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -22032,9 +22327,9 @@ msgid ""
 "measurements, reports, trends, results, analytics, cta, call to action, "
 "button"
 msgstr ""
-"สถิติ สถิติ KPI เมตริก แผงข้อมูล การวิเคราะห์ ไฮไลท์ ตัวเลข ทักษะ ความสำเร็จ เกณฑ์มาตรฐาน เ"
-"หตุการณ์สำคัญ ตัวบ่งชี้ ข้อมูล การวัด รายงาน แนวโน้ม ผลลัพธ์ การวิเคราะห์ CTA ปุ่มเรียกร้องให้ดำเ"
-"นินการ ปุ่ม"
+"สถิติ สถิติ KPI เมตริก แผงข้อมูล การวิเคราะห์ ไฮไลท์ ตัวเลข ทักษะ ความสำเร็จ เกณฑ์มาตรฐาน "
+"เหตุการณ์สำคัญ ตัวบ่งชี้ ข้อมูล การวัด รายงาน แนวโน้ม ผลลัพธ์ การวิเคราะห์ CTA "
+"ปุ่มเรียกร้องให้ดำเนินการ ปุ่ม"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -22043,8 +22338,8 @@ msgid ""
 "skills, achievements, benchmarks, milestones, indicators, data, "
 "measurements, reports, trends, results, analytics, summaries, summary"
 msgstr ""
-"สถิติ สถิติ KPI เมตริก แผงข้อมูล การวิเคราะห์ ไฮไลท์ ตัวเลข ทักษะ ความสำเร็จ เกณฑ์มาตรฐาน เ"
-"หตุการณ์สำคัญ ตัวบ่งชี้ ข้อมูล การวัด รายงาน แนวโน้ม ผลลัพธ์ การวิเคราะห์ สรุป สรุป"
+"สถิติ สถิติ KPI เมตริก แผงข้อมูล การวิเคราะห์ ไฮไลท์ ตัวเลข ทักษะ ความสำเร็จ เกณฑ์มาตรฐาน "
+"เหตุการณ์สำคัญ ตัวบ่งชี้ ข้อมูล การวัด รายงาน แนวโน้ม ผลลัพธ์ การวิเคราะห์ สรุป สรุป"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -22054,9 +22349,9 @@ msgid ""
 "measurements, reports, trends, results, analytics, summaries, summary, large-"
 "figures, prominent, standout"
 msgstr ""
-"สถิติ สถิติ KPI เมตริก แผงข้อมูล การวิเคราะห์ ไฮไลท์ ตัวเลข ทักษะ ความสำเร็จ เกณฑ์มาตรฐาน เ"
-"หตุการณ์สำคัญ ตัวบ่งชี้ ข้อมูล การวัด รายงาน แนวโน้ม ผลลัพธ์ การวิเคราะห์ สรุป สรุป ตัวเลขขนาดใ"
-"หญ่ โดดเด่น โดดเด่น"
+"สถิติ สถิติ KPI เมตริก แผงข้อมูล การวิเคราะห์ ไฮไลท์ ตัวเลข ทักษะ ความสำเร็จ เกณฑ์มาตรฐาน "
+"เหตุการณ์สำคัญ ตัวบ่งชี้ ข้อมูล การวัด รายงาน แนวโน้ม ผลลัพธ์ การวิเคราะห์ สรุป สรุป "
+"ตัวเลขขนาดใหญ่ โดดเด่น โดดเด่น"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -22230,3 +22525,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid "✽  What We Offer"
 msgstr ""
+
+#~ msgid "The form's specified model does not exist"
+#~ msgstr "ไม่มีโมเดลที่ระบุในแบบฟอร์ม"
+
+#~ msgid "Accounts are usable across all your multiple websites"
+#~ msgstr "บัญชีสามารถใช้งานได้ทั่วทั้งเว็บไซต์หลายแห่งของคุณ"
+
+#~ msgid "Places API"
+#~ msgstr "API สถานที่"

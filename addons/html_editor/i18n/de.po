@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-30 00:50+0000\n"
+"POT-Creation-Date: 2026-10-30 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 16:40+0000\n"
 "Last-Translator: \"Larissa Manderfeld (lman)\" <lman@odoo.com>\n"
 "Language-Team: German <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -282,12 +282,6 @@ msgstr "Automatisch abspielen"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/column_plugin.js:0
-msgid "Back to one column"
-msgstr "Zurück zu einer Spalte"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner"
 msgstr "Banner"
@@ -530,6 +524,12 @@ msgstr "Inhalt generiert"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
+msgid "Convert columns to regular content"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/column_plugin.js:0
 msgid "Convert into 2 columns"
 msgstr "In 2 Spalten umwandeln"
 
@@ -706,6 +706,12 @@ msgstr "Dokumente"
 #: code:addons/html_editor/static/src/main/movenode_plugin.js:0
 msgid "Drag to move"
 msgstr "Zum Verschieben ziehen"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.js:0
+msgid "Dynamic element"
+msgstr ""
 
 #. module: html_editor
 #. odoo-python
@@ -1530,10 +1536,28 @@ msgid "Ok"
 msgstr "Ok"
 
 #. module: html_editor
+#. odoo-python
+#: code:addons/html_editor/controllers/main.py:0
+msgid "Only internal users can use AI text generation."
+msgstr ""
+
+#. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_menu.js:0
 msgid "Only rows or cells selection can be merged"
 msgstr "Es können nur ausgewählte Zeilen oder Zellen zusammengeführt werden"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/backend/dynamic_field/dynamic_field_plugin.js:0
+msgid "Oops! Select a model for this template before editing fields."
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/backend/dynamic_field/dynamic_field_plugin.js:0
+msgid "Oops! Select a model for this template before inserting fields."
+msgstr ""
 
 #. module: html_editor
 #. odoo-python
@@ -1769,8 +1793,8 @@ msgstr "Link entfernen"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
-msgid "Remove columns"
-msgstr "Spalten entfernen"
+msgid "Remove column layout"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -2784,3 +2808,9 @@ msgstr "Websocket-Nachrichtbearbeitung"
 #: code:addons/html_editor/static/src/main/table/table_picker.xml:0
 msgid "x"
 msgstr "x"
+
+#~ msgid "Back to one column"
+#~ msgstr "Zurück zu einer Spalte"
+
+#~ msgid "Remove columns"
+#~ msgstr "Spalten entfernen"

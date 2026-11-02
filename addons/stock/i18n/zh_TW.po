@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:36+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 21:20+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
@@ -1463,6 +1463,12 @@ msgstr "詢問"
 
 #. module: stock
 #. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Assign"
+msgstr ""
+
+#. module: stock
+#. odoo-javascript
 #: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 msgid "Assign All"
 msgstr "分配全部"
@@ -1476,6 +1482,12 @@ msgstr "分配擁有者"
 #: model:ir.model.fields,field_description:stock.field_stock_request_count__user_id
 msgid "Assign to"
 msgstr "分配給"
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
+msgid "Assigned"
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_package__child_package_dest_ids
@@ -2713,7 +2725,8 @@ msgstr "通過此倉庫的預設路線"
 msgid ""
 "Define a minimum stock rule so that Odoo automatically creates requests for "
 "quotations or confirmed manufacturing orders to resupply your stock."
-msgstr "定義最低庫存規則，以便 Odoo 自動建立報價請求或確認製造訂單以重新補貨您的庫存."
+msgstr ""
+"定義最低庫存規則，以便 Odoo 自動建立報價請求或確認製造訂單以重新補貨您的庫存."
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.action_warehouse_form
@@ -3705,6 +3718,7 @@ msgid "Full Package Name"
 msgstr ""
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Future Activities"
 msgstr "未來活動"
@@ -4110,8 +4124,8 @@ msgstr "如果勾選該方格，Odoo 將在驗證揀貨時,自動打印退貨單
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_show_allocation_report
 msgid ""
-"If this checkbox is ticked, Odoo will automatically show the allocation "
-"report (if there are moves to allocate to) when validating."
+"If this checkbox is ticked, Odoo will show the allocation report (if there "
+"are moves to allocate to.)"
 msgstr ""
 
 #. module: stock
@@ -4902,6 +4916,7 @@ msgid "Late"
 msgstr "過往"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Late Activities"
 msgstr "逾期活動"
@@ -5539,6 +5554,7 @@ msgid "Multiple destinations"
 msgstr ""
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "My Activities"
 msgstr "我的活動"
@@ -7847,7 +7863,6 @@ msgstr "保留部分包裝"
 
 #. module: stock
 #. odoo-javascript
-#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 #: code:addons/stock/static/src/allocation_report/out_line/out_line.js:0
 msgid "Reserved"
 msgstr ""
@@ -9303,8 +9318,8 @@ msgid ""
 "The following combinations contain duplicates:\n"
 "%(error_lines)s"
 msgstr ""
-"批次/序號與產品的組合，在同一公司內必須獨一無二，即使在未有定義公司的情況也是"
-"。\n"
+"批次/序號與產品的組合，在同一公司內必須獨一無二，即使在未有定義公司的情況也"
+"是。\n"
 "以下組合有重複項目：\n"
 "%(error_lines)s"
 
@@ -9426,7 +9441,8 @@ msgstr "包含此位置的上級位置.示例:「分配區域」是「1號門」
 msgid ""
 "The procurement quantity will be rounded up to a multiple of this unit/"
 "packaging. If it is not set, it is not rounded."
-msgstr "採購數量將四捨五入至此單位/包裝的整數倍數。若未設定，便不會進行四捨五入。"
+msgstr ""
+"採購數量將四捨五入至此單位/包裝的整數倍數。若未設定，便不會進行四捨五入。"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_warn_insufficient_qty_form_view
@@ -9885,6 +9901,7 @@ msgid "Today"
 msgstr "今天"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Today Activities"
 msgstr "今天的活動"
@@ -10163,6 +10180,12 @@ msgstr ""
 #: model:ir.model.fields,help:stock.field_stock_picking__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr "記錄的異常活動的類型。"
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Unassign"
+msgstr ""
 
 #. module: stock
 #. odoo-python
@@ -10637,7 +10660,8 @@ msgstr "倉庫補貨選項"
 msgid ""
 "When a warehouse is selected for this route, this route should be seen as "
 "the default route when products pass through this warehouse."
-msgstr "當為這條路線選擇了一個倉庫時，這條路線應該被視為產品經過這個倉庫時的預設路線."
+msgstr ""
+"當為這條路線選擇了一個倉庫時，這條路線應該被視為產品經過這個倉庫時的預設路線."
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__res_company__picking_policy__one
@@ -10704,7 +10728,8 @@ msgstr ""
 msgid ""
 "When the picking is not done this allows changing the initial demand. When "
 "the picking is done this allows changing the done quantities."
-msgstr "當揀貨沒有完成時，這允許改變初始需求.當揀貨完成時，這允許改變完成的數量."
+msgstr ""
+"當揀貨沒有完成時，這允許改變初始需求.當揀貨完成時，這允許改變完成的數量."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_replenishment_info
@@ -10940,7 +10965,8 @@ msgstr "你不可封存位置 %(location)s，因為倉庫 %(warehouse)s 正使�
 msgid ""
 "You cannot cancel a stock move that has been set to 'Done'. Create a return "
 "in order to reverse the moves which took place."
-msgstr "您無法取消已設定為“完成”的庫存移動.請透過建立一個退回單據來執行反向操作."
+msgstr ""
+"您無法取消已設定為“完成”的庫存移動.請透過建立一個退回單據來執行反向操作."
 
 #. module: stock
 #. odoo-python
@@ -10974,7 +11000,8 @@ msgstr "目前位於其他公司位置的批次/序號的庫存，不可更改�
 msgid ""
 "You cannot change the ratio of this unit of measure as some products with "
 "this UoM have already been moved or are currently reserved."
-msgstr "您無法更改此計量單位的比率，因為具有此計量單位的某些產品已被移動或當前已保留."
+msgstr ""
+"您無法更改此計量單位的比率，因為具有此計量單位的某些產品已被移動或當前已保留."
 
 #. module: stock
 #. odoo-python

@@ -32,7 +32,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:36+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 21:14+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Croatian <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -1569,6 +1569,12 @@ msgstr "Pitaj"
 
 #. module: stock
 #. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Assign"
+msgstr ""
+
+#. module: stock
+#. odoo-javascript
 #: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 msgid "Assign All"
 msgstr "Dodjeli sve"
@@ -1583,6 +1589,12 @@ msgstr "Dodjeljeni vlasnik"
 #, fuzzy
 msgid "Assign to"
 msgstr "Dodijeli"
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
+msgid "Assigned"
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_package__child_package_dest_ids
@@ -3495,8 +3507,8 @@ msgid ""
 "Due to receipts scheduled in the future, you might end up with "
 "excessive stock . Check the Forecasted Report  before reordering"
 msgstr ""
-"Zbog primki zakazanih u budućnosti, mogli biste završiti s prekomjernom "
-"zalihom. Provjerite izvještaj o prognozi prije ponovne narudžbe"
+"Zbog primki zakazanih u budućnosti, mogli biste završiti s "
+"prekomjernom zalihom. Provjerite izvještaj o prognozi prije ponovne narudžbe"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move__procurement_values
@@ -3951,6 +3963,7 @@ msgid "Full Package Name"
 msgstr "Puni naziv paketa"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Future Activities"
 msgstr "Buduće aktivnosti"
@@ -4023,7 +4036,8 @@ msgstr "Potpuna sljedivost od dobavljača do kupaca"
 msgid ""
 "Give to the more specialized category, a higher priority to have them in top "
 "of the list."
-msgstr "Uvrsti u drugu kategoriju većeg prioriteta kako bi bila na vrhu popisa."
+msgstr ""
+"Uvrsti u drugu kategoriju većeg prioriteta kako bi bila na vrhu popisa."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_warehouse__sequence
@@ -4048,7 +4062,8 @@ msgstr "Primka robe"
 #: code:addons/stock/static/src/client_actions/multi_print.js:0
 #, fuzzy
 msgid "HTML reports cannot be auto-printed, skipping report: %s"
-msgstr "HTML izvještaji se ne mogu automatski ispisati, preskačem izvještaj: %s"
+msgstr ""
+"HTML izvještaji se ne mogu automatski ispisati, preskačem izvještaj: %s"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_type_form
@@ -4396,8 +4411,8 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_show_allocation_report
 msgid ""
-"If this checkbox is ticked, Odoo will automatically show the allocation "
-"report (if there are moves to allocate to) when validating."
+"If this checkbox is ticked, Odoo will show the allocation report (if there "
+"are moves to allocate to.)"
 msgstr ""
 
 #. module: stock
@@ -5046,7 +5061,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 "Keep the <strong>Counted Quantity</strong> (the Difference will be updated)"
-msgstr "Zadrži <strong>prebrojanu količinu</strong> (razlika će biti ažurirana)"
+msgstr ""
+"Zadrži <strong>prebrojanu količinu</strong> (razlika će biti ažurirana)"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_inventory_conflict_form_view
@@ -5246,6 +5262,7 @@ msgid "Late"
 msgstr "Kasni"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Late Activities"
 msgstr "Posljednje aktivnosti"
@@ -5918,6 +5935,7 @@ msgid "Multiple destinations"
 msgstr "Više odredišta"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "My Activities"
 msgstr "Moje aktivnosti"
@@ -8383,7 +8401,6 @@ msgstr "Rezerviraj djelomična pakiranja"
 
 #. module: stock
 #. odoo-javascript
-#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 #: code:addons/stock/static/src/allocation_report/out_line/out_line.js:0
 msgid "Reserved"
 msgstr ""
@@ -9355,7 +9372,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock.inventory_warning_set_view
 #, fuzzy
 msgid "Some selected lines already have quantities set, they will be ignored."
-msgstr "Neke odabrane stavke već imaju postavljene količine, bit će zanemarene."
+msgstr ""
+"Neke odabrane stavke već imaju postavljene količine, bit će zanemarene."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move_line__origin
@@ -10669,6 +10687,7 @@ msgid "Today"
 msgstr "Danas"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Today Activities"
 msgstr "Današnje aktivnosti"
@@ -10894,7 +10913,8 @@ msgstr "Prijenosi %s: Molimo dodajte stavke za premještanje."
 #: model_terms:ir.actions.act_window,help:stock.action_picking_type_list
 #: model_terms:ir.ui.view,arch_db:stock.help_message_template
 msgid "Transfers allow you to move products from one location to another."
-msgstr "Transferi omogućuju da premještate proizvode s jedne lokacije na drugu."
+msgstr ""
+"Transferi omogućuju da premještate proizvode s jedne lokacije na drugu."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_package__picking_ids
@@ -10967,6 +10987,12 @@ msgstr ""
 #: model:ir.model.fields,help:stock.field_stock_picking__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr "Vrsta aktivnosti iznimke na zapisu."
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Unassign"
+msgstr ""
 
 #. module: stock
 #. odoo-python

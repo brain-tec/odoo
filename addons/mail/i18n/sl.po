@@ -22,7 +22,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-10 17:37+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-08-31 20:07+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Slovenian <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -748,8 +748,8 @@ msgid ""
 "<p><b>Chat with coworkers</b> in real-time using direct messages.</"
 "p><p><i>You might need to invite users from the Settings app first.</i></p>"
 msgstr ""
-"<p><b>Klepetajte s sodelavci</b> v realnem času z neposrednimi sporočili.</p>"
-"<p><i>Morda boste morali najprej povabiti uporabnike iz aplikacije "
+"<p><b>Klepetajte s sodelavci</b> v realnem času z neposrednimi sporočili.</"
+"p><p><i>Morda boste morali najprej povabiti uporabnike iz aplikacije "
 "Nastavitve.</i></p>"
 
 #. module: mail
@@ -939,7 +939,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
 msgid ""
 "<strong>Save</strong> this page and come back here to set up the feature."
-msgstr "<strong>Shranite</strong> to stran in se vrnite za nastavitev funkcije."
+msgstr ""
+"<strong>Shranite</strong> to stran in se vrnite za nastavitev funkcije."
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.message_document_unfollowed
@@ -1203,6 +1204,7 @@ msgstr "Privzeto aktivirano ob vpisu."
 #: model:ir.model.fields,field_description:mail.field_discuss_channel__active
 #: model:ir.model.fields,field_description:mail.field_fetchmail_server__active
 #: model:ir.model.fields,field_description:mail.field_ir_access__active
+#: model:ir.model.fields,field_description:mail.field_ir_cron__active
 #: model:ir.model.fields,field_description:mail.field_mail_activity__active
 #: model:ir.model.fields,field_description:mail.field_mail_activity_plan__active
 #: model:ir.model.fields,field_description:mail.field_mail_activity_type__active
@@ -1564,7 +1566,8 @@ msgstr ""
 msgid ""
 "Adding followers on channels is not possible. Consider adding members "
 "instead."
-msgstr "Dodajanje sledilcev na kanale ni mogoče. Razmislite o dodajanju članov."
+msgstr ""
+"Dodajanje sledilcev na kanale ni mogoče. Razmislite o dodajanju članov."
 
 #. module: mail
 #. odoo-python
@@ -1572,7 +1575,8 @@ msgstr "Dodajanje sledilcev na kanale ni mogoče. Razmislite o dodajanju članov
 msgid ""
 "Adding more members to this chat isn't possible; it's designed for just two "
 "people."
-msgstr "V ta klepet ni mogoče dodati več članov; zasnovan je samo za dve osebi."
+msgstr ""
+"V ta klepet ni mogoče dodati več članov; zasnovan je samo za dve osebi."
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__partner_cc_ids
@@ -1706,8 +1710,9 @@ msgid ""
 "(alias_model_name)s (%(matching_id)s) and used by the %(parent_name)s %"
 "(parent_model_name)s."
 msgstr ""
-"Vzdevek%(matching_name)s (%(current_id)s) je že povezan z %(alias_model_name)"
-"s (%(matching_id)s) in ga uporablja %(parent_name)s %(parent_model_name)s."
+"Vzdevek%(matching_name)s (%(current_id)s) je že povezan z %"
+"(alias_model_name)s (%(matching_id)s) in ga uporablja %(parent_name)s %"
+"(parent_model_name)s."
 
 #. module: mail
 #. odoo-python
@@ -1930,7 +1935,8 @@ msgstr "Arhivirano"
 #: code:addons/mail/models/res_users.py:0
 msgid ""
 "Archived because %(user_name)s (#%(user_id)s) deleted the portal account"
-msgstr "Arhivirano, ker je %(user_name)s (#%(user_id)s) izbrisal portalni račun"
+msgstr ""
+"Arhivirano, ker je %(user_name)s (#%(user_id)s) izbrisal portalni račun"
 
 #. module: mail
 #. odoo-javascript
@@ -2831,8 +2837,8 @@ msgstr ""
 #: code:addons/mail/models/discuss/discuss_channel.py:0
 msgid "Cannot change initial message nor parent channel of: %(channels)s."
 msgstr ""
-"Začetnega sporočila niti nadrejenega kanala ni mogoče spremeniti: %(channels)"
-"s."
+"Začetnega sporočila niti nadrejenega kanala ni mogoče spremeniti: %"
+"(channels)s."
 
 #. module: mail
 #. odoo-python
@@ -2884,12 +2890,6 @@ msgstr ""
 #. odoo-python
 #: code:addons/mail/models/mail_activity.py:0
 msgid "Cannot search, too many activities"
-msgstr ""
-
-#. module: mail
-#. odoo-python
-#: code:addons/mail/models/mail_message.py:0
-msgid "Cannot search, too many messages"
 msgstr ""
 
 #. module: mail
@@ -4191,8 +4191,8 @@ msgid ""
 "'notifications@example.com' to override all outgoing emails."
 msgstr ""
 "Privzeto od takrat, ko se ne ujema s filtri odhodnega strežnika. Lahko je "
-"lokalni del, npr. »obvestila«, ali celoten e-poštni naslov, npr. »"
-"obvestila@primer.si«, da se preglasijo vsa odhodna e-poštna sporočila."
+"lokalni del, npr. »obvestila«, ali celoten e-poštni naslov, npr. "
+"»obvestila@primer.si«, da se preglasijo vsa odhodna e-poštna sporočila."
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_template__use_default_to
@@ -4364,7 +4364,8 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_canned_response__is_editable
 msgid "Determines if the canned response can be edited by the current user"
-msgstr "Določa, ali lahko trenutni uporabnik ureja vnaprej pripravljen odgovor."
+msgstr ""
+"Določa, ali lahko trenutni uporabnik ureja vnaprej pripravljen odgovor."
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_canned_response__is_shared
@@ -5487,8 +5488,8 @@ msgid ""
 "getattr(related_document.relation_field)."
 msgstr ""
 "Polje za povezovanje modela s podtipom modela pri uporabi samodejnega "
-"naročanja na povezani dokument. Polje je namenjeno izračunu getattr"
-"(related_document.relation_field)."
+"naročanja na povezani dokument. Polje je namenjeno izračunu "
+"getattr(related_document.relation_field)."
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_template__template_fs
@@ -6807,8 +6808,8 @@ msgid ""
 "Invalid expression, it must be a literal python dictionary definition e.g. "
 "\"{'field': 'value'}\""
 msgstr ""
-"Napačen izraz, mora biti skladen z definicijo python slovarja, npr. \""
-"{'field':'value'}\""
+"Napačen izraz, mora biti skladen z definicijo python slovarja, npr. "
+"\"{'field':'value'}\""
 
 #. module: mail
 #. odoo-python
@@ -7284,6 +7285,11 @@ msgstr "V ŽIVO"
 #: model:ir.model.fields,field_description:mail.field_mail_template__lang
 msgid "Language"
 msgstr "Jezik"
+
+#. module: mail
+#: model:ir.model.fields,help:mail.field_mail_message_translation__target_lang
+msgid "Language code used as the target for the translation request."
+msgstr ""
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_discuss_channel__last_interest_dt
@@ -7866,8 +7872,8 @@ msgid ""
 "Mailing or posting with a source should not be called with an empty %"
 "(source_type)s"
 msgstr ""
-"Pošiljanje ali objavljanje z virom se ne sme klicati s praznim %(source_type)"
-"s"
+"Pošiljanje ali objavljanje z virom se ne sme klicati s praznim %"
+"(source_type)s"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_mail__mail_ids
@@ -9018,8 +9024,8 @@ msgid ""
 "Notification should receive attachments as a list of list or tuples "
 "(received %(aids)s)"
 msgstr ""
-"Obvestilo naj prejme priloge kot seznam seznamov ali naborov (prejeto%(aids)"
-"s)"
+"Obvestilo naj prejme priloge kot seznam seznamov ali naborov (prejeto%"
+"(aids)s)"
 
 #. module: mail
 #. odoo-python
@@ -10251,6 +10257,12 @@ msgid "Pop out Attachments"
 msgstr "Odpri priloge"
 
 #. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/core/common/attachment_view.js:0
+msgid "Pop out is not supported on mobile."
+msgstr ""
+
+#. module: mail
 #: model:ir.model.fields,field_description:mail.field_fetchmail_server__port
 msgid "Port"
 msgstr "Vrata"
@@ -10335,8 +10347,8 @@ msgid ""
 "Posting a message should receive partners as a list of IDs (received %"
 "(pids)s)"
 msgstr ""
-"Objava sporočila bi morala partnerjem poslati seznam ID-jev (prejetih %(pids)"
-"s)"
+"Objava sporočila bi morala partnerjem poslati seznam ID-jev (prejetih %"
+"(pids)s)"
 
 #. module: mail
 #. odoo-python
@@ -11425,6 +11437,12 @@ msgstr "Išči strežnike vhodne pošte"
 
 #. module: mail
 #. odoo-javascript
+#: code:addons/mail/static/src/discuss/gif_picker/common/gif_picker.xml:0
+msgid "Search Klipy"
+msgstr ""
+
+#. module: mail
+#. odoo-javascript
 #: code:addons/mail/static/src/chatter/web/chatter.xml:0
 #: code:addons/mail/static/src/core/common/search_messages_panel.js:0
 #: code:addons/mail/static/src/core/common/thread_actions.js:0
@@ -11455,12 +11473,6 @@ msgstr "Iskanje po imenu"
 #: code:addons/mail/static/src/discuss/core/public_web/discuss_command_palette.js:0
 msgid "Search conversations"
 msgstr ""
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/discuss/gif_picker/common/gif_picker.xml:0
-msgid "Search for a GIF"
-msgstr "Iskanje GIF-a"
 
 #. module: mail
 #. odoo-javascript
@@ -11908,8 +11920,8 @@ msgstr "Nastavi načrtovani datum"
 #: model:ir.model.fields,help:mail.field_discuss_channel__active
 msgid "Set active to false to hide the channel without removing it."
 msgstr ""
-"Če želite skriti kanal, ne da bi ga odstranili, nastavite »active« na »false"
-"«."
+"Če želite skriti kanal, ne da bi ga odstranili, nastavite »active« na "
+"»false«."
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
@@ -11981,11 +11993,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_mail_canned_response__source
 msgid "Shortcut"
 msgstr "Bližnjica"
-
-#. module: mail
-#: model:ir.model.fields,help:mail.field_mail_message_translation__target_lang
-msgid "Shortened language code used as the target for the translation request."
-msgstr "Skrajšana jezikovna koda, uporabljena kot cilj za zahtevo za prevod."
 
 #. module: mail
 #. odoo-javascript
@@ -12800,10 +12807,10 @@ msgid ""
 "                 Please make sure you are using the correct address or "
 "contact us at %(default_email)s instead."
 msgstr ""
-"Spodnjega sporočila ni bilo mogoče sprejeti na naslovu %(alias_display_name)"
-"s.\n"
-"                 Samo%(contact_description)s lahko stopijo v stik z "
-"njim.<br /><br />\n"
+"Spodnjega sporočila ni bilo mogoče sprejeti na naslovu %"
+"(alias_display_name)s.\n"
+"                 Samo%(contact_description)s lahko stopijo v stik z njim."
+"<br /><br />\n"
 "                 Prosimo, preverite, ali uporabljate pravilen naslov, ali pa "
 "nas kontaktirajte na %(default_email)s ."
 
@@ -13480,6 +13487,14 @@ msgid "Tomorrow:"
 msgstr "Jutri:"
 
 #. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_message.py:0
+msgid ""
+"Too many messages to be processed.\n"
+"Please apply additional filters to reduce the number of potential messages."
+msgstr ""
+
+#. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.discuss_channel_view_search
 msgid "Topic"
 msgstr ""
@@ -13632,8 +13647,8 @@ msgstr ""
 "- 'Ustvari dejavnost': ustvari dejavnost (Razprava)\n"
 "- 'Pošlji e-pošto': objavi sporočilo, opombo ali pošlji e-pošto (Razprava)\n"
 "- 'Pošlji SMS': pošiljanje SMS-ov, beleženje v dokumentih (SMS) - 'Dodaj/"
-"odstrani sledilce': dodajanje ali odstranjevanje sledilcev zapisu (Razprava)"
-"\n"
+"odstrani sledilce': dodajanje ali odstranjevanje sledilcev zapisu "
+"(Razprava)\n"
 "- 'Ustvari zapis': ustvari nov zapis z novimi vrednostmi\n"
 "- 'Izvedi kodo': blok kode Python, ki bo izveden\n"
 "- »Pošlji obvestilo o spletnem kavlju«: pošlji zahtevo POST zunanjemu "
@@ -14657,8 +14672,8 @@ msgid ""
 msgstr ""
 "Pri tiskanju dokumentov in izvozu/uvozu podatkov se časovne vrednosti "
 "izračunajo glede na ta časovni pas.\n"
-"Če časovni pas ni nastavljen, se uporablja UTC (koordinirani univerzalni čas)"
-".\n"
+"Če časovni pas ni nastavljen, se uporablja UTC (koordinirani univerzalni "
+"čas).\n"
 "Anywhere else, time values are computed according to the time offset of your "
 "web client."
 
@@ -15035,6 +15050,14 @@ msgstr ""
 #. odoo-python
 #: code:addons/mail/models/discuss/discuss_channel.py:0
 msgid ""
+"You do not have the rights to change the name, description or avatar as a "
+"regular member of these read-only channels: %(channels)s."
+msgstr ""
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/discuss/discuss_channel.py:0
+msgid ""
 "You do not have the rights to change the read-only state of: %(channels)s."
 msgstr ""
 
@@ -15310,12 +15333,6 @@ msgstr "pogovori"
 #: code:addons/mail/models/discuss/discuss_channel.py:0
 msgid "created this channel."
 msgstr "ustvaril ta kanal."
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/js/rotting_mixin/rotting_statusbar.xml:0
-msgid "d"
-msgstr ""
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.account_security_alert
@@ -15892,6 +15909,14 @@ msgstr "“%(member_name)s” v “%(channel_name)s”"
 #: code:addons/mail/models/mail_canned_response.py:0
 msgid "🔒 Private"
 msgstr ""
+
+#~ msgid ""
+#~ "Shortened language code used as the target for the translation request."
+#~ msgstr ""
+#~ "Skrajšana jezikovna koda, uporabljena kot cilj za zahtevo za prevod."
+
+#~ msgid "Search for a GIF"
+#~ msgstr "Iskanje GIF-a"
 
 #~ msgid ""
 #~ "Add a Tenor GIF API key to enable GIFs support. https://"

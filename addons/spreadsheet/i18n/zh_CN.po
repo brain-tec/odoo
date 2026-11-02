@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:39+0000\n"
+"POT-Creation-Date: 2026-10-30 17:39+0000\n"
 "PO-Revision-Date: 2026-09-01 08:10+0000\n"
 "Last-Translator: \"Chloe Wang (chwa)\" <chwa@odoo.com>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
@@ -78,8 +78,8 @@ msgstr "行总计的百分比"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "%(count)s matches in %(sheetName)s"
-msgstr "%(sheetName)s工作表中有%(count)s处匹配"
+msgid "%(count)s matches in '%(sheetName)s'"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -90,8 +90,8 @@ msgstr "全部工作表中共有%(count)s处匹配"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "%(count)s matches in range %(range)s of %(sheetName)s"
-msgstr "%(sheetName)s工作表的%(range)s区域内有%(count)s处匹配"
+msgid "%(count)s matches in range %(range)s of '%(sheetName)s'"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -385,8 +385,14 @@ msgstr "1 列"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "1 match in %(sheetName)s"
-msgstr "1 条匹配结果%(sheetName)s"
+msgid "1 is hidden"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "1 match in '%(sheetName)s'"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -397,8 +403,8 @@ msgstr "所有工作表中共有 1 处匹配"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "1 match in range %(range)s of %(sheetName)s"
-msgstr "%(sheetName)s 工作表的 %(range)s 区域内有 1 处匹配"
+msgid "1 match in range %(range)s of '%(sheetName)s'"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1199,7 +1205,8 @@ msgstr "按顺序横向拼接多个单元格区域，组合成新数组。"
 msgid ""
 "Appends ranges horizontally and in sequence to return a larger array. All "
 "ranges must have the same number of rows."
-msgstr "将范围水平且按顺序追加，以返回一个更大的数组。所有范围必须具有相同的行数。"
+msgstr ""
+"将范围水平且按顺序追加，以返回一个更大的数组。所有范围必须具有相同的行数。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1861,6 +1868,13 @@ msgstr "链接工作表已隐藏，无法打开该链接。"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid ""
+"Cannot perform this action on merged cells. Unmerge the cells and try again."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Cannot remove duplicates for an unknown reason"
 msgstr "无法删除重复文件，原因不明"
 
@@ -2050,7 +2064,7 @@ msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
-#: code:addons/spreadsheet/static/src/chart/odoo_link/chart_menu.js:0
+#: code:addons/spreadsheet/static/src/chart/odoo_link/components/chart_menu.js:0
 msgid "Chart Odoo Link"
 msgstr ""
 
@@ -2401,8 +2415,8 @@ msgid ""
 "Compatibility version of ODOO.FILTER.VALUE for v18 spreadsheets. Required "
 "for date filters. Optional for others."
 msgstr ""
-"适用于 v18 表格的 ODOO.FILTER.VALUE 兼容版本，日期筛选必须使用，其他场景可选"
-"。"
+"适用于 v18 表格的 ODOO.FILTER.VALUE 兼容版本，日期筛选必须使用，其他场景可"
+"选。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2491,8 +2505,8 @@ msgstr "拼接两个数值"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "Concise formatxA0(default)"
-msgstr "精简格式（默认）"
+msgid "Concise format (default)"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4030,7 +4044,8 @@ msgstr "指数"
 msgid ""
 "Expression or reference to a cell containing a logical value (TRUE/FALSE) or "
 "an expression that can be coerced to a logical value."
-msgstr "逻辑表达式或单元格引用，内容可为布尔值（真 / 假）或可转换为布尔值的表达式。"
+msgstr ""
+"逻辑表达式或单元格引用，内容可为布尔值（真 / 假）或可转换为布尔值的表达式。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5138,7 +5153,8 @@ msgid ""
 "Indicates whether the column to be searched (the first column of the "
 "specified range) is sorted, in which case the closest match for search_key "
 "will be returned."
-msgstr "标识待检索列（指定区域首列）是否已排序，排序时将返回与查找值最接近的匹配项。"
+msgstr ""
+"标识待检索列（指定区域首列）是否已排序，排序时将返回与查找值最接近的匹配项。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5147,7 +5163,8 @@ msgid ""
 "Indicates whether the row to be searched (the first row of the specified "
 "range) is sorted, in which case the closest match for search_key will be "
 "returned."
-msgstr "标识待检索行（指定区域首行）是否已排序，排序时将返回与查找值最接近的匹配项。"
+msgstr ""
+"标识待检索行（指定区域首行）是否已排序，排序时将返回与查找值最接近的匹配项。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5355,7 +5372,8 @@ msgstr "无效公式"
 msgid ""
 "Invalid function name %s. Function names can exclusively contain "
 "alphanumerical values separated by dots (.) or underscore (_)"
-msgstr "函数名%s 无效。函数名只能包含由点（.）或下划线（_）分隔的字母数字字符。"
+msgstr ""
+"函数名%s 无效。函数名只能包含由点（.）或下划线（_）分隔的字母数字字符。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5392,8 +5410,8 @@ msgid ""
 "(nbrArgOptional)s optional. Got %(nbrValueRemaining)s too many."
 msgstr ""
 "%(functionName)s 函数的引数数目不正确。 重复使用的引数，应以 %"
-"(nbrArgRepeating)s 个为一组去提供，最多可以有 %(nbrArgOptional)s 个可选引数"
-"。 现时多出了 %(nbrValueRemaining)s 个。"
+"(nbrArgRepeating)s 个为一组去提供，最多可以有 %(nbrArgOptional)s 个可选引"
+"数。 现时多出了 %(nbrValueRemaining)s 个。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -6550,6 +6568,12 @@ msgstr "无数值显示。"
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "No region is available"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 msgid "No results"
 msgstr "没有结果"
@@ -6899,9 +6923,9 @@ msgid ""
 "found, a non-exact match may be returned."
 msgstr ""
 "使用该函数的一种方法是提供一个排序行或列 search_array，通过第二个参数 "
-"result_range 查找 search_key。另一种方法是将这两个参数合并为一个 search_array"
-"，搜索第一行或第一列，然后从数组的最后一行或最后一列返回一个值。如果未找到 "
-"search_key，则可能返回一个非精确匹配的值。"
+"result_range 查找 search_key。另一种方法是将这两个参数合并为一个 "
+"search_array，搜索第一行或第一列，然后从数组的最后一行或最后一列返回一个值。"
+"如果未找到 search_key，则可能返回一个非精确匹配的值。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7039,7 +7063,8 @@ msgstr "选择性粘贴"
 msgid ""
 "Pasting from the context menu is not supported in this browser. Use keyboard "
 "shortcuts ctrl+c / ctrl+v instead."
-msgstr "当前浏览器不支持右键菜单粘贴操作，请使用快捷键 Ctrl+C、Ctrl+V 进行复制粘贴。"
+msgstr ""
+"当前浏览器不支持右键菜单粘贴操作，请使用快捷键 Ctrl+C、Ctrl+V 进行复制粘贴。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -7572,6 +7597,12 @@ msgstr "地区"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "Region %(region)s is not available"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Reject the input"
 msgstr "拒绝输入"
 
@@ -7725,6 +7756,12 @@ msgstr "返回仅出现一次的项。"
 #: code:addons/spreadsheet/static/src/pivot/pivot_functions.js:0
 msgid "Return the current value of a spreadsheet filter."
 msgstr "返回一个电子表格筛选的当前值。"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/pivot/pivot_functions.js:0
+msgid "Return the label of the current value of a spreadsheet filter."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -9341,7 +9378,8 @@ msgstr ""
 msgid ""
 "The array or range of values whose squares will be reduced by the squares of "
 "corresponding entries in array_y and added together."
-msgstr "数组或值域，其各项的平方将减去数组_y中对应项的平方，然后将所得结果相加。"
+msgstr ""
+"数组或值域，其各项的平方将减去数组_y中对应项的平方，然后将所得结果相加。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -9350,8 +9388,8 @@ msgid ""
 "The array or range of values whose squares will be subtracted from the "
 "squares of corresponding entries in array_x and added together."
 msgstr ""
-"数组或值域，其各项的平方将从 array_x 中对应项的平方中减去，然后将所得结果相加"
-"。"
+"数组或值域，其各项的平方将从 array_x 中对应项的平方中减去，然后将所得结果相"
+"加。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -9433,8 +9471,8 @@ msgid ""
 "Examples: \"0.00\" rounded to 2 decimal places, \"hh:mm:ss\" for "
 "hour:minutes:seconds."
 msgstr ""
-"区分大小写的结果格式（需加英文引号）。示例：\"0.00\" 保留两位小数"
-"，\"hh:mm:ss\" 时分秒格式。"
+"区分大小写的结果格式（需加英文引号）。示例：\"0.00\" 保留两位小数，"
+"\"hh:mm:ss\" 时分秒格式。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -9500,6 +9538,12 @@ msgstr "在目标文本中开始查找的字符位置。"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "The chart definition is invalid for an unknown reason"
 msgstr "图表定义无效，原因不明"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "The chart is deactivated"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -9592,7 +9636,8 @@ msgstr "年金现值。"
 msgid ""
 "The current window is too small to display this sheet properly. Consider "
 "resizing your browser window or adjusting frozen rows and columns."
-msgstr "当前窗口尺寸过小，无法正常展示表格。请拉大浏览器窗口，或者取消冻结行列。"
+msgstr ""
+"当前窗口尺寸过小，无法正常展示表格。请拉大浏览器窗口，或者取消冻结行列。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -9654,7 +9699,8 @@ msgstr "该数据集是无效的"
 msgid ""
 "The date for which to determine the ISO week number. Must be a reference to "
 "a cell containing a date, a function returning a date type, or a number."
-msgstr "用于计算 ISO 周数的日期，可为日期单元格引用、返回日期类型的函数或序列号。"
+msgstr ""
+"用于计算 ISO 周数的日期，可为日期单元格引用、返回日期类型的函数或序列号。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -9894,7 +9940,8 @@ msgstr "计算所参照的结束日期。"
 msgid ""
 "The end date to consider in the calculation. Must be a reference to a cell "
 "containing a DATE, a function returning a DATE type, or a number."
-msgstr "计算所用的结束日期，必须为日期单元格引用、返回日期类型的函数或数值序列号。"
+msgstr ""
+"计算所用的结束日期，必须为日期单元格引用、返回日期类型的函数或数值序列号。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -9902,7 +9949,8 @@ msgstr "计算所用的结束日期，必须为日期单元格引用、返回日
 msgid ""
 "The end date to consider in the calculation. Must be a reference to a cell "
 "containing a date, a function returning a date type, or a number."
-msgstr "计算所用的结束日期，必须为日期单元格引用、返回日期类型的函数或数值序列号。"
+msgstr ""
+"计算所用的结束日期，必须为日期单元格引用、返回日期类型的函数或数值序列号。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -9983,7 +10031,8 @@ msgstr "字段%s不存在或您没有访问该字段的权限"
 msgid ""
 "The field (%(fieldValue)s) must be one of %(dimRowDB)s or must be a number "
 "between 1 and %s inclusive."
-msgstr "字段 (%(fieldValue)s) 必须为 %(dimRowDB)s 中的一项，或是 1 至%s之间的整数。"
+msgstr ""
+"字段 (%(fieldValue)s) 必须为 %(dimRowDB)s 中的一项，或是 1 至%s之间的整数。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -10134,8 +10183,8 @@ msgid ""
 "The function [[FUNCTION_NAME]] expects a boolean value, but '%s' is a text, "
 "and cannot be coerced to a boolean."
 msgstr ""
-"函数 [[FUNCTION_NAME]] 希望得到一个布尔值，但“%s”是文本，不能强制转换为布尔值"
-"。"
+"函数 [[FUNCTION_NAME]] 希望得到一个布尔值，但“%s”是文本，不能强制转换为布尔"
+"值。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -10177,7 +10226,8 @@ msgstr "函数 [[FUNCTION_NAME]] 需要一个单元格或区域的引用。"
 msgid ""
 "The function [[FUNCTION_NAME]] has an argument with value '%s'. It should be "
 "one of: %s."
-msgstr "函数 [[FUNCTION_NAME]] 有一个值为 '%s' 的参数。它应该是以下参数之一：%s。"
+msgstr ""
+"函数 [[FUNCTION_NAME]] 有一个值为 '%s' 的参数。它应该是以下参数之一：%s。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -12866,9 +12916,9 @@ msgstr "多选状态下不支持此操作。"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
-"This operation is not possible due to a merge. Please remove the merges "
-"first than try again."
-msgstr "由于合并，该操作无法实现。请先删除合并，然后再试一次。"
+"This operation would cause tables to overlap. Move or remove the conflicting "
+"table and try again."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -12914,8 +12964,8 @@ msgid ""
 "inconsistencies. Irregularities may indicate potential errors in formula "
 "structures, references, or arguments. (Click to turn off)"
 msgstr ""
-"该工具可分析电子表格公式的模式，并突出显示不一致之处。不一致可能表明公式结构"
-"、引用或参数中存在潜在错误。(点击关闭）"
+"该工具可分析电子表格公式的模式，并突出显示不一致之处。不一致可能表明公式结"
+"构、引用或参数中存在潜在错误。(点击关闭）"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -13812,7 +13862,8 @@ msgstr "年度周数。"
 msgid ""
 "Week value must be a string in the format %(example)s, but received %"
 "(received_value)s instead."
-msgstr "周数值必须是%(example)s格式的字符串，但实际接收到的是%(received_value)s。"
+msgstr ""
+"周数值必须是%(example)s格式的字符串，但实际接收到的是%(received_value)s。"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -14584,3 +14635,23 @@ msgstr "明天"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "yesterday"
 msgstr "昨天"
+
+#~ msgid "%(count)s matches in %(sheetName)s"
+#~ msgstr "%(sheetName)s工作表中有%(count)s处匹配"
+
+#~ msgid "%(count)s matches in range %(range)s of %(sheetName)s"
+#~ msgstr "%(sheetName)s工作表的%(range)s区域内有%(count)s处匹配"
+
+#~ msgid "1 match in %(sheetName)s"
+#~ msgstr "1 条匹配结果%(sheetName)s"
+
+#~ msgid "1 match in range %(range)s of %(sheetName)s"
+#~ msgstr "%(sheetName)s 工作表的 %(range)s 区域内有 1 处匹配"
+
+#~ msgid "Concise formatxA0(default)"
+#~ msgstr "精简格式（默认）"
+
+#~ msgid ""
+#~ "This operation is not possible due to a merge. Please remove the merges "
+#~ "first than try again."
+#~ msgstr "由于合并，该操作无法实现。请先删除合并，然后再试一次。"

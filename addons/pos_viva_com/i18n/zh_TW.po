@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-10 17:37+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-08-31 17:54+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
@@ -65,6 +65,14 @@ msgid ""
 "Could not connect to the Odoo server, please check your internet connection "
 "and try again."
 msgstr "無法連接到Odoo服務器,請檢查您的互聯網連接並重試。"
+
+#. module: pos_viva_com
+#. odoo-javascript
+#: code:addons/pos_viva_com/static/src/app/payment_viva_com.js:0
+msgid ""
+"Could not sync the order before starting the Viva.com payment. Please try "
+"again."
+msgstr ""
 
 #. module: pos_viva_com
 #: model:ir.model.fields,field_description:pos_viva_com.field_pos_payment__display_name
@@ -132,6 +140,12 @@ msgid "No internet connection. Waiting for recovery to confirm the payment..."
 msgstr ""
 
 #. module: pos_viva_com
+#. odoo-javascript
+#: code:addons/pos_viva_com/static/src/app/hooks/use_viva_app.js:0
+msgid "Oh snap !"
+msgstr ""
+
+#. module: pos_viva_com
 #. odoo-python
 #: code:addons/pos_viva_com/models/pos_payment_method.py:0
 msgid "Only 'group_pos_user' are allowed to cancel a Viva.com payment"
@@ -155,6 +169,12 @@ msgstr "只限 group_pos_user 可向 Viva.com 傳送付款請求"
 #: code:addons/pos_viva_com/models/pos_payment_method.py:0
 msgid "Only 'group_pos_user' are allowed to send a Viva.com refund request"
 msgstr "只限 group_pos_user 可向 Viva.com 傳送退款請求"
+
+#. module: pos_viva_com
+#. odoo-javascript
+#: code:addons/pos_viva_com/static/src/app/screens/payment_screen/payment_lines/payment_lines.js:0
+msgid "Pay with the Viva Wallet application"
+msgstr ""
 
 #. module: pos_viva_com
 #. odoo-javascript
@@ -220,6 +240,12 @@ msgstr "測試模式"
 #. module: pos_viva_com
 #. odoo-python
 #: code:addons/pos_viva_com/models/pos_payment_method.py:0
+msgid "There are some issues between us and Viva.com, try again later."
+msgstr ""
+
+#. module: pos_viva_com
+#. odoo-python
+#: code:addons/pos_viva_com/models/pos_payment_method.py:0
 msgid "There are some issues between us and Viva.com, try again later. %s"
 msgstr "我們與 Viva.com 之間的通訊出現了一些問題，請稍後再試。%s"
 
@@ -235,7 +261,14 @@ msgstr "我們與 Viva.com 之間的通訊出現了一些問題，請稍後再�
 msgid ""
 "Unable to retrieve Viva.com Bearer Token: Please verify that the Client ID "
 "and Client Secret are correct"
-msgstr "未能取得 Viva.com 持有人權杖。請檢查客戶端識別碼、客戶端秘密密鑰是否正確。"
+msgstr ""
+"未能取得 Viva.com 持有人權杖。請檢查客戶端識別碼、客戶端秘密密鑰是否正確。"
+
+#. module: pos_viva_com
+#. odoo-javascript
+#: code:addons/pos_viva_com/static/src/app/screens/payment_screen/payment_lines/payment_lines.js:0
+msgid "Use Viva app"
+msgstr ""
 
 #. module: pos_viva_com
 #: model_terms:ir.ui.view,arch_db:pos_viva_com.pos_payment_method_view_form_inherit_pos_viva_com
@@ -279,6 +312,39 @@ msgstr ""
 #: code:addons/pos_viva_com/static/src/app/payment_viva_com.js:0
 msgid "Viva.com Error"
 msgstr "Viva.com 錯誤"
+
+#. module: pos_viva_com
+#. odoo-javascript
+#: code:addons/pos_viva_com/static/src/app/hooks/use_viva_app.js:0
+#: code:addons/pos_viva_com/static/src/app/payment_viva_com.js:0
+msgid "Viva.com Payment Error"
+msgstr ""
+
+#. module: pos_viva_com
+#. odoo-javascript
+#: code:addons/pos_viva_com/static/src/app/utils/error_messages.js:0
+msgid ""
+"Viva.com charged %s, which does not match the total for this order (%s). The "
+"customer may have been charged; refund the transaction on the Viva terminal "
+"before retrying."
+msgstr ""
+
+#. module: pos_viva_com
+#. odoo-javascript
+#: code:addons/pos_viva_com/static/src/app/utils/error_messages.js:0
+msgid ""
+"Viva.com charged in %s, which does not match the currency set for this order "
+"(%s). The customer may have been charged; refund the transaction on the Viva "
+"terminal before retrying."
+msgstr ""
+
+#. module: pos_viva_com
+#. odoo-javascript
+#: code:addons/pos_viva_com/static/src/app/utils/error_messages.js:0
+msgid ""
+"Viva.com payment could not be validated. The customer may have been charged; "
+"refund the transaction on the Viva terminal before retrying."
+msgstr ""
 
 #. module: pos_viva_com
 #. odoo-javascript

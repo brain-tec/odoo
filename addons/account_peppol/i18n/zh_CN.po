@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:38+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-08-31 16:12+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
@@ -24,8 +24,8 @@ msgstr ""
 #. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/wizard/account_move_send_wizard.py:0
-msgid " (Customer not on Peppol)"
-msgstr " （客户不在 Peppol 上）"
+msgid " (Customer not on %(network_name)s)"
+msgstr ""
 
 #. module: account_peppol
 #. odoo-python
@@ -38,6 +38,12 @@ msgstr " (示例)"
 #: code:addons/account_peppol/wizard/account_move_send_wizard.py:0
 msgid " (Missing %(eas)s)"
 msgstr " （缺少%(eas)s ）"
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/wizard/account_move_send_wizard.py:0
+msgid " (Previously sent)"
+msgstr ""
 
 #. module: account_peppol
 #. odoo-python
@@ -69,6 +75,13 @@ msgstr "%(peppol_label)s%(disable_reason)s%(peppol_proxy_mode)s"
 msgid ""
 "%(processed)s Peppol document(s) processed, %(deleted)s document(s) deleted"
 msgstr "%(processed)s 已处理 Peppol 文档，已删除%(deleted)s 文档"
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/exceptions.py:0
+#: code:addons/account_peppol/tools/peppol_errors.py:0
+msgid "%s"
+msgstr ""
 
 #. module: account_peppol
 #. odoo-python
@@ -227,26 +240,26 @@ msgstr ""
 "                                    <div style=\"margin-bottom: 5px; margin-"
 "top: 18px;\">\n"
 "                                        <a t-attf-href=\"/odoo/accounting/\" "
-"target=\"_blank\" t-attf-style=\"padding: 8px 12px; font-size: 12px; color: {"
-"{ object.email_primary_color or '#FFFFFF' }}; text-decoration: none "
-"!important; font-weight: 400; background-color: {{ "
-"object.email_secondary_color or '#875A7B' }}; border-radius:3px\">\n"
+"target=\"_blank\" t-attf-style=\"padding: 8px 12px; font-size: 12px; color: "
+"{{ object.email_primary_color or '#FFFFFF' }}; text-decoration: none !"
+"important; font-weight: 400; background-color: "
+"{{ object.email_secondary_color or '#875A7B' }}; border-radius:3px\">\n"
 "                                            发送发票\n"
 "                                        </a>\n"
 "                                    </div>\n"
 "                                </td>\n"
 "                                <td valign=\"middle\" align=\"right\">\n"
-"                                    <t t-if=\"not object.uses_default_logo\">"
-"\n"
-"                                        <img t-att-src=\"'/"
-"logo.png?company=%s' % object.id\" style=\"height: auto; width: 80px; margin-"
-"right: 10px;\" t-att-alt=\"'%s' % object.name\"/>\n"
+"                                    <t t-if=\"not "
+"object.uses_default_logo\">\n"
+"                                        <img t-att-src=\"'/logo.png?"
+"company=%s' % object.id\" style=\"height: auto; width: 80px; margin-right: "
+"10px;\" t-att-alt=\"'%s' % object.name\"/>\n"
 "                                    </t>\n"
 "                                </td>\n"
 "                            </tr>\n"
 "                            <tr>\n"
-"                                <td colspan=\"2\" style=\"text-"
-"align:center;\">\n"
+"                                <td colspan=\"2\" style=\"text-align:center;"
+"\">\n"
 "                                    <hr style=\"background-color:#CCCCCC; "
 "border:none; height:1px; margin:16px 0;\"/>\n"
 "                                </td>\n"
@@ -262,11 +275,11 @@ msgstr ""
 "collapse:separate;\">\n"
 "                            <tr>\n"
 "                                <td style=\"font-size: 14px;\">\n"
-"                                    <p>亲爱的 <t t-out=\"object.name or ''\">"
-"YourCompany</t>，</p>\n"
+"                                    <p>亲爱的 <t t-out=\"object.name or "
+"''\">YourCompany</t>，</p>\n"
 "\n"
-"                                    <p>我们已成功地将您的公司添加到 <strong>"
-"Peppol Network</strong>。</p>\n"
+"                                    <p>我们已成功地将您的公司添加到 "
+"<strong>Peppol Network</strong>。</p>\n"
 "\n"
 "                                    <p>您现在可以通过 Odoo<strong>发送<t t-"
 "if=\"object.account_peppol_proxy_state == 'receiver'\"> 和接收</t></strong> "
@@ -289,11 +302,28 @@ msgstr ""
 
 #. module: account_peppol
 #. odoo-python
+#: code:addons/account_peppol/tools/peppol_errors.py:0
+msgid ""
+"A 0% tax cannot use Tax Category 'S' (Standard). Please update the Tax "
+"Category in the Advanced Options of the tax configuration."
+msgstr ""
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/models/account_edi_proxy_user.py:0
+msgid ""
+"A Peppol response declaring you %(status)s this document could not be sent "
+"to the Peppol Access Point."
+msgstr ""
+
+#. module: account_peppol
+#. odoo-python
 #: code:addons/account_peppol/models/account_edi_proxy_user.py:0
 msgid ""
 "A Peppol response was sent to the Peppol Access Point declaring you %"
 "(status)s this document."
-msgstr "已向 Peppol 接入点发送 Peppol 回执，申明您对该文档的状态为 %(status)s。"
+msgstr ""
+"已向 Peppol 接入点发送 Peppol 回执，申明您对该文档的状态为 %(status)s。"
 
 #. module: account_peppol
 #. odoo-python
@@ -557,7 +587,8 @@ msgstr "解压重新组装的报文时发生错误。"
 msgid ""
 "An error occurred while responding to this invoice's expeditor.%(br)sStatus: "
 "%(status)s - %(error)s"
-msgstr "发送回应至此发票的催办人时，发生错误。%(br)s状态：%(status)s - %(error)s"
+msgstr ""
+"发送回应至此发票的催办人时，发生错误。%(br)s状态：%(status)s - %(error)s"
 
 #. module: account_peppol
 #. odoo-python
@@ -676,8 +707,16 @@ msgstr "取消 Peppol"
 #. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/models/account_move.py:0
-msgid "Cannot cancel an entry that has already been sent to Peppol"
-msgstr "不能取消已发送至 Peppol 的项目"
+msgid "Cannot cancel an entry that has already been sent via %(network_name)s"
+msgstr ""
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/tools/peppol_errors.py:0
+msgid ""
+"Cannot initiate KYC for the selected scheme (unsupported, deprecated, or "
+"removed). Please select a different scheme."
+msgstr ""
 
 #. module: account_peppol
 #. odoo-python
@@ -758,8 +797,8 @@ msgstr "创建客户"
 #. module: account_peppol
 #. odoo-javascript
 #: code:addons/account_peppol/static/src/components/peppol_info/peppol_info.xml:0
-msgid "Create, send and receive e-invoices for free."
-msgstr "免费创建、发送和接收电子发票。"
+msgid "Create, send, and receive e-invoices for free."
+msgstr ""
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_account_peppol_clarification__create_uid
@@ -946,6 +985,12 @@ msgstr "错误"
 
 #. module: account_peppol
 #. odoo-python
+#: code:addons/account_peppol/models/account_edi_proxy_user.py:0
+msgid "Error importing %(proxy_type)s document (UUID: %(uuid)s):"
+msgstr ""
+
+#. module: account_peppol
+#. odoo-python
 #: code:addons/account_peppol/models/account_move_send.py:0
 msgid "Errors occurred while creating the EDI document (format: %s):"
 msgstr "创建 EDI 文档时出现错误（格式：%s）："
@@ -966,13 +1011,21 @@ msgid ""
 "this database'."
 msgstr ""
 "无法连接到 Peppol 接入点。如果从备份中还原数据库，或在未进行中立化处理的情况"
-"下复制数据库，可能会出现此问题。要解决此问题，请转至设置 > 会计 > Peppol 设置"
-"，然后点击“重新连接此数据库”。"
+"下复制数据库，可能会出现此问题。要解决此问题，请转至设置 > 会计 > Peppol 设"
+"置，然后点击“重新连接此数据库”。"
 
 #. module: account_peppol
 #. odoo-python
-#: code:addons/account_peppol/models/account_move_send.py:0
-#: code:addons/account_peppol/wizard/peppol_registration.py:0
+#: code:addons/account_peppol/tools/peppol_errors.py:0
+msgid ""
+"For tax(es) %(taxes)s: Tax Category 'O' must be used when the exemption "
+"reason code is 'VATEX-EU-O'. You can change this in the Advanced Options of "
+"the tax configuration."
+msgstr ""
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/models/res_config_settings.py:0
 msgid "France - E-Invoicing (Approved Platform)"
 msgstr "法国 - 电子发票（经审批的平台）"
 
@@ -989,20 +1042,16 @@ msgid "Fully automated"
 msgstr "全自动"
 
 #. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/models/res_config_settings.py:0
+msgid "Go to module"
+msgstr ""
+
+#. module: account_peppol
 #. odoo-javascript
 #: code:addons/account_peppol/static/src/components/peppol_info/peppol_info.js:0
 msgid "Got it !"
 msgstr "知道了！"
-
-#. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
-msgid "I accept that Odoo may process my e-invoices,"
-msgstr "我同意 Odoo 处理我的电子发票，"
-
-#. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
-msgid "I reckon I'm allowed to register this company."
-msgstr "我想我应该可以注册这家公司。"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_account_edi_common__id
@@ -1024,6 +1073,14 @@ msgid "ID"
 msgstr "ID"
 
 #. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/tools/peppol_errors.py:0
+msgid ""
+"If you are not subject to VAT, you should not have a VAT number on your "
+"company/contacts and your clients should not have one either."
+msgstr ""
+
+#. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
 msgid "If you don't have Itsme, please contact"
 msgstr "如果您没有 Itsme，请联系"
@@ -1031,8 +1088,10 @@ msgstr "如果您没有 Itsme，请联系"
 #. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/controllers/portal.py:0
-msgid "If you want to be invoiced by Peppol, your configuration must be valid."
-msgstr "如果您希望由 Peppol 开具发票，您的配置必须有效。"
+msgid ""
+"If you want to be invoiced via %(network_name)s, your configuration must be "
+"valid."
+msgstr ""
 
 #. module: account_peppol
 #: model:ir.model.fields.selection,name:account_peppol.selection__account_peppol_response__response_code__ip
@@ -1047,8 +1106,34 @@ msgstr "应收账款会计分录"
 #. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/models/account_move_send.py:0
-msgid "Invoice %s exceeds the size limit of 64 MB to be sent via Peppol."
-msgstr "发票%s 的大小超过了通过 Peppol 发送的64 MB限制。"
+msgid ""
+"Invoice %(invoice_name)s exceeds the size limit of 64 MB to be sent via %"
+"(network_name)s."
+msgstr ""
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/tools/peppol_errors.py:0
+msgid ""
+"Invoice lines using Tax Category 'O' cannot use a percentage-based tax. "
+"Please update the tax type in Advanced Options."
+msgstr ""
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/tools/peppol_errors.py:0
+msgid ""
+"Invoice lines with Tax Category 'Exempt from VAT' must have a tax rate of 0. "
+"You can change this in the Advanced Options of the tax configuration."
+msgstr ""
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/tools/peppol_errors.py:0
+msgid ""
+"Invoice lines with Tax Category 'Reverse charge' must have a tax rate of 0. "
+"You can change this in the Advanced Options of the tax configuration."
+msgstr ""
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_res_partner__invoice_sending_method
@@ -1111,6 +1196,38 @@ msgstr "迁移密钥"
 #: code:addons/account_peppol/models/account_edi_proxy_user.py:0
 msgid "Miscellaneous:"
 msgstr "杂项："
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/tools/peppol_errors.py:0
+msgid ""
+"Missing Buyer Country. Please add the Country Code to the client's contact "
+"information."
+msgstr ""
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/tools/peppol_errors.py:0
+msgid ""
+"Missing Invoiced Item VAT category code. Action Required: Install the module "
+"account_edi_ubl_cii_tax_extension."
+msgstr ""
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/tools/peppol_errors.py:0
+msgid ""
+"Missing Reverse Charge details. Please set the Exemption Reason to 'Reverse "
+"charge' in the Advanced Options of the tax configuration."
+msgstr ""
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/tools/peppol_errors.py:0
+msgid ""
+"Missing VAT category code. Action Required: Install the module "
+"account_edi_ubl_cii_tax_extension."
+msgstr ""
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__phone_number
@@ -1208,8 +1325,8 @@ msgstr "Odoo Peppol 代理返回了无效响应。"
 #. module: account_peppol
 #. odoo-javascript
 #: code:addons/account_peppol/static/src/components/peppol_info/peppol_info.xml:0
-msgid "Odoo keeps you up to date with the new regulation."
-msgstr "Odoo 让您及时了解新规定。"
+msgid "Odoo keeps you up to date with new regulations."
+msgstr ""
 
 #. module: account_peppol
 #. odoo-python
@@ -1243,8 +1360,8 @@ msgstr "合作伙伴无法接收该格式"
 #. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/wizard/account_move_send_wizard.py:0
-msgid "Partner doesn't have a valid Peppol configuration."
-msgstr "合作伙伴没有有效的 Peppol 配置。"
+msgid "Partner doesn't have a valid configuration for %(network_name)s."
+msgstr ""
 
 #. module: account_peppol
 #: model:ir.model.fields.selection,name:account_peppol.selection__res_partner__peppol_verification_state__not_valid
@@ -1263,6 +1380,8 @@ msgid "Pending Reception"
 msgstr "待接待"
 
 #. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/models/res_company.py:0
 #: model:ir.model.fields.selection,name:account_peppol.selection__account_edi_proxy_client_user__proxy_type__peppol
 msgid "Peppol"
 msgstr "Peppol"
@@ -1300,6 +1419,12 @@ msgid "Peppol Contact Email"
 msgstr "Peppol 联系人邮箱"
 
 #. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/models/res_config_settings.py:0
+msgid "Peppol Disconnected"
+msgstr ""
+
+#. module: account_peppol
 #. odoo-javascript
 #: code:addons/account_peppol/static/src/web/account_move_list_controller.js:0
 msgid "Peppol Documents Cannot Be Deleted"
@@ -1310,6 +1435,12 @@ msgstr "Peppol 文档无法被删除"
 #: code:addons/account_peppol/static/src/web/account_move_form_controller.js:0
 msgid "Peppol Documents: Cannot Delete Invoice"
 msgstr "Peppol 文档：无法删除发票"
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/models/res_company.py:0
+msgid "Peppol EAS and/or Endpoint identifier"
+msgstr ""
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__peppol_eas
@@ -1325,12 +1456,8 @@ msgstr "Peppol Endpoint"
 #. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/exceptions.py:0
-msgid ""
-"Peppol Error [code=%(error_code)s]: %(error_subject)s\n"
-"%(error_message)s"
+msgid "Peppol Error"
 msgstr ""
-"Peppol 错误 [代码=%(error_code)s]: %(error_subject)s\n"
-"%(error_message)s"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__peppol_external_provider
@@ -1387,6 +1514,11 @@ msgstr "Peppol 参与角色"
 #: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__account_peppol_purchase_journal_id
 msgid "Peppol Purchase Journal"
 msgstr "Peppol 采购日记账"
+
+#. module: account_peppol
+#: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__peppol_purchase_journal_required
+msgid "Peppol Purchase Journal Required"
+msgstr ""
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.account_peppol_view_account_invoice_filter
@@ -1568,6 +1700,12 @@ msgstr "请填写公司的路由标识。"
 #: code:addons/account_peppol/models/res_company.py:0
 msgid "Please install the phonenumbers library."
 msgstr "请安装 phonenumbers 库."
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/wizard/peppol_registration.py:0
+msgid "Please make sure the Contact email is a valid email address."
+msgstr ""
 
 #. module: account_peppol
 #. odoo-python
@@ -1785,7 +1923,8 @@ msgid ""
 "Some reliability function as implemented by the Reliability module, is not "
 "operational, or the reliability state associated with this message sequence "
 "is not valid."
-msgstr "可靠性模块实现的某些可靠性功能未运行，或与此消息序列关联的可靠性状态无效。"
+msgstr ""
+"可靠性模块实现的某些可靠性功能未运行，或与此消息序列关联的可靠性状态无效。"
 
 #. module: account_peppol
 #. odoo-python
@@ -1829,8 +1968,8 @@ msgstr ""
 #. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/controllers/portal.py:0
-msgid "That country is not available for Peppol."
-msgstr "Peppol 不适用该国家/地区。"
+msgid "That country is not available with %(network_name)s."
+msgstr ""
 
 #. module: account_peppol
 #. odoo-python
@@ -1881,11 +2020,20 @@ msgstr "从该参与方的服务元数据提供方获取的服务组无效。"
 
 #. module: account_peppol
 #. odoo-python
+#: code:addons/account_peppol/tools/peppol_errors.py:0
+msgid ""
+"The Peppol endpoint is missing in the XML file. Action Required: Update the "
+"account and account_edi_ubl_cii modules to resolve this."
+msgstr ""
+
+#. module: account_peppol
+#. odoo-python
 #: code:addons/account_peppol/models/account_edi_proxy_user.py:0
 msgid ""
 "The Peppol receiver of this document has rejected it with the following "
 "information:%(br)s%(rejection_message)s"
-msgstr "Peppol 接收方已拒绝接收此文件，并提供以下信息：%(br)s%(rejection_message)s"
+msgstr ""
+"Peppol 接收方已拒绝接收此文件，并提供以下信息：%(br)s%(rejection_message)s"
 
 #. module: account_peppol
 #. odoo-python
@@ -1912,6 +2060,14 @@ msgid ""
 "The Service Metadata Publisher associated to this participant is not "
 "reachable. url: %s"
 msgstr "无法访问与此参与方关联的服务元数据发布方。URL:%s"
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/tools/peppol_errors.py:0
+msgid ""
+"The Tax Category must be 'AE' when using Exemption Reason code 'VATEX-EU-"
+"AE'. You can change this in the Advanced Options of the tax configuration."
+msgstr ""
 
 #. module: account_peppol
 #. odoo-python
@@ -1983,7 +2139,8 @@ msgstr "电子发票网络"
 msgid ""
 "The eb3:Message header copied to the fragment header does not match the "
 "eb3:Message header in the reassembled source message."
-msgstr "复制到片段头的 eb3:Message 标头与重组后源消息中的 eb3:Message 标头不匹配。"
+msgstr ""
+"复制到片段头的 eb3:Message 标头与重组后源消息中的 eb3:Message 标头不匹配。"
 
 #. module: account_peppol
 #. odoo-python
@@ -2021,6 +2178,14 @@ msgid ""
 msgstr "终端点号码可能不正确。 请检查你输入的身份证号码是否正确。"
 
 #. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/tools/peppol_errors.py:0
+msgid ""
+"The exemption reason code is invalid. Action Required: Install the module "
+"account_edi_ubl_cii_tax_extension."
+msgstr ""
+
+#. module: account_peppol
 #. odoo-javascript
 #: code:addons/account_peppol/static/src/web/account_move_list_controller.js:0
 msgid ""
@@ -2031,6 +2196,17 @@ msgstr ""
 "以下%s Peppol 文档将重置为草稿状态：\n"
 "\n"
 "• %s"
+
+#. module: account_peppol
+#. odoo-javascript
+#: code:addons/account_peppol/static/src/web/account_move_list_controller.js:0
+msgid ""
+"The following %s document(s) were sent via Peppol / PDP and will be left "
+"untouched. If you need to modify them, you must issue a credit or debit "
+"note:\n"
+"\n"
+"• %s"
+msgstr ""
 
 #. module: account_peppol
 #. odoo-javascript
@@ -2081,7 +2257,8 @@ msgid ""
 "The processor determined that the message's security methods, parameters, "
 "scope or other security policy-level requirements or agreements were not "
 "satisfied."
-msgstr "处理器判定该消息的安全方法、参数、范围或其他安全策略级别要求或协议未满足。"
+msgstr ""
+"处理器判定该消息的安全方法、参数、范围或其他安全策略级别要求或协议未满足。"
 
 #. module: account_peppol
 #: model:ir.model.fields,help:account_peppol.field_account_peppol_rejection_wizard__reason_ids
@@ -2227,9 +2404,19 @@ msgstr "要生成完整的电子发票，还需为该合作伙伴设置国家/�
 
 #. module: account_peppol
 #. odoo-python
-#: code:addons/account_peppol/wizard/peppol_registration.py:0
-msgid "To use the Approved Platform for French E-Invoicing install the module"
-msgstr "如需使用法国电子发票合规认证平台，请安装对应模块。"
+#: code:addons/account_peppol/models/res_config_settings.py:0
+msgid ""
+"To use the Approved Platform for French E-Invoicing install the module '%s'."
+msgstr ""
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/models/res_config_settings.py:0
+msgid ""
+"To use the Approved Platform for French E-Invoicing install the module "
+"'%s'.\n"
+"The module was not found. Please update the app list first."
+msgstr ""
 
 #. module: account_peppol
 #. odoo-python
@@ -2269,6 +2456,12 @@ msgstr "MIME 多部分信息意外结束。"
 #: code:addons/account_peppol/exceptions.py:0
 msgid "Unknown Peppol Error: %s"
 msgstr "未知 Peppol 错误：%s"
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/models/res_config_settings.py:0
+msgid "Update App List"
+msgstr ""
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__use_parent_connection
@@ -2323,8 +2516,8 @@ msgstr "欢迎使用 Peppol"
 #. module: account_peppol
 #. odoo-javascript
 #: code:addons/account_peppol/static/src/components/peppol_info/peppol_info.xml:0
-msgid "What is Peppol and why it's great ?"
-msgstr "Peppol 是什么？为什么它很了不起？"
+msgid "What is Peppol and why is it great?"
+msgstr ""
 
 #. module: account_peppol
 #. odoo-python
@@ -2335,14 +2528,14 @@ msgstr "为什么应该使用法语电子发票？"
 #. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/models/account_move_send.py:0
-msgid "Why should I use PEPPOL ?"
-msgstr "为什么我要使用 PEPPOL？"
+msgid "Why should I use Peppol?"
+msgstr ""
 
 #. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/models/account_move_send.py:0
-msgid "Why should you use it ?"
-msgstr "为什么要使用它？"
+msgid "Why should you use it?"
+msgstr ""
 
 #. module: account_peppol
 #. odoo-javascript
@@ -2355,6 +2548,20 @@ msgstr "是，取消"
 #: code:addons/account_peppol/static/src/web/account_move_list_controller.js:0
 msgid "Yes, Proceed"
 msgstr "是，继续"
+
+#. module: account_peppol
+#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
+msgid ""
+"You accept that any fraudulent activity or spam will result in immediate and "
+"permanent exclusion from the Peppol network."
+msgstr ""
+
+#. module: account_peppol
+#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
+msgid ""
+"You are a legal representative authorized to register this company on the "
+"Peppol network."
+msgstr ""
 
 #. module: account_peppol
 #. odoo-python
@@ -2376,6 +2583,13 @@ msgstr "您无权更改联系人邮箱。"
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid "You are sending from"
+msgstr ""
+
+#. module: account_peppol
+#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
+msgid ""
+"You authorize Odoo to act as your Peppol Service Provider to send and "
+"receive e-invoices on your behalf."
 msgstr ""
 
 #. module: account_peppol
@@ -2410,6 +2624,22 @@ msgstr ""
 
 #. module: account_peppol
 #. odoo-python
+#: code:addons/account_peppol/models/account_move.py:0
+msgid ""
+"You cannot delete invoices that were sent via Peppol / PDP. If you need to "
+"modify them, you must issue a credit or debit note."
+msgstr ""
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/models/account_move.py:0
+msgid ""
+"You cannot reset to draft invoices that were sent via Peppol / PDP. If you "
+"need to modify them, you must issue a credit or debit note."
+msgstr ""
+
+#. module: account_peppol
+#. odoo-python
 #: code:addons/account_peppol/exceptions.py:0
 msgid "You don't have enough credit"
 msgstr "您的余额不足"
@@ -2420,7 +2650,8 @@ msgstr "您的余额不足"
 msgid ""
 "You have reached the limit of documents you can send today. Retry later. "
 "Please contact the support if you think you need to increase that limit."
-msgstr "您已达到今日可发送文档的限制。请稍后重试。如需提高限制，请联系支持团队。"
+msgstr ""
+"您已达到今日可发送文档的限制。请稍后重试。如需提高限制，请联系支持团队。"
 
 #. module: account_peppol
 #. odoo-python
@@ -2438,6 +2669,13 @@ msgid ""
 msgstr ""
 "您的注册被拒绝，原因已通过电子邮件发送给您。\n"
 "                            如果您需要进一步帮助，请联系我们的支持人员。"
+
+#. module: account_peppol
+#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
+msgid ""
+"You remain fully responsible for the content, accuracy, and legal compliance "
+"of your invoices."
+msgstr ""
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
@@ -2463,7 +2701,8 @@ msgstr "您的 Peppol 注册即将激活，现在即可开始发送发票。"
 msgid ""
 "Your company is already registered on an Access Point (%s) for receiving "
 "invoices. We will register you on Odoo as a sender only."
-msgstr "您公司已在接入点（%s）完成接收发票的注册。我们将仅在 Odoo 为您注册为发送方。"
+msgstr ""
+"您公司已在接入点（%s）完成接收发票的注册。我们将仅在 Odoo 为您注册为发送方。"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
@@ -2539,16 +2778,14 @@ msgid "and send invoices via Peppol on their behalf."
 msgstr "并代表他们通过 Peppol 发送发票。"
 
 #. module: account_peppol
-#. odoo-python
-#: code:addons/account_peppol/controllers/portal.py:0
 #: model:ir.model.fields.selection,name:account_peppol.selection__res_partner__invoice_sending_method__peppol
 msgid "by Peppol"
 msgstr "Peppol"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.mail_notification_layout_with_responsible_signature_and_peppol
-msgid "could not be sent via Peppol"
-msgstr "未能通过 Peppol 发送"
+msgid "could not be sent via"
+msgstr ""
 
 #. module: account_peppol
 #. odoo-python
@@ -2570,8 +2807,8 @@ msgstr "已拒绝"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.mail_notification_layout_with_responsible_signature_and_peppol
-msgid "sent via Peppol"
-msgstr "已通过 Peppol 发送"
+msgid "sent via"
+msgstr ""
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
@@ -2587,6 +2824,63 @@ msgstr "发送发票，但这个"
 #: model_terms:ir.ui.view,arch_db:account_peppol.mail_notification_layout_with_responsible_signature_and_peppol
 msgid "uses"
 msgstr "使用"
+
+#~ msgid "I accept that Odoo may process my e-invoices,"
+#~ msgstr "我同意 Odoo 处理我的电子发票，"
+
+#~ msgid "I reckon I'm allowed to register this company."
+#~ msgstr "我想我应该可以注册这家公司。"
+
+#~ msgid " (Customer not on Peppol)"
+#~ msgstr " （客户不在 Peppol 上）"
+
+#~ msgid "Cannot cancel an entry that has already been sent to Peppol"
+#~ msgstr "不能取消已发送至 Peppol 的项目"
+
+#~ msgid "Create, send and receive e-invoices for free."
+#~ msgstr "免费创建、发送和接收电子发票。"
+
+#~ msgid ""
+#~ "If you want to be invoiced by Peppol, your configuration must be valid."
+#~ msgstr "如果您希望由 Peppol 开具发票，您的配置必须有效。"
+
+#~ msgid "Invoice %s exceeds the size limit of 64 MB to be sent via Peppol."
+#~ msgstr "发票%s 的大小超过了通过 Peppol 发送的64 MB限制。"
+
+#~ msgid "Odoo keeps you up to date with the new regulation."
+#~ msgstr "Odoo 让您及时了解新规定。"
+
+#~ msgid "Partner doesn't have a valid Peppol configuration."
+#~ msgstr "合作伙伴没有有效的 Peppol 配置。"
+
+#~ msgid ""
+#~ "Peppol Error [code=%(error_code)s]: %(error_subject)s\n"
+#~ "%(error_message)s"
+#~ msgstr ""
+#~ "Peppol 错误 [代码=%(error_code)s]: %(error_subject)s\n"
+#~ "%(error_message)s"
+
+#~ msgid "That country is not available for Peppol."
+#~ msgstr "Peppol 不适用该国家/地区。"
+
+#~ msgid ""
+#~ "To use the Approved Platform for French E-Invoicing install the module"
+#~ msgstr "如需使用法国电子发票合规认证平台，请安装对应模块。"
+
+#~ msgid "What is Peppol and why it's great ?"
+#~ msgstr "Peppol 是什么？为什么它很了不起？"
+
+#~ msgid "Why should I use PEPPOL ?"
+#~ msgstr "为什么我要使用 PEPPOL？"
+
+#~ msgid "Why should you use it ?"
+#~ msgstr "为什么要使用它？"
+
+#~ msgid "could not be sent via Peppol"
+#~ msgstr "未能通过 Peppol 发送"
+
+#~ msgid "sent via Peppol"
+#~ msgstr "已通过 Peppol 发送"
 
 #~ msgid "<b>Authentify with itsme</b>"
 #~ msgstr "<b>使用 itsme 进行身份验证</b>"

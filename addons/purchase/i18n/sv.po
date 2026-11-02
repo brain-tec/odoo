@@ -30,7 +30,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-30 00:49+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-10-22 10:28+0000\n"
 "Last-Translator: Hanna Kharraziha <hakha@odoo.com>\n"
 "Language-Team: Swedish <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -2539,6 +2539,7 @@ msgstr "Antal Inköpsordrar"
 #: model:ir.actions.act_window,name:purchase.action_purchase_history
 #: model:ir.model,name:purchase.model_purchase_order_line
 #: model:ir.model.fields,field_description:purchase.field_account_move_line__purchase_line_id
+#: model:ir.model.fields,field_description:purchase.field_account_tax__purchase_order_line_ids
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_line_form2
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_line_view_form_invoice
@@ -3361,6 +3362,12 @@ msgid "The ordered quantity has been updated."
 msgstr ""
 
 #. module: purchase
+#. odoo-python
+#: code:addons/purchase/models/res_partner.py:0
+msgid "The partner cannot be deleted because it is used as a dropship address"
+msgstr ""
+
+#. module: purchase
 #: model_terms:ir.actions.act_window,help:purchase.act_res_partner_2_purchase_order
 msgid ""
 "The request for quotation is the first step of the purchases flow. Once\n"
@@ -3436,7 +3443,8 @@ msgstr "Denna leverantörsfaktura har ändrats från: "
 #. module: purchase
 #: model_terms:ir.actions.act_window,help:purchase.act_res_partner_2_purchase_order
 msgid "This vendor has no purchase order. Create a new RfQ"
-msgstr "Den här leverantören har ingen inköpsorder. Skapa en ny offertförfrågan"
+msgstr ""
+"Den här leverantören har ingen inköpsorder. Skapa en ny offertförfrågan"
 
 #. module: purchase
 #: model:digest.tip,name:purchase.digest_tip_purchase_0

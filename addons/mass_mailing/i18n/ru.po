@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-30 00:49+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 17:15+0000\n"
 "Last-Translator: \"Anastasiia Koroleva (koan)\" <koan@odoo.com>\n"
 "Language-Team: Russian <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -337,8 +337,8 @@ msgid ""
 "                                    <span class=\"text-muted\">Bounce</span>"
 msgstr ""
 "<br/>\n"
-"                                    <span class=\"text-muted\">"
-"Подпрыгивание</span>"
+"                                    <span class=\"text-"
+"muted\">Подпрыгивание</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_list_view_kanban
@@ -564,8 +564,8 @@ msgid ""
 "<i class=\"fa fa-bullseye me-2\" role=\"img\" aria-label=\"Lead/"
 "Opportunity\"/>"
 msgstr ""
-"<i class=\"fa fa-bullseye me-2\" role=\"img\" aria-label=\"Лид/"
-"Возможность\"/>"
+"<i class=\"fa fa-bullseye me-2\" role=\"img\" aria-label=\"Лид/Возможность\"/"
+">"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
@@ -762,8 +762,8 @@ msgid ""
 "<span class=\"fa fa-fw fa-shopping-cart\" contenteditable=\"false\"/>  Huge "
 "holiday sale savings. Don't miss out."
 msgstr ""
-"<span class=\"fa fa-fw fa-shopping-cart\" contenteditable=\"false\"/>  "
-"Грандиозная праздничная распродажа. Не упустите свой шанс!"
+"<span class=\"fa fa-fw fa-shopping-cart\" contenteditable=\"false\"/"
+">  Грандиозная праздничная распродажа. Не упустите свой шанс!"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_special_offer_cta
@@ -771,9 +771,9 @@ msgid ""
 "<span class=\"fa fa-fw fa-tag\" contenteditable=\"false\"/>  <strong>Special "
 "Offers</strong>. Complimentary care packs included with every sofa."
 msgstr ""
-"<span class=\"fa fa-fw fa-tag\" contenteditable=\"false\"/>  <strong>"
-"Специальные предложения</strong>. Подарочные наборы по уходу прилагаются к "
-"каждому дивану."
+"<span class=\"fa fa-fw fa-tag\" contenteditable=\"false\"/"
+">  <strong>Специальные предложения</strong>. Подарочные наборы по уходу "
+"прилагаются к каждому дивану."
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_kanban
@@ -937,7 +937,8 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_kanban
 msgid "<span invisible=\"not mailing_on_mailing_list\">Mailing Contact</span>"
-msgstr "<span invisible=\"not mailing_on_mailing_list\">Почтовый контакт</span>"
+msgstr ""
+"<span invisible=\"not mailing_on_mailing_list\">Почтовый контакт</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
@@ -1132,8 +1133,8 @@ msgid ""
 "<strong>John DOE</strong><br/><span class=\"h6-fs\"><font "
 "class=\"text-600\">CEO of MyCompany</font></span>"
 msgstr ""
-"<strong>Джон ДОУ</strong><br/><span class=\"h6-fs\"><font class=\"text-600\">"
-"Генеральный директор MyCompany</font></span>"
+"<strong>Джон ДОУ</strong><br/><span class=\"h6-fs\"><font "
+"class=\"text-600\">Генеральный директор MyCompany</font></span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_schedule
@@ -2524,7 +2525,8 @@ msgstr "Ширина блока"
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_media_list
 msgid ""
 "Continue reading <span class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
-msgstr "Читать далее <span class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
+msgstr ""
+"Читать далее <span class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
 
 #. module: mass_mailing
 #. odoo-python
@@ -4564,8 +4566,8 @@ msgid ""
 "\">Customer Service</span>"
 msgstr ""
 "Майкл Флетчер<br/>\n"
-"                  <span style=\"font-size: 12px; font-weight: bolder;\">"
-"Обслуживание клиентов</span>"
+"                  <span style=\"font-size: 12px; font-weight: bolder;"
+"\">Обслуживание клиентов</span>"
 
 #. module: mass_mailing
 #: model:ir.model.fields.selection,name:mass_mailing.selection__mailing_trace__failure_type__mail_email_missing
@@ -5016,8 +5018,8 @@ msgid ""
 msgstr ""
 "Опциональный язык перевода (код ISO), выбираемый при отправке e-mail. Если "
 "не установлен, будет использоваться язык основного партнера. Обычно это "
-"выражение-заполнитель, предоставляющее нужный язык, напр. {{ "
-"object.partner_id.lang }}."
+"выражение-заполнитель, предоставляющее нужный язык, напр. "
+"{{ object.partner_id.lang }}."
 
 #. module: mass_mailing
 #: model:ir.actions.act_window,name:mass_mailing.mailing_subscription_optout_action
@@ -6316,19 +6318,6 @@ msgstr "Отслеживание тестов"
 #. module: mass_mailing
 #. odoo-python
 #: code:addons/mass_mailing/wizard/mailing_mailing_test.py:0
-msgid ""
-"Test email sent to %(success)s recipient(s), could not send to %(failed)s."
-msgstr ""
-
-#. module: mass_mailing
-#. odoo-python
-#: code:addons/mass_mailing/wizard/mailing_mailing_test.py:0
-msgid "Test email sent to %(success)s recipient(s)."
-msgstr ""
-
-#. module: mass_mailing
-#. odoo-python
-#: code:addons/mass_mailing/wizard/mailing_mailing_test.py:0
 msgid "Test mailing could not be sent to %s:"
 msgstr "Тестовая рассылка не может быть отправлена на %s:"
 
@@ -6600,6 +6589,12 @@ msgid "Title Position"
 msgstr ""
 
 #. module: mass_mailing
+#. odoo-javascript
+#: code:addons/mass_mailing/static/src/components/mailing_preview_iframe/mass_mailing_preview_record_field.xml:0
+msgid "To"
+msgstr ""
+
+#. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_three_columns
 msgid ""
 "To add a fourth column, reduce the size of these three columns using the "
@@ -6713,8 +6708,8 @@ msgid ""
 "True luxury is more rewarding as a member.<br/>Join our inner circle for "
 "exclusive benefits and early access.<br/>Elevate your home today."
 msgstr ""
-"Истинная роскошь приносит больше привилегий для участников клуба.<br/>"
-"Вступайте в закрытый клуб для получения эксклюзивных бонусов и раннего "
+"Истинная роскошь приносит больше привилегий для участников клуба.<br/"
+">Вступайте в закрытый клуб для получения эксклюзивных бонусов и раннего "
 "доступа к коллекциям.<br/>Преобразите ваш дом прямо сейчас."
 
 #. module: mass_mailing

@@ -15,7 +15,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-30 00:49+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-09-14 09:32+0000\n"
 "Last-Translator: \"Chloe Wang (chwa)\" <chwa@odoo.com>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
@@ -72,8 +72,8 @@ msgstr ""
 
 #. module: pos_restaurant
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_order_change_receipt
-msgid "<br/>Guest"
-msgstr "<br/>访客"
+msgid "<span class=\"text-bold\">T </span>"
+msgstr ""
 
 #. module: pos_restaurant
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_restaurant_pos_category_kanban_view
@@ -206,7 +206,8 @@ msgstr "为默认课程分配类别"
 msgid ""
 "Assign products to courses like starter, main or dessert to ensure dishes "
 "are prepared and served in the correct order."
-msgstr "将产品分配到开胃菜、主菜或甜点等菜品类别中，以确保菜肴按正确顺序准备和上菜。"
+msgstr ""
+"将产品分配到开胃菜、主菜或甜点等菜品类别中，以确保菜肴按正确顺序准备和上菜。"
 
 #. module: pos_restaurant
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.res_config_settings_view_form
@@ -720,7 +721,9 @@ msgstr "香烤蔬菜"
 #. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/screens/product_screen/control_buttons/control_buttons.xml:0
+#: code:addons/pos_restaurant/static/src/app/services/pos_store.js:0
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_preset__use_guest
+#: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_order_change_receipt
 msgid "Guest"
 msgstr "访客"
 
@@ -1384,15 +1387,10 @@ msgstr "切换楼层视图"
 
 #. module: pos_restaurant
 #. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/utils/printer/generate_printer_data.js:0
-msgid "T %s"
-msgstr "T%s"
-
-#. module: pos_restaurant
-#. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/screens/payment_screen/order_details_dialog.js:0
 #: code:addons/pos_restaurant/static/src/app/screens/ticket_screen/ticket_screen.xml:0
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_order__table_id
+#: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_order_change_receipt
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_order_receipt_header
 msgid "Table"
 msgstr "桌台"
@@ -1673,3 +1671,9 @@ msgstr ""
 #: code:addons/pos_restaurant/static/src/app/screens/split_bill_screen/split_bill_screen.xml:0
 msgid "product(s) selected"
 msgstr ""
+
+#~ msgid "<br/>Guest"
+#~ msgstr "<br/>访客"
+
+#~ msgid "T %s"
+#~ msgstr "T%s"

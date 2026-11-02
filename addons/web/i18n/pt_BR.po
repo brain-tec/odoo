@@ -19,7 +19,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:39+0000\n"
+"POT-Creation-Date: 2026-10-30 17:39+0000\n"
 "PO-Revision-Date: 2026-09-23 12:46+0000\n"
 "Last-Translator: \"Maitê Dietze (madi)\" <madi@odoo.com>\n"
 "Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/odoo-"
@@ -81,12 +81,6 @@ msgstr "%s a agendar"
 #: code:addons/web/static/src/core/l10n/dates.js:0
 msgid "'%s' is not a correct date or datetime"
 msgstr "“%s” não é um campo Data ou Data e hora correto"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/form/form_error_dialog/form_error_dialog.xml:0
-msgid "'Oh snap!'"
-msgstr "“Ah, não!”"
 
 #. module: web
 #. odoo-javascript
@@ -253,8 +247,8 @@ msgid ""
 "<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">240.00</"
 "span></span>"
 msgstr ""
-"<span class=\"text-nowrap\"> $<span class=\"oe_currency_value\">240,00</span>"
-"</span>"
+"<span class=\"text-nowrap\"> $<span class=\"oe_currency_value\">240,00</"
+"span></span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -351,8 +345,8 @@ msgid ""
 "                                    </span>"
 msgstr ""
 "<span>\n"
-"                                        [FURN_7777] Cadeira de "
-"escritório<br/>Cadeira amarela confortável para o trabalho diário\n"
+"                                        [FURN_7777] Cadeira de escritório<br/"
+">Cadeira amarela confortável para o trabalho diário\n"
 "                                   </span>"
 
 #. module: web
@@ -365,8 +359,8 @@ msgid ""
 "                                    </span>"
 msgstr ""
 "<span>\n"
-"                                        [FURN_8999] Sofá de três lugares<br/>"
-"\n"
+"                                        [FURN_8999] Sofá de três lugares<br/"
+">\n"
 "Sofá de três lugares com espreguiçadeira na cor cinza aço\n"
 "                                   </span>"
 
@@ -1853,6 +1847,7 @@ msgstr "Converter para webp"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 #: code:addons/web/static/src/core/errors/error_dialogs.js:0
 #: code:addons/web/static/src/views/fields/copy_clipboard/copy_clipboard_field.js:0
 msgid "Copied"
@@ -1864,6 +1859,12 @@ msgstr "Copiado"
 #: code:addons/web/static/src/webclient/actions/action_service.js:0
 msgid "Copy"
 msgstr "Copiar"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
+msgid "Copy Arch"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -3784,7 +3785,8 @@ msgstr "Intervalo de tempo inválido"
 #. odoo-python
 #: code:addons/web/controllers/json.py:0
 msgid "Invalid view type '%(view_type)s' for action id=%(action)s"
-msgstr "Tipo de visualização inválido '%(view_type)s' para a ação id=%(action)s"
+msgstr ""
+"Tipo de visualização inválido '%(view_type)s' para a ação id=%(action)s"
 
 #. module: web
 #. odoo-javascript
@@ -5265,6 +5267,12 @@ msgstr "Recursos offline não estão disponíveis em um contexto não seguro"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/form/form_error_dialog/form_error_dialog.xml:0
+msgid "Oh snap!"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/confirmation_dialog/confirmation_dialog.js:0
 #: code:addons/web/static/src/public/error_notifications.js:0
 #: code:addons/web/static/src/views/calendar/calendar_year/calendar_year_popover.xml:0
@@ -6385,6 +6393,12 @@ msgstr "Pesquisar mais…"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/reference/reference_field.js:0
+msgid "Search a record..."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_picker.js:0
 msgid "Search emoji"
 msgstr "Pesquisar emoji"
@@ -6691,6 +6705,7 @@ msgstr "Shaka"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.js:0
+#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
 msgid "Share"
 msgstr "Compartilhar"
 
@@ -6729,6 +6744,12 @@ msgstr "Shinkansen"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Shinto"
 msgstr "Shinto"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
+msgid "Shortcuts"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -7152,6 +7173,14 @@ msgid "The app seems to be installed on your device"
 msgstr "O aplicativo parece estar instalado em seu dispositivo"
 
 #. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/search/search_arch_parser.js:0
+msgid ""
+"The autocomplete value for %(field)s has not been found: the record with id %"
+"(id)s doesn't seem to exist"
+msgstr ""
+
+#. module: web
 #. odoo-python
 #: code:addons/web/controllers/export.py:0
 msgid ""
@@ -7257,6 +7286,14 @@ msgid ""
 msgstr ""
 "O usuário deve ter uma configuração de ação incorporada exclusiva por "
 "configuração do usuário, ação e ID do registro."
+
+#. module: web
+#. odoo-python
+#: code:addons/web/controllers/export.py:0
+msgid ""
+"There are too many columns (%(count)s columns, limit: %(limit)s) to export "
+"as Excel 2007-2013 (.xlsx) format. Consider splitting the export."
+msgstr ""
 
 #. module: web
 #. odoo-python
@@ -27425,6 +27462,9 @@ msgstr "秘"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "空"
 msgstr "空"
+
+#~ msgid "'Oh snap!'"
+#~ msgstr "“Ah, não!”"
 
 #~ msgid "Memory limit (in bytes)"
 #~ msgstr "Limite de memória (em bytes)"
