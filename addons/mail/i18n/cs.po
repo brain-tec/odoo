@@ -22,7 +22,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 17:42+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-07-10 14:43+0000\n"
 "Last-Translator: \"Marta (wacm)\" <wacm@odoo.com>\n"
 "Language-Team: Czech <https://translate.odoo.com/projects/odoo-s19-3/mail/cs/"
@@ -2751,12 +2751,6 @@ msgstr ""
 #. odoo-python
 #: code:addons/mail/models/mail_activity.py:0
 msgid "Cannot search, too many activities"
-msgstr ""
-
-#. module: mail
-#. odoo-python
-#: code:addons/mail/models/mail_message.py:0
-msgid "Cannot search, too many messages"
 msgstr ""
 
 #. module: mail
@@ -7014,6 +7008,11 @@ msgstr "ŽIVĚ"
 #: model:ir.model.fields,field_description:mail.field_mail_template__lang
 msgid "Language"
 msgstr "Jazyk"
+
+#. module: mail
+#: model:ir.model.fields,help:mail.field_mail_message_translation__target_lang
+msgid "Language code used as the target for the translation request."
+msgstr ""
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_discuss_channel__last_interest_dt
@@ -11524,11 +11523,6 @@ msgid "Shortcut"
 msgstr "Zkratka"
 
 #. module: mail
-#: model:ir.model.fields,help:mail.field_mail_message_translation__target_lang
-msgid "Shortened language code used as the target for the translation request."
-msgstr "Zkrácený kód jazyka použitý jako cíl pro požadavek na překlad."
-
-#. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/core/web/command_palette.js:0
 msgid "Show All Activities"
@@ -12981,6 +12975,14 @@ msgstr ""
 #: code:addons/mail/static/src/core/web/activity.xml:0
 msgid "Tomorrow:"
 msgstr "Zítra:"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_message.py:0
+msgid ""
+"Too many messages to be processed.\n"
+"Please apply additional filters to reduce the number of potential messages."
+msgstr ""
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.discuss_channel_view_search
@@ -15320,6 +15322,10 @@ msgstr ""
 #: code:addons/mail/models/mail_canned_response.py:0
 msgid "🔒 Private"
 msgstr ""
+
+#~ msgid ""
+#~ "Shortened language code used as the target for the translation request."
+#~ msgstr "Zkrácený kód jazyka použitý jako cíl pro požadavek na překlad."
 
 #~ msgid ""
 #~ "The Tax Identification Number. Values here will be validated based on the "

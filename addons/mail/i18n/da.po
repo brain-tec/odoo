@@ -20,7 +20,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 17:42+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-07-28 13:05+0000\n"
 "Last-Translator: \"Kira Petersen François (peti)\" <peti@odoo.com>\n"
 "Language-Team: Danish <https://translate.odoo.com/projects/odoo-s19-3/mail/"
@@ -2750,12 +2750,6 @@ msgstr ""
 #. odoo-python
 #: code:addons/mail/models/mail_activity.py:0
 msgid "Cannot search, too many activities"
-msgstr ""
-
-#. module: mail
-#. odoo-python
-#: code:addons/mail/models/mail_message.py:0
-msgid "Cannot search, too many messages"
 msgstr ""
 
 #. module: mail
@@ -7027,6 +7021,11 @@ msgstr "LIVE"
 #: model:ir.model.fields,field_description:mail.field_mail_template__lang
 msgid "Language"
 msgstr "Sprog"
+
+#. module: mail
+#: model:ir.model.fields,help:mail.field_mail_message_translation__target_lang
+msgid "Language code used as the target for the translation request."
+msgstr ""
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_discuss_channel__last_interest_dt
@@ -11538,12 +11537,6 @@ msgid "Shortcut"
 msgstr "Genvej"
 
 #. module: mail
-#: model:ir.model.fields,help:mail.field_mail_message_translation__target_lang
-msgid "Shortened language code used as the target for the translation request."
-msgstr ""
-"Forkortet sprogkode, der angiver målsproget for oversættelsesanmodningen."
-
-#. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/core/web/command_palette.js:0
 msgid "Show All Activities"
@@ -12998,6 +12991,14 @@ msgstr "I morgen formiddag"
 #: code:addons/mail/static/src/core/web/activity.xml:0
 msgid "Tomorrow:"
 msgstr "I morgen:"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_message.py:0
+msgid ""
+"Too many messages to be processed.\n"
+"Please apply additional filters to reduce the number of potential messages."
+msgstr ""
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.discuss_channel_view_search
@@ -15333,6 +15334,11 @@ msgstr "\"%s\""
 #: code:addons/mail/models/mail_canned_response.py:0
 msgid "🔒 Private"
 msgstr ""
+
+#~ msgid ""
+#~ "Shortened language code used as the target for the translation request."
+#~ msgstr ""
+#~ "Forkortet sprogkode, der angiver målsproget for oversættelsesanmodningen."
 
 #~ msgid "Search for a GIF"
 #~ msgstr "Søg efter en GIF"

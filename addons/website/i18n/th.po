@@ -19,7 +19,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 17:42+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-10-28 15:35+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Thai <https://translate.odoo.com/projects/odoo-s19-3/website/"
@@ -249,12 +249,6 @@ msgstr "$ 32M"
 
 #. module: website
 #. odoo-python
-#: code:addons/website/models/ir_ui_view.py:0
-msgid "%(error)s (website: %(website_id)s)"
-msgstr ""
-
-#. module: website
-#. odoo-python
 #: code:addons/website/models/website_rewrite.py:0
 msgid "%(url)s not found"
 msgstr ""
@@ -317,8 +311,8 @@ msgid ""
 "'Alt tag' specifies an alternate text for an image, if the image cannot be "
 "displayed (slow connection, missing image, screen reader ...)."
 msgstr ""
-"'แท็ก Alt' ระบุข้อความสำรองสำหรับรูปภาพ หากไม่สามารถแสดงรูปภาพได้ (การเชื่อมต่อช้า รูปภาพห"
-"ายไป โปรแกรมอ่านหน้าจอ ...)"
+"'แท็ก Alt' ระบุข้อความสำรองสำหรับรูปภาพ หากไม่สามารถแสดงรูปภาพได้ (การเชื่อมต่อช้า "
+"รูปภาพหายไป โปรแกรมอ่านหน้าจอ ...)"
 
 #. module: website
 #. odoo-javascript
@@ -644,8 +638,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
 msgid "50,000+ companies use our services <br/>to grow their businesses."
-msgstr ""
-"มีบริษัทมากกว่า 50,000 แห่งที่ใช้บริการของเรา <br/>เพื่อพัฒนาธุรกิจของพวกเขา"
+msgstr "มีบริษัทมากกว่า 50,000 แห่งที่ใช้บริการของเรา <br/>เพื่อพัฒนาธุรกิจของพวกเขา"
 
 #. module: website
 #. odoo-javascript
@@ -3122,8 +3115,7 @@ msgstr "เพิ่มรูปภาพ"
 #. odoo-javascript
 #: code:addons/website/static/src/components/resource_editor/resource_editor_warning.xml:0
 msgid "Add analytics or marketing tags? Inject code in <head> or <body>."
-msgstr ""
-"ต้องการเพิ่มแท็กวิเคราะห์หรือแท็กการตลาดหรือไม่? ใส่โค้ดใน <head> หรือ <body>"
+msgstr "ต้องการเพิ่มแท็กวิเคราะห์หรือแท็กการตลาดหรือไม่? ใส่โค้ดใน <head> หรือ <body>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -8023,6 +8015,12 @@ msgid "External ID"
 msgstr "ไอดีจากภายนอก"
 
 #. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "External ID can not be loaded: %(error)s (website: %(website_id)s)"
+msgstr ""
+
+#. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/avatars_option.xml:0
 msgid "Extra Content"
@@ -8680,8 +8678,8 @@ msgid ""
 "you reach 250 Executive Park Blvd. Parking is available on-site near Suite "
 "3400."
 msgstr ""
-"จากใจกลางเมืองซานฟรานซิสโก ให้ขับตามทาง US-101 South และออกที่ Bayshore Boulevard แ"
-"ล้วเลี้ยวซ้ายเข้าสู่ Executive Park Blvd จากนั้นขับตรงไปจนกระทั่งถึง 250 Executive Park "
+"จากใจกลางเมืองซานฟรานซิสโก ให้ขับตามทาง US-101 South และออกที่ Bayshore Boulevard "
+"แล้วเลี้ยวซ้ายเข้าสู่ Executive Park Blvd จากนั้นขับตรงไปจนกระทั่งถึง 250 Executive Park "
 "Blvd มีที่จอดรถในบริเวณใกล้ Suite 3400"
 
 #. module: website
@@ -9609,6 +9607,12 @@ msgstr "ฉันเห็นด้วย"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/form/utils.js:0
+msgid "I agree to the"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/components/dialog/page_properties.xml:0
 msgid "I am sure about this."
 msgstr "ฉันแน่ใจเกี่ยวกับเรื่องนี้"
@@ -9807,8 +9811,7 @@ msgstr ""
 msgid ""
 "If you need to add analytics or marketing tags, inject code in your <head> "
 "or <body> instead."
-msgstr ""
-"หากคุณต้องการเพิ่มแท็กการวิเคราะห์หรือการตลาด ให้ใส่โค้ดใน<head>หรือ<body>ของคุณแทน"
+msgstr "หากคุณต้องการเพิ่มแท็กการวิเคราะห์หรือการตลาด ให้ใส่โค้ดใน<head>หรือ<body>ของคุณแทน"
 
 #. module: website
 #. odoo-javascript
@@ -10031,8 +10034,8 @@ msgid ""
 "            Each modification on the master page is automatically applied to "
 "all translated versions."
 msgstr ""
-"ในโหมดนี้ คุณสามารถแปลได้เฉพาะข้อความเท่านั้น หากต้องการเปลี่ยนโครงสร้างของเพจ คุณต้องแก้ไขเ"
-"พจต้นแบบ\n"
+"ในโหมดนี้ คุณสามารถแปลได้เฉพาะข้อความเท่านั้น หากต้องการเปลี่ยนโครงสร้างของเพจ "
+"คุณต้องแก้ไขเพจต้นแบบ\n"
 "            การแก้ไขแต่ละครั้งบนหน้าต้นแบบจะถูกนำไปใช้กับเวอร์ชันที่แปลทั้งหมดโดยอัตโนมัติ"
 
 #. module: website
@@ -11576,8 +11579,8 @@ msgid ""
 "Make sure to wait if errors keep being shown: sometimes enabling an API "
 "allows to use it immediately but Google keeps triggering errors for a while"
 msgstr ""
-"ตรวจสอบให้แน่ใจว่าได้รอ หากมีข้อผิดพลาดแสดงอยู่: บางครั้งการเปิดใช้งาน API ทำให้สามารถใช้งาน"
-"ได้ทันที แต่ Google จะคอยกระตุ้นข้อผิดพลาดอยู่พักหนึ่ง"
+"ตรวจสอบให้แน่ใจว่าได้รอ หากมีข้อผิดพลาดแสดงอยู่: บางครั้งการเปิดใช้งาน API "
+"ทำให้สามารถใช้งานได้ทันที แต่ Google จะคอยกระตุ้นข้อผิดพลาดอยู่พักหนึ่ง"
 
 #. module: website
 #. odoo-javascript
@@ -16681,8 +16684,8 @@ msgid ""
 "Blvd, Suite 3400, is just a short walk from the stop."
 msgstr ""
 "นั่ง BART ไปยังสถานี Balboa Park จากนั่น ขึ้นรถบัสสาย 29 ที่มุ่งหน้าไป Bayview และลงที่ "
-"Executive Park อาคารที่ 250 Executive Park Blvd, Suite 3400 อยู่ห่างจากจุดลงรถเพียงร"
-"ะยะเดินสั้นๆ"
+"Executive Park อาคารที่ 250 Executive Park Blvd, Suite 3400 "
+"อยู่ห่างจากจุดลงรถเพียงระยะเดินสั้นๆ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_closer_look
@@ -16795,6 +16798,12 @@ msgstr "ไอดีเทมเพลต: %s"
 #: model_terms:ir.ui.view,arch_db:website.qweb_500
 msgid "Template fallback"
 msgstr "Template fallback"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "Template not found: '%(error)s' (website: %(website_id)s)"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega
@@ -17692,8 +17701,7 @@ msgstr ""
 msgid ""
 "To add your page to this category, open the page properties: \"Site -> "
 "Properties\"."
-msgstr ""
-"หากต้องการเพิ่มเพจของคุณลงในหมวดหมู่นี้ ให้เปิดคุณสมบัติของเพจ: \"ไซต์ -> คุณสมบัติ\""
+msgstr "หากต้องการเพิ่มเพจของคุณลงในหมวดหมู่นี้ ให้เปิดคุณสมบัติของเพจ: \"ไซต์ -> คุณสมบัติ\""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_tabs
@@ -19085,8 +19093,8 @@ msgid ""
 "We use cookies to provide improved experience on this website. You can learn "
 "more about our cookies and how we use them in our"
 msgstr ""
-"เราใช้คุกกี้เพื่อมอบประสบการณ์ที่ดีขึ้นบนเว็บไซต์นี้ คุณสามารถเรียนรู้เพิ่มเติมเกี่ยวกับคุกกี้ของเราและวิธีที่"
-"เราใช้คุกกี้เหล่านี้ได้ใน"
+"เราใช้คุกกี้เพื่อมอบประสบการณ์ที่ดีขึ้นบนเว็บไซต์นี้ "
+"คุณสามารถเรียนรู้เพิ่มเติมเกี่ยวกับคุกกี้ของเราและวิธีที่เราใช้คุกกี้เหล่านี้ได้ใน"
 
 #. module: website
 #. odoo-javascript
@@ -19950,8 +19958,8 @@ msgid ""
 "Your Dynamic Snippet will be displayed here... This message is displayed "
 "because you did not provide enough options to retrieve its content.<br/>"
 msgstr ""
-"โค้ดแบบไดนามิกของคุณจะแสดงขึ้นที่นี่... ข้อความนี้แสดงขึ้นเพราะคุณไม่ได้กำหนดตัวเลือกเพียงพอเพื่อดึง"
-"เนื้อหาของมัน<br/>"
+"โค้ดแบบไดนามิกของคุณจะแสดงขึ้นที่นี่... "
+"ข้อความนี้แสดงขึ้นเพราะคุณไม่ได้กำหนดตัวเลือกเพียงพอเพื่อดึงเนื้อหาของมัน<br/>"
 
 #. module: website
 #. odoo-javascript

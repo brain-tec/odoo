@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 17:42+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-10-28 12:34+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Hindi <https://translate.odoo.com/projects/odoo-s19-3/website/"
@@ -214,12 +214,6 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
 msgid "$ 32M"
-msgstr ""
-
-#. module: website
-#. odoo-python
-#: code:addons/website/models/ir_ui_view.py:0
-msgid "%(error)s (website: %(website_id)s)"
 msgstr ""
 
 #. module: website
@@ -1091,15 +1085,13 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid "<i class=\"fa fa-check text-success\" role=\"img\"/>  Email support"
-msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  ईमेल के लिए सहायता"
+msgstr "<i class=\"fa fa-check text-success\" role=\"img\"/>  ईमेल के लिए सहायता"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid ""
 "<i class=\"fa fa-check text-success\" role=\"img\"/>  Limited customization"
-msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/> लिमिटेड कस्टमाइज़ेशन"
+msgstr "<i class=\"fa fa-check text-success\" role=\"img\"/> लिमिटेड कस्टमाइज़ेशन"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
@@ -1211,8 +1203,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid "<i class=\"fa fa-times text-danger\" role=\"img\"/>  No customization"
-msgstr ""
-"<i class=\"fa fa-times text-danger\" role=\"img\"/> कोई कस्टमाइज़ेशन नहीं"
+msgstr "<i class=\"fa fa-times text-danger\" role=\"img\"/> कोई कस्टमाइज़ेशन नहीं"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
@@ -5476,8 +5467,7 @@ msgstr "संपर्क करें"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
 msgid "Contact us about anything related to our company or services."
-msgstr ""
-"हमारी कंपनी या सेवाओं से जुड़ी किसी भी चीज़ के बारे में हमसे संपर्क करें।"
+msgstr "हमारी कंपनी या सेवाओं से जुड़ी किसी भी चीज़ के बारे में हमसे संपर्क करें।"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_contact
@@ -7795,6 +7785,12 @@ msgid "External ID"
 msgstr "एक्सटर्नल आईडी"
 
 #. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "External ID can not be loaded: %(error)s (website: %(website_id)s)"
+msgstr ""
+
+#. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/avatars_option.xml:0
 msgid "Extra Content"
@@ -9351,6 +9347,12 @@ msgstr ""
 #: code:addons/website/static/src/xml/website.cookies_bar.xml:0
 #: model_terms:ir.ui.view,arch_db:website.cookies_bar
 msgid "I agree"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/form/utils.js:0
+msgid "I agree to the"
 msgstr ""
 
 #. module: website
@@ -16451,6 +16453,12 @@ msgid "Template fallback"
 msgstr ""
 
 #. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "Template not found: '%(error)s' (website: %(website_id)s)"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega_columns
 msgid "Terms and Conditions"
@@ -16703,8 +16711,7 @@ msgstr ""
 #: model:ir.model.fields,help:website.field_website_published_multi_mixin__website_url
 #: model:ir.model.fields,help:website.field_website_snippet_filter__website_url
 msgid "The full relative URL to access the document through the website."
-msgstr ""
-"वेबसाइट के माध्यम से दस्तावेज़ को ऐक्सेस करने के लिए पूरा रिलेटिव यूआरएल।"
+msgstr "वेबसाइट के माध्यम से दस्तावेज़ को ऐक्सेस करने के लिए पूरा रिलेटिव यूआरएल।"
 
 #. module: website
 #. odoo-python
@@ -19094,8 +19101,7 @@ msgstr ""
 msgid ""
 "We’re committed to providing prompt and effective solutions to ensure your "
 "satisfaction."
-msgstr ""
-"हम आपकी संतुष्टि के लिए हम तुरंत और असरदार समाधान देने के लिए प्रतिबद्ध हैं।"
+msgstr "हम आपकी संतुष्टि के लिए हम तुरंत और असरदार समाधान देने के लिए प्रतिबद्ध हैं।"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_about_personal_s_text_block_h2

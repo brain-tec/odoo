@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 17:42+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-10-28 12:34+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-s19-3/"
@@ -252,12 +252,6 @@ msgstr "ブロックの数"
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
 msgid "$ 32M"
 msgstr "$ 32M"
-
-#. module: website
-#. odoo-python
-#: code:addons/website/models/ir_ui_view.py:0
-msgid "%(error)s (website: %(website_id)s)"
-msgstr "%(error)s (ウェブサイト: %(website_id)s)"
 
 #. module: website
 #. odoo-python
@@ -8433,6 +8427,12 @@ msgid "External ID"
 msgstr "外部ID"
 
 #. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "External ID can not be loaded: %(error)s (website: %(website_id)s)"
+msgstr ""
+
+#. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/avatars_option.xml:0
 msgid "Extra Content"
@@ -9885,8 +9885,8 @@ msgid ""
 "Hint: How to use Google Map on your website (Contact Us page and as a "
 "snippet)"
 msgstr ""
-"ヒント: ウェブサイトでGoogleマップを使用する方法(お問い合わせページおよび"
-"スニペット)"
+"ヒント: ウェブサイトでGoogleマップを使用する方法(お問い合わせページおよびスニ"
+"ペット)"
 
 #. module: website
 #. odoo-javascript
@@ -10044,6 +10044,12 @@ msgstr "ハイブリッド"
 #: model_terms:ir.ui.view,arch_db:website.cookies_bar
 msgid "I agree"
 msgstr "同意"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/form/utils.js:0
+msgid "I agree to the"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -10444,8 +10450,8 @@ msgid ""
 "Improve navigation and hierarchy of site by adding parent page in "
 "breadcrumbs format."
 msgstr ""
-"サイトのナビゲーションと階層構造を改善するために、パンくずリスト形式で親"
-"ページを追加します。"
+"サイトのナビゲーションと階層構造を改善するために、パンくずリスト形式で親ペー"
+"ジを追加します。"
 
 #. module: website
 #. odoo-javascript
@@ -10478,8 +10484,8 @@ msgid ""
 "            Each modification on the master page is automatically applied to "
 "all translated versions."
 msgstr ""
-"このモードではテキストの翻訳のみが可能です。ページの構造を変更するには"
-"マスターページを編集する必要があります。マスターページで行った変更は、\n"
+"このモードではテキストの翻訳のみが可能です。ページの構造を変更するにはマス"
+"ターページを編集する必要があります。マスターページで行った変更は、\n"
 "            翻訳されたすべてのバージョンに自動的に適用されます。"
 
 #. module: website
@@ -17321,6 +17327,12 @@ msgid "Template fallback"
 msgstr "テンプレートフォールバック"
 
 #. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "Template not found: '%(error)s' (website: %(website_id)s)"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega_columns
 msgid "Terms and Conditions"
@@ -17527,7 +17539,8 @@ msgstr "当社の変革"
 #: code:addons/website/static/src/builder/plugins/form/form_option_plugin.js:0
 msgid ""
 "The field \"%(fieldName)s\" is mandatory for the action \"%(actionName)s\"."
-msgstr "「%(fieldName)s 」フィールドの入力はアクション「%(actionName)s 」で必須です。"
+msgstr ""
+"「%(fieldName)s 」フィールドの入力はアクション「%(actionName)s 」で必須です。"
 
 #. module: website
 #. odoo-python
@@ -17547,7 +17560,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/form/form_option_plugin.js:0
 msgid "The field “%(fieldName)s” is mandatory for the selected action."
-msgstr "選択したアクションでは、「%(fieldName)s」フィールドへの入力が必須です。"
+msgstr ""
+"選択したアクションでは、「%(fieldName)s」フィールドへの入力が必須です。"
 
 #. module: website
 #. odoo-python
@@ -18006,7 +18020,8 @@ msgstr "このページはまだ存在しません。作成しますか?"
 msgid ""
 "This page may be corrupted if you save these changes. Are you sure you want "
 "to continue?"
-msgstr "この変更を保存すると、このページが破損する可能性があります。本当に続けますか?"
+msgstr ""
+"この変更を保存すると、このページが破損する可能性があります。本当に続けますか?"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.view_website_rewrite_form
@@ -18242,8 +18257,8 @@ msgid ""
 "To add your page to this category, open the page properties: \"Site -> "
 "Properties\"."
 msgstr ""
-"このカテゴリにページを追加するには、ページのプロパティを開いて下さい:「"
-"サイト -> プロパティ」。"
+"このカテゴリにページを追加するには、ページのプロパティを開いて下さい:「サイ"
+"ト -> プロパティ」。"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_tabs
@@ -20849,9 +20864,9 @@ msgid ""
 "showcase, mosaic, collage, arrangement, collection, visual-grid"
 msgstr ""
 "カード, ショップ, グリッド, アバター, カラム, カート, 商品, EC, カテゴリ, 強"
-"調, 画像, 写真, イラスト, メディア, ビジュアル, 導入, ホーム, クーポン, "
-"コード, 説明, 角丸, カード, 行動喚起, CTA, マーケティング, ショーケース, "
-"モザイク, コラージュ, 配置, コレクション, ビジュアルグリッド"
+"調, 画像, 写真, イラスト, メディア, ビジュアル, 導入, ホーム, クーポン, コー"
+"ド, 説明, 角丸, カード, 行動喚起, CTA, マーケティング, ショーケース, モザイ"
+"ク, コラージュ, 配置, コレクション, ビジュアルグリッド"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -20863,8 +20878,8 @@ msgid ""
 msgstr ""
 "カード, ショップ, グリッド, カラム, カート, 商品, EC, カテゴリ, 強調, 画像, "
 "写真, イラスト, メディア, ビジュアル, 導入, ホーム, クーポン, コード, 説明, "
-"角丸, カード, 行動喚起, CTA, マーケティング, ショーケース, モザイク, "
-"コラージュ, 配置, コレクション, ビジュアルグリッド"
+"角丸, カード, 行動喚起, CTA, マーケティング, ショーケース, モザイク, コラー"
+"ジュ, 配置, コレクション, ビジュアルグリッド"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -22169,6 +22184,9 @@ msgstr "✽  ピザ"
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid "✽  What We Offer"
 msgstr "✽  当社が提供するもの"
+
+#~ msgid "%(error)s (website: %(website_id)s)"
+#~ msgstr "%(error)s (ウェブサイト: %(website_id)s)"
 
 #~ msgid "Accounts are usable across all your multiple websites"
 #~ msgstr "アカウントは複数サイトに渡って使用できます"
