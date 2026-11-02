@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:36+0000\n"
-"PO-Revision-Date: 2026-06-20 15:09+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
+"PO-Revision-Date: 2026-10-28 13:50+0000\n"
 "Last-Translator: \"Marta (wacm)\" <wacm@odoo.com>\n"
 "Language-Team: Polish <https://translate.odoo.com/projects/odoo-s19-2/"
 "html_editor/pl/>\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 2026.6.1\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: html_editor
 #. odoo-javascript
@@ -300,12 +300,6 @@ msgstr "Automatyczne odtwarzanie"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/column_plugin.js:0
-msgid "Back to one column"
-msgstr "Powrót do jednej kolumny"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner"
 msgstr "Banner"
@@ -532,6 +526,12 @@ msgstr "Wygenerowana treść"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
+msgid "Convert columns to regular content"
+msgstr "Konwertuj kolumny na zwykłą zawartość"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/column_plugin.js:0
 msgid "Convert into 2 columns"
 msgstr "Konwersja na 2 kolumny"
 
@@ -713,6 +713,12 @@ msgstr "Dokumenty"
 #: code:addons/html_editor/static/src/main/movenode_plugin.js:0
 msgid "Drag to move"
 msgstr "Przeciągnij, aby przenieść"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/components/history_dialog/history_dialog.js:0
+msgid "Dynamic element"
+msgstr ""
 
 #. module: html_editor
 #. odoo-python
@@ -1192,7 +1198,7 @@ msgstr "Wstaw swój podpis e-mailowy"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/signature_plugin.js:0
 msgid "Insert your handwritten signature"
-msgstr ""
+msgstr "Wstaw odręczny podpis"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1460,6 +1466,25 @@ msgstr "Ok"
 #. module: html_editor
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
+msgid "Only internal users can use AI text generation."
+msgstr ""
+"Tylko użytkownicy wewnętrzni mogą korzystać z generowania tekstu przez AI."
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/backend/dynamic_field/dynamic_field_plugin.js:0
+msgid "Oops! Select a model for this template before editing fields."
+msgstr "Ups! Wybierz model dla tego szablonu przed edycją pól."
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/backend/dynamic_field/dynamic_field_plugin.js:0
+msgid "Oops! Select a model for this template before inserting fields."
+msgstr "Ups! Wybierz model dla tego szablonu przed wstawieniem pól."
+
+#. module: html_editor
+#. odoo-python
+#: code:addons/html_editor/controllers/main.py:0
 msgid "Oops, it looks like our AI is unreachable!"
 msgstr "Ups, wygląda na to, że nasze AI jest teraz niedostępne!"
 
@@ -1683,8 +1708,8 @@ msgstr "Usuń link"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
-msgid "Remove columns"
-msgstr "Usuń kolumny"
+msgid "Remove column layout"
+msgstr "Usuń układ kolumn"
 
 #. module: html_editor
 #. odoo-javascript
@@ -2593,6 +2618,12 @@ msgstr "obsługa komunikatów websocket"
 #: code:addons/html_editor/static/src/main/table/table_picker.xml:0
 msgid "x"
 msgstr "x"
+
+#~ msgid "Back to one column"
+#~ msgstr "Powrót do jednej kolumny"
+
+#~ msgid "Remove columns"
+#~ msgstr "Usuń kolumny"
 
 #~ msgid "Insert your signature from Sign"
 #~ msgstr "Wstaw swój podpis z aplikacji Podpisy"

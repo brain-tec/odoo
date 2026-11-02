@@ -21,7 +21,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-07 17:37+0000\n"
+"POT-Creation-Date: 2026-10-30 17:36+0000\n"
 "PO-Revision-Date: 2026-10-12 11:08+0000\n"
 "Last-Translator: \"Malaz Siddig Elsayed Abuidris (msea)\" <msea@odoo.com>\n"
 "Language-Team: Arabic <https://translate.odoo.com/projects/odoo-s19-2/"
@@ -254,12 +254,6 @@ msgstr "$ 32M"
 
 #. module: website
 #. odoo-python
-#: code:addons/website/models/ir_ui_view.py:0
-msgid "%(error)s (website: %(website_id)s)"
-msgstr "%(error)s (الموقع الإلكتروني: %(website_id)s)"
-
-#. module: website
-#. odoo-python
 #: code:addons/website/models/website_rewrite.py:0
 msgid "%(url)s not found"
 msgstr ""
@@ -318,6 +312,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.list_website_public_pages
 msgid "'. Showing results for '"
 msgstr "'. يتم عرض النتائج لـ '"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/snippets/s_searchbar/search_bar.js:0
+msgid "(%(count)s found)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -7302,6 +7302,12 @@ msgstr "دونات"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/options/popup_option_plugin.js:0
+msgid "Drag blocks here"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/js/tours/tour_utils.js:0
 msgid "Drag the <b>%s</b> block and drop it at the bottom of the page."
 msgstr "قم بسحب <b>%s</b>الكتلة البرمجية الإنشائية وأفلتها في أسفل الصفحة."
@@ -8199,6 +8205,12 @@ msgstr "معاينة الامتداد"
 #: model:ir.model.fields,field_description:website.field_website_page__xml_id
 msgid "External ID"
 msgstr "معرف خارجي"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "External ID can not be loaded: %(error)s (website: %(website_id)s)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -9209,6 +9221,15 @@ msgstr "خريطة Google"
 #: model:ir.model.fields,field_description:website.field_website__google_maps_api_key
 msgid "Google Maps API Key"
 msgstr "مفتاح الواجهة البرمجية للتطبيق لخرائط Google"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/options/google_maps_option/google_maps_service.js:0
+#: code:addons/website/static/src/core/website_map_service.js:0
+msgid ""
+"Google Maps configuration has changed. Please reload the page for changes to "
+"take effect."
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -14065,8 +14086,8 @@ msgstr "العنصر النائب"
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/google_maps_option/google_maps_api_key_dialog.xml:0
-msgid "Places API"
-msgstr "الواجهة البرمجية للأماكن"
+msgid "Places API (NEW)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -16139,8 +16160,8 @@ msgid ""
 "Simple forms. Natural textures. Timeless design. Explore our new furniture "
 "collection—crafted to bring calm and clarity to your space."
 msgstr ""
-"أشكال بسيطة. مواد طبيعية. تصميم خالد. اكتشف مجموعتنا الجديدة من الأثاث المصمم "
-"خصيصًا لإضفاء الهدوء والسكينة على مساحتك."
+"أشكال بسيطة. مواد طبيعية. تصميم خالد. اكتشف مجموعتنا الجديدة من الأثاث "
+"المصمم خصيصًا لإضفاء الهدوء والسكينة على مساحتك."
 
 #. module: website
 #. odoo-javascript
@@ -16952,9 +16973,23 @@ msgid "Template ID: %s"
 msgstr "معرف القالب: %s"
 
 #. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid ""
+"Template does not exist or has been deleted: %(error)s (website: %"
+"(website_id)s)"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.qweb_500
 msgid "Template fallback"
 msgstr "ارتداد القالب"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "Template not found: '%(error)s' (website: %(website_id)s)"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega
@@ -17181,12 +17216,6 @@ msgstr "النطاق التالي غير صالح:"
 #: code:addons/website/static/src/xml/website_form.xml:0
 msgid "The form has been sent successfully."
 msgstr "تم ارسال الاستمارة بنجاح."
-
-#. module: website
-#. odoo-python
-#: code:addons/website/controllers/form.py:0
-msgid "The form's specified model does not exist"
-msgstr "نموذج الاستمارة المحدد غير موجود"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_ir_actions_server__website_url
@@ -17544,6 +17573,13 @@ msgid ""
 "This font already exists, you can only add it as a local font to replace the "
 "server version."
 msgstr "هذا الخط موجود بالفعل. يمكنك فقط إضافته كخط محلي لاستبدال نسخة الخادم."
+
+#. module: website
+#. odoo-python
+#: code:addons/website/controllers/form.py:0
+msgid ""
+"This form cannot be submitted. Please contact the website administrator."
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -18462,8 +18498,8 @@ msgstr "استخدام خرائط Google في موقعك (صفحة تواصل م
 #: code:addons/website/static/src/builder/plugins/font/add_font_dialog.xml:0
 msgid "Use Google’s servers for fonts. It may impact GDPR compliance"
 msgstr ""
-"الاعتماد على خوادم Google لتقديم الخطوط. يُرجى التنويه بأن هذا الإجراء قد يؤثر "
-"على مدى توافق الموقع مع أحكام لائحة حماية البيانات العامة (GDPR)"
+"الاعتماد على خوادم Google لتقديم الخطوط. يُرجى التنويه بأن هذا الإجراء قد "
+"يؤثر على مدى توافق الموقع مع أحكام لائحة حماية البيانات العامة (GDPR)"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_theme_website_menu__use_main_menu_as_parent
@@ -19020,8 +19056,8 @@ msgid ""
 "We are a team of passionate people whose goal is to improve everyone's life "
 "through disruptive products."
 msgstr ""
-"نحن فريق من الأشخاص الشغوفين الذين يهدفون إلى تحسين حياة الجميع من خلال منتجات "
-"مبتكرة."
+"نحن فريق من الأشخاص الشغوفين الذين يهدفون إلى تحسين حياة الجميع من خلال "
+"منتجات مبتكرة."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega_links
@@ -20040,6 +20076,12 @@ msgstr "لا يمكنك صنع نسخة مطابقة لهذا الحقل."
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/options/card_image_option_plugin.js:0
+msgid "You cannot duplicate this image."
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/facebook_option_plugin.js:0
 msgid "You didn't provide a valid Facebook link"
 msgstr "لم تقم بتقديم رابط Facebook صالح"
@@ -20385,8 +20427,8 @@ msgid ""
 "banner, announcement, scrolling text, trust indicators, info bar, site-wide "
 "banner, minimal design, trendy, bold, presentation"
 msgstr ""
-"لافتة، إعلان، نص متحرك، مؤشرات الثقة، شريط المعلومات، لافتة شاملة للموقع، تصميم "
-"بسيط، عصري، جريء، عرض تقديمي"
+"لافتة، إعلان، نص متحرك، مؤشرات الثقة، شريط المعلومات، لافتة شاملة للموقع، "
+"تصميم بسيط، عصري، جريء، عرض تقديمي"
 
 #. module: website
 #. odoo-python
@@ -21038,9 +21080,9 @@ msgid ""
 "cta, button, highlight, showcase, spotlight, sober, trendy, design, picture, "
 "photo, illustration, visual, description, containers, layouts, product, buy"
 msgstr ""
-"بطل، شاشة عملاقة، عنوان رئيسي، رأس الصفحة، مقدمة، لافتة، دعوة للعمل، زر، تمييز"
-"، عرض، تسليط الضوء، رصين، عصري، تصميم، صورة، صورة فوتوغرافية، رسم توضيحي، "
-"بصري، وصف، حاويات، تخطيطات، منتج، شراء"
+"بطل، شاشة عملاقة، عنوان رئيسي، رأس الصفحة، مقدمة، لافتة، دعوة للعمل، زر، "
+"تمييز، عرض، تسليط الضوء، رصين، عصري، تصميم، صورة، صورة فوتوغرافية، رسم "
+"توضيحي، بصري، وصف، حاويات، تخطيطات، منتج، شراء"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21117,9 +21159,9 @@ msgid ""
 "photo, illustration, media, visual, intro, home, content, description, call "
 "to action, cta, minimalist, marketing"
 msgstr ""
-"بطل، شاشة عملاقة، عنوان، رأس الصفحة، متجر، عربة التسوق، منتج، تجارة إلكترونية"
-"، صورة، صورة فوتوغرافية، رسم توضيحي، وسائط، مرئي، مقدمة، الصفحة الرئيسية، "
-"محتوى، وصف، دعوة للعمل، cta، بسيط، تسويق"
+"بطل، شاشة عملاقة، عنوان، رأس الصفحة، متجر، عربة التسوق، منتج، تجارة "
+"إلكترونية، صورة، صورة فوتوغرافية، رسم توضيحي، وسائط، مرئي، مقدمة، الصفحة "
+"الرئيسية، محتوى، وصف، دعوة للعمل، cta، بسيط، تسويق"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21128,9 +21170,9 @@ msgid ""
 "photo, illustration, media, visual, intro, home, content, description, "
 "rounded, card, call to action, cta, minimalist, marketing"
 msgstr ""
-"بطل، شاشة عملاقة، عنوان، رأس الصفحة، متجر، عربة التسوق، منتج، تجارة إلكترونية"
-"، صورة، صورة فوتوغرافية، رسم توضيحي، وسائط، مرئي، مقدمة، الصفحة الرئيسية، "
-"محتوى، وصف، مستدير، بطاقة، دعوة للعمل، cta، بسيط، تسويق"
+"بطل، شاشة عملاقة، عنوان، رأس الصفحة، متجر، عربة التسوق، منتج، تجارة "
+"إلكترونية، صورة، صورة فوتوغرافية، رسم توضيحي، وسائط، مرئي، مقدمة، الصفحة "
+"الرئيسية، محتوى، وصف، مستدير، بطاقة، دعوة للعمل، cta، بسيط، تسويق"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21579,9 +21621,9 @@ msgid ""
 "shop, cart, product, categories, ecommerce, e-commerce, cards, trendy, "
 "column, layouts, picture, photo, illustration, media, visual"
 msgstr ""
-"المتجر، سلة التسوق، المنتج، الفئات، التجارة الإلكترونية، التجارة الإلكترونية، "
-"البطاقات، العصري/الحديث، العمود، التخطيطات/القوالب، الصورة، صورة فوتوغرافية، "
-"التوضيح (الرسوم)، الوسائط، المرئيات"
+"المتجر، سلة التسوق، المنتج، الفئات، التجارة الإلكترونية، التجارة "
+"الإلكترونية، البطاقات، العصري/الحديث، العمود، التخطيطات/القوالب، الصورة، "
+"صورة فوتوغرافية، التوضيح (الرسوم)، الوسائط، المرئيات"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21775,6 +21817,15 @@ msgstr "✽  البيتزا"
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid "✽  What We Offer"
 msgstr "✽ ما نقدمه"
+
+#~ msgid "%(error)s (website: %(website_id)s)"
+#~ msgstr "%(error)s (الموقع الإلكتروني: %(website_id)s)"
+
+#~ msgid "Places API"
+#~ msgstr "الواجهة البرمجية للأماكن"
+
+#~ msgid "The form's specified model does not exist"
+#~ msgstr "نموذج الاستمارة المحدد غير موجود"
 
 #~ msgid "Accounts are usable across all your multiple websites"
 #~ msgstr "يمكن استخدام الحسابات عبر كافة مواقعك الإلكترونية المتعددة"

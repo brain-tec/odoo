@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-20 09:01+0000\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
 "PO-Revision-Date: 2026-02-28 13:33+0000\n"
 "Last-Translator: \"Kwanghee Park (kwpa)\" <kwpa@odoo.com>\n"
 "Language-Team: Korean <https://translate.odoo.com/projects/odoo-s19-2/"
@@ -150,8 +150,8 @@ msgstr "열 %(column)s에 잘못된 값이 포함되어 있습니다(값: %(valu
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
-"Column %(column)s contains incorrect values. Error in line %(line)d: "
-"%(error)s"
+"Column %(column)s contains incorrect values. Error in line %(line)d: %"
+"(error)s"
 msgstr ""
 "열 %(column)s에 잘못된 값이 있습니다. %(line)d 항목 오류: %(error)s가 발생했"
 "습니다."
@@ -179,8 +179,8 @@ msgstr "의견"
 msgid ""
 "Could not retrieve URL: %(url)s [%(field_name)s: L%(line_number)d]: %(error)s"
 msgstr ""
-"URL을 검색 할 수 없습니다 : %(url)s [%(field_name)s: L%(line_number)d]: "
-"%(error)s"
+"URL을 검색 할 수 없습니다 : %(url)s [%(field_name)s: L%(line_number)d]: %"
+"(error)s"
 
 #. module: base_import
 #. odoo-javascript
@@ -306,8 +306,8 @@ msgstr ""
 #: code:addons/base_import/models/base_import.py:0
 msgid ""
 "Error while importing records: all rows should be of the same size, but the "
-"title row has %(title_row_entries)d entries while the first row has "
-"%(first_row_entries)d. You may need to change the separator character."
+"title row has %(title_row_entries)d entries while the first row has %"
+"(first_row_entries)d. You may need to change the separator character."
 msgstr ""
 "레코드를 가져오는 동안 오류가 발생했습니다: 모든 행에 동일한 수의 항목이 있어"
 "야 합니다. 제목 행에는 %(title_row_entries)d개의 항목이 있고, 첫 번째 데이터 "
@@ -458,15 +458,6 @@ msgid ""
 msgstr ""
 "모델이 openchatter를 사용하는 경우 기록 추적이 구독을 설정하고 가져오는 동안 "
 "알림을 보내지만 가져오기 속도가 느려집니다."
-
-#. module: base_import
-#. odoo-python
-#: code:addons/base_import/models/base_import.py:0
-msgid ""
-"Image size excessive, imported images must be smaller than 42 million pixel"
-msgstr ""
-"이미지 크기가 초과되었습니다. 4,200만 픽셀보다 작은 이미지만 가져올 수 있습니"
-"다."
 
 #. module: base_import
 #. odoo-javascript
@@ -1002,3 +993,10 @@ msgstr "초"
 #: code:addons/base_import/models/base_import.py:0
 msgid "unknown error code %s"
 msgstr "%s에서 알수없는 오류가 발생했습니다"
+
+#~ msgid ""
+#~ "Image size excessive, imported images must be smaller than 42 million "
+#~ "pixel"
+#~ msgstr ""
+#~ "이미지 크기가 초과되었습니다. 4,200만 픽셀보다 작은 이미지만 가져올 수 있"
+#~ "습니다."

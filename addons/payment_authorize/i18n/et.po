@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-20 18:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2018-08-24 09:21+0000\n"
 "Last-Translator: Martin Aavastik <martin@avalah.ee>, 2018\n"
 "Language-Team: Estonian (https://www.transifex.com/odoo/teams/41243/et/)\n"
@@ -97,6 +97,12 @@ msgstr ""
 msgid ""
 "Could not fetch merchant details:\n"
 "%s"
+msgstr ""
+
+#. module: payment_authorize
+#. odoo-python
+#: code:addons/payment_authorize/models/authorize_request.py:0
+msgid "Could not retrieve the transaction details."
 msgstr ""
 
 #. module: payment_authorize
