@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-10 18:16+0000\n"
+"POT-Creation-Date: 2026-10-24 18:12+0000\n"
 "PO-Revision-Date: 2026-08-31 19:44+0000\n"
 "Last-Translator: \"Fernanda Alvarez (mfar)\" <mfar@odoo.com>\n"
 "Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
@@ -500,8 +500,8 @@ msgid ""
 "have                         been issued for your account. Please contact us "
 "directly for this                         operation."
 msgstr ""
-"No puedes cambiar el tipo de responsabilidad de ARCA una vez que ya emitiste"
-"                         documentos para tu cuenta. Contáctanos para "
+"No puedes cambiar el tipo de responsabilidad de ARCA una vez que ya "
+"emitiste                         documentos para tu cuenta. Contáctanos para "
 "realizar esta                         operación."
 
 #. module: l10n_ar
@@ -557,7 +557,7 @@ msgstr "Contacto"
 
 #. module: l10n_ar
 #. odoo-python
-#: code:addons/l10n_ar/models/res_company.py:0
+#: code:addons/l10n_ar/models/res_partner.py:0
 msgid ""
 "Could not change the ARCA Responsibility of this company because there are "
 "already accounting entries."
@@ -812,8 +812,8 @@ msgid ""
 msgstr ""
 "Los encabezados y pies de página se omiten del PDF impreso para los diarios "
 "preimpresos. Si necesitas incluirlos en el PDF, selecciona un diario en "
-"línea (no enviado a ARCA) o un diario de factura electrónica (enviado a ARCA)"
-"."
+"línea (no enviado a ARCA) o un diario de factura electrónica (enviado a "
+"ARCA)."
 
 #. module: l10n_ar
 #: model:ir.model.fields,field_description:l10n_ar.field_account_account__id
@@ -1250,8 +1250,8 @@ msgid ""
 msgstr ""
 "Debería haber un solo impuesto del grupo fiscal “IVA” por línea, pero este "
 "no es el caso de la línea “%s”. Agregue un impuesto a esta línea o compruebe "
-"las opciones avanzadas de la configuración fiscal para el campo “Grupo fiscal"
-"” correspondiente."
+"las opciones avanzadas de la configuración fiscal para el campo “Grupo "
+"fiscal” correspondiente."
 
 #. module: l10n_ar
 #: model:ir.model.fields,help:l10n_ar.field_res_country__l10n_ar_afip_code
@@ -1339,16 +1339,6 @@ msgstr ""
 
 #. module: l10n_ar
 #. odoo-python
-#: code:addons/l10n_ar/models/account_move.py:0
-msgid ""
-"You are trying to create an invoice for foreign partner but you don't have "
-"an exportation journal"
-msgstr ""
-"Está intentando crear una factura para un cliente del exterior pero no "
-"cuenta con un diario de tipo exportación"
-
-#. module: l10n_ar
-#. odoo-python
 #: code:addons/l10n_ar/models/account_journal.py:0
 msgid ""
 "You can not change %s journal's configuration if it already has validated "
@@ -1367,3 +1357,10 @@ msgstr "Cero"
 #: model_terms:ir.ui.view,arch_db:l10n_ar.view_move_form
 msgid "to"
 msgstr "al"
+
+#~ msgid ""
+#~ "You are trying to create an invoice for foreign partner but you don't "
+#~ "have an exportation journal"
+#~ msgstr ""
+#~ "Está intentando crear una factura para un cliente del exterior pero no "
+#~ "cuenta con un diario de tipo exportación"

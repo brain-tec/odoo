@@ -21,7 +21,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:36+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 21:16+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Norwegian Bokmål <https://translate.odoo.com/projects/odoo-"
@@ -1452,6 +1452,12 @@ msgstr "Spør"
 
 #. module: stock
 #. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Assign"
+msgstr ""
+
+#. module: stock
+#. odoo-javascript
 #: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 msgid "Assign All"
 msgstr "Tildel alle"
@@ -1464,6 +1470,12 @@ msgstr "Tildel eier"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_request_count__user_id
 msgid "Assign to"
+msgstr ""
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
+msgid "Assigned"
 msgstr ""
 
 #. module: stock
@@ -3685,6 +3697,7 @@ msgid "Full Package Name"
 msgstr ""
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Future Activities"
 msgstr "Fremtidige aktiviteter"
@@ -4113,8 +4126,8 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_show_allocation_report
 msgid ""
-"If this checkbox is ticked, Odoo will automatically show the allocation "
-"report (if there are moves to allocate to) when validating."
+"If this checkbox is ticked, Odoo will show the allocation report (if there "
+"are moves to allocate to.)"
 msgstr ""
 
 #. module: stock
@@ -4916,6 +4929,7 @@ msgid "Late"
 msgstr "Forsinket"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Late Activities"
 msgstr "Forsinkede aktiviteter"
@@ -5556,6 +5570,7 @@ msgid "Multiple destinations"
 msgstr ""
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "My Activities"
 msgstr "Aktivitetene mine"
@@ -7862,7 +7877,6 @@ msgstr "Reserver delvis pakkinger"
 
 #. module: stock
 #. odoo-javascript
-#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 #: code:addons/stock/static/src/allocation_report/out_line/out_line.js:0
 msgid "Reserved"
 msgstr ""
@@ -8069,8 +8083,8 @@ msgid ""
 "Rule %(rule)s belongs to %(rule_company)s while the route belongs to %"
 "(route_company)s."
 msgstr ""
-"Regel %(rule)s tilhører %(rule_company)s mens ruten tilhører %(route_company)"
-"s."
+"Regel %(rule)s tilhører %(rule_company)s mens ruten tilhører %"
+"(route_company)s."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_rule__rule_message
@@ -9684,8 +9698,8 @@ msgstr ""
 msgid ""
 "This lot %(lot_name)s is incompatible with this product %(product_name)s"
 msgstr ""
-"Dette lotet %(lot_name)s er inkompatibelt med dette produktet %(product_name)"
-"s."
+"Dette lotet %(lot_name)s er inkompatibelt med dette produktet %"
+"(product_name)s."
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.stock_move_action
@@ -9943,6 +9957,7 @@ msgid "Today"
 msgstr "I dag"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Today Activities"
 msgstr "Dagens aktiviteter"
@@ -10223,6 +10238,12 @@ msgstr ""
 #: model:ir.model.fields,help:stock.field_stock_picking__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr "Type unntaks-aktivitet på posten."
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Unassign"
+msgstr ""
 
 #. module: stock
 #. odoo-python
@@ -10805,7 +10826,8 @@ msgstr ""
 #: model:ir.model.fields,help:stock.field_stock_picking__owner_id
 msgid ""
 "When validating the transfer, the products will be assigned to this owner."
-msgstr "Ved validering av overføringen vil produktene bli tildelt denne eieren."
+msgstr ""
+"Ved validering av overføringen vil produktene bli tildelt denne eieren."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move_line__owner_id

@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:36+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-08-31 16:40+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
@@ -593,8 +593,8 @@ msgid ""
 "picture of your receipt and let Odoo digitalizes it for you. The OCR and "
 "Artificial Intelligence will fill the data automatically."
 msgstr ""
-"不要再把你的費用收據放在口袋裡了。只需拍下收據的照片，讓 Odoo 為您將其數位化"
-"。 OCR 和人工智能將自動辨識資訊。"
+"不要再把你的費用收據放在口袋裡了。只需拍下收據的照片，讓 Odoo 為您將其數位"
+"化。 OCR 和人工智能將自動辨識資訊。"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_account_analytic_applicability__business_domain
@@ -975,6 +975,11 @@ msgstr ""
 #: model_terms:product.template,description:hr_expense.expense_product_travel_accommodation_product_template
 msgid "Hotel, plane ticket, taxi, etc."
 msgstr "酒店、機票、出租車等"
+
+#. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_account_tax__hr_expense_ids
+msgid "Hr Expense"
+msgstr ""
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_res_config_settings__hr_expense_alias_domain_id
@@ -1797,11 +1802,10 @@ msgstr ""
 #: model:ir.model.fields,help:hr_expense.field_hr_employee__expense_manager_id
 msgid ""
 "Select the user responsible for approving \"Expenses\" of this employee.\n"
-"If empty, the approval is done by an Administrator or Approver (determined "
-"in settings/users)."
+"If empty, the approval is done by the department manager (if they are an "
+"expense approver), otherwise by the employee's manager. If there is none, "
+"the expense is auto-validated."
 msgstr ""
-"選擇負責審批該員工“費用”的用戶。\n"
-"如果為空，則審批由管理員或審批人完成（在設置/用戶中確定）。"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__selectable_payment_method_line_ids
@@ -2399,6 +2403,7 @@ msgstr "你沒有權限編輯此開支。"
 #. module: hr_expense
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
+#: code:addons/hr_expense/wizard/hr_expense_post_wizard.py:0
 msgid "You don't have the access rights to modify this expense."
 msgstr ""
 
@@ -2483,3 +2488,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
 msgid "with the same receipt already exists."
 msgstr "連同相同的收據，已經存在。"
+
+#~ msgid ""
+#~ "Select the user responsible for approving \"Expenses\" of this employee.\n"
+#~ "If empty, the approval is done by an Administrator or Approver "
+#~ "(determined in settings/users)."
+#~ msgstr ""
+#~ "選擇負責審批該員工“費用”的用戶。\n"
+#~ "如果為空，則審批由管理員或審批人完成（在設置/用戶中確定）。"

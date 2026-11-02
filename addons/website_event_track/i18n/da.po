@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:38+0000\n"
+"POT-Creation-Date: 2026-10-24 17:40+0000\n"
 "PO-Revision-Date: 2026-09-03 12:13+0000\n"
 "Last-Translator: \"Kira Petersen François (peti)\" <peti@odoo.com>\n"
 "Language-Team: Danish <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -65,6 +65,12 @@ msgstr "%s Onlinetilmelding til arrangementer"
 #: model_terms:ir.ui.view,arch_db:website_event_track.agenda_main
 #: model_terms:ir.ui.view,arch_db:website_event_track.tracks_display_list
 msgid "(timezone:"
+msgstr ""
+
+#. module: website_event_track
+#. odoo-javascript
+#: code:addons/website_event_track/static/src/xml/website_event_track_email_reminder.xml:0
+msgid ", your favorites are only available from this device."
 msgstr ""
 
 #. module: website_event_track
@@ -136,7 +142,17 @@ msgstr ""
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.tracks_search
-msgid "<i class=\"fa fa-bell mx-2 text-muted\"/> Favorite Talks"
+msgid "<i class=\"fa fa-star mx-2 text-muted\"/> Favorite Talks"
+msgstr ""
+
+#. module: website_event_track
+#: model_terms:ir.ui.view,arch_db:website_event_track.track_widget_reminder
+msgid "<i class=\"fa fa-star\" title=\"Favorite On\"/> Favorited"
+msgstr ""
+
+#. module: website_event_track
+#: model_terms:ir.ui.view,arch_db:website_event_track.track_widget_reminder
+msgid "<i class=\"fa fa-star-o\" title=\"Set Favorite\"/> Add to favorite"
 msgstr ""
 
 #. module: website_event_track
@@ -277,7 +293,8 @@ msgid ""
 "                                    Hello<t t-if=\"not user_id.is_public\" t-"
 "out=\"' ' + user_id.name\"/>,\n"
 "                                    <br/><br/>\n"
-"                                    You recently show interest for the talk\n"
+"                                    You recently showed interest for the "
+"talk\n"
 "                                    <a t-if=\"object.description or "
 "object.partner_biography\" t-attf-href=\"{{ object.get_base_url() }}"
 "{{ object.website_url }}\" style=\"font-weight:bold;color:#875A7B;text-"
@@ -700,12 +717,6 @@ msgid "Add talk reminder: {{ object.name }}"
 msgstr ""
 
 #. module: website_event_track
-#. odoo-javascript
-#: code:addons/website_event_track/static/src/xml/website_event_track_email_reminder.xml:0
-msgid "Add this talk to your agenda ?"
-msgstr ""
-
-#. module: website_event_track
 #: model:event.track,name:website_event_track.event_track19
 msgid "Advanced lead management: tips and tricks from the fields"
 msgstr "Avanceret leadhåndtering: tips og tricks fra det virkelige liv"
@@ -790,6 +801,12 @@ msgstr ""
 "beslutning om at fjerne påmindelsen."
 
 #. module: website_event_track
+#. odoo-javascript
+#: code:addons/website_event_track/static/src/xml/website_event_track_email_reminder.xml:0
+msgid "As you are not"
+msgstr ""
+
+#. module: website_event_track
 #: model_terms:event.track,description:website_event_track.event_7_track_17
 msgid ""
 "As you may have heard before, making your own furniture is actually not as "
@@ -868,11 +885,6 @@ msgid "Book your seats to the best talks"
 msgstr "Bestil plads til de bedste foredrag"
 
 #. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.tracks_display_list
-msgid "Book your talks"
-msgstr "Book dine foredrag"
-
-#. module: website_event_track
 #: model:event.track,name:website_event_track.event_7_track_14
 msgid "Building a DIY cabin from the ground up"
 msgstr "Guide til at bygge en gør-det-selv-hytte fra bunden"
@@ -923,12 +935,6 @@ msgid "Category"
 msgstr "Kategori"
 
 #. module: website_event_track
-#. odoo-javascript
-#: code:addons/website_event_track/static/src/interactions/event_track_reminder.js:0
-msgid "Check your email to add the track to your agenda."
-msgstr ""
-
-#. module: website_event_track
 #: model:event.track,name:website_event_track.event_7_track_12
 msgid "Climate positive"
 msgstr "Klimapositiv"
@@ -976,12 +982,6 @@ msgstr "Virksomhedsnavn"
 #: model:ir.model,name:website_event_track.model_res_config_settings
 msgid "Config Settings"
 msgstr "Konfigurationsindstillinger"
-
-#. module: website_event_track
-#. odoo-javascript
-#: code:addons/website_event_track/static/src/xml/website_event_track_email_reminder.xml:0
-msgid "Confirm"
-msgstr ""
 
 #. module: website_event_track
 #: model:mail.template,subject:website_event_track.mail_template_data_track_confirmation
@@ -1183,9 +1183,10 @@ msgstr ""
 "Vis dine deltagere en knap til handlingsopfordring, mens de ser et bidrag."
 
 #. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.event_track_aside_other_track
-msgid "Done"
-msgstr "Udført"
+#. odoo-javascript
+#: code:addons/website_event_track/static/src/xml/website_event_track_email_reminder.xml:0
+msgid "Do you want an invitation by email to add to your agenda?"
+msgstr ""
 
 #. module: website_event_track
 #: model_terms:event.track,description:website_event_track.event_7_track_18
@@ -1340,12 +1341,6 @@ msgstr "Navn på Arrangementapp"
 #: model_terms:ir.ui.view,arch_db:website_event_track.res_config_settings_view_form
 msgid "Events PWA"
 msgstr "Arrangement-PWA"
-
-#. module: website_event_track
-#. odoo-javascript
-#: code:addons/website_event_track/static/src/interactions/event_track_reminder.js:0
-msgid "Favorite On"
-msgstr "Føjet til favoritter"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.session_topbar
@@ -1841,7 +1836,6 @@ msgstr ""
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.agenda_main_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.event_track_aside_other_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.track_list_item
 msgid "Live"
 msgstr "Live"
@@ -2021,6 +2015,12 @@ msgid "Next Activity Type"
 msgstr "Næste aktivitetstype"
 
 #. module: website_event_track
+#. odoo-javascript
+#: code:addons/website_event_track/static/src/xml/website_event_track_email_reminder.xml:0
+msgid "No Invitation"
+msgstr ""
+
+#. module: website_event_track
 #: model_terms:ir.actions.act_window,help:website_event_track.event_track_visitor_action
 msgid "No Track Visitors yet!"
 msgstr "Endnu ingen besøgende!"
@@ -2028,13 +2028,7 @@ msgstr "Endnu ingen besøgende!"
 #. module: website_event_track
 #. odoo-javascript
 #: code:addons/website_event_track/static/src/xml/website_event_track_email_reminder.xml:0
-msgid "No thanks"
-msgstr ""
-
-#. module: website_event_track
-#. odoo-javascript
-#: code:addons/website_event_track/static/src/xml/website_event_track_email_reminder.xml:0
-msgid "No thanks & don't ask again"
+msgid "No don't ask again"
 msgstr ""
 
 #. module: website_event_track
@@ -2302,6 +2296,12 @@ msgid "Select Categories"
 msgstr ""
 
 #. module: website_event_track
+#. odoo-javascript
+#: code:addons/website_event_track/static/src/xml/website_event_track_email_reminder.xml:0
+msgid "Send Invitation"
+msgstr ""
+
+#. module: website_event_track
 #: model:mail.template,description:website_event_track.mail_template_data_track_confirmation
 msgid ""
 "Sent to speakers whose track proposal is accepted (set the template on the "
@@ -2322,12 +2322,6 @@ msgstr "SEO-navn"
 #: model:ir.model.fields,field_description:website_event_track.field_event_track_tag_category__sequence
 msgid "Sequence"
 msgstr "Sekvens"
-
-#. module: website_event_track
-#. odoo-javascript
-#: code:addons/website_event_track/static/src/interactions/event_track_reminder.js:0
-msgid "Set Favorite"
-msgstr "Markér som favorit"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__website_cta_delay
@@ -2426,6 +2420,12 @@ msgid "Submit Proposal"
 msgstr "Indsend forslag"
 
 #. module: website_event_track
+#. odoo-javascript
+#: code:addons/website_event_track/static/src/xml/website_event_track_email_reminder.xml:0
+msgid "Successfully added to your favorites"
+msgstr ""
+
+#. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__partner_tag_line
 msgid "Tag Line"
 msgstr "Tag-linje"
@@ -2459,12 +2459,6 @@ msgid ""
 "Talk already in your Favorites. The page does not seem to be up-to-date and "
 "needs a refresh."
 msgstr ""
-
-#. module: website_event_track
-#. odoo-javascript
-#: code:addons/website_event_track/static/src/interactions/event_track_reminder.js:0
-msgid "Talk removed from your Favorites"
-msgstr "Foredrag fjernet fra dine favoritter"
 
 #. module: website_event_track
 #. odoo-python
@@ -2775,15 +2769,15 @@ msgstr ""
 "titler ender på ønskelisten."
 
 #. module: website_event_track
+#. odoo-javascript
+#: code:addons/website_event_track/static/src/interactions/event_track_reminder.js:0
+msgid "Track added to favorites"
+msgstr ""
+
+#. module: website_event_track
 #: model:mail.message.subtype,description:website_event_track.mt_track_blocked
 msgid "Track blocked"
 msgstr "Bidrag blokeret"
-
-#. module: website_event_track
-#. odoo-javascript
-#: code:addons/website_event_track/static/src/interactions/event_track_reminder.js:0
-msgid "Track successfully added to your favorites."
-msgstr ""
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_event__track_ids
@@ -2950,12 +2944,6 @@ msgstr ""
 #: code:addons/website_event_track/static/src/xml/event_track_proposal_templates.xml:0
 msgid "We will evaluate your proposition and get back to you shortly."
 msgstr "Vi vil vurdere dit forslag og vende tilbage til dig hurtigst muligt."
-
-#. module: website_event_track
-#. odoo-javascript
-#: code:addons/website_event_track/static/src/xml/website_event_track_email_reminder.xml:0
-msgid "We will send you a link to add this talk to your agenda."
-msgstr ""
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
@@ -3153,6 +3141,12 @@ msgid "in %s"
 msgstr ""
 
 #. module: website_event_track
+#. odoo-javascript
+#: code:addons/website_event_track/static/src/xml/website_event_track_email_reminder.xml:0
+msgid "logged in"
+msgstr ""
+
+#. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_form
 msgid "minutes after Track start"
 msgstr "minutter efter bidragets start"
@@ -3183,3 +3177,18 @@ msgstr ""
 #: code:addons/website_event_track/static/src/xml/website_event_pwa.xml:0
 msgid "x"
 msgstr ""
+
+#~ msgid "Book your talks"
+#~ msgstr "Book dine foredrag"
+
+#~ msgid "Done"
+#~ msgstr "Udført"
+
+#~ msgid "Favorite On"
+#~ msgstr "Føjet til favoritter"
+
+#~ msgid "Set Favorite"
+#~ msgstr "Markér som favorit"
+
+#~ msgid "Talk removed from your Favorites"
+#~ msgstr "Foredrag fjernet fra dine favoritter"

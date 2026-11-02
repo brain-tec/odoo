@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:36+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-08-31 16:39+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Thai <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -37,10 +37,10 @@ msgid ""
 "directly on the expense account, as usual.\n"
 "            "
 msgstr ""
-" - ในกรณีที่มีใบแจ้งหนี้อยู่ในระบบแล้ว การชำระเงินจะวิ่งไปบันทึกที่ บัญชีเจ้าหนี้การค้า เพื่อให้สามารถจั"
-"บคู่ตัดจ่ายกับใบแจ้งหนี้ใบนั้นได้พอดี\n"
-"                 - ในกรณีที่ยังไม่มีใบแจ้งหนี้อยู่ในระบบ การชำระเงินจะถูกบันทึกตรงเข้า บัญชีค่าใ"
-"ช้จ่าย ทันทีตามปกติ\n"
+" - ในกรณีที่มีใบแจ้งหนี้อยู่ในระบบแล้ว การชำระเงินจะวิ่งไปบันทึกที่ บัญชีเจ้าหนี้การค้า "
+"เพื่อให้สามารถจับคู่ตัดจ่ายกับใบแจ้งหนี้ใบนั้นได้พอดี\n"
+"                 - ในกรณีที่ยังไม่มีใบแจ้งหนี้อยู่ในระบบ การชำระเงินจะถูกบันทึกตรงเข้า "
+"บัญชีค่าใช้จ่าย ทันทีตามปกติ\n"
 "            "
 
 #. module: hr_expense
@@ -399,8 +399,7 @@ msgstr ""
 msgid ""
 "Both price-included and price-excluded taxes will behave as price-included "
 "taxes for expenses."
-msgstr ""
-"ทั้งภาษีที่รวมราคาและไม่รวมราคาจะทำหน้าที่เป็นภาษีที่รวมราคาสำหรับค่าใช้จ่าย"
+msgstr "ทั้งภาษีที่รวมราคาและไม่รวมราคาจะทำหน้าที่เป็นภาษีที่รวมราคาสำหรับค่าใช้จ่าย"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.report_expense
@@ -599,8 +598,8 @@ msgid ""
 "picture of your receipt and let Odoo digitalizes it for you. The OCR and "
 "Artificial Intelligence will fill the data automatically."
 msgstr ""
-"อย่าเก็บตั๋วค่าใช้จ่ายไว้ในกระเป๋าของคุณอีกต่อไป เพียงถ่ายภาพใบเสร็จและให้ Odoo แปลงเป็นดิจิทัลให้"
-"กับคุณ OCR และปัญญาประดิษฐ์จะกรอกข้อมูลโดยอัตโนมัติ"
+"อย่าเก็บตั๋วค่าใช้จ่ายไว้ในกระเป๋าของคุณอีกต่อไป เพียงถ่ายภาพใบเสร็จและให้ Odoo "
+"แปลงเป็นดิจิทัลให้กับคุณ OCR และปัญญาประดิษฐ์จะกรอกข้อมูลโดยอัตโนมัติ"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_account_analytic_applicability__business_domain
@@ -981,6 +980,11 @@ msgstr ""
 #: model_terms:product.template,description:hr_expense.expense_product_travel_accommodation_product_template
 msgid "Hotel, plane ticket, taxi, etc."
 msgstr "โรงแรม ตั๋วเครื่องบิน แท็กซี่ ฯลฯ"
+
+#. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_account_tax__hr_expense_ids
+msgid "Hr Expense"
+msgstr ""
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_res_config_settings__hr_expense_alias_domain_id
@@ -1416,8 +1420,8 @@ msgid ""
 "Give Odoo a hand to find an account by setting up an expense account.\n"
 "%(expense)s %(expense_name)s.\n"
 msgstr ""
-"Odoo ได้ตรวจสอบค่าใช้จ่าย, สินค้า, บริษัทของคุณ และสมุดบัญชีของคุณแล้ว แต่ยังไม่พบข้อมูลที่ต้องกา"
-"ร\n"
+"Odoo ได้ตรวจสอบค่าใช้จ่าย, สินค้า, บริษัทของคุณ และสมุดบัญชีของคุณแล้ว "
+"แต่ยังไม่พบข้อมูลที่ต้องการ\n"
 "ช่วย Odoo เลือกบัญชีสำหรับบันทึกค่าใช้จ่ายนี้โดยการตั้งค่าบัญชีค่าใช้จ่าย\n"
 "%(expense)s %(expense_name)s.\n"
 
@@ -1659,8 +1663,8 @@ msgid ""
 "don't <em>need to save</em> - Odoo will save eveyrthing for you when you "
 "navigate."
 msgstr ""
-"พร้อมหรือยัง? คุณสามารถบันทึกด้วยตนเองหรือยกเลิกการแก้ไขได้จากที่นี่ คุณไม่จำเป็นต้อง<em>บันทึกเอ"
-"ง</em> Odoo จะบันทึกทุกอย่างให้คุณเมื่อคุณนำทาง"
+"พร้อมหรือยัง? คุณสามารถบันทึกด้วยตนเองหรือยกเลิกการแก้ไขได้จากที่นี่ "
+"คุณไม่จำเป็นต้อง<em>บันทึกเอง</em> Odoo จะบันทึกทุกอย่างให้คุณเมื่อคุณนำทาง"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_refuse_wizard__reason
@@ -1804,11 +1808,10 @@ msgstr ""
 #: model:ir.model.fields,help:hr_expense.field_hr_employee__expense_manager_id
 msgid ""
 "Select the user responsible for approving \"Expenses\" of this employee.\n"
-"If empty, the approval is done by an Administrator or Approver (determined "
-"in settings/users)."
+"If empty, the approval is done by the department manager (if they are an "
+"expense approver), otherwise by the employee's manager. If there is none, "
+"the expense is auto-validated."
 msgstr ""
-"เลือกผู้ใช้ที่รับผิดชอบในการอนุมัติ \"ค่าใช้จ่าย\" ของพนักงานคนนี้\n"
-"หากว่างเปล่า การอนุมัติจะทำโดยผู้ดูแลระบบหรือผู้อนุมัติ (กำหนดในการตั้งค่า/ผู้ใช้)"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__selectable_payment_method_line_ids
@@ -2406,6 +2409,7 @@ msgstr ""
 #. module: hr_expense
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
+#: code:addons/hr_expense/wizard/hr_expense_post_wizard.py:0
 msgid "You don't have the access rights to modify this expense."
 msgstr ""
 
@@ -2490,3 +2494,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
 msgid "with the same receipt already exists."
 msgstr "โดยมีใบเสร็จเดียวกันนี้อยู่แล้ว"
+
+#~ msgid ""
+#~ "Select the user responsible for approving \"Expenses\" of this employee.\n"
+#~ "If empty, the approval is done by an Administrator or Approver "
+#~ "(determined in settings/users)."
+#~ msgstr ""
+#~ "เลือกผู้ใช้ที่รับผิดชอบในการอนุมัติ \"ค่าใช้จ่าย\" ของพนักงานคนนี้\n"
+#~ "หากว่างเปล่า การอนุมัติจะทำโดยผู้ดูแลระบบหรือผู้อนุมัติ (กำหนดในการตั้งค่า/ผู้ใช้)"

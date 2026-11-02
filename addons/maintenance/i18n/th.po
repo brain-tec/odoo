@@ -15,7 +15,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:36+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 17:19+0000\n"
 "Last-Translator: Nusara Boonma <nuboo@odoo.com>\n"
 "Language-Team: Thai <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -676,8 +676,7 @@ msgstr "ไอดี"
 msgid ""
 "ID of the parent record holding the alias (example: project holding the task "
 "creation alias)"
-msgstr ""
-"ไอดีของบันทึกหลักที่มีนามแฝง (ตัวอย่าง: โปรเจ็กต์ที่มีนามแฝงในการสร้างงาน)"
+msgstr "ไอดีของบันทึกหลักที่มีนามแฝง (ตัวอย่าง: โปรเจ็กต์ที่มีนามแฝงในการสร้างงาน)"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__activity_exception_icon
@@ -710,8 +709,7 @@ msgstr "ถ้าเลือก ข้อความบางข้อคว�
 msgid ""
 "If set, this content will automatically be sent out to unauthorized users "
 "instead of the default message."
-msgstr ""
-"หากตั้งค่าไว้ เนื้อหานี้จะถูกส่งไปยังผู้ใช้ที่ไม่ได้รับอนุญาตโดยอัตโนมัติแทนข้อความเริ่มต้น"
+msgstr "หากตั้งค่าไว้ เนื้อหานี้จะถูกส่งไปยังผู้ใช้ที่ไม่ได้รับอนุญาตโดยอัตโนมัติแทนข้อความเริ่มต้น"
 
 #. module: maintenance
 #: model:ir.model.fields.selection,name:maintenance.selection__maintenance_request__state__normal
@@ -946,8 +944,7 @@ msgstr "เวลาเฉลี่ยระหว่างความล้ม
 #: model:ir.model.fields,help:maintenance.field_maintenance_mixin__mtbf
 msgid ""
 "Mean Time Between Failure, computed based on done corrective maintenances."
-msgstr ""
-"เวลาเฉลี่ยระหว่างความล้มเหลว คำนวณโดยอิงตามการบำรุงรักษาที่ถูกแก้ไขเสร็จแล้ว"
+msgstr "เวลาเฉลี่ยระหว่างความล้มเหลว คำนวณโดยอิงตามการบำรุงรักษาที่ถูกแก้ไขเสร็จแล้ว"
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__mttr
@@ -1129,8 +1126,8 @@ msgid ""
 "attached, even if they did not reply to it. If set, this will disable the "
 "creation of new records completely."
 msgstr ""
-"ไอดีทางเลือกของเธรด (บันทึก) ที่จะแนบข้อความขาเข้าทั้งหมด แม้ว่าพวกเขาจะไม่ตอบกลับก็ตาม หากตั้"
-"งค่าไว้ การดำเนินการนี้จะปิดใช้งานการสร้างการบันทึกใหม่ทั้งหมด"
+"ไอดีทางเลือกของเธรด (บันทึก) ที่จะแนบข้อความขาเข้าทั้งหมด แม้ว่าพวกเขาจะไม่ตอบกลับก็ตาม "
+"หากตั้งค่าไว้ การดำเนินการนี้จะปิดใช้งานการสร้างการบันทึกใหม่ทั้งหมด"
 
 #. module: maintenance
 #: model:ir.model.fields.selection,name:maintenance.selection__maintenance_equipment__equipment_assign_to__other
@@ -1318,6 +1315,13 @@ msgid "Scheduled Date"
 msgstr "วันที่ตามกำหนดการ"
 
 #. module: maintenance
+#. odoo-python
+#: code:addons/maintenance/models/maintenance.py:0
+msgid ""
+"Scheduled Date and Scheduled End must either both be set or both be empty."
+msgstr ""
+
+#. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__schedule_end
 msgid "Scheduled End"
 msgstr ""
@@ -1462,8 +1466,8 @@ msgid ""
 "email that does not reply to an existing record will cause the creation of a "
 "new record of this model (e.g. a Project Task)"
 msgstr ""
-"โมเดล (ชนิดเอกสาร Odoo) ซึ่งสอดคล้องกับนามแฝงนี้ อีเมลขาเข้าที่ไม่ตอบกลับบันทึกที่มีอยู่จะทำให้เกิด"
-"การสร้างบันทึกใหม่ของโมเดลนี้ (เช่น โปรเจ็กต์งาน)"
+"โมเดล (ชนิดเอกสาร Odoo) ซึ่งสอดคล้องกับนามแฝงนี้ "
+"อีเมลขาเข้าที่ไม่ตอบกลับบันทึกที่มีอยู่จะทำให้เกิดการสร้างบันทึกใหม่ของโมเดลนี้ (เช่น โปรเจ็กต์งาน)"
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_name

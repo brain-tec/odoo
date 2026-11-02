@@ -15,11 +15,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:39+0000\n"
+"POT-Creation-Date: 2026-10-30 17:39+0000\n"
 "PO-Revision-Date: 2026-09-15 10:41+0000\n"
 "Last-Translator: Bren Driesen <brdri@odoo.com>\n"
-"Language-Team: Dutch <https://translate.odoo.com/projects/odoo-s19-4/web/nl/>"
-"\n"
+"Language-Team: Dutch <https://translate.odoo.com/projects/odoo-s19-4/web/nl/"
+">\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -76,12 +76,6 @@ msgstr "%s te plannen"
 #: code:addons/web/static/src/core/l10n/dates.js:0
 msgid "'%s' is not a correct date or datetime"
 msgstr "'%s' is geen correcte datum of datum/tijd"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/form/form_error_dialog/form_error_dialog.xml:0
-msgid "'Oh snap!'"
-msgstr "'Oh nee!'"
 
 #. module: web
 #. odoo-javascript
@@ -248,8 +242,8 @@ msgid ""
 "<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">240.00</"
 "span></span>"
 msgstr ""
-"<span class=\"text-nowrap\">€ <span class=\"oe_currency_value\">240,00</span>"
-"</span>"
+"<span class=\"text-nowrap\">€ <span class=\"oe_currency_value\">240,00</"
+"span></span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -331,8 +325,8 @@ msgid ""
 "                                    </span>"
 msgstr ""
 "<span>\n"
-"                                        Vloerbescherming voor stoelen<br/>"
-"Bureaustoelen kunnen je vloer beschadigen: bescherm je vloer\n"
+"                                        Vloerbescherming voor stoelen<br/"
+">Bureaustoelen kunnen je vloer beschadigen: bescherm je vloer\n"
 "                                   </span>"
 
 #. module: web
@@ -1846,6 +1840,7 @@ msgstr "Omzetten naar webp"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 #: code:addons/web/static/src/core/errors/error_dialogs.js:0
 #: code:addons/web/static/src/views/fields/copy_clipboard/copy_clipboard_field.js:0
 msgid "Copied"
@@ -1857,6 +1852,12 @@ msgstr "Gekopieerd"
 #: code:addons/web/static/src/webclient/actions/action_service.js:0
 msgid "Copy"
 msgstr "Kopiëren"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
+msgid "Copy Arch"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -5267,6 +5268,12 @@ msgstr "Offline functies zijn niet beschikbaar in een niet-beveiligde context"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/form/form_error_dialog/form_error_dialog.xml:0
+msgid "Oh snap!"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/confirmation_dialog/confirmation_dialog.js:0
 #: code:addons/web/static/src/public/error_notifications.js:0
 #: code:addons/web/static/src/views/calendar/calendar_year/calendar_year_popover.xml:0
@@ -5355,7 +5362,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 msgid "Oops! You cannot edit the %(parentFieldLabel)s \"%(parentName)s\"."
-msgstr "Oeps! Je kunt de %(parentFieldLabel)s \"%(parentName)s\" niet bewerken."
+msgstr ""
+"Oeps! Je kunt de %(parentFieldLabel)s \"%(parentName)s\" niet bewerken."
 
 #. module: web
 #. odoo-javascript
@@ -6384,6 +6392,12 @@ msgstr "Zoek meer..."
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/reference/reference_field.js:0
+msgid "Search a record..."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_picker.js:0
 msgid "Search emoji"
 msgstr "Zoek emoji"
@@ -6690,6 +6704,7 @@ msgstr "Shaka"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.js:0
+#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
 msgid "Share"
 msgstr "Delen"
 
@@ -6728,6 +6743,12 @@ msgstr "Shinkansen"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Shinto"
 msgstr "Shinto"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
+msgid "Shortcuts"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -7151,14 +7172,22 @@ msgid "The app seems to be installed on your device"
 msgstr "De app lijkt geïnstalleerd te zijn op je apparaat"
 
 #. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/search/search_arch_parser.js:0
+msgid ""
+"The autocomplete value for %(field)s has not been found: the record with id %"
+"(id)s doesn't seem to exist"
+msgstr ""
+
+#. module: web
 #. odoo-python
 #: code:addons/web/controllers/export.py:0
 msgid ""
 "The content of this cell is too long for an XLSX file (more than %s "
 "characters). Please use the CSV format for this export."
 msgstr ""
-"De inhoud van deze cel is te lang voor een XLSX-bestand (meer dan %s tekens)"
-". Gebruik de CSV-indeling voor deze export."
+"De inhoud van deze cel is te lang voor een XLSX-bestand (meer dan %s "
+"tekens). Gebruik de CSV-indeling voor deze export."
 
 #. module: web
 #. odoo-javascript
@@ -7257,6 +7286,14 @@ msgid ""
 msgstr ""
 "De gebruiker moet één unieke embedded actie-instelling hebben per "
 "gebruikersinstelling, actie en record-id."
+
+#. module: web
+#. odoo-python
+#: code:addons/web/controllers/export.py:0
+msgid ""
+"There are too many columns (%(count)s columns, limit: %(limit)s) to export "
+"as Excel 2007-2013 (.xlsx) format. Consider splitting the export."
+msgstr ""
 
 #. module: web
 #. odoo-python
@@ -27430,6 +27467,9 @@ msgstr "秘"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "空"
 msgstr "空"
+
+#~ msgid "'Oh snap!'"
+#~ msgstr "'Oh nee!'"
 
 #~ msgid "Memory limit (in bytes)"
 #~ msgstr "Geheugenlimiet (in bytes)"

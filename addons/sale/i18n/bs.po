@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:39+0000\n"
+"POT-Creation-Date: 2026-10-24 17:40+0000\n"
 "PO-Revision-Date: 2026-08-31 17:29+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Bosnian <https://translate.odoo.com/projects/odoo-s19-4/sale/"
@@ -636,25 +636,77 @@ msgid ""
 msgstr ""
 
 #. module: sale
-#: model:mail.template,body_html:sale.email_template_edi_sale
+#: model:mail.template,body_html:sale.email_template_proforma
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        <t t-set=\"doc_name\" t-value=\"'quotation' if object.state in "
-"('draft', 'sent') else 'order'\"/>\n"
 "        Hello,\n"
 "        <br/><br/>\n"
-"        Your <t t-out=\"doc_name or ''\">quotation</t> <span style=\"font-"
-"weight: bold;\" t-out=\"object.name or ''\"/>\n"
+"        <t t-if=\"object.state in ('draft', 'sent')\">\n"
+"            Your Pro forma invoice for quotation <span style=\"font-weight: "
+"bold;\" t-out=\"object.name or ''\">S00052</span>\n"
+"        </t>\n"
+"        <t t-else=\"\">\n"
+"            Your Pro forma invoice for order <span style=\"font-weight: bold;"
+"\" t-out=\"object.name or ''\">S00052</span>\n"
+"        </t>\n"
 "        <t t-if=\"object.origin\">\n"
-"            (with reference: <t t-out=\"object.origin or ''\">S00052</t> )\n"
+"            (with reference: <t t-out=\"object.origin or ''\"/> )\n"
 "        </t>\n"
 "        <t t-if=\"object.client_order_ref\">\n"
 "            (<t t-out=\"object.client_order_ref or ''\">CUSTOMER REF</t>)\n"
 "        </t>\n"
 "        amounting in <span style=\"font-weight: bold;\" t-"
 "out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
+"10.00</span> is available.\n"
+"        <br/><br/>\n"
+"        Do not hesitate to contact us if you have any questions.\n"
+"        <t t-if=\"not is_html_empty(object.user_id.signature)\">\n"
+"            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-"
+"out=\"object.user_id.signature or ''\">Mitchell Admin</t></div>\n"
+"        </t>\n"
+"    </p>\n"
+"</div>\n"
+"            "
+msgstr ""
+
+#. module: sale
+#: model:mail.template,body_html:sale.email_template_edi_sale
+msgid ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"        Hello,\n"
+"        <br/><br/>\n"
+"        <t t-if=\"object.state in ('draft', 'sent')\">\n"
+"            Your quotation <span style=\"font-weight: bold;\" t-"
+"out=\"object.name or ''\"/>\n"
+"            <t t-if=\"object.origin\">\n"
+"                (with reference: <t t-out=\"object.origin or ''\">S00052</"
+"t> )\n"
+"            </t>\n"
+"            <t t-if=\"object.client_order_ref\">\n"
+"                (<t t-out=\"object.client_order_ref or ''\">CUSTOMER REF</"
+"t>)\n"
+"            </t>\n"
+"            amounting in <span style=\"font-weight: bold;\" t-"
+"out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
 "10.00</span> is ready for review.\n"
+"        </t>\n"
+"        <t t-else=\"\">\n"
+"            Your order <span style=\"font-weight: bold;\" t-"
+"out=\"object.name or ''\"/>\n"
+"            <t t-if=\"object.origin\">\n"
+"                (with reference: <t t-out=\"object.origin or ''\">S00052</"
+"t> )\n"
+"            </t>\n"
+"            <t t-if=\"object.client_order_ref\">\n"
+"                (<t t-out=\"object.client_order_ref or ''\">CUSTOMER REF</"
+"t>)\n"
+"            </t>\n"
+"            amounting in <span style=\"font-weight: bold;\" t-"
+"out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
+"10.00</span> is ready for review.\n"
+"        </t>\n"
 "        <br/>\n"
 "        <t t-set=\"documents\" t-value=\"object._get_product_documents()\"/"
 ">\n"
@@ -677,38 +729,6 @@ msgid ""
 "            </ul>\n"
 "        </t>\n"
 "        <br/>\n"
-"        Do not hesitate to contact us if you have any questions.\n"
-"        <t t-if=\"not is_html_empty(object.user_id.signature)\">\n"
-"            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-"
-"out=\"object.user_id.signature or ''\">Mitchell Admin</t></div>\n"
-"        </t>\n"
-"    </p>\n"
-"</div>\n"
-"            "
-msgstr ""
-
-#. module: sale
-#: model:mail.template,body_html:sale.email_template_proforma
-msgid ""
-"<div style=\"margin: 0px; padding: 0px;\">\n"
-"    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        <t t-set=\"doc_name\" t-value=\"'quotation' if object.state in "
-"('draft', 'sent') else 'order'\"/>\n"
-"        Hello,\n"
-"        <br/><br/>\n"
-"        Your Pro Forma invoice for <t t-out=\"doc_name or ''\">quotation</t> "
-"<span style=\"font-weight: bold;\" t-out=\"object.name or ''\">S00052</"
-"span>\n"
-"        <t t-if=\"object.origin\">\n"
-"            (with reference: <t t-out=\"object.origin or ''\"/> )\n"
-"        </t>\n"
-"        <t t-if=\"object.client_order_ref\">\n"
-"            (<t t-out=\"object.client_order_ref or ''\">CUSTOMER REF</t>)\n"
-"        </t>\n"
-"        amounting in <span style=\"font-weight: bold;\" t-"
-"out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ "
-"10.00</span> is available.\n"
-"        <br/><br/>\n"
 "        Do not hesitate to contact us if you have any questions.\n"
 "        <t t-if=\"not is_html_empty(object.user_id.signature)\">\n"
 "            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-"
@@ -927,9 +947,27 @@ msgstr "<span>Upozorenje: ova narudžba bi mogla biti duplikat od</span>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
-#, fuzzy
-msgid "<strong class=\"d-block mt-3\">Shipping Address</strong>"
-msgstr "<strong class=\"d-block mt-3\">Adresa isporuke</strong>"
+msgid ""
+"<strong>\n"
+"                        Invoicing Address\n"
+"                    </strong>"
+msgstr ""
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
+msgid ""
+"<strong>\n"
+"                        Shipping Address\n"
+"                    </strong>"
+msgstr ""
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
+msgid ""
+"<strong>\n"
+"                    Invoicing and Shipping Address\n"
+"                </strong>"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -1000,7 +1038,8 @@ msgstr "Potvrđeni prodajni nalog zahtijeva datum potvrde."
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 #, fuzzy
 msgid "A note, whose content usually applies to the section or product above."
-msgstr "Napomena čiji se sadržaj obično odnosi na gornji odjeljak ili proizvod."
+msgstr ""
+"Napomena čiji se sadržaj obično odnosi na gornji odjeljak ili proizvod."
 
 #. module: sale
 #. odoo-python
@@ -1146,8 +1185,8 @@ msgid ""
 msgstr ""
 "Planovi aktivnosti koriste se za dodjeljivanje popisa aktivnosti u samo "
 "nekoliko klikova\n"
-"               npr. \"Raspored dostave\", \"Praćenje plaćanja narudžbe\", "
-"...)"
+"               npr. \"Raspored dostave\", \"Praćenje plaćanja "
+"narudžbe\", ...)"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_sales_order_filter
@@ -3084,7 +3123,8 @@ msgstr ""
 #: model:ir.model.fields,help:sale.field_sale_order__sale_warning_text
 #, fuzzy
 msgid "Internal warning for the partner or the products as set by the user."
-msgstr "Interno upozorenje za partnera ili proizvode koje je postavio korisnik."
+msgstr ""
+"Interno upozorenje za partnera ili proizvode koje je postavio korisnik."
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_res_partner__incoterm_id
@@ -3269,7 +3309,6 @@ msgid "Invoicing"
 msgstr "Fakturisanje"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 #, fuzzy
 msgid "Invoicing Address"
@@ -3291,7 +3330,6 @@ msgid "Invoicing Target"
 msgstr "Cilj fakturisanja"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 #, fuzzy
 msgid "Invoicing and Shipping Address"
@@ -4669,7 +4707,8 @@ msgstr "Referenca"
 #: model:ir.model.fields,help:sale.field_sale_order__origin
 #, fuzzy
 msgid "Reference of the document that generated this sales order request"
-msgstr "Referenca dokumenta koji je generirao ovaj zahtjev za prodajnu narudžbu"
+msgstr ""
+"Referenca dokumenta koji je generirao ovaj zahtjev za prodajnu narudžbu"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_advance_payment_inv__advance_payment_method__delivered
@@ -6337,11 +6376,10 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__validity_date
-#, fuzzy
 msgid ""
-"Validity of the order, after that you will not able to sign & pay the "
-"quotation."
-msgstr "Valjanost narudžbe, nakon toga nećete moći potpisati i platiti ponudu."
+"Validity of the quotation. After this date, you will no longer be able to "
+"sign and pay it."
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -6488,18 +6526,6 @@ msgstr "Ne možete promijeniti cjenik potvrđene narudžbe!"
 
 #. module: sale
 #. odoo-python
-#: code:addons/sale/models/product_product.py:0
-#: code:addons/sale/models/product_template.py:0
-#, fuzzy
-msgid ""
-"You cannot change the product's type because it is already used in sales "
-"orders."
-msgstr ""
-"Nije moguće mijenjanje tipa proizvoda jer je već korišten na prodajnim "
-"nalozima."
-
-#. module: sale
-#. odoo-python
 #: code:addons/sale/models/sale_order_line.py:0
 #, fuzzy
 msgid ""
@@ -6554,6 +6580,16 @@ msgstr ""
 "Morate definirati proizvod za sve što prodajete ili kupujete,\n"
 " da li se radi o proizvodu koji se može skladištiti, potrošnom materijalu "
 "ili usluzi."
+
+#. module: sale
+#. odoo-python
+#: code:addons/sale/models/product_product.py:0
+#: code:addons/sale/models/product_template.py:0
+msgid ""
+"You should not change the product type because this product is already used "
+"in sales orders. Changing it may affect how the related order lines are "
+"delivered."
+msgstr ""
 
 #. module: sale
 #: model:portal.entry,name:sale.portal_your_orders
@@ -6746,6 +6782,25 @@ msgid ""
 "'Quotation' or 'Order' }} {{ object.name or 'n/a' }} "
 "{{ object.client_order_ref and ('(' + object.client_order_ref + ')') or '' }}"
 msgstr ""
+
+#, fuzzy
+#~ msgid "<strong class=\"d-block mt-3\">Shipping Address</strong>"
+#~ msgstr "<strong class=\"d-block mt-3\">Adresa isporuke</strong>"
+
+#, fuzzy
+#~ msgid ""
+#~ "Validity of the order, after that you will not able to sign & pay the "
+#~ "quotation."
+#~ msgstr ""
+#~ "Valjanost narudžbe, nakon toga nećete moći potpisati i platiti ponudu."
+
+#, fuzzy
+#~ msgid ""
+#~ "You cannot change the product's type because it is already used in sales "
+#~ "orders."
+#~ msgstr ""
+#~ "Nije moguće mijenjanje tipa proizvoda jer je već korišten na prodajnim "
+#~ "nalozima."
 
 #, fuzzy
 #~ msgid "Connect your software"

@@ -19,7 +19,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-10 17:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 17:46+0000\n"
 "Last-Translator: \"Chloe Wang (chwa)\" <chwa@odoo.com>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
@@ -30,11 +30,6 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Weblate 2026.8.1\n"
-
-#. module: project
-#: model:ir.model.fields.selection,name:project.selection__project_project__privacy_visibility__portal
-msgid " All internal users and invited portal users"
-msgstr " 所有内部用户和受邀门户用户"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__rating_count
@@ -273,8 +268,8 @@ msgid ""
 "            "
 msgstr ""
 "<div>\n"
-"    <t t-set=\"access_token\" t-value=\"object._rating_get_access_token()\"/>"
-"\n"
+"    <t t-set=\"access_token\" t-value=\"object._rating_get_access_token()\"/"
+">\n"
 "    <t t-set=\"partner\" t-value=\"object._rating_get_partner()\"/>\n"
 "    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
 "style=\"width:100%; margin:0px auto;\">\n"
@@ -352,23 +347,23 @@ msgstr ""
 "        </td></tr>\n"
 "        <tr><td><br/>此致，敬礼！</td></tr>\n"
 "        <tr><td>\n"
-"           <t t-out=\"object.project_id.company_id.name or ''\">您的公司</t>"
-"\n"
+"           <t t-out=\"object.project_id.company_id.name or ''\">您的公司</"
+"t>\n"
 "        </td></tr>\n"
 "        <tr><td style=\"opacity: 0.5;\">\n"
-"            <t t-out=\"object.project_id.company_id.phone or ''\">1 650-123-"
-"4567</t>\n"
+"            <t t-out=\"object.project_id.company_id.phone or ''\">1 "
+"650-123-4567</t>\n"
 "            <t t-if=\"object.project_id.company_id.email\">\n"
-"                | <a t-attf-href=\"mailto:{{ "
-"object.project_id.company_id.email }}\" style=\"text-decoration:none; color: "
-"#454748;\" t-out=\"object.project_id.company_id.email or ''\">"
-"info@yourcompany.com</a>\n"
+"                | <a t-attf-href=\"mailto:"
+"{{ object.project_id.company_id.email }}\" style=\"text-decoration:none; "
+"color: #454748;\" t-out=\"object.project_id.company_id.email or "
+"''\">info@yourcompany.com</a>\n"
 "            </t>\n"
 "            <t t-if=\"object.project_id.company_id.website\">\n"
 "                | <a t-attf-href=\"{{ object.project_id.company_id.website }}"
 "\" style=\"text-decoration:none; color: #454748;\" t-"
-"out=\"object.project_id.company_id.website or ''\">http://www.example.com</a>"
-"\n"
+"out=\"object.project_id.company_id.website or ''\">http://www.example.com</"
+"a>\n"
 "            </t>\n"
 "        </td></tr>\n"
 "    </tbody>\n"
@@ -440,8 +435,8 @@ msgstr ""
 "Freeman</t>，<br/><br/>\n"
 "    感谢您与我们联系，非常感谢您对我们产品/服务的关注。<br/>\n"
 "    我们团队正在审核您的咨询，并将尽快给您回复。<br/>\n"
-"    在此期间，若您有任何其他问题或需求，欢迎随时告知，我们将竭诚为您服务"
-"。<br/><br/>\n"
+"    在此期间，若您有任何其他问题或需求，欢迎随时告知，我们将竭诚为您服务。"
+"<br/><br/>\n"
 "    感谢您的耐心等待。<br/>\n"
 "    此致，\n"
 "    <t t-if=\"user.signature\">\n"
@@ -501,8 +496,8 @@ msgstr ""
 "<i class=\"fa fa-fw o_button_icon fa-smile-o text-success\" "
 "invisible=\"rating_avg &lt; 3.66\" title=\"满意\"/>\n"
 "<i class=\"fa fa-fw o_button_icon fa-meh-o text-warning\" "
-"invisible=\"rating_avg &lt; 2.33 or rating_avg &gt;= 3.66\" title=\"一般\"/>"
-"\n"
+"invisible=\"rating_avg &lt; 2.33 or rating_avg &gt;= 3.66\" title=\"一般\"/"
+">\n"
 "<i class=\"fa fa-fw o_button_icon fa-frown-o text-danger\" "
 "invisible=\"rating_avg &gt;= 2.33\" title=\"不满意\"/>"
 
@@ -1005,6 +1000,11 @@ msgid "All internal users"
 msgstr "所有内部用户"
 
 #. module: project
+#: model:ir.model.fields.selection,name:project.selection__project_project__privacy_visibility__portal
+msgid "All internal users and invited portal users"
+msgstr ""
+
+#. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__allocated_hours
 #: model:ir.model.fields,field_description:project.field_project_task_burndown_chart_report__allocated_hours
 msgid "Allocated Time"
@@ -1378,8 +1378,8 @@ msgid ""
 "Choose a <b>name</b> for your project. <i>It can be anything you want: the "
 "name of a customer, of a product, of a team, of a construction site, etc.</i>"
 msgstr ""
-"为您的项目选择 1 个<b>名称</b>。<i>可以是任何您想要的名称：客户名称、产品名称"
-"、团队名称、建筑工地名称等。</i>"
+"为您的项目选择 1 个<b>名称</b>。<i>可以是任何您想要的名称：客户名称、产品名"
+"称、团队名称、建筑工地名称等。</i>"
 
 #. module: project
 #. odoo-javascript
@@ -1817,7 +1817,8 @@ msgstr "该项目结束的日期。在查看项目的计划时，会考虑到项
 msgid ""
 "Date on which this task was last assigned (or unassigned). Based on this, "
 "you can get statistics on the time it usually takes to assign tasks."
-msgstr "该任务上次指派（或未指派）的日期。据此，您可以统计出指派任务通常所需的时间。"
+msgstr ""
+"该任务上次指派（或未指派）的日期。据此，您可以统计出指派任务通常所需的时间。"
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project_stage__rotting_threshold_days
@@ -2300,6 +2301,7 @@ msgid "Future"
 msgstr "未来"
 
 #. module: project
+#: model_terms:ir.ui.view,arch_db:project.project_update_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "Future Activities"
@@ -2538,8 +2540,8 @@ msgid ""
 "If enabled, this stage will be displayed as folded in the Kanban and List "
 "views of your projects. Projects in a folded stage are considered as closed."
 msgstr ""
-"启用后，此阶段在看板和列表视图中将显示为折叠状态，且其中的项目将被视为已关闭"
-"。"
+"启用后，此阶段在看板和列表视图中将显示为折叠状态，且其中的项目将被视为已关"
+"闭。"
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project_stage__mail_template_id
@@ -2769,6 +2771,7 @@ msgid "Last Updated on"
 msgstr "上次更新日期"
 
 #. module: project
+#: model_terms:ir.ui.view,arch_db:project.project_update_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "Late Activities"
@@ -2991,6 +2994,7 @@ msgid "Months"
 msgstr "个月"
 
 #. module: project
+#: model_terms:ir.ui.view,arch_db:project.project_update_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "My Activities"
@@ -3450,8 +3454,8 @@ msgid ""
 "necessarily the model given by alias_model_id (example: project "
 "(parent_model) and task (model))"
 msgstr ""
-"拥有别名的母项模型。拥有别名参考的模型不一定是alias_model_id给出的模型（例如"
-"：project(parent_model) 和任务 (模型)）"
+"拥有别名的母项模型。拥有别名参考的模型不一定是alias_model_id给出的模型（例"
+"如：project(parent_model) 和任务 (模型)）"
 
 #. module: project
 #. odoo-python
@@ -3581,7 +3585,8 @@ msgstr "私密"
 msgid ""
 "Private (non-template) tasks cannot be converted into sub-tasks. Please set "
 "a project on the task to gain access to this feature."
-msgstr "私有（非模板）任务无法转换为子任务。请为该任务指定项目，即可使用此功能。"
+msgstr ""
+"私有（非模板）任务无法转换为子任务。请为该任务指定项目，即可使用此功能。"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
@@ -4491,6 +4496,7 @@ msgid "Show Sub-Tasks"
 msgstr "显示子任务"
 
 #. module: project
+#: model_terms:ir.ui.view,arch_db:project.project_update_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "Show all records whose next activity date is past"
@@ -5108,7 +5114,8 @@ msgstr "项目和相关合作伙伴必须与同一家公司有关联。"
 msgid ""
 "The project's company cannot be changed if its analytic account has analytic "
 "lines or if more than one project is linked to it."
-msgstr "如果项目的分析账户有分析项目，或者有多个项目与之关联，则不能更改项目的公司。"
+msgstr ""
+"如果项目的分析账户有分析项目，或者有多个项目与之关联，则不能更改项目的公司。"
 
 #. module: project
 #: model:ir.model.constraint,message:project.constraint_project_project_project_date_greater
@@ -5253,8 +5260,8 @@ msgid ""
 "records to align them under the same company."
 msgstr ""
 "该项目与%(project_company)s相关联，而所选阶段属于%(stage_company)s。有几个选"
-"项可以考虑：要么从项目或阶段中删除公司名称。或者，可以更新这些记录的公司信息"
-"，使它们归属于同一个公司。"
+"项可以考虑：要么从项目或阶段中删除公司名称。或者，可以更新这些记录的公司信"
+"息，使它们归属于同一个公司。"
 
 #. module: project
 #. odoo-python
@@ -5314,7 +5321,8 @@ msgstr "这将存档以下项目中的阶段及其包含的所有任务："
 msgid ""
 "Those represent the different categories of things you have to do (e.g. "
 "\"Call\" or \"Send email\")."
-msgstr "这些代表了你必须做的不同类别的事情（例如：\"打电话 \"或 \"发送电子邮件\"）"
+msgstr ""
+"这些代表了你必须做的不同类别的事情（例如：\"打电话 \"或 \"发送电子邮件\"）"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
@@ -5407,6 +5415,7 @@ msgid "Today"
 msgstr "今天"
 
 #. module: project
+#: model_terms:ir.ui.view,arch_db:project.project_update_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "Today Activities"
@@ -5878,14 +5887,16 @@ msgstr "不能删除包含项目的阶段。您应首先删除阶段内的所有
 msgid ""
 "You cannot delete stages containing tasks. You can either archive them or "
 "first delete all of their tasks."
-msgstr "您不能删除包含任务的阶段。 您可以存档它们，也可以先删除它们的所有任务。"
+msgstr ""
+"您不能删除包含任务的阶段。 您可以存档它们，也可以先删除它们的所有任务。"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_project_task_type_delete_wizard
 msgid ""
 "You cannot delete stages containing tasks. You should first delete all of "
 "their tasks."
-msgstr "您不能删除包含任务的阶段。 您可以存档它们，也可以先删除它们的所有任务。"
+msgstr ""
+"您不能删除包含任务的阶段。 您可以存档它们，也可以先删除它们的所有任务。"
 
 #. module: project
 #. odoo-python
@@ -6141,7 +6152,8 @@ msgstr "将创建任务在您的"
 msgid ""
 "{{ object.project_id.company_id.name or user.env.company.name }}: "
 "Satisfaction Survey"
-msgstr "{{ object.project_id.company_id.name or user.env.company.name }}: 满意度调查"
+msgstr ""
+"{{ object.project_id.company_id.name or user.env.company.name }}: 满意度调查"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_project_card
@@ -6160,6 +6172,9 @@ msgstr "👤 未指派"
 #: code:addons/project/static/src/components/project_many2one_field/project_many2one_field.js:0
 msgid "🔒 Private"
 msgstr "🔒 私密"
+
+#~ msgid " All internal users and invited portal users"
+#~ msgstr " 所有内部用户和受邀门户用户"
 
 #~ msgid "Administrator can manage the employees' schedule"
 #~ msgstr "管理员可以管理员工的日程安排"

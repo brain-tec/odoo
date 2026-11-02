@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:37+0000\n"
+"POT-Creation-Date: 2026-10-30 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 17:05+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-s19-4/product/"
@@ -3449,7 +3449,8 @@ msgstr "Iltimos, avval ba'zi mahsulotlarni tanlang."
 #: code:addons/product/models/product_pricelist_item.py:0
 #, fuzzy
 msgid "Please specify the category for which this rule should be applied"
-msgstr "Iltimos, ushbu qoida qo‘llanilishi kerak bo‘lgan kategoriyani belgilang"
+msgstr ""
+"Iltimos, ushbu qoida qo‘llanilishi kerak bo‘lgan kategoriyani belgilang"
 
 #. module: product
 #. odoo-python
@@ -4429,6 +4430,12 @@ msgstr "Ofis uchun yumshoq yopiladigan pedalli chiqindi qutisi"
 #, fuzzy
 msgid "Sony"
 msgstr "Sony"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/report/product_pricelist_report.py:0
+msgid "Sorry, you are not allowed to access this document."
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__categ_id

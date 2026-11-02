@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:36+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-10-12 10:36+0000\n"
 "Last-Translator: \"Malaz Siddig Elsayed Abuidris (msea)\" <msea@odoo.com>\n"
 "Language-Team: Arabic <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -1135,8 +1135,8 @@ msgid ""
 "attached, even if they did not reply to it. If set, this will disable the "
 "creation of new records completely."
 msgstr ""
-"معرف اختياري لمناقشة (سجل) سيتم إرفاق كافة رسائل البريد الإلكتروني الواردة فيه"
-"، حتى لو لم يتم الرد عليها. إذا تم تعيين قيمة له، سيعطل هذا إنشاء السجلات "
+"معرف اختياري لمناقشة (سجل) سيتم إرفاق كافة رسائل البريد الإلكتروني الواردة "
+"فيه، حتى لو لم يتم الرد عليها. إذا تم تعيين قيمة له، سيعطل هذا إنشاء السجلات "
 "الجديدة بالكامل."
 
 #. module: maintenance
@@ -1326,6 +1326,13 @@ msgid "Scheduled Date"
 msgstr "التاريخ المجدول"
 
 #. module: maintenance
+#. odoo-python
+#: code:addons/maintenance/models/maintenance.py:0
+msgid ""
+"Scheduled Date and Scheduled End must either both be set or both be empty."
+msgstr ""
+
+#. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__schedule_end
 msgid "Scheduled End"
 msgstr "النهاية المجدولة "
@@ -1470,8 +1477,8 @@ msgid ""
 "email that does not reply to an existing record will cause the creation of a "
 "new record of this model (e.g. a Project Task)"
 msgstr ""
-"النموذج (مستندات أودو) الذي يقترن به هذا اللقب. أي رسالة واردة لا ترد على سجل "
-"موجود ستقوم بإنشاء سجل جديد من نفس نوع هذا النموذج (مثلًا: مهمة مشروع)"
+"النموذج (مستندات أودو) الذي يقترن به هذا اللقب. أي رسالة واردة لا ترد على "
+"سجل موجود ستقوم بإنشاء سجل جديد من نفس نوع هذا النموذج (مثلًا: مهمة مشروع)"
 
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_team__alias_name

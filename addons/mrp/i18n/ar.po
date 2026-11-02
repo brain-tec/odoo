@@ -15,11 +15,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-10-12 10:35+0000\n"
 "Last-Translator: \"Malaz Siddig Elsayed Abuidris (msea)\" <msea@odoo.com>\n"
-"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-s19-4/mrp/"
-"ar/>\n"
+"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-s19-4/mrp/ar/"
+">\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -987,8 +987,8 @@ msgid ""
 "you want to change it, please archive the product and create a new one."
 msgstr ""
 "بما أنه قد تم استخدام وحدات قياس أخرى (مثال: %(problem_uom)s) غير %(uom)s "
-"لهذا المنتج، فلا يمكن تغيير وحدة القياس. إذا كنت ترغب في تغييرها، فيُرجى أرشفة "
-"المنتج وإنشاء منتج جديد."
+"لهذا المنتج، فلا يمكن تغيير وحدة القياس. إذا كنت ترغب في تغييرها، فيُرجى "
+"أرشفة المنتج وإنشاء منتج جديد."
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
@@ -1201,7 +1201,8 @@ msgstr "تسلسل الطلب المتأخر"
 #: model:ir.model.fields,help:mrp.field_mrp_production__backorder_sequence
 msgid "Backorder sequence, if equals to 0 means there is not related backorder"
 msgstr ""
-"تسلسل الطلب المتأخر، إذا كان مساوياً لـ0، هذا يعني أنه لا يوجد طلب متأخر ذو صلة"
+"تسلسل الطلب المتأخر، إذا كان مساوياً لـ0، هذا يعني أنه لا يوجد طلب متأخر ذو "
+"صلة"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder__barcode
@@ -2052,8 +2053,8 @@ msgstr ""
 "الكمية الحالية من المنتجات.\n"
 "في سياق به موقع مخزون واحد، وهذا يشمل البضائع المخزنة في هذا الموقع، أو أي "
 "من توابعه.\n"
-"في سياق به مستودع واحد، وهذا يشمل البضائع المخزنة في موقع مخزون هذا المستودع"
-"، أو أي من توابعه.\n"
+"في سياق به مستودع واحد، وهذا يشمل البضائع المخزنة في موقع مخزون هذا "
+"المستودع، أو أي من توابعه.\n"
 "التخزين في موقع المخزون لمستودع هذا المحل، أو أي من توابعه.\n"
 "خلاف ذلك، وهذا يشمل البضائع المخزنة في أي موقع مع نوع 'الداخلي'."
 
@@ -2118,8 +2119,8 @@ msgstr "التاريخ حسب الشهر"
 msgid ""
 "Date you expect to finish production or actual date you finished production."
 msgstr ""
-"التاريخ الذي تتوقع إنهاء الإنتاج فيه أو التاريخ الفعلي الذي انتهيت من الإنتاج "
-"فيه."
+"التاريخ الذي تتوقع إنهاء الإنتاج فيه أو التاريخ الفعلي الذي انتهيت من "
+"الإنتاج فيه."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__date_start
@@ -2653,8 +2654,8 @@ msgstr ""
 "المراد إزالتها)\n"
 "في سياق به موقع مخزون واحد، وهذا يشمل البضائع المخزنة في هذا الموقع، أو أي "
 "من توابعه.\n"
-"في سياق به مستودع واحد، وهذا يشمل البضائع المخزنة في موقع مخزون هذا المستودع"
-"، أو أي من توابعه.\n"
+"في سياق به مستودع واحد، وهذا يشمل البضائع المخزنة في موقع مخزون هذا "
+"المستودع، أو أي من توابعه.\n"
 "خلاف ذلك، وهذا يشمل البضائع المخزنة في أي موقع مع نوع 'الداخلي'."
 
 #. module: mrp
@@ -2951,7 +2952,8 @@ msgstr ""
 msgid ""
 "If the active field is set to False, it will allow you to hide the resource "
 "record without removing it."
-msgstr "إذا تم تحويل قيمة الحقل النشط إلى خطأ، يمكنك إخفاء سجل مورد دون إزالته."
+msgstr ""
+"إذا تم تحويل قيمة الحقل النشط إلى خطأ، يمكنك إخفاء سجل مورد دون إزالته."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_stock_picking_type__auto_print_mrp_reception_report_labels
@@ -3052,8 +3054,8 @@ msgid ""
 "Informative date allowing to define when the manufacturing order should be "
 "processed at the latest to fulfill delivery on time."
 msgstr ""
-"بيانات توضيحية تسمح بتحديد آخر وقت يجب أن تتم معالجة أمر التصنيع فيه لاستيفاء "
-"التوصيل في الوقت المناسب."
+"بيانات توضيحية تسمح بتحديد آخر وقت يجب أن تتم معالجة أمر التصنيع فيه "
+"لاستيفاء التوصيل في الوقت المناسب."
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__product_default_code
@@ -3965,9 +3967,9 @@ msgid ""
 "of Materials, which means that operations can still be planned on it/them. "
 "To prevent this, deletion of the work center is recommended instead."
 msgstr ""
-"انتبه لكون مركز (مراكز) العمل المؤرشفة: '%s' لا تزال مرتبطة بقائمة مواد نشطة، "
-"مما يعني أنه لا يزال بالإمكان تخطيط العمليات عليها. لمنع حدوث ذلك، ننصح بحذف "
-"مركز العمل عوضاً عن ذلك."
+"انتبه لكون مركز (مراكز) العمل المؤرشفة: '%s' لا تزال مرتبطة بقائمة مواد "
+"نشطة، مما يعني أنه لا يزال بالإمكان تخطيط العمليات عليها. لمنع حدوث ذلك، "
+"ننصح بحذف مركز العمل عوضاً عن ذلك."
 
 #. module: mrp
 #. odoo-python
@@ -5805,6 +5807,12 @@ msgstr "بعد غد"
 
 #. module: mrp
 #. odoo-python
+#: code:addons/mrp/models/mrp_production.py:0
+msgid "The end date cannot be set in the future."
+msgstr ""
+
+#. module: mrp
+#. odoo-python
 #: code:addons/mrp/models/stock_orderpoint.py:0
 msgid "The following replenishment order has been generated"
 msgstr "تم إنشاء أمر تجديد المخزون التالي"
@@ -5855,8 +5863,8 @@ msgid ""
 "The planned end date of the work order cannot be prior to the planned start "
 "date, please correct this to save the work order."
 msgstr ""
-"لا يمكن أن يسبق تاريخ الانتهاء المخطط له تاريخ البدء. يرجى تصحيح ذلك لحفظ أمر "
-"العمل."
+"لا يمكن أن يسبق تاريخ الانتهاء المخطط له تاريخ البدء. يرجى تصحيح ذلك لحفظ "
+"أمر العمل."
 
 #. module: mrp
 #. odoo-python
@@ -5943,7 +5951,8 @@ msgstr ""
 msgid ""
 "The total cost share for a manufacturing order's by-products cannot exceed "
 "100."
-msgstr "لا يمكن أن يتخطى إجمالي حصة التكلفة للمنتجات الثانوية لأمر التصنيع 100."
+msgstr ""
+"لا يمكن أن يتخطى إجمالي حصة التكلفة للمنتجات الثانوية لأمر التصنيع 100."
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_split_form
@@ -6508,8 +6517,8 @@ msgid ""
 "Use Manufacturing Orders (MO) to build finished products while consuming "
 "components: i.e. 1 Table = 4 Table Legs + 1 Table Top"
 msgstr ""
-"استخدم أوامر التصنيع (MO) لبناء منتجات كاملة أثناء استهلاك المكونات. مثال:  1 "
-"طاولة = 4 أرجل طاولة + 1 سطح طاولة"
+"استخدم أوامر التصنيع (MO) لبناء منتجات كاملة أثناء استهلاك المكونات. مثال:  "
+"1 طاولة = 4 أرجل طاولة + 1 سطح طاولة"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.product_product_form_view_bom_button
@@ -6777,7 +6786,8 @@ msgid ""
 "the required components."
 msgstr ""
 "تتيح لك عمليات أوامر العمل إنشاء وإدارة عمليات التصنيع التي يجب تتبعها في "
-"مراكز عملك لإنتاج منتج. تكون مرفقة بقوائم المواد التي ستحدد المكونات المطلوبة."
+"مراكز عملك لإنتاج منتج. تكون مرفقة بقوائم المواد التي ستحدد المكونات "
+"المطلوبة."
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_stock_move__workorder_id
@@ -7125,8 +7135,8 @@ msgid ""
 "'Productivity'. Create one from the Manufacturing app, menu: Configuration / "
 "Productivity Losses."
 msgstr ""
-"يجب أن تقوم بتعريف خسارة إنتاجية واحدة على الأقل في فئة 'الإنتاجية'. قم بإنشاء "
-"واحدة من تطبيق التصنيع، القائمة: إعدادات/خسائر الإنتاجية."
+"يجب أن تقوم بتعريف خسارة إنتاجية واحدة على الأقل في فئة 'الإنتاجية'. قم "
+"بإنشاء واحدة من تطبيق التصنيع، القائمة: إعدادات/خسائر الإنتاجية."
 
 #. module: mrp
 #. odoo-python
@@ -7136,8 +7146,8 @@ msgid ""
 "'Performance'. Create one from the Manufacturing app, menu: Configuration / "
 "Productivity Losses."
 msgstr ""
-"يجب أن تقوم بتعريف خسارة إنتاجية غير نشطة واحدة على الأقل في فئة 'الأداء'. قم "
-"بإنشاء واحدة من تطبيق التصنيع، القائمة: إعدادات/خسائر الإنتاجية."
+"يجب أن تقوم بتعريف خسارة إنتاجية غير نشطة واحدة على الأقل في فئة 'الأداء'. "
+"قم بإنشاء واحدة من تطبيق التصنيع، القائمة: إعدادات/خسائر الإنتاجية."
 
 #. module: mrp
 #. odoo-python

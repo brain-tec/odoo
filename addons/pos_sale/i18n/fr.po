@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:36+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-09-16 08:55+0000\n"
 "Last-Translator: \"Cécile Collart (cco)\" <cco@odoo.com>\n"
 "Language-Team: French <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -37,6 +37,18 @@ msgstr "%(line_description)s (Annulé)"
 #: code:addons/pos_sale/models/account_move.py:0
 msgid "%(old_name)s (Cancelled)"
 msgstr "%(old_name)s (Annulé)"
+
+#. module: pos_sale
+#. odoo-python
+#: code:addons/pos_sale/models/pos_config.py:0
+msgid "%s needs a Default Product"
+msgstr ""
+
+#. module: pos_sale
+#. odoo-python
+#: code:addons/pos_sale/models/pos_config.py:0
+msgid "%s needs a Down Payment Product"
+msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
@@ -211,28 +223,6 @@ msgid "Invoiced"
 msgstr "Facturé"
 
 #. module: pos_sale
-#. odoo-javascript
-#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
-msgid ""
-"It seems that you didn't configure a down payment product in your point of "
-"sale. You can go to your point of sale configuration to choose one."
-msgstr ""
-"Il semble que vous n'ayez pas configuré de produit d'acompte dans votre "
-"point de vente. Allez aux paramètres de votre point de vente pour en choisir "
-"un."
-
-#. module: pos_sale
-#. odoo-javascript
-#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
-msgid ""
-"It seems that you didn't configure a down payment product in your point of "
-"sale. You can go to your point of sale settings to choose one."
-msgstr ""
-"Il semble que vous n’ayez pas configuré de produit d’acompte dans votre "
-"point de vente. Vous pouvez vous rendre dans les paramètres de votre point "
-"de vente pour en sélectionner un."
-
-#. module: pos_sale
 #: model:ir.model,name:pos_sale.model_account_move
 msgid "Journal Entry"
 msgstr "Pièce comptable"
@@ -260,12 +250,6 @@ msgid "Linked Sale Orders"
 msgstr "Commandes clients associées"
 
 #. module: pos_sale
-#. odoo-javascript
-#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
-msgid "No down payment product"
-msgstr "Aucun produit d'acompte"
-
-#. module: pos_sale
 #: model:ir.actions.act_window,name:pos_sale.pos_session_action_from_crm_team
 msgid "Open Sessions"
 msgstr "Sessions ouvertes"
@@ -290,6 +274,18 @@ msgstr "Commande du PdV"
 #: model:ir.model.fields.selection,name:pos_sale.selection__sale_report__state__paid
 msgid "Paid"
 msgstr "Payé"
+
+#. module: pos_sale
+#. odoo-python
+#: code:addons/pos_sale/models/pos_config.py:0
+msgid "Please set a Default Product on %s before opening a session."
+msgstr ""
+
+#. module: pos_sale
+#. odoo-python
+#: code:addons/pos_sale/models/pos_config.py:0
+msgid "Please set a Down Payment Product on %s before opening a session."
+msgstr ""
 
 #. module: pos_sale
 #: model:ir.model,name:pos_sale.model_pos_config
@@ -335,6 +331,12 @@ msgstr "Comptabilisé"
 #: model:ir.model,name:pos_sale.model_product_template
 msgid "Product"
 msgstr "Produit"
+
+#. module: pos_sale
+#. odoo-javascript
+#: code:addons/pos_sale/static/src/app/components/screens/product_screen/control_buttons/control_buttons.js:0
+msgid "Quotation / Order"
+msgstr ""
 
 #. module: pos_sale
 #. odoo-javascript
@@ -410,6 +412,12 @@ msgid ""
 msgstr ""
 "Le taux de conversion de la devise vers la devise de taux applicable à la "
 "date de la commande"
+
+#. module: pos_sale
+#. odoo-javascript
+#: code:addons/pos_sale/static/src/app/services/pos_store.js:0
+msgid "There is nothing left to settle on this sale order."
+msgstr ""
 
 #. module: pos_sale
 #: model:ir.model.fields,help:pos_sale.field_pos_config__crm_team_id
@@ -497,3 +505,22 @@ msgstr "id"
 #: code:addons/pos_sale/static/src/app/components/orderline/orderline.xml:0
 msgid "x"
 msgstr "x"
+
+#~ msgid ""
+#~ "It seems that you didn't configure a down payment product in your point "
+#~ "of sale. You can go to your point of sale configuration to choose one."
+#~ msgstr ""
+#~ "Il semble que vous n'ayez pas configuré de produit d'acompte dans votre "
+#~ "point de vente. Allez aux paramètres de votre point de vente pour en "
+#~ "choisir un."
+
+#~ msgid ""
+#~ "It seems that you didn't configure a down payment product in your point "
+#~ "of sale. You can go to your point of sale settings to choose one."
+#~ msgstr ""
+#~ "Il semble que vous n’ayez pas configuré de produit d’acompte dans votre "
+#~ "point de vente. Vous pouvez vous rendre dans les paramètres de votre "
+#~ "point de vente pour en sélectionner un."
+
+#~ msgid "No down payment product"
+#~ msgstr "Aucun produit d'acompte"

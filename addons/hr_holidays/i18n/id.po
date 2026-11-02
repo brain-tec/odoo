@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-09-23 05:34+0000\n"
 "Last-Translator: \"Nurul Aini Akrima Sabila (nuaas)\" <nuaas@odoo.com>\n"
 "Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -557,6 +557,11 @@ msgstr ""
 "\n"
 "    Versi:\n"
 "    %(versions)s"
+
+#. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
+msgid "A supporting document is required for this type of time off."
+msgstr ""
 
 #. module: hr_holidays
 #. odoo-python
@@ -1222,22 +1227,22 @@ msgid "Both Approved and Confirmed"
 msgstr "Disetujui dan Dikonfirmasi"
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__manager
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__manager
-msgid "By Employee's Approver"
-msgstr "Berdasarkan Approver Karyawan"
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__hr
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__hr
+msgid "By HR Responsible"
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__both
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__both
-msgid "By Employee's Approver and Time Off Officer"
-msgstr "Berdasarkan Approver Karyawan dan Petugas Cuti"
+msgid "By HR Responsible and Time Off Approver"
+msgstr ""
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__hr
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__hr
-msgid "By Time Off Officer"
-msgstr "Berdasarkan Petugas Cuti"
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__manager
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__manager
+msgid "By Time Off Approver"
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__count_days_as__calendar
@@ -1369,7 +1374,8 @@ msgstr ""
 #. module: hr_holidays
 #: model_terms:ir.actions.act_window,help:hr_holidays.action_hr_leave_report
 msgid "Check back later to overview all time off requests"
-msgstr "Periksa lagi nanti untuk mendapatkan gambaran umum semua permintaan cut"
+msgstr ""
+"Periksa lagi nanti untuk mendapatkan gambaran umum semua permintaan cut"
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__maximum_leave
@@ -1856,7 +1862,8 @@ msgstr ""
 #: code:addons/hr_holidays/models/resource_calendar_leaves.py:0
 msgid ""
 "Due to a change in global time offs, you have been granted %s day(s) back."
-msgstr "Oleh karena perubahan cuti global, Anda diberikan kembali %s hari cuti."
+msgstr ""
+"Oleh karena perubahan cuti global, Anda diberikan kembali %s hari cuti."
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report_calendar__duration
@@ -2347,6 +2354,14 @@ msgid ""
 msgstr ""
 "Jika kolom aktif diatur ke Salah, itu akan memungkinkan Anda untuk "
 "menyembunyikan data sumber daya tanpa menghapusnya."
+
+#. module: hr_holidays
+#: model:ir.model.fields,help:hr_holidays.field_hr_work_entry_type__create_calendar_meeting
+msgid ""
+"If this field is checked, every leave request of this type will have a "
+"corresponding entry in the calendar application. There will be no entry if "
+"this stays unchecked."
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_work_entry_type__count_days_as
@@ -3161,7 +3176,8 @@ msgstr ""
 #: code:addons/hr_holidays/models/hr_leave.py:0
 msgid ""
 "Oops! %(state)s Time-Off requests can only be deleted by Administrators."
-msgstr "Oops! %(state)s Permintaan Cuti hanya dapat dihapus oleh Administrator."
+msgstr ""
+"Oops! %(state)s Permintaan Cuti hanya dapat dihapus oleh Administrator."
 
 #. module: hr_holidays
 #: model:ir.ui.menu,name:hr_holidays.menu_hr_holidays_dashboard
@@ -3229,6 +3245,8 @@ msgstr ""
 
 #. module: hr_holidays
 #. odoo-javascript
+#. odoo-python
+#: code:addons/hr_holidays/models/resource_calendar.py:0
 #: code:addons/hr_holidays/static/src/views/calendar/calendar_side_panel/calendar_side_panel.xml:0
 #: model:ir.actions.act_window,name:hr_holidays.open_view_public_holiday
 #: model:ir.actions.act_window,name:hr_holidays.resource_calendar_global_leaves_action_from_calendar
@@ -4253,7 +4271,8 @@ msgstr "Cuti untuk mereka yang Anda merupakan manajer dari"
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 msgid "Time off request must be confirmed or validated in order to refuse it."
-msgstr "Permintaan cuti harus dikonfirmasi atau divalidasi untuk dapat ditolak."
+msgstr ""
+"Permintaan cuti harus dikonfirmasi atau divalidasi untuk dapat ditolak."
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report_calendar__tz
@@ -4807,7 +4826,8 @@ msgstr "Anda hanya dapat memvalidasi cuti dengan validasi dari Manajer Cuti."
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 msgid ""
 "You can only validate an allocation with validation by Time Off Manager."
-msgstr "Anda hanya dapat memvalidasi alokasi dengan validasi dari Manajer Cuti."
+msgstr ""
+"Anda hanya dapat memvalidasi alokasi dengan validasi dari Manajer Cuti."
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -5005,7 +5025,8 @@ msgstr ""
 #. module: hr_holidays
 #: model:ir.model.constraint,message:hr_holidays.constraint_hr_leave_accrual_level_added_value_greater_than_zero
 msgid "You must give a rate greater than 0 in accrual plan levels."
-msgstr "Anda harus memberikan nilai lebih besar dari 0 di level rencana akrual."
+msgstr ""
+"Anda harus memberikan nilai lebih besar dari 0 di level rencana akrual."
 
 #. module: hr_holidays
 #. odoo-python
@@ -5354,6 +5375,15 @@ msgstr "validasi"
 #: code:addons/hr_holidays/static/src/components/accrual_level/accrual_levels.js:0
 msgid "year(s)"
 msgstr ""
+
+#~ msgid "By Employee's Approver"
+#~ msgstr "Berdasarkan Approver Karyawan"
+
+#~ msgid "By Employee's Approver and Time Off Officer"
+#~ msgstr "Berdasarkan Approver Karyawan dan Petugas Cuti"
+
+#~ msgid "By Time Off Officer"
+#~ msgstr "Berdasarkan Petugas Cuti"
 
 #~ msgid "There is no valid allocation to cover that request."
 #~ msgstr "Tidak ada alokasi yang valid untuk mencakup permintaan tersebut."

@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:36+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-10-20 12:33+0000\n"
 "Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
 "Language-Team: French <https://translate.odoo.com/projects/odoo-s19-4/stock/"
@@ -617,8 +617,8 @@ msgid ""
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        Bonjour <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>"
-",<br/><br/>\n"
+"        Bonjour <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</"
+"t>,<br/><br/>\n"
 "        <t t-if=\"hasattr(object, 'delivery_type') and object.delivery_type "
 "== 'in_store'\">\n"
 "            Votre commande a été retirée.\n"
@@ -635,8 +635,8 @@ msgstr ""
 "                <t t-set=\"multiple_carrier_tracking\" t-"
 "value=\"object.get_multiple_carrier_tracking()\"/>\n"
 "                <t t-if=\"multiple_carrier_tracking\">\n"
-"                    <t t-foreach=\"multiple_carrier_tracking\" t-as=\"line\">"
-"\n"
+"                    <t t-foreach=\"multiple_carrier_tracking\" t-"
+"as=\"line\">\n"
 "                        <br/><a t-att-href=\"line[1]\" target=\"_blank\" t-"
 "out=\"line[0] or ''\"/>\n"
 "                    </t>\n"
@@ -1232,8 +1232,8 @@ msgid ""
 msgstr ""
 "Ajoutez et personnalisez des opérations de transit pour traiter les "
 "mouvements de produits dans vos entrepôts. Exemple : déchargement > contrôle "
-"qualité > mise en stock pour les produits entrants, et transfert > emballage"
-" > expédition pour les produits sortants. \n"
+"qualité > mise en stock pour les produits entrants, et transfert > "
+"emballage > expédition pour les produits sortants. \n"
 " Vous pouvez également définir des stratégies de rangement pour vos "
 "entrepôts afin d'envoyer directement les produits entrants à des "
 "emplacements enfants spécifiques (par ex. un bac ou une étagère spécifique)."
@@ -1249,11 +1249,11 @@ msgid ""
 msgstr ""
 "Ajoutez et personnalisez des opérations de transit pour traiter les "
 "mouvements de produits dans vos entrepôts. Exemple : déchargement > contrôle "
-"qualité> mise en stock pour les produits entrants, et transfert > emballage"
-" > expédition pour les produits sortants. Vous pouvez également définir des "
-"stratégies de rangement pour vos entrepôts afin d'envoyer directement les "
-"produits entrants à des emplacements enfants spécifiques (par un bac ou une "
-"étagère spécifique)."
+"qualité> mise en stock pour les produits entrants, et transfert > "
+"emballage > expédition pour les produits sortants. Vous pouvez également "
+"définir des stratégies de rangement pour vos entrepôts afin d'envoyer "
+"directement les produits entrants à des emplacements enfants spécifiques "
+"(par un bac ou une étagère spécifique)."
 
 #. module: stock
 #. odoo-javascript
@@ -1588,6 +1588,12 @@ msgstr "Me demander"
 
 #. module: stock
 #. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Assign"
+msgstr ""
+
+#. module: stock
+#. odoo-javascript
 #: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 msgid "Assign All"
 msgstr "Assigner tout"
@@ -1601,6 +1607,12 @@ msgstr "Assigner un propriétaire"
 #: model:ir.model.fields,field_description:stock.field_stock_request_count__user_id
 msgid "Assign to"
 msgstr "Attribuer à"
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
+msgid "Assigned"
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_package__child_package_dest_ids
@@ -1960,8 +1972,8 @@ msgid ""
 "(old_location)s) to a different location (%(new_location)s)."
 msgstr ""
 "Impossible de déplacer un conteneur contenant des colis situés dans un autre "
-"emplacement (%(old_location)s) vers un emplacement différent (%(new_location)"
-"s)."
+"emplacement (%(old_location)s) vers un emplacement différent (%"
+"(new_location)s)."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
@@ -3920,6 +3932,7 @@ msgid "Full Package Name"
 msgstr "Nom complet du colis"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Future Activities"
 msgstr "Activités futures"
@@ -4354,11 +4367,9 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_show_allocation_report
 msgid ""
-"If this checkbox is ticked, Odoo will automatically show the allocation "
-"report (if there are moves to allocate to) when validating."
+"If this checkbox is ticked, Odoo will show the allocation report (if there "
+"are moves to allocate to.)"
 msgstr ""
-"Si cette case est cochée, Odoo affichera automatiquement le rapport "
-"d’allocation (s’il y a des mouvements à allouer) lors de la validation."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move__show_operations
@@ -5178,6 +5189,7 @@ msgid "Late"
 msgstr "En retard"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Late Activities"
 msgstr "Activités en retard"
@@ -5816,6 +5828,7 @@ msgid "Multiple destinations"
 msgstr "Destinations multiples"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "My Activities"
 msgstr "Mes activités"
@@ -7028,7 +7041,8 @@ msgstr "Problème de planification"
 #. odoo-python
 #: code:addons/stock/models/stock_warehouse.py:0
 msgid "Please contact your administrator to configure your warehouse."
-msgstr "Veuillez contacter votre administrateur pour configurer votre entrepôt."
+msgstr ""
+"Veuillez contacter votre administrateur pour configurer votre entrepôt."
 
 #. module: stock
 #. odoo-python
@@ -8176,7 +8190,6 @@ msgstr "Réserver des conditionnements partiels"
 
 #. module: stock
 #. odoo-javascript
-#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 #: code:addons/stock/static/src/allocation_report/out_line/out_line.js:0
 msgid "Reserved"
 msgstr "Réservé"
@@ -8735,8 +8748,9 @@ msgid ""
 "Serial number (%(serial_number)s) already exists in location(s): %"
 "(location_list)s. Please correct the serial number encoded."
 msgstr ""
-"Numéro de série (%(serial_number)s) déjà existant dans le(s) emplacement(s) "
-": %(location_list)s.Veuillez corriger le numéro de série encodé."
+"Numéro de série (%(serial_number)s) déjà existant dans le(s) "
+"emplacement(s) : %(location_list)s.Veuillez corriger le numéro de série "
+"encodé."
 
 #. module: stock
 #. odoo-python
@@ -9639,8 +9653,8 @@ msgid ""
 "Otherwise, the serial number should be corrected to prevent inconsistent "
 "data."
 msgstr ""
-"Le numéro de série (%(serial_number)s) est déjà utilisé dans cet emplacement "
-": %(location_list)s.\n"
+"Le numéro de série (%(serial_number)s) est déjà utilisé dans cet "
+"emplacement : %(location_list)s.\n"
 "\n"
 "Comment est-ce possible? Par exemple si une livraison est validée avant que "
 "la livraison correspondante soit validée. Dans ce cas, le problème sera "
@@ -10130,8 +10144,8 @@ msgstr ""
 #: code:addons/stock/models/stock_package.py:0
 msgid "This package is currently set to be sent in %(location_names_list)s."
 msgstr ""
-"Ce colis est actuellement défini pour être envoyé vers %(location_names_list)"
-"s."
+"Ce colis est actuellement défini pour être envoyé vers %"
+"(location_names_list)s."
 
 #. module: stock
 #. odoo-python
@@ -10337,6 +10351,7 @@ msgid "Today"
 msgstr "Aujourd'hui"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Today Activities"
 msgstr "Activités du jour"
@@ -10450,8 +10465,9 @@ msgid ""
 " Such dates are set automatically at lot/serial number creation based on "
 "values set on the product (in days)."
 msgstr ""
-"Les dates suivantes peuvent être suivies via les numéros de lot et de série "
-": date de péremption, date de retrait, date d'expiration et date d'alerte. \n"
+"Les dates suivantes peuvent être suivies via les numéros de lot et de "
+"série : date de péremption, date de retrait, date d'expiration et date "
+"d'alerte. \n"
 " Ces dates sont définies automatiquement lors de la création du lot/numéro "
 "de série en fonction de valeurs spécifiées pour chaque produit (en jours)."
 
@@ -10462,10 +10478,11 @@ msgid ""
 "life, alert. Such dates are set automatically at lot/serial number creation "
 "based on values set on the product (in days)."
 msgstr ""
-"Les dates suivantes peuvent être suivies via les numéros de lot et de série "
-": date de péremption, date de retrait, date d'expiration et date d'alerte. "
-"Ces dates sont définies automatiquement lors de la création du lot/numéro de "
-"série en fonction de valeurs spécifiées pour chaque produit (en jours)."
+"Les dates suivantes peuvent être suivies via les numéros de lot et de "
+"série : date de péremption, date de retrait, date d'expiration et date "
+"d'alerte. Ces dates sont définies automatiquement lors de la création du lot/"
+"numéro de série en fonction de valeurs spécifiées pour chaque produit (en "
+"jours)."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -10561,7 +10578,8 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_package__picking_ids
 msgid "Transfers in which the Package is set as Destination Package"
-msgstr "Transferts dans lesquels le colis est défini comme colis de destination"
+msgstr ""
+"Transferts dans lesquels le colis est défini comme colis de destination"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_location__usage__transit
@@ -10627,6 +10645,12 @@ msgstr "Type d’opération"
 #: model:ir.model.fields,help:stock.field_stock_picking__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr "Type d'activité d'exception enregistrée."
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Unassign"
+msgstr ""
 
 #. module: stock
 #. odoo-python
@@ -11991,3 +12015,10 @@ msgid ""
 msgstr ""
 "{{ object.company_id.name }} Bon de livraison (Ref {{ object.name or 'n/"
 "a' }})"
+
+#~ msgid ""
+#~ "If this checkbox is ticked, Odoo will automatically show the allocation "
+#~ "report (if there are moves to allocate to) when validating."
+#~ msgstr ""
+#~ "Si cette case est cochée, Odoo affichera automatiquement le rapport "
+#~ "d’allocation (s’il y a des mouvements à allouer) lors de la validation."

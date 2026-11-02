@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-09-09 12:18+0000\n"
 "Last-Translator: \"Maitê Dietze (madi)\" <madi@odoo.com>\n"
 "Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/odoo-"
@@ -333,8 +333,8 @@ msgid ""
 "            "
 msgstr ""
 "<div>\n"
-"                    Prezado(a) <b><t t-out=\"object.env.context.get"
-"('manager')\"/></b> , \n"
+"                    Prezado(a) <b><t t-"
+"out=\"object.env.context.get('manager')\"/></b> , \n"
 "<br/><br/> <p> estou solicitando uma folga e agradeceria se pudesse aprová-"
 "la o quanto antes!</p>\n"
 "                    <ul> <li> Tipo de licença: <t t-"
@@ -395,8 +395,8 @@ msgid ""
 "= 'hour'\">Hours</span>"
 msgstr ""
 "<span class=\"ml8\" invisible=\"unit_of_measure == 'hour'\">Dais</span>\n"
-"                            <span class=\"ml8\" invisible=\"unit_of_measure "
-"!= 'hour'\">Horas</span>"
+"                            <span class=\"ml8\" invisible=\"unit_of_measure !"
+"= 'hour'\">Horas</span>"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_kanban
@@ -610,6 +610,11 @@ msgstr ""
 "   %(versions)s"
 
 #. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
+msgid "A supporting document is required for this type of time off."
+msgstr ""
+
+#. module: hr_holidays
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 msgid "A time off cannot be duplicated."
@@ -666,8 +671,8 @@ msgid ""
 "this period, but %(nb_days)s days will be used because this leave %"
 "(work_entry_type_name)s can only be taken by days."
 msgstr ""
-"De acordo com o seu horário de trabalho, espera-se que você trabalhe %(days)"
-"s dias neste período, mas %(nb_days)s dias serão utilizados, pois esta "
+"De acordo com o seu horário de trabalho, espera-se que você trabalhe %"
+"(days)s dias neste período, mas %(nb_days)s dias serão utilizados, pois esta "
 "licença %(work_entry_type_name)s só pode ser tirada por dias."
 
 #. module: hr_holidays
@@ -1277,22 +1282,22 @@ msgid "Both Approved and Confirmed"
 msgstr "Ambos aprovado e confirmado"
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__manager
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__manager
-msgid "By Employee's Approver"
-msgstr "Por aprovador do funcionário"
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__hr
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__hr
+msgid "By HR Responsible"
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__both
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__both
-msgid "By Employee's Approver and Time Off Officer"
-msgstr "Por aprovador do funcionário e administrador de folgas"
+msgid "By HR Responsible and Time Off Approver"
+msgstr ""
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__hr
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__hr
-msgid "By Time Off Officer"
-msgstr "Por administrador de folgas"
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__manager
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__manager
+msgid "By Time Off Approver"
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__count_days_as__calendar
@@ -2327,9 +2332,9 @@ msgid ""
 "{{ object.work_entry_type_id.name }} from {{ object.request_date_from }} to "
 "{{ object.request_date_to }}"
 msgstr ""
-"Estou solicitando {{ object.duration_display }} de {{ "
-"object.work_entry_type_id.name }} de {{ object.request_date_from }} para {{ "
-"object.request_date_to }}"
+"Estou solicitando {{ object.duration_display }} de "
+"{{ object.work_entry_type_id.name }} de {{ object.request_date_from }} para "
+"{{ object.request_date_to }}"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_calendar_event__id
@@ -2427,6 +2432,14 @@ msgid ""
 msgstr ""
 "Se o campo \"ativo\" for definido como \"false\", isso permitirá esconder o "
 "registro do recurso sem removê-lo."
+
+#. module: hr_holidays
+#: model:ir.model.fields,help:hr_holidays.field_hr_work_entry_type__create_calendar_meeting
+msgid ""
+"If this field is checked, every leave request of this type will have a "
+"corresponding entry in the calendar application. There will be no entry if "
+"this stays unchecked."
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_work_entry_type__count_days_as
@@ -3040,8 +3053,8 @@ msgstr "Nenhum feriado foi adicionado."
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
 msgid "No, always consider the entire accrual period (whole calendar days)."
 msgstr ""
-"Não, sempre considere todo o período de acúmulo (dias inteiros do calendário)"
-"."
+"Não, sempre considere todo o período de acúmulo (dias inteiros do "
+"calendário)."
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -3239,8 +3252,8 @@ msgstr ""
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_plan__is_based_on_worked_time
 msgid "Only excludes requests where the time type is set as unpaid kind of."
 msgstr ""
-"Exclui apenas solicitações em que o tipo de horário esteja definido como “"
-"não remunerado”."
+"Exclui apenas solicitações em que o tipo de horário esteja definido como "
+"“não remunerado”."
 
 #. module: hr_holidays
 #. odoo-python
@@ -3317,6 +3330,8 @@ msgstr "Linha do Assistente de Visualização de Feriados"
 
 #. module: hr_holidays
 #. odoo-javascript
+#. odoo-python
+#: code:addons/hr_holidays/models/resource_calendar.py:0
 #: code:addons/hr_holidays/static/src/views/calendar/calendar_side_panel/calendar_side_panel.xml:0
 #: model:ir.actions.act_window,name:hr_holidays.open_view_public_holiday
 #: model:ir.actions.act_window,name:hr_holidays.resource_calendar_global_leaves_action_from_calendar
@@ -3647,7 +3662,8 @@ msgstr "A sequência é gerada automaticamente pelo delta da hora de início."
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__postpone_max_days
 msgid "Set a maximum of accruals an allocation keeps at the end of the year."
-msgstr "Defina um máximo de acréscimos que uma alocação mantém no final do ano."
+msgstr ""
+"Defina um máximo de acréscimos que uma alocação mantém no final do ano."
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_level_view_form
@@ -3856,7 +3872,8 @@ msgstr ""
 #: model:ir.model.fields,help:hr_holidays.field_hr_work_entry_type__color
 msgid ""
 "The color selected here will be used in every screen with the time type."
-msgstr "A cor selecionada aqui será usada em todas as telas com o tipo de hora."
+msgstr ""
+"A cor selecionada aqui será usada em todas as telas com o tipo de hora."
 
 #. module: hr_holidays
 #. odoo-python
@@ -4926,7 +4943,8 @@ msgstr "Você só pode validar uma licença com a validação do Gerente de Folg
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 msgid ""
 "You can only validate an allocation with validation by Time Off Manager."
-msgstr "Você só pode validar uma alocação com a validação do Gerente de Folgas."
+msgstr ""
+"Você só pode validar uma alocação com a validação do Gerente de Folgas."
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -5486,6 +5504,15 @@ msgstr "validar"
 #: code:addons/hr_holidays/static/src/components/accrual_level/accrual_levels.js:0
 msgid "year(s)"
 msgstr "ano(s)"
+
+#~ msgid "By Employee's Approver"
+#~ msgstr "Por aprovador do funcionário"
+
+#~ msgid "By Employee's Approver and Time Off Officer"
+#~ msgstr "Por aprovador do funcionário e administrador de folgas"
+
+#~ msgid "By Time Off Officer"
+#~ msgstr "Por administrador de folgas"
 
 #~ msgid "(s)"
 #~ msgstr "(s)"

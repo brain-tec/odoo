@@ -15,7 +15,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:37+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-09-15 10:41+0000\n"
 "Last-Translator: \"Nurul Aini Akrima Sabila (nuaas)\" <nuaas@odoo.com>\n"
 "Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -253,12 +253,6 @@ msgstr "# Blok-Blok"
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
 msgid "$ 32M"
 msgstr "$ 32M"
-
-#. module: website
-#. odoo-python
-#: code:addons/website/models/ir_ui_view.py:0
-msgid "%(error)s (website: %(website_id)s)"
-msgstr "%(error)s (website: %(website_id)s)"
 
 #. module: website
 #. odoo-python
@@ -797,8 +791,8 @@ msgid ""
 "email\">info@yourcompany.example.com</a>"
 msgstr ""
 "<a class=\"o_translate_inline\" href=\"mail-"
-"to:info@yourcompany.example.com\" title=\"Send an email\">"
-"info@perusahaanAnda.contoh.com</a>"
+"to:info@yourcompany.example.com\" title=\"Send an "
+"email\">info@perusahaanAnda.contoh.com</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_call_to_action
@@ -806,8 +800,8 @@ msgid ""
 "<a class=\"o_translate_inline\" "
 "href=\"mailto:info@yourcompany.example.com\">info@yourcompany.example.com</a>"
 msgstr ""
-"<a class=\"o_translate_inline\" href=\"mailto:info@yourcompany.example.com\">"
-"info@yourcompany.example.com</a>"
+"<a class=\"o_translate_inline\" "
+"href=\"mailto:info@yourcompany.example.com\">info@yourcompany.example.com</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_contact_info
@@ -845,8 +839,8 @@ msgid ""
 "<a href=\"#\" class=\"btn btn-primary o_translate_inline\" "
 "role=\"button\">More details</a>"
 msgstr ""
-"<a href=\"#\" class=\"btn btn-primary o_translate_inline\" role=\"button\">"
-"Detail lebih lanjut</a>"
+"<a href=\"#\" class=\"btn btn-primary o_translate_inline\" "
+"role=\"button\">Detail lebih lanjut</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_text_box
@@ -894,8 +888,8 @@ msgid ""
 "<a href=\"#\" role=\"button\" class=\"btn btn-secondary "
 "o_translate_inline\">View All</a>"
 msgstr ""
-"<a href=\"#\" role=\"button\" class=\"btn btn-secondary o_translate_inline\">"
-"Lihat Semua</a>"
+"<a href=\"#\" role=\"button\" class=\"btn btn-secondary "
+"o_translate_inline\">Lihat Semua</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
@@ -1031,8 +1025,8 @@ msgid ""
 ">"
 msgstr ""
 "<br/>Sell online easily with a user-friendly platform that streamlines all "
-"the steps, including setup, inventory management, and payment "
-"processing.<br/>"
+"the steps, including setup, inventory management, and payment processing.<br/"
+">"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
@@ -1499,8 +1493,8 @@ msgstr ""
 "                        Pengembalian Online 30 Hari\n"
 "                    </small>\n"
 "                    <small class=\"d-flex align-items-center\">\n"
-"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/>"
-"\n"
+"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/"
+">\n"
 "                        Pengiriman Standar\n"
 "                    </small>"
 
@@ -1509,8 +1503,8 @@ msgstr ""
 msgid ""
 "<small class=\"text-center\">Instant setup, satisfied or reimbursed.</small>"
 msgstr ""
-"<small class=\"text-center\">Setup instan, Anda puas atau uang "
-"dikembalikan.</small>"
+"<small class=\"text-center\">Setup instan, Anda puas atau uang dikembalikan."
+"</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_attributes_vertical
@@ -2137,8 +2131,8 @@ msgid ""
 "\">Our company was founded ten years ago around a common dream made by our "
 "founders.</span>"
 msgstr ""
-"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 0.4505vw, 400px)"
-";\">Perusahaan kami didirikan sepuluh tahun yang lalu berdasarkan mimpi "
+"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 0.4505vw, 400px);"
+"\">Perusahaan kami didirikan sepuluh tahun yang lalu berdasarkan mimpi "
 "bersama yang diusung oleh para pendiri.</span>"
 
 #. module: website
@@ -2147,8 +2141,8 @@ msgid ""
 "<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 4.2272vw, 400px);"
 "\">PORTFOLIO</span>"
 msgstr ""
-"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 4.2272vw, 400px)"
-";\">PORTOFOLIO</span>"
+"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 4.2272vw, 400px);"
+"\">PORTOFOLIO</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_bold
@@ -2156,8 +2150,8 @@ msgid ""
 "<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 8.2563vw, 400px);"
 "\">Contact us.</span>"
 msgstr ""
-"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 8.2563vw, 400px)"
-";\">Hubungi kami.</span>"
+"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 8.2563vw, 400px);"
+"\">Hubungi kami.</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_search_box
@@ -2167,8 +2161,8 @@ msgid ""
 "                <span class=\"visually-hidden\">Loading...</span>\n"
 "            </span>"
 msgstr ""
-"<span class=\"o_search_spinner d-none spinner-border spinner-border-sm text-"
-"500\" style=\"--spinner-border-width: 0.1em;\" role=\"status\">\n"
+"<span class=\"o_search_spinner d-none spinner-border spinner-border-sm "
+"text-500\" style=\"--spinner-border-width: 0.1em;\" role=\"status\">\n"
 "                <span class=\"visually-hidden\">Memuat...</span>\n"
 "            </span>"
 
@@ -2183,8 +2177,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_small-fs\">\n"
 "                                            <strong>Iris DOE</strong><br/>\n"
-"                                            <span class=\"text-muted\">"
-"Manajer MyCompany</span>\n"
+"                                            <span class=\"text-"
+"muted\">Manajer MyCompany</span>\n"
 "                                        </span>"
 
 #. module: website
@@ -2228,8 +2222,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_small-fs\">\n"
 "                                        Furniture Design Specialist\n"
-"                                        <br/><br/><br/><br/><br/><br/><br/>"
-"<br/><br/><br/><br/>\n"
+"                                        <br/><br/><br/><br/><br/><br/><br/"
+"><br/><br/><br/><br/>\n"
 "                                    </span>"
 
 #. module: website
@@ -2393,8 +2387,8 @@ msgid ""
 "<span class=\"s_website_form_field_description small form-text text-"
 "muted\">We typically respond within 1-2 business days.</span>"
 msgstr ""
-"<span class=\"s_website_form_field_description small form-text text-muted\">"
-"Kami biasanya memberi tanggapan dalam 1-2 hari kerja.</span>"
+"<span class=\"s_website_form_field_description small form-text text-"
+"muted\">Kami biasanya memberi tanggapan dalam 1-2 hari kerja.</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
@@ -2556,8 +2550,8 @@ msgid ""
 msgstr ""
 "<span style=\"font-size: 10.75rem;\">\n"
 "                        <font class=\"text-gradient\" style=\"background-"
-"image: linear-gradient(0deg, var(--o-color-4) 25%, var(--o-color-5) 90%);\">"
-"\n"
+"image: linear-gradient(0deg, var(--o-color-4) 25%, var(--o-color-5) 90%);"
+"\">\n"
 "                            87%\n"
 "                        </font>\n"
 "                    </span>"
@@ -2576,8 +2570,8 @@ msgid ""
 "HEADLINE\n"
 "                        </span>"
 msgstr ""
-"<span style=\"font-size: clamp(8px, 1em + 1.657vw, 400px);\" class=\"o_rfs\">"
-"\n"
+"<span style=\"font-size: clamp(8px, 1em + 1.657vw, 400px);\" "
+"class=\"o_rfs\">\n"
 "                            HEADLINE <font class=\"bg-o-color-1\">MENARIK</"
 "font>\n"
 "                        </span>"
@@ -2604,8 +2598,8 @@ msgstr ""
 "<span>Kami menggunakan cookie untuk memberikan pengalaman pengguna yang "
 "lebih baik di website ini.</span>\n"
 "                                            <a href=\"/website/cookie-"
-"policy\" class=\"o_cookies_bar_text_policy small o_translate_inline\">"
-"Kebijakan Cookie</a>"
+"policy\" class=\"o_cookies_bar_text_policy small "
+"o_translate_inline\">Kebijakan Cookie</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons_horizontal
@@ -3177,6 +3171,12 @@ msgstr "ACME Corp"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
+msgid "AI recommended"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/google_maps_option/google_maps_api_key_dialog.xml:0
 msgid "API Key"
 msgstr "API Key"
@@ -3260,8 +3260,8 @@ msgstr "Gambar Akordeon"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
-msgid "Accounts are usable across all your multiple websites"
-msgstr "Akun dapat digunakan di semua website-website Anda"
+msgid "Accounts created on this website are usable across all other websites"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -4024,6 +4024,18 @@ msgid "Amazing pages"
 msgstr "Halaman-halaman luar biasa"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Amber"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Amethyst"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
 #: model_terms:ir.ui.view,arch_db:website.s_map
 msgid "An address must be specified for a map to be embedded"
@@ -4326,6 +4338,12 @@ msgid "At The End"
 msgstr "Diakhir"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/form/form_field_option.js:0
+msgid "At least one of these words should match"
+msgstr ""
+
+#. module: website
 #: model:ir.model,name:website.model_ir_attachment
 msgid "Attachment"
 msgstr "Lampiran"
@@ -4340,6 +4358,12 @@ msgstr "Lampiran yang menggunakan salinan saya"
 #: code:addons/website/static/src/builder/plugins/form/form_option.xml:0
 msgid "Audios"
 msgstr "Audio"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Aurora"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
@@ -4376,12 +4400,6 @@ msgstr "Kelompok Berwenang"
 #: code:addons/website/static/src/builder/plugins/theme/theme_font_weight_option.xml:0
 msgid "Auto"
 msgstr "Otomatis"
-
-#. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/builder/plugins/theme/theme_font_weight_option.xml:0
-msgid "Auto means it will inherit the parent value"
-msgstr "\"Auto\" berarti akan mewarisi value induknya"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_partner__publish_on
@@ -4793,6 +4811,12 @@ msgstr "Blog"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Bloom"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/social_media_option_plugin.js:0
 msgid "Bluesky"
 msgstr "Bluesky"
@@ -4803,6 +4827,12 @@ msgstr "Bluesky"
 #: code:addons/website/static/src/builder/plugins/theme/theme_shadow_option.xml:0
 msgid "Blur"
 msgstr "Blur"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Blush"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -5011,6 +5041,12 @@ msgstr "Link-Link Rusak"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Bronze"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
 msgid "Build my website"
 msgstr "Buat website saya"
@@ -5053,6 +5089,12 @@ msgstr "Dibuat agar tahan lama.<br/>Dirancang untuk menginspirasi."
 #: model:ir.model.fields,field_description:website.field_theme_ir_asset__bundle
 msgid "Bundle"
 msgstr "Bundel"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Burgundy"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -5218,6 +5260,12 @@ msgstr "Kamera"
 #: model:ir.model.fields,field_description:website.field_website_snippet_filter__can_publish
 msgid "Can Publish"
 msgstr "Dapat Dipublikasikan"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Candy"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -5664,12 +5712,6 @@ msgid "Children"
 msgstr "Turunan"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
-msgid "Choose a preset palette"
-msgstr "Pilih palet preset"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_frame
 msgid ""
 "Choose a vibrant image and write an inspiring paragraph about it. It does "
@@ -5711,6 +5753,12 @@ msgid "Circle"
 msgstr "Lingkaran"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Citron"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_manifesto
 msgid "Clarity"
 msgstr "Clarity"
@@ -5735,6 +5783,12 @@ msgid ""
 msgstr ""
 "Classic pizza with fresh mozzarella, San Marzano tomatoes, and basil leaves, "
 "drizzled with extra virgin olive oil."
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Clay"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -5858,6 +5912,18 @@ msgstr "Tutup obrolan"
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Closer Look"
 msgstr "Melihat Lebih Dekat"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Coast"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Cobalt"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -6296,6 +6362,12 @@ msgstr "Halaman Controller"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/theme/theme_font_weight_option.xml:0
+msgid "Controls the text's font weight. \"Auto\" inherits the parent value"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/xml/website.cookies_bar.xml:0
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid "Cookie Policy"
@@ -6395,6 +6467,12 @@ msgstr "Hak Cipta"
 #: model_terms:ir.ui.view,arch_db:website.footer_copyright_company_name
 msgid "Copyright &amp;copy;"
 msgstr "Hak Cipta &amp;copy;"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Coral"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features_grid
@@ -6607,6 +6685,12 @@ msgid "Creating solutions that drive growth and long-term value."
 msgstr "Membuat solusi yang mendorong pertumbuhan dan nilai jangka-panjang."
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Crimson"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_catalog
 msgid "Croissant"
 msgstr "Croissant"
@@ -6729,6 +6813,12 @@ msgstr "Alat Kustomisasi"
 #: model:ir.model.fields,field_description:website.field_theme_ir_ui_view__customize_show
 msgid "Customize Show"
 msgstr "Kustomisasi Show"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Cyan"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
@@ -6954,8 +7044,8 @@ msgstr "Default switch checkbox input"
 #. module: website
 #. odoo-python
 #: code:addons/website/models/website.py:0
-msgid "Default website changed"
-msgstr "Website default diubah"
+msgid "Default website changed to %(default_website_name)s."
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -7144,8 +7234,8 @@ msgid ""
 "Design is the intermediary between <strong>information</strong> and "
 "<strong>understanding</strong>"
 msgstr ""
-"Desain adalah perantara antara <strong>informasi</strong> dan <strong>"
-"pemahaman</strong>"
+"Desain adalah perantara antara <strong>informasi</strong> dan "
+"<strong>pemahaman</strong>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_services_pack
@@ -7719,6 +7809,12 @@ msgstr "Donat"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/options/popup_option_plugin.js:0
+msgid "Drag blocks here"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/components/dialog/edit_menu.xml:0
 msgid "Drag to the right to get a submenu"
 msgstr "Tarik menu ke kanan untuk mendapatkan sub-menu"
@@ -8025,6 +8121,12 @@ msgid "Either action_server_id or filter_id must be provided."
 msgstr "Baik action_server_id atau filter_id harus disediakan."
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Electric"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_odoo_menu
 msgid "Electronics"
 msgstr "Elektronik"
@@ -8067,8 +8169,8 @@ msgstr ""
 "Percantik tempat tinggal Anda dengan furnitur yang memadukan estetika modern "
 "dan pesona klasik, dirancang untuk menghadirkan kenyamanan dan keindahan di "
 "rumah Anda.\n"
-"                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"
-"<br/><br/><br/><br/><br/>"
+"                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/"
+"><br/><br/><br/><br/><br/>"
 
 #. module: website
 #. odoo-javascript
@@ -8094,6 +8196,18 @@ msgstr "Otomatisasi email"
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Embed Code"
 msgstr "Embed Kode"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Ember"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Emerald"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
@@ -8607,6 +8721,12 @@ msgstr "Tampilan Extension"
 #: model:ir.model.fields,field_description:website.field_website_page__xml_id
 msgid "External ID"
 msgstr "ID Eksternal"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "External ID can not be loaded: %(error)s (website: %(website_id)s)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -9161,6 +9281,12 @@ msgid "Footer Visible"
 msgstr "Visibilitas Footer"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Forest"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 #: model_terms:ir.ui.view,arch_db:website.s_form_aside
 #: model_terms:ir.ui.view,arch_db:website.s_title_form
@@ -9533,6 +9659,12 @@ msgstr "Kembali"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/interactions/website_auth_form.js:0
+msgid "Go back to the homepage"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/components/fields/redirect_field.xml:0
 msgid "Go to"
 msgstr "Pergi ke"
@@ -9611,6 +9743,15 @@ msgstr "Kunci API Google Maps"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/options/google_maps_option/google_maps_service.js:0
+#: code:addons/website/static/src/core/website_map_service.js:0
+msgid ""
+"Google Maps configuration has changed. Please reload the page for changes to "
+"take effect."
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/social_media_option_plugin.js:0
 #: model_terms:ir.ui.view,arch_db:website.s_cta_mobile
 msgid "Google Play"
@@ -9637,6 +9778,12 @@ msgstr "Google Tag Manager/Google Analytics"
 #: model:ir.model.fields,help:website.field_website__google_search_console
 msgid "Google key, or Enable to access first reply"
 msgstr "Kunci Google, atau Aktifkan untuk mengakses reply pertama"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Graphite"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -9695,6 +9842,12 @@ msgstr "Grup"
 #: model:ir.model.fields,field_description:website.field_website_page_properties__group_ids
 msgid "Groups"
 msgstr "Kelompok"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Grove"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_services_pack
@@ -9778,6 +9931,11 @@ msgstr "Happy Anniversary Odoo!"
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_lite
 msgid "Happy customers"
 msgstr "Pelanggan puas"
+
+#. module: website
+#: model:ir.model.fields,field_description:website.field_res_config_settings__has_cookie_policy
+msgid "Has Cookie Policy"
+msgstr ""
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_page_properties__has_parent_page
@@ -10255,6 +10413,12 @@ msgstr "Hybrid"
 #: model_terms:ir.ui.view,arch_db:website.cookies_bar
 msgid "I agree"
 msgstr "Saya setuju"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/form/utils.js:0
+msgid "I agree to the"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -11049,6 +11213,30 @@ msgid "Installing \"%s\""
 msgstr "Menginstal \"%s\""
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Installing Blog..."
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Installing Events..."
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Installing eCommerce..."
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Installing eLearning..."
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_services_pack
 msgid "Integrations"
 msgstr "Integrasi"
@@ -11090,7 +11278,8 @@ msgstr "Sistem Intuitive"
 #: code:addons/website/static/src/builder/plugins/options/google_maps_option/google_maps_service.js:0
 #: code:addons/website/static/src/core/website_map_service.js:0
 msgid "Invalid API Key. The following error was returned by Google: %(error)s"
-msgstr "API Key Tidak valid. Error berikut dikembalikkan oleh Google: %(error)s"
+msgstr ""
+"API Key Tidak valid. Error berikut dikembalikkan oleh Google: %(error)s"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_controller_page__invalid_locators
@@ -11150,6 +11339,12 @@ msgstr ""
 #: code:addons/website/static/src/builder/plugins/options/image_gallery_option.xml:0
 msgid "Inverted colors"
 msgstr "Inverted colors"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Iris"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team
@@ -11648,6 +11843,12 @@ msgid "Labels Width"
 msgstr "Lebar Label"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Lagoon"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_ecomm_categories_showcase
 msgid "Lamps"
 msgstr "Lampu"
@@ -12020,6 +12221,12 @@ msgid "Light & Dark"
 msgstr "Terang & Gelap"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Lilac"
+msgstr ""
+
+#. module: website
 #: model:ir.model.fields,field_description:website.field_website_snippet_filter__limit
 msgid "Limit"
 msgstr "Batas"
@@ -12192,6 +12399,12 @@ msgid "Logo"
 msgstr "Logo"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
+msgid "Logo colors"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_centered
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega_links
@@ -12232,6 +12445,12 @@ msgstr ""
 #: code:addons/website/static/src/builder/plugins/options/cover_properties_option.xml:0
 msgid "Low"
 msgstr "Rendah"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Luna"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_bento_grid_avatars
@@ -12622,6 +12841,12 @@ msgstr "Gabung Wizard Partner"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Merlot"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/countdown_option.xml:0
 msgid "Message + Timer"
 msgstr "Pesan + Timer"
@@ -12691,6 +12916,12 @@ msgstr "Middle"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Midnight"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/timeline_list_option.xml:0
 #: code:addons/website/static/src/builder/plugins/timeline_images_option.xml:0
 msgid "Milestones"
@@ -12731,6 +12962,18 @@ msgstr "Minimalis"
 #: code:addons/website/static/src/builder/plugins/options/age_verification_popup_option.xml:0
 msgid "Minimum Age"
 msgstr "Usia Minimum"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Mink"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Mint"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -13093,6 +13336,12 @@ msgstr ""
 "terdekat Anda."
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Neon"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_odoo_menu
 msgid "Networks"
 msgstr "Network"
@@ -13213,7 +13462,6 @@ msgstr "Notifikasi SMS Buletin"
 
 #. module: website
 #. odoo-javascript
-#: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
 #: code:addons/website/static/src/snippets/s_dynamic_snippet_carousel/000.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Next"
@@ -13875,6 +14123,12 @@ msgstr ""
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Orbit"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/avatars_option.xml:0
 msgid "Order"
 msgstr "Order"
@@ -14461,8 +14715,8 @@ msgid ""
 "Paragraph with <strong>bold</strong>, <span class=\"text-muted\">muted</"
 "span> and <em>italic</em> texts"
 msgstr ""
-"Paragraf dengan teks <strong>bold</strong>, <span class=\"text-muted\">"
-"muted</span> dan <em>italic</em>."
+"Paragraf dengan teks <strong>bold</strong>, <span class=\"text-"
+"muted\">muted</span> dan <em>italic</em>."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
@@ -14627,6 +14881,12 @@ msgstr "Pil-Pil"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Pine"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/social_media_option_plugin.js:0
 #: model_terms:ir.ui.view,arch_db:website.s_share
 msgid "Pinterest"
@@ -14643,8 +14903,8 @@ msgstr "Placeholder"
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/google_maps_option/google_maps_api_key_dialog.xml:0
-msgid "Places API"
-msgstr "Lokasi API"
+msgid "Places API (NEW)"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -14699,6 +14959,12 @@ msgid ""
 msgstr ""
 "Mohon isi formulir dengan tepat. File “%(fileName)s” terlalu besar. "
 "(Maksimum %(max)s MB)"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Plum"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -14901,6 +15167,7 @@ msgstr "Paket Harga"
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/countdown_option.xml:0
 #: code:addons/website/static/src/builder/plugins/options/header/header_font_option.xml:0
+#: code:addons/website/static/src/builder/plugins/theme/theme_colors_option.xml:0
 msgid "Primary"
 msgstr "Primer"
 
@@ -15920,6 +16187,12 @@ msgstr ""
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Rose"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/accordion_option.xml:0
 #: code:addons/website/static/src/builder/plugins/options/countdown_option.xml:0
 #: code:addons/website/static/src/builder/plugins/theme/theme_button_option.xml:0
@@ -15991,6 +16264,12 @@ msgstr "Baris × Kolom"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Ruby"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/components/resource_editor/resource_editor.js:0
 msgid "SCSS file: %s"
 msgstr "File SCSS: %s"
@@ -16029,6 +16308,18 @@ msgstr "Dioptimalkan SEO"
 msgid "SVG images are not supported. Please select a PNG, JPG, WEBP, or GIF"
 msgstr ""
 "Gambar SVG tidak didukung. Silakan pilih format PNG, JPG, WEBP, atau GIF"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Saffron"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Sage"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -16206,6 +16497,12 @@ msgstr "Mode Scrolling"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Seafoam"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/js/backend/view_hierarchy/hierarchy_navbar.xml:0
 #: code:addons/website/static/src/snippets/s_searchbar/000.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -16273,6 +16570,11 @@ msgid "Search within"
 msgstr "Cari di dalam"
 
 #. module: website
+#: model_terms:ir.ui.view,arch_db:website.website_search_box_input
+msgid "Search..."
+msgstr ""
+
+#. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/client_actions/configurator/configurator.js:0
 msgid "Searching your images..."
@@ -16323,6 +16625,7 @@ msgstr "Project kedua"
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/countdown_option.xml:0
 #: code:addons/website/static/src/builder/plugins/options/header/header_font_option.xml:0
+#: code:addons/website/static/src/builder/plugins/theme/theme_colors_option.xml:0
 msgid "Secondary"
 msgstr "Sekunder"
 
@@ -17013,6 +17316,12 @@ msgid "Skip and start from scratch"
 msgstr "Skip dan mulai dari awal"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Slate"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_list
 msgid "Sleek"
 msgstr "Sleek"
@@ -17469,6 +17778,12 @@ msgstr ""
 "beberapa minggu kedepan."
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Steel"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_picture
 msgid "Step Up Your Game"
 msgstr "Step Up Your Game"
@@ -17494,6 +17809,12 @@ msgstr "Langkah"
 #: code:addons/website/static/src/builder/plugins/options/table_of_content_option.xml:0
 msgid "Sticky"
 msgstr "Sticky"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Stone"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
@@ -17883,6 +18204,12 @@ msgid "Template fallback"
 msgstr "Fallback Template"
 
 #. module: website
+#. odoo-python
+#: code:addons/website/models/ir_ui_view.py:0
+msgid "Template not found: '%(error)s' (website: %(website_id)s)"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_utility_1_s_title_split
 msgid "Terms &amp; Conditions"
 msgstr "Syarat &amp; Ketentuan"
@@ -17903,6 +18230,12 @@ msgstr "Syarat Layanan"
 #: model_terms:ir.ui.view,arch_db:website.template_footer_contact
 msgid "Terms of Services"
 msgstr "Ketentuan Penggunaan Layanan"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Terra"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -18082,8 +18415,8 @@ msgstr ""
 msgid ""
 "The domain path cannot contain relative path segments like '/./' or '/../'."
 msgstr ""
-"Domain path tidak boleh memiliki relative path segment seperti '/./' or '/../"
-"'."
+"Domain path tidak boleh memiliki relative path segment seperti '/./' or "
+"'/../'."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_striped
@@ -18138,12 +18471,6 @@ msgstr ""
 #: code:addons/website/static/src/xml/website_form.xml:0
 msgid "The form has been sent successfully."
 msgstr "Formulir telah berhasil dikirim."
-
-#. module: website
-#. odoo-python
-#: code:addons/website/controllers/form.py:0
-msgid "The form's specified model does not exist"
-msgstr "Model spesifik untuk formulir tersebut tidak ada"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_ir_actions_server__website_url
@@ -18241,32 +18568,13 @@ msgstr "Jumlah karakter minimum yang diwajibkan."
 #: model:ir.model.fields,field_description:website.field_website_controller_page__name
 msgid ""
 "The name is used to generate the URL and is shown in the browser title bar"
-msgstr "Nama digunakan untuk membuat URL dan ditunjukkan di kolom judul browser"
+msgstr ""
+"Nama digunakan untuk membuat URL dan ditunjukkan di kolom judul browser"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_controller_page__name_slugified
 msgid "The name of the page usable in a URL"
 msgstr "Nama halaman yang dapat digunakan di URL"
-
-#. module: website
-#. odoo-python
-#: code:addons/website/models/website.py:0
-msgid "The new default website is %(default_website_name)s."
-msgstr "Website default yang baru adalah %(default_website_name)s."
-
-#. module: website
-#. odoo-python
-#: code:addons/website/models/website.py:0
-msgid ""
-"The new default website is %(default_website_name)s. The following default "
-"settings were copied from the old default website to the new one: %"
-"(transferred_settings)s. Note that these settings are still present on the "
-"old default website."
-msgstr ""
-"Website default yang baru adalah %(default_website_name)s. Pengaturan "
-"default berikut telah disalin dari website default lama ke yang baru: %"
-"(transferred_settings)s. Perhatikan bahwa pengaturan ini masih ada di "
-"website default lama."
 
 #. module: website
 #. odoo-python
@@ -18556,6 +18864,13 @@ msgid "This font is missing font weight"
 msgstr "Font ini tidak memiliki bobot font"
 
 #. module: website
+#. odoo-python
+#: code:addons/website/controllers/form.py:0
+msgid ""
+"This form cannot be submitted. Please contact the website administrator."
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "This is a \""
 msgstr "Ini adalah \""
@@ -18737,6 +19052,12 @@ msgstr "Partnership yang berkembang pesat semenjak 2021"
 #: code:addons/website/static/src/builder/plugins/options/mega_menu_option.xml:0
 msgid "Thumbnails"
 msgstr "Thumbnail"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Tide"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -19455,6 +19776,12 @@ msgstr "Unggah file zip yang berisi beberapa bobot untuk hasil terbaik."
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
+msgid "Upload your"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/form/form_option.xml:0
 #: model:ir.model.fields,field_description:website.field_theme_ir_attachment__url
 #: model:ir.model.fields,field_description:website.field_theme_website_menu__url
@@ -19575,12 +19902,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.theme_view_kanban
 msgid "Use this theme"
 msgstr "Gunakan tema ini"
-
-#. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
-msgid "Use your"
-msgstr "Gunakan"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_ir_model__website_form_key
@@ -19732,6 +20053,12 @@ msgstr ""
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Velvet"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/age_verification_popup_option.xml:0
 msgid "Verify"
 msgstr "Verifikasi"
@@ -19842,6 +20169,12 @@ msgstr "Tampilan yang menggunakan salinan saya"
 #: model:ir.model.fields,field_description:website.field_website_page__inherit_children_ids
 msgid "Views which inherit from this one"
 msgstr "Bagan yang diturunkan dari yang satu ini"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "Violet"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -20858,6 +21191,22 @@ msgstr "Website yang akan diterjemahkan"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/theme/theme_font_weight_option.js:0
+msgid ""
+"Weight for \"Bold\" in the text toolbar. Unless Font Weight is \"Auto\", "
+"only equal or heavier values are available."
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/theme/theme_font_weight_option.xml:0
+msgid ""
+"Weight for \"Light\" in the text toolbar. Unless Font Weight is \"Auto\", "
+"only equal or lighter values are available."
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/client_actions/website_preview/website_builder_action.xml:0
 msgid "Welcome to your"
 msgstr "Selamat datang ke"
@@ -21204,6 +21553,12 @@ msgstr "Anda tidak dapat menduplikat field ini."
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/builder/plugins/options/card_image_option_plugin.js:0
+msgid "You cannot duplicate this image."
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/options/timeline_list_option_plugin.js:0
 #: code:addons/website/static/src/builder/plugins/options/timeline_option_plugin.js:0
 #: code:addons/website/static/src/builder/plugins/timeline_images_option_plugin.js:0
@@ -21241,6 +21596,13 @@ msgstr "Anda tidak memiliki izin untuk mengedit record ini."
 msgid "You don't have the necessary access rights to access this dashboard."
 msgstr ""
 "Anda tidak memiliki hak ase yang diperlukan untuk mengakses dashboard ini."
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/website.py:0
+msgid ""
+"You don't have the necessary access rights to use the website configurator."
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -21573,7 +21935,8 @@ msgstr "otomatis"
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
 "awards, achievements, prizes, honors, recognition, list, accomplishments"
-msgstr "penghargaan, prestasi, hadiah, apresiasi, pengakuan, daftar, pencapaian"
+msgstr ""
+"penghargaan, prestasi, hadiah, apresiasi, pengakuan, daftar, pencapaian"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -21720,12 +22083,6 @@ msgstr "tutup"
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/highlight/highlight_configurator.xml:0
 msgid "color"
-msgstr "warna"
-
-#. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
-msgid "colors"
 msgstr "warna"
 
 #. module: website
@@ -22660,7 +23017,6 @@ msgstr ""
 
 #. module: website
 #. odoo-javascript
-#: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
 #: code:addons/website/static/src/components/dialog/add_page_dialog.xml:0
 msgid "or"
 msgstr "atau"
@@ -22938,7 +23294,8 @@ msgstr "scope.data.label"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "scrolling, depth, effect, background, layer, visual, movement, parallax"
-msgstr "scrolling, depth, effect, background, layer, visual, movement, parallax"
+msgstr ""
+"scrolling, depth, effect, background, layer, visual, movement, parallax"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -23263,3 +23620,44 @@ msgstr "✽  Pizzas"
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid "✽  What We Offer"
 msgstr "✽  What We Offer"
+
+#~ msgid "%(error)s (website: %(website_id)s)"
+#~ msgstr "%(error)s (website: %(website_id)s)"
+
+#~ msgid "The form's specified model does not exist"
+#~ msgstr "Model spesifik untuk formulir tersebut tidak ada"
+
+#~ msgid "Accounts are usable across all your multiple websites"
+#~ msgstr "Akun dapat digunakan di semua website-website Anda"
+
+#~ msgid "Auto means it will inherit the parent value"
+#~ msgstr "\"Auto\" berarti akan mewarisi value induknya"
+
+#~ msgid "Choose a preset palette"
+#~ msgstr "Pilih palet preset"
+
+#~ msgid "Default website changed"
+#~ msgstr "Website default diubah"
+
+#~ msgid "Places API"
+#~ msgstr "Lokasi API"
+
+#~ msgid "The new default website is %(default_website_name)s."
+#~ msgstr "Website default yang baru adalah %(default_website_name)s."
+
+#~ msgid ""
+#~ "The new default website is %(default_website_name)s. The following "
+#~ "default settings were copied from the old default website to the new one: "
+#~ "%(transferred_settings)s. Note that these settings are still present on "
+#~ "the old default website."
+#~ msgstr ""
+#~ "Website default yang baru adalah %(default_website_name)s. Pengaturan "
+#~ "default berikut telah disalin dari website default lama ke yang baru: %"
+#~ "(transferred_settings)s. Perhatikan bahwa pengaturan ini masih ada di "
+#~ "website default lama."
+
+#~ msgid "Use your"
+#~ msgstr "Gunakan"
+
+#~ msgid "colors"
+#~ msgstr "warna"

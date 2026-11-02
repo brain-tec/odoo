@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:39+0000\n"
+"POT-Creation-Date: 2026-10-30 17:39+0000\n"
 "PO-Revision-Date: 2026-08-31 19:28+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/odoo-"
@@ -78,7 +78,7 @@ msgstr "% do total da linha"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "%(count)s matches in %(sheetName)s"
+msgid "%(count)s matches in '%(sheetName)s'"
 msgstr ""
 
 #. module: spreadsheet
@@ -90,7 +90,7 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "%(count)s matches in range %(range)s of %(sheetName)s"
+msgid "%(count)s matches in range %(range)s of '%(sheetName)s'"
 msgstr ""
 
 #. module: spreadsheet
@@ -388,7 +388,13 @@ msgstr "1 coluna"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "1 match in %(sheetName)s"
+msgid "1 is hidden"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "1 match in '%(sheetName)s'"
 msgstr ""
 
 #. module: spreadsheet
@@ -400,7 +406,7 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "1 match in range %(range)s of %(sheetName)s"
+msgid "1 match in range %(range)s of '%(sheetName)s'"
 msgstr ""
 
 #. module: spreadsheet
@@ -497,7 +503,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "A flag specifying whether to compute the slope or not"
-msgstr "Um sinalizador que especifica se a inclinação deve ser calculada ou não"
+msgstr ""
+"Um sinalizador que especifica se a inclinação deve ser calculada ou não"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -525,7 +532,8 @@ msgstr "É necessário um valor limite mínimo de intervalo"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "A named range name cannot resemble a cell reference."
-msgstr "Um nome de intervalo não pode se assemelhar a uma referência de célula."
+msgstr ""
+"Um nome de intervalo não pode se assemelhar a uma referência de célula."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -651,7 +659,8 @@ msgstr "Um segmento de uma cadeia de caracteres."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "A series of interest rates to compound against the principal."
-msgstr "Uma série de taxas de juros a serem calculadas sobre o valor principal."
+msgstr ""
+"Uma série de taxas de juros a serem calculadas sobre o valor principal."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1371,7 +1380,8 @@ msgstr "Matriz ou intervalo que contém o conjunto de dados a ser considerado."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Array result was not expanded because it would overwrite data."
-msgstr "O resultado da matriz não foi expandido porque sobrescreveria os dados."
+msgstr ""
+"O resultado da matriz não foi expandido porque sobrescreveria os dados."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1802,7 +1812,8 @@ msgstr ""
 msgid ""
 "Calculates the sum of the difference of the squares of the values in two "
 "array."
-msgstr "Calcula a soma da diferença dos quadrados dos valores em duas matrizes."
+msgstr ""
+"Calcula a soma da diferença dos quadrados dos valores em duas matrizes."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1938,6 +1949,13 @@ msgstr "Não é possível ocultar todas as linhas de uma planilha."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Cannot open the link because the linked sheet is hidden."
 msgstr "Não é possível abrir o link porque a planilha vinculada está oculta."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid ""
+"Cannot perform this action on merged cells. Unmerge the cells and try again."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -2137,7 +2155,7 @@ msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
-#: code:addons/spreadsheet/static/src/chart/odoo_link/chart_menu.js:0
+#: code:addons/spreadsheet/static/src/chart/odoo_link/components/chart_menu.js:0
 msgid "Chart Odoo Link"
 msgstr ""
 
@@ -2593,7 +2611,7 @@ msgstr "Concatenação de dois valores."
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid "Concise formatxA0(default)"
+msgid "Concise format (default)"
 msgstr ""
 
 #. module: spreadsheet
@@ -4187,7 +4205,8 @@ msgstr "Fevereiro"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Field \"%s\" not found in pivot for measure display calculation"
-msgstr "Campo \"%s\" não encontrado no pivô para cálculo de exibição de medidas"
+msgstr ""
+"Campo \"%s\" não encontrado no pivô para cálculo de exibição de medidas"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -6737,6 +6756,12 @@ msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "No region is available"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 msgid "No results"
 msgstr ""
@@ -7771,6 +7796,12 @@ msgstr "Região"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid "Region %(region)s is not available"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Reject the input"
 msgstr "Rejeitar a entrada"
 
@@ -7925,6 +7956,12 @@ msgstr "Retorne itens que aparecem exatamente uma vez"
 #: code:addons/spreadsheet/static/src/pivot/pivot_functions.js:0
 msgid "Return the current value of a spreadsheet filter."
 msgstr "Retorna o valor atual de um filtro de planilha."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/pivot/pivot_functions.js:0
+msgid "Return the label of the current value of a spreadsheet filter."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -9545,7 +9582,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "The array or range containing the dataset to consider."
-msgstr "A matriz ou intervalo que contém o conjunto de dados a ser considerado."
+msgstr ""
+"A matriz ou intervalo que contém o conjunto de dados a ser considerado."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -9768,6 +9806,12 @@ msgstr "A definição do gráfico é inválida por um motivo desconhecido"
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "The chart is deactivated"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "The column index of the column to be returned."
 msgstr "O índice da coluna a ser retornada."
@@ -9877,7 +9921,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "The data points to return the y values for on the ideal curve fit."
-msgstr "Os pontos de dados para retornar os valores y no ajuste ideal da curva."
+msgstr ""
+"Os pontos de dados para retornar os valores y no ajuste ideal da curva."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -11523,7 +11568,8 @@ msgstr "Os periods_by_year (%s) devem ser estritamente positivos."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "The pivot cannot be created because cell %s contains a reserved value"
-msgstr "O pivô não pode ser criado porque a célula %s contém um valor reservado"
+msgstr ""
+"O pivô não pode ser criado porque a célula %s contém um valor reservado"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -13331,11 +13377,9 @@ msgstr "Esta operação não é permitida com múltiplas seleções."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
-"This operation is not possible due to a merge. Please remove the merges "
-"first than try again."
+"This operation would cause tables to overlap. Move or remove the conflicting "
+"table and try again."
 msgstr ""
-"Essa operação não é possível devido a uma mesclagem. Remova as mesclagens "
-"primeiro e tente novamente."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -14721,7 +14765,8 @@ msgstr "A [[FUNCTION_NAME]] espera que o peso seja positivo ou igual a 0."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "[[FUNCTION_NAME]] has mismatched argument count %s vs %s."
-msgstr "[[FUNCTION_NAME]] tem uma contagem de argumentos incompatível %s vs %s."
+msgstr ""
+"[[FUNCTION_NAME]] tem uma contagem de argumentos incompatível %s vs %s."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -15090,3 +15135,10 @@ msgstr "amanhã"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "yesterday"
 msgstr "ontem"
+
+#~ msgid ""
+#~ "This operation is not possible due to a merge. Please remove the merges "
+#~ "first than try again."
+#~ msgstr ""
+#~ "Essa operação não é possível devido a uma mesclagem. Remova as mesclagens "
+#~ "primeiro e tente novamente."

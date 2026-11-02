@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 16:46+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Hindi <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -39,8 +39,8 @@ msgstr ""
 "                    अभी तक कोई बैलेंस नहीं!\n"
 "                </p>\n"
 "                <p>\n"
-"                     <a type=\"action\" class=\"text-link\" name=\"%d\">"
-"छुट्टियां तय करकेf</a> क्यों न शुरुआत करें?\n"
+"                     <a type=\"action\" class=\"text-link\" "
+"name=\"%d\">छुट्टियां तय करकेf</a> क्यों न शुरुआत करें?\n"
 "                </p>\n"
 "            "
 
@@ -545,6 +545,11 @@ msgid ""
 msgstr ""
 
 #. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
+msgid "A supporting document is required for this type of time off."
+msgstr ""
+
+#. module: hr_holidays
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 msgid "A time off cannot be duplicated."
@@ -577,8 +582,7 @@ msgstr "आज की अनुपस्थिति"
 msgid ""
 "Absent Employee(s), Whose time off requests are either confirmed or "
 "validated on today"
-msgstr ""
-"अनुपस्थित कर्मचारी, जिनकी छुट्टी के अनुरोध आज के दिन के लिए कन्फ़र्म या मान्य हैं"
+msgstr "अनुपस्थित कर्मचारी, जिनकी छुट्टी के अनुरोध आज के दिन के लिए कन्फ़र्म या मान्य हैं"
 
 #. module: hr_holidays
 #: model:ir.actions.act_window,name:hr_holidays.hr_employee_action_from_department
@@ -985,8 +989,7 @@ msgstr "रकम"
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 msgid "An employee already booked time off which overlaps with this period:"
-msgstr ""
-"एक कर्मचारी ने पहले ही छुट्टी बुक कर ली है जो इस अवधि के साथ ओवरलैप हो रही है:"
+msgstr "एक कर्मचारी ने पहले ही छुट्टी बुक कर ली है जो इस अवधि के साथ ओवरलैप हो रही है:"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.report_holidayssummary
@@ -1205,22 +1208,22 @@ msgid "Both Approved and Confirmed"
 msgstr "मंज़ूरी और पुष्टि भी"
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__manager
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__manager
-msgid "By Employee's Approver"
-msgstr "कर्मचारी को मंज़ूरी देने वाले व्यक्ति के ज़रिए"
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__hr
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__hr
+msgid "By HR Responsible"
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__both
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__both
-msgid "By Employee's Approver and Time Off Officer"
-msgstr "कर्मचारी के मंज़ूरकर्ता और छुट्टी की मंज़ूरी देने वाले अधिकारी के ज़रिए"
+msgid "By HR Responsible and Time Off Approver"
+msgstr ""
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__hr
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__hr
-msgid "By Time Off Officer"
-msgstr "छुट्टी मंज़ूर करने वाले के ज़रिए"
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__allocation_validation_type__manager
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__leave_validation_type__manager
+msgid "By Time Off Approver"
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_work_entry_type__count_days_as__calendar
@@ -2324,6 +2327,14 @@ msgstr ""
 "बिना छिपाने की अनुमति देगा।"
 
 #. module: hr_holidays
+#: model:ir.model.fields,help:hr_holidays.field_hr_work_entry_type__create_calendar_meeting
+msgid ""
+"If this field is checked, every leave request of this type will have a "
+"corresponding entry in the calendar application. There will be no entry if "
+"this stays unchecked."
+msgstr ""
+
+#. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_work_entry_type__count_days_as
 msgid ""
 "If you take a leave on the whole week, worked days will result in a various "
@@ -2596,8 +2607,7 @@ msgstr "अधिकतम अतिरिक्त राशि"
 #: model:ir.model.fields,help:hr_holidays.field_hr_work_entry_type__virtual_remaining_leaves
 msgid ""
 "Maximum Time Off Allowed - Time Off Already Taken - Time Off Waiting Approval"
-msgstr ""
-"अधिकतम स्वीकृत छुट्टी - पहले ली गई छुट्टी - मंज़ूरी की प्रतीक्षा में छुट्टी"
+msgstr "अधिकतम स्वीकृत छुट्टी - पहले ली गई छुट्टी - मंज़ूरी की प्रतीक्षा में छुट्टी"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_level_view_form
@@ -3011,8 +3021,7 @@ msgstr "घंटों की संख्या"
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__number_of_days
 msgid "Number of days of the time off request. Used in the calculation."
-msgstr ""
-"छुट्टी (टाइम ऑफ) अनुरोध के दिनों की संख्या. इसका उपयोग गणना में होता है।"
+msgstr "छुट्टी (टाइम ऑफ) अनुरोध के दिनों की संख्या. इसका उपयोग गणना में होता है।"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__message_has_error_counter
@@ -3023,8 +3032,7 @@ msgstr "गड़बड़ी की संख्या"
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__number_of_hours
 msgid "Number of hours of the time off request. Used in the calculation."
-msgstr ""
-"छुट्टी (टाइम ऑफ) अनुरोध के घंटों की संख्या. इसका उपयोग गणना में होता है।"
+msgstr "छुट्टी (टाइम ऑफ) अनुरोध के घंटों की संख्या. इसका उपयोग गणना में होता है।"
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__message_needaction_counter
@@ -3118,8 +3126,7 @@ msgstr "सिर्फ़ एक मैनेजर ही रद्द की 
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 msgid "Only a time off Administrator can approve/refuse their own requests."
-msgstr ""
-"सिर्फ़ एक छुट्टी एडमिनिस्ट्रेटर ही अपने अनुरोधों को मंज़ूर/अस्वीकार कर सकते हैं।"
+msgstr "सिर्फ़ एक छुट्टी एडमिनिस्ट्रेटर ही अपने अनुरोधों को मंज़ूर/अस्वीकार कर सकते हैं।"
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__is_based_on_worked_time
@@ -3202,6 +3209,8 @@ msgstr ""
 
 #. module: hr_holidays
 #. odoo-javascript
+#. odoo-python
+#: code:addons/hr_holidays/models/resource_calendar.py:0
 #: code:addons/hr_holidays/static/src/views/calendar/calendar_side_panel/calendar_side_panel.xml:0
 #: model:ir.actions.act_window,name:hr_holidays.open_view_public_holiday
 #: model:ir.actions.act_window,name:hr_holidays.resource_calendar_global_leaves_action_from_calendar
@@ -3216,8 +3225,7 @@ msgstr "सार्वजनिक छुट्टियां"
 #: model_terms:ir.actions.act_window,help:hr_holidays.open_view_public_holiday
 msgid ""
 "Public Holidays are non-working days that don't impact employees' balances"
-msgstr ""
-"सार्वजनिक छुट्टियां काम के दिन नहीं होते और इनसे कर्मचारी का बैलेंस कम नहीं होता"
+msgstr "सार्वजनिक छुट्टियां काम के दिन नहीं होते और इनसे कर्मचारी का बैलेंस कम नहीं होता"
 
 #. module: hr_holidays
 #. odoo-python
@@ -3530,8 +3538,8 @@ msgstr "शुरुआती समय के डेल्टा (अंतर)
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__postpone_max_days
 msgid "Set a maximum of accruals an allocation keeps at the end of the year."
 msgstr ""
-"तय करें कि साल खत्म होने पर आवंटन में ज़्यादा से ज़्यादा जमा की गई कितनी छुट्टियां रखी जाएंगी"
-"।"
+"तय करें कि साल खत्म होने पर आवंटन में ज़्यादा से ज़्यादा जमा की गई कितनी छुट्टियां रखी "
+"जाएंगी।"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_level_view_form
@@ -3801,8 +3809,8 @@ msgstr ""
 #: model:ir.model.constraint,message:hr_holidays.constraint_hr_leave_date_check3
 msgid "The request start date must be before or equal to the request end date."
 msgstr ""
-"अनुरोध की शुरुआत की तारीख अनुरोध की समाप्ति की तारीख से पहले या उसके बराबर होनी चाहिए"
-"।"
+"अनुरोध की शुरुआत की तारीख अनुरोध की समाप्ति की तारीख से पहले या उसके बराबर होनी "
+"चाहिए।"
 
 #. module: hr_holidays
 #: model:ir.model.constraint,message:hr_holidays.constraint_hr_leave_mandatory_day_date_from_after_day_to
@@ -3918,14 +3926,12 @@ msgstr ""
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__accrual_validity_type
 msgid "This field defines the unit of time after which the accrual ends."
-msgstr ""
-"यह फ़ील्ड समय की वह इकाई तय करता है जिसके बाद उपार्जन (अक्रूअल) खत्म होगा।"
+msgstr "यह फ़ील्ड समय की वह इकाई तय करता है जिसके बाद उपार्जन (अक्रूअल) खत्म होगा।"
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__start_type
 msgid "This field defines the unit of time after which the accrual starts."
-msgstr ""
-"यह फ़ील्ड समय की वह इकाई तय करता है जिसके बाद उपार्जन (अक्रूअल) शुरू होता है।"
+msgstr "यह फ़ील्ड समय की वह इकाई तय करता है जिसके बाद उपार्जन (अक्रूअल) शुरू होता है।"
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_work_entry_type__has_valid_allocation
@@ -4320,8 +4326,7 @@ msgstr "साल में दो बार"
 #: code:addons/hr_holidays/models/resource_calendar_leaves.py:0
 msgid ""
 "Two public holidays cannot overlap each other for the same working hours."
-msgstr ""
-"दो सार्वजनिक छुट्टियाँ एक ही काम के घंटों के लिए एक-दूसरे से ओवरलैप नहीं हो सकतीं।"
+msgstr "दो सार्वजनिक छुट्टियाँ एक ही काम के घंटों के लिए एक-दूसरे से ओवरलैप नहीं हो सकतीं।"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_employee_report_filter
@@ -4558,8 +4563,7 @@ msgstr "बुधवार"
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave_accrual_plan_level.py:0
 msgid "Weekday must be selected to use the frequency weekly"
-msgstr ""
-"फ़्रीक्वेंसी 'साप्ताहिक' उपयोग करने के लिए सप्ताह का दिन चुनना ज़रूरी है"
+msgstr "फ़्रीक्वेंसी 'साप्ताहिक' उपयोग करने के लिए सप्ताह का दिन चुनना ज़रूरी है"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__frequency__weekly
@@ -4718,8 +4722,7 @@ msgstr ""
 msgid ""
 "You can create a new allocation or follow the approval status of the current "
 "ones."
-msgstr ""
-"आप नया आवंटन बनाएं या मौजूदा आवंटनों की मंज़ूरी की स्थिति को फ़ॉलो करें।"
+msgstr "आप नया आवंटन बनाएं या मौजूदा आवंटनों की मंज़ूरी की स्थिति को फ़ॉलो करें।"
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__accrual_validity_count
@@ -4749,16 +4752,14 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 msgid "You can only validate a leave with validation by Time Off Manager."
-msgstr ""
-"आप सिर्फ़ छुट्टी मैनेजर द्वारा सत्यापन वाली छुट्टी को ही मान्य कर सकते हैं।"
+msgstr "आप सिर्फ़ छुट्टी मैनेजर द्वारा सत्यापन वाली छुट्टी को ही मान्य कर सकते हैं।"
 
 #. module: hr_holidays
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 msgid ""
 "You can only validate an allocation with validation by Time Off Manager."
-msgstr ""
-"आप सिर्फ़ छुट्टी मैनेजर द्वारा सत्यापन वाले आवंटन को ही मान्य कर सकते हैं।"
+msgstr "आप सिर्फ़ छुट्टी मैनेजर द्वारा सत्यापन वाले आवंटन को ही मान्य कर सकते हैं।"
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -4852,8 +4853,7 @@ msgstr "आप इस छुट्टी को मंज़ूर नहीं 
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 msgid ""
 "You cannot delete an allocation request which has some validated leaves."
-msgstr ""
-"आपके पास कुछ स्वीकृत छुट्टियां हैं. इसलिए, आप छुट्टी के अनुरोध को हटा नहीं सकते हैं।"
+msgstr "आपके पास कुछ स्वीकृत छुट्टियां हैं. इसलिए, आप छुट्टी के अनुरोध को हटा नहीं सकते हैं।"
 
 #. module: hr_holidays
 #. odoo-python
@@ -4882,8 +4882,7 @@ msgstr ""
 msgid ""
 "You cannot have a cap on yearly accrued time without setting a maximum "
 "amount."
-msgstr ""
-"आप अधिकतम राशि तय किए बिना सालाना जमा हुए समय की कोई सीमा नहीं रख सकते हैं।"
+msgstr "आप अधिकतम राशि तय किए बिना सालाना जमा हुए समय की कोई सीमा नहीं रख सकते हैं।"
 
 #. module: hr_holidays
 #: model:ir.model.constraint,message:hr_holidays.constraint_hr_leave_accrual_level_valid_postpone_max_days_value
@@ -5294,6 +5293,15 @@ msgstr "मान्य"
 #: code:addons/hr_holidays/static/src/components/accrual_level/accrual_levels.js:0
 msgid "year(s)"
 msgstr ""
+
+#~ msgid "By Employee's Approver"
+#~ msgstr "कर्मचारी को मंज़ूरी देने वाले व्यक्ति के ज़रिए"
+
+#~ msgid "By Employee's Approver and Time Off Officer"
+#~ msgstr "कर्मचारी के मंज़ूरकर्ता और छुट्टी की मंज़ूरी देने वाले अधिकारी के ज़रिए"
+
+#~ msgid "By Time Off Officer"
+#~ msgstr "छुट्टी मंज़ूर करने वाले के ज़रिए"
 
 #~ msgid "There is no valid allocation to cover that request."
 #~ msgstr "उस अनुरोध को कवर करने के लिए कोई मान्य आवंटन नहीं है।"

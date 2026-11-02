@@ -19,7 +19,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-10 17:37+0000\n"
+"POT-Creation-Date: 2026-10-30 17:37+0000\n"
 "PO-Revision-Date: 2026-09-07 14:11+0000\n"
 "Last-Translator: \"Larissa Manderfeld (lman)\" <lman@odoo.com>\n"
 "Language-Team: German <https://translate.odoo.com/projects/odoo-s19-4/mail/"
@@ -228,8 +228,8 @@ msgstr ""
 #: code:addons/mail/static/src/core/common/message_reaction_list.js:0
 msgid "%(emoji)s reacted by %(person1)s, %(person2)s, %(person3)s, and 1 other"
 msgstr ""
-"%(person1)s, %(person2)s, %(person3)s und 1 weitere Person haben mit %(emoji)"
-"s reagiert"
+"%(person1)s, %(person2)s, %(person3)s und 1 weitere Person haben mit %"
+"(emoji)s reagiert"
 
 #. module: mail
 #. odoo-javascript
@@ -319,8 +319,8 @@ msgstr ""
 "zu erwähnen%(new_line)s%(bold_start)s@Rolle%(bold_end)s, um mehrere Personen "
 "zu benachrichtigen%(new_line)s%(bold_start)s/Befehl%(bold_end)s, um einen "
 "Befehl auszuführen%(new_line)s%(bold_start)s::Kürzel%(bold_end)s, um eine "
-"vorgefertigte Antwort einzufügen%(new_line)s%(bold_start)s:Emoji:%(bold_end)"
-"s, um ein Emoji einzufügen"
+"vorgefertigte Antwort einzufügen%(new_line)s%(bold_start)s:Emoji:%"
+"(bold_end)s, um ein Emoji einzufügen"
 
 #. module: mail
 #. odoo-javascript
@@ -397,8 +397,8 @@ msgid ""
 "%(user_name)s has invited you to the %(strong_start)s%(channel_name)s%"
 "(strong_end)s channel."
 msgstr ""
-"%(user_name)s hat Sie zum Kanal %(strong_start)s%(channel_name)s%(strong_end)"
-"s eingeladen."
+"%(user_name)s hat Sie zum Kanal %(strong_start)s%(channel_name)s%"
+"(strong_end)s eingeladen."
 
 #. module: mail
 #. odoo-python
@@ -783,8 +783,8 @@ msgid ""
 "notify someone with <i>'@'</i>. Start your message with <i>'/'</i> to get "
 "the list of possible commands.</p>"
 msgstr ""
-"<p><b>Schreiben Sie eine Nachricht</b> an die Mitglieder des Kanals.</p> <p>"
-"Sie können jemanden mit <i>„@“</i> benachrichtigen. Beginnen Sie Ihre "
+"<p><b>Schreiben Sie eine Nachricht</b> an die Mitglieder des Kanals.</p> "
+"<p>Sie können jemanden mit <i>„@“</i> benachrichtigen. Beginnen Sie Ihre "
 "Nachricht mit <i>„/“</i>, um die Liste der möglichen Befehle anzuzeigen.</p>"
 
 #. module: mail
@@ -1107,7 +1107,8 @@ msgstr "Eine Rolle mit demselben Namen existiert bereits."
 #. odoo-python
 #: code:addons/mail/wizard/mail_compose_message.py:0
 msgid "A scheduled date is needed to schedule a message"
-msgstr "Um eine Nachricht zu planen, muss ein geplantes Datum angegeben werden."
+msgstr ""
+"Um eine Nachricht zu planen, muss ein geplantes Datum angegeben werden."
 
 #. module: mail
 #. odoo-python
@@ -1269,6 +1270,7 @@ msgstr "Standardmäßig aktiviert beim Abonnieren."
 #: model:ir.model.fields,field_description:mail.field_discuss_channel__active
 #: model:ir.model.fields,field_description:mail.field_fetchmail_server__active
 #: model:ir.model.fields,field_description:mail.field_ir_access__active
+#: model:ir.model.fields,field_description:mail.field_ir_cron__active
 #: model:ir.model.fields,field_description:mail.field_mail_activity__active
 #: model:ir.model.fields,field_description:mail.field_mail_activity_plan__active
 #: model:ir.model.fields,field_description:mail.field_mail_activity_type__active
@@ -1462,8 +1464,8 @@ msgid ""
 msgstr ""
 "Aktivitätspläne werden verwendet, um eine Liste von Aktivitäten mit nur "
 "wenigen Klicks zuzuweisen\n"
-"                    (z. B. „Einführung“, „Verfolgung potenzieller Kunden“, „"
-"Meeting für Projektmeilensteine“ ...)"
+"                    (z. B. „Einführung“, „Verfolgung potenzieller Kunden“, "
+"„Meeting für Projektmeilensteine“ ...)"
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_activity_schedule
@@ -1789,8 +1791,8 @@ msgid ""
 "(parent_model_name)s."
 msgstr ""
 "Alias %(matching_name)s (%(current_id)s) ist schon mit %(alias_model_name)s "
-"(%(matching_id)s) verknüpft und wird von %(parent_name)s %(parent_model_name)"
-"s verwendet."
+"(%(matching_id)s) verknüpft und wird von %(parent_name)s %"
+"(parent_model_name)s verwendet."
 
 #. module: mail
 #. odoo-python
@@ -1946,7 +1948,8 @@ msgstr "Eine E-Mail wird benötigt, damit find_or_create funktioniert"
 #. module: mail
 #: model:ir.model.constraint,message:mail.constraint_mail_poll_unique_end_message_id
 msgid "An end message can only be linked to one poll."
-msgstr "Eine Abschlussnachricht kann nur mit einer Abstimmung verknüpft werden."
+msgstr ""
+"Eine Abschlussnachricht kann nur mit einer Abstimmung verknüpft werden."
 
 #. module: mail
 #. odoo-javascript
@@ -3003,12 +3006,6 @@ msgstr ""
 #: code:addons/mail/models/mail_activity.py:0
 msgid "Cannot search, too many activities"
 msgstr "Suche nicht möglich, zu viele Aktivitäten"
-
-#. module: mail
-#. odoo-python
-#: code:addons/mail/models/mail_message.py:0
-msgid "Cannot search, too many messages"
-msgstr "Suche nicht möglich, zu viele Nachrichten"
 
 #. module: mail
 #. odoo-python
@@ -4330,9 +4327,9 @@ msgid ""
 "'notifications@example.com' to override all outgoing emails."
 msgstr ""
 "Standardwert, wenn er nicht mit den Filtern des Ausgangsservers "
-"übereinstimmt. Kann entweder ein lokaler Teil sein, z.B. „Benachrichtigungen"
-"“ oder eine vollständige E-Mail-Adresse, z.B. „"
-"benachrichtigungen@beispiel.com“, um alle ausgehenden E-Mails zu "
+"übereinstimmt. Kann entweder ein lokaler Teil sein, z.B. "
+"„Benachrichtigungen“ oder eine vollständige E-Mail-Adresse, z.B. "
+"„benachrichtigungen@beispiel.com“, um alle ausgehenden E-Mails zu "
 "überschreiben."
 
 #. module: mail
@@ -4745,7 +4742,8 @@ msgstr "Möchten Sie, dass andere Sie im Meeting hören können?"
 #. odoo-javascript
 #: code:addons/mail/static/src/discuss/call/common/call_preview.xml:0
 msgid "Do you want people to see and hear you in the meeting?"
-msgstr "Möchten Sie, dass die Teilnehmer Sie im Meeting sehen und hören können?"
+msgstr ""
+"Möchten Sie, dass die Teilnehmer Sie im Meeting sehen und hören können?"
 
 #. module: mail
 #. odoo-javascript
@@ -5877,7 +5875,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/mail/models/mail_tracking_duration_mixin.py:0
 msgid "For performance reasons, use \"=\" operators on rotting fields."
-msgstr "Verwenden Sie aus Leistungsgründen den Operator „=“ in Verfallsfeldern."
+msgstr ""
+"Verwenden Sie aus Leistungsgründen den Operator „=“ in Verfallsfeldern."
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_template__email_layout_force_footer
@@ -7334,8 +7333,8 @@ msgid ""
 "- auth: The auth value should be treated as a secret and not shared outside "
 "of Odoo"
 msgstr ""
-"Bezieht sich auf die von der Benachrichtigung verwendeten Browserschlüssel: "
-"\n"
+"Bezieht sich auf die von der Benachrichtigung verwendeten "
+"Browserschlüssel: \n"
 "- p256dh: Dies ist der öffentliche Schlüssel des Abonnements, der vom "
 "Browser erzeugt wurde. Der Browser\n"
 "          hält den privaten Schlüssel geheim und verwendet ihn zum "
@@ -7494,6 +7493,11 @@ msgstr "LIVE"
 #: model:ir.model.fields,field_description:mail.field_mail_template__lang
 msgid "Language"
 msgstr "Sprache"
+
+#. module: mail
+#: model:ir.model.fields,help:mail.field_mail_message_translation__target_lang
+msgid "Language code used as the target for the translation request."
+msgstr ""
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_discuss_channel__last_interest_dt
@@ -9631,8 +9635,8 @@ msgid ""
 "Only messages type comment can have their content updated on model "
 "'discuss.channel'"
 msgstr ""
-"Nur bei Nachrichten vom Typ Kommentar kann der Inhalt im Modell „"
-"discuss.channel“ aktualisiert werden."
+"Nur bei Nachrichten vom Typ Kommentar kann der Inhalt im Modell "
+"„discuss.channel“ aktualisiert werden."
 
 #. module: mail
 #: model:ir.model.constraint,message:mail.constraint_ir_attachment_mail_call_artifact_uniq
@@ -9806,8 +9810,8 @@ msgstr ""
 "Optionale Übersetzungssprache (ISO-Code), die beim Versenden einer E-Mail "
 "ausgewählt werden kann. Wenn keine Einstellung vorgenommen wird, wird die "
 "Hauptsprache des Partners verwendet. In der Regel sollte dies ein "
-"Platzhalterausdruck sein, der die entsprechende Sprache angibt, z. B. {{ "
-"object.partner_id.lang }}."
+"Platzhalterausdruck sein, der die entsprechende Sprache angibt, z. B. "
+"{{ object.partner_id.lang }}."
 
 #. module: mail
 #. odoo-javascript
@@ -10511,6 +10515,12 @@ msgid "Pop out Attachments"
 msgstr "Pop-out-Anhänge"
 
 #. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/core/common/attachment_view.js:0
+msgid "Pop out is not supported on mobile."
+msgstr ""
+
+#. module: mail
 #: model:ir.model.fields,field_description:mail.field_fetchmail_server__port
 msgid "Port"
 msgstr "Port"
@@ -10645,8 +10655,8 @@ msgid ""
 "(close_cancel)s%(close_em)s, %(open_samp)s%(save_keyboard_shortcut)s%"
 "(close_samp)s %(open_em)sto %(open_save)ssave%(close_save)s%(close_em)s"
 msgstr ""
-"Drücken Sie %(open_samp)sESC%(close_samp)s %(open_em)s, um %(open_cancel)"
-"sabzubrechen%(close_cancel)s%(close_em)s, %(open_samp)s%"
+"Drücken Sie %(open_samp)sESC%(close_samp)s %(open_em)s, um %"
+"(open_cancel)sabzubrechen%(close_cancel)s%(close_em)s, %(open_samp)s%"
 "(save_keyboard_shortcut)s%(close_samp)s %(open_em)s , um %(open_save)szu "
 "speichern%(close_save)s%(close_em)s"
 
@@ -11720,6 +11730,12 @@ msgstr "Posteingangsserver suchen"
 
 #. module: mail
 #. odoo-javascript
+#: code:addons/mail/static/src/discuss/gif_picker/common/gif_picker.xml:0
+msgid "Search Klipy"
+msgstr ""
+
+#. module: mail
+#. odoo-javascript
 #: code:addons/mail/static/src/chatter/web/chatter.xml:0
 #: code:addons/mail/static/src/core/common/search_messages_panel.js:0
 #: code:addons/mail/static/src/core/common/thread_actions.js:0
@@ -11750,12 +11766,6 @@ msgstr "Nach Name suchen"
 #: code:addons/mail/static/src/discuss/core/public_web/discuss_command_palette.js:0
 msgid "Search conversations"
 msgstr "Unterhaltungen suchen"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/discuss/gif_picker/common/gif_picker.xml:0
-msgid "Search for a GIF"
-msgstr "Nach einem GIF suchen"
 
 #. module: mail
 #. odoo-javascript
@@ -11918,8 +11928,8 @@ msgstr "Selbst ausgewählt"
 #: code:addons/mail/wizard/mail_activity_schedule.py:0
 msgid "Selected user '%(user)s' cannot upload documents on model '%(model)s'"
 msgstr ""
-"Der ausgewählte Benutzer „%(user)s“ kann keine Dokumente im Modell „%(model)s"
-"“ hochladen"
+"Der ausgewählte Benutzer „%(user)s“ kann keine Dokumente im Modell „%"
+"(model)s“ hochladen"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_discuss_channel__self_member_id
@@ -12289,13 +12299,6 @@ msgstr "Mit allen Benutzern geteilt"
 #: model:ir.model.fields,field_description:mail.field_mail_canned_response__source
 msgid "Shortcut"
 msgstr "Abkürzung"
-
-#. module: mail
-#: model:ir.model.fields,help:mail.field_mail_message_translation__target_lang
-msgid "Shortened language code used as the target for the translation request."
-msgstr ""
-"Verkürzter Sprachcode, der als Ziel für die Übersetzungsanfrage verwendet "
-"wird."
 
 #. module: mail
 #. odoo-javascript
@@ -13073,7 +13076,8 @@ msgstr "Der Endpunkt muss eindeutig sein!"
 #. odoo-python
 #: code:addons/mail/models/mail_activity_plan_template.py:0
 msgid "The field \"%(field_name)s\" must be related to the res.users model."
-msgstr "Das Feld „%(field_name)s“ muss mit dem Modell res.users verknüpft sein."
+msgstr ""
+"Das Feld „%(field_name)s“ muss mit dem Modell res.users verknüpft sein."
 
 #. module: mail
 #. odoo-python
@@ -13304,7 +13308,8 @@ msgstr "Der Server „%s“ kann nicht verwendet werden, da er archiviert ist."
 #: model:ir.model.fields,help:mail.field_mail_mail__preview
 #: model:ir.model.fields,help:mail.field_mail_message__preview
 msgid "The text-only beginning of the body used as email preview."
-msgstr "Der Nur-Text-Anfang des Textes, der als E-Mail-Vorschau verwendet wird."
+msgstr ""
+"Der Nur-Text-Anfang des Textes, der als E-Mail-Vorschau verwendet wird."
 
 #. module: mail
 #. odoo-javascript
@@ -13836,6 +13841,14 @@ msgid "Tomorrow:"
 msgstr "Morgen:"
 
 #. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_message.py:0
+msgid ""
+"Too many messages to be processed.\n"
+"Please apply additional filters to reduce the number of potential messages."
+msgstr ""
+
+#. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.discuss_channel_view_search
 msgid "Topic"
 msgstr "Thema"
@@ -13875,7 +13888,8 @@ msgstr "Nachrichten übersetzen"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
 msgid "Translate customer messages using the Google Translate API"
-msgstr "Übersetzen Sie Kundennachrichten mithilfe der API von Google Translate."
+msgstr ""
+"Übersetzen Sie Kundennachrichten mithilfe der API von Google Translate."
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_message_translation__body
@@ -15442,6 +15456,14 @@ msgstr ""
 #. odoo-python
 #: code:addons/mail/models/discuss/discuss_channel.py:0
 msgid ""
+"You do not have the rights to change the name, description or avatar as a "
+"regular member of these read-only channels: %(channels)s."
+msgstr ""
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/discuss/discuss_channel.py:0
+msgid ""
 "You do not have the rights to change the read-only state of: %(channels)s."
 msgstr ""
 "Sie haben keine Berechtigung, den schreibgeschützten Status von %(channels)s "
@@ -15729,12 +15751,6 @@ msgid "created this channel."
 msgstr "hat diesen Kanal erstellt."
 
 #. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/js/rotting_mixin/rotting_statusbar.xml:0
-msgid "d"
-msgstr "T"
-
-#. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.account_security_alert
 msgid "day, month dd, yyyy - hh:mm:ss (GMT)"
 msgstr "Tag, Monat tt, jjjj - hh:mm:ss (GMT)"
@@ -15817,8 +15833,8 @@ msgstr "z. B. „Begrüßungs-E-Mail“"
 msgid ""
 "e.g. \"Welcome to MyCompany\" or \"Nice to meet you, {{ object.name }}\""
 msgstr ""
-"z. B. „Willkommen bei MeinUnternehmen“ oder „Schön, Sie kennenzulernen, {{ "
-"object.name }}“"
+"z. B. „Willkommen bei MeinUnternehmen“ oder „Schön, Sie kennenzulernen, "
+"{{ object.name }}“"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_alias_domain_view_form
@@ -16313,6 +16329,21 @@ msgstr "„%(member_name)s“ in „%(channel_name)s“"
 #: code:addons/mail/models/mail_canned_response.py:0
 msgid "🔒 Private"
 msgstr "🔒 Privat"
+
+#~ msgid "Cannot search, too many messages"
+#~ msgstr "Suche nicht möglich, zu viele Nachrichten"
+
+#~ msgid ""
+#~ "Shortened language code used as the target for the translation request."
+#~ msgstr ""
+#~ "Verkürzter Sprachcode, der als Ziel für die Übersetzungsanfrage verwendet "
+#~ "wird."
+
+#~ msgid "d"
+#~ msgstr "T"
+
+#~ msgid "Search for a GIF"
+#~ msgstr "Nach einem GIF suchen"
 
 #~ msgid ""
 #~ "Add a Tenor GIF API key to enable GIFs support. https://"

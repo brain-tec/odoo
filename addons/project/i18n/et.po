@@ -30,7 +30,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-10 17:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 17:43+0000\n"
 "Last-Translator: Erik Köster <erik@officeplus.ee>\n"
 "Language-Team: Estonian <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -41,11 +41,6 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 2026.8.1\n"
-
-#. module: project
-#: model:ir.model.fields.selection,name:project.selection__project_project__privacy_visibility__portal
-msgid " All internal users and invited portal users"
-msgstr " Kõik ettevõttesisesed kasutajad ja kutsutud portaalikasutajad"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__rating_count
@@ -286,16 +281,16 @@ msgid ""
 "            "
 msgstr ""
 "<div>\n"
-"    <t t-set=\"access_token\" t-value=\"object._rating_get_access_token()\"/>"
-"\n"
+"    <t t-set=\"access_token\" t-value=\"object._rating_get_access_token()\"/"
+">\n"
 "    <t t-set=\"partner\" t-value=\"object._rating_get_partner()\"/>\n"
 "    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
 "style=\"width:100%; margin:0px auto;\">\n"
 "    <tbody>\n"
 "        <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
 "            <t t-if=\"partner.name\">\n"
-"                Tere <t t-out=\"partner.name or ''\">Brandon Freeman</t>"
-",<br/><br/>\n"
+"                Tere <t t-out=\"partner.name or ''\">Brandon Freeman</t>,<br/"
+"><br/>\n"
 "            </t>\n"
 "            <t t-else=\"\">\n"
 "                Tere,<br/><br/>\n"
@@ -304,8 +299,9 @@ msgstr ""
 "t-out=\"object.name or ''\">planeerimise ja eelarvestamise</strong> "
 "ülesandega,\n"
 "            <t t-if=\"object._rating_get_operator().name\">\n"
-"                mis on määratud <strong t-out=\"object._rating_get_operator()"
-".name or ''\">Mitchell Admin</strong>.<br/>\n"
+"                mis on määratud <strong t-"
+"out=\"object._rating_get_operator().name or ''\">Mitchell Admin</strong>.<br/"
+">\n"
 "            </t>\n"
 "            <t t-else=\"\">\n"
 "                .<br/>\n"
@@ -373,19 +369,19 @@ msgstr ""
 "t>\n"
 "        </td></tr>\n"
 "        <tr><td style=\"opacity: 0.5;\">\n"
-"            <t t-out=\"object.project_id.company_id.phone or ''\">1 650-123-"
-"4567</t>\n"
+"            <t t-out=\"object.project_id.company_id.phone or ''\">1 "
+"650-123-4567</t>\n"
 "            <t t-if=\"object.project_id.company_id.email\">\n"
-"                | <a t-attf-href=\"mailto:{{ "
-"object.project_id.company_id.email }}\" style=\"text-decoration:none; color: "
-"#454748;\" t-out=\"object.project_id.company_id.email or ''\">"
-"info@yourcompany.com</a>\n"
+"                | <a t-attf-href=\"mailto:"
+"{{ object.project_id.company_id.email }}\" style=\"text-decoration:none; "
+"color: #454748;\" t-out=\"object.project_id.company_id.email or "
+"''\">info@yourcompany.com</a>\n"
 "            </t>\n"
 "            <t t-if=\"object.project_id.company_id.website\">\n"
 "                | <a t-attf-href=\"{{ object.project_id.company_id.website }}"
 "\" style=\"text-decoration:none; color: #454748;\" t-"
-"out=\"object.project_id.company_id.website or ''\">http://www.example.com</a>"
-"\n"
+"out=\"object.project_id.company_id.website or ''\">http://www.example.com</"
+"a>\n"
 "            </t>\n"
 "        </td></tr>\n"
 "    </tbody>\n"
@@ -996,6 +992,11 @@ msgid "All internal users"
 msgstr "Kõik ettevõttesisesed kasutajad"
 
 #. module: project
+#: model:ir.model.fields.selection,name:project.selection__project_project__privacy_visibility__portal
+msgid "All internal users and invited portal users"
+msgstr ""
+
+#. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__allocated_hours
 #: model:ir.model.fields,field_description:project.field_project_task_burndown_chart_report__allocated_hours
 msgid "Allocated Time"
@@ -1591,7 +1592,8 @@ msgstr "Kaanepilt"
 #: code:addons/project/static/src/js/tours/project.js:0
 msgid ""
 "Create <b>activities</b> to set yourself to-dos or to schedule meetings."
-msgstr "Loo <b>tegevused</b> , et planeerida endale ülesandeid või koosolekuid."
+msgstr ""
+"Loo <b>tegevused</b> , et planeerida endale ülesandeid või koosolekuid."
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_report_project_task_user__create_date
@@ -2318,6 +2320,7 @@ msgid "Future"
 msgstr "Tulevik"
 
 #. module: project
+#: model_terms:ir.ui.view,arch_db:project.project_update_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "Future Activities"
@@ -2801,6 +2804,7 @@ msgid "Last Updated on"
 msgstr "Viimati uuendatud"
 
 #. module: project
+#: model_terms:ir.ui.view,arch_db:project.project_update_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "Late Activities"
@@ -3027,6 +3031,7 @@ msgid "Months"
 msgstr "Kuu järel"
 
 #. module: project
+#: model_terms:ir.ui.view,arch_db:project.project_update_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "My Activities"
@@ -3497,13 +3502,15 @@ msgstr ""
 #. odoo-python
 #: code:addons/project/models/res_partner.py:0
 msgid "Partner company cannot be different from its assigned projects' company"
-msgstr "Kliendi ettevõte ei saa olla erinev talle määratud projekti ettevõttest"
+msgstr ""
+"Kliendi ettevõte ei saa olla erinev talle määratud projekti ettevõttest"
 
 #. module: project
 #. odoo-python
 #: code:addons/project/models/res_partner.py:0
 msgid "Partner company cannot be different from its assigned tasks' company"
-msgstr "Kliendi ettevõte ei saa olla erinev talle määratud ülesande ettevõttest"
+msgstr ""
+"Kliendi ettevõte ei saa olla erinev talle määratud ülesande ettevõttest"
 
 #. module: project
 #: model:ir.actions.act_window,name:project.project_task_action_from_partner
@@ -4553,6 +4560,7 @@ msgid "Show Sub-Tasks"
 msgstr ""
 
 #. module: project
+#: model_terms:ir.ui.view,arch_db:project.project_update_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "Show all records whose next activity date is past"
@@ -5197,7 +5205,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/project/models/project_task.py:0
 msgid "The task and the associated partner must be linked to the same company."
-msgstr "Ülesanne ja sellega seotud klient peavad olema seotud sama ettevõttega."
+msgstr ""
+"Ülesanne ja sellega seotud klient peavad olema seotud sama ettevõttega."
 
 #. module: project
 #. odoo-javascript
@@ -5489,6 +5498,7 @@ msgid "Today"
 msgstr "Täna"
 
 #. module: project
+#: model_terms:ir.ui.view,arch_db:project.project_update_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "Today Activities"
@@ -6267,6 +6277,9 @@ msgstr "👤 Määramata"
 #: code:addons/project/static/src/components/project_many2one_field/project_many2one_field.js:0
 msgid "🔒 Private"
 msgstr "🔒 Isiklik"
+
+#~ msgid " All internal users and invited portal users"
+#~ msgstr " Kõik ettevõttesisesed kasutajad ja kutsutud portaalikasutajad"
 
 #~ msgid "Administrator can manage the employees' schedule"
 #~ msgstr "Administraator saab hallata töötaja graafikut"

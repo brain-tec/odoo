@@ -23,7 +23,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 17:36+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 21:17+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Portuguese <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -1517,6 +1517,12 @@ msgstr "Perguntar"
 
 #. module: stock
 #. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Assign"
+msgstr ""
+
+#. module: stock
+#. odoo-javascript
 #: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 msgid "Assign All"
 msgstr "Atribuir todos"
@@ -1530,6 +1536,12 @@ msgstr "Atribuir Responsável"
 #: model:ir.model.fields,field_description:stock.field_stock_request_count__user_id
 msgid "Assign to"
 msgstr "Atribuir a"
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
+msgid "Assigned"
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_package__child_package_dest_ids
@@ -1845,7 +1857,8 @@ msgstr ""
 #: model:ir.model.fields,help:stock.field_stock_location__active
 msgid ""
 "By unchecking the active field, you may hide a location without deleting it."
-msgstr "Ao desmarcar o campo ativo, pode ocultar uma localização sem a excluir."
+msgstr ""
+"Ao desmarcar o campo ativo, pode ocultar uma localização sem a excluir."
 
 #. module: stock
 #. odoo-python
@@ -3684,8 +3697,8 @@ msgid ""
 "Otherwise, this includes goods stored in any Stock Location with 'internal' "
 "type."
 msgstr ""
-"Quantidade prevista (calculado como quantidade em mãos - saída + "
-"recebimento - quantidade a remover)\n"
+"Quantidade prevista (calculado como quantidade em mãos - saída + recebimento "
+"- quantidade a remover)\n"
 "Em um contexto com um único local de estoque, isso inclui mercadorias "
 "armazenadas neste local, ou qualquer um de seus secundários.\n"
 "Em um contexto com um único armazém, isso inclui mercadorias armazenadas no "
@@ -3825,6 +3838,7 @@ msgid "Full Package Name"
 msgstr ""
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Future Activities"
 msgstr "Atividades Futuras"
@@ -4262,8 +4276,8 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_show_allocation_report
 msgid ""
-"If this checkbox is ticked, Odoo will automatically show the allocation "
-"report (if there are moves to allocate to) when validating."
+"If this checkbox is ticked, Odoo will show the allocation report (if there "
+"are moves to allocate to.)"
 msgstr ""
 
 #. module: stock
@@ -5073,6 +5087,7 @@ msgid "Late"
 msgstr "Atrasado"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Late Activities"
 msgstr "Atividades em Atraso"
@@ -5714,6 +5729,7 @@ msgid "Multiple destinations"
 msgstr ""
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "My Activities"
 msgstr "Minhas atividades"
@@ -5964,8 +5980,8 @@ msgid ""
 "No rule has been found to replenish \"%(product)s\" in \"%(location)s\".\n"
 "Verify the routes configuration on the product."
 msgstr ""
-"Nenhuma regra foi encontrada para repor \"%(product)s\" em \"%(location)"
-"s\".\n"
+"Nenhuma regra foi encontrada para repor \"%(product)s\" em \"%"
+"(location)s\".\n"
 "Verifique a configuração das rotas no produto."
 
 #. module: stock
@@ -8060,7 +8076,6 @@ msgstr "Reservar embalagens parciais"
 
 #. module: stock
 #. odoo-javascript
-#: code:addons/stock/static/src/allocation_report/allocation_report.xml:0
 #: code:addons/stock/static/src/allocation_report/out_line/out_line.js:0
 msgid "Reserved"
 msgstr ""
@@ -8618,8 +8633,8 @@ msgid ""
 "Serial number (%(serial_number)s) already exists in location(s): %"
 "(location_list)s. Please correct the serial number encoded."
 msgstr ""
-"O número de série (%(serial_number)s) já existe nos locais: %(location_list)"
-"s. Corrija o número de série codificado."
+"O número de série (%(serial_number)s) já existe nos locais: %"
+"(location_list)s. Corrija o número de série codificado."
 
 #. module: stock
 #. odoo-python
@@ -8631,8 +8646,8 @@ msgid ""
 "Please correct this to prevent inconsistent data."
 msgstr ""
 "O número de série (%(serial_number)s) não está localizado em %"
-"(source_location)s, mas está localizado no(s) local(is): %(other_locations)"
-"s.\n"
+"(source_location)s, mas está localizado no(s) local(is): %"
+"(other_locations)s.\n"
 "\n"
 "Corrija isso para evitar dados inconsistentes."
 
@@ -8646,8 +8661,8 @@ msgid ""
 "Source location for this move will be changed to %(recommended_location)s"
 msgstr ""
 "O número de série (%(serial_number)s) não está localizado em %"
-"(source_location)s, mas está localizado no(s) local(is): %(other_locations)"
-"s.\n"
+"(source_location)s, mas está localizado no(s) local(is): %"
+"(other_locations)s.\n"
 "\n"
 "O local de origem dessa movimentação será alterado para %"
 "(recommended_location)s"
@@ -9940,7 +9955,8 @@ msgstr ""
 #: code:addons/stock/models/stock_move_line.py:0
 msgid ""
 "This lot %(lot_name)s is incompatible with this product %(product_name)s"
-msgstr "Este lote %(lot_name)s é incompatível com este produto %(product_name)s"
+msgstr ""
+"Este lote %(lot_name)s é incompatível com este produto %(product_name)s"
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.stock_move_action
@@ -10197,6 +10213,7 @@ msgid "Today"
 msgstr "Hoje"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Today Activities"
 msgstr "Atividades do Dia"
@@ -10483,6 +10500,12 @@ msgstr ""
 #: model:ir.model.fields,help:stock.field_stock_picking__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr "Tipo de atividade de exceção registrada."
+
+#. module: stock
+#. odoo-javascript
+#: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
+msgid "Unassign"
+msgstr ""
 
 #. module: stock
 #. odoo-python
@@ -11017,8 +11040,8 @@ msgid ""
 "When products arrive in <b>%(source_location)s</b>, <br> <b>%(operation)s</"
 "b> are created to send them to <b>%(destination)s</b>."
 msgstr ""
-"Quando os produtos chegam em <b>%(source_location)s</b>, <br> <b>%(operation)"
-"s</b> são criadas para enviá-los para <b>%(destination)s</b>."
+"Quando os produtos chegam em <b>%(source_location)s</b>, <br> <b>%"
+"(operation)s</b> são criadas para enviá-los para <b>%(destination)s</b>."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_rule__location_dest_from_rule

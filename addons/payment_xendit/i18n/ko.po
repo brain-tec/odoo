@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-10 17:40+0000\n"
+"POT-Creation-Date: 2026-10-24 17:41+0000\n"
 "PO-Revision-Date: 2026-08-31 13:42+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Korean <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -94,26 +94,6 @@ msgid "Card"
 msgstr ""
 
 #. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "Card Code"
-msgstr "카드 코드"
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "Card Holder First Name"
-msgstr "카드 소유자 이름"
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "Card Holder Last Name"
-msgstr "카드 소유자 성"
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "Card Number"
-msgstr "카드 번호"
-
-#. module: payment_xendit
 #: model:payment.method,name:payment_xendit.payment_method_cashalo
 msgid "Cashalo"
 msgstr ""
@@ -140,16 +120,6 @@ msgid "Display Name"
 msgstr "표시명"
 
 #. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "Email"
-msgstr "이메일"
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "Expiration"
-msgstr "만료일"
-
-#. module: payment_xendit
 #: model:payment.method,name:payment_xendit.payment_method_fpx
 msgid "FPX"
 msgstr ""
@@ -171,24 +141,6 @@ msgid "ID"
 msgstr "ID"
 
 #. module: payment_xendit
-#. odoo-javascript
-#: code:addons/payment_xendit/static/src/interactions/payment_form.js:0
-msgid "Invalid CVN"
-msgstr "잘못된 CVN"
-
-#. module: payment_xendit
-#. odoo-javascript
-#: code:addons/payment_xendit/static/src/interactions/payment_form.js:0
-msgid "Invalid Card Number"
-msgstr "유효하지 않은 카드 번호"
-
-#. module: payment_xendit
-#. odoo-javascript
-#: code:addons/payment_xendit/static/src/interactions/payment_form.js:0
-msgid "Invalid Date"
-msgstr "유효하지 않은 날짜"
-
-#. module: payment_xendit
 #: model:payment.method,name:payment_xendit.payment_method_jcb
 msgid "JCB"
 msgstr ""
@@ -197,11 +149,6 @@ msgstr ""
 #: model:payment.method,name:payment_xendit.payment_method_jeniuspay
 msgid "JeniusPay"
 msgstr ""
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "John"
-msgstr "홍길동"
 
 #. module: payment_xendit
 #: model:payment.method,name:payment_xendit.payment_method_kredivo
@@ -227,11 +174,6 @@ msgstr ""
 #: model:payment.method,name:payment_xendit.payment_method_linkaja
 msgid "LinkAja"
 msgstr ""
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "MM"
-msgstr "월"
 
 #. module: payment_xendit
 #: model:payment.method,name:payment_xendit.payment_method_mandiri
@@ -269,25 +211,9 @@ msgid "Payment Transaction"
 msgstr "지불 거래"
 
 #. module: payment_xendit
-#. odoo-javascript
-#: code:addons/payment_xendit/static/src/interactions/payment_form.js:0
-msgid "Payment processing failed"
-msgstr "결제 프로세스 실패"
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "Phone Number"
-msgstr "전화번호"
-
-#. module: payment_xendit
 #: model:payment.method,name:payment_xendit.payment_method_promptpay
 msgid "Prompt Pay"
 msgstr ""
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.payment_provider_form_xendit
-msgid "Public Key"
-msgstr "일반 키"
 
 #. module: payment_xendit
 #: model:payment.method,name:payment_xendit.payment_method_qris
@@ -310,20 +236,23 @@ msgid "Siam Commerical Bank"
 msgstr ""
 
 #. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "Smith"
-msgstr "홍길동"
-
-#. module: payment_xendit
 #. odoo-python
-#: code:addons/payment_xendit/controllers/main.py:0
-msgid "The access token doesn't match the transaction reference."
+#: code:addons/payment_xendit/models/payment_transaction.py:0
+msgid ""
+"The payment requires authentication from the customer, which isn't possible "
+"for this unattended transaction. Please ask the customer to pay manually."
 msgstr ""
 
 #. module: payment_xendit
 #: model:ir.model.fields,help:payment_xendit.field_payment_provider__code
 msgid "The technical code of this payment provider."
 msgstr "이 결제대행업체의 기술 코드입니다."
+
+#. module: payment_xendit
+#. odoo-python
+#: code:addons/payment_xendit/models/payment_transaction.py:0
+msgid "The transaction is not linked to a token."
+msgstr ""
 
 #. module: payment_xendit
 #: model:payment.method,name:payment_xendit.payment_method_touch_n_go
@@ -343,6 +272,12 @@ msgstr ""
 #. module: payment_xendit
 #: model:payment.method,name:payment_xendit.payment_method_uob
 msgid "United Overseas Bank"
+msgstr ""
+
+#. module: payment_xendit
+#. odoo-python
+#: code:addons/payment_xendit/models/payment_provider.py:0
+msgid "Update the Xendit webhook configuration"
 msgstr ""
 
 #. module: payment_xendit
@@ -391,6 +326,12 @@ msgid "Xendit"
 msgstr "Xendit"
 
 #. module: payment_xendit
+#. odoo-python
+#: code:addons/payment_xendit/models/payment_provider.py:0
+msgid "Xendit Dashboard"
+msgstr ""
+
+#. module: payment_xendit
 #: model:ir.model.fields,field_description:payment_xendit.field_payment_provider__xendit_public_key
 msgid "Xendit Public Key"
 msgstr "Xendit 공개 키"
@@ -406,9 +347,14 @@ msgid "Xendit Webhook Token"
 msgstr "Xendit 웹훅 토큰"
 
 #. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "YYYY"
-msgstr "YYYY"
+#. odoo-python
+#: code:addons/payment_xendit/models/payment_provider.py:0
+msgid ""
+"Xendit replaced the single webhook field used by the %(provider)s payment "
+"provider with separate v3 event groups. Update the %(webhook_link)s on the %"
+"(dashboard_link)s before %(deadline)s to keep receiving payment and card "
+"token status updates."
+msgstr ""
 
 #. module: payment_xendit
 #: model:payment.method,name:payment_xendit.payment_method_zalopay
@@ -416,6 +362,58 @@ msgid "Zalopay"
 msgstr ""
 
 #. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "john.smith@example.com"
-msgstr "john.smith@example.com"
+#. odoo-python
+#: code:addons/payment_xendit/models/payment_provider.py:0
+msgid "webhook configuration"
+msgstr ""
+
+#~ msgid "Card Code"
+#~ msgstr "카드 코드"
+
+#~ msgid "Card Holder First Name"
+#~ msgstr "카드 소유자 이름"
+
+#~ msgid "Card Holder Last Name"
+#~ msgstr "카드 소유자 성"
+
+#~ msgid "Card Number"
+#~ msgstr "카드 번호"
+
+#~ msgid "Email"
+#~ msgstr "이메일"
+
+#~ msgid "Expiration"
+#~ msgstr "만료일"
+
+#~ msgid "Invalid CVN"
+#~ msgstr "잘못된 CVN"
+
+#~ msgid "Invalid Card Number"
+#~ msgstr "유효하지 않은 카드 번호"
+
+#~ msgid "Invalid Date"
+#~ msgstr "유효하지 않은 날짜"
+
+#~ msgid "John"
+#~ msgstr "홍길동"
+
+#~ msgid "MM"
+#~ msgstr "월"
+
+#~ msgid "Payment processing failed"
+#~ msgstr "결제 프로세스 실패"
+
+#~ msgid "Phone Number"
+#~ msgstr "전화번호"
+
+#~ msgid "Public Key"
+#~ msgstr "일반 키"
+
+#~ msgid "Smith"
+#~ msgstr "홍길동"
+
+#~ msgid "YYYY"
+#~ msgstr "YYYY"
+
+#~ msgid "john.smith@example.com"
+#~ msgstr "john.smith@example.com"

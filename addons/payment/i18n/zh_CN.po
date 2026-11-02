@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-10 17:38+0000\n"
+"POT-Creation-Date: 2026-10-30 17:38+0000\n"
 "PO-Revision-Date: 2026-08-31 20:36+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
@@ -63,10 +63,10 @@ msgid ""
 "transactions you intend to capture can only be captured in full. Handle the "
 "transactions individually to capture a partial amount.\"/>"
 msgstr ""
-"<i class=\"fa fa-info-circle oe_inline\" invisible=\"support_partial_capture "
-"!= 'full_only'\" title=\"Some of the transactions you intend to capture can "
-"only be captured in full. Handle the transactions individually to capture a "
-"partial amount.\"/>"
+"<i class=\"fa fa-info-circle oe_inline\" "
+"invisible=\"support_partial_capture != 'full_only'\" title=\"Some of the "
+"transactions you intend to capture can only be captured in full. Handle the "
+"transactions individually to capture a partial amount.\"/>"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.token_form
@@ -1813,7 +1813,8 @@ msgstr "公司的主要币别，用于显示币别字段。"
 msgid ""
 "The maximum payment amount that this payment provider is available for. "
 "Leave blank to make it available for any payment amount."
-msgstr "这个支付提供商可用的最大支付金额。如果没有设置，任何支付金额都是可用的。"
+msgstr ""
+"这个支付提供商可用的最大支付金额。如果没有设置，任何支付金额都是可用的。"
 
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_provider__auth_msg
@@ -2041,6 +2042,18 @@ msgstr ""
 "                     建议为其设置电子邮箱地址。"
 
 #. module: payment
+#. odoo-python
+#: code:addons/payment/controllers/portal.py:0
+msgid "This payment method is not available."
+msgstr ""
+
+#. module: payment
+#. odoo-python
+#: code:addons/payment/controllers/portal.py:0
+msgid "This payment provider is not available."
+msgstr ""
+
+#. module: payment
 #: model_terms:ir.actions.act_window,help:payment.action_payment_provider
 msgid "To add a provider to the current company:"
 msgstr "要向当前公司添加服务商："
@@ -2071,7 +2084,8 @@ msgstr "令牌化"
 msgid ""
 "Tokenization is the process of saving the payment details as a token that "
 "can later be reused without having to enter the payment details again."
-msgstr "令牌化是将支付信息保存为令牌的过程，以后无需再次输入支付信息即可重复使用。"
+msgstr ""
+"令牌化是将支付信息保存为令牌的过程，以后无需再次输入支付信息即可重复使用。"
 
 #. module: payment
 #. odoo-python
@@ -2197,7 +2211,8 @@ msgstr "不管服务商在网站是否可见，令牌保持功能，但只在管
 msgid ""
 "Whether the transaction happened in a production environment. False for "
 "transactions created before this tracking was implemented."
-msgstr "用于判断交易是否发生在生产环境。追踪功能启用前创建的交易，此字段统一设为否。"
+msgstr ""
+"用于判断交易是否发生在生产环境。追踪功能启用前创建的交易，此字段统一设为否。"
 
 #. module: payment
 #: model:payment.provider,name:payment.payment_provider_transfer
@@ -2444,8 +2459,8 @@ msgstr "ZIP"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__partner_zip
-msgid "Zip"
-msgstr "邮政编码"
+msgid "Zip Code"
+msgstr ""
 
 #. module: payment
 #. odoo-python
@@ -2482,3 +2497,6 @@ msgstr ""
 #: model:ir.model,name:payment.model_ir_websocket
 msgid "websocket message handling"
 msgstr ""
+
+#~ msgid "Zip"
+#~ msgstr "邮政编码"

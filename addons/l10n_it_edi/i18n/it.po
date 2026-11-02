@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.5a1+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 18:25+0000\n"
+"POT-Creation-Date: 2026-10-24 18:15+0000\n"
 "PO-Revision-Date: 2026-08-31 12:56+0000\n"
 "Last-Translator: \"Marianna Ciofani (cima)\" <cima@odoo.com>\n"
 "Language-Team: Italian <https://translate.odoo.com/projects/odoo-s19-4/"
@@ -512,14 +512,14 @@ msgstr "Riferimento fattura"
 #. module: l10n_it_edi
 #. odoo-python
 #: code:addons/l10n_it_edi/models/account_move.py:0
-msgid "Invoice(s) to check"
-msgstr "Fattura/e da controllare"
+msgid "Invoices must have %(number)s one %(kind)s tax set per line."
+msgstr "Le fatture devono riportare %(number)s un'imposta %(kind)s per riga."
 
 #. module: l10n_it_edi
 #. odoo-python
 #: code:addons/l10n_it_edi/models/account_move.py:0
-msgid "Invoices must have %(number)s one %(kind)s tax set per line."
-msgstr "Le fatture devono riportare %(number)s un'imposta %(kind)s per riga."
+msgid "Invoices to check"
+msgstr ""
 
 #. module: l10n_it_edi
 #: model_terms:ir.ui.view,arch_db:l10n_it_edi.account_invoice_form_l10n_it
@@ -1105,6 +1105,31 @@ msgid "Shareholder"
 msgstr "Socio"
 
 #. module: l10n_it_edi
+#. odoo-python
+#: code:addons/l10n_it_edi/models/account_move.py:0
+msgid ""
+"Simplified Invoices (TD07, TD08, TD09) can only be issued for a total amount "
+"of up to 400€. Please issue an ordinary invoice instead."
+msgstr ""
+
+#. module: l10n_it_edi
+#. odoo-python
+#: code:addons/l10n_it_edi/models/res_partner.py:0
+msgid ""
+"Simplified Invoices (TD07, TD08, TD09) can only be used with domestic "
+"partners that do not belong to the Public Administration. Please issue an "
+"ordinary invoice instead."
+msgstr ""
+
+#. module: l10n_it_edi
+#. odoo-python
+#: code:addons/l10n_it_edi/models/account_move.py:0
+msgid ""
+"Simplified Invoices (TD07, TD08, TD09) cannot be used for self-invoices. "
+"Please issue an ordinary invoice instead."
+msgstr ""
+
+#. module: l10n_it_edi
 #: model_terms:ir.ui.view,arch_db:l10n_it_edi.account_invoice_form_l10n_it
 msgid "Sistema di interscambio"
 msgstr "Sistema di interscambio"
@@ -1251,10 +1276,10 @@ msgid ""
 "It will try again for 10 days, after which it will be considered accepted, "
 "but you will still have to send it by post or e-mail."
 msgstr ""
-"Il file di fattura elettronica %(file)s non può essere inoltrato a %(partner)"
-"s (Pubblica Amministrazione) dal SdI in questo momento. Verrà riprovato per "
-"10 giorni, dopodiché sarà considerato accettato, ma dovrai comunque inviarlo "
-"per posta o e-mail."
+"Il file di fattura elettronica %(file)s non può essere inoltrato a %"
+"(partner)s (Pubblica Amministrazione) dal SdI in questo momento. Verrà "
+"riprovato per 10 giorni, dopodiché sarà considerato accettato, ma dovrai "
+"comunque inviarlo per posta o e-mail."
 
 #. module: l10n_it_edi
 #. odoo-python
@@ -1263,8 +1288,8 @@ msgid ""
 "The e-invoice file %(file)s couldn't be forwarded to %(partner)s.\n"
 "Please remember to send it via post or e-mail."
 msgstr ""
-"Il file di fattura elettronica %(file)s non è stato inoltrato a %(partner)"
-"s.\n"
+"Il file di fattura elettronica %(file)s non è stato inoltrato a %"
+"(partner)s.\n"
 "Si prega di inviarlo per posta o e-mail."
 
 #. module: l10n_it_edi
@@ -1591,6 +1616,12 @@ msgstr "Visualizza fattura/e"
 #. module: l10n_it_edi
 #. odoo-python
 #: code:addons/l10n_it_edi/models/account_move.py:0
+msgid "View invoices"
+msgstr ""
+
+#. module: l10n_it_edi
+#. odoo-python
+#: code:addons/l10n_it_edi/models/account_move.py:0
 msgid ""
 "We are simulating the sending of the e-invoice file %s, as we are in demo "
 "mode."
@@ -1635,6 +1666,14 @@ msgstr "Tipo di ritenuta d'acconto. Solo per EDI contabilità italiana."
 #: code:addons/l10n_it_edi/models/account_move.py:0
 msgid "XML FatturaPA"
 msgstr "XML FatturaPA"
+
+#. module: l10n_it_edi
+#. odoo-python
+#: code:addons/l10n_it_edi/models/account_move.py:0
+msgid ""
+"You cannot reset to draft invoices that were sent to the SdI. If you need to "
+"modify them, you must issue a credit or debit note."
+msgstr ""
 
 #. module: l10n_it_edi
 #. odoo-python
@@ -1775,8 +1814,8 @@ msgid ""
 "require being registered to the \"Gestione separata\""
 msgstr ""
 "[M2] Lavoro autonomo che non fa parte dei soliti doveri professionali/"
-"artistici, o redditi dovuti per un obbligo di agire, non agire o "
-"permettere - che richiedono l'iscrizione alla \"Gestione separata\""
+"artistici, o redditi dovuti per un obbligo di agire, non agire o permettere "
+"- che richiedono l'iscrizione alla \"Gestione separata\""
 
 #. module: l10n_it_edi
 #: model:ir.model.fields.selection,name:l10n_it_edi.selection__account_tax__l10n_it_withholding_reason__m
@@ -1813,8 +1852,8 @@ msgid ""
 "not require being registered to the \"Gestione separata\""
 msgstr ""
 "[O] Lavoro autonomo che non fa parte dei soliti doveri professionali/"
-"artistici, o redditi dovuti per un obbligo di agire, non agire o "
-"permettere - che non richiedono l'iscrizione alla \"Gestione separata\""
+"artistici, o redditi dovuti per un obbligo di agire, non agire o permettere "
+"- che non richiedono l'iscrizione alla \"Gestione separata\""
 
 #. module: l10n_it_edi
 #: model:ir.model.fields.selection,name:l10n_it_edi.selection__account_tax__l10n_it_withholding_reason__p
@@ -2147,9 +2186,10 @@ msgstr ""
 
 #. module: l10n_it_edi
 #: model:ir.model.fields.selection,name:l10n_it_edi.selection__account_tax__l10n_it_withholding_reason__w
-msgid "[W] Income from 2015 tinders subject to law art. 25-ter D.P.R. 600/1973"
+msgid ""
+"[W] Income from tenders subject to Art. 25-ter of Presidential Decree "
+"600/1973"
 msgstr ""
-"[W] Redditi da tinder 2015 soggetti alla legge art. 25-ter D.P.R. 600/1973"
 
 #. module: l10n_it_edi
 #: model:ir.model.fields.selection,name:l10n_it_edi.selection__account_tax__l10n_it_withholding_reason__x
@@ -2254,3 +2294,11 @@ msgstr "withholding_no_enasarco"
 #: code:addons/l10n_it_edi/models/res_partner.py:0
 msgid "zip"
 msgstr "CAP"
+
+#~ msgid "Invoice(s) to check"
+#~ msgstr "Fattura/e da controllare"
+
+#~ msgid ""
+#~ "[W] Income from 2015 tinders subject to law art. 25-ter D.P.R. 600/1973"
+#~ msgstr ""
+#~ "[W] Redditi da tinder 2015 soggetti alla legge art. 25-ter D.P.R. 600/1973"
