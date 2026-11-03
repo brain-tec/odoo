@@ -142,9 +142,8 @@ export function defineMailModels() {
 
 export function getChannelCommandsForThread(threadId) {
     const store = getService("mail.store");
-    const suggestionService = getService("mail.suggestion");
     const thread = store["mail.thread"].get({ model: "discuss.channel", id: threadId });
-    return suggestionService.getChannelCommands(thread.channel);
+    return thread.channel.getCommands();
 }
 
 export const mailModels = {
@@ -607,7 +606,7 @@ function preventActualMediaUsage() {
 /**
  * Intercept the browser's native fullscreen API so tests can drive it without a real user
  * gesture. `document.fullscreenElement` and the `fullscreenchange` event are simulated, letting
- * the `mail.fullscreen` service derive its `isBrowserFullscreen` state from a controllable source.
+ * `MailFullscreenPlugin` derive its `isBrowserFullscreen` state from a controllable source.
  *
  * @param {Object} [param0]
  * @param {boolean} [param0.grant=true] Whether fullscreen requests are granted. When `false`,

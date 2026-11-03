@@ -22,6 +22,8 @@ import { url } from "@web/core/utils/urls";
 import { isBrowserSafari, isMobileOS } from "@web/core/browser/feature_detection";
 import { CallAction } from "@mail/discuss/call/common/call_actions";
 import { ACTION_TAGS } from "@mail/core/common/action";
+import { MailFullscreenPlugin } from "@mail/core/common/mail_fullscreen";
+import { PttExtensionPlugin } from "@mail/discuss/call/common/ptt_extension_plugin";
 
 let sequence = 1;
 const getSequence = () => sequence++;
@@ -480,7 +482,7 @@ export class Rtc extends Record {
      * @returns {boolean}
      */
     get isBrowserFullscreen() {
-        return this.isFullscreen && this.fullscreen.isBrowserFullscreen;
+        return this.isFullscreen && this.fullscreen.isBrowserFullscreen();
     }
 
     /**
@@ -536,7 +538,7 @@ export class Rtc extends Record {
         this.closeCallPermissionDialog = undefined;
         /** @type {Services["dialog"]} */
         this.dialog = undefined;
-        /** @type {Services["mail.fullscreen"]} */
+        /** @type {MailFullscreenPlugin} */
         this.fullscreen = undefined;
         /** @type {import("@web/core/notifications/notification_plugin").NotificationPlugin} */
         this.notification = undefined;
@@ -544,7 +546,7 @@ export class Rtc extends Record {
         this.p2pService = undefined;
         /** @type {Services["discuss.pip_service"]} */
         this.pipService = undefined;
-        /** @type {Services["discuss.ptt_extension"]} */
+        /** @type {PttExtensionPlugin} */
         this.pttExtService = undefined;
         /** @type {import("@mail/core/common/sound_effects_plugin").SoundEffectsPlugin} */
         this.soundEffects = undefined;
@@ -558,7 +560,6 @@ export class Rtc extends Record {
         this.notification = this.store.notification;
         this.dialog = services.dialog;
         this.soundEffects = this.store.soundEffects;
-        this.pttExtService = services["discuss.ptt_extension"];
         if (this._broadcastChannel) {
             this._broadcastChannel.onmessage = this._onBroadcastChannelMessage.bind(this);
             this._postToTabs({ type: CROSS_TAB_CLIENT_MESSAGE.INIT });
@@ -761,7 +762,7 @@ export class Rtc extends Record {
             !this.store.settings.usePushToTalk ||
             (ev instanceof KeyboardEvent && !this.store.settings.isPushToTalkKey(ev)) ||
             !this.localSession.isTalking ||
-            this.pttExtService.voiceActivated
+            this.pttExtService.voiceActivated()
         ) {
             return false;
         }
@@ -2336,9 +2337,9 @@ export class Rtc extends Record {
      * Applies blur effect to a video stream using BlurManager.
      *
      * @param {MediaStream} videoStream - input video stream.
-     * @returns {Promise<BlurManager>} - BlurManager instance.
+     * @returns {BlurManager} - BlurManager instance.
      */
-    async applyBlurEffect(videoStream) {
+    applyBlurEffect(videoStream) {
         return new BlurManager(videoStream, {
             backgroundBlur: this.store.settings.backgroundBlurAmount,
             edgeBlur: this.store.settings.edgeBlurAmount,
@@ -2572,7 +2573,7 @@ export class Rtc extends Record {
             this.blurManager?.close();
             this.blurManager = undefined;
             try {
-                this.blurManager = await this.applyBlurEffect(sourceStream);
+                this.blurManager = this.applyBlurEffect(sourceStream);
                 const blurredStream = await this.blurManager.stream;
                 outputTrack = blurredStream.getVideoTracks()[0];
             } catch (_e) {
@@ -2950,8 +2951,6 @@ export const rtcService = {
     dependencies: [
         "bus_service",
         "discuss.pip_service",
-        "discuss.ptt_extension",
-        "mail.fullscreen",
         "mail.store",
         "presence",
     ],
@@ -2962,6 +2961,7 @@ export const rtcService = {
     start(env, services) {
         const store = services["mail.store"];
         const rtc = store.rtc;
+        rtc.pttExtService = usePlugin(PttExtensionPlugin);
         rtc.pipService = services["discuss.pip_service"];
         rtc.onChange(
             () => [rtc.pipService.state.active],
@@ -2990,9 +2990,9 @@ export const rtcService = {
             },
             { immediate: true, initialRun: false }
         );
-        rtc.fullscreen = services["mail.fullscreen"];
+        rtc.fullscreen = usePlugin(MailFullscreenPlugin);
         rtc.onChange(
-            () => [rtc.fullscreen.id],
+            () => [rtc.fullscreen.id()],
             function onChangeFullscreen(fullscreenId) {
                 const wasFullscreen = rtc.isFullscreen;
                 rtc.isFullscreen = fullscreenId === CALL_FULLSCREEN_ID;

@@ -1588,7 +1588,7 @@ class DiscussChannel(models.Model):
             }
         return {
             "type": "ir.actions.act_url",
-            "url": f"/odoo/action-mail.action_discuss?active_id={self.id}",
+            "url": f"/odoo/discuss?active_id={self.id}",
             "target": "self",
         }
 
@@ -1906,6 +1906,10 @@ class DiscussChannel(models.Model):
         """ Return the channel types that load members lazily. """
         return ["channel", "group"]
 
+    def _role_allowed_channel_types(self):
+        """ Return the channel types whose members can have a channel role. """
+        return ["channel", "group"]
+
     def channel_rename(self, name):
         self.ensure_one()
         self.write({'name': name})
@@ -2002,6 +2006,11 @@ class DiscussChannel(models.Model):
             partners=message.author_id,
             post_joined_message=False,
         )
+        if message:
+            Store(bus_channel=self).add(
+                message,
+                lambda res: res.one("linkedSubChannel", [], value=sub_channel),
+            )
         notification = Markup('<div class="o_mail_notification" data-oe-type="thread_creation" data-oe-id="%s"></div>') % sub_channel.id
         self.message_post(
             body=notification, message_type="notification", subtype_xmlid="mail.mt_comment"
