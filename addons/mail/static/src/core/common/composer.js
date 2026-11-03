@@ -9,6 +9,7 @@ import {
 } from "@mail/core/common/plugin/plugin_sets";
 import { groupAttachments } from "@mail/utils/common/attachments";
 import { MessageHighlightPlugin } from "@mail/core/common/message_highlight_plugin";
+import { RecordLinkPlugin } from "@mail/core/common/record_link_plugin";
 import {
     onExternalClick,
     propComputed,
@@ -206,6 +207,7 @@ export class Composer extends Component {
             { composer: this.composer }
         );
         this.ui = usePlugin(UIPlugin);
+        this.recordLink = usePlugin(RecordLinkPlugin);
         this.composerService = useService("mail.composer");
         this.inputContainerRef = signal.ref(HTMLSpanElement);
         this.pickerContainerRef = signal.ref(HTMLDivElement);
@@ -541,8 +543,6 @@ export class Composer extends Component {
             composerPluginDependencies: {
                 // Read lazily: the config is only read once, at editor
                 // creation, but the placeholder can change afterwards.
-                getAncestors: () => this.ancestors,
-                getComposerType: () => this.props.type,
                 getPlaceholder: () => this.placeholder,
                 getSavedSelection: () => {
                     const { composerHtml, editorSelection } = this.props.composer;
@@ -555,6 +555,7 @@ export class Composer extends Component {
                 getSuggestionTarget: () => this.inputContainerRef(),
                 getThread: () => this.props.composer.targetThread,
                 isEditable: () => !this.isEditorReadonly && !this.isEditorDisabled,
+                isNote: () => this.props.type === COMPOSER_TYPES.NOTE,
                 onBeforePaste: (selection, ev) => this.onPaste(ev),
                 onFocusin: this.onFocusin.bind(this),
                 onFocusout: this.onFocusout.bind(this),
@@ -562,6 +563,7 @@ export class Composer extends Component {
                 onInsertSuggestion: (option) => this.addSuggestion(option),
                 onKeydown: this.onKeydown.bind(this),
                 onMentions: (mentions) => this.addMentions(mentions),
+                recordLink: this.recordLink,
                 saveSelection: (selection) => {
                     this.props.composer.editorSelection = {
                         ...selection,
@@ -994,6 +996,7 @@ export class Composer extends Component {
             }
             this.state.active = false;
             await this.editor?.shared.mention.whenMentionsChecked();
+            await this.editor?.shared.recordLink.whenRecordLinksRendered();
             // The type may have just been switched, before the layout effect.
             this.syncMentionsWithComposerType();
             let body = trimEmptyBlocksAround(this.props.composer.composerHtml);
@@ -1001,6 +1004,7 @@ export class Composer extends Component {
                 // Links are only styled while typing (VisualLinkPlugin): linkify them on post.
                 body = parseAndTransform(body, addLink);
             }
+            body = await this.recordLink.markRecordLinks(body);
             await cb(body);
             if (this.props.onPostCallback) {
                 this.props.onPostCallback();

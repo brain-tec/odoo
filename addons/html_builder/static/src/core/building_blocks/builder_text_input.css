@@ -1,0 +1,10 @@
+.o_hb_input_field_text {
+    .o_hb_input_text {
+        appearance: none;
+        border: none;
+        background: none;
+        color: inherit;
+        padding: 0;
+        margin-right: calc(var(--o-we-sidebar-content-field-clickable-spacing) * 0.5);
+    }
+}

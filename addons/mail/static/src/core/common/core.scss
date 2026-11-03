@@ -44,10 +44,10 @@ $o-discuss-talkingColor: lighten($success, 10%);
     @return calc((#{$border-radius} + #{$border-radius-lg}) * 7 / 8);
 }
 
-/* Tint of the messages and chat bubble previews with a bubble color */
+/* Tint of the messages and thread previews with a bubble color */
 .o-mail-Message-bubble.o-blue,
 .o-mail-Message-bubbleTail.o-blue,
-.o_popover:has(> .o-mail-ChatBubble-preview.o-blue) {
+.o-mail-ThreadPreview-popover:has(.o-mail-ThreadPreview.o-blue) {
     --o-bubble-bg: var(--o-mail-bubble-blue-bg);
     --o-bubble-bg-muted: var(--o-mail-bubble-blue-bg-muted);
     --o-bubble-border-color: var(--o-mail-bubble-blue-border-color);
@@ -55,7 +55,7 @@ $o-discuss-talkingColor: lighten($success, 10%);
 }
 .o-mail-Message-bubble.o-green,
 .o-mail-Message-bubbleTail.o-green,
-.o_popover:has(> .o-mail-ChatBubble-preview.o-green) {
+.o-mail-ThreadPreview-popover:has(.o-mail-ThreadPreview.o-green) {
     --o-bubble-bg: var(--o-mail-bubble-green-bg);
     --o-bubble-bg-muted: var(--o-mail-bubble-green-bg-muted);
     --o-bubble-border-color: var(--o-mail-bubble-green-border-color);
@@ -63,7 +63,7 @@ $o-discuss-talkingColor: lighten($success, 10%);
 }
 .o-mail-Message-bubble.o-orange,
 .o-mail-Message-bubbleTail.o-orange,
-.o_popover:has(> .o-mail-ChatBubble-preview.o-orange) {
+.o-mail-ThreadPreview-popover:has(.o-mail-ThreadPreview.o-orange) {
     --o-bubble-bg: var(--o-mail-bubble-orange-bg);
     --o-bubble-bg-muted: var(--o-mail-bubble-orange-bg-muted);
     --o-bubble-border-color: var(--o-mail-bubble-orange-border-color);
@@ -394,7 +394,7 @@ $o-mail-utilities: map-merge(
     }
 }
 
-a.o_mail_redirect, a.o_channel_redirect, a.o-discuss-mention, a.o_message_redirect_transformed {
+a.o_mail_redirect, a.o_channel_redirect, a.o-discuss-mention, a.o_message_redirect_transformed, a.o_record_redirect_transformed {
     user-select: none;
     border-radius: var(--o-bs-btn-border-radius-lg);
     padding: 0rem 0.25rem;
@@ -405,7 +405,7 @@ a.o_mail_redirect, a.o_channel_redirect, a.o-discuss-mention, a.o_message_redire
     display: inline-block;
 }
 
-a.o_mail_redirect, a.o_channel_redirect, a.o_message_redirect_transformed {
+a.o_mail_redirect, a.o_channel_redirect, a.o_message_redirect_transformed, a.o_record_redirect_transformed {
     @include o-mention-variant(rgba($primary, .15), rgba($primary, .25), darken($primary, 10%), rgba($primary, .2), rgba($primary, .5), darken($primary, 15%));
 }
 

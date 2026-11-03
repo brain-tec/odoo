@@ -6,17 +6,14 @@ declare module "services" {
     import { discussCorePublic } from "@mail/discuss/core/public/discuss_core_public_service";
     import { discussCorePublicWeb } from "@mail/discuss/core/public_web/discuss_core_public_web_service";
     import { discussCoreWeb } from "@mail/discuss/core/web/discuss_core_web_service";
-    import { fullscreenService } from "@mail/core/common/mail_fullscreen";
     import { im_status } from "@mail/core/common/im_status_service";
     import { mailCoreCommon } from "@mail/core/common/mail_core_common_service";
     import { mailCoreWeb } from "@mail/core/web/mail_core_web_service";
     import { mailPopoutService } from "@mail/core/common/mail_popout_service";
     import { notificationPermissionService } from "@mail/core/common/notification_permission_service";
     import { outOfFocusService } from "@mail/core/common/out_of_focus_service";
-    import { pttExtensionHookService } from "@mail/discuss/call/common/ptt_extension_service";
     import { rtcService } from "@mail/discuss/call/common/rtc_service";
     import { storeService } from "@mail/core/common/store_plugin";
-    import { suggestionService } from "@mail/core/common/suggestion_service";
     import { voiceMessageService } from "@mail/discuss/voice_message/common/voice_message_service";
 
     export interface Services {
@@ -25,18 +22,15 @@ declare module "services" {
         "discuss.core.public.web": typeof discussCorePublicWeb;
         "discuss.core.web": typeof discussCoreWeb;
         "discuss.pip_service": typeof callPipService;
-        "discuss.ptt_extension": typeof pttExtensionHookService;
         "discuss.rtc": typeof rtcService;
         "discuss.voice_message": typeof voiceMessageService;
         "mail.attachment_upload": typeof attachmentUploadService;
         "mail.core.common": typeof mailCoreCommon;
         "mail.core.web": typeof mailCoreWeb;
-        "mail.fullscreen": typeof fullscreenService;
         "mail.notification.permission": typeof notificationPermissionService;
         "mail.out_of_focus": typeof outOfFocusService;
         "mail.popout": typeof mailPopoutService;
         "mail.store": typeof storeService;
-        "mail.suggestion": typeof suggestionService;
         im_status: typeof im_status;
     }
 }

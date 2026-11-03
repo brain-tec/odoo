@@ -26,73 +26,6 @@ from odoo.addons.website_sale.models.website import PRICELIST_SELECTED_SESSION_C
 _lt = LazyTranslate(__name__)
 
 
-class TableCompute:
-    def __init__(self):
-        self.table = {}
-
-    def _check_place(self, posx, posy, sizex, sizey, ppr):
-        res = True
-        for y in range(sizey):
-            for x in range(sizex):
-                if posx + x >= ppr:
-                    res = False
-                    break
-                row = self.table.setdefault(posy + y, {})
-                if row.setdefault(posx + x) is not None:
-                    res = False
-                    break
-            for x in range(ppr):
-                self.table[posy + y].setdefault(x, None)
-        return res
-
-    def process(self, products, ppg=20, ppr=4):
-        # Compute products positions on the grid
-        minpos = 0
-        maxy = 0
-        x = 0
-        for index, p in enumerate(products):
-            x = min(max(p.website_size_x, 1), ppr)
-            y = min(max(p.website_size_y, 1), ppr)
-            if index >= ppg:
-                x = y = 1
-
-            pos = minpos
-            while not self._check_place(pos % ppr, pos // ppr, x, y, ppr):
-                pos += 1
-            # if 21st products (index 20) and the last line is full (ppr products in it), break
-            # (pos + 1.0) / ppr is the line where the product would be inserted
-            # maxy is the number of existing lines
-            # + 1.0 is because pos begins at 0, thus pos 20 is actually the 21st block
-            # and to force python to not round the division operation
-            if index >= ppg and ((pos + 1.0) // ppr) > maxy:
-                break
-
-            if x == 1 and y == 1:  # simple heuristic for CPU optimization
-                minpos = pos // ppr
-
-            for y2 in range(y):
-                for x2 in range(x):
-                    self.table[(pos // ppr) + y2][(pos % ppr) + x2] = False
-            self.table[pos // ppr][pos % ppr] = {
-                "product": p,
-                "x": x,
-                "y": y,
-                "ribbon": p.sudo().website_ribbon_id,
-            }
-            if index <= ppg:
-                maxy = max(maxy, y + (pos // ppr))
-
-        # Format table according to HTML needs
-        rows = sorted(self.table.items())
-        rows = [r[1] for r in rows]
-        for col in range(len(rows)):
-            cols = sorted(rows[col].items())
-            x += len(cols)
-            rows[col] = [r[1] for r in cols if r[1]]
-
-        return rows
-
-
 def _get_parent_category_route(depth, param_name="_"):
     """Recursively build the parent category part of the route."""
     if depth < 1:
@@ -359,16 +292,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
         gap = website.shop_gap or "16px"
 
         attribute_value_params = self._get_attribute_value_params(post)
-        # TODO: remove support for `attribute_values` query param in version 20 (or later).
-        if not attribute_value_params and (
-            attribute_values := request.httprequest.args.getlist("attribute_values")
-        ):
-            # Transform the attribute value query params list into a dict.
-            # Before: ["1-2,3", "4-5,6"]
-            # After: {"1": "2,3", "4": "5,6"}
-            attribute_value_params = dict([
-                pair.split("-") for pair in attribute_values if pair and pair.count("-") == 1
-            ])
         attribute_value_dict = self._get_attribute_value_dict(attribute_value_params)
         attribute_value_ids = set(itertools.chain.from_iterable(attribute_value_dict.values()))
         grouped_attributes_values = (
@@ -379,9 +302,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
             .sorted()
             .grouped("attribute_id")
         )
-        if not_reload_request and request.httprequest.args.getlist("attribute_values"):
-            redirect_url = self._get_url_with_attribute_values(grouped_attributes_values)
-            return request.redirect(redirect_url, code=301)
         if attribute_value_params:
             request.session["attribute_value_params"] = attribute_value_params
         else:
@@ -670,7 +590,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
             "product_variants": product_variants,
             "search_product": search_product,
             "search_count": product_count,  # common for all searchbox
-            "bins": TableCompute().process(products, ppg, ppr),
             "ppg": ppg,
             "ppr": ppr,
             "gap": gap,
@@ -775,10 +694,15 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
         search_term = kwargs.get("search")
 
-        if search_term and not kwargs.get("attribute_values"):
+        # Preselect the variant matching the search term, unless attribute values are already
+        # given in the URL.
+        if search_term and not self._get_attribute_value_params(kwargs):
             attribute_values = product._get_attribute_values_from_search_term(search_term)
             if attribute_values:
-                kwargs["attribute_values"] = ",".join(str(v) for v in sorted(attribute_values.ids))
+                redirect_url = self._get_url_with_attribute_values(
+                    attribute_values.sorted().grouped("attribute_id")
+                )
+                return request.redirect(redirect_url, code=301)
 
         product_values = self._prepare_product_values(
             # request context must be given to ensure context updates in overrides are correctly
@@ -786,8 +710,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
             product.with_context(self.env.context),
             **kwargs,
         )
-        if "redirect_url" in product_values:
-            return request.redirect(product_values["redirect_url"], code=301)
         return request.render("website_sale.product", product_values)
 
     @route(
@@ -984,22 +906,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
         attribute_value_params = self._get_attribute_value_params(kwargs)
         attribute_value_dict = self._get_attribute_value_dict(attribute_value_params)
         attribute_value_ids = set(itertools.chain.from_iterable(attribute_value_dict.values()))
-        # TODO: remove support for `attribute_values` query param in version 20 (or later).
-        if not attribute_value_ids and (attribute_values := kwargs.get("attribute_values")):
-            attribute_value_ids = {
-                int(value_id)
-                for value_id in attribute_values.split(",")
-                if value_id and value_id.isdigit()
-            }
-            grouped_attributes_values = (
-                self
-                .env["product.attribute.value"]
-                .browse(attribute_value_ids)
-                .exists()
-                .sorted()
-                .grouped("attribute_id")
-            )
-            return {"redirect_url": self._get_url_with_attribute_values(grouped_attributes_values)}
         if attribute_value_ids:
             combination = product.attribute_line_ids.mapped(
                 lambda ptal: (
@@ -1943,8 +1849,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 product.set_sequence_up()
             elif sequence == "down":
                 product.set_sequence_down()
-        if {"x", "y"} <= options.keys():
-            product.write({"website_size_x": options["x"], "website_size_y": options["y"]})
         if {"tag_field", "tag_ids"} <= options.keys():
             product.write({options["tag_field"]: options["tag_ids"] or False})
 
@@ -2160,7 +2064,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
         `grouped_attributes_values` (formatted as query params).
         """
         query = request.httprequest.args.to_dict(flat=False)
-        query.pop("attribute_values", None)
         slug = self.env["ir.http"]._slug
         for pa, pavs in grouped_attributes_values.items():
             query[slug(pa)] = ",".join([slug(pav) for pav in pavs])
