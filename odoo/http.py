@@ -131,6 +131,12 @@ import zlib
 from abc import ABC, abstractmethod
 from datetime import datetime
 from io import BytesIO
+try:
+    # Try the standard library module
+    from importlib.metadata import version as package_version
+except ImportError:
+    # Try the backport package importlib_metadata
+    from importlib_metadata import version as package_version
 from os.path import join as opj
 from pathlib import Path
 from urllib.parse import urlparse
@@ -145,7 +151,6 @@ import werkzeug.routing
 import werkzeug.security
 import werkzeug.wrappers
 import werkzeug.wsgi
-from werkzeug.urls import URL, url_parse, url_encode, url_quote
 from werkzeug.exceptions import (HTTPException, BadRequest, Forbidden,
                                  NotFound, InternalServerError)
 try:
@@ -164,6 +169,7 @@ from .exceptions import UserError, AccessError, AccessDenied
 from .modules.module import get_manifest
 from .modules.registry import Registry
 from .service import security, model as service_model
+from ._werkzeug_compat import URL, url_encode, url_parse, url_quote
 from .tools import (config, consteq, date_utils, file_path, parse_version,
                     profiler, submap, unique, ustr,)
 from .tools.geoipresolver import GeoIPResolver
@@ -253,7 +259,7 @@ ROUTING_KEYS = {
     'alias', 'host', 'methods',
 }
 
-if parse_version(werkzeug.__version__) >= parse_version('2.0.2'):
+if parse_version(package_version('werkzeug')) >= parse_version('2.0.2'):
     # Werkzeug 2.0.2 adds the websocket option. If a websocket request
     # (ws/wss) is trying to access an HTTP route, a WebsocketMismatch
     # exception is raised. On the other hand, Werkzeug 0.16 does not
@@ -1100,11 +1106,11 @@ class Response(werkzeug.wrappers.Response):
             self.response.append(self.render())
             self.template = None
 
-    def set_cookie(self, key, value='', max_age=None, expires=None, path='/', domain=None, secure=False, httponly=False, samesite=None, cookie_type='required'):
+    def set_cookie(self, key, value='', max_age=None, expires=None, path='/', domain=None, secure=False, httponly=False, samesite=None, cookie_type='required', partitioned=False):
         if request.db and not request.env['ir.http']._is_allowed_cookie(cookie_type):
             expires = 0
             max_age = 0
-        super().set_cookie(key, value=value, max_age=max_age, expires=expires, path=path, domain=domain, secure=secure, httponly=httponly, samesite=samesite)
+        super().set_cookie(key, value=value, max_age=max_age, expires=expires, path=path, domain=domain, secure=secure, httponly=httponly, samesite=samesite, partitioned=partitioned)
 
 
 class FutureResponse:
@@ -1124,11 +1130,11 @@ class FutureResponse:
         return self.charset
 
     @functools.wraps(werkzeug.Response.set_cookie)
-    def set_cookie(self, key, value='', max_age=None, expires=None, path='/', domain=None, secure=False, httponly=False, samesite=None, cookie_type='required'):
+    def set_cookie(self, key, value='', max_age=None, expires=None, path='/', domain=None, secure=False, httponly=False, samesite=None, cookie_type='required', partitioned=False):
         if request.db and not request.env['ir.http']._is_allowed_cookie(cookie_type):
             expires = 0
             max_age = 0
-        werkzeug.Response.set_cookie(self, key, value=value, max_age=max_age, expires=expires, path=path, domain=domain, secure=secure, httponly=httponly, samesite=samesite)
+        werkzeug.Response.set_cookie(self, key, value=value, max_age=max_age, expires=expires, path=path, domain=domain, secure=secure, httponly=httponly, samesite=samesite, partitioned=partitioned)
 
 
 class Request:

@@ -61,6 +61,7 @@ _CONST_OPCODES = set(to_opcodes([
     'POP_TOP', 'ROT_TWO', 'ROT_THREE', 'ROT_FOUR', 'DUP_TOP', 'DUP_TOP_TWO',
     'LOAD_CONST',
     'RETURN_VALUE', # return the result of the literal/expr evaluation
+    'RETURN_CONST', # added in 3.12, returns a constant directly
     # literal collections
     'BUILD_LIST', 'BUILD_MAP', 'BUILD_TUPLE', 'BUILD_SET',
     # 3.6: literal map with constant keys https://bugs.python.org/issue27140
@@ -94,6 +95,8 @@ _EXPR_OPCODES = _CONST_OPCODES.union(to_opcodes([
     'GEN_START',  # added in 3.10 but already removed from 3.11.
     # Added in 3.11, replacing all BINARY_* and INPLACE_*
     'BINARY_OP',
+    # Added in 3.12
+    'BINARY_SLICE',
 ])) - _BLACKLIST
 
 _SAFE_OPCODES = _EXPR_OPCODES.union(to_opcodes([
@@ -127,10 +130,16 @@ _SAFE_OPCODES = _EXPR_OPCODES.union(to_opcodes([
     # replacement of POP_JUMP_IF_TRUE and POP_JUMP_IF_FALSE
     'POP_JUMP_FORWARD_IF_FALSE', 'POP_JUMP_FORWARD_IF_TRUE',
     'POP_JUMP_BACKWARD_IF_FALSE', 'POP_JUMP_BACKWARD_IF_TRUE',
+    # special cases of conditional jumps added in 3.11
+    'POP_JUMP_FORWARD_IF_NONE', 'POP_JUMP_BACKWARD_IF_NONE',
+    'POP_JUMP_FORWARD_IF_NOT_NONE', 'POP_JUMP_BACKWARD_IF_NOT_NONE',
     #replacement of JUMP_ABSOLUTE
     'JUMP_BACKWARD',
     #replacement of JUMP_IF_NOT_EXC_MATCH
     'CHECK_EXC_MATCH',
+    # Added in 3.12
+    'END_FOR', 'CALL_INTRINSIC_1', 'LOAD_FAST_AND_CLEAR', 'LOAD_FAST_CHECK',
+    'POP_JUMP_IF_NOT_NONE', 'POP_JUMP_IF_NONE', 'STORE_SLICE',
     # new opcodes
     'RETURN_GENERATOR',
     'PUSH_EXC_INFO',
