@@ -84,7 +84,6 @@ module.exports = [
             curly: ["error", "all"],
             "no-restricted-syntax": [
                 "error",
-                "PrivateIdentifier",
                 {
                     selector: "CallExpression[callee.name='useEffect'][arguments.length>1]",
                     message:
@@ -139,6 +138,7 @@ module.exports = [
             // nesting that @eslint/css cannot parse yet
             "**/account_asset/static/src/scss/account_asset.css",
             "**/ai/static/src/editor/embedded_components/core/voice_transcription.css",
+            "**/ai/static/src/views/fields/call_debrief/call_debrief.css",
             "**/appointment/static/src/scss/appointment_type_views.css",
             "**/appointment/static/src/scss/web_calendar.css",
             "**/hr_holidays/static/src/scss/time_off.css",
