@@ -28,7 +28,7 @@ class TestRecruitment(MailCase, TransactionCase):
         self.env['ir.default'].set('res.partner', 'lang', 'en_US')
 
         # Creating an applicant will create a partner (email_from inverse)
-        applicant = self.env['hr.applicant'].sudo().with_context(lang='pl_PL').create({
+        applicant = self.env['hr.applicant'].sudo().with_context(lang='pl_PL', auto_create_partner=True).create({
             'partner_name': 'Test Applicant',
             'email_from': "test_aplicant@example.com"
         })
@@ -262,7 +262,7 @@ class TestRecruitment(MailCase, TransactionCase):
             'email_from': 'test@thisisatest.com',
         }
         # First application, a partner should be created
-        self.env['hr.applicant'].create(applicant_data)
+        self.env['hr.applicant'].with_context(auto_create_partner=True).create(applicant_data)
         partner_count = self.env['res.partner'].search_count([('email', '=', 'test@thisisatest.com')])
         self.assertEqual(partner_count, 1)
         # Second application, no partner should be created
@@ -337,6 +337,28 @@ class TestRecruitment(MailCase, TransactionCase):
             app_2
         )
 
+    def test_applicant_refuse_duplicates_keeps_talent(self):
+        refuse_reason = self.env['hr.applicant.refuse.reason'].create([{'name': 'Fired'}])
+        pool = self.env['hr.talent.pool'].create({'name': 'Developers'})
+        talent = self.env['hr.applicant'].create({
+            'partner_name': 'Cameron Ellis',
+            'email_from': 'cameron.ellis@example.com',
+            'talent_pool_ids': [Command.set(pool.ids)],
+        })
+        applicant, duplicate = self.env['hr.applicant'].create([{
+            'partner_name': 'Cameron Ellis',
+            'email_from': 'cameron.ellis@example.com',
+        } for _i in range(2)])
+        wizard = self.env['applicant.get.refuse.reason'].create({
+            'refuse_reason_id': refuse_reason.id,
+            'applicant_ids': [applicant.id],
+            'duplicates': True,
+        })
+        self.assertEqual(wizard.duplicate_applicant_ids, duplicate)
+        wizard.action_refuse_reason_apply()
+        self.assertTrue(talent.active)
+        self.assertFalse(duplicate.active)
+
     def test_applicant_refuse_single_editable_body(self):
         officer = self.env['res.users'].create({
             'name': 'Refuse Officer',
@@ -385,6 +407,49 @@ class TestRecruitment(MailCase, TransactionCase):
         message = applicant.message_ids[0]
         self.assertIn('object.partner_name kept as-is', message.body)
         self.assertNotIn('Dear Laurie Poiret', message.body)
+        # The applicant had no contact: it is created to send the refusal
+        self.assertEqual(applicant.partner_id.email, 'laurie.poiret@aol.ru')
+        self.assertEqual(message.partner_ids, applicant.partner_id)
+
+    def test_applicant_contact_created_when_needed(self):
+        existing_partner = self.env['res.partner'].create({'name': 'Laurie', 'email': 'laurie.poiret@aol.ru'})
+        new_applicant, known_applicant = self.env['hr.applicant'].create([
+            {'partner_name': 'New Applicant', 'email_from': 'new.applicant@example.com'},
+            {'partner_name': 'Laurie Poiret', 'email_from': 'laurie.poiret@aol.ru'},
+        ])
+        # Setting the email doesn't create a contact, it only links the existing one
+        self.assertFalse(new_applicant.partner_id)
+        self.assertEqual(known_applicant.partner_id, existing_partner)
+
+        # Going further (e.g. scheduling a meeting) creates it, unless the contact of the email exists
+        known_applicant.partner_id = False
+        new_applicant.action_create_meeting()
+        known_applicant.action_create_meeting()
+        self.assertRecordValues(new_applicant.partner_id, [{'name': 'New Applicant', 'email': 'new.applicant@example.com'}])
+        self.assertEqual(known_applicant.partner_id, existing_partner)
+        self.assertEqual(self.env['res.partner'].search_count([('email', '=', 'laurie.poiret@aol.ru')]), 1)
+
+    def test_template_email_links_applicant_contact(self):
+        """ A template email sent to an applicant without contact (e.g. on a stage change) links the applicant
+        to the contact of the recipient, found from the email whatever its case, or created. """
+        template = self.env.ref('hr_recruitment.email_template_data_applicant_interest')
+        stage = self.env['hr.recruitment.stage'].create({'name': 'Interested', 'template_id': template.id})
+        existing_partner = self.env['res.partner'].create({'name': 'Laurie', 'email': 'laurie.poiret@aol.ru'})
+        new_applicant, known_applicant = self.env['hr.applicant'].create([
+            {'partner_name': 'New Applicant', 'email_from': 'New.Applicant@Example.com'},
+            {'partner_name': 'Laurie Poiret', 'email_from': 'laurie.poiret@aol.ru'},
+        ])
+        known_applicant.partner_id = False
+        self.flush_tracking()
+
+        with self.mock_mail_gateway():
+            (new_applicant | known_applicant).stage_id = stage
+            self.flush_tracking()
+
+        self.assertEqual(new_applicant.partner_id.email_normalized, 'new.applicant@example.com')
+        self.assertEqual(known_applicant.partner_id, existing_partner)
+        self.assertEqual(self.env['res.partner'].search_count([('email_normalized', '=', 'new.applicant@example.com')]), 1)
+        self.assertEqual(self.env['res.partner'].search_count([('email_normalized', '=', 'laurie.poiret@aol.ru')]), 1)
 
     def test_archive_applicant_routing(self):
         app_1, app_2 = self.env['hr.applicant'].create([
@@ -486,7 +551,7 @@ class TestRecruitment(MailCase, TransactionCase):
         self.assertEqual(len(res['domain'][0][2]), 3, "The list view should display 3 applications")
 
     def test_applicant_modify_email_number(self):
-        applicant = self.env['hr.applicant'].create({
+        applicant = self.env['hr.applicant'].with_context(auto_create_partner=True).create({
             'partner_name': 'Mary Applicant',
             'email_from': 'applicant@example.com',
             'partner_phone': '123456789',
