@@ -17,7 +17,7 @@ from odoo.addons.mail.tests.common import MailCommon, mail_new_test_user
 from odoo.addons.mail.tools.discuss import Store
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import HttpCase, users
-from odoo.tools import BinaryBytes, html_escape, mute_logger
+from odoo.tools import BinaryBytes, convert_file, html_escape, mute_logger
 
 
 class TestChannelInternals(MailCommon, HttpCase):
@@ -99,6 +99,14 @@ class TestChannelInternals(MailCommon, HttpCase):
         channel = self.env["discuss.channel"].create({"name": "Archive Access Test"})
         channel.write({"active": False})
         self.assertFalse(channel.active)
+
+    def test_builtin_channel_recreated_on_upgrade(self):
+        """A deleted built-in channel recreated on upgrade should get its default name."""
+        self.env.ref("mail.channel_admin").unlink()
+        convert_file(self.env, "mail", "data/discuss_channel_data.xml", idref={}, mode="update")
+        channel_admin = self.env.ref("mail.channel_admin")
+        self.assertEqual(channel_admin.name, "Administrators")
+        self.assertEqual(channel_admin.description, "General channel for administrators.")
 
     @users('employee')
     @freeze_time("2020-03-22 10:42:06")
@@ -1018,6 +1026,14 @@ class TestChannelInternals(MailCommon, HttpCase):
             ),
         ):
             channel.image_128 = BinaryBytes(b"<svg/>")
+
+    def test_group_write_empty_name(self):
+        group = self.env["discuss.channel"]._create_group(
+            users_to=self.user_employee,
+            name="Group",
+        )
+        group.write({"name": False})
+        self.assertEqual(group.name, "")
 
     @freeze_time("2025-04-08 10:00:00")
     def test_channel_notification(self):
