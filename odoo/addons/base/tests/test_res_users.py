@@ -13,6 +13,7 @@ from odoo.http import request_var
 from odoo.tests import (
     Form,
     HttpCase,
+    RecordCapturer,
     TransactionCase,
     freeze_time,
     new_test_user,
@@ -60,7 +61,7 @@ class UsersCommonCase(TransactionCase):
         users.invalidate_recordset()
 
 
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestUsers(UsersCommonCase):
 
     def test_name_search(self):
@@ -832,7 +833,7 @@ class TestUsers2(UsersCommonCase):
         self.cr.flush()
 
 
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestUsersTweaks(TransactionCase):
     def test_superuser(self):
         """ The superuser is inactive and must remain as such. """
@@ -986,6 +987,13 @@ class TestApiKeys(UsersCommonCase):
         with self.assertRaisesRegex(UserError, 'The provided API key is invalid or does not belong to the current user'):
             self.env['res.users.apikeys'].with_user(SUPERUSER_ID).generate(
                 self.api_key, 'scope', 'Another key', self.tomorrow)
+
+    def test_generate_apikey_readonly(self):
+        # Can create a readonly key
+        with RecordCapturer(self.env['res.users.apikeys'], []) as capture:
+            self.env['res.users.apikeys'].with_user(self.user_internal).generate(
+                self.api_key, 'scope', 'A readonly key', self.tomorrow, readonly=True)
+        self.assertTrue(capture.records.readonly)
 
 
 class TestResUsersForm(TransactionCase):

@@ -3,6 +3,8 @@ import collections
 import datetime
 import time
 
+from psycopg2.errors import ReadOnlySqlTransaction
+
 import odoo
 from odoo.exceptions import AccessDenied, AccessError, ValidationError
 from odoo.http import request_var
@@ -14,7 +16,7 @@ from odoo.tools import DotDict, mute_logger
 from odoo.addons.base.tests.common import SavepointCaseWithUserDemo
 
 
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestExternalAPI(SavepointCaseWithUserDemo):
 
     def test_call_kw(self):
@@ -260,6 +262,34 @@ class TestAPIKeys(common.HttpCase):
             kwargs={}
         )
         self.assertTrue(isinstance(api_key, int))
+
+    def test_key_readonly(self):
+        env = self.env(user=self._user)
+        r = env['res.users.apikeys.description'].create({
+            'name': 'a',
+            'readonly': True,
+        }).make_key()
+        k = r['context']['default_key']
+
+        uid = auth.dispatch('authenticate', [self.env.cr.dbname, 'byl', k, {}])
+        self.assertEqual(uid, self._user.id)
+
+        # read-only operations are ok
+        ctx = model.dispatch('execute_kw', [
+            self.env.cr.dbname, uid, k,
+            'res.users', 'context_get', []
+        ])
+        self.assertEqual(ctx['tz'], 'Australia/Eucla')
+
+        # read/write are not
+        with (
+            mute_logger('odoo.sql_db'),
+            self.assertRaises(ReadOnlySqlTransaction),
+        ):
+            model.dispatch('execute_kw', [
+                self.env.cr.dbname, uid, k,
+                'res.users.apikeys.description', 'create', [{'name': 'Name of the key'}]
+            ])
 
     def test_delete(self):
         env = self.env(user=self._user)

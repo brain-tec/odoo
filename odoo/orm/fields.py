@@ -322,7 +322,7 @@ class Field[T, C]:
     exportable: bool = True
 
     # mapping from type name to field type
-    _by_type__: dict[str, Field] = {}
+    _by_type__: dict[str, type[Field]] = {}
 
     def __init__(self, string: str | Sentinel = SENTINEL, **kwargs):
         kwargs['string'] = string
@@ -808,8 +808,8 @@ class Field[T, C]:
 
         # Compute the new domain for ('x.y.z', op, value)
         # as ('x', 'any', [('y', 'any', [('z', op, value)])])
-        # If the followed relation is a nullable many2one, we accept null
-        # for that path as well.
+        # If the followed relation is a nullable many2one or an x2many, we
+        # accept null for that path as well, as _compute_related does.
 
         # determine whether the related field can be null
         falsy_value = self.falsy_value
@@ -837,7 +837,7 @@ class Field[T, C]:
         domain = Domain(field_seq[-1].name, operator, value)
         for field in reversed(field_seq[:-1]):
             domain = Domain(field.name, 'any!' if self.compute_sudo else 'any', domain)
-            if can_be_null and field.type == 'many2one' and not field.required:
+            if can_be_null and field.relational and not field.required:
                 domain |= Domain(field.name, '=', False)
         return domain
 
