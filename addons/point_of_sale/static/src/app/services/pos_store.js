@@ -369,10 +369,16 @@ export class PosStore extends WithLazyGetterTrap {
         return [
             {
                 timeout: 180000, // 3 minutes
-                action: () =>
-                    this.router.state.current !== "PaymentScreen" &&
-                    this.saveIfOrder() &&
-                    this.navigate("SaverScreen"),
+                action: () => {
+                    if (this.router.state.current === "PaymentScreen") {
+                        return false;
+                    }
+                    if (!this.saveIfOrder()) {
+                        return false;
+                    }
+                    this.resetCashier();
+                    return this.navigate("SaverScreen");
+                },
             },
             {
                 timeout: 120000, // 2 minutes
@@ -897,7 +903,7 @@ export class PosStore extends WithLazyGetterTrap {
     async openConfigurator(pTemplate, opts = {}) {
         const attrById = this.models["product.attribute"].getAllBy("id");
         const attributeLines = pTemplate.attribute_line_ids.filter(
-            (attr) => attr.attribute_id?.id in attrById
+            (attr) => attr.active !== false && attr.attribute_id?.id in attrById
         );
         let attributeLinesValues = attributeLines.map((attr) => attr.product_template_value_ids);
         let variantProduct = null;
