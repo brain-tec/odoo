@@ -62,7 +62,10 @@ class ResourceCalendar(models.Model):
     company_id = fields.Many2one(
         'res.company', 'Company', domain=lambda self: [('id', 'in', self.env.companies.ids)],
         default=lambda self: self.env.company, index='btree_not_null')
-    country_id = fields.Many2one(related='company_id.country_id')
+    country_id = fields.Many2one(
+        'res.country', 'Country', compute='_compute_country_id', store=True, readonly=False,
+        domain=lambda self: [('id', 'in', self.env.companies.country_id.ids)],
+        precompute=True, index='btree_not_null')
     country_code = fields.Char(related='country_id.code', depends=['country_id'])
     leave_ids = fields.One2many(
         'resource.calendar.leaves', 'calendar_id', 'Time Off')
@@ -190,6 +193,14 @@ class ResourceCalendar(models.Model):
     # --------------------------------------------------
     # Compute Methods
     # --------------------------------------------------
+
+    @api.depends('company_id.country_id')
+    def _compute_country_id(self):
+        for calendar in self:
+            if calendar.company_id:
+                calendar.country_id = calendar.company_id.country_id
+            elif not calendar.country_id:
+                calendar.country_id = False
 
     @api.depends('reference_calendar_id', 'reference_calendar_id.hours_per_week', 'hours_per_week', 'company_id.resource_calendar_id.hours_per_week')
     def _compute_full_time_required_hours(self):
@@ -615,7 +626,7 @@ class ResourceCalendar(models.Model):
                     if leave_resource and leave_resource._is_flexible():
                         dt0, dt1 = self._handle_flexible_leave_interval(dt0, dt1, leave)
                     result[resource.id].append((max(start, dt0), min(end, dt1), leave))
-        return {r.id: Intervals(result[r.id]) for r in all_resources}
+        return {r.id: Intervals(result[r.id], keep_distinct=True) for r in all_resources}
 
     def _work_intervals_batch(self, start_dt, end_dt, resources_per_tz=None, domain=None, compute_leaves=True):
         """ Return the effective work intervals: attendance intervals minus leave intervals.

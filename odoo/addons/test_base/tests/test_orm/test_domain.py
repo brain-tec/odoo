@@ -12,6 +12,7 @@ from odoo.tools import SQL, OrderedSet
 from .test_domain_expression import TransactionExpressionCase
 
 
+@tagged('at_install', '-post_install')
 class TestDomain(TransactionExpressionCase):
     def _search(self, model, domain, init_domain=Domain.TRUE, test_complement=False):
         # just overwrite the defaults here, because we test complements manually
@@ -339,6 +340,31 @@ class TestDomain(TransactionExpressionCase):
         res_search = self._search(Child, [('tag_ids', 'not any', [('name', '=', 'Urgent')])])
         self.assertEqual(res_search, child_2 + child_3)
 
+    def test_not_in_related_non_stored(self):
+        """ `a not in x` on a non-stored related field `a` (`foo.bar`) is
+        `foo.bar not in x` and `foo not any bar in x`: when `foo` is not set,
+        `a` is falsy, so it is not in `x`. """
+        Related = self.env['test_orm.related']
+        foo_a, foo_b, foo_null = self.env['test_orm.related_foo'].create([
+            {'name': 'a'}, {'name': 'b'}, {'name': False},
+        ])
+        rec_a, rec_b, rec_null, rec_unset = Related.create([
+            {'foo_id': foo_a.id},
+            {'foo_id': foo_b.id},
+            {'foo_id': foo_null.id},
+            {'foo_id': False},
+        ])
+        init_domain = [('id', 'in', (rec_a + rec_b + rec_null + rec_unset).ids)]
+        for field_name in ('foo_name', 'foo_name_sudo'):
+            with self.subTest(field_name=field_name):
+                for domain in (
+                    [(field_name, '!=', 'a')],
+                    [(field_name, 'not in', ['a'])],
+                    [('foo_id', 'not any', [('name', '=', 'a')])],
+                ):
+                    result = self._search(Related, init_domain + domain, init_domain=init_domain)
+                    self.assertEqual(result, rec_b + rec_null + rec_unset, domain)
+
     def test_any_in_search_field(self):
         Message = self.env.registry['test_orm.message']
         model = self.env[Message._name]
@@ -370,6 +396,7 @@ class TestDomain(TransactionExpressionCase):
         self.assertEqual(res_search, related, "the archived message should still be found")
 
 
+@tagged('at_install', '-post_install')
 class TestDomainComplement(TransactionExpressionCase):
 
     def test_inequalities_int(self):
@@ -427,7 +454,7 @@ class TestDomainComplement(TransactionExpressionCase):
             self._search(Model, [('parent_id', '>=', 'Par')])
 
 
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestDomainOptimize(TransactionCase):
     number_domain = Domain('numeric', '>', 5)
 
