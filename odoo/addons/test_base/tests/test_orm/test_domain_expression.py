@@ -48,8 +48,7 @@ class TransactionExpressionCase(TransactionCase):
         return sql
 
 
-@tagged('res_partner')
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestExpression(TestOrmPartnerCommon, SavepointCaseWithUserDemo, TransactionExpressionCase):
 
     @classmethod
@@ -1504,7 +1503,7 @@ class TestExpression(TestOrmPartnerCommon, SavepointCaseWithUserDemo, Transactio
         self.assertFalse(partner.filtered_domain(domain), "We should not find the record anymore (parent_id is inaccessible)")
 
 
-@tagged('res_partner')
+@tagged('at_install', '-post_install')
 class TestExpression2(TransactionExpressionCase):
 
     def test_long_table_alias(self):
@@ -1514,7 +1513,7 @@ class TestExpression2(TransactionExpressionCase):
         self.env['test_orm.domain_expression.users'].search([('name', '=', 'test')])
 
 
-@tagged('res_partner')
+@tagged('at_install', '-post_install')
 class TestBypassAccess(TransactionExpressionCase):
 
     def test_bypass_search_access(self):
@@ -1763,8 +1762,7 @@ class TestBypassAccess(TransactionExpressionCase):
         )
 
 
-@tagged('res_partner')
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestQueries(TransactionCase):
 
     def test_logic(self):
@@ -2060,8 +2058,7 @@ class TestQueries(TransactionCase):
             Model.name_search('foo', operator='not ilike')
 
 
-@tagged('res_partner')
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestMany2one(TransactionCase):
     def setUp(self):
         super().setUp()
@@ -2159,11 +2156,12 @@ class TestMany2one(TransactionCase):
         with self.assertQueries(['''
             SELECT "test_orm_partner"."id"
             FROM "test_orm_partner"
-            WHERE ("test_orm_partner"."business_id" IS NULL OR "test_orm_partner"."business_id" NOT IN (
-                SELECT "test_orm_business"."id"
+            WHERE NOT EXISTS (SELECT 1 FROM (SELECT "test_orm_business"."id"
                 FROM "test_orm_business"
                 WHERE "test_orm_business"."name" LIKE %s
-            ))
+                ) AS "test_orm_partner__business_id__exists"
+                WHERE "test_orm_partner__business_id__exists"."id" = "test_orm_partner"."business_id"
+            )
             ORDER BY ...
         ''']):
             self.Partner.search(['!', ('business_id.name', 'like', self.business.name)])
@@ -2381,11 +2379,12 @@ class TestMany2one(TransactionCase):
         with self.assertQueries(['''
             SELECT "test_orm_partner"."id"
             FROM "test_orm_partner"
-            WHERE ("test_orm_partner"."business_id" IS NULL OR "test_orm_partner"."business_id" NOT IN (
-                SELECT "test_orm_business"."id"
+            WHERE NOT EXISTS (SELECT 1 FROM (SELECT "test_orm_business"."id"
                 FROM "test_orm_business"
                 WHERE "test_orm_business"."name" LIKE %s
-            ))
+                ) AS "test_orm_partner__business_id__exists"
+                WHERE "test_orm_partner__business_id__exists"."id" = "test_orm_partner"."business_id"
+            )
             ORDER BY ...
         ''']):
             self.Partner.search([('business_id', 'not like', "blablabla")])
@@ -2405,8 +2404,7 @@ class TestMany2one(TransactionCase):
             self.assertGreater(len(self.Partner.name_search('test')), 0)
 
 
-@tagged('res_partner')
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestOne2many(TransactionCase):
     def setUp(self):
         super().setUp()
@@ -2649,8 +2647,7 @@ class TestOne2many(TransactionCase):
             self.Partner.search([('bank_ids', '=', False)], order='id')
 
 
-@tagged('res_partner')
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestMany2many(TransactionCase):
     def setUp(self):
         super().setUp()
@@ -2859,7 +2856,7 @@ class TestMany2many(TransactionCase):
             self.Partner.search([('category_id', '=', False)], order='id')
 
 
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestAnyfy(TransactionCase):
     def _test_combine_anies(self, domain, expected):
         model = self.env['test_orm.partner']

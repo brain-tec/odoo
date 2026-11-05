@@ -113,7 +113,7 @@ class ResUsers(models.Model):
         compute='_compute_company_employee', search='_search_company_employee', readonly=True)
     department_id = fields.Many2one(related='employee_id.department_id', string='Department')
 
-    job_title = fields.Char(**related_employee_field('job_title'), user_writeable=True)
+    job_id = fields.Many2one('hr.job', **related_employee_field('job_id'))
     work_phone = fields.Char(**related_employee_field('work_phone'), user_writeable=True)
     mobile_phone = fields.Char(**related_employee_field('mobile_phone'), user_writeable=True)
     work_email = fields.Char(**related_employee_field('work_email'), user_writeable=True)
@@ -457,12 +457,6 @@ class ResUsers(models.Model):
             res['views'] = [(self.env.ref('base.view_users_form').id, 'form')]
 
         return res
-
-    def _store_avatar_card_fields(self, res: Store.FieldList):
-        super()._store_avatar_card_fields(res)
-        if res.is_for_internal_users():
-            # sudo: res.users - internal users can access employee information of accessible user
-            res.many("employee_ids", "_store_avatar_card_fields", sudo=True)
 
     def _store_im_status_fields(self, res: Store.FieldList):
         super()._store_im_status_fields(res)

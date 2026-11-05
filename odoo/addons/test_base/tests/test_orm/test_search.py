@@ -105,7 +105,7 @@ class TestSearch(TestOrmPartnerCommon, TransactionCase):
         self.assertNotIn(credit_communal, cc_search, "Search for inactive record with x_active set to True has failed")
 
 
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestSubqueries(TransactionCase):
     """ Test the subqueries made by search() with relational fields. """
     maxDiff = None
@@ -151,13 +151,14 @@ class TestSubqueries(TransactionCase):
         with self.assertQueries(["""
             SELECT "test_orm_multi"."id"
             FROM "test_orm_multi"
-            WHERE ("test_orm_multi"."partner" IS NULL OR "test_orm_multi"."partner" NOT IN (
-                SELECT "test_orm_partner"."id"
+            WHERE NOT EXISTS (SELECT 1 FROM (SELECT "test_orm_partner"."id"
                 FROM "test_orm_partner"
                 WHERE ("test_orm_partner"."email" LIKE %s
                     AND "test_orm_partner"."name" LIKE %s
                 )
-            ))
+                ) AS "test_orm_multi__partner__exists"
+                WHERE "test_orm_multi__partner__exists"."id" = "test_orm_multi"."partner"
+            )
             ORDER BY "test_orm_multi"."id"
         """]):
             self.env['test_orm.multi'].search([
@@ -166,17 +167,52 @@ class TestSubqueries(TransactionCase):
                     ('partner.email', 'like', '@example.com'),
             ])
 
+    def test_not_any_many2one_self_reference(self):
+        """ `not any` on a many2one pointing to its own model uses a distinct
+        alias for the subquery, and still matches records without a parent. """
+        Partner = self.env['test_orm.partner']
+        parent_a, parent_b = Partner.create([{'name': 'parent a'}, {'name': 'parent b'}])
+        child_a, child_b = Partner.create([
+            {'name': 'child a', 'parent_id': parent_a.id},
+            {'name': 'child b', 'parent_id': parent_b.id},
+        ])
+        domain = [
+            ('id', 'in', (parent_a | parent_b | child_a | child_b).ids),
+            ('parent_id', 'not any', [('name', '=', 'parent a')]),
+        ]
+        # warmup
+        Partner.search(domain)
+
+        with self.assertQueries(["""
+            SELECT "test_orm_partner"."id"
+            FROM "test_orm_partner"
+            WHERE ("test_orm_partner"."active" IS TRUE
+                AND "test_orm_partner"."id" IN %s
+                AND NOT EXISTS (
+                    SELECT 1 FROM (
+                        SELECT "test_orm_partner"."id"
+                        FROM "test_orm_partner"
+                        WHERE "test_orm_partner"."name" IN %s
+                    ) AS "test_orm_partner__parent_id__exists"
+                    WHERE "test_orm_partner__parent_id__exists"."id" = "test_orm_partner"."parent_id"
+                ))
+            ORDER BY "test_orm_partner"."id"
+        """]):
+            found = Partner.search(domain)
+        self.assertEqual(found, parent_a | parent_b | child_b)
+
     def test_not_or_many2one_with_subfield(self):
         with self.assertQueries(["""
             SELECT "test_orm_multi"."id"
             FROM "test_orm_multi"
-            WHERE ("test_orm_multi"."partner" IS NULL OR "test_orm_multi"."partner" NOT IN (
-                SELECT "test_orm_partner"."id"
+            WHERE NOT EXISTS (SELECT 1 FROM (SELECT "test_orm_partner"."id"
                 FROM "test_orm_partner"
                 WHERE ("test_orm_partner"."email" LIKE %s
                     OR "test_orm_partner"."name" LIKE %s
                 )
-            ))
+                ) AS "test_orm_multi__partner__exists"
+                WHERE "test_orm_multi__partner__exists"."id" = "test_orm_multi"."partner"
+            )
             ORDER BY "test_orm_multi"."id"
         """]):
             self.env['test_orm.multi'].search([
@@ -210,11 +246,12 @@ class TestSubqueries(TransactionCase):
         with self.assertQueries(["""
             SELECT "test_orm_multi"."id"
             FROM "test_orm_multi"
-            WHERE ("test_orm_multi"."partner" IS NULL OR "test_orm_multi"."partner" NOT IN (
-                SELECT "test_orm_partner"."id"
+            WHERE NOT EXISTS (SELECT 1 FROM (SELECT "test_orm_partner"."id"
                 FROM "test_orm_partner"
                 WHERE ("test_orm_partner"."email" LIKE %s OR "test_orm_partner"."name" LIKE %s)
-            ))
+                ) AS "test_orm_multi__partner__exists"
+                WHERE "test_orm_multi__partner__exists"."id" = "test_orm_multi"."partner"
+            )
             ORDER BY "test_orm_multi"."id"
         """]):
             self.env['test_orm.multi'].search([
@@ -515,7 +552,7 @@ class TestSubqueries(TransactionCase):
             Head.search([('node_id', 'parent_of', nodes.ids)])
 
 
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestSearchRelated(TransactionCase):
     @classmethod
     def setUpClass(cls):
@@ -1189,13 +1226,12 @@ class TestSearchRelated(TransactionCase):
         with self.assertQueries(["""
             SELECT "test_orm_related"."id"
             FROM "test_orm_related"
-            WHERE (
-                "test_orm_related"."foo_id" IS NULL OR "test_orm_related"."foo_id" NOT IN (
-                    SELECT "test_orm_related_foo"."id"
+            WHERE NOT EXISTS (SELECT 1 FROM (SELECT "test_orm_related_foo"."id"
                     FROM "test_orm_related_foo"
                     WHERE "test_orm_related_foo"."name" IN %s
+                    ) AS "test_orm_related__foo_id__exists"
+                    WHERE "test_orm_related__foo_id__exists"."id" = "test_orm_related"."foo_id"
                 )
-            )
             ORDER BY "test_orm_related"."id"
         """]):
             model.search([('foo_name', '!=', 'a')])
@@ -1241,13 +1277,13 @@ class TestSearchRelated(TransactionCase):
         with self.assertQueries(["""
             SELECT "test_orm_related"."id"
             FROM "test_orm_related"
-            WHERE (
-                "test_orm_related"."foo_id" IS NULL OR
-                "test_orm_related"."foo_id" NOT IN (
+            WHERE NOT EXISTS (
+                SELECT 1 FROM (
                     SELECT "test_orm_related_foo"."id"
                     FROM "test_orm_related_foo"
                     WHERE "test_orm_related_foo"."name" IN %s
-                )
+                ) AS "test_orm_related__foo_id__exists"
+                WHERE "test_orm_related__foo_id__exists"."id" = "test_orm_related"."foo_id"
             )
             ORDER BY "test_orm_related"."id"
         """]):
@@ -1286,11 +1322,12 @@ class TestSearchRelated(TransactionCase):
         with self.assertQueries(["""
             SELECT "test_orm_related"."id"
             FROM "test_orm_related"
-            WHERE ("test_orm_related"."foo_id" IS NULL OR "test_orm_related"."foo_id" NOT IN (
-                SELECT "test_orm_related_foo"."id"
+            WHERE NOT EXISTS (SELECT 1 FROM (SELECT "test_orm_related_foo"."id"
                 FROM "test_orm_related_foo"
                 WHERE "test_orm_related_foo"."name" IN %s
-            ))
+                ) AS "test_orm_related__foo_id__exists"
+                WHERE "test_orm_related__foo_id__exists"."id" = "test_orm_related"."foo_id"
+            )
             ORDER BY "test_orm_related"."id"
         """]):
             model.search([('foo_name_sudo', '!=', 'a')])
@@ -1490,7 +1527,7 @@ class TestSearchRelated(TransactionCase):
             model.search([('foo_bar_name', '=', 'a')])
 
 
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestSearchAccessOperator(TransactionCase):
     @classmethod
     def setUpClass(cls):
@@ -1543,7 +1580,7 @@ class TestSearchAccessOperator(TransactionCase):
             messages.search([])
 
 
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestSearchAny(TransactionCase):
     @classmethod
     def setUpClass(cls):
@@ -1829,7 +1866,7 @@ class TestAnyDomainSearchContext(TransactionCase):
             link.with_user(restricted_user).attachment_id  # just read it
 
 
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestFlushSearch(TransactionCase):
 
     @classmethod
@@ -2137,6 +2174,7 @@ class TestFlushSearch(TransactionCase):
         self.assertEqual(self.env['test_orm.custom.table_query_sql'].search([]).sum_quantity, 25)
 
 
+@tagged('at_install', '-post_install')
 class TestDatePartNumber(TransactionExpressionCase):
     @classmethod
     def setUpClass(cls):
@@ -2232,6 +2270,7 @@ class TestDatePartNumber(TransactionExpressionCase):
         self.assertEqual(result, account)
 
 
+@tagged('at_install', '-post_install')
 class TestBinarySearch(TransactionExpressionCase):
     def test_binary_search(self):
         binary_value = BinaryBytes(b'content', filename='test')
@@ -2269,7 +2308,7 @@ class TestBinarySearch(TransactionExpressionCase):
                     self._search(record, [(field_name, 'like', 't%')])
 
 
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('at_install', '-post_install')
 class TestNonIntId(TransactionCase):
     def test_query_non_int(self):
         records = self.env['test_orm.view.str.id'].search([('name', '=', 'test')])

@@ -112,9 +112,6 @@ class HrVersion(models.Model):
     member_of_department = fields.Boolean("Member of department", compute='_compute_part_of_department', search='_search_part_of_department',
         help="Whether the employee is a member of the active user's department or one of it's child department.")
     job_id = fields.Many2one('hr.job', check_company=True, tracking=1, index=True)
-    job_title = fields.Char(compute="_compute_job_title", inverse="_inverse_job_title", store=True, readonly=False,
-        string="Job Title", tracking=True)
-    is_custom_job_title = fields.Boolean(compute='_compute_is_custom_job_title', store=True, default=False, groups="hr.group_hr_user")
     address_id = fields.Many2one(
         'res.partner',
         string='Work Address',
@@ -139,7 +136,14 @@ class HrVersion(models.Model):
 
     resource_calendar_id = fields.Many2one(
         'resource.calendar', required=True, default=lambda self: self.env.company.resource_calendar_id, inverse='_inverse_resource_calendar_id', string="Working Hours", index='btree_not_null', tracking=1,
-        domain="['|', ('company_id', '=', False), ('company_id.id', 'parent_of', company_id)]")
+        domain="""['&',
+            '|',
+                ('company_id', '=', False),
+                ('company_id.id', 'parent_of', company_id),
+            '|',
+                ('country_id', '=', False),
+                ('country_id', '=', company_country_id)
+        ]""")
     tz = fields.Selection(_tz_get, string='Timezone', required=True, default=lambda self: self.env.context.get('tz') or self.env.user.tz or 'UTC')
 
     # Contract Information
@@ -213,22 +217,6 @@ class HrVersion(models.Model):
                     ('location_type', '=', 'office'),
                 ])
             version.work_location_id = work_locations if len(work_locations) == 1 else False
-
-    @api.depends('job_id.name')
-    def _compute_job_title(self):
-        for version in self.filtered('job_id'):
-            if version._origin.job_id != version.job_id or not version.is_custom_job_title:
-                version.job_title = version.job_id.name
-
-    def _inverse_job_title(self):
-        for version in self:
-            version.is_custom_job_title = version.job_title != version.job_id.name
-
-    @api.depends('job_id')
-    def _compute_is_custom_job_title(self):
-        for version in self.filtered('job_id'):
-            if version._origin.job_id != version.job_id:
-                version.is_custom_job_title = False
 
     @api.depends("private_country_id")
     def _compute_allowed_country_state_ids(self):
