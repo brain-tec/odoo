@@ -1023,8 +1023,8 @@ class AccountMove(models.Model):
             # set the tags as well, during the encoding. So, if no receivable/payable
             # line has been created yet, the invoice would be detected as always exigible,
             # and set the tags on some lines ; which would be wrong.
-            record.always_tax_exigible = not record.is_invoice(True) \
-                                         and not record._collect_tax_cash_basis_values()
+            record.always_tax_exigible = record.journal_id.type in ('bank', 'cash') \
+                                         or (not record.is_invoice(True) and not record._collect_tax_cash_basis_values())
 
     @api.depends('partner_id')
     def _compute_commercial_partner_id(self):
@@ -4954,7 +4954,10 @@ class AccountMove(models.Model):
             new_lines.is_imported = True
             if not existing_lines:
                 try:
-                    self.with_context(default_move_type=self.move_type)._link_bill_origin_to_purchase_orders(timeout=4)
+                    self.with_context(
+                        default_move_type=self.move_type,
+                        invoice_origin_from_description=any(file_data.get('invoice_origin_from_description') for file_data in files_data),
+                    )._link_bill_origin_to_purchase_orders(timeout=4)
                 except (UserError, ValueError):
                     _logger.exception("Failed to link bill to purchase order")
 
