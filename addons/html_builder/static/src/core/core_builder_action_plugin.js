@@ -72,15 +72,24 @@ function getStyleValue(el, styleName) {
     return cssValues.join(" ");
 }
 
-function setStyle(el, styleName, value, { extraClass, force = false, allowImportant = true } = {}) {
-    const computedStyle = window.getComputedStyle(el);
-    const cssProps = CSS_SHORTHANDS[styleName] || [styleName];
-    // Always reset the inline style first to not put inline style on an
-    // element which already has this style through css stylesheets.
+function cleanStyle(el, cssProps, extraClass) {
     for (const cssProp of cssProps) {
         el.style.setProperty(cssProp, "");
     }
     el.classList.remove(extraClass);
+}
+
+export function setStyle(
+    el,
+    styleName,
+    value,
+    { extraClass, force = false, allowImportant = true } = {}
+) {
+    const computedStyle = window.getComputedStyle(el);
+    const cssProps = CSS_SHORTHANDS[styleName] || [styleName];
+    // Always reset the inline style first to not put inline style on an
+    // element which already has this style through css stylesheets.
+    cleanStyle(el, cssProps, extraClass);
 
     // Replacing ', ' by ',' to prevent attributes with internal space separators from being split:
     // eg: "rgba(55, 12, 47, 1.9) 47px" should be split as ["rgba(55,12,47,1.9)", "47px"]
@@ -320,6 +329,13 @@ export class StyleAction extends BuilderAction {
                 setStyle(editingElement, styleName, value, styleParams);
             }
         });
+    }
+    clean({ editingElement, params: { mainParam: styleName, extraClass } = {} }) {
+        // The style action usually clears the previous style before applying a
+        // new one. We keep an explicit method here for edge cases, such as a
+        // `BuilderSelect` clearing its linked input behavior in the
+        // `BuilderNumberSelect` component.
+        cleanStyle(editingElement, CSS_SHORTHANDS[styleName] || [styleName], extraClass);
     }
     _getValueWithoutTransition(el, styleName) {
         return withoutTransition(el, () => getStyleValue(el, styleName));
