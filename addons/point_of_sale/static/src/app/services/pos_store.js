@@ -383,6 +383,15 @@ export class PosStore extends WithLazyGetterTrap {
         this.navigate(page, params);
     }
 
+    get configFastPaymentMethod() {
+        const fastPaymentMethods = this.config.paymentMethods.filter(
+            (pm) => pm.type !== "pay_later"
+        );
+        // Fall back to all payment methods when there is no cash/bank method
+        // configured, so a fast payment method is always available if any method exists.
+        return fastPaymentMethods.length ? fastPaymentMethods : this.config.paymentMethods;
+    }
+
     get defaultPage() {
         return {
             page: "ProductScreen",
@@ -413,10 +422,16 @@ export class PosStore extends WithLazyGetterTrap {
         return [
             {
                 timeout: 180000, // 3 minutes
-                action: () =>
-                    this.router.currentScreen() !== "PaymentScreen" &&
-                    this.saveIfOrder() &&
-                    this.navigate("SaverScreen"),
+                action: () => {
+                    if (this.router.currentScreen() === "PaymentScreen") {
+                        return false;
+                    }
+                    if (!this.saveIfOrder()) {
+                        return false;
+                    }
+                    this.resetCashier();
+                    return this.navigate("SaverScreen");
+                },
             },
             {
                 timeout: 120000, // 2 minutes
@@ -953,7 +968,7 @@ export class PosStore extends WithLazyGetterTrap {
     async openConfigurator(pTemplate, opts = {}) {
         const attrById = this.models["product.attribute"].getAllBy("id");
         const attributeLines = pTemplate.attribute_line_ids.filter(
-            (attr) => attr.attribute_id?.id in attrById
+            (attr) => attr.active !== false && attr.attribute_id?.id in attrById
         );
         let attributeLinesValues = attributeLines.map((attr) => attr.product_template_value_ids);
         let variantProduct = null;
@@ -2798,7 +2813,7 @@ export class PosStore extends WithLazyGetterTrap {
                 paymentLines[0].payment_method_id.type === "pay_later" &&
                 this.currency.isNegative(paymentLines[0].amount))
         ) {
-            opts.fastPaymentMethod = this.config.paymentMethods[0];
+            opts.fastPaymentMethod = this.configFastPaymentMethod[0];
         }
         return opts;
     }
