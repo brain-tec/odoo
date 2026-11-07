@@ -9,14 +9,14 @@
 # Rita Bastos, 2025
 # Peter Lawrence Romão <peterromao@yahoo.co.uk>, 2025
 # Daniel Reis, 2025
-# Humberto Sousa <humberto.sousa@smartimprove.pt>, 2025.
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Humberto Sousa <humberto.sousa@smartimprove.pt>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 18:37+0000\n"
-"PO-Revision-Date: 2025-11-21 06:38+0000\n"
+"PO-Revision-Date: 2026-11-02 17:33+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Portuguese <https://translate.odoo.com/projects/odoo-18/"
 "survey/pt/>\n"
@@ -26,7 +26,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
 "1000000 == 0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__question_count
@@ -214,6 +214,41 @@ msgid ""
 "</div>\n"
 "            "
 msgstr ""
+"<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-"
+"family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
+"    <table style=\"width:600px;margin:5px auto;\">\n"
+"        <tbody>\n"
+"            <tr><td>\n"
+"                <!-- Utilizamos o logótipo da empresa que realizou o "
+"inquérito (para gerir casos de várias empresas) -->\n"
+"                <a href=\"/\"><img t-if=\"not "
+"object.survey_id.create_uid.company_id.uses_default_logo\" t-attf-src=\"/"
+"logo.png?company={{ object.survey_id.create_uid.company_id.id }}\" "
+"style=\"vertical-align:baseline;max-width:100px;\"/></a>\n"
+"            </td><td style=\"text-align:right;vertical-align:middle;\">\n"
+"                    Certificação: <t t-out=\"object.survey_id.display_name "
+"or ''\">Formulário de comentários</t>\n"
+"            </td></tr>\n"
+"        </tbody>\n"
+"    </table>\n"
+"    <table style=\"width:600px;margin:0px auto;background:white;border:1px "
+"solid #e1e1e1;\">\n"
+"        <tbody>\n"
+"            <tr><td style=\"padding:15px 20px 10px 20px;\">\n"
+"                <p>Caro/a <span t-out=\"object.partner_id.name or "
+"'participante'\">participante:</span></p>\n"
+"                <p>\n"
+"                    Enviamos em anexo a sua certificação de\n"
+"                        <strong t-out=\"object.survey_id.display_name or "
+"''\">Criação de mobiliário</strong>\n"
+"                    .\n"
+"                </p>\n"
+"                <p>Parabéns por ter aprovado o questionário com uma "
+"pontuação de <strong t-out=\"object.scoring_percentage\"/> %!</p>\n"
+"            </td></tr>\n"
+"        </tbody>\n"
+"    </table>\n"
+"</div>"
 
 #. module: survey
 #: model:mail.template,body_html:survey.mail_template_user_input_invite
@@ -370,8 +405,8 @@ msgid ""
 "                        </span>"
 msgstr ""
 "<span class=\"fw-bold text-muted ms-2 d-none d-md-inline\">\n"
-"                            <span id=\"enter-tooltip\">ou prima Enter</"
-"span>\n"
+"                            <span id=\"enter-tooltip\">ou prima Enter</span>"
+"\n"
 "                        </span>"
 
 #. module: survey
@@ -500,8 +535,8 @@ msgstr ""
 msgid ""
 "<span>\"Red\" is not a category, I know what you are trying to do ;)</span>"
 msgstr ""
-"<span>\"Vermelho\" não é uma categoria, sabemos o que está a tentar "
-"fazer ;)</span>"
+"<span>\"Vermelho\" não é uma categoria, sabemos o que está a tentar fazer ;)"
+"</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_view_form
@@ -3362,8 +3397,8 @@ msgid ""
 msgstr ""
 "Idioma de tradução (ISO code) opcional a selecionar no envio de um e-mail. "
 "Se não atribuído, a versão inglesa será utilizada. Deverá usualmente ser uma "
-"expressão substituta que providencie o idioma apropriado, ex. "
-"{{ object.partner_id.lang }}."
+"expressão substituta que providencie o idioma apropriado, ex. {{ "
+"object.partner_id.lang }}."
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form

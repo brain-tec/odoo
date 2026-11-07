@@ -8,14 +8,14 @@
 # Manav Shah, 2025
 # Ujjawal Pathak, 2025
 #
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-11-21 02:25+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 09:48+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Hindi <https://translate.odoo.com/projects/odoo-18/"
 "base_import/hi/>\n"
 "Language: hi\n"
@@ -23,7 +23,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: base_import
 #. odoo-javascript
@@ -453,14 +453,6 @@ msgid ""
 msgstr ""
 "अगर मॉडल ओपनचैटर (openchatter) का इस्तेमाल करता है, तो इतिहास की ट्रैकिंग, इंपोर्ट के "
 "दौरान सदस्यताएं सेट करेगी और नोटिफ़िकेशन भेजेगी, लेकिन इससे इंपोर्ट धीमा हो जाएगा।"
-
-#. module: base_import
-#. odoo-python
-#: code:addons/base_import/models/base_import.py:0
-msgid ""
-"Image size excessive, imported images must be smaller than 42 million pixel"
-msgstr ""
-"इमेज का साइज़ बहुत ज़्यादा है, इंपोर्ट की गई इमेज 42 मिलियन पिक्सल से छोटी होनी चाहिए"
 
 #. module: base_import
 #. odoo-javascript
@@ -991,3 +983,9 @@ msgstr "सेकंड"
 #: code:addons/base_import/models/base_import.py:0
 msgid "unknown error code %s"
 msgstr "अज्ञात गड़बड़ी कोड %s"
+
+#~ msgid ""
+#~ "Image size excessive, imported images must be smaller than 42 million "
+#~ "pixel"
+#~ msgstr ""
+#~ "इमेज का साइज़ बहुत ज़्यादा है, इंपोर्ट की गई इमेज 42 मिलियन पिक्सल से छोटी होनी चाहिए"

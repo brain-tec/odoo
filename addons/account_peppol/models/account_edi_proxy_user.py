@@ -168,15 +168,20 @@ class AccountEdiProxyClientUser(models.Model):
         if 'is_in_extractable_state' in move._fields:
             move.is_in_extractable_state = False
         try:
-            move._extend_with_attachments(attachment, new=True)
-            move._message_log(
-                body=self.env._(
-                    "%(proxy_type)s document (UUID: %(uuid)s) has been received successfully",
-                    proxy_type=dict(self._fields['proxy_type']._description_selection(self.env))[self.proxy_type],
-                    uuid=uuid,
-                ),
-                attachment_ids=attachment.ids,
-            )
+            if move._extend_with_attachments(attachment, new=True):
+                move._message_log(
+                    body=self.env._(
+                        "%(proxy_type)s document (UUID: %(uuid)s) has been received successfully",
+                        proxy_type=dict(self._fields['proxy_type']._description_selection(self.env))[self.proxy_type],
+                        uuid=uuid,
+                    ),
+                    attachment_ids=attachment.ids,
+                )
+            else:
+                move.peppol_move_state = 'error'
+                move.message_post(
+                    body=self.env._("There was an error while importing the bill, you can find attached the incoming XML"),
+                )
             move._autopost_bill()
         except Exception as err:
             _logger.exception(
@@ -498,12 +503,16 @@ class AccountEdiProxyClientUser(models.Model):
         )
         self.company_id.account_peppol_proxy_state = 'sender'
 
+    def _get_peppol_supported_document_types(self):
+        self.ensure_one()
+        return self.company_id._peppol_supported_document_types()
+
     def _peppol_register_receiver(self):
         # remove in master
         self.ensure_one()
         params = {
             'company_details': self._get_company_details(),
-            'supported_identifiers': list(self.company_id._peppol_supported_document_types())
+            'supported_identifiers': list(self._get_peppol_supported_document_types())
         }
         self._call_peppol_proxy(
             endpoint=self._get_peppol_proxy_endpoint('1/register_receiver'),
@@ -528,7 +537,7 @@ class AccountEdiProxyClientUser(models.Model):
             endpoint=self._get_peppol_proxy_endpoint('1/register_sender_as_receiver'),
             params={
                 'migration_key': company.sudo().account_peppol_migration_key,
-                'supported_identifiers': list(company._peppol_supported_document_types())
+                'supported_identifiers': list(self._get_peppol_supported_document_types())
             },
         )
         # once we sent the migration key over, we don't need it
