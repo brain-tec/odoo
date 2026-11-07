@@ -7,14 +7,14 @@
 # Martin Trigaux, 2024
 # Larissa Manderfeld, 2024
 #
-# "Larissa Manderfeld (lman)" <lman@odoo.com>, 2025.
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# "Larissa Manderfeld (lman)" <lman@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-12-31 08:42+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 09:46+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Spanish <https://translate.odoo.com/projects/odoo-18/"
 "base_import/es/>\n"
@@ -24,7 +24,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
 "0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: base_import
 #. odoo-javascript
@@ -470,15 +470,6 @@ msgstr ""
 "Si el modelo usa openchatter, el seguimiento del historial configurará "
 "suscripciones y enviará notificaciones durante la importación, pero hará más "
 "lenta la importación."
-
-#. module: base_import
-#. odoo-python
-#: code:addons/base_import/models/base_import.py:0
-msgid ""
-"Image size excessive, imported images must be smaller than 42 million pixel"
-msgstr ""
-"Tamaño de imagen excesivo, las imágenes importadas deben ser menores a 42 "
-"millones de pixeles"
 
 #. module: base_import
 #. odoo-javascript
@@ -1021,3 +1012,10 @@ msgstr "segundos"
 #: code:addons/base_import/models/base_import.py:0
 msgid "unknown error code %s"
 msgstr "código de error desconocido%s"
+
+#~ msgid ""
+#~ "Image size excessive, imported images must be smaller than 42 million "
+#~ "pixel"
+#~ msgstr ""
+#~ "Tamaño de imagen excesivo, las imágenes importadas deben ser menores a 42 "
+#~ "millones de pixeles"
