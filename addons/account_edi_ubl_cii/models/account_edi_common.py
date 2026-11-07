@@ -462,6 +462,18 @@ class AccountEdiCommon(models.AbstractModel):
     # Import invoice
     # -------------------------------------------------------------------------
 
+    def _import_fix_line_price_unit_quantity_discount(self, quantity, discount, price_unit, line_total_amount, currency):
+        """ Recompute the quantity, discount and price unit so the line subtotal matches the line total amount
+        (LineExtensionAmount in UBL, LineTotalAmount in CII).
+        """
+        # TODO remove when France enforce stricter rules
+        current_line_subtotal = (1 - discount / 100) * (quantity * price_unit)
+        if not currency.is_zero((line_total_amount or 0.0) - current_line_subtotal):
+            quantity = quantity or 1
+            discount = 0
+            price_unit = (line_total_amount or 0.0) / quantity
+        return quantity, discount, price_unit
+
     def _import_invoice_ubl_cii(self, invoice, file_data, new=False):
         tree = file_data['xml_tree']
 
@@ -1150,19 +1162,20 @@ class AccountEdiCommon(models.AbstractModel):
 
         vat_mismatch = False
         if customer:
+            country = self._import_retrieve_country(collected_values)
             if not customer.vat:
-                country = self._import_retrieve_country(collected_values)
                 if self.env['res.partner']._run_vat_test(vat, country, True):
                     customer.vat = vat
                 return
-            if self._check_customer_vat_match(customer, vat, collected_values):
+            country_mismatch = bool(country and customer.country_id and customer.country_id != country)
+            if not country_mismatch and self._check_customer_vat_match(customer, vat, collected_values):
                 return
             vat_mismatch = True
 
         partner_create_values = self._import_prepare_missing_customer_create_values(collected_values)
         customer = self.env['res.partner'].create(partner_create_values)
         if vat_mismatch:
-            logs.append(_("Could not retrieve a partner corresponding to '%s' with the same VAT. A new partner was created.", name))
+            logs.append(_("Could not retrieve a partner corresponding to '%s' with the same VAT and country. A new partner was created.", name))
         else:
             logs.append(_("Could not retrieve a partner corresponding to '%s'. A new partner was created.", name))
         customer_values['customer'] = customer

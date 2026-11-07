@@ -837,6 +837,38 @@ test("Reaction summary opens again after clicking it", async () => {
     await contains(".o-mail-MessageReactionList-preview");
 });
 
+test("Reaction with long content stays inside the thread", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({
+        channel_type: "channel",
+        name: "channel1",
+    });
+    const messageId = pyEnv["mail.message"].create({
+        body: "Hello world",
+        res_id: channelId,
+        message_type: "comment",
+        model: "discuss.channel",
+    });
+    const content = "long".repeat(100);
+    pyEnv["mail.message.reaction"].create({
+        message_id: messageId,
+        content,
+        partner_id: serverState.partnerId,
+    });
+    await start();
+    await openDiscuss(channelId);
+    await contains(".o-mail-MessageReaction");
+    const contentRect = queryFirst(".o-mail-Discuss-content").getBoundingClientRect();
+    const reactionRect = queryFirst(".o-mail-MessageReaction").getBoundingClientRect();
+    expect(reactionRect.right).not.toBeGreaterThan(contentRect.right);
+    await click(".o-mail-Message [title='Expand']");
+    await click(".o-mail-Message-moreMenu [title='View Reactions']");
+    await contains(".o-mail-MessageReactionMenu-persona");
+    const persona = queryFirst(".o-mail-MessageReactionMenu-persona");
+    expect(persona.scrollWidth).not.toBeGreaterThan(persona.clientWidth);
+    await contains(`.o-mail-MessageReactionMenu button[title='${content}']`);
+});
+
 test("Select already reacted emoji from the emoji picker keeps the reaction on message", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({
@@ -2174,4 +2206,20 @@ test("Notification sent for nameless partner", async () => {
     await contains(".o-mail-MessageNotificationPopover", {
         text: "Mitchell Admin, Invoice Address",
     });
+});
+
+test("Remove link preview when message no longer contains the link", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "EditPreviewTest" });
+    await start();
+    await openDiscuss(channelId);
+    await insertText(".o-mail-Composer-input", "https://make-link-preview.com");
+    await click(".o-mail-Composer-send:enabled");
+    await contains(".o-mail-LinkPreviewCard", { count: 1 });
+    await click(".o-mail-Message [title='Expand']");
+    await click(".o-mail-Message-moreMenu [title='Edit']");
+    await insertText(".o-mail-Message.o-editing .o-mail-Composer-input", "Hi", { replace: true });
+    await press("Enter");
+    await contains(".o-mail-Message-body:text('Hi (edited)')");
+    await contains(".o-mail-LinkPreviewCard", { count: 0 });
 });
