@@ -11,6 +11,7 @@ import {
     start,
     startServer,
     triggerHotkey,
+    waitStoreFetch,
 } from "@mail/../tests/mail_test_helpers";
 import { deleteBackward } from "@html_editor/../tests/_helpers/user_actions";
 import {
@@ -18,7 +19,7 @@ import {
     getEditorFromComposerEl,
     insertTextInComposer,
 } from "@mail/../tests/mail_test_helpers_composer";
-import { expect, describe, test } from "@odoo/hoot";
+import { after, expect, describe, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import { onWillUpdateProps } from "@odoo/owl";
 import {
@@ -35,8 +36,8 @@ import { MENTION_AMOUNT_WARNING } from "@mail/core/common/composer";
 import { DiscussAvatar } from "@mail/core/common/discuss_avatar";
 import { NavigableList } from "@mail/core/common/navigable_list";
 import { useAncestors } from "@mail/core/common/ancestor_plugin";
-import { waitFor, waitForNone } from "@odoo/hoot-dom";
-import { rpc } from "@web/core/network/rpc";
+import { press, waitFor, waitForNone } from "@odoo/hoot-dom";
+import { ConnectionAbortedError, rpc, rpcBus } from "@web/core/network/rpc";
 import { range } from "@web/core/utils/numbers";
 
 describe.current.tags("desktop");
@@ -127,6 +128,32 @@ test("suggestion list closed by Escape stays closed when the mention search answ
     await insertTextInComposer(".o-mail-Composer", "T");
     await expect.waitForSteps(["get_mention_suggestions"]);
     await mailContains(".o-mail-Composer-suggestion:has(:text('TestPartner'))");
+});
+
+test("typing on aborts the ongoing mention search of the previous term", async () => {
+    await startServer();
+    const { promise: fetchHeld } = Promise.withResolvers();
+    onRpc("res.partner", "get_mention_suggestions", async ({ kwargs }) => {
+        expect.step(`search "${kwargs.search}"`);
+        await fetchHeld;
+    });
+    const onResponse = ({ detail: { data, error } }) => {
+        if (
+            error instanceof ConnectionAbortedError &&
+            data.params.method === "get_mention_suggestions"
+        ) {
+            expect.step(`abort "${data.params.kwargs.search}"`);
+        }
+    };
+    rpcBus.addEventListener("RPC:RESPONSE", onResponse);
+    after(() => rpcBus.removeEventListener("RPC:RESPONSE", onResponse));
+    await start();
+    await openFormView("res.partner", serverState.partnerId);
+    await click("button:text('Send message')");
+    await insertTextInComposer(".o-mail-Composer", "@");
+    await expect.waitForSteps(['search ""']);
+    await insertTextInComposer(".o-mail-Composer", "a");
+    await expect.waitForSteps(['abort ""', 'search "a"']);
 });
 
 test("click away from the empty suggestion list keeps the fetched suggestions", async () => {
@@ -363,6 +390,21 @@ test("Do not fetch if search more specific and fetch had no result", async () =>
     await expect.waitForSteps([]);
 });
 
+test("mention typed after a canned response search without result is searched on the server", async () => {
+    await startServer();
+    listenStoreFetch("mail.canned.response");
+    onRpc("res.partner", "get_mention_suggestions", ({ kwargs }) => {
+        expect.step(`search "${kwargs.search}"`);
+    });
+    await start();
+    await openFormView("res.partner", serverState.partnerId);
+    await click("button:text('Send message')");
+    await insertTextInComposer(".o-mail-Composer", "::");
+    await waitStoreFetch("mail.canned.response");
+    await insertTextInComposer(".o-mail-Composer", " @");
+    await expect.waitForSteps(['search ""']);
+});
+
 test("[text composer] show other channel member in @ mention", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({
@@ -468,6 +510,29 @@ test("select @ mention insert mention text in composer", async () => {
     await insertTextInComposer(".o-mail-Composer", "@");
     await contains(".o-mail-Composer-suggestion strong:text('TestPartner'):count(1)").click();
     await containsTextInComposer(".o-mail-Composer", "\uFEFF@TestPartner\uFEFF\u00a0");
+});
+
+test("partner without a name is mentioned by its email", async () => {
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ email: "invoice@odoo.com", name: false });
+    const channelId = pyEnv["discuss.channel"].create({
+        name: "general",
+        channel_member_ids: [
+            Command.create({ partner_id: serverState.partnerId }),
+            Command.create({ partner_id: partnerId }),
+        ],
+    });
+    onRpcBefore("/mail/message/post", (args) =>
+        expect.step(`post to ${args.post_data.partner_ids}`)
+    );
+    await start();
+    await openDiscuss(channelId);
+    await insertTextInComposer(".o-mail-Composer", "@invoice");
+    await click(".o-mail-Composer-suggestion:contains('(invoice@odoo.com)')");
+    await containsTextInComposer(".o-mail-Composer", "\uFEFF@invoice@odoo.com\uFEFF\u00a0");
+    await press("Enter");
+    await waitFor(".o-mail-Message a.o_mail_redirect:text('@invoice@odoo.com'):count(1)");
+    await expect.waitForSteps([`post to ${partnerId}`]);
 });
 
 test("select @ mention from the suggestion list being filtered", async () => {

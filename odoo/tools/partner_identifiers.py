@@ -11,6 +11,7 @@ from stdnum.ee import registrikood as ee_en
 from stdnum.fi import ytunnus as fi_en
 from stdnum.fr import nir as fr_cn, siret as fr_siret, siren as fr_siren
 from stdnum.gb import vat as gb_vat
+from stdnum.hr import oib as hr_oib
 from stdnum.ie import pps as ie_ppsn
 from stdnum.jp import cn as jp_en
 from stdnum.lv import pvn as lv_en
@@ -21,6 +22,8 @@ from stdnum.se import orgnr as se_en
 
 from odoo.tools.translate import LazyGettext, LazyTranslate
 from odoo.tools.partner_identifier_validation import (
+    NON_DIGIT_RE,
+    ae_tin_validate,
     nl_kvk_validate,
     nl_oin_validate,
     pk_cn_validate,
@@ -62,8 +65,8 @@ TIN_METADATA = {
         'category': 'VAT',
         'countries': ['AD'],
     },
-    'AE_TIN': {
-        'scheme': '0235',
+    'AE_TRN': {  # 15-digit TRN; the 10-digit TIN (Peppol) is in additional_identifiers
+        'sequence': 10,
         'category': 'TIN',
         'countries': ['AE'],
     },
@@ -478,6 +481,16 @@ TIN_METADATA = {
 }
 
 ADDITIONAL_IDENTIFIERS_METADATA = {
+    'AE_TIN': {  # The first 10 digits of the TRN, deduced from AE_TRN
+        'sequence': 20,
+        'scheme': '0235',
+        'label': _lt('TIN'),
+        'help': _lt('UAE Tax Identification Number. If your business is VAT-registered, this is the first 10 digits of your 15-digit TRN.'),
+        'placeholder': '1001234567',
+        'category': 'TIN',
+        'validation_function': ae_tin_validate,
+        'countries': ['AE'],
+    },
     'AT_EN': {
         'sequence': 10,
         'scheme': '9915',
@@ -663,11 +676,12 @@ ADDITIONAL_IDENTIFIERS_METADATA = {
         'countries': ['HK'],
     },
     'HR_EN': {
-        **GLN_SHARED_VALS,
         'sequence': 10,
         'label': _lt('Company ID'),
-        'help': _lt('Croatian company ID number.'),
+        'help': _lt('Croatian company ID number (OIB).'),
+        'placeholder': '33392005961',
         'category': 'EN',
+        'validation_function': hr_oib.validate,
         'countries': ['HR'],
     },
     'HU_EN': {
@@ -996,6 +1010,8 @@ def get_deduced_identifiers(key, value):
     Example: FR_SIRET => FR_SIREN, BE_VAT => BE_EN.
     """
     deduced = {}
+    if key == 'AE_TRN':
+        deduced['AE_TIN'] = NON_DIGIT_RE.sub('', value)[:10]
     if key == 'AT_VAT':
         deduced['AT_EN'] = get_non_prefixed_identifier('AT', value)
     if key == 'AU_ACN':
