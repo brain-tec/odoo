@@ -437,7 +437,7 @@ class AccountMoveLine(models.Model):
     )
     discount = fields.Float(
         string='Discount (%)',
-        digits='Discount',
+        min_display_digits='Discount',
         default=0.0,
     )
     tax_calculation_rounding_method = fields.Selection(
@@ -3873,7 +3873,7 @@ class AccountMoveLine(models.Model):
         """Return a formatted list of dicts representing the child lines of the given section or subsection."""
         self.ensure_one()
 
-        children_lines = self.move_id.invoice_line_ids.filtered(lambda l: self in {l.parent_id, l.parent_id.parent_id})
+        children_lines = self.move_id.invoice_line_ids.filtered(lambda l: self in {l.parent_id, l.parent_id.parent_id}).sorted('sequence')
         subsection_lines = children_lines.filtered(lambda l: l.display_type == 'line_subsection')
         direct_children_lines = children_lines.filtered(lambda l: l.parent_id == self and l.display_type != 'line_subsection')
 
