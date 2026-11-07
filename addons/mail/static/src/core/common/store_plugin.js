@@ -3,7 +3,11 @@ import { partnerCompareRegistry } from "@mail/core/common/partner_compare";
 import { SoundEffectsPlugin } from "@mail/core/common/sound_effects_plugin";
 import { Store as BaseStore, fields, makeStore } from "@mail/model/export";
 import { formatLocalDateTime, resolveTimeZoneName } from "@mail/utils/common/dates";
-import { attClassObjectToString, generateEmojisOnHtml } from "@mail/utils/common/format";
+import {
+    attClassObjectToString,
+    generateEmojisOnHtml,
+    getPartnerMentionName,
+} from "@mail/utils/common/format";
 
 import { Plugin, proxy, usePlugin } from "@odoo/owl";
 
@@ -619,7 +623,7 @@ export class Store extends BaseStore {
      * @param {import("models").Thread} [thread]
      */
     getPartnerMentionTexts(partner, thread) {
-        const name = (thread?.getPersonaName(partner) ?? partner.displayName)?.trim();
+        const name = getPartnerMentionName(partner, thread);
         return [name && `@${name}`, partner.email && `@${partner.email}`].filter(Boolean);
     }
 
@@ -893,13 +897,18 @@ export class Store extends BaseStore {
 
     /** @param {import("models").Thread} [thread] the thread from which the suggestions are triggered */
     sortPartnerSuggestionsContext(thread) {
+        const followerPartnerIds = new Set(
+            [...(thread?.followers ?? []), thread?.selfFollower]
+                .filter((follower) => follower?.partner_id)
+                .map((follower) => follower.partner_id.id)
+        );
         const latestMessageIdByAuthorId = new Map();
         for (const { author_id, id } of thread?.messages || []) {
             if (author_id && !latestMessageIdByAuthorId.has(author_id.id)) {
                 latestMessageIdByAuthorId.set(author_id.id, id);
             }
         }
-        return { latestMessageIdByAuthorId };
+        return { followerPartnerIds, latestMessageIdByAuthorId };
     }
 }
 Store.register();

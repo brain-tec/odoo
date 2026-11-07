@@ -133,6 +133,9 @@ export class SelfOrder {
                 if (payment_result === "Success") {
                     const [orderData] = data["pos.order"];
                     const localOrder = this.models["pos.order"].get(orderData.id);
+                    if (!localOrder) {
+                        return;
+                    }
                     orderData.partner_id = localOrder?.raw.partner_id || false;
                     this.models.connectNewData(data);
                     const order = this.models["pos.order"].find(
@@ -451,11 +454,13 @@ export class SelfOrder {
         this.currentCategory = this.availableCategories[0];
     }
 
-    hasPaymentMethod() {
-        return (
-            this.config.self_ordering_mode === "kiosk" &&
-            this.models["pos.payment.method"].filter((pm) => pm.type !== "cash").length > 0
+    get paymentMethods() {
+        return this.models["pos.payment.method"].filter(
+            (pm) => pm.type !== "cash" || pm.payment_provider
         );
+    }
+    hasPaymentMethod() {
+        return this.config.self_ordering_mode === "kiosk" && this.paymentMethods.length > 0;
     }
 
     async confirmOrder() {

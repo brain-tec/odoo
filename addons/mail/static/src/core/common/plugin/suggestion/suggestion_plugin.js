@@ -8,7 +8,6 @@ import { useSearch } from "@mail/utils/common/hooks";
 import { markRaw, proxy, untrack, useOnChange } from "@odoo/owl";
 
 import { normalize } from "@web/core/l10n/utils";
-import { ConnectionAbortedError } from "@web/core/network/rpc";
 
 /** @typedef {import("@mail/core/common/navigable_list").Option} Option */
 
@@ -47,8 +46,6 @@ export class MailSuggestionPlugin extends Plugin {
         },
     };
 
-    /** @type {AbortController|undefined} */
-    abortController;
     /**
      * @type {{
      *   getSuggestionPosition?: () => string,
@@ -177,26 +174,7 @@ export class MailSuggestionPlugin extends Plugin {
         }
         const sources = this.getSources();
         for (const candidatePosition of candidatePositions) {
-            if (candidatePosition < 0 || candidatePosition >= text.length) {
-                continue;
-            }
-
-            const findAppropriateSource = () => {
-                let goodCandidate;
-                for (const source of sources) {
-                    const { allowedPosition, delimiter } = source;
-                    if (
-                        text.substring(candidatePosition).startsWith(delimiter) && // delimiter is used
-                        (allowedPosition === undefined || allowedPosition === candidatePosition) && // delimiter is allowed position
-                        (!goodCandidate || delimiter.length > goodCandidate.delimiter.length) // delimiter is more specific
-                    ) {
-                        goodCandidate = source;
-                    }
-                }
-                return goodCandidate;
-            };
-
-            const candidateSource = findAppropriateSource();
+            const candidateSource = this.findSource(sources, text, candidatePosition);
             if (!candidateSource) {
                 continue;
             }
@@ -219,26 +197,42 @@ export class MailSuggestionPlugin extends Plugin {
         this.isDismissed = true;
     }
 
-    /** @param {string} term */
-    async fetchSuggestions(term) {
+    /**
+     * @param {string} term
+     * @param {{ abortSignal: AbortSignal }} options
+     */
+    async fetchSuggestions(term, { abortSignal }) {
         if (this.isDestroyed) {
             return;
         }
         const { source } = this.detection;
-        try {
-            this.abortController?.abort();
-            this.abortController = new AbortController();
-            await source.fetch?.(normalize(term), { abortSignal: this.abortController.signal });
-        } catch (e) {
-            if (e instanceof ConnectionAbortedError) {
-                return;
-            }
-            throw e;
-        }
+        await source.fetch?.(normalize(term), { abortSignal });
         if (this.isDestroyed) {
             return;
         }
         return this.searchSuggestions(term).length === 0 ? false : undefined;
+    }
+
+    /**
+     * The source with the longest delimiter typed at the given position.
+     *
+     * @param {SuggestionSource[]} sources
+     * @param {string} text
+     * @param {number} position
+     */
+    findSource(sources, text, position) {
+        let bestSource;
+        for (const source of sources) {
+            const { allowedPosition, delimiter } = source;
+            if (
+                text.startsWith(delimiter, position) &&
+                (allowedPosition === undefined || allowedPosition === position) &&
+                (!bestSource || delimiter.length > bestSource.delimiter.length)
+            ) {
+                bestSource = source;
+            }
+        }
+        return bestSource;
     }
 
     /**
