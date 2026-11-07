@@ -82,19 +82,32 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #           - select the current db snapshot
     _query_count_init_messaging = 33
     # Queries for _query_count_messaging_menu_channels (in order):
-    #   2: self_member_id of the current user (first occurrence)
-    #       - fetch res_users
-    #       - search discuss_channel JOIN member
-    #   8: load more, twice per tab (the priority domain first, then the rest) for the
-    #      chat, channel, meeting and livechat tabs:
-    #       - search_fetch discuss_channel
+    #   5: chat tab:
+    #       - fetch res_users (current persona, first occurrence)
+    #       - search_fetch discuss_channel_member (pinned channel ids)
+    #       - search discuss_channel JOIN member (is_member, first occurrence)
+    #       2: load more (the priority domain first, then the rest):
+    #           - search_fetch discuss_channel
+    #   4: channel tab:
+    #       - search_fetch discuss_channel_member (pinned channel ids)
+    #       - read group mail_message (needaction channel ids)
+    #       2: load more:
+    #           - search_fetch discuss_channel
+    #   3: meeting tab:
+    #       - search_fetch discuss_channel_member (pinned channel ids)
+    #       2: load more:
+    #           - search_fetch discuss_channel
+    #   4: livechat tab:
+    #       - search_fetch discuss_channel_member (pinned channel ids, tab domain)
+    #       - search_fetch discuss_channel_member (pinned channel ids, priority domain)
+    #       2: load more:
+    #           - search_fetch discuss_channel
     #   1: read group member (prefetch _compute_self_member_id)
     #   1: search discuss_channel (last message of each channel, add_channels_last_message)
     #   1: search mail_message (_compute_message_needaction)
     #   1: search discuss_channel (add_channels_last_needaction)
     #   36: channel _to_store_defaults:
     #       - read group member (_compute_invited_member_ids)
-    #       - fetch discuss_channel_member (invited member)
     #       - search discuss_channel_rtc_session
     #       - fetch discuss_channel_rtc_session
     #       - search member (channel_member_ids)
@@ -163,7 +176,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - search mail_message_schedule (last message of the needaction message)
     #       - search discuss_channel (linkedSubChannel of the needaction message)
     #   1: select the current db snapshot
-    _query_count_messaging_menu_channels = 76
+    _query_count_messaging_menu_channels = 81
     # Queries for _query_count_init_messaging_with_chat_hub (in order):
     #   2: _search_is_member (for current user, first occurrence)
     #       - fetch res_users
@@ -254,7 +267,8 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - fetch mail_message
     #       - search mail_notification (notification tab)
     #       - fetch mail_notification
-    #   3: initialize_counters, discuss.channel tabs:
+    #   7: initialize_counters, discuss.channel tabs:
+    #       - search mail_message (needaction channel ids, once per tab, 4 queries)
     #       - search_fetch discuss_channel (important channels)
     #       - read group member (prefetch _compute_self_member_id)
     #       - fetch discuss_channel_member (self member, tab domains)
@@ -313,7 +327,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - fetch discuss_call_history
     #       - search mail_call_artifact
     #   1: select the current db snapshot
-    _query_count_page_load = 71
+    _query_count_page_load = 75
     # Queries for _query_count_open_channel (in order):
     #   1: fetch res_users (current user)
     #   1: search discuss_channel JOIN member (_search_is_member, first occurrence)

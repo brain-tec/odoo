@@ -720,6 +720,8 @@ class ResUsers(models.Model):
         if 'group_ids' in vals and any(self._ids):
             # clear caches linked to the users
             self.env.invalidate_all()
+            # Record-access results are cached per (uid, companies), not per groups.
+            self.env.transaction.invalidate_access_cache()
             self.env.transaction.invalidate_ormcache()
 
         # per-method / per-model caches have been removed so the various
@@ -1177,7 +1179,7 @@ class ResUsers(models.Model):
         positives = []
         negatives = []
         for group_ext_id in group_spec.split(','):
-            group_ext_id = group_ext_id.strip()
+            assert group_ext_id == group_ext_id.strip(), "spaces detected in group definition"
             if group_ext_id.startswith('!'):
                 negatives.append(group_ext_id[1:])
             else:
