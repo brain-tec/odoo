@@ -23,15 +23,15 @@
 # Maitê Dietze, 2025
 # Daniel Reis, 2025
 # Wil Odoo, 2025
-# Humberto Sousa <humberto.sousa@smartimprove.pt>, 2025.
+# Humberto Sousa <humberto.sousa@smartimprove.pt>, 2025, 2026.
 # "Pedro Silva (Exo)" <pedrocs@exo.pt>, 2025, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-10 17:38+0000\n"
-"PO-Revision-Date: 2026-07-11 18:31+0000\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
+"PO-Revision-Date: 2026-10-27 12:32+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Portuguese <https://translate.odoo.com/projects/odoo-18/"
 "account/pt/>\n"
@@ -41,7 +41,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
 "1000000 == 0) ? 1 : 2);\n"
-"X-Generator: Weblate 2026.6.1\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__type
@@ -1017,14 +1017,14 @@ msgid "<span class=\"o_stat_text\">Invoiced</span>"
 msgstr "<span class=\"o_stat_text\">Faturado</span>"
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
-msgid "<span class=\"o_stat_text\">Journal Entries</span>"
-msgstr "<span class=\"o_stat_text\">Movimentos lançados no diário</span>"
-
-#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
 msgid "<span class=\"o_stat_text\">Journal Entry</span>"
 msgstr "<span class=\"o_stat_text\">Movimento do Diário</span>"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
+msgid "<span class=\"o_stat_text\">Journal Items</span>"
+msgstr "<span class=\"o_stat_text\">Itens do diário</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -1909,6 +1909,11 @@ msgid "Account Mapping"
 msgstr "Mapeamento de Contas"
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_tax__account_move_line_ids
+msgid "Account Move Line"
+msgstr "Linha de movimentação da conta"
+
+#. module: account
 #: model:ir.model,name:account.model_account_move_reversal
 msgid "Account Move Reversal"
 msgstr "Reversão de Movimento Contabilístico"
@@ -1978,6 +1983,11 @@ msgstr "Contas a receber (PDV)"
 #: model:ir.model.fields,field_description:account.field_account_move_line__is_account_reconcile
 msgid "Account Reconcile"
 msgstr "Reconciliar Conta"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_tax__account_reconcile_model_line_ids
+msgid "Account Reconcile Model Line"
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__account_root_id
@@ -11496,6 +11506,12 @@ msgid "Online Payments"
 msgstr "Pagamentos Online"
 
 #. module: account
+#. odoo-python
+#: code:addons/account/models/partner.py:0
+msgid "Only Accounting managers can create foreign taxes."
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_report__only_tax_exigible
 msgid "Only Tax Exigible Lines"
 msgstr "Somente Linhas Exigíveis de Imposto"
@@ -12889,6 +12905,7 @@ msgstr "Data de Bloqueio de Compra"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__group_show_purchase_receipts
+#: model:ir.model.fields.selection,name:account.selection__account_invoice_report__move_type__in_receipt
 #: model:ir.model.fields.selection,name:account.selection__account_move__move_type__in_receipt
 #: model:res.groups,name:account.group_purchase_receipts
 msgid "Purchase Receipt"
@@ -13720,6 +13737,7 @@ msgid "Sales Lock Date"
 msgstr "Data de Bloqueio de Vendas"
 
 #. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_invoice_report__move_type__out_receipt
 #: model:ir.model.fields.selection,name:account.selection__account_move__move_type__out_receipt
 msgid "Sales Receipt"
 msgstr "Recibo de vendas"
@@ -18401,18 +18419,10 @@ msgid ""
 "You can not archive a journal containing draft journal entries.\n"
 "\n"
 "To proceed:\n"
-"1/ click on the top-right button 'Journal Entries' from this journal form\n"
-"2/ then filter on 'Draft' entries\n"
+"1/ go to Accounting > Accounting > Journal Entries\n"
+"2/ filter on this journal and on 'Unposted' entries\n"
 "3/ select them all and post or delete them through the action menu"
 msgstr ""
-"Não é possível arquivar um diário contendo rascunhos de movimentos "
-"contabilísticos.\n"
-"\n"
-"Para prosseguir:\n"
-"1/ clique no botão superior direito 'Entradas no Diário' deste formulário de "
-"diário\n"
-"2/ depois filtre por entradas 'Rascunho'\n"
-"3/ selecione-os todos e valide ou elimine-os através do menu de ação"
 
 #. module: account
 #. odoo-python
@@ -19785,6 +19795,27 @@ msgid ""
 msgstr ""
 "{{ object.company_id.name }} Recibo de Pagamento (Refª {{ object.name or 'n/"
 "a' }})"
+
+#~ msgid "<span class=\"o_stat_text\">Journal Entries</span>"
+#~ msgstr "<span class=\"o_stat_text\">Movimentos lançados no diário</span>"
+
+#~ msgid ""
+#~ "You can not archive a journal containing draft journal entries.\n"
+#~ "\n"
+#~ "To proceed:\n"
+#~ "1/ click on the top-right button 'Journal Entries' from this journal "
+#~ "form\n"
+#~ "2/ then filter on 'Draft' entries\n"
+#~ "3/ select them all and post or delete them through the action menu"
+#~ msgstr ""
+#~ "Não é possível arquivar um diário contendo rascunhos de movimentos "
+#~ "contabilísticos.\n"
+#~ "\n"
+#~ "Para prosseguir:\n"
+#~ "1/ clique no botão superior direito 'Entradas no Diário' deste formulário "
+#~ "de diário\n"
+#~ "2/ depois filtre por entradas 'Rascunho'\n"
+#~ "3/ selecione-os todos e valide ou elimine-os através do menu de ação"
 
 #~ msgid "Restrict the use of taxes to a type of product."
 #~ msgstr "Restringir o uso de impostos a um tipo de produto."

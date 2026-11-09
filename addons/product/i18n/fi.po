@@ -41,8 +41,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-10 18:38+0000\n"
-"PO-Revision-Date: 2026-10-09 08:24+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-11-04 14:23+0000\n"
 "Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
 "Language-Team: Finnish <https://translate.odoo.com/projects/odoo-18/product/"
 "fi/>\n"
@@ -2557,7 +2557,7 @@ msgstr "Hinnan pyöristys"
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_tree_view
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
 msgid "Price Rules"
-msgstr "Hinnoittelusäännöt"
+msgstr "Hintasäännöt"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
@@ -2702,7 +2702,7 @@ msgstr "Tuotteen ominaisuus"
 #. module: product
 #: model:ir.model,name:product.model_product_attribute_custom_value
 msgid "Product Attribute Custom Value"
-msgstr "Tuotteen ominaisuuden mukautettu arvo"
+msgstr "Tuoteominaisuuden mukautettu arvo"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__product_template_value_ids
@@ -3262,6 +3262,12 @@ msgstr "Näytä kaikki tietueet joissa on toimenpide myöhässä"
 #: model:product.attribute,name:product.size_attribute
 msgid "Size"
 msgstr "Koko"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/report/product_pricelist_report.py:0
+msgid "Sorry, you are not allowed to access this document."
+msgstr "Valitettavasti sinulla ei ole oikeutta tähän dokumentiin."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_res_partner__specific_property_product_pricelist
