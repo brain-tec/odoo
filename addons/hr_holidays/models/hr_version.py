@@ -244,10 +244,12 @@ class HrVersion(models.Model):
 
     def _get_more_vals_leave_interval(self, interval, leaves):
         result = super()._get_more_vals_leave_interval(interval, leaves)
+        holidays = self.env['hr.leave']
         for leave in leaves:
             if interval[0] >= leave[0] and interval[1] <= leave[1]:
-                if leave[2].holiday_id:
-                    result.append(('leave_ids', leave[2].holiday_id))
+                holidays |= leave[2].holiday_id
+        if holidays:
+            result.append(('leave_ids', holidays))
         return result
 
     def _get_interval_leave_work_entry_type(self, interval, leaves, bypassing_codes):
@@ -265,7 +267,12 @@ class HrVersion(models.Model):
 
         interval_start = interval[0].astimezone(UTC).replace(tzinfo=None)
         interval_stop = interval[1].astimezone(UTC).replace(tzinfo=None)
-        including_rcleaves = [l[2] for l in leaves if l[2] and interval_start >= l[2][0].date_from and interval_stop <= l[2][0].date_to]
+        including_rcleaves = [
+            rcleave
+            for leave in leaves
+            for rcleave in leave[2]
+            if interval_start >= rcleave.date_from and interval_stop <= rcleave.date_to
+        ]
         including_global_rcleaves = [l for l in including_rcleaves if not l.holiday_id]
         including_holiday_rcleaves = [l for l in including_rcleaves if l.holiday_id]
         rc_leave = False
@@ -281,7 +288,8 @@ class HrVersion(models.Model):
         elif including_global_rcleaves:
             rc_leave = including_global_rcleaves[0]
         elif including_holiday_rcleaves:
-            rc_leave = including_holiday_rcleaves[0]
+            # A later employee time off overlays an earlier one when both are kept.
+            rc_leave = max(including_holiday_rcleaves, key=lambda leave: leave.holiday_id.id)
         if rc_leave:
             return self._get_leave_work_entry_type_dates(rc_leave, interval_start, interval_stop, self.employee_id)
         return self.env.ref('hr_work_entry.generic_work_entry_type_leave')
@@ -297,6 +305,18 @@ class HrVersion(models.Model):
             return res
         work_entry_type = vals['work_entry_type_id']
         return res or (work_entry_type.count_as == 'absence' or work_entry_type.request_unit != 'hour')
+
+    @api.model
+    def _get_work_entries_postprocess_duration_vals(self, vals, date_start, tz, adapt_to_calendar):
+        leave = vals.get('leave_ids')
+        if adapt_to_calendar and leave and len(leave) == 1 and leave.work_entry_type_request_unit == 'half_day' \
+                and leave.request_date_from != leave.request_date_to:
+            calendar = vals['version_id'].resource_calendar_id
+            day = date_start.astimezone(tz).date()
+            if calendar and calendar._is_duration_based_on_date(day):
+                _is_half, duration = leave._get_half_day_leave_hours_on_date(day, calendar=calendar)
+                return day, (duration if duration else 0.0)
+        return super()._get_work_entries_postprocess_duration_vals(vals, date_start, tz, adapt_to_calendar)
 
     @api.model
     def _get_work_entry_source_fields(self):
