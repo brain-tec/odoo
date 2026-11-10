@@ -264,14 +264,14 @@ class WebsiteSale(payment_portal.PaymentPortal):
             return request.redirect(f"/web/login?redirect={request.httprequest.path}")
 
         post = {k: v for k, v in post.items() if not k.startswith("_")}
-        # TODO: remove support for `category` query param in version 20 (or later).
-        category = self._validate_and_get_category(category)
+        ProductCategory = self.env["product.public.category"]
+        category = category or ProductCategory
+        if category.website_id.id not in (website.id, False):
+            category = ProductCategory
         if category:
             path = category.website_url + (f"/page/{page}" if page else "")
-            # Redirect to the correct category URL if needed. There are 2 potential reasons for
-            # redirecting:
-            # - The category was given as a query parameter instead of in the path,
-            # - The category's parents (if any) weren't included in the path.
+            # Redirect to the canonical category URL if the category's parents weren't
+            # correctly included in the path.
             if not_reload_request and path != request.httprequest.path:
                 url = urlparse(request.httprequest.url)
                 return request.redirect(url._replace(path=path).geturl(), code=301)
@@ -647,19 +647,16 @@ class WebsiteSale(payment_portal.PaymentPortal):
         return request.render("website_sale.products", values)
 
     @route(["/shop/reload"], type="jsonrpc", auth="public", website=True)
-    def shop_reload(self, *args, **kwargs):
-        response = self.shop(*args, **kwargs)
+    def shop_reload(self, *args, category=None, **kwargs):
+        category = self.env["product.public.category"].browse(category and int(category)).exists()
+        response = self.shop(*args, category=category, **kwargs)
         html_content = response.render()
         product_count = response.qcontext.get("search_count", 0)
 
         return {"product_count": product_count, "html": str(html_content)}
 
     @route(
-        [
-            f"{SHOP_PATH}/<model('product.template'):product>",
-            f"{SHOP_PATH}/<model('product.public.category'):category>/<model('product.template'):product>",
-            f"{SHOP_PATH}/product/<model('product.template'):product>",
-        ],
+        f"{SHOP_PATH}/<model('product.template'):product>",
         type="http",
         auth="public",
         website=True,
@@ -682,15 +679,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 return request.redirect(SHOP_PATH)
 
         request.update_context(website_sale_product_page=True)
-        # TODO: remove support for deprecated paths in version 20 (or later).
-        path = product.website_url
-        # Redirect to the correct product URL if needed. There are 2 potential reasons for
-        # redirecting:
-        # - A `/product` prefix was included in the path,
-        # - A category slug was included in the path.
-        if path != request.httprequest.path:
-            query = request.httprequest.args.to_dict(flat=False)
-            return request.redirect(product._get_product_url(query), code=301)
 
         search_term = kwargs.get("search")
 
@@ -1769,19 +1757,35 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
             rendering_values["signup_url"] = signup_url._replace(
                 query=urlencode(
-                    dict(parse_qs(signup_url.query), redirect="/shop/unarchive_user_addresses"),
+                    dict(parse_qs(signup_url.query), redirect="/shop/confirmation/link_order"),
                     doseq=True,
                 )
             ).geturl()
 
         return rendering_values
 
-    @route("/shop/unarchive_user_addresses", type="http", auth="user", sitemap=False)
-    def shop_unarchive_user_addresses(self):
-        self.env["res.partner"].sudo().search([
-            ("active", "=", False),
-            ("parent_id", "=", self.env.user.partner_id.id),
-        ]).active = True
+    @route("/shop/confirmation/link_order", type="http", auth="user", sitemap=False)
+    def shop_confirmation_link_order(self):
+        if sale_order_id := request.session.get("sale_last_order_id"):
+            order_sudo = self.env["sale.order"].sudo().browse(sale_order_id).exists()
+            partner = self.env.user.partner_id
+            if order_sudo and order_sudo.partner_id != partner:
+                # Sign in: attach the checkout addresses to the account to show the order.
+                customer = order_sudo.partner_id
+                shipping_partner = order_sudo.partner_shipping_id
+                if customer.commercial_partner_id != partner.commercial_partner_id:
+                    customer.write({
+                        "parent_id": partner.id,
+                        "type": "other" if customer == shipping_partner else "invoice",
+                    })
+                if (
+                    shipping_partner != customer
+                    and shipping_partner.commercial_partner_id != partner.commercial_partner_id
+                ):
+                    shipping_partner.write({"parent_id": partner.id, "type": "delivery"})
+
+            if order_sudo:
+                return request.redirect(order_sudo.get_portal_url(share_token=False))
 
         return request.redirect("/my")
 
@@ -1967,27 +1971,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
             "currency_id": request.env.website.currency_id.id,
             "pricelist_id": request.pricelist.id,
         })
-
-    @staticmethod
-    def _validate_and_get_category(category):
-        """Validate and return the `product.public.category` record corresponding to the provided
-        category, which can be a record, a record id, or a slug.
-
-        If the provided category is invalid, non-existing, or inaccessible, return an empty
-        recordset. Otherwise, return the corresponding record.
-
-        :param str|product.public.category category: The category to validate and return.
-        :return: The validated category, or an empty recordset.
-        :rtype: product.public.category
-        """
-        ProductCategory = request.env["product.public.category"]
-        if category and isinstance(category, str) and not category.isdigit():
-            return ProductCategory
-        if (
-            category := ProductCategory.browse(category and int(category)).exists()
-        ) and category.website_id.id in (request.env.website.id, False):
-            return category
-        return ProductCategory
 
     def _get_attribute_value_params(self, query_params):
         """Extract the attribute value query params from a dict of more general query params.

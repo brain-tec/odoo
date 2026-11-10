@@ -350,12 +350,6 @@ class ResPartner(models.Model):
     fiscal_country_group_codes = fields.Json(compute='_compute_fiscal_country_group_codes')
     partner_vat_placeholder = fields.Char(compute='_compute_partner_vat_placeholder')
     duplicate_bank_partner_ids = fields.Many2many('res.partner', compute='_compute_duplicate_bank_partner_ids')
-    qr_code_method = fields.Selection(
-        selection=lambda self: self.env['res.partner.bank'].get_available_qr_methods_in_sequence(),
-        string="Payment QR-code",
-        company_dependent=True,
-        copy=False,
-    )
 
     @api.depends('company_id', 'country_code')
     @api.depends_context('allowed_company_ids')
@@ -581,13 +575,13 @@ class ResPartner(models.Model):
     property_account_payable_id = fields.Many2one('account.account', company_dependent=True,
         check_company=True,
         string="Account Payable",
-        domain="[('account_type', '=', 'liability_payable')]",
+        ui_domain="[('account_type', '=', 'liability_payable')]",
         ondelete='restrict')
     property_account_payable_active = fields.Boolean(related='property_account_payable_id.active', string="Account Payable Active")
     property_account_receivable_id = fields.Many2one('account.account', company_dependent=True,
         check_company=True,
         string="Account Receivable",
-        domain="[('account_type', '=', 'asset_receivable')]",
+        ui_domain="[('account_type', '=', 'asset_receivable')]",
         ondelete='restrict')
     property_account_receivable_active = fields.Boolean(related='property_account_receivable_id.active', string="Account Receivable Active")
     property_account_position_id = fields.Many2one('account.fiscal.position', company_dependent=True,
@@ -638,7 +632,7 @@ class ResPartner(models.Model):
     invoice_template_pdf_report_id = fields.Many2one(
         string="Invoice report",
         comodel_name='ir.actions.report',
-        domain="[('id', 'in', available_invoice_template_pdf_report_ids)]",
+        ui_domain="[('id', 'in', available_invoice_template_pdf_report_ids)]",
         readonly=False,
         store=True,
     )
@@ -973,7 +967,10 @@ class ResPartner(models.Model):
         normalized_vat = vat.replace(' ', '').replace('.', '')
         country_prefix = re.match('^[a-zA-Z]{2}|^', vat).group()
 
-        criteria = [{'domain': [('vat', 'in', (normalized_vat, vat))]}]
+        criteria = []
+        if country_code := customer_values.get('country_code'):
+            criteria.append({'domain': [('vat', 'in', (normalized_vat, vat)), ('country_id.code', '=', country_code.upper())]})
+        criteria.append({'domain': [('vat', 'in', (normalized_vat, vat))]})
         extra_vat_values = self._get_country_specific_vat_variants(normalized_vat, country_prefix)
         if extra_vat_values:
             criteria.append({'domain': [('vat', 'in', extra_vat_values)]})

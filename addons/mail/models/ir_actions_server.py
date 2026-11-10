@@ -66,7 +66,7 @@ class IrActionsServer(models.Model):
     # Message Post
     template_id = fields.Many2one(
         'mail.template', 'Mail Template',
-        domain="[('model_id', '=', model_id)]",
+        ui_domain="[('model_id', '=', model_id)]",
         compute='_compute_template_id',
         ondelete='set null', readonly=False, store=True,
     )
@@ -85,17 +85,17 @@ class IrActionsServer(models.Model):
     has_activity_plans = fields.Boolean(compute='_compute_has_activity_plans')
     activity_plan_id = fields.Many2one(
         'mail.activity.plan', string='Activity Plan',
-        domain="['|', ('res_model', '=', False), ('res_model', '=', model_name)]",
+        ui_domain="['|', ('res_model', '=', False), ('res_model', '=', model_name)]",
         compute='_compute_activity_plan_id', readonly=False, store=True)
     activity_plan_has_user_on_demand = fields.Boolean(related="activity_plan_id.has_user_on_demand")
     # Next Activity: activity-based
     activity_type_id = fields.Many2one(
         'mail.activity.type', string='Activity Type',
-        domain="['|', ('res_model', '=', False), ('res_model', '=', model_name)]",
+        ui_domain="['|', ('res_model', '=', False), ('res_model', '=', model_name)]",
         related=False, compute='_compute_activity_type_id', search=False,
         readonly=False, store=True,
         ondelete='restrict')
-    activity_summary = fields.Char('Summary', readonly=False, store=True)
+    activity_summary = fields.Char('Summary', related=False, readonly=False, store=True)
     activity_note = fields.Html('Note', readonly=False, store=True)
     # Next Activity: common
     activity_date_deadline_range = fields.Integer(

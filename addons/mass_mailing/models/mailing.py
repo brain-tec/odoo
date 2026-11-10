@@ -178,12 +178,13 @@ class MailingMailing(models.Model):
     # Mailing Filter
     mailing_filter_ids = fields.Many2many(
         'mailing.filter', 'mail_mass_mailing_filter_rel', 'mailing_mailing_id', 'mailing_filter_id', compute='_compute_mailing_filter_ids',
-        readonly=False, store=True, string="Dynamic Lists", domain="[('mailing_model_name', '=', mailing_model_name)]")
+        readonly=False, store=True, string="Dynamic Lists", ui_domain="[('mailing_model_name', '=', mailing_model_name)]")
     # A/B Testing
     ab_testing_completed = fields.Boolean(related='campaign_id.ab_testing_completed')
     ab_testing_description = fields.Html('A/B Testing Description', compute="_compute_ab_testing_description")
     ab_testing_enabled = fields.Boolean(
         string='Allow A/B Testing', default=False,
+        inverse='_create_ab_testing_utm_campaigns',
         help='If checked, recipients will be mailed only once for the whole campaign. '
              'This lets you send different mailings to randomly selected recipients and test '
              'the effectiveness of the mailings, without causing duplicate messages.')
@@ -566,7 +567,6 @@ class MailingMailing(models.Model):
                 at = fields.Datetime.from_string(values['ab_testing_schedule_datetime'])
                 ab_testing_cron._trigger(at=at)
         mailings = super().create(vals_list)
-        mailings._create_ab_testing_utm_campaigns()
         mailings._fix_attachment_ownership()
 
         for values, mailing in zip(vals_list, mailings):
@@ -587,8 +587,6 @@ class MailingMailing(models.Model):
             raise ValidationError(_("A campaign should be set when A/B test is enabled"))
 
         result = super().write(values)
-        if values.get('ab_testing_enabled'):
-            self._create_ab_testing_utm_campaigns()
         self._fix_attachment_ownership()
 
         if any(self.mapped('ab_testing_schedule_datetime')):

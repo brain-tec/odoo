@@ -411,6 +411,7 @@ class TestOrmRelated(models.Model):
     message = fields.Many2one('test_orm.message')
     message_name = fields.Text(related="message.body", related_sudo=False, string='Message Body')
     message_currency = fields.Many2one(related="message.author", string='Message Author')
+    message_priority = fields.Integer(related='message.priority', store=True, readonly=False)
 
     foo_id = fields.Many2one('test_orm.related_foo')
     foo_ids = fields.Many2many('test_orm.related_foo', string='Foos')
@@ -1746,7 +1747,7 @@ class TestOrmModel2Some_Access(models.Model):
     _name = 'test_orm.model2.some_access'
     _description = 'Testing Utilities attrs and groups sub'
 
-    g_id = fields.Many2one('test_orm.model.some_access', domain='[("a", "=", g_d)]')
+    g_id = fields.Many2one('test_orm.model.some_access', ui_domain='[("a", "=", g_d)]')
     g_d = fields.Integer(related='g_id.d')
 
 

@@ -3,6 +3,7 @@ from lxml import html
 from odoo.fields import Command
 from odoo.tests import HttpCase
 
+from odoo.addons.website.tests.common import set_url_code
 from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
 
 
@@ -15,6 +16,11 @@ class WebsiteSaleSEO(HttpCase, WebsiteSaleCommon):
     )
 
     _test_user_name = 'Test Sales & Product Manager'
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        set_url_code(cls.env.ref('base.lang_fr'))
 
     def test_website_sale_user_designer_can_edit_seo(self):
         public_categ = self.env["product.public.category"].create({"name": "Website Category"})
@@ -39,22 +45,15 @@ class WebsiteSaleSEO(HttpCase, WebsiteSaleCommon):
         lang_fr = self.env["res.lang"].sudo()._activate_lang("fr_FR")
         website.language_ids = self.env.ref("base.lang_en") + lang_fr
 
-        public_categ = self.env["product.public.category"].create({
-            "name": "Website Category",
-            "website_id": website.id,
-        })
-        self.product.public_categ_ids = [Command.link(public_categ.id)]
+        product_path = self.product.website_url
 
-        slug = self.env["ir.http"]._slug
-        categ_product_path = f"/shop/{slug(public_categ)}/{slug(self.product.product_tmpl_id)}"
-
-        res = self.url_open(categ_product_path)
+        res = self.url_open(product_path)
         res.raise_for_status()
         root = html.fromstring(res.content)
         canonical = root.xpath('//link[@rel="canonical"]')[0].attrib["href"]
         self.assertEqual(canonical, self.base_url() + self.product.website_url)
 
-        res = self.url_open(f"/fr{categ_product_path}")
+        res = self.url_open(f"/fr{product_path}")
         res.raise_for_status()
         root = html.fromstring(res.content)
         canonical = root.xpath('//link[@rel="canonical"]')[0].attrib["href"]
