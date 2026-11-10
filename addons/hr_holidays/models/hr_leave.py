@@ -592,7 +592,8 @@ class HrLeave(models.Model):
                 leave.date_from,
                 leave.date_to,
                 leave.work_entry_type_id.include_public_holidays_in_duration,
-                resource_calendar or leave.resource_calendar_id
+                resource_calendar or leave.resource_calendar_id,
+                leave.work_entry_type_id.allow_request_on_top,
             ] += leave.employee_id
         # We force the company in the domain as we are more than likely in a compute_sudo
         domain = [('count_as', '=', 'absence'),
@@ -602,15 +603,20 @@ class HrLeave(models.Model):
                   '|', ('holiday_id', '=', False), ('holiday_id', 'not in', employee_leaves.ids)]
         if additional_domain:
             domain = Domain.AND([domain, additional_domain])
+        # Requests allowed on top keep their duration over employee absences.
+        # Public holidays still follow include_public_holidays_in_duration.
         # Precompute values in batch for performance purposes
         work_time_per_day_mapped = {
-            (date_from, date_to, include_public_holidays_in_duration, calendar): employees.with_context(
-                    compute_leaves=not include_public_holidays_in_duration)._list_work_time_per_day(date_from, date_to, domain=domain, calendar=calendar)
-            for (date_from, date_to, include_public_holidays_in_duration, calendar), employees in employees_by_dates_calendar.items()
+            (date_from, date_to, include_public_holidays_in_duration, calendar, allow_request_on_top): employees.with_context(
+                    compute_leaves=not include_public_holidays_in_duration)._list_work_time_per_day(
+                        date_from, date_to, domain=Domain.AND([domain, [('holiday_id', '=', False)]]) if allow_request_on_top else domain, calendar=calendar)
+            for (date_from, date_to, include_public_holidays_in_duration, calendar, allow_request_on_top), employees in employees_by_dates_calendar.items()
         }
         work_days_data_mapped = {
-            (date_from, date_to, include_public_holidays_in_duration, calendar): employees._get_work_days_data_batch(date_from, date_to, compute_leaves=not include_public_holidays_in_duration, domain=domain, calendar=calendar)
-            for (date_from, date_to, include_public_holidays_in_duration, calendar), employees in employees_by_dates_calendar.items()
+            (date_from, date_to, include_public_holidays_in_duration, calendar, allow_request_on_top): employees._get_work_days_data_batch(
+                date_from, date_to, compute_leaves=not include_public_holidays_in_duration,
+                domain=Domain.AND([domain, [('holiday_id', '=', False)]]) if allow_request_on_top else domain, calendar=calendar)
+            for (date_from, date_to, include_public_holidays_in_duration, calendar, allow_request_on_top), employees in employees_by_dates_calendar.items()
         }
         for leave in self:
             calendar = resource_calendar or leave.resource_calendar_id
@@ -665,11 +671,17 @@ class HrLeave(models.Model):
                         days = hours / 24
                 elif leave.work_entry_type_request_unit == 'day' and check_work_entry_type:
                     # list of tuples (day, hours)
-                    work_time_per_day_list = work_time_per_day_mapped[leave.date_from, leave.date_to, leave.work_entry_type_id.include_public_holidays_in_duration, calendar][leave.employee_id.id]
+                    work_time_per_day_list = work_time_per_day_mapped[leave.date_from, leave.date_to, leave.work_entry_type_id.include_public_holidays_in_duration, calendar, leave.work_entry_type_id.allow_request_on_top][leave.employee_id.id]
                     days = len(work_time_per_day_list)
                     hours = sum(map(lambda t: t[1], work_time_per_day_list))
+                elif (
+                    leave.work_entry_type_request_unit == 'half_day'
+                    and leave.request_date_from != leave.request_date_to
+                    and any(calendar.attendance_ids.mapped('duration_based'))
+                ):
+                    days, hours = leave._get_duration_based_half_day_duration(calendar)
                 else:
-                    work_days_data = work_days_data_mapped[leave.date_from, leave.date_to, leave.work_entry_type_id.include_public_holidays_in_duration, calendar][leave.employee_id.id]
+                    work_days_data = work_days_data_mapped[leave.date_from, leave.date_to, leave.work_entry_type_id.include_public_holidays_in_duration, calendar, leave.work_entry_type_id.allow_request_on_top][leave.employee_id.id]
                     hours, days = work_days_data['hours'], work_days_data['days']
             else:
                 today_hours = calendar.get_work_hours_count(
@@ -684,6 +696,59 @@ class HrLeave(models.Model):
                 days = float_round(days, precision_rounding=0.5)
             result[leave.id] = (days, hours)
         return result
+
+    def _get_duration_based_half_day_duration(self, calendar):
+        """Compute the (days, hours) duration of a multi-day half-day request on a calendar
+        that has at least one duration-based attendance.
+        """
+        self.ensure_one()
+        public_holiday_dates = set()
+        if not self.work_entry_type_id.include_public_holidays_in_duration:
+            tz = ZoneInfo(self.tz) if self.tz else UTC
+            public_holidays = self.env['resource.calendar.leaves'].search([
+                ('resource_id', '=', False),
+                ('date_from', '<', self.date_to),
+                ('date_to', '>', self.date_from),
+                ('calendar_id', 'in', [False, calendar.id]),
+                ('company_id', '=', self.company_id.id),
+                ('count_as', '=', 'absence'),
+            ])
+            for ph in public_holidays:
+                day = ph.date_from.replace(tzinfo=UTC).astimezone(tz).date()
+                last_day = (ph.date_to.replace(tzinfo=UTC).astimezone(tz) - timedelta(microseconds=1)).date()
+                while day <= last_day:
+                    public_holiday_dates.add(day)
+                    day += timedelta(days=1)
+
+        total_days = 0.0
+        total_hours = 0.0
+        current = self.request_date_from
+        while current <= self.request_date_to:
+            if current not in public_holiday_dates:
+                is_half, day_contribution = self._get_half_day_leave_hours_on_date(current, calendar=calendar)
+                if day_contribution:
+                    total_days += 0.5 if is_half else 1.0
+                    total_hours += day_contribution
+            current += timedelta(days=1)
+        return total_days, total_hours
+
+    def _get_half_day_leave_hours_on_date(self, date, calendar=None):
+        self.ensure_one()
+        calendar = calendar or self.resource_calendar_id
+        is_half = (
+            date == self.request_date_from and self.request_date_from_period == 'pm'
+        ) or (
+            date == self.request_date_to and self.request_date_to_period == 'am'
+        )
+        if calendar._is_duration_based_on_date(date):
+            day_hours = calendar._get_duration_based_work_hours_on_date(date)
+            hours = day_hours * 0.5 if is_half else day_hours
+        else:
+            day_period = None
+            if is_half:
+                day_period = 'afternoon' if date == self.request_date_from else 'morning'
+            hours = calendar._get_fixed_hours_on_date(date, day_period=day_period)
+        return is_half, hours
 
     @api.depends('date_from', 'date_to', 'resource_calendar_id')
     def _compute_duration(self):
@@ -1300,14 +1365,16 @@ class HrLeave(models.Model):
                 if target_leave_vals:
                     new_leaves_vals.extend(target_leave_vals)
 
-        if not new_leaves_vals:
-            return self.env['hr.leave']
-        return self.env['hr.leave'].with_context(
-            tracking_disable=True,
-            mail_activity_automation_skip=True,
-            leave_fast_create=True,
-            leave_skip_state_check=True
-        ).create(new_leaves_vals)
+        new_leaves = self.env['hr.leave']
+        if new_leaves_vals:
+            new_leaves = self.env['hr.leave'].with_context(
+                tracking_disable=True,
+                mail_activity_automation_skip=True,
+                leave_fast_create=True,
+                leave_skip_state_check=True
+            ).create(new_leaves_vals)
+        new_leaves.filtered(lambda leave: leave.state == 'validate')._create_resource_leave()
+        return new_leaves
 
     def _action_validate(self, check_state=True):
         current_employee = self.env.user.employee_id
