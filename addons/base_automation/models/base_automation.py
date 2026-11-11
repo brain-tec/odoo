@@ -111,8 +111,8 @@ TIME_TRIGGERS = [
 ]
 
 # which fields have an impact on the registry and the cron
-CRITICAL_FIELDS = ('model_id', 'active', 'trigger', 'on_change_field_ids')
-RANGE_FIELDS = ('trg_date_range', 'trg_date_range_type')
+CRITICAL_FIELDS = frozenset(['model_id', 'active', 'trigger', 'on_change_field_ids'])
+RANGE_FIELDS = frozenset(['trg_date_range', 'trg_date_range_type'])
 
 
 def get_webhook_request_payload():
@@ -186,25 +186,28 @@ class BaseAutomation(models.Model):
     trg_selection_field_id = fields.Many2one(
         'ir.model.fields.selection',
         string='Trigger Field',
-        domain="[('field_id', 'in', trigger_field_ids)]",
+        ui_domain="[('field_id', 'in', trigger_field_ids)]",
         compute='_compute_trg_selection_field_id',
         readonly=False, store=True,
         help="Some triggers need a reference to a selection field. This field is used to store it.")
     trg_field_ref_model_name = fields.Char(
         string='Trigger Field Model',
-        compute='_compute_trg_field_ref_model_name')
+        compute='_compute_trg_field_ref_model_name',
+        search='_search_trg_field_ref_model_name',
+    )
     trg_field_ref = fields.Many2oneReference(
         model_field='trg_field_ref_model_name',
         compute='_compute_trg_field_ref',
         string='Trigger Reference',
         readonly=False,
         store=True,
+        ondelete=lambda self, model: 'set null' if model._name in self._get_trg_field_ref_model_names() else 'ignore',
         help="Some triggers need a reference to another field. This field is used to store it.")
     trg_date_id = fields.Many2one(
         'ir.model.fields', string='Trigger Date',
         compute='_compute_trg_date_id',
         readonly=False, store=True, tracking=True,
-        domain="[('model_id', '=', model_id), ('ttype', 'in', ('date', 'datetime'))]",
+        ui_domain="[('model_id', '=', model_id), ('ttype', 'in', ('date', 'datetime'))]",
         help="""When should the condition be triggered.
                 If present, will be checked by the scheduler. If empty, will be checked at creation and update.""")
     trg_date_range = fields.Integer(
@@ -374,6 +377,17 @@ class BaseAutomation(models.Model):
                 continue
             automation.trg_field_ref_model_name = relation
 
+    def _search_trg_field_ref_model_name(self, operator, value):
+        return [('trigger', 'in', ['on_stage_set', 'on_tag_set']), ('model_id.name', operator, value)]
+
+    @api.ormcache()
+    def _get_trg_field_ref_model_names(self):
+        recs = self.sudo().search_fetch([
+            ('trigger', 'in', ['on_stage_set', 'on_tag_set']),
+            ('trg_field_ref_model_name', '!=', False),
+        ], ['trg_field_ref_model_name'])
+        return {rec.trg_field_ref_model_name for rec in recs}
+
     # doesn't depends on filter_domain on purpose
     # since it is a backup for onchange when filter_domain is changed
     def _compute_previous_domain(self):
@@ -484,20 +498,24 @@ class BaseAutomation(models.Model):
         if base_automations._has_trigger_onchange():
             # Invalidate templates cache to update on_change attributes if needed
             self.env.transaction.invalidate_ormcache('templates')
+        if any(base_automations.mapped('trg_field_ref')):
+            self.env.transaction.invalidate_ormcache()
         return base_automations
 
     def write(self, vals: dict):
         clear_templates = self._has_trigger_onchange()
         res = super().write(vals)
-        if set(vals).intersection(CRITICAL_FIELDS):
+        if not CRITICAL_FIELDS.isdisjoint(vals):
             self._update_cron()
             self._update_registry()
             clear_templates |= self._has_trigger_onchange()
             if clear_templates and any(self._ids):
                 # Invalidate templates cache to update on_change attributes if needed
                 self.env.transaction.invalidate_ormcache('templates')
-        elif set(vals).intersection(RANGE_FIELDS):
+        elif not RANGE_FIELDS.isdisjoint(vals):
             self._update_cron()
+        if vals.get('trg_field_ref'):
+            self.env.transaction.invalidate_ormcache()  # _get_trg_field_ref_model_names
         return res
 
     def unlink(self):

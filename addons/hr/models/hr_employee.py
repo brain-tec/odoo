@@ -94,7 +94,7 @@ class HrEmployee(models.Model):
     def _get_hr_responsible_domain(self):
         return "[('share', '=', False), ('company_ids', 'in', company_id), ('all_group_ids', 'in', %s)]" % self.env.ref('hr.group_hr_user').id
 
-    hr_responsible_id = fields.Many2one(related='version_id.hr_responsible_id', readonly=False, inherited=True, domain=lambda self: self.env['hr.version']._get_hr_responsible_domain(), groups="hr.group_hr_user")
+    hr_responsible_id = fields.Many2one(related='version_id.hr_responsible_id', readonly=False, inherited=True, ui_domain=lambda self: self.env['hr.version']._get_hr_responsible_domain(), groups="hr.group_hr_user")
 
     @api.model
     def _lang_get(self):
@@ -110,7 +110,7 @@ class HrEmployee(models.Model):
         inherited=True,
         index=False,
         store=False,
-        domain="""['&',
+        ui_domain="""['&',
             '|',
                 ('company_id', '=', False),
                 ('company_id.id', 'parent_of', company_id),
@@ -213,7 +213,7 @@ class HrEmployee(models.Model):
         relation='employee_bank_account_rel',
         column1='employee_id',
         column2='bank_account_id',
-        domain="[('partner_id', '=', work_contact_id), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        ui_domain="[('partner_id', '=', work_contact_id), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         groups="hr.group_hr_user",
         copy=False,
         tracking=True,
@@ -291,7 +291,7 @@ class HrEmployee(models.Model):
     )
     # Direct subordinates
     parent_id = fields.Many2one('hr.employee', 'Manager', tracking=True, index=True,
-                                domain="['|', ('company_id', '=', False), ('company_id', 'in', allowed_company_ids)]")
+                                ui_domain="['|', ('company_id', '=', False), ('company_id', 'in', allowed_company_ids)]")
     child_ids = fields.One2many('hr.employee', 'parent_id', string='Direct subordinates', domain=[('active', '=', True)])
     child_count = fields.Integer('Direct Subordinates Count', compute='_compute_child_count',
         recursive=True, compute_sudo=True)
@@ -306,7 +306,7 @@ class HrEmployee(models.Model):
 
     coach_id = fields.Many2one(
         'hr.employee', 'Coach', compute='_compute_coach', store=True, readonly=False,
-        domain="['|', ('company_id', '=', False), ('company_id', 'in', allowed_company_ids)]",
+        ui_domain="['|', ('company_id', '=', False), ('company_id', 'in', allowed_company_ids)]",
         help='Select the "Employee" who is the coach of this employee.\n'
              'The "Coach" has no specific rights or responsibilities by default.')
     category_ids = fields.Many2many(
@@ -945,6 +945,11 @@ class HrEmployee(models.Model):
         filtered_versions = versions.filtered_domain([('date_version', '<=', date)])
         return max(filtered_versions, key=lambda v: v.date_version) if filtered_versions else versions[0]
 
+    def _get_version_to_copy(self, date_version):
+        self.ensure_one()
+        return self._get_version(date_version) or self.env['hr.version'].search(
+            [('employee_id', '=', self.id), ('active', '=', True)], limit=1)
+
     def create_version(self, values):
         """Create a new version of the employee, effective from ``values['date_version']``.
 
@@ -978,12 +983,7 @@ class HrEmployee(models.Model):
         elif isinstance(date, datetime):
             date = date.date()
 
-        version_to_copy = self._get_version(date)
-        if not version_to_copy:
-            version_to_copy = self.env['hr.version'].search([
-                ('employee_id', '=', self.id),
-                ('active', '=', True),
-            ], limit=1)
+        version_to_copy = self._get_version_to_copy(date)
         if version_to_copy.date_version == date:
             return version_to_copy
 
@@ -1066,23 +1066,28 @@ class HrEmployee(models.Model):
         if date and isinstance(date, str):
             date = fields.Date.to_date(date)
 
-        contracts = self._get_contract_versions(date)[self.id]
-        future_contract_dates = [d for d in list(contracts.keys()) if d > date]
-        new_contract_date_end = min(future_contract_dates) + relativedelta(days=-1) if future_contract_dates else False
-
         # There is already a version but with no contract defined on it so we simply write on it the dates
         if version_same_date := self.version_ids.filtered(lambda v: v.date_version == date):
             version_same_date.write({
                 'contract_date_start': date,
-                'contract_date_end': new_contract_date_end
+                'contract_date_end': self._get_new_contract_max_end_date(date, version_same_date),
             })
             return version_same_date
 
         return self.create_version({
             'date_version': date,
             'contract_date_start': date,
-            'contract_date_end': new_contract_date_end
+            'contract_date_end': self._get_new_contract_max_end_date(date, self._get_version_to_copy(date)),
         })
+
+    def _get_new_contract_max_end_date(self, start_date, to_copy_version):
+        """ Returns the contract max end date for a version with `date_version` set to `start_date`
+            and which would be a copy of `to_copy_version`
+        """
+        self.ensure_one()
+        contracts = self._get_contract_versions(start_date)[self.id]
+        future_contract_dates = [d for d in list(contracts.keys()) if d > start_date]
+        return min(future_contract_dates) + relativedelta(days=-1) if future_contract_dates else False
 
     def _is_in_contract(self, date):
         """Return whether a contract of the employee covers ``date``.
@@ -2920,9 +2925,9 @@ class HrEmployee(models.Model):
             check_contract=True,
         )
 
-        work_resources_per_calendar = defaultdict(lambda: self.env['resource.resource'])
-        attendance_resources_per_calendar = defaultdict(lambda: self.env['resource.resource'])
-        leave_resources_per_calendar = defaultdict(lambda: self.env['resource.resource'])
+        work_resources_per_calendar = defaultdict(self.env['resource.resource'].sudo)
+        attendance_resources_per_calendar = defaultdict(self.env['resource.resource'].sudo)
+        leave_resources_per_calendar = defaultdict(self.env['resource.resource'].sudo)
         for employee, calendar_periods in calendar_tz_periods_per_employee.items():
             for period_start, period_stop, (calendar, tz) in calendar_periods:
                 if calendar._is_flexible():

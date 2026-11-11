@@ -88,7 +88,7 @@ class AccountTax(models.Model):
         column1='dest_tax_id',  # This Replacement tax
         column2='src_tax_id',  # Domestic Tax to replace
         string="Replaces",
-        domain="""[
+        ui_domain="""[
             ('type_tax_use', '=', type_tax_use),
             ('is_domestic', '=', True),
         ]""",
@@ -141,7 +141,7 @@ class AccountTax(models.Model):
         string="Tax Group",
         compute='_compute_tax_group_id', readonly=False, store=True,
         required=True, precompute=True,
-        domain="[('country_id', 'in', (country_id, False))]")
+        ui_domain="[('country_id', 'in', (country_id, False))]")
     # Technical field to make the 'tax_exigibility' field invisible if the same named field is set to false in 'res.company' model
     hide_tax_exigibility = fields.Boolean(string='Hide Use Cash Basis Option', related='company_id.tax_exigibility', readonly=True)
     tax_exigibility = fields.Selection(
@@ -152,7 +152,7 @@ class AccountTax(models.Model):
         "Based on Payment: the tax is due as soon as the payment of the invoice is received.")
     cash_basis_transition_account_id = fields.Many2one(string="Cash Basis Transition Account",
         check_company=True,
-        domain="[('account_type', 'not in', ('asset_receivable', 'liability_payable'))]",
+        ui_domain="[('account_type', 'not in', ('asset_receivable', 'liability_payable'))]",
         comodel_name='account.account',
         help="Account used to transition the tax amount for cash basis taxes. It will contain the tax amount as long as the original invoice has not been reconciled ; at reconciliation, this amount cancelled on this account and put on the regular tax account.")
     invoice_repartition_line_ids = fields.One2many(
@@ -331,14 +331,18 @@ class AccountTax(models.Model):
 
     @api.depends('account_move_line_ids', 'account_reconcile_model_line_ids')
     def _compute_is_used(self):
-        used_taxes = set(self.sudo().search([
-            ('id', 'in', self.ids),
-            '|',
+        TaxesSudo = self.env['account.tax'].sudo()
+        used_taxes = TaxesSudo.search([
+            ('id', 'in', self._origin.ids),
             ('account_move_line_ids', '!=', False),
-            ('account_reconcile_model_line_ids', '!=', False),
-        ]))
+        ])
+        if taxes_to_check := self._origin - used_taxes:
+            used_taxes |= TaxesSudo.search([
+                ('id', 'in', taxes_to_check.ids),
+                ('account_reconcile_model_line_ids', '!=', False),
+            ])
         for tax in self:
-            tax.is_used = tax in used_taxes
+            tax.is_used = tax._origin in used_taxes
 
     @api.depends('is_used', 'repartition_line_ids.account_id', 'repartition_line_ids.sequence', 'repartition_line_ids.factor_percent', 'repartition_line_ids.use_in_tax_closing', 'repartition_line_ids.tag_ids')
     def _compute_repartition_lines_str(self):
@@ -5127,6 +5131,13 @@ class AccountTax(models.Model):
                 # tax itself isn't, so ignore the amount and rely on the category code instead.
                 tax_domain &= Domain('ubl_cii_tax_category_code', '=', 'AE')
             orders = ['sequence', 'id']
+            if invoice_predictive := tax_values.get('invoice_predictive'):
+                fiscal_position = tax_values.get('fiscal_position')
+                if fiscal_position and fiscal_position.foreign_vat:
+                    country = fiscal_position.country_id
+                else:
+                    country = invoice_predictive['invoice'].tax_country_id
+                tax_domain &= Domain('country_id', '=', country.id)
             if name := tax_values.get('name'):
                 tax_domain &= Domain('name', '=', name)
             if tax_exigibility := tax_values.get('tax_exigibility'):
@@ -5203,7 +5214,7 @@ class AccountTaxRepartitionLine(models.Model):
     document_type = fields.Selection(string="Related to", selection=[('invoice', 'Invoice'), ('refund', 'Refund')], required=True)
     account_id = fields.Many2one(string="Account",
         comodel_name='account.account',
-        domain="[('account_type', 'not in', ('asset_receivable', 'liability_payable', 'off_balance'))]",
+        ui_domain="[('account_type', 'not in', ('asset_receivable', 'liability_payable', 'off_balance'))]",
         check_company=True,
         index='btree_not_null',
         help="Account on which to post the tax amount")

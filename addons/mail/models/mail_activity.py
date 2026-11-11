@@ -63,7 +63,9 @@ class MailActivity(models.Model):
         'Related Document Model',
         index=True, related='res_model_id.model', precompute=True, store=True, readonly=True)
     res_model_name = fields.Char(string='Model', related='res_model_id.display_name')
-    res_id = fields.Many2oneReference(string='Related Document ID', index=True, model_field='res_model')
+    res_id = fields.Many2oneReference(string='Related Document ID', index=True, model_field='res_model',
+        ondelete=lambda s, model: 'cascade' if isinstance(model, s.env.registry['mail.activity.mixin']) else 'ignore',
+    )
     res_name = fields.Char(
         'Document Name', compute='_compute_res_name', compute_sudo=True, store=True,
         readonly=True)
@@ -91,7 +93,7 @@ class MailActivity(models.Model):
     # activity
     activity_type_id = fields.Many2one(
         'mail.activity.type', string='Activity Type',
-        domain="['|', ('res_model', '=', False), ('res_model', '=', res_model)]", ondelete='restrict', index='btree_not_null',
+        ui_domain="['|', ('res_model', '=', False), ('res_model', '=', res_model)]", ondelete='restrict', index='btree_not_null',
         default=_default_activity_type)
     activity_category = fields.Selection(related='activity_type_id.category', readonly=True)
     activity_decoration = fields.Selection(related='activity_type_id.decoration_type', readonly=True)

@@ -264,14 +264,14 @@ class WebsiteSale(payment_portal.PaymentPortal):
             return request.redirect(f"/web/login?redirect={request.httprequest.path}")
 
         post = {k: v for k, v in post.items() if not k.startswith("_")}
-        # TODO: remove support for `category` query param in version 20 (or later).
-        category = self._validate_and_get_category(category)
+        ProductCategory = self.env["product.public.category"]
+        category = category or ProductCategory
+        if category.website_id.id not in (website.id, False):
+            category = ProductCategory
         if category:
             path = category.website_url + (f"/page/{page}" if page else "")
-            # Redirect to the correct category URL if needed. There are 2 potential reasons for
-            # redirecting:
-            # - The category was given as a query parameter instead of in the path,
-            # - The category's parents (if any) weren't included in the path.
+            # Redirect to the canonical category URL if the category's parents weren't
+            # correctly included in the path.
             if not_reload_request and path != request.httprequest.path:
                 url = urlparse(request.httprequest.url)
                 return request.redirect(url._replace(path=path).geturl(), code=301)
@@ -491,9 +491,11 @@ class WebsiteSale(payment_portal.PaymentPortal):
         # categories
 
         Category = self.env["product.public.category"]
-        categs_domain = (
-            Domain("parent_id", "=", False) & Domain("not_in_shop", "=", False) & website_domain
-        )
+        categs_domain = Domain("not_in_shop", "=", False) & website_domain
+        # The sidebar renders the whole category tree: fetch it at once rather than level by level
+        show_category_tree = website.is_view_active("website_sale.products_categories")
+        if not show_category_tree:
+            categs_domain &= Domain("parent_id", "=", False)
         if search:
             # using a sub-query is more efficient than using a query in the shape of "ids in (...)"
             # when there are 100k product ids to match.
@@ -504,6 +506,9 @@ class WebsiteSale(payment_portal.PaymentPortal):
         else:
             search_categories = Category
         categs = Category.search_fetch(categs_domain)
+        if show_category_tree:
+            # `filtered` keeps the whole tree as prefetch ids
+            categs = categs.filtered(lambda c: not c.parent_id)
 
         category_entries = Category
         if category:
@@ -647,19 +652,16 @@ class WebsiteSale(payment_portal.PaymentPortal):
         return request.render("website_sale.products", values)
 
     @route(["/shop/reload"], type="jsonrpc", auth="public", website=True)
-    def shop_reload(self, *args, **kwargs):
-        response = self.shop(*args, **kwargs)
+    def shop_reload(self, *args, category=None, **kwargs):
+        category = self.env["product.public.category"].browse(category and int(category)).exists()
+        response = self.shop(*args, category=category, **kwargs)
         html_content = response.render()
         product_count = response.qcontext.get("search_count", 0)
 
         return {"product_count": product_count, "html": str(html_content)}
 
     @route(
-        [
-            f"{SHOP_PATH}/<model('product.template'):product>",
-            f"{SHOP_PATH}/<model('product.public.category'):category>/<model('product.template'):product>",
-            f"{SHOP_PATH}/product/<model('product.template'):product>",
-        ],
+        f"{SHOP_PATH}/<model('product.template'):product>",
         type="http",
         auth="public",
         website=True,
@@ -682,15 +684,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 return request.redirect(SHOP_PATH)
 
         request.update_context(website_sale_product_page=True)
-        # TODO: remove support for deprecated paths in version 20 (or later).
-        path = product.website_url
-        # Redirect to the correct product URL if needed. There are 2 potential reasons for
-        # redirecting:
-        # - A `/product` prefix was included in the path,
-        # - A category slug was included in the path.
-        if path != request.httprequest.path:
-            query = request.httprequest.args.to_dict(flat=False)
-            return request.redirect(product._get_product_url(query), code=301)
 
         search_term = kwargs.get("search")
 
@@ -1983,27 +1976,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
             "currency_id": request.env.website.currency_id.id,
             "pricelist_id": request.pricelist.id,
         })
-
-    @staticmethod
-    def _validate_and_get_category(category):
-        """Validate and return the `product.public.category` record corresponding to the provided
-        category, which can be a record, a record id, or a slug.
-
-        If the provided category is invalid, non-existing, or inaccessible, return an empty
-        recordset. Otherwise, return the corresponding record.
-
-        :param str|product.public.category category: The category to validate and return.
-        :return: The validated category, or an empty recordset.
-        :rtype: product.public.category
-        """
-        ProductCategory = request.env["product.public.category"]
-        if category and isinstance(category, str) and not category.isdigit():
-            return ProductCategory
-        if (
-            category := ProductCategory.browse(category and int(category)).exists()
-        ) and category.website_id.id in (request.env.website.id, False):
-            return category
-        return ProductCategory
 
     def _get_attribute_value_params(self, query_params):
         """Extract the attribute value query params from a dict of more general query params.
