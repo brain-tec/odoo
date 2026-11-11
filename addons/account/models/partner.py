@@ -469,7 +469,12 @@ class ResPartner(models.Model):
         """Compute the total amount invoiced to the partner. Multiple currencies may have been linked to the invoices, then it
         is important to define a unique currency to compute the total amount otherwise this one is meaningless. This currency
         is either the one of the partner's company if they have one or the currency of the environment's company."""
+        self.total_invoiced = 0.0
         if self.ids:
+            all_partners = self.with_context(active_test=False).search_fetch(
+                [('id', 'child_of', self.ids)],
+                ['parent_id'],
+            )
             query_res = self.env.execute_query(SQL(
                 """SELECT move.partner_id, SUM(move.amount_total_signed * COALESCE(currency_rate.rate, 1))
                      FROM account_move move
@@ -493,16 +498,17 @@ class ResPartner(models.Model):
                       AND move.partner_id IN %(partner_ids)s
                       AND move.move_type IN ('out_invoice', 'out_refund')
                     GROUP BY move.partner_id""",
-                partner_ids=tuple(self.ids),
+                partner_ids=tuple(all_partners.ids),
                 company_ids=tuple(self.env.companies.ids),
                 default_company_id=self.env.company.id,
             ))
-            data_map = dict(query_res)
-        else:
-            data_map = {}
-
-        for partner in self:
-            partner.total_invoiced = data_map.get(partner.id, 0.0)
+            all_partners_by_id = {partner.id: partner for partner in all_partners}
+            for partner_id, total in query_res:
+                partner = all_partners_by_id[partner_id]
+                while partner:
+                    if partner in self:
+                        partner.total_invoiced += total
+                    partner = partner.parent_id
 
     @api.depends('credit')
     def _compute_days_sales_outstanding(self):
@@ -575,13 +581,13 @@ class ResPartner(models.Model):
     property_account_payable_id = fields.Many2one('account.account', company_dependent=True,
         check_company=True,
         string="Account Payable",
-        domain="[('account_type', '=', 'liability_payable')]",
+        ui_domain="[('account_type', '=', 'liability_payable')]",
         ondelete='restrict')
     property_account_payable_active = fields.Boolean(related='property_account_payable_id.active', string="Account Payable Active")
     property_account_receivable_id = fields.Many2one('account.account', company_dependent=True,
         check_company=True,
         string="Account Receivable",
-        domain="[('account_type', '=', 'asset_receivable')]",
+        ui_domain="[('account_type', '=', 'asset_receivable')]",
         ondelete='restrict')
     property_account_receivable_active = fields.Boolean(related='property_account_receivable_id.active', string="Account Receivable Active")
     property_account_position_id = fields.Many2one('account.fiscal.position', company_dependent=True,
@@ -632,7 +638,7 @@ class ResPartner(models.Model):
     invoice_template_pdf_report_id = fields.Many2one(
         string="Invoice report",
         comodel_name='ir.actions.report',
-        domain="[('id', 'in', available_invoice_template_pdf_report_ids)]",
+        ui_domain="[('id', 'in', available_invoice_template_pdf_report_ids)]",
         readonly=False,
         store=True,
     )

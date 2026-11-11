@@ -108,7 +108,7 @@ class AccountMoveLine(models.Model):
         index=False,  # covered by _account_id_date_idx
         bypass_search_access=True,
         ondelete="restrict",
-        domain="[('account_type', '!=', 'off_balance')]",
+        domain=[('account_type', '!=', 'off_balance')],
         check_company=True,
         tracking=True,
     )
@@ -428,7 +428,7 @@ class AccountMoveLine(models.Model):
     product_uom_id = fields.Many2one(
         comodel_name='uom.uom',
         string='Unit',
-        domain="[('id', 'in', allowed_uom_ids)] if allowed_uom_ids else []",
+        ui_domain="[('id', 'in', allowed_uom_ids)] if allowed_uom_ids else []",
         compute='_compute_product_uom_id', store=True, readonly=False, precompute=True,
         ondelete="restrict",
     )
@@ -2355,6 +2355,10 @@ class AccountMoveLine(models.Model):
         for line in self:
             if line.move_id.inalterable_hash:
                 raise UserError(_('You cannot delete journal items belonging to a locked journal entry.'))
+
+    def _delete_extra(self):
+        yield from super()._delete_extra()
+        yield self.env['account.payment.register'].search([('line_ids', 'in', self.ids)])
 
     def unlink(self):
         if not self:

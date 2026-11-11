@@ -71,7 +71,7 @@ class StockQuant(models.Model):
     sn_duplicated = fields.Boolean(string="Duplicated Serial Number", compute='_compute_sn_duplicated', help="If the same SN is in another Quant")
     package_id = fields.Many2one(
         'stock.package', 'Package',
-        domain="['|', ('location_id', '=', location_id), '&', ('location_id', '=', False), ('quant_ids', '=', False)]",
+        ui_domain="['|', ('location_id', '=', location_id), '&', ('location_id', '=', False), ('quant_ids', '=', False)]",
         help='The package containing this quant', ondelete='restrict', check_company=True, index=True)
     owner_id = fields.Many2one(
         'res.partner', 'Owner',
@@ -116,7 +116,7 @@ class StockQuant(models.Model):
     is_outdated = fields.Boolean('Quantity has been moved since last count', compute='_compute_is_outdated', search='_search_is_outdated')
     user_id = fields.Many2one(
         'res.users', 'Assigned To', help="User assigned to do product count.",
-        domain=lambda self: [('all_group_ids', 'in', self._get_inventory_user_groups().ids)])
+        ui_domain=lambda self: [('all_group_ids', 'in', self._get_inventory_user_groups().ids)])
 
     @api.depends('quantity', 'reserved_quantity')
     def _compute_available_quantity(self):

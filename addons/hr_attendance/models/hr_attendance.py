@@ -65,7 +65,7 @@ class HrAttendance(models.Model):
     out_latitude = fields.Float(digits=(10, 7), readonly=True, aggregator=None)
     out_longitude = fields.Float(digits=(10, 7), readonly=True, aggregator=None)
     out_location = fields.Char(help="Based on GPS-Coordinates if available or on IP Address")
-    out_ip_address = fields.Char(readonly=True)
+    out_ip_address = fields.Char(string="Out IP Address", readonly=True)
     out_browser = fields.Char(readonly=True)
     out_mode = fields.Selection(selection=[('kiosk', "Kiosk"),
                                            ('systray', "Systray"),
@@ -92,7 +92,7 @@ class HrAttendance(models.Model):
     work_entry_type_id = fields.Many2one(
         'hr.work.entry.type', string="Time Type", index=True, required=True,
         default=lambda self: self.env.company.sudo().attendance_work_entry_type_id,
-        domain="[('id', 'in', allowed_work_entry_type_ids)]",
+        ui_domain="[('id', 'in', allowed_work_entry_type_ids)]",
     )
     wet_display_code = fields.Char(related='work_entry_type_id.display_code', export_string_translation=False)
     # color index of the linked work entry type, used by calendar/gantt views

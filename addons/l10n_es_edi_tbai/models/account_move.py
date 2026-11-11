@@ -67,7 +67,7 @@ class AccountMove(models.Model):
     l10n_es_tbai_reversed_ids = fields.Many2many(
         'account.move', 'account_move_tbai_reversed_moves', 'refund_id', 'reversed_move_id',
         string="Refunded Vendor Bills",
-        domain="[('move_type', '=', 'in_invoice'), ('commercial_partner_id', '=', commercial_partner_id)]",
+        ui_domain="[('move_type', '=', 'in_invoice'), ('commercial_partner_id', '=', commercial_partner_id)]",
         help="In the case where a vendor refund has multiple original invoices, you can set them here. ",
     )
 
@@ -371,7 +371,7 @@ class AccountMove(models.Model):
 
     def action_post(self):
         for move in self:
-            if (move.move_type in ('in_refund', 'out_refund')
+            if (move.is_refund()
                 and move.company_id.l10n_es_tbai_is_enabled
                 and not move.reversed_entry_id
                 and not move.l10n_es_tbai_reversed_ids
