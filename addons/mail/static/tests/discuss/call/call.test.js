@@ -39,6 +39,7 @@ import {
     mockDate,
     mockSendBeacon,
     mockUserAgent,
+    press,
     queryFirst,
     test,
     waitUntil,
@@ -1154,6 +1155,27 @@ test("Shows warning badge on mic/camera on non-granted permission in meeting con
     await waitNotifications(["discuss.channel.rtc.session/ended"]);
 });
 
+test("mute and deafen hotkeys are ignored when not in a call", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    pyEnv["discuss.channel.rtc.session"].create({
+        channel_member_id: pyEnv["discuss.channel.member"].create({
+            channel_id: channelId,
+            partner_id: pyEnv["res.partner"].create({ name: "Alfred" }),
+        }),
+        channel_id: channelId,
+    });
+    await start();
+    await openDiscuss(channelId);
+    await contains(".o-discuss-CallParticipantCard[aria-label='Alfred']");
+    await contains(".o-mail-Composer-input:focus");
+    queryFirst(".o-mail-Composer-input").blur();
+    await press(["shift", "d"]);
+    await press(["shift", "m"]);
+    await click(".o-discuss-Call:not(.o-selfInCall) button[title='Join Call']");
+    await contains(".o-discuss-Call.o-selfInCall");
+});
+
 test("should not show context menu on participant card when not in a call", async () => {
     mockGetMedia();
     const pyEnv = await startServer();
@@ -1573,6 +1595,32 @@ test("Escape closes meeting UI layers sequentially", async () => {
     triggerHotkey("Escape");
     await contains(".o-mail-Meeting", { count: 0 });
     await contains(".o-discuss-Call");
+});
+
+test("call of another channel starts with its cards while being in a call", async () => {
+    const pyEnv = await startServer();
+    const [generalId, salesId] = pyEnv["discuss.channel"].create([
+        { name: "General" },
+        { name: "Sales" },
+    ]);
+    pyEnv["discuss.channel.rtc.session"].create({
+        channel_member_id: pyEnv["discuss.channel.member"].create({
+            channel_id: salesId,
+            partner_id: pyEnv["res.partner"].create({ name: "Mario" }),
+        }),
+        channel_id: salesId,
+        is_screen_sharing_on: true,
+    });
+    await start();
+    await openDiscuss(generalId);
+    await click("[title='Start Call']");
+    await contains(".o-discuss-Call.o-selfInCall");
+    await click(".o-mail-DiscussSidebarChannel:text('Sales')");
+    await contains(
+        ".o-discuss-Call:not(.o-selfInCall) .o-discuss-CallParticipantCard[aria-label='Mario']"
+    );
+    await contains(".o-discuss-Call:not(.o-selfInCall) .o-discuss-Call-mainCards:first-child");
+    await contains(".o-discuss-CallPresentationBar", { count: 0 });
 });
 
 test("Access to Pinned Messages from Meeting Chat", async () => {
