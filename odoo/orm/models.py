@@ -933,7 +933,7 @@ class BaseModel(metaclass=MetaModel):
         :returns: dictionary with a *datas* matrix
         :rtype: dict
         """
-        if not (self.env.is_admin() or self.env.user.has_group('base.group_allow_export')):
+        if not (self.env.su or self.env.user._is_admin() or self.env.user.has_group('base.group_allow_export')):
             raise UserError(_("You don't have the rights to export data. Please contact an Administrator."))
         fields_to_export = [fix_import_export_id_paths(f) for f in fields_to_export]
         return {'datas': self._export_rows(fields_to_export)}
@@ -3610,8 +3610,37 @@ class BaseModel(metaclass=MetaModel):
     def unlink(self) -> typing.Literal[True]:
         """ Delete the records in ``self``.
 
+        The ORM first determines all the records impacted by the deletion:
+
+        * the records linked to ``self`` by another field with ``ondelete='cascade'``
+        * the records returned by :meth:`_delete_extra`
+        * recursively, the records impacted by the deletion of the above.
+
+        The methods decorated with :func:`~odoo.api.ondelete` are then called
+        on *all* the records to delete, including the cascade-deleted ones,
+        before anything is removed from the database. The callables they
+        return are called once the records have been deleted.
+
+        The cache is updated accordingly afterwards: fields with ``ondelete='set
+        null'`` are set to ``False``, and the fields depending on the deleted
+        records are marked to recompute.
+
+        .. note::
+
+            Avoid overriding this method to customize deletion. Implement
+            :meth:`_delete_extra` to delete additional records, and use
+            :func:`~odoo.api.ondelete` methods to prevent the deletion or to
+            run some code after it. Contrary to an override of ``unlink``,
+            both are also applied on the records deleted in cascade.
+
+            Override only when you need an action when the user directly unlinks
+            that record.
+
         :raise AccessError: if the user is not allowed to delete all the given records
-        :raise UserError: if the record is default property for other records
+        :raise UserError: if a record is used as the default value of a
+            company-dependent field
+        :raise ValidationError: if a record is referenced by a field with
+            ``ondelete='restrict'``
         """
         if not self:
             return True
@@ -3817,8 +3846,24 @@ class BaseModel(metaclass=MetaModel):
 
     def _delete_extra(self) -> Iterator[BaseModel]:
         """ Return records that must also be deleted whenever ``self`` is deleted.
-        This method is aimed at being overridden by models, instead of overriding
-        :meth:`unlink`.
+
+        This method is aimed at being overridden by models, instead of
+        overriding :meth:`unlink`. It is called by :meth:`unlink` on every
+        record to delete, including the ones deleted in cascade, and the
+        yielded records are deleted in the same operation (their own
+        :meth:`_delete_extra` and :func:`~odoo.api.ondelete` methods are
+        processed too).
+
+        The method is called in superuser mode, without the active test.
+        Overrides should yield the records of the parent method, then yield
+        recordsets (possibly empty) to delete::
+
+            def _delete_extra(self):
+                yield from super()._delete_extra()
+                # delete the messages of mails that are not notifications
+                yield self.filtered(lambda m: not m.is_notification).mail_message_id
+
+        :return: an iterator of recordsets to delete together with ``self``
         """
         env = self.env
         assert env.su and not env.context['active_test']
@@ -3966,6 +4011,10 @@ class BaseModel(metaclass=MetaModel):
         if not self:
             return True
 
+        if not all(self._ids):
+            # unexpected write() on new records
+            raise ValueError(f"write() forbidden on {self}, use update() instead")
+
         self.check_access('write')
         for field_name in vals:
             try:
@@ -4049,8 +4098,6 @@ class BaseModel(metaclass=MetaModel):
             # line's order after the modification.
             self.modified(fnames_modifying_relations, before=True)
 
-            real_recs = self.filtered('id')
-
             for field, value in field_values:
                 field.write(self, value)
 
@@ -4074,17 +4121,17 @@ class BaseModel(metaclass=MetaModel):
 
             # validate non-inversed fields first
             inverse_fields = [f.name for fs in determine_inverses.values() for f in fs]
-            real_recs._validate_fields(vals, inverse_fields)
+            self._validate_fields(vals, inverse_fields)
 
             for fields in determine_inverses.values():
                 # write again on non-stored fields that have been invalidated from cache
                 for field in fields:
-                    if not field.store and (not field.inherited or field.type not in ('one2many', 'many2many')) and any(field._cache_missing_ids(real_recs)):
-                        field.write(real_recs, vals[field.name])
+                    if not field.store and (not field.inherited or field.type not in ('one2many', 'many2many')) and any(field._cache_missing_ids(self)):
+                        field.write(self, vals[field.name])
 
                 # inverse records that are not being computed
                 try:
-                    fields[0].determine_inverse(real_recs)
+                    fields[0].determine_inverse(self)
                 except AccessError as e:
                     if fields[0].inherited:
                         description = self.env['ir.model']._get(self._name).name
@@ -4097,14 +4144,14 @@ class BaseModel(metaclass=MetaModel):
                     raise
 
             # invalidate the cache
-            if real_recs and (cache_name := self._clear_cache_name) and (
+            if (cache_name := self._clear_cache_name) and (
                 self._clear_cache_on_fields is None
                 or not vals.keys().isdisjoint(self._clear_cache_on_fields)
             ):
                 self.env.transaction.invalidate_ormcache(cache_name)
 
             # validate inversed fields
-            real_recs._validate_fields(inverse_fields)
+            self._validate_fields(inverse_fields)
 
         if self._check_company_auto:
             self._check_company(list(vals))
@@ -5670,7 +5717,7 @@ class BaseModel(metaclass=MetaModel):
 
             # set inverse fields on new records in the comodel
             if field.relational:
-                inv_recs = self[field.name].filtered(lambda r: not r.id)
+                inv_recs = field.convert_to_record(value, self).filtered(lambda r: not r.id)
                 if not inv_recs:
                     continue
                 # we need to adapt the value of the inverse fields to integrate self into it:
