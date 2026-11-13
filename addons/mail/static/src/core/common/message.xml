@@ -20,7 +20,7 @@
                 <div class="o-mail-Message-sidebar d-flex flex-shrink-0 align-items-center flex-column bg-inherit" t-att-class="this.getSidebarAttClass()">
                     <t t-if="!this.props.squashed">
                         <div class="o-mail-Message-avatarContainer position-relative bg-inherit rounded-3" t-att-class="this.getAvatarContainerAttClass()">
-                            <img class="o-mail-Message-avatar w-100 h-100 rounded-3" t-att-src="this.message.authorAvatarUrl" t-att-class="this.authorAvatarAttClass"/>
+                            <img class="o-mail-Message-avatar w-100 h-100 rounded-3" t-att-src="this.message.authorAvatarUrl" t-att-class="this.authorAvatarAttClass" alt=""/>
                         </div>
                         <t t-if="this.message.is_bookmarked" t-call="mail.Message.sidebarBookmark"/>
                     </t>
@@ -161,7 +161,7 @@
     </div>
     <div t-elif="this.message.thread?.eq(this.props.thread) and (this.message.incoming_email_to?.length or this.message.incoming_email_cc?.length)" class="mx-1">
         <span class="o-mail-Message-notification cursor-pointer" t-att-class="this.message.failureNotifications.length > 0 ? 'text-danger align-middle' : this.text-600" role="button" tabindex="0" t-att-title="this.deliveryFailureText" t-on-click="this.onClickNotification">
-            <i class="oi oi-filled" t-att-data-icon="this.message.failureNotifications.length > 0 ? 'cancel' : 'mail'" role="img"/>
+            <i class="oi oi-filled" t-att-data-icon="this.message.failureNotifications.length > 0 ? 'cancel' : 'mail'" aria-hidden="true"/>
         </span>
     </div>
 </t>

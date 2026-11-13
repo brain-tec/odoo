@@ -1315,7 +1315,7 @@ class HrLeave(models.Model):
                 if changes:
                     # create() protects these fields while its inverses run, so an
                     # assignment would reach the cache only and leave date_to stale
-                    leave.write(changes)
+                    leave.update(changes)
 
                 self.env.remove_to_compute(self._fields['work_entry_type_id'], leave)   # to stop onchange methods from resetting the wet chosen earlier
 
@@ -1738,7 +1738,7 @@ class HrLeave(models.Model):
         or cancelled requests.
         """
         values = vals
-        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user') or self.env.is_superuser()
+        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user') or self.env.su
         if not is_officer and values.keys() - {'attachment_ids', 'supported_attachment_ids', 'message_main_attachment_id'}:
             if any(hol.date_from.date() < fields.Date.today() and hol.employee_id.leave_manager_id != self.env.user
                    and hol.state not in ('confirm', 'draft') for hol in self):
@@ -2541,7 +2541,7 @@ class HrLeave(models.Model):
         :rtype: bool
         :raise UserError: when not possible and ``raise_if_not_possible``
         """
-        if self.env.is_superuser():
+        if self.env.su:
             return True
 
         is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')

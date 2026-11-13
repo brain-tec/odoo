@@ -319,14 +319,6 @@ class AccountMove(models.Model):
                     return xml_tree
         return res
 
-    def _check_l10n_it_edi_xml_content(self, file_data):
-        """ Checks if the XML root tag starts with 'FatturaElettronica'. Handles both standard XML and signed p7m files."""
-        xml_tree = self._parse_xml_with_recovery(file_data['raw'], file_data['name'])
-        if xml_tree is None:
-            return False
-        tag_name = etree.QName(xml_tree).localname
-        return tag_name.startswith('FatturaElettronica')
-
     def _is_l10n_it_edi_import_file(self, file_data):
         xml_tree = file_data.get('xml_tree')
         return (xml_tree is not None and etree.QName(file_data['xml_tree']).localname.startswith('FatturaElettronica'))
@@ -1266,29 +1258,43 @@ class AccountMove(models.Model):
     # EDI: Import
     # -------------------------------------------------------------------------
 
-    def cron_l10n_it_edi_download_and_update(self):
-        """ Crons run with sudo(), with empty recordset. Remember that. """
-        retrigger = False
-        for proxy_user in self.env['account_edi_proxy_client.user'].search([('proxy_type', '=', 'l10n_it_edi')]):
-            proxy_user = proxy_user.with_company(proxy_user.company_id)
-            if proxy_user.edi_mode != 'demo':
-                moves_to_check = self.search([
-                    ('company_id', '=', proxy_user.company_id.id),
-                    ('l10n_it_edi_transaction', '!=', False),
-                    *Domain.OR(
-                        [[('l10n_it_edi_state', 'in', WAITING_STATES)],
-                        Domain.AND(
-                            [
-                                [('l10n_it_edi_state', '=', 'forwarded')],
-                                [('commercial_partner_id.l10n_it_pa_index', '=ilike', '_' * 6)],
-                            ]
-                        )]
-                    )
-                ])
-                if moves_to_check:
-                    moves_to_check._l10n_it_edi_update_send_state()
-                retrigger = retrigger or self._l10n_it_edi_download_invoices(proxy_user)
+    @api.model
+    def _l10n_it_edi_check_send_state(self, companies=None):
+        """ Updates the SdI state of moves waiting for a response. """
+        domain = [
+            ('l10n_it_edi_transaction', '!=', False),
+            *Domain.OR([
+                [('l10n_it_edi_state', 'in', WAITING_STATES)],
+                Domain.AND([
+                    [('l10n_it_edi_state', '=', 'forwarded')],
+                    [('commercial_partner_id.l10n_it_pa_index', '=ilike', '_' * 6)],
+                ]),
+            ]),
+        ]
+        if companies:
+            domain.append(('company_id', 'in', companies.ids))
 
+        if moves_to_check := self.search(domain):
+            for company_moves in moves_to_check.grouped('company_id').values():
+                company_moves._l10n_it_edi_update_send_state()
+
+        return {'type': 'ir.actions.client', 'tag': 'reload'}
+
+    def cron_l10n_it_edi_download_and_update(self, companies=None):
+        """ Crons run with sudo(), with empty recordset. Remember that. """
+        domain = [
+            ('proxy_type', '=', 'l10n_it_edi'),
+            ('edi_mode', '!=', 'demo'),
+        ]
+        if companies:
+            domain.append(('company_id', 'in', companies.ids))
+
+        retrigger = False
+        proxy_users = self.env['account_edi_proxy_client.user'].search(domain)
+        self.env['account.move']._l10n_it_edi_check_send_state(proxy_users.company_id)
+
+        for proxy_user in proxy_users:
+            retrigger = retrigger or self._l10n_it_edi_download_invoices(proxy_user)
         # Retrigger download if there are still some on the server
         if retrigger:
             _logger.info('Retriggering "Receive invoices from the SdI"...')
@@ -1749,6 +1755,20 @@ class AccountMove(models.Model):
                     self.partner_id.is_company = partner_info.get('is_company')
                     self.partner_id.l10n_it_codice_fiscale = partner_info.get('codice_fiscale', False)
                     message_to_log.extend(logs)
+
+            if (
+                partner_role == 'buyer'
+                and (customer := self.partner_id.commercial_partner_id)
+                and not self._l10n_it_edi_document_type_mapping().get(document_type, {}).get('self_invoice')
+            ):
+                if (
+                    not customer.l10n_it_pa_index
+                    and len(destination_code or '') in (6, 7)
+                    and destination_code.upper() not in ('0000000', 'XXXXXXX')
+                ):
+                    customer.l10n_it_pa_index = destination_code
+                if not customer.l10n_it_pec_email and (destination_pec := get_text(tree, '//PECDestinatario')):
+                    customer.l10n_it_pec_email = destination_pec
 
             # Document Number -----------------------------------
             if number := get_text(tree, './/DatiGeneraliDocumento//Numero'):

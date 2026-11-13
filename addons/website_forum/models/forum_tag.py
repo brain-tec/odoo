@@ -72,14 +72,16 @@ class ForumTag(models.Model):
 
     @api.depends("forum_id", "forum_id.name", "name")
     def _compute_website_url(self):
+        super()._compute_website_url()
         for tag in self:
-            tag.website_url = f'/forum/{self.env["ir.http"]._slug(tag.forum_id)}/tag/{self.env["ir.http"]._slug(tag)}/questions'
+            if tag.id:  # _slug() fails on unsaved records (e.g. in an onchange)
+                tag.website_url = f'/forum/{self.env["ir.http"]._slug(tag.forum_id)}/tag/{self.env["ir.http"]._slug(tag)}/questions'
 
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
             forum = self.env['forum.forum'].browse(vals.get('forum_id'))
-            if self.env.user.karma < forum.karma_tag_create and not self.env.is_admin():
+            if self.env.user.karma < forum.karma_tag_create and not (self.env.su or self.env.user._is_admin()):
                 raise AccessError(_('%d karma required to create a new Tag.', forum.karma_tag_create))
         return super(ForumTag, self.with_context(mail_create_nolog=True, mail_create_nosubscribe=True)).create(vals_list)
 
