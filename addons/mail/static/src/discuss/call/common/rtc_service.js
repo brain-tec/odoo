@@ -312,6 +312,8 @@ export class Rtc extends Record {
     fallbackMode = false;
     isPipMode = false;
     isFullscreen = false;
+    /** Mirrors `screenTrack.enabled`, which a template cannot observe. */
+    isScreenTrackPaused = false;
     /** @type {RtcLog} */
     logs = {};
     notifications = reactive(new Map());
@@ -611,8 +613,14 @@ export class Rtc extends Record {
         this.setPttReleaseTimeout();
     }
 
+    /** @param {boolean} paused */
+    setScreenTrackPaused(paused) {
+        this.screenTrack.enabled = !paused;
+        this.isScreenTrackPaused = paused;
+    }
+
     showMirroringWarning() {
-        this.screenTrack.enabled = false;
+        this.setScreenTrackPaused(true);
         const trackEndedFn = () => this.removeMirroringWarning?.();
         this.removeMirroringWarning = this.overlay.add(
             CallInfiniteMirroringWarning,
@@ -712,9 +720,12 @@ export class Rtc extends Record {
     async leaveCall(channel = this.localChannel) {
         this.store.fullscreenChannel = null;
         this.hasPendingRequest = true;
-        await rpc("/mail/rtc/channel/leave_call", { channel_id: channel.id }, { silent: true });
-        this.endCall(channel);
-        this.hasPendingRequest = false;
+        try {
+            await rpc("/mail/rtc/channel/leave_call", { channel_id: channel.id }, { silent: true });
+        } finally {
+            this.endCall(channel);
+            this.hasPendingRequest = false;
+        }
     }
 
     /**
@@ -1534,18 +1545,22 @@ export class Rtc extends Record {
             this.notification.add(_t("Your browser does not support webRTC."), { type: "warning" });
             return;
         }
-        this.pttExtService.subscribe();
         this.hasPendingRequest = true;
-        const data = await rpc(
-            "/mail/rtc/channel/join_call",
-            {
-                camera,
-                channel_id: channel.id,
-                check_rtc_session_ids: channel.rtc_session_ids.map((session) => session.id),
-            },
-            { silent: true }
-        );
-        this.hasPendingRequest = false;
+        let data;
+        try {
+            data = await rpc(
+                "/mail/rtc/channel/join_call",
+                {
+                    camera,
+                    channel_id: channel.id,
+                    check_rtc_session_ids: channel.rtc_session_ids.map((session) => session.id),
+                },
+                { silent: true }
+            );
+        } finally {
+            this.hasPendingRequest = false;
+        }
+        this.pttExtService.subscribe();
         // Initializing a new session implies closing the current session.
         this.clear();
         this.localChannel = channel;
@@ -2010,6 +2025,10 @@ export class Rtc extends Record {
                     this.screenTrack = undefined;
                     closeStream(this.sourceScreenStream);
                     this.sourceScreenStream = null;
+                    if (this.screenAudioTrack) {
+                        this.screenAudioTrack = undefined;
+                        this.updateAudioTrack();
+                    }
                     break;
                 }
             }
@@ -2104,6 +2123,7 @@ export class Rtc extends Record {
             }
             case "screen": {
                 Object.assign(this, {
+                    isScreenTrackPaused: false,
                     isSendingScreen: Boolean(outputTrack),
                     screenAudioTrack: screenAudioTrack,
                     screenTrack: outputTrack,
@@ -2138,6 +2158,8 @@ export class Rtc extends Record {
             this.audioTrack = destination.stream.getAudioTracks()[0];
         } else {
             this.audioTrack = micAudioTrack ?? screenAudioTrack;
+            this.audioContext?.close();
+            this.audioContext = undefined;
         }
         await this.network?.updateUpload("audio", this.audioTrack);
     }
@@ -2145,7 +2167,9 @@ export class Rtc extends Record {
     async resetMicAudioTrack({ force = false }) {
         this.micAudioTrack?.stop();
         this.micAudioTrack = undefined;
-        this.audioTrack?.stop();
+        if (this.audioTrack !== this.screenAudioTrack) {
+            this.audioTrack?.stop();
+        }
         this.audioTrack = undefined;
         if (!this.localChannel) {
             return;
@@ -2165,6 +2189,7 @@ export class Rtc extends Record {
                 }
             } catch {
                 this.showMediaUnavailableWarning({ microphone: true });
+                this.updateAudioTrack();
                 return;
             }
             if (!this.localSession) {
@@ -2181,6 +2206,8 @@ export class Rtc extends Record {
             micAudioTrack.enabled = !this.localSession.isMute && this.localSession.isTalking;
             this.micAudioTrack = micAudioTrack;
             this.linkVoiceActivationDebounce();
+            this.updateAudioTrack();
+        } else {
             this.updateAudioTrack();
         }
     }
@@ -2434,7 +2461,7 @@ export const rtcService = {
             } else if (!rtc.isFullscreen) {
                 rtc.removeMirroringWarning?.();
                 if (wasFullscreen && rtc.screenTrack) {
-                    rtc.screenTrack.enabled = true;
+                    rtc.setScreenTrackPaused(false);
                 }
             }
         });
