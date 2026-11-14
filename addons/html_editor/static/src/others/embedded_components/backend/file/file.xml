@@ -3,7 +3,7 @@
     <!-- /file template -->
     <t t-name="html_editor.EmbeddedFile" t-inherit="html_editor.ReadonlyEmbeddedFile" t-inherit-mode="primary">
         <xpath expr="//span[hasclass('o_file_name_container')]" position="after">
-            <input t-attf-class="rounded border-0 mx-2 #{ this.localState.editFileName ? '' : 'd-none'}"
+            <input t-attf-class="rounded border-0 mx-2 flex-grow-1 min-w-0 #{ this.localState.editFileName ? '' : 'd-none'}"
                 t-ref="this.nameInput" type="text" maxLength="100" t-att-placeholder="this.fileModel.filename"
                 t-on-blur="this.onBlurNameInput" t-on-input.stop="" t-on-keydown.stop="this.onKeydownNameInput"
                 t-att-value="this.fileModel.filename"/>
@@ -16,8 +16,21 @@
             <attribute name="t-on-focus">this.onFocusFileName</attribute>
             <attribute name="tabindex">-1</attribute>
         </xpath>
+        <xpath expr="//span[hasclass('alert-info')]" position="attributes">
+            <attribute name="t-ref">this.fileBox</attribute>
+            <attribute name="t-att-style">this.localState.editFileName ? `width: ${this.localState.boxWidth}px` : ""</attribute>
+        </xpath>
         <xpath expr="//span[hasclass('o_file_name')]" position="after">
             <i class="oi oi-filled mx-1 invisible align-items-center d-inline-flex" data-icon="edit"/>
+        </xpath>
+        <xpath expr="//FileSettings" position="attributes">
+            <attribute name="rename.bind">this.onFileRename</attribute>
+            <attribute name="toggleInlinePreview.bind">this.toggleInlinePreview</attribute>
+            <attribute name="remove.bind">this.onFileRemove</attribute>
+        </xpath>
+        <xpath expr="//span[hasclass('alert-info')]" position="attributes">
+            <!-- With the settings overlay, the preview replaces the file box -->
+            <attribute name="t-if">!this.isPreviewShown or !this.hasSettingsOverlay</attribute>
         </xpath>
     </t>
 </templates>
