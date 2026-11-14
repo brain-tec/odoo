@@ -1133,7 +1133,28 @@ class TestAPI(ThreadRecipients):
                 message,
                 body=Markup("line1<br>edit<br>line2<br>line3"),
             )
-        self.assertEqual(message.body, Markup('<p>line1 <br>edit<br>line2<br>line3<span class="o-mail-Message-edited" data-o-datetime="2025-04-08 13:00:00"></span></p>'))
+            self.assertEqual(
+                message.body,
+                Markup(
+                    '<p>line1<br>edit<br>line2<br>line3 <span class="o-mail-Message-edited" data-o-datetime="2025-04-08 13:00:00"></span></p>'
+                ),
+            )
+
+            ticket_record._message_update_content(message, body=Markup("<p>Hello<b>world</b></p>"))
+            self.assertEqual(
+                message.body,
+                Markup(
+                    '<p>Hello<b>world</b><span class="o-mail-Message-edited" data-o-datetime="2025-04-08 13:00:00"></span></p>'
+                ),
+            )
+
+            ticket_record._message_update_content(message, body=Markup("Hello <b>world</b>"))
+            self.assertEqual(
+                message.body,
+                Markup(
+                    '<p>Hello <b>world</b><span class="o-mail-Message-edited" data-o-datetime="2025-04-08 13:00:00"></span></p>'
+                ),
+            )
 
     @mute_logger('openerp.addons.mail.models.mail_mail')
     @users('employee')
@@ -1454,6 +1475,25 @@ class TestDiscuss(HttpCase, MailCommon, TestRecipients):
         )
         self.assertEqual(res["messages"], all_res["messages"])
         self.assertNotIn("count", res)
+
+    def test_message_fetch_exclude_ids(self):
+        record = self.test_record.with_user(self.user_employee)
+        messages = self.env["mail.message"]
+        for index in range(6):
+            messages += record.message_post(body=f"Message {index}", message_type="comment")
+        MailMessage = self.env["mail.message"].with_user(self.user_employee)
+        # messages known client-side are skipped, the page is the next closest messages
+        res = MailMessage._message_fetch([], thread=record, before=messages[5].id, exclude_ids=messages[3:5].ids, limit=2)
+        self.assertEqual(res["messages"], messages[1:3].sorted("id", reverse=True))
+        res = MailMessage._message_fetch([], thread=record, after=messages[0].id, exclude_ids=messages[1:3].ids, limit=2)
+        self.assertEqual(res["messages"], messages[3:5].sorted("id", reverse=True))
+        # without reference, the newest messages that are not known yet
+        res = MailMessage._message_fetch([], thread=record, exclude_ids=messages[4:].ids, limit=2)
+        self.assertEqual(res["messages"], messages[2:4].sorted("id", reverse=True))
+        # after 0 is a reference too: the oldest messages, not the newest ones
+        all_messages = MailMessage._message_fetch([], thread=record, limit=None)["messages"]
+        res = MailMessage._message_fetch([], thread=record, after=0, limit=2)
+        self.assertEqual(res["messages"], all_messages[-2:])
 
     @users("employee")
     def test_unlink_notification_message(self):

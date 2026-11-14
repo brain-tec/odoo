@@ -94,7 +94,7 @@ class ProductProduct(models.Model):
         help="Technical field to correctly show the currently selected company's currency that corresponds "
              "to the totaled value of the product's valuation layers")
 
-    @api.depends_context('to_date', 'company', 'warehouse_id')
+    @api.depends_context('to_date', 'company', 'allowed_company_ids', 'warehouse_id')
     @api.depends('cost_method', 'stock_move_ids.value', 'standard_price')
     def _compute_value(self):
         company_id = self.env.company
@@ -461,7 +461,7 @@ class ProductProduct(models.Model):
             moves_batch.move_line_ids.fetch(move_line_fields)
             for move in moves_batch:
                 quantity = quantity_by_product_id.get(move.product_id.id, 0.0)
-                average_cost = std_price_by_product_id.get(move.product_id.id, move.value / move._get_valued_qty() if move._get_valued_qty() else 0)
+                average_cost = std_price_by_product_id.get(move.product_id.id, move.value / move._get_valued_qty(signed=True) if move._get_valued_qty() else 0)
                 value = value_by_product_id.get(move.product_id.id, 0.0)
                 if move.product_id != product:
                     product = move.product_id

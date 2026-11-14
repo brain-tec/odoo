@@ -1827,6 +1827,82 @@ test("Cross tab calls: opening the fullscreen URL joins when no tab hosts the ca
     await expect.waitForSteps(["join_call"]);
 });
 
+test("Cross tab calls: rejecting an invitation to another channel keeps the hosted call", async () => {
+    const pyEnv = await startServer();
+    const [hostedChannelId, invitingChannelId] = pyEnv["discuss.channel"].create([
+        { name: "General" },
+        { name: "Sales" },
+    ]);
+    const hostedSessionId = pyEnv["discuss.channel.rtc.session"].create({
+        channel_member_id: pyEnv["discuss.channel.member"].search([
+            ["channel_id", "=", hostedChannelId],
+        ])[0],
+        channel_id: hostedChannelId,
+    });
+    const invitingMemberId = pyEnv["discuss.channel.member"].create({
+        channel_id: invitingChannelId,
+        partner_id: pyEnv["res.partner"].create({ name: "Bob" }),
+    });
+    const invitingSessionId = pyEnv["discuss.channel.rtc.session"].create({
+        channel_member_id: invitingMemberId,
+        channel_id: invitingChannelId,
+    });
+    const invitedMemberIds = pyEnv["discuss.channel.member"].search([
+        ["channel_id", "=", invitingChannelId],
+        ["partner_id", "=", serverState.partnerId],
+    ]);
+    pyEnv["discuss.channel.member"].write(invitedMemberIds, {
+        rtc_inviting_session_id: invitingSessionId,
+    });
+    onRpc("/mail/rtc/channel/leave_call", async (request) => {
+        const { params } = await request.json();
+        expect.step(`leave_call:${params.channel_id}`);
+        // the server declines the invitation, a late store fetch must not ring again
+        pyEnv["discuss.channel.member"].write(invitedMemberIds, { rtc_inviting_session_id: false });
+    });
+    const broadcastChannel = new BroadcastChannel("call_sync_state");
+    broadcastChannel.onmessage = (event) => expect.step(event.data.type);
+    await start();
+    await openDiscuss(hostedChannelId);
+    broadcastChannel.postMessage({
+        type: CROSS_TAB_HOST_MESSAGE.UPDATE_REMOTE,
+        hostedChannelId,
+        hostedSessionId,
+        changes: { [hostedSessionId]: { is_deaf: false, is_muted: false } },
+    });
+    await waitFor("[title='Mute']");
+    await click(".o-discuss-CallInvitation button[title='Reject']");
+    await waitForNone(".o-discuss-CallInvitation");
+    await click("[title='Mute']");
+    await expect.waitForSteps([
+        CROSS_TAB_CLIENT_MESSAGE.INIT,
+        `leave_call:${invitingChannelId}`,
+        CROSS_TAB_CLIENT_MESSAGE.REQUEST_ACTION,
+    ]);
+});
+
+test("Cross tab calls: the host tab keeps its call when another tab closes the call", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    const env = await start();
+    await openDiscuss(channelId);
+    await click("[title='Start Call']");
+    await waitFor("[title='Disconnect']");
+    const broadcastChannel = new BroadcastChannel("call_sync_state");
+    broadcastChannel.onmessage = (event) => {
+        if (event.data.type === CROSS_TAB_HOST_MESSAGE.PIP_CHANGE) {
+            expect.step("pip_change");
+        }
+    };
+    broadcastChannel.postMessage({
+        type: CROSS_TAB_HOST_MESSAGE.CLOSE,
+        hostedSessionId: env.services["mail.store"].rtc.localSession.id,
+    });
+    broadcastChannel.postMessage({ type: CROSS_TAB_CLIENT_MESSAGE.INIT });
+    await expect.waitForSteps(["pip_change"]);
+    await waitFor("[title='Disconnect']");
+});
+
 test("automatically cancel incoming call after some time", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
@@ -2892,4 +2968,50 @@ test("meeting ready banner is hidden in chat but shown in channel", async () => 
     await waitUntil(() => meeting?.channel?.id === channelId);
     expect(meeting.showInviteBanner).toBe(true);
     await waitFor(".o-mail-MeetingReadyBanner button:text('Add Others'):count(1)");
+});
+
+test("remote audio monitors are closed when replaced or when the remote leaves", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    const bobSessionId = pyEnv["discuss.channel.rtc.session"].create({
+        channel_member_id: pyEnv["discuss.channel.member"].create({
+            channel_id: channelId,
+            partner_id: pyEnv["res.partner"].create({ name: "Bob" }),
+        }),
+        channel_id: channelId,
+    });
+    await start();
+    await openDiscuss(channelId);
+    await contains("[title='Join Call']:count(1)").click();
+    await waitFor(".o-discuss-CallParticipantCard[aria-label='Mitchell Admin']:count(1)");
+    await waitFor(".o-discuss-CallParticipantCard[aria-label='Bob']:count(1)");
+    const getAudioTrack = async () =>
+        (await navigator.mediaDevices.getUserMedia({ audio: true })).getAudioTracks()[0];
+    const [firstTrack, secondTrack, thirdTrack] = await Promise.all([
+        getAudioTrack(),
+        getAudioTrack(),
+        getAudioTrack(),
+    ]);
+    const audioContexts = [];
+    patch(window, {
+        AudioContext: class extends window.AudioContext {
+            constructor() {
+                super(...arguments);
+                audioContexts.push(this);
+            }
+        },
+    });
+    const rtc = getService("discuss.rtc");
+    const bobSession = getService("mail.store")["discuss.channel.rtc.session"].get(bobSessionId);
+    const firstUpdate = rtc.updateStream(bobSession, firstTrack);
+    const replacedMonitor = audioContexts.at(-1);
+    const secondUpdate = rtc.updateStream(bobSession, secondTrack);
+    const currentMonitor = audioContexts.at(-1);
+    await Promise.all([firstUpdate, secondUpdate]);
+    await waitUntil(() => replacedMonitor.state === "closed");
+    expect(currentMonitor.state).toBe("running");
+    rtc.updateStream(bobSession, thirdTrack);
+    const lateMonitor = audioContexts.at(-1);
+    rtc.disconnect(bobSession);
+    await waitUntil(() => currentMonitor.state === "closed" && lateMonitor.state === "closed");
 });
