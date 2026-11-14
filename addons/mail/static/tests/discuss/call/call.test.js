@@ -40,9 +40,11 @@ import {
     mockDate,
     mockSendBeacon,
     mockUserAgent,
+    mockWorker,
     press,
     queryFirst,
     test,
+    waitFor,
     waitUntil,
 } from "@odoo/hoot";
 import {
@@ -938,6 +940,115 @@ test("Cross tab calls: opening the fullscreen URL joins when no tab hosts the ca
     await expect.waitForSteps(["join_call"]);
 });
 
+test("Cross tab calls: rejecting an invitation to another channel keeps the hosted call", async () => {
+    const pyEnv = await startServer();
+    const [hostedChannelId, invitingChannelId] = pyEnv["discuss.channel"].create([
+        { name: "General" },
+        { name: "Sales" },
+    ]);
+    const hostedSessionId = pyEnv["discuss.channel.rtc.session"].create({
+        channel_member_id: pyEnv["discuss.channel.member"].search([
+            ["channel_id", "=", hostedChannelId],
+        ])[0],
+        channel_id: hostedChannelId,
+    });
+    const invitingMemberId = pyEnv["discuss.channel.member"].create({
+        channel_id: invitingChannelId,
+        partner_id: pyEnv["res.partner"].create({ name: "Bob" }),
+    });
+    const invitingSessionId = pyEnv["discuss.channel.rtc.session"].create({
+        channel_member_id: invitingMemberId,
+        channel_id: invitingChannelId,
+    });
+    pyEnv["discuss.channel.member"].write(
+        pyEnv["discuss.channel.member"].search([
+            ["channel_id", "=", invitingChannelId],
+            ["partner_id", "=", serverState.partnerId],
+        ]),
+        { rtc_inviting_session_id: invitingSessionId }
+    );
+    onRpc("/mail/rtc/channel/leave_call", async (request) => {
+        const { params } = await request.json();
+        expect.step(`leave_call:${params.channel_id}`);
+    });
+    const broadcastChannel = new BroadcastChannel("call_sync_state");
+    broadcastChannel.onmessage = (event) => expect.step(event.data.type);
+    await start();
+    await openDiscuss(hostedChannelId);
+    broadcastChannel.postMessage({
+        type: CROSS_TAB_HOST_MESSAGE.UPDATE_REMOTE,
+        hostedChannelId,
+        hostedSessionId,
+        changes: { [hostedSessionId]: { is_deaf: false, is_muted: false } },
+    });
+    await contains("[title='Mute']");
+    await click(".o-discuss-CallInvitation button[title='Reject']");
+    await contains(".o-discuss-CallInvitation", { count: 0 });
+    await click("[title='Mute']");
+    await expect.waitForSteps([
+        CROSS_TAB_CLIENT_MESSAGE.INIT,
+        `leave_call:${invitingChannelId}`,
+        CROSS_TAB_CLIENT_MESSAGE.REQUEST_ACTION,
+    ]);
+});
+
+test("Cross tab calls: the host tab keeps its call when another tab closes the call", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    const env = await start();
+    await openDiscuss(channelId);
+    await click("[title='Start Call']");
+    await contains("[title='Disconnect']");
+    const broadcastChannel = new BroadcastChannel("call_sync_state");
+    broadcastChannel.onmessage = (event) => {
+        if (event.data.type === CROSS_TAB_HOST_MESSAGE.PIP_CHANGE) {
+            expect.step("pip_change");
+        }
+    };
+    broadcastChannel.postMessage({
+        type: CROSS_TAB_HOST_MESSAGE.CLOSE,
+        hostedSessionId: env.services["mail.store"].rtc.localSession.id,
+    });
+    broadcastChannel.postMessage({ type: CROSS_TAB_CLIENT_MESSAGE.INIT });
+    await expect.waitForSteps(["pip_change"]);
+    await contains("[title='Disconnect']");
+});
+
+test("can start the call again after failing to join it", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    let isJoinFailing = true;
+    onRpc("/mail/rtc/channel/join_call", () => {
+        if (isJoinFailing) {
+            isJoinFailing = false;
+            throw new Error("join_call failed");
+        }
+    });
+    await start();
+    await openDiscuss(channelId);
+    expect.errors(1);
+    await click("[title='Start Call']");
+    await expect.waitForErrors(["RPC_ERROR: join_call failed"]);
+    await click("[title='Start Call']");
+    await contains(".o-discuss-Call");
+});
+
+test("disconnecting ends the call even when leaving it fails", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    onRpc("/mail/rtc/channel/leave_call", () => {
+        throw new Error("leave_call failed");
+    });
+    await start();
+    await openDiscuss(channelId);
+    await click("[title='Start Call']");
+    await contains(".o-discuss-Call");
+    expect.errors(1);
+    await click(".o-discuss-CallActionList [title='Disconnect']");
+    await expect.waitForErrors(["RPC_ERROR: leave_call failed"]);
+    await contains("[title='Join the Call']");
+});
+
 test("automatically cancel incoming call after some time", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
@@ -1647,4 +1758,48 @@ test("show warning when blur hardware acceleration is not available", async () =
     expect(".o-discuss-CallDropdown-content:has(:text('Performance Warning:'))").toBeVisible();
     await click("[title='Dismiss warning']");
     await contains(".o-discuss-BlurPerformanceWarning-button", { count: 0 });
+});
+
+test("camera turns on without blur when the blur model fails", async () => {
+    patchWithCleanup(browser.navigator.mediaDevices, {
+        getUserMedia(constraints) {
+            if (!constraints.video) {
+                return super.getUserMedia(constraints);
+            }
+            const canvas = document.createElement("canvas");
+            const stream = canvas.captureStream();
+            canvas.getContext("2d").fillRect(0, 0, 1, 1);
+            return stream;
+        },
+    });
+    mockWorker((worker) => {
+        const workerSide = worker._messageChannel.port2;
+        workerSide.addEventListener("message", ({ data }) => {
+            if (worker.url.endsWith("tick_worker.js") && data.command === "start") {
+                workerSide.postMessage({ command: "tick" });
+            }
+        });
+    });
+    patchWithCleanup(window.SelfieSegmentation.prototype, {
+        close() {
+            expect.step("blur model closed");
+            return super.close();
+        },
+        async send() {
+            throw new Error("Blur model unavailable");
+        },
+    });
+    patchWithCleanup(console, {
+        warn: (error) => expect.step(`warn: ${error.message}`),
+    });
+    localStorage.setItem("mail_user_setting_use_blur", "true");
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    await start();
+    await openDiscuss(channelId);
+    await click("[title='Start Call']");
+    await click("button[title='Turn camera on']");
+    await waitFor(".o_notification:has(:text('Background blur could not be loaded'))");
+    await waitFor("button[title='Stop camera']");
+    await expect.waitForSteps(["warn: Blur model unavailable", "blur model closed"]);
 });
