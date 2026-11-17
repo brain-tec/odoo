@@ -46,7 +46,7 @@ import {
     queryFirst,
     test,
 } from "@odoo/hoot";
-import { press, waitUntil } from "@odoo/hoot-dom";
+import { press, waitFor, waitUntil } from "@odoo/hoot-dom";
 import {
     Command,
     getService,
@@ -1152,6 +1152,41 @@ test("Cross tab calls: the host tab keeps its call when another tab closes the c
     await contains("[title='Disconnect']");
 });
 
+test("can start the call again after failing to join it", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    let isJoinFailing = true;
+    onRpc("/mail/rtc/channel/join_call", () => {
+        if (isJoinFailing) {
+            isJoinFailing = false;
+            throw new Error("join_call failed");
+        }
+    });
+    await start();
+    await openDiscuss(channelId);
+    expect.errors(1);
+    await click("[title='Start Call']");
+    await expect.waitForErrors(["RPC_ERROR: join_call failed"]);
+    await click("[title='Start Call']");
+    await contains(".o-discuss-Call");
+});
+
+test("disconnecting ends the call even when leaving it fails", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    onRpc("/mail/rtc/channel/leave_call", () => {
+        throw new Error("leave_call failed");
+    });
+    await start();
+    await openDiscuss(channelId);
+    await click("[title='Start Call']");
+    await contains(".o-discuss-Call");
+    expect.errors(1);
+    await click(".o-discuss-CallActionList [title='Disconnect']");
+    await expect.waitForErrors(["RPC_ERROR: leave_call failed"]);
+    await contains("[title='Join the Call']");
+});
+
 test("automatically cancel incoming call after some time", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
@@ -1995,4 +2030,45 @@ test("Adjust view: sidebar layout always shows the sidebar, even alone", async (
     await contains(".o-mail-Meeting");
     // Sidebar mode always shows the sidebar column, even with a single participant.
     await contains(".o-discuss-Call-sidebar");
+});
+
+test("camera turns on without blur when the blur model fails", async () => {
+    patchWithCleanup(navigator.mediaDevices, {
+        getUserMedia(constraints) {
+            if (!constraints.video) {
+                return super.getUserMedia(constraints);
+            }
+            const canvas = document.createElement("canvas");
+            const stream = canvas.captureStream();
+            canvas.getContext("2d").fillRect(0, 0, 1, 1);
+            return stream;
+        },
+    });
+    patchWithCleanup(HTMLVideoElement.prototype, {
+        requestVideoFrameCallback(callback) {
+            Promise.resolve().then(callback);
+        },
+    });
+    patchWithCleanup(window.SelfieSegmentation.prototype, {
+        close() {
+            expect.step("blur model closed");
+            return super.close();
+        },
+        async send() {
+            throw new Error("Blur model unavailable");
+        },
+    });
+    patchWithCleanup(console, {
+        warn: (error) => expect.step(`warn: ${error.message}`),
+    });
+    localStorage.setItem("mail_user_setting_use_blur", "true");
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    await start();
+    await openDiscuss(channelId);
+    await click("[title='Start Call']");
+    await click("button[title='Turn camera on']");
+    await waitFor(".o_notification:has(:text('Background blur could not be loaded'))");
+    await waitFor("button[title='Turn camera off']");
+    await expect.waitForSteps(["warn: Blur model unavailable", "blur model closed"]);
 });
