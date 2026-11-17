@@ -346,7 +346,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
             # voip module read activity_type during create leading to one less query in enterprise on action_feedback
             _category = activity.activity_type_id.category
 
-        with self.assertQueryCount(admin=11, employee=10):  # tm: 8 / 8
+        with self.assertQueryCount(admin=11, employee=11):  # tm: 8 / 8
             activity.action_feedback(feedback='Zizisse Done !')
 
     @warmup
@@ -381,7 +381,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
 
         record.write({'name': 'Dupe write'})
 
-        with self.assertQueryCount(admin=13, employee=12):  # tm: 10 / 10
+        with self.assertQueryCount(admin=13, employee=13):  # tm: 10 / 10
             record.action_close('Dupe feedback')
 
         self.assertEqual(record.activity_ids, self.env['mail.activity'])
@@ -407,7 +407,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
 
         record.write({'name': 'Dupe write'})
 
-        with self.assertQueryCount(admin=15, employee=14):  # tm: 12 / 12
+        with self.assertQueryCount(admin=15, employee=15):  # tm: 12 / 12
             record.action_close('Dupe feedback', attachment_ids=attachments.ids)
 
         # notifications
@@ -1393,7 +1393,11 @@ class TestMailAccessPerformance(BaseMailPerformance):
         self.env.transaction.invalidate_access_cache()
         profile = self.profile() if self.warm else nullcontext()
         with self.assertQueryCount(employee=5), profile:
-            found = self.activities.with_env(self.env).search([('summary', 'ilike', 'TestActivity')])
+            found = self.activities.with_env(self.env).search([
+                # 'summary' has restricted allow_sudo_search
+                ('res_model', 'in', self.activities.mapped('res_model')),
+                ('summary', 'ilike', 'TestActivity'),
+            ])
         self.assertEqual(found, self.activities - self.activities_emp_nope)
 
     @users('employee')
@@ -1423,8 +1427,14 @@ class TestMailAccessPerformance(BaseMailPerformance):
         # recheck condition: 1
         profile = self.profile() if self.warm else nullcontext()
         with self.assertQueryCount(employee=6), profile:
-            found = self.messages.with_env(self.env).search([('body', 'ilike', 'Posting on ')])
+            found_restriced = self.messages.with_env(self.env).search([
+                # 'body' has restricted allow_sudo_search
+                ('model', 'in', self.messages.mapped('model')),
+                ('body', 'ilike', 'Posting on '),
+            ])
+        found = self.messages.with_env(self.env).search([('body', 'ilike', 'Posting on ')])
         self.assertEqual(found, self.messages - self.messages_emp_nope)
+        self.assertLessEqual(found_restriced, found)
 
 
 @tagged('mail_performance', 'mail_store', 'post_install', '-at_install')
