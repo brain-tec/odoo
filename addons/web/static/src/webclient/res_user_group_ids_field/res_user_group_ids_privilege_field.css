@@ -1,0 +1,21 @@
+.o_field_res_user_group_ids_privilege {
+    .o_is_disjoint:not(.o_is_implied) .o-checkbox > input {
+        background-color: var(--danger);
+        border-color: var(--danger);
+    }
+    .o_is_implied:not(.o_is_disjoint) .o-checkbox > input {
+        border-color: var(--o-bs-form-check-input-checked-bg-color);
+        background-image: var(--o-check-mark-form-check-checked-image) !important;
+    }
+    .o_is_implied.o_is_disjoint .o-checkbox > input {
+        border-color: var(--danger);
+        background-image: var(--o-check-mark-danger-image) !important;
+    }
+
+    .o_group_info_button[data-icon="info"] {
+        opacity: 0.2;
+        &:hover {
+            opacity: 1;
+        }
+    }
+}

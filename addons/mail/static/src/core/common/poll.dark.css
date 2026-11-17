@@ -1,0 +1,27 @@
+.o-mail-Poll, .o-mail-PollResult {
+    --border-opacity: .5;
+}
+
+.o-mail-PollResult-emojiWrapper {
+    background-color: rgba(255, 255, 255, 0.096);
+    border-color: transparent;
+}
+
+/* Stronger backgrounds, a fainter check icon on the neutral state, an opaque border on the winning option */
+.o-mail-Poll {
+    --poll-bg-opacity: 0.2;
+    --poll-check-opacity: 0.5;
+
+    &.o-ongoing .o-mail-PollOption.o-selected,
+    &.o-ongoing.o-isShowingResults .o-mail-PollOption.o-hasVotes {
+        --poll-bg-opacity: 0.2;
+    }
+
+    &:not(.o-ongoing) .o-mail-PollOption.o-winningOption {
+        --poll-bg-opacity: 0.4;
+    }
+}
+
+.o-mail-Poll:not(.o-ongoing) .o-mail-PollOption.o-winningOption {
+    --poll-border-color: rgb(from var(--poll-bg) r g b);
+}

@@ -1,0 +1,200 @@
+body:not(.o_touch_device) .o_settings_container .o_field_selection {
+    &:not(:hover):not(:focus-within) {
+        & select:not(:hover) {
+            background: transparent var(--o-caret-down) no-repeat right center;
+        }
+    }
+}
+
+.o_base_settings_view .o_form_renderer {
+   height: 100%;
+   overflow: auto;
+}
+
+.o_setting_container {
+   height: 100%;
+   > * {
+      overflow: auto;
+      flex: 1 0 auto;
+   }
+}
+
+.o_settings_container {
+    display: flex;
+    flex: 0 1 auto;
+    flex-flow: row wrap;
+    padding: 0;
+    margin: auto 0 auto 0;
+
+    .o_form_label.o_light_label, .o_light_label .o_form_label {
+        font-weight: var(--o-bs-font-weight-normal);
+    }
+}
+
+.o_enterprise_label {
+   position: absolute;
+   top: 0px;
+   right: 40px;
+   cursor: pointer;
+}
+
+/* Use a very specif selector to overwrite generic form-view rules */
+.o_form_view.o_base_settings_view .o_form_renderer.o_form_nosheet {
+   display: flex;
+   flex-flow: column nowrap;
+   padding: 0px;
+}
+
+.o_base_settings_view .o_control_panel {
+    margin-bottom: var(--settings__controlPanel-margin-bottom, var(--o-bs-spacer-3));
+}
+
+/* BASE SETTINGS LAYOUT */
+.o_base_settings_view .o_form_renderer {
+   --settings__tab-bg: var(--gray-100);
+   --settings__tab-bg--active: var(--o-component-active-bg);
+   --settings__tab-color: var(--body-color);
+   --settings__title-bg: var(--gray-200);
+
+   height: 100%;
+
+   .o_control_panel {
+       flex: 0 0 auto;
+
+       .o_panel {
+           display: flex;
+           flex-flow: row wrap;
+           width: 100%;
+       }
+
+       .o_form_statusbar {
+           padding: 0;
+           margin: 0;
+           border: 0;
+       }
+   }
+
+   .o_setting_container {
+       display: flex;
+       flex: 1 1 auto;
+       overflow: auto;
+
+       .settings_tab {
+           display: flex;
+           flex: 0 0 auto;
+           flex-flow: column nowrap;
+           background: var(--settings__tab-bg);
+           overflow: auto;
+
+           .selected {
+               background-color: var(--settings__tab-bg--active, var(--o-component-active-bg));
+               box-shadow: inset 2px 0 0 var(--o-component-active-border);
+           }
+
+           .tab {
+               display: flex;
+               padding: 0 calc(var(--o-horizontal-padding) * 2) 0 var(--o-horizontal-padding);
+               height: 40px;
+               color: var(--settings__tab-color);
+               font-size: 13px;
+               line-height: 40px;
+               cursor: pointer;
+               white-space: nowrap;
+
+               .icon {
+                   width: 23px;
+                   min-width: 23px;
+                   margin-right: 10px;
+               }
+
+               &:hover, &.selected {
+                   color: var(--o-bs-black);
+               }
+           }
+            .o_page_invalid {
+                color: var(--o-text-color-danger) !important;
+                background-color: var(--o-input-invalid-bg) !important;
+            }
+       }
+
+       .settings {
+           /* The left padding of the titles and headers doubles on large screens */
+           --o-settings-padding-left: var(--o-horizontal-padding);
+
+           position: relative;
+           flex: 1 1 100%;
+           background-color: var(--o-view-background-color);
+           overflow: auto;
+
+           @media screen and (min-width: 1200px), print and (min-width: 220mm) { /* media-breakpoint-up(xl) */
+               --o-settings-padding-left: calc(var(--o-horizontal-padding) * 2);
+           }
+
+           > .app_settings_block {
+               h2 {
+                   margin: 0 0 !important;
+                   padding: .7rem var(--o-horizontal-padding) .7rem var(--o-settings-padding-left);
+                   background-color: var(--settings__title-bg);
+                   font-size: 15px;
+
+                   &.o_invisible_modifier + .o_settings_container {
+                       display: none;
+                   }
+               }
+
+               h3 {
+                   margin: 0 0 !important;
+                   padding: .7rem var(--o-horizontal-padding) .7rem var(--o-settings-padding-left);
+                   font-weight: 400;
+                   font-size: 13px;
+               }
+
+               .o_settings_container {
+                   max-width: var(--o-bs-breakpoint-lg); /* Provide a maximum container size to ensure readability */
+                   @media screen and (min-width: 768px), print and (min-width: 188mm) {
+                        padding: 0 var(--o-horizontal-padding) 0 var(--o-settings-padding-left);
+                   }
+                   margin-bottom: 24px;
+               }
+           }
+
+           .settingSearchHeader {
+               display: flex;
+               align-items: center;
+               margin-bottom: 10px;
+               padding: .8rem var(--o-horizontal-padding) .8rem var(--o-settings-padding-left);
+               background-color: var(--gray-200);
+
+               .icon {
+                   width: 1.4em;
+                   height: 1.4em;
+                   margin-right: 10px;
+               }
+
+               & + .app_settings_header {
+                   margin-top: -10px;
+               }
+           }
+
+           .app_settings_header {
+               padding: 0 var(--o-horizontal-padding) 0 var(--o-settings-padding-left);
+           }
+
+           .highlighter {
+               background: yellow;
+               color: black;
+               font-weight: bold;
+           }
+       }
+
+       .d-block {
+           display: block!important;
+       }
+   }
+}
+
+@media screen and (max-width: 767.98px), print and (max-width: 187.98mm) {
+    .o_form_renderer .o_setting_left_pane .o_boolean_toggle.form-switch {
+        padding-left: var(--o-bs-form-switch-width);
+    }
+}

@@ -1,0 +1,93 @@
+.o_stock_reports_body_print {
+    background-color: white;
+    color: black;
+    .o_stock_reports_level0 {
+        border-width: 1px;
+        border-style: solid hidden groove;
+        font-weight: bold;
+    }
+}
+
+.o_main_content {
+    .o_stock_reports_page {
+        position: absolute;
+    }
+}
+.o_stock_reports_page {
+    background-color: var(--o-view-background-color);
+    &.o_stock_reports_no_print {
+        margin: var(--o-horizontal-padding) auto;
+        padding: var(--o-sheet-vpadding) var(--o-horizontal-padding);
+        .o_stock_reports_level0 {
+            border-width: 1px;
+            border-style: solid hidden groove;
+            font-weight: normal;
+        }
+        .o_stock_reports_table {
+            thead { 
+                display: table-row-group;
+            }
+            white-space: nowrap;
+            margin-top: 30px;
+        }
+        .o_report_line_header {
+            text-align: left;
+            padding-left: 10px;
+        }
+        .o_report_header {
+            border-top-style: groove;
+            border-bottom-style: groove;
+            border-width: 2px;
+        }
+    }
+    .o_stock_reports_unfolded {
+        display: inline-block;
+    }
+    .o_stock_reports_dim {
+        opacity: 0.5;
+    }
+    .o_stock_reports_nofoldable {
+        margin-left: 17px;
+    }
+    a.o_stock_report_lot_action  {
+        cursor: pointer;
+    }
+    a.o_stock_report_partner_action  {
+        cursor: pointer;
+    }
+    .o_stock_reports_unfolded td + td {
+        visibility: hidden;
+    }
+    div.o_stock_reports_web_action,
+    span.o_stock_reports_web_action, i.oi,
+    span.o_stock_reports_unfoldable, span.o_stock_reports_foldable, a.o_stock_reports_web_action  {
+        cursor: pointer;
+    }
+    .o_stock_reports_caret_icon {
+        margin-left: -3px;
+    }
+    th {
+        border-bottom: thin groove;
+    }
+    .o_stock_reports_level1 {
+        border-width: 2px;
+        border-style: hidden hidden solid;
+        font-weight: inherit;
+    }
+    .o_stock_reports_level2 {
+        border-width: 1px;
+        border-style: solid hidden;
+        font-weight: inherit;
+        > td > span:last-child {
+            margin-left: 25px;
+        }
+    }
+    .o_stock_reports_default_style {
+        border-width: 0px;
+        border-style: solid hidden;
+        font-weight: inherit;
+        > td > span:last-child {
+            margin-left: 50px;
+        }
+    }
+}
