@@ -30,6 +30,8 @@ import { ChannelMember } from "@mail/discuss/core/common/channel_member_model";
 
 import {
     advanceTime,
+    after,
+    animationFrame,
     beforeEach,
     describe,
     expect,
@@ -1139,6 +1141,48 @@ test("shows warning on infinite mirror effect (screen-sharing then fullscreen)",
     await contains(".o-discuss-CallParticipantCard button[aria-label='Stop Presenting']");
 });
 
+test("stream paused on infinite mirror effect leaves other cards clickable and resumes at once", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    await start();
+    await openDiscuss(channelId);
+    await click("[title='Start Call']");
+    await click("[title='Share Screen']");
+    await contains("video[type='screen']");
+    await triggerEvents(".o-discuss-Call-mainCards", ["mousemove"]); // show overlay
+    await click("button[title='Fullscreen']");
+    await contains("button:contains('Show My Screen Anyway')");
+    await contains(".o-discuss-CallParticipantCard:not(.pe-none) img[alt='Avatar']");
+    await click("button:contains('Show My Screen Anyway')");
+    await animationFrame();
+    expect("video[type='screen']").toHaveCount(1);
+});
+
+test("pausing the user's own screen keeps other participants' screens visible", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    const channelMemberId = pyEnv["discuss.channel.member"].create({
+        channel_id: channelId,
+        partner_id: pyEnv["res.partner"].create({ name: "Bob" }),
+    });
+    const env = await start();
+    const network = await makeMockRtcNetwork({ env, channelId });
+    const bobRemote = network.makeMockRemote(channelMemberId);
+    await openDiscuss(channelId);
+    await click("[title='Join Call']");
+    await bobRemote.updateConnectionState("connected");
+    await bobRemote.updateUpload("screen", createVideoStream().getVideoTracks()[0]);
+    await contains(".o-discuss-CallParticipantCard[aria-label='Bob'] video");
+    await triggerEvents(".o-discuss-Call-mainCards", ["mousemove"]); // show overlay
+    await click("[title='Share Screen']");
+    await triggerEvents(".o-discuss-Call-mainCards", ["mousemove"]); // show overlay
+    await click("button[title='Fullscreen']");
+    await contains("button:contains('Show My Screen Anyway')");
+    await triggerEvents(".o-discuss-Call-mainCards", ["mousemove"]); // show overlay
+    await click("[title='Show sidebar']");
+    await contains(".o-discuss-CallParticipantCard[aria-label='Bob']:not(.pe-none) video");
+});
+
 test("single 'join' (without camera) button when last call was audio-only", async () => {
     const pyEnv = await startServer();
     onRpc("/mail/rtc/session/notify_call_members", () => true);
@@ -1398,6 +1442,79 @@ test("all streams are properly closed when requesting new ones and tuning the fe
     await triggerEvents(".o-discuss-Call-mainCards", ["mousemove"]); // show overlay
     await click("[title='Stop Sharing Screen']");
     expect(screenStream.getTracks()[0].readyState).toBe("ended");
+});
+
+/** Makes screen shares carry an audio track, returned in the order of the shares. */
+function mockScreenShareWithAudio() {
+    const screenAudioTracks = [];
+    patchWithCleanup(browser.navigator.mediaDevices, {
+        getDisplayMedia() {
+            const audioContext = new AudioContext();
+            after(() => audioContext.close());
+            const stream = createVideoStream();
+            stream.addTrack(audioContext.createMediaStreamDestination().stream.getAudioTracks()[0]);
+            screenAudioTracks.push(stream.getAudioTracks()[0]);
+            return stream;
+        },
+    });
+    return screenAudioTracks;
+}
+
+test("turning the microphone on keeps sharing the screen audio", async () => {
+    let hasMicrophone = false;
+    patchWithCleanup(browser.navigator.mediaDevices, {
+        getUserMedia(constraints) {
+            if (constraints.audio && !hasMicrophone) {
+                throw new Error("Requested device not found");
+            }
+            return super.getUserMedia(constraints);
+        },
+    });
+    const screenAudioTracks = mockScreenShareWithAudio();
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    await start();
+    await openDiscuss(channelId);
+    await click("[title='Start Call']");
+    await contains("[title='Unmute']");
+    await click("[title='Share Screen']");
+    await contains("video");
+    await triggerEvents(".o-discuss-Call-mainCards", ["mousemove"]); // show overlay
+    hasMicrophone = true;
+    await click("[title='Unmute']");
+    await contains("[title='Mute']");
+    expect(screenAudioTracks[0].readyState).toBe("live");
+});
+
+test("stopping the screen share sends the microphone alone", async () => {
+    mockScreenShareWithAudio();
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    const env = await start();
+    const rtc = env.services["discuss.rtc"];
+    await openDiscuss(channelId);
+    await click("[title='Start Call']");
+    await contains("[title='Mute']");
+    await click("[title='Share Screen']");
+    await contains("video");
+    await triggerEvents(".o-discuss-Call-mainCards", ["mousemove"]); // show overlay
+    await click("[title='Stop Sharing Screen']");
+    expect(rtc.audioTrack).toBe(rtc.micAudioTrack);
+});
+
+test("losing the microphone keeps sharing the screen audio", async () => {
+    const screenAudioTracks = mockScreenShareWithAudio();
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    const env = await start();
+    const rtc = env.services["discuss.rtc"];
+    await openDiscuss(channelId);
+    await click("[title='Start Call']");
+    await contains("[title='Mute']");
+    await click("[title='Share Screen']");
+    await contains("video");
+    rtc.micAudioTrack.dispatchEvent(new Event("ended"));
+    await waitUntil(() => rtc.audioTrack === screenAudioTracks[0]);
 });
 
 test("Show connecting state on cards", async () => {
