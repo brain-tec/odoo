@@ -1429,8 +1429,15 @@ class HrLeave(models.Model):
         return balance_per_leave
 
     def _inverse_supported_attachment_ids(self):
+        assigned_attachments = self.env['ir.attachment']
         for holiday in self:
-            holiday.attachment_ids = holiday.supported_attachment_ids
+            attachments = holiday.supported_attachment_ids
+            # The gantt multi create gives the same files to several leaves, each keeps its own copy
+            shared_attachments = attachments & assigned_attachments
+            if shared_attachments:
+                attachments = (attachments - shared_attachments) | shared_attachments.copy()
+            holiday.attachment_ids = attachments
+            assigned_attachments |= attachments
         self.invalidate_recordset(['attachment_ids'])
 
     def _get_max_allowed_absence_hours(self, base_max_hours):
@@ -1505,13 +1512,6 @@ class HrLeave(models.Model):
                 if self.env.context.get('import_file'):
                     message += _("To import it as a new time off request instead, leave the External ID column empty.")
                 raise ValidationError(message)
-
-    @api.constrains('employee_id')
-    def _check_executive_employee_type(self):
-        executive_type = self.env.ref('hr.contract_type_company_executive', raise_if_not_found=False)
-        for holiday in self:
-            if executive_type and holiday.employee_id.employee_type_id == executive_type:
-                raise ValidationError(_("You cannot create a time off request for an employee of type company executive."))
 
     def _check_validity(self):
         """Check that the requests are covered by allocations and avoid mandatory days.
@@ -1728,7 +1728,13 @@ class HrLeave(models.Model):
         holiday_sudo.add_follower(self.employee_id.id)
         if self.validation_type == 'manager':
             holiday_sudo.message_subscribe(partner_ids=self.employee_id.leave_manager_id.partner_id.ids)
-        if self.validation_type == 'no_validation' or (self.env.user.has_group('hr_holidays.group_hr_holidays_user') and self.employee_id != self.env.user.employee_id):
+        if self.validation_type == "no_validation" or (
+            self.env.user.has_group("hr_holidays.group_hr_holidays_user")
+            and (
+                self.employee_id != self.env.user.employee_id
+                or not self.employee_id.leave_manager_id
+            )
+        ):
             # Automatic validation should be done in sudo, because user might not have the rights to do it by himself
             # skip_time_rules: bulk trigger below, once resource.calendar.leaves exist for all auto-approved leaves
             holiday_sudo.with_context(skip_time_rules=True).action_approve()
@@ -3007,7 +3013,7 @@ class HrLeave(models.Model):
             remaining_days -= nbr_days
 
             if use_worked_days:
-                if half_days:
+                if half_days or current_leave.request_date_from_period == 'pm':
                     new_request_date_to, new_request_date_to_period = current_leave._get_request_date_to_with_period(nbr_days, work_intervals)
                 else:
                     new_request_date_to = current_leave._get_request_date_to(nbr_days, days_data)
@@ -3085,14 +3091,20 @@ class HrLeave(models.Model):
         :return: ``(date, 'am' or 'pm')``, ``False`` if not reached
         """
         self.ensure_one()
+        date_from = self.date_from.replace(tzinfo=UTC)
         for interval in work_intervals:
             if interval[1].date() < self.request_date_from:
                 continue
+            if interval[1] <= date_from:
+                continue
+            if interval[0] < date_from:
+                interval = (date_from, interval[1], interval[2])
+            is_first_afternoon = self.request_date_from_period == 'pm' and interval[1].date() == self.request_date_from
             interval_days = self.resource_calendar_id._get_attendance_intervals_days_data([interval])['days']
             if number_of_days < interval_days:
                 return (interval[1].date(), 'am')
             if number_of_days == interval_days:
-                if float_compare(number_of_days, 0.5, precision_digits=2) == 0:
+                if float_compare(number_of_days, 0.5, precision_digits=2) == 0 and not is_first_afternoon:
                     last_day_morning_hours = self.employee_id._get_hours_for_date(interval[0].date(), day_period='morning')
                     last_day_morning = last_day_morning_hours[1] - last_day_morning_hours[0]
                     return (interval[1].date(), 'am') if interval[2].day_period != 'afternoon' and last_day_morning else (interval[1].date(), 'pm')

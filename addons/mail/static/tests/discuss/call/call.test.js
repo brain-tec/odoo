@@ -2170,6 +2170,27 @@ test("only notified of a call disconnection when the server ends the session", a
     await expect.waitForSteps(["notifyServerDisconnect"]);
 });
 
+test("mute and deafen hotkeys are ignored when not in a call", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    pyEnv["discuss.channel.rtc.session"].create({
+        channel_member_id: pyEnv["discuss.channel.member"].create({
+            channel_id: channelId,
+            partner_id: pyEnv["res.partner"].create({ name: "Alfred" }),
+        }),
+        channel_id: channelId,
+    });
+    await start();
+    await openDiscuss(channelId);
+    await waitFor(".o-discuss-CallParticipantCard[aria-label='Alfred']:count(1)");
+    await waitFor(".o-mail-Composer-html:focus:count(1)");
+    queryFirst(".o-mail-Composer-html").blur();
+    await press(["shift", "d"]);
+    await press(["shift", "m"]);
+    await contains(".o-discuss-Call:not(.o-selfInCall) button[title='Join Call']:count(1)").click();
+    await waitFor(".o-discuss-Call.o-selfInCall:count(1)");
+});
+
 test("should not show context menu on participant card when not in a call", async () => {
     mockGetMedia();
     const pyEnv = await startServer();
@@ -2591,6 +2612,34 @@ test("Escape closes meeting UI layers sequentially", async () => {
     triggerHotkey("Escape");
     await waitForNone(".o-mail-Meeting");
     await waitFor(".o-discuss-Call:count(1)");
+});
+
+test("call of another channel starts with its cards while being in a call", async () => {
+    const pyEnv = await startServer();
+    const [generalId, salesId] = pyEnv["discuss.channel"].create([
+        { name: "General" },
+        { name: "Sales" },
+    ]);
+    pyEnv["discuss.channel.rtc.session"].create({
+        channel_member_id: pyEnv["discuss.channel.member"].create({
+            channel_id: salesId,
+            partner_id: pyEnv["res.partner"].create({ name: "Mario" }),
+        }),
+        channel_id: salesId,
+        is_screen_sharing_on: true,
+    });
+    await start();
+    await openDiscuss(generalId);
+    await contains("[title='Start Call']:count(1)").click();
+    await waitFor(".o-discuss-Call.o-selfInCall:count(1)");
+    await contains(".o-mail-NotificationItem:has(:text('Sales')):count(1)").click();
+    await waitFor(
+        ".o-discuss-Call:not(.o-selfInCall) .o-discuss-CallParticipantCard[aria-label='Mario']:count(1)"
+    );
+    await waitFor(
+        ".o-discuss-Call:not(.o-selfInCall) .o-discuss-Call-mainCards:first-child:count(1)"
+    );
+    await waitForNone(".o-discuss-CallPresentationBar");
 });
 
 test("Access to Pinned Messages from Meeting Chat", async () => {

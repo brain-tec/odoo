@@ -1,0 +1,36 @@
+.configurator_color{
+    /* This code is copied from the sale/static/src/js/product_template_attribute_line/product_template_attribute_line.scss */
+    /* since the POS does not directly depend on it. */
+    /* In the future, we should explore options to import the CSS directly to avoid duplication. */
+    &.active {
+        --border-color: var(--o-action);
+    }
+
+    &.ptav-not-available {
+        opacity: 1;
+
+        &:after {
+            content: "";
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            bottom: -5px;
+            right: -5px;
+            border: 2px solid var(--danger);
+            border-radius: 50%;
+            background: var(--o-crossed-out-image);
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+    }
+}
+.ptav-not-available{
+    opacity: .5;
+}
+option.ptav-not-available {
+    opacity: 1;
+    color: #ccc;
+}
+.price-extra-cell {
+    width: max-content;
+}

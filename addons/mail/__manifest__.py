@@ -219,10 +219,12 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/src/views/web/activity/**',
         ],
         "web.assets_web_dark": [
-            # ensure core.dark.scss before any other style
-            'mail/static/src/core/common/core.dark.scss',
+            # ensure core.dark.css before any other style
+            'mail/static/src/core/common/core.dark.css',
             'mail/static/src/**/*.dark.scss',
             'mail/static/src/**/*.dark.css',
+            # rules that only the light theme needs
+            ('remove', 'mail/static/src/**/*.light.css'),
         ],
         "web.assets_frontend": [
             "mail/static/src/scss/css_variables.scss",
@@ -313,11 +315,13 @@ For more specific needs, you may also assign custom-defined actions
             'web/static/src/core/**/*.dark.css',
             # removed from html_editor.assets_editor, which the composer uses
             'html_editor/static/src/**/*.dark.css',
-            # ensure core.dark.scss before any other style
-            'mail/static/src/core/common/core.dark.scss',
+            # ensure core.dark.css before any other style
+            'mail/static/src/core/common/core.dark.css',
             'mail/static/src/**/common/**/*.dark.scss',
             'mail/static/src/**/common/**/*.dark.css',
             'mail/static/src/**/public_web/**/*.dark.css',
+            # rules that only the light theme needs
+            ('remove', 'mail/static/src/**/*.light.css'),
         ],
         'mail.assets_markdown': [
             'mail/static/src/markdown_assets/mail_markdown_assets.css',

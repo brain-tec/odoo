@@ -1,0 +1,23 @@
+.o-mail-DiscussApp-sidebarBgColor {
+    background-color: color-mix(in srgb, var(--white) 15%, var(--o-webclient-background-color)) !important;
+}
+
+.o-discuss-badge {
+    --mail-discuss-badge-mutedBg: var(--gray-500);
+}
+
+.o-discuss-ellipsisButton {
+    --o-discuss-ellipsisButton-mutedBorderOpacity: .75;
+}
+
+.o-discuss-text-body {
+    color: var(--o-main-text-color) !important;
+}
+
+.o-discuss-warningBadge .i {
+    text-shadow: 0px 0px 5px rgba(0, 0, 0, .5);
+}
+
+.o-secondary {
+    --o-secondary: var(--o-gray-700);
+}

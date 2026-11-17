@@ -1,0 +1,48 @@
+/* Each poll state sets its color and the opacities of its background, border and check icon */
+.o-mail-Poll {
+    --poll-bg: var(--secondary);
+    --poll-bg-opacity: 0.1;
+    --poll-border-opacity: 0.15;
+    --poll-check-opacity: 0.65;
+
+    background-color: var(--mail-Poll-bgColor, var(--o-view-background-color));
+
+    &.o-ongoing .o-mail-PollOption.o-selected,
+    &.o-ongoing.o-isShowingResults .o-mail-PollOption.o-hasVotes {
+        --poll-bg: var(--o-action);
+        --poll-bg-opacity: 0.1;
+        --poll-border-opacity: 0.5;
+        --poll-check-opacity: 1;
+    }
+
+    &:not(.o-ongoing) .o-mail-PollOption.o-winningOption {
+        --poll-bg: var(--o-brand-primary);
+        --poll-bg-opacity: 0.2;
+        --poll-border-opacity: 0.5;
+        --poll-check-opacity: 1;
+    }
+
+    &.o-isShowingResults .o-mail-PollOption {
+        --poll-bg-color: rgb(from var(--poll-bg) r g b / var(--poll-bg-opacity));
+        background: linear-gradient(to right, var(--poll-bg-color), var(--poll-bg-color)) no-repeat;
+    }
+}
+
+.o-mail-PollOption {
+    --poll-border-color: rgb(from var(--poll-bg) r g b / var(--poll-border-opacity));
+    border: 1px solid var(--poll-border-color);
+    background-size: 0%;
+    transition: background-size 0.6s cubic-bezier(0.215, 0.61, 0.355, 1);
+
+    [data-icon="check_circle"].oi-filled {
+        color: rgb(from var(--poll-bg) r g b / var(--poll-check-opacity));
+    }
+
+    .form-check-input:focus {
+        box-shadow: none;
+    }
+}
+
+.o-mail-CreatePollOptionDialog-emoji {
+    width: 2.25rem;
+}
