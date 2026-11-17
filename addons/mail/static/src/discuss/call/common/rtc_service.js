@@ -315,6 +315,8 @@ export class Rtc extends Record {
     isFullscreen = false;
     /** Whether fullscreen was active before opening PIP. */
     hadFullscreen = false;
+    /** Mirrors `screenTrack.enabled`, which a template cannot observe. */
+    isScreenTrackPaused = false;
     /** @type {RtcLog} */
     logs = {};
     notifications = reactive(new Map());
@@ -611,6 +613,12 @@ export class Rtc extends Record {
             return;
         }
         this.setPttReleaseTimeout();
+    }
+
+    /** @param {boolean} paused */
+    setScreenTrackPaused(paused) {
+        this.screenTrack.enabled = !paused;
+        this.isScreenTrackPaused = paused;
     }
 
     setPttReleaseTimeout(duration = PTT_RELEASE_DURATION) {
@@ -1999,6 +2007,10 @@ export class Rtc extends Record {
                     this.screenTrack = undefined;
                     closeStream(this.sourceScreenStream);
                     this.sourceScreenStream = null;
+                    if (this.screenAudioTrack) {
+                        this.screenAudioTrack = undefined;
+                        this.updateAudioTrack();
+                    }
                     break;
                 }
             }
@@ -2101,6 +2113,7 @@ export class Rtc extends Record {
             }
             case "screen": {
                 Object.assign(this, {
+                    isScreenTrackPaused: false,
                     isSendingScreen: Boolean(outputTrack),
                     screenAudioTrack: screenAudioTrack,
                     screenTrack: outputTrack,
@@ -2135,6 +2148,8 @@ export class Rtc extends Record {
             this.audioTrack = destination.stream.getAudioTracks()[0];
         } else {
             this.audioTrack = micAudioTrack ?? screenAudioTrack;
+            this.audioContext?.close();
+            this.audioContext = undefined;
         }
         await this.network?.updateUpload("audio", this.audioTrack);
     }
@@ -2142,7 +2157,9 @@ export class Rtc extends Record {
     async resetMicAudioTrack({ force = false }) {
         this.micAudioTrack?.stop();
         this.micAudioTrack = undefined;
-        this.audioTrack?.stop();
+        if (this.audioTrack !== this.screenAudioTrack) {
+            this.audioTrack?.stop();
+        }
         this.audioTrack = undefined;
         if (!this.localChannel) {
             return;
@@ -2162,6 +2179,7 @@ export class Rtc extends Record {
                 }
             } catch {
                 this.showMediaUnavailableWarning({ microphone: true });
+                this.updateAudioTrack();
                 return;
             }
             if (!this.localSession) {
@@ -2178,6 +2196,8 @@ export class Rtc extends Record {
             micAudioTrack.enabled = !this.localSession.isMute && this.localSession.isTalking;
             this.micAudioTrack = micAudioTrack;
             this.linkVoiceActivationDebounce();
+            this.updateAudioTrack();
+        } else {
             this.updateAudioTrack();
         }
     }
@@ -2431,10 +2451,10 @@ export const rtcService = {
                 rtc.displaySurface !== "browser" &&
                 rtc.fullscreen.id === CALL_FULLSCREEN_ID
             ) {
-                rtc.screenTrack.enabled = false;
+                rtc.setScreenTrackPaused(true);
             } else if (!rtc.isFullscreen) {
                 if (wasFullscreen && rtc.screenTrack) {
-                    rtc.screenTrack.enabled = true;
+                    rtc.setScreenTrackPaused(false);
                 }
             }
         });
