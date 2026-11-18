@@ -1043,12 +1043,15 @@ class HrEmployee(models.Model):
             else:
                 if len(employee.work_contact_id.employee_ids) <= 1:
                     partner = employee.work_contact_id
+                    vals = {
+                        fname: value for fname, value in [('email', employee.work_email), ('phone', employee.work_phone)]
+                        if partner[fname] != value
+                    }
+                    if not vals:
+                        continue
                     if not employee.user_id and not partner.user_ids:
                         partner = partner.sudo()
-                    partner.write({
-                        'email': employee.work_email,
-                        'phone': employee.work_phone,
-                    })
+                    partner.write(vals)
         if employees_without_work_contact:
             employees_without_work_contact.sudo()._create_work_contacts()
 
@@ -2446,7 +2449,13 @@ class HrEmployee(models.Model):
     def action_cancel_departure(self):
         self.ensure_one()
         self.action_unarchive()
-        self.departure_id.unlink()
+        departure = self.departure_id
+        if departure:
+            # The departure date was set as end date of an open-ended contract when the departure was created
+            version_sudo = self._get_version(departure.departure_date).sudo()
+            if not version_sudo.fixed_term and version_sudo.contract_date_end == departure.departure_date:
+                version_sudo.contract_date_end = False
+        departure.unlink()
 
     def _get_working_periods_by_field(self, start, stop, field_key):
         """
