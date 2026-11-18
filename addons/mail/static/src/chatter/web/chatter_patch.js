@@ -6,7 +6,7 @@ import { useAttachmentUploader } from "@mail/core/common/attachment_uploader_hoo
 import { usePopoutAttachment } from "@mail/core/common/attachment_view";
 import { MailAttachmentDropzone } from "@mail/core/common/mail_attachment_dropzone";
 import { MessageCardList } from "@mail/core/common/message_card_list";
-import { useMessageSearch } from "@mail/core/common/message_search_hook";
+import { MessageSearchPlugin } from "@mail/core/common/message_search_plugin";
 import { SearchMessageInput } from "@mail/core/common/search_message_input";
 import { SearchMessageResult } from "@mail/core/common/search_message_result";
 import { Activity } from "@mail/core/web/activity";
@@ -14,7 +14,16 @@ import { FollowerList } from "@mail/core/web/follower_list";
 import { groupAttachments } from "@mail/utils/common/attachments";
 import { assignGetter, isDragSourceExternalFile } from "@mail/utils/common/misc";
 
-import { t, untrack, useEffect, useOnChange, useProps, useScope } from "@odoo/owl";
+import {
+    providePlugins,
+    t,
+    untrack,
+    useEffect,
+    useOnChange,
+    usePlugin,
+    useProps,
+    useScope,
+} from "@odoo/owl";
 
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
@@ -99,7 +108,8 @@ const chatterPatch = {
             showScheduledMessages: true,
         });
         this.dialog = useService("dialog");
-        this.messageSearch = useMessageSearch();
+        providePlugins([MessageSearchPlugin], { thread: this.thread });
+        this.messageSearch = usePlugin(MessageSearchPlugin);
         this.attachmentUploader = useAttachmentUploader(this.thread);
         this.followerListDropdown = useDropdownState();
         /** @type {number|null} */
@@ -132,6 +142,7 @@ const chatterPatch = {
                                 this.reloadParentView();
                             }
                         });
+                        this.closeSearch();
                         this.state.activePanel = CHATTER_PANEL.ATTACHMENT;
                     }
                 },
@@ -160,6 +171,7 @@ const chatterPatch = {
                         this.webChatterProps.isAttachmentBoxVisibleInitially &&
                         this.attachments.length > 0
                     ) {
+                        this.closeSearch();
                         this.state.activePanel = CHATTER_PANEL.ATTACHMENT;
                     }
                 }
@@ -328,7 +340,6 @@ const chatterPatch = {
         } else {
             this.onThreadCreated?.(this.state.thread);
             this.onThreadCreated = null;
-            this.messageSearch.thread = this.state.thread;
             this.closeSearch();
         }
     },
@@ -471,6 +482,7 @@ const chatterPatch = {
                     if (self.hasParentReloadOnAttachmentsChanged) {
                         self.reloadParentView();
                     }
+                    self.closeSearch();
                     self.state.activePanel = CHATTER_PANEL.ATTACHMENT;
                     if (self.rootRef()) {
                         self.rootRef().scrollTop = 0;

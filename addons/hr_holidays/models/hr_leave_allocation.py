@@ -145,6 +145,7 @@ class HrLeaveAllocation(models.Model):
     ], compute="_compute_type_request_unit")
     department_id = fields.Many2one('hr.department', compute='_compute_department_id', store=True, string='Department', readonly=False)
     is_officer = fields.Boolean(compute='_compute_is_officer')
+    is_manager = fields.Boolean(compute='_compute_is_manager')
     # max_leaves, leaves_taken and virtual_remaining_leaves are for display purpose only
     # Do not use them for computation, use the result of _process_accrual_plans instead !
     max_leaves = fields.Float(compute='_compute_leaves')
@@ -184,6 +185,17 @@ class HrLeaveAllocation(models.Model):
     @api.depends('accrual_plan_id')
     def _compute_is_officer(self):
         self.is_officer = self.env.user.has_group("hr_holidays.group_hr_holidays_user")
+
+    @api.depends_context('uid')
+    @api.depends('employee_id.leave_manager_id', 'employee_id.user_id')
+    def _compute_is_manager(self):
+        is_officer = self.env.user.has_group("hr_holidays.group_hr_holidays_user")
+        for allocation in self:
+            # the time off approver of the employee, not for his own allocations
+            allocation.is_manager = is_officer or (
+                allocation.employee_id.leave_manager_id == self.env.user
+                and allocation.employee_id.user_id != self.env.user
+            )
 
     def _get_employee_hours_per_day(self, allocation_data={}):
         """Return the hours per day of the employee, to convert days into hours.
@@ -255,7 +267,15 @@ class HrLeaveAllocation(models.Model):
                 )
             allocation.name_validity = name_validity
 
-    @api.depends('employee_id', 'work_entry_type_id', 'nextcall')
+    @api.depends(
+        'employee_id', 'work_entry_type_id', 'nextcall',
+        'employee_id.leave_ids.state',
+        'employee_id.leave_ids.work_entry_type_id',
+        'employee_id.leave_ids.date_from',
+        'employee_id.leave_ids.date_to',
+        'employee_id.leave_ids.number_of_days',
+        'employee_id.leave_ids.number_of_hours',
+    )
     def _compute_leaves(self):
         date_from = fields.Date.context_today(self)
         employee_days_per_allocation = self.employee_id._get_consumed_leaves(self.work_entry_type_id, date_from)[0]
