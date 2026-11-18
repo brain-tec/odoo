@@ -105,7 +105,13 @@ class PosController(PortalAccount):
                 "SELECT id FROM pos_config WHERE id = %s FOR UPDATE NOWAIT",
                 (pos_config.id,)
             )
-            pos_config.open_ui()
+            try:
+                pos_config.open_ui()
+            except UserError:
+                # Enable frontend error rendering so this backend route displays an Odoo error page.
+                request.is_frontend = True
+                request.lang = request.env['res.lang']._get_data(code=request.env.lang)
+                raise
             pos_session = request.env['pos.session'].sudo().search(domain, limit=1)
 
         # The POS only works in one company, so we enforce the one of the session in the context
@@ -146,10 +152,11 @@ class PosController(PortalAccount):
         form_values = {}
         if request.httprequest.method == 'POST':
             for field in ['pos_reference', 'date_order', 'ticket_code']:
-                if not kwargs.get(field):
+                value = (kwargs.get(field) or '').strip()
+                if not value:
                     errors[field] = " "
                 else:
-                    form_values[field] = kwargs.get(field)
+                    form_values[field] = value
 
             if errors:
                 errors['generic'] = _("Please fill all the required fields.")
@@ -158,7 +165,7 @@ class PosController(PortalAccount):
             else:
                 date_order = datetime(*[int(i) for i in form_values['date_order'].split('-')])
                 order = request.env['pos.order'].sudo().search([
-                    ('pos_reference', '=like', '%' + form_values['pos_reference'].strip().replace('%', r'\%').replace('_', r'\_')),
+                    ('pos_reference', '=like', '%' + form_values['pos_reference'].replace('%', r'\%').replace('_', r'\_')),
                     ('date_order', '>=', date_order - timedelta(days=1)),
                     ('date_order', '<', date_order + timedelta(days=2)),
                     ('ticket_code', '=', form_values['ticket_code']),

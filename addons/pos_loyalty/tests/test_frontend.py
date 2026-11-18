@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from odoo import Command
 from odoo.tests import tagged
+from odoo.tools import mute_logger
 
 from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCommon
 from odoo.addons.point_of_sale.tests.common_setup_methods import setup_product_combo_items
@@ -660,8 +661,13 @@ class TestUi(TestPointOfSaleHttpCommon):
         # Check the created gift cards.
         self.assertEqual(len(programs['gift_card_1'].coupon_ids), 1)
         self.assertAlmostEqual(programs['gift_card_1'].coupon_ids.points, 10)
-        self.assertEqual(len(programs['gift_card_2'].coupon_ids), 1)
-        self.assertAlmostEqual(programs['gift_card_2'].coupon_ids.points, 20)
+        self.assertEqual(len(programs['gift_card_2'].coupon_ids), 2)
+        physical_gift_card_2 = programs['gift_card_2'].coupon_ids.filtered(lambda c: c.code == 'physical-gift-card-2')
+        self.assertEqual(len(physical_gift_card_2), 1)
+        self.assertAlmostEqual(physical_gift_card_2.points, 15)
+        manual_gift_card_2 = programs['gift_card_2'].coupon_ids - physical_gift_card_2
+        self.assertEqual(len(manual_gift_card_2), 1)
+        self.assertAlmostEqual(manual_gift_card_2.points, 20)
         # Check the created ewallets.
         ewallet_1_aaa = self.env['loyalty.card'].search([('partner_id', '=', partner_aaa.id), ('program_id', '=', programs['ewallet_1'].id)])
         self.assertEqual(len(ewallet_1_aaa), 1)
@@ -4152,3 +4158,31 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('PosLoyaltyPartnerListAfterCouponRemoval')
+
+
+@tagged('post_install', '-at_install')
+class TestPosSessionError(TestPointOfSaleHttpCommon):
+
+    def test_missing_gift_card_print_report(self):
+        """Opening the POS displays the missing report error without creating a session."""
+        self.env['loyalty.program'].search([]).active = False
+        program = self.env['loyalty.program'].browse(
+            self.env['loyalty.program'].create_from_template('gift_card')['res_id']
+        )
+        program.write({
+            'pos_report_print_id': False,
+            'pos_config_ids': [Command.clear()],
+            'currency_id': self.main_pos_config.currency_id.id,
+        })
+        program.rule_ids.product_ids.available_in_pos = True
+        self.assertTrue(program.mail_template_id)
+
+        self.authenticate('pos_user', 'pos_user')
+        # The expected validation error is logged by the HTTP dispatcher.
+        with mute_logger('odoo.http'):
+            response = self.url_open(self._get_url())
+        self.assertIn('Oops! Something went wrong.', response.text)
+
+        self.assertEqual(response.status_code, 422)
+        self.assertIn('There is no print report on the gift card program', response.text)
+        self.assertFalse(self.main_pos_config.current_session_id)
