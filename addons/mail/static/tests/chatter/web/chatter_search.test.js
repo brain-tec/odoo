@@ -14,9 +14,10 @@ import {
 } from "@mail/../tests/mail_test_helpers";
 import { insertTextInComposer } from "@mail/../tests/mail_test_helpers_composer";
 import { describe, test, waitFor, waitForNone } from "@odoo/hoot";
+import { mockDate } from "@odoo/hoot-mock";
 import { contains, serverState } from "@web/../tests/web_test_helpers";
 
-import { HIGHLIGHT_CLASS } from "@mail/core/common/message_search_hook";
+import { HIGHLIGHT_CLASS } from "@mail/core/common/message_search_plugin";
 
 describe.current.tags("desktop");
 defineMailModels();
@@ -208,6 +209,7 @@ test("opening search in chatter hides files and pinned messages panels", async (
 });
 
 test("Search in chatter should be hightligted", async () => {
+    mockDate("2024-10-20 10:00:00");
     patchUiSize({ size: SIZES.XXL });
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "John Doe" });
@@ -216,11 +218,20 @@ test("Search in chatter should be hightligted", async () => {
         model: "res.partner",
         res_id: partnerId,
     });
+    pyEnv["mail.scheduled.message"].create({
+        subject: "empty subject",
+        body: "<p>scheduled empty body</p>",
+        model: "res.partner",
+        res_id: partnerId,
+        scheduled_date: "2024-10-20 14:00:00",
+    });
     await start();
     await openFormView("res.partner", partnerId);
     await contains("[title='Search Messages']:count(1)").click();
     await insertText(".o-mail-SearchInput input", "empty");
     await waitFor(`.o-mail-SearchMessageResult .o-mail-Message .${HIGHLIGHT_CLASS}:count(1)`);
+    await waitFor(`.o-mail-Scheduled-Message .${HIGHLIGHT_CLASS}:count(2)`);
+    await waitFor(`.${HIGHLIGHT_CLASS}:count(3)`);
 });
 
 test("Scrolling bottom in non-aside chatter should load more searched message", async () => {
@@ -248,18 +259,34 @@ test("Scrolling bottom in non-aside chatter should load more searched message", 
 
 test("Switching chatter filters after empty result should show messages", async () => {
     const pyEnv = await startServer();
-    pyEnv["mail.message"].create({
-        body: "not empty",
-        message_type: "comment",
-        model: "res.partner",
-        res_id: serverState.partnerId,
-        subtype_id: pyEnv["mail.message.subtype"].search([
-            ["subtype_xmlid", "=", "mail.mt_comment"],
-        ])[0],
-    });
+    pyEnv["mail.message"].create([
+        {
+            body: "not empty",
+            message_type: "comment",
+            model: "res.partner",
+            res_id: serverState.partnerId,
+            subtype_id: pyEnv["mail.message.subtype"].search([
+                ["subtype_xmlid", "=", "mail.mt_comment"],
+            ])[0],
+        },
+        {
+            body: "internal search note",
+            message_type: "comment",
+            model: "res.partner",
+            res_id: serverState.partnerId,
+            subtype_id: pyEnv["mail.message.subtype"].search([
+                ["subtype_xmlid", "=", "mail.mt_note"],
+            ])[0],
+        },
+    ]);
     await start();
     await openFormView("res.partner", serverState.partnerId);
     await contains("[title='Search Messages']:count(1)").click();
+    await contains("[title='Filter Messages']:count(1)").click();
+    await contains(".o-dropdown-item:text('Notes'):count(1)").click();
+    await waitFor(
+        ".o-mail-SearchMessageResult .o-mail-Message-content:text('internal search note'):count(1)"
+    );
     await contains("[title='Filter Messages']:count(1)").click();
     await contains(".o-dropdown-item:text('Changes'):count(1)").click();
     await waitFor(".o-mail-MessageCardList:text('No messages found'):count(1)");

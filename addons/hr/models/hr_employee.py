@@ -393,7 +393,7 @@ class HrEmployee(models.Model):
     # skills and resume
     resume_line_ids = fields.One2many('hr.resume.line', 'employee_id', string="Resume lines")
     employee_skill_ids = fields.One2many('hr.employee.skill', 'employee_id', string="Skills",
-        domain=[('skill_type_id.active', '=', True)])
+        domain=[('skill_type_id.active', '=', True), ('is_company_visible', '=', True)])
     current_employee_skill_ids = fields.One2many('hr.employee.skill',
         compute='_compute_current_employee_skill_ids', readonly=False)
     skill_ids = fields.Many2many('hr.skill', compute='_compute_skill_ids', store=True, groups="hr.group_hr_user")
@@ -445,21 +445,21 @@ class HrEmployee(models.Model):
             })
         return new_vals_list
 
-    @api.depends('employee_skill_ids')
+    @api.depends('employee_skill_ids', 'company_id', 'employee_skill_ids.skill_type_id.company_id')
     def _compute_current_employee_skill_ids(self):
-        current_employee_skill_by_employee = self.employee_skill_ids.get_current_skills_by_employee()
+        current_employee_skill_by_employee = self.employee_skill_ids._filter_company_visible().get_current_skills_by_employee()
         for employee in self:
             employee.current_employee_skill_ids = current_employee_skill_by_employee[employee.id]
 
-    @api.depends('employee_skill_ids.skill_id')
+    @api.depends('employee_skill_ids.skill_id', 'company_id', 'employee_skill_ids.skill_type_id.company_id')
     def _compute_skill_ids(self):
         for employee in self:
-            employee.skill_ids = employee.employee_skill_ids.skill_id
+            employee.skill_ids = employee.employee_skill_ids._filter_company_visible().skill_id
 
-    @api.depends('employee_skill_ids')
+    @api.depends('employee_skill_ids', 'company_id', 'employee_skill_ids.skill_type_id.company_id')
     def _compute_certification_ids(self):
         for employee in self:
-            employee.certification_ids = employee.employee_skill_ids.filtered('is_certification')
+            employee.certification_ids = employee.employee_skill_ids._filter_company_visible().filtered('is_certification')
 
     def _compute_display_certification_page(self):
         self.display_certification_page = bool(self.env['hr.skill.type'].search_count([('is_certification', '=', True)], limit=1))
@@ -2430,25 +2430,10 @@ class HrEmployee(models.Model):
         if version_vals:
             version_vals['last_modified_date'] = fields.Datetime.now()
             version_vals['last_modified_uid'] = self.env.uid
+            # hr.version.write() takes care of logging the grouped "As of <date>"
+            # tracking message on the employee's chatter itself, so this also
+            # works when the version is written directly (automations, AI, ...)
             self.version_id.write(version_vals)
-
-            for employee in self:
-                multi_update_version_ids = self.env.context.get('multi_update_version_ids')
-                if multi_update_version_ids:
-                    first_version_sudo = employee.version_ids.filtered(lambda v: v.id == multi_update_version_ids[0]).sudo()
-                    last_version_sudo = employee.version_ids.filtered(lambda v: v.id == multi_update_version_ids[-1]).sudo()
-                else:
-                    first_version_sudo = employee.version_id.sudo()
-                    last_version_sudo = first_version_sudo
-                start = format_date_abbr(self.env, first_version_sudo.date_start) if first_version_sudo.date_start else False
-                end = format_date_abbr(self.env, last_version_sudo.date_end) if last_version_sudo.date_end else False
-                if start and end:
-                    msg = self.env._("As of %(start)s to %(end)s") % {'start': start, 'end': end}
-                elif start:
-                    msg = self.env._("As of %s") % (start)
-                else:
-                    msg = self.env._("As of")
-                employee._track_set_log_message(Markup("<b>%s</b>") % msg)
         if vals.get('department_id') or vals.get('user_id'):
             department_id = vals['department_id'] if vals.get('department_id') else self[:1].department_id.id
             # When added to a department or changing user, subscribe to the channels auto-subscribed by department
@@ -3479,9 +3464,9 @@ class HrEmployee(models.Model):
         version_changes_to_display = {}
         for field_name in version_changes:
             new_value = version_changes[field_name]
-            field = self.env['ir.model.fields'].search([('model', '=', 'hr.version'), ('name', '=', field_name)])
-            if field['relation']:
-                new_value = self.env[field['relation']].search([('id', 'in', new_value)])
+            field = self.env['hr.version']._fields[field_name]
+            if field.relational:
+                new_value = self.env[field.comodel_name].search([('id', 'in', new_value)])
             tracking_values = self._create_mail_tracking_values(
                 self[field_name], new_value,
                 field_name, self._track_get_fields_info([field_name])[field_name],
