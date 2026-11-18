@@ -1006,12 +1006,15 @@ class HrEmployee(models.Model):
             else:
                 if len(employee.work_contact_id.employee_ids) <= 1:
                     partner = employee.work_contact_id
+                    vals = {
+                        fname: value for fname, value in [('email', employee.work_email), ('phone', employee.work_phone)]
+                        if partner[fname] != value
+                    }
+                    if not vals:
+                        continue
                     if not employee.user_id and not partner.user_ids:
                         partner = partner.sudo()
-                    partner.write({
-                        'email': employee.work_email,
-                        'phone': employee.work_phone,
-                    })
+                    partner.write(vals)
         if employees_without_work_contact:
             employees_without_work_contact.sudo()._create_work_contacts()
 
@@ -2379,7 +2382,13 @@ class HrEmployee(models.Model):
 
     def action_new_departure(self):
         self.ensure_one()
-        if not self.is_in_contract:
+        # A contract already ended (end date set to bound the last payslip) is still ended through a departure,
+        # on its end date by default
+        version_sudo = self.sudo().version_id
+        ended_contract_date = version_sudo.contract_date_start and version_sudo.contract_date_end
+        if ended_contract_date and ended_contract_date >= fields.Date.context_today(self):
+            ended_contract_date = False
+        if not self.is_in_contract and not ended_contract_date:
             raise UserError(self.env._("You can't end the collaboration of an employee without contract, archive it instead."))
         if self.departure_id:
             if self.departure_id.apply_date:
@@ -2405,6 +2414,7 @@ class HrEmployee(models.Model):
             'target': 'new',
             'context': {
                 'default_employee_id': self.id,
+                **({'default_dismissal_date': ended_contract_date} if ended_contract_date else {}),
             },
         }
 
