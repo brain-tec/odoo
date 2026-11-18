@@ -5943,11 +5943,17 @@ class AccountMove(models.Model):
                 skip_invoice_sync=move.move_type == 'entry',
             ).copy(default_values)
 
+        reversed_storno = {
+            reverse_line: not line.is_storno
+            for move, reverse_move in zip(self, reverse_moves)
+            if move.move_type == 'entry' and move.company_id.account_storno
+            for line, reverse_line in zip(move.line_ids, reverse_move.line_ids, strict=True)
+        }
         reverse_moves.with_context(skip_invoice_sync=cancel).write({'line_ids': [
             Command.update(line.id, {
                 'balance': -line.balance,
                 'amount_currency': -line.amount_currency,
-                **({'is_storno': not line.is_storno} if line.company_id.account_storno else {}),
+                **({'is_storno': reversed_storno[line]} if line in reversed_storno else {}),
             })
             for line in reverse_moves.line_ids
             if line.move_id.move_type == 'entry' or line.display_type == 'cogs'
@@ -5977,6 +5983,17 @@ class AccountMove(models.Model):
 
     def _is_protected_by_audit_trail(self):
         return any(move.posted_before and move.company_id.restrictive_audit_trail for move in self)
+
+    @api.model
+    def _get_active_accrual_domain(self, date):
+        """ Returns the domain of active accrual entries which is of state posted and as of `date`
+        and its reversal is not yet posted or its planned posted date is not reached yet.
+        """
+        return Domain([
+            ('state', '=', 'posted'),
+            ('date', '<=', date),
+            ('reversal_move_ids', 'not any', [('state', '!=', 'cancel'), ('date', '<=', date)]),
+        ])
 
     def _unlink_or_reverse(self, default_values_list=None):
         if not self:
