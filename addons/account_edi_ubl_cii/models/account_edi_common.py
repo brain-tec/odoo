@@ -259,11 +259,22 @@ class AccountEdiCommon(models.AbstractModel):
 
     @api.model
     def _vat_is_equal(self, partner_vat, other_vat, country=False):
+        """
+        Compare the VAT against a partner's stored VAT:
+        - country-specific normalization where needed, which should stay consistent
+            with `_get_country_specific_vat_variants`,
+        - country prefixes are ignored, as the VAT may be stored with or without one
+            (ISO code or VAT-specific prefix, e.g. EL for Greece).
+        """
         partner_vat = partner_vat.replace(' ', '').upper()
         vat_to_compare = other_vat.replace(' ', '').replace('.', '').upper()
         if country and country.code == 'CH':
             partner_vat = re.sub(r"(TVA|IVA|MWST)?$", "", partner_vat.replace('.', '').replace('-', ''))
             vat_to_compare = re.sub(r"(TVA|IVA|MWST)?$", "", vat_to_compare.replace('-', ''))
+        if country:
+            for prefix in {country.code, *{'GB': ('XI',), 'GR': ('EL',), 'JP': ('T',)}.get(country.code, ())}:
+                partner_vat = partner_vat.removeprefix(prefix)
+                vat_to_compare = vat_to_compare.removeprefix(prefix)
         return partner_vat == vat_to_compare
 
     # -------------------------------------------------------------------------
@@ -579,6 +590,18 @@ class AccountEdiCommon(models.AbstractModel):
     # Import invoice
     # -------------------------------------------------------------------------
 
+    def _import_fix_line_price_unit_quantity_discount(self, quantity, discount, price_unit, line_total_amount, currency):
+        """ Recompute the quantity, discount and price unit so the line subtotal matches the line total amount
+        (LineExtensionAmount in UBL, LineTotalAmount in CII).
+        """
+        # TODO remove when France enforce stricter rules
+        current_line_subtotal = (1 - discount / 100) * (quantity * price_unit)
+        if not currency.is_zero((line_total_amount or 0.0) - current_line_subtotal):
+            quantity = quantity or 1
+            discount = 0
+            price_unit = (line_total_amount or 0.0) / quantity
+        return quantity, discount, price_unit
+
     def _import_invoice_ubl_cii(self, invoice, file_data, new=False):
         invoice.ensure_one()
         if invoice.invoice_line_ids:
@@ -629,7 +652,7 @@ class AccountEdiCommon(models.AbstractModel):
             })
 
         source_attachment = file_data['attachment'] or self.env['ir.attachment']
-        attachments = source_attachment + self._import_attachments(invoice, tree)
+        attachments = source_attachment + self._generate_pdf_attachment(invoice, tree)
 
         self._log_import_invoice_ubl_cii(invoice, invoice_logs=fill_invoice_logs, attachments=attachments)
 
@@ -649,42 +672,8 @@ class AccountEdiCommon(models.AbstractModel):
         invoice.message_post(body=body, attachment_ids=attachments.ids if attachments else None)
 
     def _import_attachments(self, invoice, tree):
-        # Import the embedded documents in the xml if some are found
-        attachments = self.env['ir.attachment']
-        if invoice.message_main_attachment_id.mimetype == 'application/pdf':
-            # Invoice look like it was already imported, don't import attachments again
-            return attachments
-        additional_docs = tree.findall('./{*}AdditionalDocumentReference')
-        for document in additional_docs:
-            attachment_name = document.find('{*}ID')
-            attachment_data = document.find('{*}Attachment/{*}EmbeddedDocumentBinaryObject')
-            if attachment_name is not None and attachment_data is not None:
-                mimetype = attachment_data.attrib.get('mimeCode')
-                # Strip internal newlines/spaces to prevent 'raw' field validation failure on create
-                if not (extension := SUPPORTED_FILE_TYPES.get(mimetype)) or not (text := ''.join((attachment_data.text or '').split())):
-                    continue
-                # Normalize the name of the file : some e-fff emitters put the full path of the file
-                # (Windows or Linux style) and/or the name of the xml instead of the pdf.
-                # Get only the filename with the right extension.
-                name = (attachment_name.text or 'invoice').split('\\')[-1].split('/')[-1].split('.')[0] + extension
-                attachment = self.env['ir.attachment'].create({
-                    'name': name,
-                    'res_id': invoice.id,
-                    'res_model': 'account.move',
-                    'raw': text + '=' * (len(text) % 4),  # Fix incorrect padding
-                    'type': 'binary',
-                    'mimetype': mimetype,
-                })
-                # Upon receiving an email (containing an xml) with a configured alias to create invoice, the xml is
-                # set as the main_attachment. To be rendered in the form view, the pdf should be the main_attachment.
-                if invoice.message_main_attachment_id and \
-                        invoice.message_main_attachment_id.name.endswith('.xml') and \
-                        'pdf' not in invoice.message_main_attachment_id.mimetype and \
-                        mimetype == 'application/pdf':
-                    invoice._message_set_main_attachment_id(attachment, force=True, filter_xml=False)
-                attachments |= attachment
-
-        return attachments
+        # To be implemented by the different formats (UBL, CII), since the XML structure differs between them.
+        return self.env['ir.attachment']
 
     def _import_partner(self, company_id, name, phone, email, vat, *, routing_identifier=False, additional_identifiers=None, postal_address={}, **kwargs):
         """ Retrieve the partner, if no matching partner is found, create it (only if he has a vat and a name) """
@@ -1414,9 +1403,11 @@ class AccountEdiCommon(models.AbstractModel):
 
     def _check_customer_vat_match(self, customer, vat, collected_values):
         """
-        Compare the VAT from an EDI document against a partner's stored VAT,
-        with country-specific normalization where needed.
-        Should stay consistent with `_get_country_specific_vat_variants`.
+        Compare the VAT from an EDI document against a partner's stored VAT:
+        - country-specific normalization where needed, which should stay consistent
+          with `_get_country_specific_vat_variants`,
+        - country prefixes are ignored, as the VAT may be stored with or without one
+          (ISO code or VAT-specific prefix, e.g. EL for Greece).
         """
         country = self._import_retrieve_country(collected_values)
         return self._vat_is_equal(customer.vat, vat, country)
@@ -1437,19 +1428,20 @@ class AccountEdiCommon(models.AbstractModel):
         vat = customer_values.get('vat')
         if not name or (customer and not vat):
             return
-        if not vat and not self._import_get_valid_additional_identifiers(customer_values):
-            return
 
         vat_mismatch = False
         if customer:
-            country = self._import_retrieve_country(collected_values)
-            if not customer.vat:
-                customer.vat, _country_code = self.env['res.partner']._run_vat_checks(country, vat, validation='setnull')
+            if vat:
+                country = self._import_retrieve_country(collected_values)
+                if not customer.vat:
+                    customer.vat, _country_code = self.env['res.partner']._run_vat_checks(country, vat, validation='setnull')
+                    return
+                country_mismatch = bool(country and customer.country_id and customer.country_id != country)
+                if not country_mismatch and self._check_customer_vat_match(customer, vat, collected_values):
+                    return
+                vat_mismatch = True
+            else:
                 return
-            country_mismatch = bool(country and customer.country_id and customer.country_id != country)
-            if not country_mismatch and self._check_customer_vat_match(customer, vat, collected_values):
-                return
-            vat_mismatch = True
 
         partner_create_values = self._import_prepare_missing_customer_create_values(collected_values)
         customer = self.env['res.partner'].create(partner_create_values)
@@ -1475,6 +1467,12 @@ class AccountEdiCommon(models.AbstractModel):
             if result['valid']:
                 partner_create_values['routing_scheme'] = scheme
                 partner_create_values['routing_endpoint'] = result['value']
+
+        # The scheme of the endpoint is not always one a partner can hold ('GLN' or 'DK:CVR' in UBL 2.0/2.1
+        # documents): drop the endpoint then, so create() does not raise.
+        if partner_create_values.get('routing_scheme') not in self.env['res.partner']._fields['routing_scheme'].get_values(self.env):
+            partner_create_values.pop('routing_scheme', None)
+            partner_create_values.pop('routing_endpoint', None)
 
         country = self._import_retrieve_country(collected_values)
         if country:
@@ -2030,10 +2028,11 @@ class AccountEdiCommon(models.AbstractModel):
         if originator_pdf := collected_values['file_data'].get('originator_pdf'):
             invoice._message_set_main_attachment_id(originator_pdf)
 
-        # Collect the embedded documents.
+        # Collect the embedded documents, or generate a PDF when the XML file doesn't provide one.
         invoice = collected_values['invoice']
         source_attachment = collected_values['file_data']['attachment'] or self.env['ir.attachment']
-        attachments = source_attachment + self._import_attachments(invoice, collected_values['tree'])
+        embedded_attachments = self._import_attachments(invoice, collected_values['tree'])
+        attachments = source_attachment + self._generate_pdf_attachment(invoice, additional_docs=embedded_attachments)
 
         # Chatter.
         body = Markup("<strong>%s</strong>") % self.env._(
@@ -2043,3 +2042,46 @@ class AccountEdiCommon(models.AbstractModel):
         if logs := dict.fromkeys(collected_values['logs']):
             body += Markup("<ul>%s</ul>") % Markup().join(Markup("<li>%s</li>") % l for l in logs)
         invoice.with_context(no_new_invoice=True).message_post(body=body, attachment_ids=attachments.ids)
+
+    def _generate_pdf_attachment(self, invoice, tree=None, additional_docs=None):
+        """ ATTEMPTS to create a PDF attachment when the XML file doesn't provide one."""
+        if additional_docs is None:
+            additional_docs = self._import_attachments(invoice, tree)
+        IrConfigParam = self.env['ir.config_parameter'].sudo()
+        disable_pdf_in_xml = IrConfigParam.get_bool("account_edi_ubl_cii.disable_pdf_in_xml")
+        if (
+            additional_docs or
+            invoice.message_main_attachment_id.mimetype == 'application/pdf' or
+            not invoice.is_purchase_document() or
+            disable_pdf_in_xml
+        ):
+            return additional_docs
+        try:
+            invoices_by_odoo_xmlid = 'account_edi_ubl_cii.action_report_account_invoices_generated_by_odoo'
+            if not self.env.ref(invoices_by_odoo_xmlid, raise_if_not_found=False):
+                _logger.warning("Missing template while generating substitute PDF attachment for invoice %s", invoice.id)
+                return additional_docs
+            report_xmlid = invoices_by_odoo_xmlid
+
+            pdf_raw, pdf_extension = self.env['ir.actions.report'] \
+                        ._render_qweb_pdf(report_xmlid, res_ids=[invoice.id])
+
+            if pdf_extension != 'pdf':
+                return additional_docs
+
+            invoice_name = invoice.display_name.replace(_('Draft'), '')
+            pdf_filename = _('%(invoice_name)s - Generated by Odoo', invoice_name=invoice_name)
+
+            attachment = self.env['ir.attachment'].create({
+                'name': pdf_filename + '.pdf',
+                'res_id': invoice.id,
+                'res_model': 'account.move',
+                'raw': pdf_raw,
+                'type': 'binary',
+                'mimetype': 'application/pdf',
+            })
+            invoice._message_set_main_attachment_id(attachment, force=True, filter_xml=False)
+            return attachment
+        except Exception:  # noqa: BLE001
+            _logger.exception("Error while generating substitute PDF attachment for invoice %s", invoice.id)
+        return additional_docs

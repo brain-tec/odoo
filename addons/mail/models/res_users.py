@@ -45,6 +45,7 @@ class ResUsers(models.Model):
              "- By email: Notifications are sent to your email address.\n"
              "- In Odoo: Notifications appear in your Odoo inbox.")
     presence_ids = fields.One2many("mail.presence", "user_id", groups="base.group_system")
+    status_message = fields.Char("Status Message", size=100, copy=False, user_writeable=True)
     # OOO management
     out_of_office_from = fields.Datetime(user_writeable=True)
     out_of_office_to = fields.Datetime(user_writeable=True)
@@ -447,6 +448,14 @@ class ResUsers(models.Model):
         self.ensure_one()
         return limited_field_access_token(self, "im_status", scope="mail.presence")
 
+    def _get_im_status_version(self):
+        """Version of `im_status`: the latest of the inputs that can change its value
+        (presence poll, manual status write). Both only move forward, so the version does too."""
+        self.ensure_one()
+        # sudo: mail.presence - can read own presence.
+        last_poll = self.sudo().presence_ids.last_poll
+        return max(last_poll, self.write_date) if last_poll else self.write_date
+
     def _store_init_global_fields(self, res: Store.FieldList):
         xmlid_to_res_id = self.env["ir.model.data"]._xmlid_to_res_id
         # sudo: res.partner - exposing OdooBot data is considered acceptable
@@ -479,24 +488,27 @@ class ResUsers(models.Model):
             "partner_id",
             lambda res: (
                 res.extend(["active", "name", "tz"]),
-                res.one("main_user_id", ["partner_id"]),
+                res.one("main_user_id", ["partner_id"], version=False),
                 res.from_method("_store_avatar_fields"),
             ),
         )
-        res.attr("is_admin", lambda u: u._is_admin())
-        res.extend(["notification_type", "share", "signature"])
+        res.attr("is_admin", lambda u: u._is_admin(), version=False)
+        res.extend(["notification_type", "share", "signature", "status_message"])
         res.from_method("_store_im_status_fields")
 
     def _store_main_user_fields(self, res: Store.FieldList):
         res.extend(["active", "partner_id", "share"])
+        res.attr("status_message", internal=True)
 
     def _store_im_status_fields(self, res: Store.FieldList):
-        res.attr("im_status")
-        res.attr("im_status_access_token", lambda p: p._get_im_status_access_token())
+        res.attr("im_status", version=lambda u: u._get_im_status_version())
+        res.attr(
+            "im_status_access_token", lambda p: p._get_im_status_access_token(), version=False,
+        )
         res.one("partner_id", "_store_im_status_fields")
 
     def _store_manual_im_status_fields(self, res: Store.FieldList):
-        res.attr("im_status")
+        res.attr("im_status", version=lambda u: u._get_im_status_version())
 
     def _store_user_fields(self, res: Store.FieldList):
         res.one("partner_id", "_store_partner_fields")
@@ -591,7 +603,9 @@ class ResUsers(models.Model):
     def _store_avatar_card_fields(self, res: Store.FieldList):
         res.attr("share")
         res.one("partner_id", "_store_avatar_card_fields")
-        res.attr("is_public", lambda u: u._is_public())
+        # Depends on the user groups: no write_date reflects it.
+        res.attr("is_public", lambda u: u._is_public(), version=False)
+        res.attr("status_message", internal=True)
         res.from_method("_store_im_status_fields", internal=True)
 
     # ------------------------------------------------------------
