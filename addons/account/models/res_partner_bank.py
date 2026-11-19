@@ -4,7 +4,6 @@ from odoo import _, api, fields, models, SUPERUSER_ID, tools
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import SQL
 from odoo.tools.image import image_data_uri
-from odoo.tools.bank_account_number import format_account_number, validate_iban, validate_clabe
 
 
 class ResPartnerBank(models.Model):
@@ -24,7 +23,6 @@ class ResPartnerBank(models.Model):
     partner_customer_rank = fields.Integer(related='partner_id.customer_rank')
     company_qr_code = fields.Boolean(compute='_compute_company_qr_code')
     related_moves = fields.One2many('account.move', inverse_name='partner_bank_id')
-    account_type = fields.Selection(selection_add=[('iban', 'IBAN'), ('clabe', 'CLABE')])
 
     # Add tracking to the base fields
     bank_bic = fields.Char(tracking=True)
@@ -42,28 +40,6 @@ class ResPartnerBank(models.Model):
     )
     lock_trust_fields = fields.Boolean(compute='_compute_lock_trust_fields')
     duplicate_bank_partner_ids = fields.Many2many('res.partner', compute="_compute_duplicate_bank_partner_ids")
-
-    @api.depends('country_id')
-    def _compute_account_type(self):
-        super()._compute_account_type()
-
-    @api.model
-    def retrieve_account_type(self, account_number):
-        for validator, account_type in (
-            (validate_iban, 'iban'),
-            (validate_clabe, 'clabe'),
-        ):
-            # A CLABE only exists in Mexico: an account of another country that passes its checksum is not one.
-            # Without a record (the account number widget of the bank setup wizard), the account is the company's own.
-            country_code = self.country_code if len(self) == 1 else self.env.company.country_code
-            if account_type == 'clabe' and country_code not in (False, 'MX'):
-                continue
-            try:
-                validator(self.env, account_number)
-                return account_type
-            except ValidationError:
-                pass
-        return super().retrieve_account_type(account_number)
 
     @api.constrains('journal_id')
     def _check_journal_id(self):
@@ -358,9 +334,6 @@ class ResPartnerBank(models.Model):
             vals['allow_out_payment'] = False
 
         for vals in vals_list:
-            if vals.get('account_number'):
-                vals['account_number'] = format_account_number(self.env, vals['account_number'])
-
             if (partner_id := vals.get('partner_id')) and (account_number := vals.get('account_number')):
                 archived_res_partner_bank = self.env['res.partner.bank'].search([('active', '=', False), ('partner_id', '=', partner_id), ('account_number', '=', account_number)])
                 if archived_res_partner_bank:
@@ -379,9 +352,6 @@ class ResPartnerBank(models.Model):
 
     def write(self, vals):
         # EXTENDS base res.partner.bank
-        if vals.get('account_number'):
-            vals['account_number'] = format_account_number(self.env, vals['account_number'])
-
         # track and log changes on partner_id
         track_fnames = [fname for fname in self._track_get_fields() if fname in vals]
         if track_fnames:

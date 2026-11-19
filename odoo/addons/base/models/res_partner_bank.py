@@ -2,7 +2,8 @@ import re
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import clean_context
+from odoo.tools import clean_context, SQL
+from odoo.tools.bank_account_number import format_account_number, normalize_account_number, validate_clabe, validate_iban
 
 
 def sanitize_account_number(account_number):
@@ -22,7 +23,7 @@ class ResPartnerBank(models.Model):
 
     active = fields.Boolean(default=True)
     account_type = fields.Selection(
-        selection=[('bank', 'Normal')],
+        selection=[('bank', 'Normal'), ('iban', 'IBAN'), ('clabe', 'CLABE')],
         string="Type",
         help="Bank account type: Normal, IBAN, CLABE, or other from localization. Inferred from the bank account number.",
         compute='_compute_account_type',
@@ -31,7 +32,9 @@ class ResPartnerBank(models.Model):
     sanitized_account_number = fields.Char(
         string="Sanitized Account Number",
         compute='_compute_sanitized_account_number',
-        readonly=True, store=True,
+        compute_sql='_compute_sql_sanitized_account_number',
+        compute_sudo=False,
+        readonly=True,
     )
     holder_name = fields.Char(
         string="Holder Name",
@@ -86,8 +89,8 @@ class ResPartnerBank(models.Model):
     note = fields.Text('Notes')
     color = fields.Integer(compute='_compute_color')
 
-    _unique_number = models.Constraint(
-        'unique(sanitized_account_number, partner_id)',
+    _unique_number = models.UniqueIndex(
+        r"((regexp_replace(upper(account_number), '[\W_]+', '', 'g')), partner_id)",
         "The combination Account Number/Partner must be unique.",
     )
 
@@ -136,7 +139,10 @@ class ResPartnerBank(models.Model):
     @api.depends('account_number')
     def _compute_sanitized_account_number(self):
         for account in self:
-            account.sanitized_account_number = sanitize_account_number(account.account_number)
+            account.sanitized_account_number = normalize_account_number(account.account_number)
+
+    def _compute_sql_sanitized_account_number(self, table):
+        return SQL(r"regexp_replace(upper(%s), '[\W_]+', '', 'g')", table.account_number)
 
     @api.depends('partner_id.country_id', 'company_id.country_id')
     def _compute_country_id(self):
@@ -149,18 +155,32 @@ class ResPartnerBank(models.Model):
 
     def _search_account_number(self, operator, value):
         if operator in ('in', 'not in'):
-            value = [sanitize_account_number(i) for i in value]
+            value = [normalize_account_number(i) for i in value]
         else:
-            value = sanitize_account_number(value)
+            value = normalize_account_number(value)
         return [('sanitized_account_number', operator, value)]
 
     @api.model
     def retrieve_account_type(self, account_number):
         """ To be overridden by subclasses in order to support other account_types.
         """
+        for validator, account_type in (
+            (validate_iban, 'iban'),
+            (validate_clabe, 'clabe'),
+        ):
+            # A CLABE only exists in Mexico: an account of another country that passes its checksum is not one.
+            # Without a record (the account number widget of the bank setup wizard), the account is the company's own.
+            country_code = self.country_code if len(self) == 1 else self.env.company.country_code
+            if account_type == 'clabe' and country_code not in (False, 'MX'):
+                continue
+            try:
+                validator(self.env, account_number)
+                return account_type
+            except ValidationError:
+                pass
         return 'bank'
 
-    @api.depends('account_number')
+    @api.depends('account_number', 'country_id')
     def _compute_account_type(self):
         for account in self:
             account.account_type = account.retrieve_account_type(account.account_number)
@@ -184,8 +204,8 @@ class ResPartnerBank(models.Model):
     def _sanitize_vals(self, vals):
         if 'sanitized_account_number' in vals:  # do not allow to write on sanitized directly
             vals['account_number'] = vals.pop('sanitized_account_number')
-        if 'account_number' in vals:
-            vals['sanitized_account_number'] = sanitize_account_number(vals['account_number'])
+        if vals.get('account_number'):
+            vals['account_number'] = format_account_number(self.env, vals['account_number'])
         if vals.get('bank_bic'):
             vals['bank_bic'] = vals['bank_bic'].upper()
 
@@ -198,6 +218,10 @@ class ResPartnerBank(models.Model):
     def write(self, vals):
         self._sanitize_vals(vals)
         return super().write(vals)
+
+    @api.onchange('account_number')
+    def _onchange_account_number(self):
+        self.account_number = format_account_number(self.env, self.account_number)
 
     @api.onchange('country_id')
     def _onchange_country_id(self):

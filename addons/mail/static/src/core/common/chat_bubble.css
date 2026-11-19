@@ -1,0 +1,89 @@
+
+.o-mail-ChatBubble {
+    height: auto !important;
+    z-index: var(--o-mail-ChatBubble-zindex);
+    border: none !important;
+    padding: 0;
+    background-color: transparent !important;
+
+    &:hover {
+        .o-mail-ChatBubble-close {
+            display: inline-flex;
+        }
+        .o-mail-ChatBubble-counter {
+            display: none;
+        }
+    }
+
+    &:hover, &.o-active {
+        filter: brightness(1.1);
+    }
+
+    &.o-bouncing {
+        /* One iteration is a full bounce, so the component can stop the
+           animation on any iteration boundary without the bubble jumping. */
+        animation: o-mail-ChatBubble-bouncing 0.5s;
+        animation-timing-function: cubic-bezier(.5, 0.95, 0, .5);
+        animation-iteration-count: infinite;
+    }
+
+}
+
+.o-mail-ChatBubble-close {
+    right: -3px;
+    top: -5px;
+    z-index: 6;
+    font-size: 11px;
+    display: none;
+    padding: calc(var(--o-bs-spacer-1) / 2);
+    --border-opacity: .5;
+
+    &:not(:hover) {
+        color: var(--o-bs-text-muted);
+    }
+
+    &:hover {
+        --border-opacity: .75;
+    }
+}
+
+.o-mail-ChatBubble-country {
+    width: 14px;
+    left: 0px;
+}
+
+.o-mail-ChatBubble-counter {
+    z-index: 7;
+    top: -3px;
+    right: -4px;
+    display: inline-flex;
+    outline: 1px solid var(--gray-300);
+}
+
+.o-mail-ChatBubble-preview {
+    min-width: 160px;
+    right: var(--o-mail-ChatHub-bubblesWidth);
+    z-index: calc(var(--o-mail-ChatBubble-zindex) - 1);
+}
+
+.o-mail-ChatBubble-status {
+    z-index: 6;
+    bottom: 0px;
+    right: -1px;
+    background-color: transparent;
+}
+
+.o-mail-ChatBubble-unreadIndicator {
+    font-size: .5rem;
+    bottom: 40%;
+    right: -10px;
+}
+
+@keyframes o-mail-ChatBubble-bouncing {
+    from, to {
+        transform: translate3d(0, 0, 0);
+    }
+    50% {
+        transform: translate3d(0, -10px, 0);
+    }
+} 

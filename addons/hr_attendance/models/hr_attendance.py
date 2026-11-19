@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from bisect import bisect_left, bisect_right
 from calendar import monthrange
 from collections import defaultdict
 from datetime import UTC, datetime, time, timedelta
@@ -7,10 +8,12 @@ from random import randint
 from zoneinfo import ZoneInfo
 
 from dateutil.relativedelta import relativedelta
+from markupsafe import Markup
 
 from odoo import _, api, exceptions, fields, models
 from odoo.exceptions import AccessError, ValidationError
-from odoo.tools import convert, float_compare, float_is_zero, format_datetime
+from odoo.fields import Domain
+from odoo.tools import convert, float_compare, float_is_zero, format_datetime, format_duration
 from odoo.tools.date_utils import float_to_time, sum_intervals, time_to_float
 from odoo.tools.intervals import Intervals
 
@@ -124,6 +127,9 @@ class HrAttendance(models.Model):
     overtime_attendance_ids = fields.One2many('hr.attendance', 'source_attendance_id')
     # set to True on surviving output records when their source is modified or deleted
     source_stale = fields.Boolean(default=False, copy=False, export_string_translation=False)
+    # dry run of the daily overtime rules, shown as a banner on the form
+    time_rule_split_preview = fields.Html(
+        compute='_compute_time_rule_split_preview', export_string_translation=False)
 
     @api.depends('date')
     def _compute_day_of_date(self):
@@ -207,6 +213,25 @@ class HrAttendance(models.Model):
             domain.append(('country_id', '=', False))
         return domain
 
+    @api.depends(
+        'employee_id', 'check_in', 'check_out', 'break_duration', 'work_entry_type_id', 'state',
+        'time_rule_id', 'source_attendance_id', 'overtime_attendance_ids',
+    )
+    def _compute_time_rule_split_preview(self):
+        """Show the split summary of the attendance (:meth:`_get_time_rule_split_summary`) on
+        the form; empty when the rules leave the attendance as it is."""
+        for attendance in self:
+            summary = attendance._get_time_rule_split_summary()
+            if not summary:
+                attendance.time_rule_split_preview = False
+            elif len(summary['parts']) == 1:
+                attendance.time_rule_split_preview = Markup("<p class='mb-0'>%s.</p>") % summary['title']
+            else:
+                lines = Markup().join(Markup("<li>%s</li>") % part['label'] for part in summary['parts'])
+                attendance.time_rule_split_preview = Markup(
+                    "<p class='mb-1'>%s:</p><ul class='mb-0'>%s</ul>"
+                ) % (summary['title'], lines)
+
     @api.depends('check_in', 'check_out', 'break_duration')
     def _compute_worked_hours(self):
         """Compute ``worked_hours``: ``check_out - check_in`` in hours, minus ``break_duration``.
@@ -269,46 +294,56 @@ class HrAttendance(models.Model):
         attendances. Skipped when the context has ``skip_time_rules``, i.e. for the writes of
         the time rule pipeline, the refusal and the automatic check-out.
 
+        The attendances that can conflict with the batch are read in one search, restricted to
+        the periods of the batch (its attendances less than a day apart) and to the open
+        attendances. Each attendance is then compared to its neighbours: the previous attendance
+        of the employee must be over when it starts and no other may start before it ends,
+        e.g. 08:00-12:00 conflicts with 11:00-13:00 but not with 12:00-13:00.
+
         :raise ValidationError: if the attendance overlaps another one or if another attendance
             of the employee is still open
         """
         if self.env.context.get('skip_time_rules'):
             return
-        for attendance in self:
-            # we take the latest attendance before our check_in time and check it doesn't overlap with ours
-            last_attendance_before_check_in = self.env['hr.attendance'].search([
-                ('employee_id', '=', attendance.employee_id.id),
-                ('check_in', '<=', attendance.check_in),
-                ('id', '!=', attendance.id),
-            ], order='check_in desc', limit=1)
-            if last_attendance_before_check_in and last_attendance_before_check_in.check_out and last_attendance_before_check_in.check_out > attendance.check_in:
-                raise exceptions.ValidationError(_("Cannot create new attendance record for %(empl_name)s, the employee was already checked in on %(datetime)s",
-                                                   empl_name=attendance.employee_id.name,
-                                                   datetime=format_datetime(self.env, last_attendance_before_check_in.check_in, dt_format=False)))
-
-            if not attendance.check_out:
-                # if our attendance is "open" (no check_out), we verify there is no other "open" attendance
-                no_check_out_attendances = self.env['hr.attendance'].search([
-                    ('employee_id', '=', attendance.employee_id.id),
-                    ('check_out', '=', False),
-                    ('id', '!=', attendance.id),
-                ], order='check_in desc', limit=1)
-                if no_check_out_attendances:
-                    raise exceptions.ValidationError(_("Cannot create new attendance record for %(empl_name)s, the employee hasn't checked out since %(datetime)s",
-                                                       empl_name=attendance.employee_id.name,
-                                                       datetime=format_datetime(self.env, no_check_out_attendances.check_in, dt_format=False)))
+        # one period per group of attendances less than a day apart, so that attendances far
+        # apart in time (e.g. 2024 and 2026) don't read all the attendances in between
+        periods = []
+        for start, stop in sorted((attendance.check_in, attendance.check_out or attendance.check_in) for attendance in self):
+            if periods and start <= periods[-1][1] + timedelta(days=1):
+                periods[-1][1] = max(periods[-1][1], stop)
             else:
-                # we verify that the latest attendance with check_in time before our check_out time
-                # is the same as the one before our check_in time computed before, otherwise it overlaps
-                last_attendance_before_check_out = self.env['hr.attendance'].search([
-                    ('employee_id', '=', attendance.employee_id.id),
-                    ('check_in', '<', attendance.check_out),
-                    ('id', '!=', attendance.id),
-                ], order='check_in desc', limit=1)
-                if last_attendance_before_check_out and last_attendance_before_check_in != last_attendance_before_check_out:
+                periods.append([start, stop])
+        candidates = self.env['hr.attendance'].search_fetch(
+            Domain('employee_id', 'in', self.employee_id.ids) & (
+                Domain.OR(Domain('check_in', '<=', stop) & Domain('check_out', '>=', start) for start, stop in periods)
+                | Domain('check_out', '=', False)
+            ),
+            ['employee_id', 'check_in', 'check_out'],
+            order='check_in, id',
+        )
+        candidates_by_employee = candidates.grouped('employee_id')
+        for employee, attendances in self.grouped('employee_id').items():
+            employee_candidates = list(candidates_by_employee[employee])
+            check_ins = [candidate.check_in for candidate in employee_candidates]
+            open_candidates = [candidate for candidate in employee_candidates if not candidate.check_out]
+            for attendance in attendances:
+                index = bisect_right(check_ins, attendance.check_in)
+                # the attendance itself is among the candidates starting before it: skip it
+                previous_candidates = [candidate for candidate in employee_candidates[max(index - 2, 0):index] if candidate != attendance]
+                previous = previous_candidates[-1] if previous_candidates else None
+                if previous and previous.check_out and previous.check_out > attendance.check_in:
                     raise exceptions.ValidationError(_("Cannot create new attendance record for %(empl_name)s, the employee was already checked in on %(datetime)s",
-                                                       empl_name=attendance.employee_id.name,
-                                                       datetime=format_datetime(self.env, last_attendance_before_check_out.check_in, dt_format=False)))
+                                                       empl_name=employee.name,
+                                                       datetime=format_datetime(self.env, previous.check_in, dt_format=False)))
+                if not attendance.check_out:
+                    if other_open := [candidate for candidate in open_candidates if candidate != attendance]:
+                        raise exceptions.ValidationError(_("Cannot create new attendance record for %(empl_name)s, the employee hasn't checked out since %(datetime)s",
+                                                           empl_name=employee.name,
+                                                           datetime=format_datetime(self.env, other_open[-1].check_in, dt_format=False)))
+                elif starting_during := employee_candidates[index:bisect_left(check_ins, attendance.check_out)]:
+                    raise exceptions.ValidationError(_("Cannot create new attendance record for %(empl_name)s, the employee was already checked in on %(datetime)s",
+                                                       empl_name=employee.name,
+                                                       datetime=format_datetime(self.env, starting_during[-1].check_in, dt_format=False)))
 
     # fields whose change on a source attendance should warn surviving outputs
     _STALE_TRIGGER_FIELDS = frozenset({'check_in', 'check_out', 'break_duration', 'employee_id', 'work_entry_type_id'})
@@ -810,6 +845,194 @@ class HrAttendance(models.Model):
         :rtype: float
         """
         return self.break_duration or 0.0
+
+    def _get_time_rule_split_preview(self):
+        """Return the attendances the daily overtime rules would split the attendance into.
+
+        Dry run of the ``exceed`` daily rules, nothing is written: works on unsaved (onchange)
+        records and on draft ones, whatever their state. The other validated attendances of the
+        employee on the same days are taken into account, as the rules evaluate the daily total;
+        the saved version of the record (``_origin``) is replaced by the current values. The break
+        is distributed over the parts as :meth:`hr.time.rule._apply_output` does.
+
+        :return: ``[(work_entry_type, worked_hours)]`` in chronological order; empty when the
+            attendance is not a time rule source (no span, refused, output of a rule or already
+            split)
+        :rtype: list
+        """
+        self.ensure_one()
+        if (
+            not (self.employee_id and self.check_in and self.check_out and self.work_entry_type_id)
+            or self.check_out <= self.check_in
+            or self.state == 'refused'
+            or self.time_rule_id
+            or self.source_attendance_id
+            or self.overtime_attendance_ids
+        ):
+            return []
+        rules = self.env['hr.time.rule'].sudo().search([
+            ('active', '=', True),
+            ('threshold_operator', '=', 'exceed'),
+            ('quantity_period', '!=', 'week'),
+            '|',
+                ('company_id', '=', False),
+                ('company_id', 'in', self.env.companies.ids),
+        ])
+        source = self.sudo()
+        source_wet = self.work_entry_type_id
+        break_hours = self.break_duration or 0.0
+        span_secs = (self.check_out - self.check_in).total_seconds()
+        if not rules:
+            return [(source_wet, span_secs / 3600 - break_hours)]
+
+        tz = ZoneInfo(self.employee_id.sudo()._get_tz())
+
+        def to_local(dt):
+            return dt.replace(tzinfo=UTC).astimezone(tz).replace(tzinfo=None)
+
+        def utc_secs(start, stop):
+            return (stop.replace(tzinfo=tz).astimezone(UTC) - start.replace(tzinfo=tz).astimezone(UTC)).total_seconds()
+
+        start_local, stop_local = to_local(self.check_in), to_local(self.check_out)
+        date_from, date_to = start_local.date(), stop_local.date()
+        others = self._get_source_records_for_time_rules(
+            datetime.combine(date_from, time.min, tzinfo=tz).astimezone(UTC),
+            datetime.combine(date_to + timedelta(days=1), time.min, tzinfo=tz).astimezone(UTC),
+            self.employee_id,
+        ) - self._origin
+        excess, _deficit, _active_iv = rules._evaluate_rules(
+            others | source, datetime.combine(date_from, time.min), datetime.combine(date_to, time.min),
+        )
+        outputs = [
+            iv for iv in self.env['hr.time.rule']._resolve_output_intervals(
+                excess.get(source.employee_id, {}).get(source, []))
+            if iv.rule.work_entry_type_id
+        ]
+        if not outputs:
+            return [(source_wet, span_secs / 3600 - break_hours)]
+
+        # (start, stop, work entry type, keeps the source type and premium pays)
+        segments = [(iv.start, iv.end, iv.wet, iv.wet == source_wet and not iv.pp) for iv in outputs]
+        dummy = self.env['resource.calendar']
+        outputs_iv = Intervals([(iv.start, iv.end, dummy) for iv in outputs], keep_distinct=True)
+        segments += [
+            (start, stop, source_wet, True)
+            for start, stop, _dummy in Intervals([(start_local, stop_local, dummy)]) - outputs_iv
+            if utc_secs(start, stop) >= 1
+        ]
+        segments.sort(key=lambda segment: segment[0])
+
+        # the break goes to the parts keeping the source type, if they can hold it
+        pool_secs = sum(utc_secs(start, stop) for start, stop, _wet, keeps_type in segments if keeps_type)
+        if pool_secs < break_hours * 3600:
+            pool_secs = 0
+        base_secs = pool_secs or span_secs
+        result = []
+        for start, stop, wet, keeps_type in segments:
+            secs = utc_secs(start, stop)
+            part_break = secs / base_secs * break_hours if break_hours and (keeps_type or not pool_secs) else 0.0
+            result.append((wet, secs / 3600 - part_break))
+        return result
+
+    def _log_time_rule_split(self, new_records, previous_values):
+        """Log in the chatter of each attendance of ``self`` how the time rules split it
+        (:meth:`_get_time_rule_split_summary`), with a link to each part.
+
+        Called after the rules wrote their excess results. Attendances the rules left
+        unchanged (same type, rule and check-out, no new record) get no message, so re-running
+        the rules does not log twice.
+
+        :param new_records: ``hr.attendance`` records created by the rules (or ``None``)
+        :param dict previous_values: ``{attendance: (work_entry_type_id, time_rule_id,
+            check_out)}`` before the rules ran
+        """
+        created_sources = (new_records or self.browse()).source_attendance_id
+        for source in self:
+            current = (source.work_entry_type_id, source.time_rule_id, source.check_out)
+            if source not in created_sources and previous_values.get(source) == current:
+                continue
+            summary = source._get_time_rule_split_summary()
+            if not summary:
+                continue
+            parts = self.browse([part['attendance_id'] for part in summary['parts']])
+            title = self.env._(
+                "%(summary)s by the time rules (%(rules)s)",
+                summary=summary['title'],
+                rules=', '.join(parts.time_rule_id.mapped('name')),
+            )
+            if len(parts) == 1:
+                body = Markup("<p>%s.</p>") % title
+            else:
+                lines = Markup().join(
+                    Markup("<li>%s</li>") % self.browse(part['attendance_id'])._get_html_link(title=part['label'])
+                    for part in summary['parts']
+                )
+                body = Markup("<p>%s:</p><ul>%s</ul>") % (title, lines)
+            source._message_log(body=body)
+
+    def _get_time_rule_split_summary(self):
+        """Return what the time rules made, or will make, of the attendance.
+
+        The single source of the split shown by the form banner, the systray and the kiosk
+        after a check-out, and the chatter. ``self`` may be any part of a split (the source or a
+        record created from it): the summary is about the source.
+
+        - Already split (records created from the source, or the source reclassified by a
+          rule): the parts are the source and the records created from it, undertime records
+          excepted.
+        - Otherwise (unsaved, draft, or not split yet): the parts come from the dry run
+          :meth:`_get_time_rule_split_preview`.
+
+        :return: ``False`` when the rules leave the attendance as it is (or it is refused),
+            else a dict with ``pending`` (``True`` when the split is not done yet), ``title``,
+            ``parts`` (chronological ``[{'work_entry_type': str, 'hours': float, 'label': str,
+            'attendance_id': int or False}]``, the id only for parts already created) and
+            ``message`` (title and parts on one line)
+        :rtype: dict | bool
+        """
+        self.ensure_one()
+        source = (self.source_attendance_id or self).sudo()
+        if source.state == 'refused':
+            return False
+        outputs = source.overtime_attendance_ids.filtered(
+            lambda att: att.time_rule_id.threshold_operator != 'less_than'
+        )
+        if outputs or source.time_rule_id:
+            pending = False
+            split = [
+                (part.work_entry_type_id, part.worked_hours, part.id)
+                for part in (source | outputs).sorted('check_in')
+            ]
+        else:
+            pending = True
+            split = [(wet, hours, False) for wet, hours in source._get_time_rule_split_preview()]
+            if not split or (len(split) == 1 and split[0][0] == source.work_entry_type_id):
+                return False
+
+        # the plain name: the display name of a time type depends on the viewer's companies
+        # (hr_holidays adds the country), the summary must not
+        if len(split) == 1:
+            type_name = split[0][0].name
+            if pending:
+                title = self.env._("This attendance will be entirely replaced with %(type)s", type=type_name)
+            else:
+                title = self.env._("This attendance was entirely replaced with %(type)s", type=type_name)
+        elif pending:
+            title = self.env._("This attendance will be split into %(count)s attendances", count=len(split))
+        else:
+            title = self.env._("This attendance was split into %(count)s attendances", count=len(split))
+        parts = [{
+            'work_entry_type': wet.name,
+            'hours': hours,
+            'label': self.env._("%(type)s: %(hours)s", type=wet.name, hours=format_duration(hours)),
+            'attendance_id': attendance_id,
+        } for wet, hours, attendance_id in split]
+        return {
+            'pending': pending,
+            'title': title,
+            'parts': parts,
+            'message': f"{title} ({', '.join(part['label'] for part in parts)})",
+        }
 
     def _get_write_source_extra_source_fields(self):
         """Writing ``work_entry_type_id``, ``state`` or ``break_duration`` also runs the rules.
