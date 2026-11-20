@@ -3,6 +3,7 @@
 from datetime import datetime
 
 from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 from odoo.fields import Domain
 
 
@@ -30,8 +31,8 @@ class FleetVehicleModel(models.Model):
         return [(str(i), i) for i in range(1970, current_year + 1)]
 
     name = fields.Char('Model name', required=True, tracking=True)
-    company_id = fields.Many2one('res.company', string='Company')
-    brand_id = fields.Many2one('fleet.vehicle.model.brand', 'Manufacturer', required=True, tracking=True, index='btree_not_null')
+    company_id = fields.Many2one('res.company', string='Company', index='btree_not_null')
+    brand_id = fields.Many2one('fleet.vehicle.model.brand', 'Brand', required=True, tracking=True, index='btree_not_null')
     category_id = fields.Many2one('fleet.vehicle.model.category', 'Category', tracking=True)
     vendors = fields.Many2many('res.partner', 'fleet_vehicle_model_vendors', 'model_id', 'partner_id', string='Vendors')
     image_128 = fields.Image(related='brand_id.image_128', readonly=True)
@@ -115,6 +116,12 @@ class FleetVehicleModel(models.Model):
                 record.co2_emission_unit = 'g/km'
             else:
                 record.co2_emission_unit = 'g/mi'
+
+    @api.constrains('default_fuel_type', 'default_co2')
+    def _check_default_co2(self):
+        for model in self:
+            if model.default_co2 <= 0 and model.default_fuel_type and model.default_fuel_type not in ('electric', 'hydrogen'):
+                raise ValidationError(self.env._('The CO₂ Emissions must be positive unless the fuel type is electric or hydrogen.'))
 
     @api.model
     def _search_vehicle_count(self, operator, value):

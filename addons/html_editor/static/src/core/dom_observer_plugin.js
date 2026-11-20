@@ -29,7 +29,6 @@ export const EDITOR_MUTATION_TYPES = /** @type {const} */ ({
     CLASS_LIST: "classList",
     ADD: "add",
     REMOVE: "remove",
-    CUSTOM: "custom",
 });
 
 /**
@@ -71,7 +70,6 @@ export const EDITOR_MUTATION_TYPES = /** @type {const} */ ({
  *    | (NativeMutation<"characterData"> | { value: string })
  *    | (Pick<NativeMutation<"childList">, "previousSibling" | "nextSibling"> | { tree: Tree, parent: Node } & { type: "add" })
  *    | (Pick<NativeMutation<"childList">, "previousSibling" | "nextSibling"> | { tree: Tree, parent: Node } & { type: "remove" })
- *    | { apply: Function, revert: Function } & { type: "custom" },
  * { type: T }
  * > } EditorMutation
  */
@@ -105,8 +103,6 @@ export const EDITOR_MUTATION_TYPES = /** @type {const} */ ({
  * @typedef { Object } DomObserverShared
  * @property { DomObserverPlugin['ignore'] } ignore
  * @property { DomObserverPlugin['hasStagedMutations'] } hasStagedMutations
- * @property { DomObserverPlugin['stageCustomMutation'] } stageCustomMutation
- * @property { DomObserverPlugin['applyCustomMutation'] } applyCustomMutation
  * @property { DomObserverPlugin['getMutationsCommonAncestor'] } getMutationsCommonAncestor
  * @property { DomObserverPlugin['getClassChanges'] } getClassChanges
  */
@@ -131,8 +127,6 @@ export class DomObserverPlugin extends Plugin {
     static shared = [
         "ignore",
         "hasStagedMutations",
-        "stageCustomMutation",
-        "applyCustomMutation",
         "getMutationsCommonAncestor",
         "getClassChanges",
     ];
@@ -144,7 +138,12 @@ export class DomObserverPlugin extends Plugin {
         // --------
 
         // Start / Refresh
-        on_editor_started_handlers: withSequence(9, this.observe.bind(this)),
+        on_editor_started_handlers: [
+            withSequence(9, this.observe.bind(this)),
+            // Run last, so that the content changes made by other start
+            // handlers are seen.
+            withSequence(Infinity, () => this.triggerContentUpdated(this.editable)),
+        ],
         on_will_reset_history_handlers: this.reset.bind(this),
         on_committed_to_history_handlers: () => {
             this.triggerContentUpdated();
@@ -170,6 +169,7 @@ export class DomObserverPlugin extends Plugin {
         on_history_rebased_handlers: () => {
             /** @see on_will_rebase_history_handlers */
             this.observe();
+            this.triggerContentUpdated(this.editable);
         },
         on_remote_history_commit_applied_handlers: (newCommit) => {
             const root =
@@ -244,8 +244,8 @@ export class DomObserverPlugin extends Plugin {
         // ----------
 
         has_history_commit_changes_predicates: (commit) => {
-            if ("mutations" in commit.data) {
-                return !!commit.data.mutations.length;
+            if (commit.data.mutations?.length) {
+                return true;
             }
         },
     };
@@ -427,20 +427,15 @@ export class DomObserverPlugin extends Plugin {
         }
         const currentMutationsCount = this.mutations.length;
         if (currentMutationsCount) {
-            // Normalize the mutated nodes. Note: this can cause other commits
-            // to be written.
-            const commitRoot = this.getMutationsCommonAncestor(this.mutations) || this.editable;
-            this.dependencies.dom.normalize(commitRoot);
             if (!hasRelatedCommit) {
+                // Normalize the mutated nodes. Note: this can cause other commits
+                // to be written. The state restored by reverting a commit is
+                // already normalized, so normalization is skipped if there is
+                // a related commit.
+                const commitRoot = this.getMutationsCommonAncestor(this.mutations) || this.editable;
+                this.dependencies.dom.normalize(commitRoot);
                 this.trigger("on_pending_mutations_normalized_handlers");
-            }
-            this.flush();
-            if (currentMutationsCount === this.mutations.length) {
-                // If there was no added staged mutation during the
-                // normalization commit, force the trigger of a content_updated
-                // to allow i.e. the hint plugin to react to non-observed
-                // changes (i.e. a div becoming a baseContainer).
-                this.triggerContentUpdated();
+                this.flush();
             }
         }
         return { ...data, mutations: [...this.mutations] };
@@ -454,34 +449,6 @@ export class DomObserverPlugin extends Plugin {
         this.revertMutations([...this.mutations]);
         this.observer.takeRecords();
         this.clearStage();
-    }
-
-    /**
-     * @deprecated Use special commit data and apply/revert resource subscribers
-     * instead of this.
-     *
-     * @todo This mutation type definitely fails in collaborative since it's not
-     * serializable. If we ever use it in a context that uses collaboration,
-     * we'll need to adapt it.
-     *
-     * @param { Object } spec
-     * @param { Function } spec.apply
-     * @param { Function } spec.revert
-     */
-    stageCustomMutation({ apply, revert }) {
-        /** @type { EditorMutation<"custom"> } */
-        const customMutation = {
-            type: EDITOR_MUTATION_TYPES.CUSTOM,
-            apply: () => {
-                apply();
-                this.stageCustomMutation({ apply, revert });
-            },
-            revert: () => {
-                revert();
-                this.stageCustomMutation({ apply: revert, revert: apply });
-            },
-        };
-        this.stage(customMutation);
     }
 
     /**
@@ -995,10 +962,6 @@ export class DomObserverPlugin extends Plugin {
         }
         for (const mutation of mutations) {
             switch (mutation.type) {
-                case EDITOR_MUTATION_TYPES.CUSTOM: {
-                    mutation.apply();
-                    break;
-                }
                 case EDITOR_MUTATION_TYPES.CHARACTER_DATA: {
                     const node = this.dependencies.domReferenceMap.getNodeById(mutation.nodeId);
                     if (node) {
@@ -1123,16 +1086,6 @@ export class DomObserverPlugin extends Plugin {
     }
 
     /**
-     * Take a "custom" mutation and apply it in the DOM.
-     *
-     * @param { EditorMutation<"custom"> } mutation
-     */
-    applyCustomMutation(mutation) {
-        mutation.apply();
-        this.stageCustomMutation({ apply: mutation.apply, revert: mutation.revert });
-    }
-
-    /**
      * Take a batch of serialized mutations, reverse both their effect and their
      * order, then apply that.
      *
@@ -1152,8 +1105,6 @@ export class DomObserverPlugin extends Plugin {
                     return { ...mutation, type: EDITOR_MUTATION_TYPES.ADD };
                 case EDITOR_MUTATION_TYPES.ADD:
                     return { ...mutation, type: EDITOR_MUTATION_TYPES.REMOVE };
-                case EDITOR_MUTATION_TYPES.CUSTOM:
-                    return { ...mutation, apply: mutation.revert, revert: mutation.apply };
                 default:
                     throw new Error(`Unknown mutation type: ${mutation.type}`);
             }
@@ -1228,14 +1179,17 @@ export class DomObserverPlugin extends Plugin {
     }
 
     /**
-     * Trigger `on_content_updated_handlers` if there are staged mutations and
-     * their targets have a common ancestor.
+     * Trigger `on_content_updated_handlers` on the given root, or on the common
+     * ancestor of the staged mutations if no root is given.
+     *
+     * @param { HTMLElement } [root]
      */
-    triggerContentUpdated() {
+    triggerContentUpdated(
+        root = this.mutations.length && this.getMutationsCommonAncestor(this.mutations)
+    ) {
         // @todo @phoenix remove this?
         // @todo @phoenix this includes previous mutations that were already
         // stored in the current commit. Ideally, it should only include the new ones.
-        const root = this.mutations.length && this.getMutationsCommonAncestor(this.mutations);
         if (root) {
             this.trigger("on_content_updated_handlers", root);
         }
