@@ -1,0 +1,43 @@
+.o_timeoff_card {
+    min-height: 80px;
+
+    span {
+        line-height: 1;
+    }
+
+    .o_timeoff_name {
+        color: var(--body-color);
+        font-size: 15px;
+        margin-bottom: 3px;
+        font-weight: bolder;
+    }
+
+    .o_timeoff_duration {
+        font-size: 40px;
+        width: auto;
+        line-height: 1;
+
+        img {
+            height: 30px;
+            filter: var(--timeOffCard-icon-filter);
+        }
+    }
+
+    .o_timeoff_validity {
+        font-size: 14px;
+    }
+
+    .no-bg-color {
+        /* The goal is to achieve the same background as in the calendar renderer, */
+        /* which uses a mix for the background color and has 30% opacity. */
+        /* (with a darker shade for the bright version, otherwise it wouldn't be visible) */
+        --timeOffCard-base-color: color-mix(in srgb, var(--o-white) 25%, var(--o-colors-0));
+        --timeOffCard-base-color-with-fake-opacity: color-mix(in srgb, var(--timeOffCard-base-color) 30%, var(--o-view-background-color));
+
+        background-color: var(--timeOffCard-base-color-with-fake-opacity);
+    }
+}
+
+.o_time_off_card_popover_warning {
+    max-width: 300px;
+}

@@ -1,0 +1,38 @@
+.o_calendar_popover_link {
+    margin-top: 6px;
+
+    &.o_calendar_color {
+        --o-calendar-bg-opacity: 1;
+
+        border-radius: var(--border-radius);
+        border-color: var(--o-calendar-popover-color, var(--info));
+        padding: 0 var(--o-bs-spacer-1);
+        background: rgb(from var(--o-calendar-popover-color--subtle, var(--info)) r g b / var(--o-calendar-bg-opacity));
+        font-weight: var(--o-bs-font-weight-normal);
+
+        &:hover {
+            --o-calendar-bg-opacity: .5 !important;
+        }
+
+        &.o_event_dot {
+            --o-calendar-bg-opacity: 0;
+
+            &:before {
+                margin-right: var(--o-bs-spacer-1);
+                /* eslint-disable-next-line css/font-family-fallbacks -- icon font */
+                font-family: 'Material Symbols Outlined';
+                font-size: var(--o-font-size-base-smaller);
+                color: var(--o-calendar-popover-color, var(--info));
+                content: '\f111';
+            }
+
+        }
+    }
+
+    &.o_calendar_color {
+        --o-calendar-popover-color: var(--o-calendar-color);
+        --o-calendar-popover-color--subtle: color-mix(in srgb, var(--o-white) 55%, var(--o-calendar-popover-color));
+
+        color: var(--o-black);
+    }
+}
