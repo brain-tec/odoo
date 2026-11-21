@@ -8,6 +8,7 @@ import {
     dropFiles,
     insertText,
     listenStoreFetch,
+    onRpcAfter,
     onRpcBefore,
     openFormView,
     patchUiSize,
@@ -19,15 +20,17 @@ import {
 } from "@mail/../tests/mail_test_helpers";
 import { Message } from "@mail/core/common/message";
 import { describe, expect, mockUserAgent, rightClick, test } from "@odoo/hoot";
-import { advanceTime } from "@odoo/hoot-mock";
+import { advanceTime, animationFrame } from "@odoo/hoot-mock";
 
 import { range } from "@web/core/utils/numbers";
 import {
     clickSave,
     defineActions,
     getService,
+    makeServerError,
     mockService,
     onRpc,
+    pagerNext,
     patchWithCleanup,
     serverState,
 } from "@web/../tests/web_test_helpers";
@@ -129,6 +132,29 @@ test("can post a message on a record thread", async () => {
 
     await click("button:text('Send message')");
     await expect.waitForSteps(["/mail/message/post"]);
+});
+
+test("composer stays usable when posting a message fails", async () => {
+    expect.errors(1);
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ name: "John Doe" });
+    const postDef = Promise.withResolvers();
+    onRpc("/mail/message/post", async () => {
+        expect.step("/mail/message/post");
+        await postDef.promise;
+        throw makeServerError({ description: "Posting failed" });
+    });
+    await start();
+    await openFormView("res.partner", partnerId);
+    await click("button", { text: "Send message" });
+    await insertText(".o-mail-Composer-input", "hey");
+    await click(".o-mail-Composer button[aria-label='Send']:enabled");
+    await contains(".o-mail-Composer-input[readonly]", { value: "hey" });
+    await expect.waitForSteps(["/mail/message/post"]);
+    postDef.resolve();
+    await contains(".o-mail-Composer-input:not([readonly])", { value: "hey" });
+    await contains(".o-mail-Composer button[aria-label='Send']:enabled");
+    await expect.waitForErrors(["RPC_ERROR"]);
 });
 
 test("can post a note on a record thread", async () => {
@@ -972,4 +998,39 @@ test("Can only mention internal users in Log note", async () => {
     await contains(".o-mail-Message:eq(0) .o-mail-Message-body.o-note");
     await contains(".o-mail-Message:eq(0):has(:text('@External Partner'))");
     await contains(".o-mail-Message:eq(0):not(:has(a.o_mail_redirect))");
+});
+
+test("late suggested recipients don't overwrite the next record's recipients", async () => {
+    const pyEnv = await startServer();
+    pyEnv["res.partner"].write([serverState.partnerId], { email: "mitchell@odoo.com" });
+    const [partnerId_1, partnerId_2] = pyEnv["res.partner"].create([
+        { name: "John Doe", email: "john@doe.be" },
+        { name: "Jane Doe", email: "jane@doe.be" },
+    ]);
+    const [fakeId_1, fakeId_2] = pyEnv["res.fake"].create([
+        { name: "Fake 1", partner_id: partnerId_1 },
+        { name: "Fake 2", partner_id: partnerId_2 },
+    ]);
+    const suggestions = Promise.withResolvers();
+    onRpcBefore("/mail/thread/recipients/get_suggested_recipients", async () => {
+        expect.step("suggestions requested");
+        await suggestions.promise;
+    });
+    onRpcAfter("/mail/thread/recipients/get_suggested_recipients", () =>
+        expect.step("suggestions returned")
+    );
+    await start();
+    await openFormView("res.fake", fakeId_1, { resIds: [fakeId_1, fakeId_2] });
+    await click("button", { text: "Send message" });
+    await contains(".o-mail-RecipientsInput .o_tag_badge_text", { text: "John Doe" });
+    await click(".o_field_many2one_selection input");
+    await click(".o-autocomplete--dropdown-item", { text: "Mitchell Admin" });
+    await expect.waitForSteps(["suggestions requested"]);
+    await pagerNext();
+    await contains(".o-mail-RecipientsInput .o_tag_badge_text", { text: "Jane Doe" });
+    suggestions.resolve();
+    await expect.waitForSteps(["suggestions returned"]);
+    await animationFrame();
+    expect(".o-mail-RecipientsInput .o_tag_badge_text:text('Jane Doe')").toHaveCount(1);
+    expect(".o-mail-RecipientsInput .o_tag_badge_text:text('Mitchell Admin')").toHaveCount(0);
 });
