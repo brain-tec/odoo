@@ -1,0 +1,65 @@
+.o_worklocation_btn {
+    min-height: 1.25rem;
+    color: var(--body-color);
+}
+
+.o_worklocation_line {
+    height: 3px;
+}
+
+.o_homework_multi {
+    text-transform: none;
+    .o_homeworking_content .oi {
+        height: var(--o-homework-icon-size, 20px);
+        aspect-ratio: 1;
+        font-size: var(--o-homework-icon-size, 1em);
+    }
+}
+
+.o_calendar_header_cell:hover {
+    .o_worklocation_action {
+        opacity: 1 !important;
+    }
+}
+
+/* ----- View specific */
+.o_calendar_fc_view_timeGridDay {
+    .o_worklocation_btn {
+        margin-top: 0px;
+    }
+}
+
+@media screen and (max-width: 767.98px), print and (max-width: 187.98mm) {
+
+    .location_xs_hide {
+        display: none !important;
+    }
+
+    .o_calendar_fc_view_timeGridWeek .o_homework_multi {
+        --o-homework-icon-size: 1rem;
+
+        > span {
+            display: none !important;
+        }
+    }
+}
+
+.o_homework_multi {
+    .o_worklocation_color {
+        --WorkLocation-color-subtle: color-mix(in srgb, var(--o-white) 65%, var(--WorkLocation-color));
+        color: color-mix(in srgb, var(--o-black) 10%, var(--WorkLocation-color));
+        background-color: var(--WorkLocation-color-subtle);
+        border-color: var(--WorkLocation-color-subtle) !important;
+    }
+}
+.o_homework_single {
+    .o_worklocation_color {
+        --WorkLocation-color-subtle: color-mix(in srgb, var(--o-white) 65%, var(--WorkLocation-color));
+        background-color: var(--WorkLocation-color-subtle);
+    }
+}
+.o_worklocation_outline:hover {
+    --WorkLocation-color-subtle: color-mix(in srgb, var(--o-white) 65%, var(--WorkLocation-color));
+    outline: 2px solid hsl(from var(--WorkLocation-color-subtle) h s min(l + 10, 100));
+    outline-offset: -2px;
+}
