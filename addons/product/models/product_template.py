@@ -4,6 +4,7 @@ import itertools
 import logging
 
 from collections import defaultdict
+from copy import deepcopy
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -1322,13 +1323,13 @@ class ProductTemplate(models.Model):
         e.g: Black excludes XL and L
         -> XL excludes Black
         -> L excludes Black"""
-        result = dict(exclusions)
+        result = deepcopy(exclusions)
         for key, value in exclusions.items():
             for exclusion in value:
-                if exclusion in result and key not in result[exclusion]:
-                    result[exclusion].append(key)
-                else:
+                if exclusion not in result:
                     result[exclusion] = [key]
+                elif key not in result[exclusion]:
+                    result[exclusion].append(key)
 
         return result
 
@@ -1806,13 +1807,6 @@ class ProductTemplate(models.Model):
                 'product_name': self.product_variant_id.display_name,
             }
         return {}
-
-    @api.model
-    def get_empty_list_help(self, help_message):
-        self = self.with_context(
-            empty_list_help_document_name=_("product"),
-        )
-        return super().get_empty_list_help(help_message)
 
     @api.model
     def get_import_templates(self):

@@ -1008,12 +1008,15 @@ export class Composer extends Component {
                 body = parseAndTransform(body, addLink);
             }
             body = await this.recordLink.markRecordLinks(body);
-            await cb(body);
+            try {
+                await cb(body);
+            } finally {
+                this.state.active = true;
+            }
             if (this.props.onPostCallback) {
                 this.props.onPostCallback();
             }
             this.clear();
-            this.state.active = true;
         }
     }
 
@@ -1146,7 +1149,7 @@ export class Composer extends Component {
                 })
             );
         } else {
-            this.props.composer.message.showDeleteConfirm(this, this.rootRef, this.ancestors);
+            this.props.composer.message.showDeleteConfirm(this.rootRef, this.ancestors);
         }
         this.clearRawMentions();
     }

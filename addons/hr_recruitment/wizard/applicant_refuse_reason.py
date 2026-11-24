@@ -4,6 +4,7 @@ from itertools import product
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.fields import Domain
+from odoo.tools import clean_context
 
 
 class ApplicantGetRefuseReason(models.TransientModel):
@@ -149,12 +150,13 @@ class ApplicantGetRefuseReason(models.TransientModel):
         return {'type': 'ir.actions.act_window_close'}
 
     def _get_related_original_applicants(self):
-        duplication_fields = ['id', 'email_normalized', 'partner_phone_sanitized', 'linkedin_profile']
+        duplication_fields = ['id', 'partner_id', 'email_normalized', 'partner_phone_sanitized', 'linkedin_profile_name']
         original_applicant_by_field_value = {field: {} for field in duplication_fields}
         related_original_applicants = dict()
         for original_applicant, field in product(self.applicant_ids, duplication_fields):
             value = original_applicant[field]
-            if value:
+            # same rule as the search of the duplicates: a too short phone number (e.g. only "+32") is no match
+            if value and (field != 'partner_phone_sanitized' or original_applicant._check_phone_validity()):
                 original_applicant_by_field_value[field][value] = original_applicant
 
         for duplicate_applicant in self.duplicate_applicant_ids:
@@ -172,8 +174,10 @@ class ApplicantGetRefuseReason(models.TransientModel):
         for applicant in self.applicant_ids:
             mail_values = self._prepare_mail_values(applicant)
             if self.template_id:
-                # Ensure template custom recipients are used if needed
+                # Ensure template custom recipients are used if needed. Clean the context of
+                # the refuse action (default_applicant_ids), as contacts may be created for them.
                 composer = self.env['mail.compose.message'].with_context(
+                    clean_context(self.env.context),
                     default_composition_mode='comment',
                     default_model=applicant._name,
                     default_res_ids=applicant.ids,
