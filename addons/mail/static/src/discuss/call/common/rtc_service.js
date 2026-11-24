@@ -375,6 +375,8 @@ export class Rtc extends Record {
     /** @type {{audio?: boolean, video?: boolean, transcription?: boolean} | null} */
     recordingRequest = null;
     recordingState = fields.Attr({ audio: false, transcription: false, video: false });
+    /** Mirrors `screenTrack.enabled`, which a template cannot observe. */
+    isScreenTrackPaused = false;
     /** @type {RtcLog} */
     logs = {};
     /** @type {Map<any, {id: any, position: "bottom"|"top", text: TranslatedString}>} call notifications by id */
@@ -464,6 +466,7 @@ export class Rtc extends Record {
     _remotelyHostedChannelId;
     _crossTabTimeoutId;
     crossTabInitDeferred = Promise.withResolvers();
+    isStarted = false;
     /** @type {number} count of how many times the p2p service attempted a connection recovery */
     _p2pRecoveryCount = 0;
 
@@ -574,6 +577,10 @@ export class Rtc extends Record {
     }
 
     start() {
+        if (this.isStarted) {
+            return;
+        }
+        this.isStarted = true;
         this.notification = this.store.notification;
         this.soundEffects = this.store.soundEffects;
         if (this._broadcastChannel) {
@@ -805,6 +812,12 @@ export class Rtc extends Record {
             return;
         }
         this.setPttReleaseTimeout();
+    }
+
+    /** @param {boolean} paused */
+    setScreenTrackPaused(paused) {
+        this.screenTrack.enabled = !paused;
+        this.isScreenTrackPaused = paused;
     }
 
     setPttReleaseTimeout(duration = PTT_RELEASE_DURATION) {
@@ -2632,6 +2645,7 @@ export class Rtc extends Record {
             }
             case "screen": {
                 Object.assign(this, {
+                    isScreenTrackPaused: false,
                     isSendingScreen: Boolean(outputTrack),
                     screenAudioTrack: screenAudioTrack,
                     screenTrack: outputTrack,
@@ -3044,10 +3058,10 @@ export const rtcService = {
                     rtc.displaySurface !== "browser" &&
                     fullscreenId === CALL_FULLSCREEN_ID
                 ) {
-                    rtc.screenTrack.enabled = false;
+                    rtc.setScreenTrackPaused(true);
                 } else if (!rtc.isFullscreen) {
                     if (wasFullscreen && rtc.screenTrack) {
-                        rtc.screenTrack.enabled = true;
+                        rtc.setScreenTrackPaused(false);
                     }
                 }
             },

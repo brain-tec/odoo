@@ -477,7 +477,7 @@
             <field name="arch" type="xml">
                 <graph string="Invoices Analysis" type="line" sample="1">
                     <field name="invoice_date" interval="month"/>
-                    <field name="amount_untaxed" type="measure"/>
+                    <field name="amount_untaxed_signed" type="measure"/>
                 </graph>
             </field>
         </record>
@@ -488,7 +488,7 @@
             <field name="arch" type="xml">
                 <pivot string="Invoices Analysis" sample="1">
                     <field name="invoice_date" type="row"/>
-                    <field name="amount_untaxed" type="measure"/>
+                    <field name="amount_untaxed_signed" type="measure"/>
                 </pivot>
             </field>
         </record>
@@ -554,12 +554,26 @@
             </field>
         </record>
 
+        <record id="view_account_move_help" model="ir.ui.view">
+            <field name="name">account.move.help</field>
+            <field name="model">account.move</field>
+            <field name="arch" type="xml">
+                <help>
+                    <div invisible="context.get('default_move_type') != 'in_invoice'">
+                        <widget name="bill_upload_guide" large_icons="1"/>
+                    </div>
+                    <t t-out="action_help" invisible="context.get('default_move_type') == 'in_invoice'"/>
+                </help>
+            </field>
+        </record>
+
         <record id="view_invoice_tree" model="ir.ui.view">
             <field name="name">account.invoice.list</field>
             <field name="model">account.move</field>
             <field name="arch" type="xml">
                 <list string="Invoices"
                       js_class="account_tree"
+                      help_id="%(account.view_account_move_help)d"
                       decoration-info="state == 'draft'"
                       decoration-muted="state == 'cancel'"
                       expand="context.get('expand', False)"
@@ -792,12 +806,12 @@
                                 class="oe_highlight"
                                 invisible="state != 'posted' or is_being_sent or invoice_pdf_report_file or move_type in ('entry', 'in_invoice','in_refund','in_receipt')"
                                 string="Print"
-                                data-hotkey="p"/>
+                                data-hotkey="shift+p"/>
                         <button name="action_print_pdf"
                                 type="object"
                                 invisible="state != 'posted' or (not is_being_sent and not invoice_pdf_report_file) or move_type in ('in_invoice','in_refund','in_receipt')"
                                 string="Print"
-                                data-hotkey="p"/>
+                                data-hotkey="shift+p"/>
                         <!-- Register Payment (only invoices / receipts) -->
                         <button name="action_register_payment" id="account_invoice_payment_btn"
                                 type="object" class="oe_highlight"

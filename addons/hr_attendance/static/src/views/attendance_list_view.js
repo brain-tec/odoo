@@ -1,31 +1,27 @@
 import { registry } from "@web/core/registry";
 
 import { listView } from "@web/views/list/list_view";
-import { ListRenderer } from "@web/views/list/list_renderer";
-import { AttendanceActionHelper } from "@hr_attendance/views/attendance_helper_view";
+import { ListController } from "@web/views/list/list_controller";
+import { AttendanceControlPanel } from "@hr_attendance/components/attendance_dashboard/attendance_control_panel";
+import { AttendanceDashboard } from "@hr_attendance/components/attendance_dashboard/attendance_dashboard";
 
-export class AttendanceListRenderer extends ListRenderer {
-    static template = "hr_attendance.AttendanceListRenderer";
-    static components = {
-        ...AttendanceListRenderer.components,
-        AttendanceActionHelper,
-    };
-
-    /** @override **/
-    get showNoContentHelper() {
-        // Rows's length need to be lower than 6 to avoid nocontent overlapping
-        return super.showNoContentHelper && this.props.list.count < 6;
-    }
+export class AttendanceListController extends ListController {
+    static template = "hr_attendance.AttendanceListController";
+    static components = { ...ListController.components, AttendanceDashboard };
 }
 
 export class AttendanceListModel extends listView.Model {
-    /** @override **/
+    /**
+     * The attendances of the archived employees are hidden unless the search filters on the employee's active state
+     * (Archived Employees filter).
+     * @override
+     */
     async load(params = {}) {
-        const activeDomainParam = params.domain?.some(
-            (index) => Array.isArray(index) && index[0] == "employee_id.active"
+        const filtersEmployeeActive = params.domain?.some(
+            (leaf) => Array.isArray(leaf) && leaf[0] === "employee_id.active"
         );
-        if (!activeDomainParam) {
-            params.domain?.push(["employee_id.active", "=", true]);
+        if (params.domain && !filtersEmployeeActive && "employee_id" in this.config.fields) {
+            params = { ...params, domain: [...params.domain, ["employee_id.active", "=", true]] };
         }
         return super.load(params);
     }
@@ -33,8 +29,9 @@ export class AttendanceListModel extends listView.Model {
 
 export const attendanceListView = {
     ...listView,
-    Renderer: AttendanceListRenderer,
     Model: AttendanceListModel,
+    Controller: AttendanceListController,
+    ControlPanel: AttendanceControlPanel,
 };
 
 registry.category("views").add("attendance_list_view", attendanceListView);

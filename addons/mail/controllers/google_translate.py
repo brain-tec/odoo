@@ -3,6 +3,7 @@
 import babel
 import requests
 
+from odoo import _
 from odoo.addons.mail.tools.discuss import mail_route
 from odoo.http import request, Controller
 
@@ -54,10 +55,10 @@ class GoogleTranslateController(Controller):
                     "target_lang": target_lang,
                 }
                 translation = request.env["mail.message.translation"].sudo().create(vals)
-            except requests.exceptions.HTTPError as err:
-                return {"error": err.response.json()["error"]["message"]}
+            except requests.exceptions.RequestException:
+                return {"error": _("Translation service unavailable")}
         try:
-            lang_name = babel.Locale(translation.source_lang).get_display_name(request.env.user.lang)
+            lang_name = babel.Locale(translation.source_lang).get_display_name(request_lang)
         except babel.UnknownLocaleError:
             lang_name = translation.source_lang
         return {

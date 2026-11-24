@@ -1383,13 +1383,6 @@ class ProductProduct(models.Model):
 
         return prices
 
-    @api.model
-    def get_empty_list_help(self, help_message):
-        self = self.with_context(
-            empty_list_help_document_name=_("product"),
-        )
-        return super().get_empty_list_help(help_message)
-
     def get_product_multiline_description_sale(self, with_display_name=True):
         """Compute a multiline description of this product, in the context of sales
         (do not use for purchases or other display reasons that don't intend to use "description_sale").
@@ -1462,3 +1455,10 @@ class ProductProduct(models.Model):
 
     def _get_main_uom(self):
         return self.product_tmpl_id._get_main_uom()
+
+    @api.model
+    def search_panel_select_range(self, field_name, **kwargs):
+        result = super().search_panel_select_range(field_name, **kwargs)
+        if field_name == 'categ_id' and self.env.context.get('product_catalog_order_model') and 'values' in result:
+            result['values'].sort(key=lambda v: v.get('display_name', ''))
+        return result

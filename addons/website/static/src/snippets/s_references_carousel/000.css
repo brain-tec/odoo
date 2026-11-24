@@ -1,0 +1,84 @@
+.s_references_carousel {
+    /* Defaults of the "Logo Size" and "Gap" options, which set them inline. */
+    --references-carousel-logo-height: 72px;
+    --references-carousel-gap: 32px;
+    --references-carousel-cell-padding: calc(var(--references-carousel-logo-height) / 6);
+
+    /* Animation options, read by website/static/src/interactions/marquee.css */
+    &.s_references_carousel_direction_right {
+        --marquee-animation: o-marquee-scroll-right;
+    }
+    &.s_references_carousel_direction_none {
+        --marquee-animation: none;
+
+        .o_marquee_pause {
+            display: none;
+        }
+    }
+    &.s_references_carousel_hover_pause {
+        --marquee-hover-play-state: paused;
+    }
+    &.s_references_carousel_hover_slow {
+        --marquee-hover-play-state: running;
+        --marquee-animation-hover-multiplier: 2;
+    }
+    &.s_references_carousel_hover_direction {
+        --marquee-hover-play-state: paused, running;
+    }
+    &.s_references_carousel_parallax {
+        --marquee-scroll-play-state: paused;
+    }
+
+    /* Clips the logos so that they do not run under a title set aside: the
+       parallax translates their container, which cannot clip itself. */
+    .s_references_carousel_marquee_wrapper {
+        overflow-x: clip;
+        /* Below the width of the logos, which would push the strip under a
+           title set aside, but above 0, which would let it sit 0 wide beside
+           a full width title. */
+        min-width: 50%;
+    }
+
+    .s_references_carousel_marquee_item {
+        /* Not `d-flex`: its `!important` would show the clones hidden below. */
+        display: flex;
+        align-items: center;
+        gap: var(--references-carousel-gap);
+        /* Part of the strip width, so that the -100% translation also covers
+           the gap before the next clone. */
+        padding-inline-end: var(--references-carousel-gap);
+    }
+
+    .s_references_carousel_item {
+        /* The width follows the logo, so that the space between logos stays
+           even. The padding keeps a logo off the cell edges without shrinking
+           it. */
+        height: calc(var(--references-carousel-logo-height) + 2 * var(--references-carousel-cell-padding));
+        padding: var(--references-carousel-cell-padding);
+
+        & img {
+            /* Caps only, as a cropped or upscaled logo is a broken logo. They
+               are absolute: a percentage of a cell sized by its content would
+               be circular. */
+            max-width: calc(var(--references-carousel-logo-height) * 2.5);
+            max-height: var(--references-carousel-logo-height);
+        }
+    }
+
+    /* Each logo once, rather than a slice of the loop. */
+    @media (prefers-reduced-motion: reduce) {
+        .s_references_carousel_marquee_container {
+            justify-content: center;
+        }
+        .s_references_carousel_marquee_item {
+            /* Or it shrinks to a single column. */
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding-inline-end: 0;
+        }
+        .o_marquee_item_clone {
+            display: none;
+        }
+    }
+}
