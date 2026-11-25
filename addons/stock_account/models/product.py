@@ -3,7 +3,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.tools import float_is_zero, float_repr, float_round, float_compare
+from odoo.tools import clean_context, float_is_zero, float_repr, float_round, float_compare
 from odoo.exceptions import ValidationError
 from collections import defaultdict
 from datetime import datetime
@@ -63,7 +63,7 @@ class ProductTemplate(models.Model):
             raise UserError(_("The action leads to the creation of a journal entry, for which you don't have the access rights."))
         # Create the account moves.
         if move_vals_list:
-            account_moves = self.env['account.move'].sudo().create(move_vals_list)
+            account_moves = self.env['account.move'].sudo().with_context(clean_context(self._context)).create(move_vals_list)
             account_moves._post()
         return res
 
@@ -112,31 +112,50 @@ class ProductProduct(models.Model):
             self.filtered(lambda p: p.cost_method != 'fifo')._change_standard_price(vals['standard_price'])
         return super(ProductProduct, self).write(vals)
 
-    @api.depends('stock_valuation_layer_ids')
-    @api.depends_context('to_date', 'company')
-    def _compute_value_svl(self):
-        """Compute totals of multiple svl related values"""
-        company_id = self.env.company
-        self.company_currency_id = company_id.currency_id
+    def _get_valuation_layer_group_domain(self):
+        company_id = self.env.company.id
         domain = [
             ('product_id', 'in', self.ids),
-            ('company_id', '=', company_id.id),
+            ('company_id', '=', company_id),
         ]
         if self.env.context.get('to_date'):
             to_date = fields.Datetime.to_datetime(self.env.context['to_date'])
             domain.append(('create_date', '<=', to_date))
-        groups = self.env['stock.valuation.layer']._read_group(domain, ['value:sum', 'quantity:sum'], ['product_id'])
+        return domain
+
+    def _get_valuation_layer_group_fields(self):
+        return ['value:sum', 'quantity:sum']
+
+    def _get_valuation_layer_groups(self):
+        domain = self._get_valuation_layer_group_domain()
+        group_fields = self._get_valuation_layer_group_fields()
+        return self.env['stock.valuation.layer']._read_group(domain, group_fields, ['product_id'])
+
+    def _prepare_valuation_layer_field_values(self, valuation_layer_group):
+        self.ensure_one()
+        value_svl = self.env.company.currency_id.round(valuation_layer_group['value'])
+        avg_cost = 0
+        if not float_is_zero(valuation_layer_group['quantity'], precision_rounding=self.uom_id.rounding):
+            avg_cost = value_svl / valuation_layer_group['quantity']
+        return {
+            "value_svl": value_svl,
+            "quantity_svl": valuation_layer_group['quantity'],
+            "avg_cost": avg_cost,
+            "total_value": avg_cost * self.sudo(False).qty_available
+        }
+
+    @api.depends('stock_valuation_layer_ids')
+    @api.depends_context('to_date', 'company')
+    def _compute_value_svl(self):
+        """Compute totals of multiple svl related values"""
+        self.company_currency_id = self.env.company.currency_id
+        valuation_layer_groups = self._get_valuation_layer_groups()
         products = self.browse()
         # Browse all products and compute products' quantities_dict in batch.
-        self.env['product.product'].browse([group['product_id'][0] for group in groups]).sudo(False).mapped('qty_available')
-        for group in groups:
-            product = self.browse(group['product_id'][0])
-            value_svl = company_id.currency_id.round(group['value'])
-            avg_cost = value_svl / group['quantity'] if group['quantity'] else 0
-            product.value_svl = value_svl
-            product.quantity_svl = group['quantity']
-            product.avg_cost = avg_cost
-            product.total_value = avg_cost * product.sudo(False).qty_available
+        self.env['product.product'].browse([group['product_id'][0] for group in valuation_layer_groups]).sudo(False).mapped('qty_available')
+        for valuation_layer_group in valuation_layer_groups:
+            product = self.browse(valuation_layer_group['product_id'][0])
+            product.update(product._prepare_valuation_layer_field_values(valuation_layer_group))
             products |= product
         remaining = (self - products)
         remaining.value_svl = 0
@@ -301,6 +320,7 @@ class ProductProduct(models.Model):
                     'debit': abs(value),
                     'credit': 0,
                     'product_id': product.id,
+                    'quantity': 0,
                 }), (0, 0, {
                     'name': _(
                         '%(user)s changed cost from %(previous)s to %(new_price)s - %(product)s',
@@ -313,28 +333,39 @@ class ProductProduct(models.Model):
                     'debit': 0,
                     'credit': abs(value),
                     'product_id': product.id,
+                    'quantity': 0,
                 })],
             }
             am_vals_list.append(move_vals)
 
-        account_moves = self.env['account.move'].sudo().create(am_vals_list)
+        account_moves = self.env['account.move'].sudo().with_context(clean_context(self._context)).create(am_vals_list)
         if account_moves:
             account_moves._post()
+
+    def _get_fifo_candidates_domain(self, company):
+        return [
+            ("product_id", "=", self.id),
+            ("remaining_qty", ">", 0),
+            ("company_id", "=", company.id),
+        ]
+
+    def _get_fifo_candidates(self, company):
+        candidates_domain = self._get_fifo_candidates_domain(company)
+        return self.env["stock.valuation.layer"].sudo().search(candidates_domain)
+
+    def _get_qty_taken_on_candidate(self, qty_to_take_on_candidates, candidate):
+        return min(qty_to_take_on_candidates, candidate.remaining_qty)
 
     def _run_fifo(self, quantity, company):
         self.ensure_one()
 
         # Find back incoming stock valuation layers (called candidates here) to value `quantity`.
         qty_to_take_on_candidates = quantity
-        candidates = self.env['stock.valuation.layer'].sudo().search([
-            ('product_id', '=', self.id),
-            ('remaining_qty', '>', 0),
-            ('company_id', '=', company.id),
-        ])
+        candidates = self._get_fifo_candidates(company)
         new_standard_price = 0
         tmp_value = 0  # to accumulate the value taken on the candidates
         for candidate in candidates:
-            qty_taken_on_candidate = min(qty_to_take_on_candidates, candidate.remaining_qty)
+            qty_taken_on_candidate = self._get_qty_taken_on_candidate(qty_to_take_on_candidates, candidate)
 
             candidate_unit_cost = candidate.remaining_value / candidate.remaining_qty
             new_standard_price = candidate_unit_cost
@@ -491,6 +522,9 @@ class ProductProduct(models.Model):
         # If some negative stock were fixed, we need to recompute the standard price.
         for product in self:
             product = product.with_company(company.id)
+            # Only recompute if we fixed some negative stock
+            if not svls_to_vacuum_by_product[product.id]:
+                continue
             if product.cost_method == 'average' and not float_is_zero(product.quantity_svl,
                                                                       precision_rounding=product.uom_id.rounding):
                 product.sudo().with_context(disable_auto_svl=True).write({'standard_price': product.value_svl / product.quantity_svl})
@@ -534,7 +568,7 @@ class ProductProduct(models.Model):
                 'move_type': 'entry',
             })
             vacuum_pairs_to_reconcile.append((vacuum_svl, svl_to_vacuum))
-        new_account_moves = AccountMove.create(account_move_vals)
+        new_account_moves = AccountMove.with_context(clean_context(self._context)).create(account_move_vals)
         new_account_moves._post()
         for new_account_move, (vacuum_svl, svl_to_vacuum) in zip(new_account_moves, vacuum_pairs_to_reconcile):
             account = svls_accounts[svl_to_vacuum.id]['stock_output']
@@ -760,8 +794,13 @@ class ProductProduct(models.Model):
         candidates = stock_moves\
             .sudo()\
             .filtered(lambda m: is_returned == bool(m.origin_returned_move_id and sum(m.stock_valuation_layer_ids.mapped('quantity')) >= 0))\
-            .mapped('stock_valuation_layer_ids')\
-            .sorted()
+            .mapped('stock_valuation_layer_ids')
+
+        if self.env.context.get('candidates_prefetch_ids'):
+            candidates = candidates.with_prefetch(self.env.context.get('candidates_prefetch_ids'))
+
+        if len(candidates) > 1:
+            candidates = candidates.sorted(lambda svl: (svl.create_date, svl.id))
 
         value_invoiced = self.env.context.get('value_invoiced', 0)
         if 'value_invoiced' in self.env.context:
@@ -909,7 +948,7 @@ class ProductCategory(models.Model):
             raise UserError(_("The action leads to the creation of a journal entry, for which you don't have the access rights."))
         # Create the account moves.
         if move_vals_list:
-            account_moves = self.env['account.move'].sudo().create(move_vals_list)
+            account_moves = self.env['account.move'].sudo().with_context(clean_context(self._context)).create(move_vals_list)
             account_moves._post()
         return res
 

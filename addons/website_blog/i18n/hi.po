@@ -4,14 +4,17 @@
 # 
 # Translators:
 # Martin Trigaux, 2023
+# Wil Odoo, 2024
+# Manav Shah, 2025
+# Ujjawal Pathak, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-03 16:41+0000\n"
+"POT-Creation-Date: 2025-02-10 08:28+0000\n"
 "PO-Revision-Date: 2022-09-22 05:56+0000\n"
-"Last-Translator: Martin Trigaux, 2023\n"
+"Last-Translator: Ujjawal Pathak, 2025\n"
 "Language-Team: Hindi (https://app.transifex.com/odoo/teams/41243/hi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,10 +23,16 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.date_selector
+msgid "#{year}"
+msgstr ""
+
+#. module: website_blog
+#. odoo-python
 #: code:addons/website_blog/models/website_blog.py:0
 #, python-format
 msgid "%s (copy)"
-msgstr ""
+msgstr "%s (कॉपी)"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_cover_post_fullwidth_design
@@ -72,7 +81,7 @@ msgid ""
 msgstr ""
 
 #. module: website_blog
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_blog/static/src/js/tours/website_blog.js:0
 #, python-format
 msgid "<b>Publish your blog post</b> to make it visible to your visitors."
@@ -94,7 +103,7 @@ msgid ""
 msgstr ""
 
 #. module: website_blog
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_blog/static/src/js/tours/website_blog.js:0
 #, python-format
 msgid ""
@@ -281,13 +290,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__message_needaction
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__message_needaction
 msgid "Action Needed"
-msgstr ""
+msgstr "कार्रवाई की ज़रूरत है"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__active
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__active
 msgid "Active"
-msgstr ""
+msgstr "सक्रिय"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_tags_display
@@ -297,7 +306,7 @@ msgstr ""
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blogs_nav
 msgid "All"
-msgstr ""
+msgstr "सभी "
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.post_breadcrumbs
@@ -310,6 +319,7 @@ msgid "All blogs"
 msgstr ""
 
 #. module: website_blog
+#. odoo-python
 #: code:addons/website_blog/models/website_snippet_filter.py:0
 #, python-format
 msgid "Alone in the ocean"
@@ -321,7 +331,7 @@ msgid "Along those lines, how difficult is the set up and break down?"
 msgstr ""
 
 #. module: website_blog
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_blog/static/src/js/website_blog.js:0
 #, python-format
 msgid "Amazing blog article: %s! Check it live: %s"
@@ -361,7 +371,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_form
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_search
 msgid "Archived"
-msgstr ""
+msgstr "संग्रहीत किया गया"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_sidebar_blog_index_archives
@@ -392,6 +402,11 @@ msgid ""
 "will go star gazing with you and overwhelm you with trivia and great "
 "knowledge."
 msgstr ""
+"खगोल विज्ञान क्लब ऐसी जगहें हैं जहाँ बहुत सारे जानकार लोग (शौकिया खगोलविद) "
+"होते हैं, जिन्हें अपना ज्ञान दूसरों के साथ बांटना बहुत पसंद होता है. आप बस "
+"एक कोक और कुछ स्नैक्स के खर्च में उनके साथ तारे देखने जा सकते हैं. वे आपको "
+"तारों और ब्रह्मांड के बारे में ढेर सारी दिलचस्प बातें और अद्भुत जानकारी "
+"देंगे."
 
 #. module: website_blog
 #: model:blog.blog,subtitle:website_blog.blog_blog_2
@@ -407,7 +422,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__message_attachment_count
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__message_attachment_count
 msgid "Attachment Count"
-msgstr ""
+msgstr "अटैचमेंट काउंट"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__author_id
@@ -427,6 +442,7 @@ msgid "Avatar"
 msgstr ""
 
 #. module: website_blog
+#. odoo-python
 #: code:addons/website_blog/models/website_snippet_filter.py:0
 #, python-format
 msgid "Awesome hotel rooms"
@@ -482,6 +498,7 @@ msgid "Beyond The Eye"
 msgstr ""
 
 #. module: website_blog
+#. odoo-python
 #: code:addons/website_blog/models/website.py:0
 #: model:ir.model,name:website_blog.model_blog_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__blog_id
@@ -636,7 +653,7 @@ msgstr ""
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag__category_id
 msgid "Category"
-msgstr ""
+msgstr "वर्ग"
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_3
@@ -644,14 +661,14 @@ msgid "Children’s’ Facilities"
 msgstr ""
 
 #. module: website_blog
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_blog/static/src/js/tours/website_blog.js:0
 #, python-format
 msgid "Choose an image from the library."
 msgstr ""
 
 #. module: website_blog
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_blog/static/src/js/tours/website_blog.js:0
 #, python-format
 msgid "Click here to add new content to your website."
@@ -679,7 +696,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_blog.post_info
 #: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
 msgid "Comments"
-msgstr ""
+msgstr "टिप्पणियाँ"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
@@ -724,7 +741,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag__create_uid
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag_category__create_uid
 msgid "Created by"
-msgstr ""
+msgstr "द्वारा निर्मित"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__create_date
@@ -732,7 +749,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag__create_date
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag_category__create_date
 msgid "Created on"
-msgstr ""
+msgstr "इस तारीख को बनाया गया"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_searchbar_input_snippet_options
@@ -747,7 +764,7 @@ msgstr ""
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_searchbar_input_snippet_options
 msgid "Description"
-msgstr ""
+msgstr "विवरण"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
@@ -760,7 +777,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag__display_name
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag_category__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "डिस्प्ले नाम"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
@@ -803,14 +820,14 @@ msgid "Edit the 'Filter Results' page header."
 msgstr ""
 
 #. module: website_blog
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_blog/static/src/js/tours/website_blog.js:0
 #, python-format
 msgid "Edit your title, the subtitle is optional."
 msgstr ""
 
 #. module: website_blog
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_blog/static/src/js/tours/website_blog.js:0
 #, python-format
 msgid "Enter your post's title"
@@ -851,13 +868,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__message_follower_ids
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__message_follower_ids
 msgid "Followers"
-msgstr ""
+msgstr "फ़ॉलोवर"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__message_partner_ids
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__message_partner_ids
 msgid "Followers (Partners)"
-msgstr ""
+msgstr "फ़ॉलोवर (पार्टनर)"
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_4
@@ -912,18 +929,18 @@ msgstr ""
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
 msgid "Grid"
-msgstr ""
+msgstr "ग्रिड"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_search
 msgid "Group By"
-msgstr ""
+msgstr "इन्होंने ग्रुप किया"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__has_message
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__has_message
 msgid "Has Message"
-msgstr ""
+msgstr "मैसेज है"
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_3
@@ -970,13 +987,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag__id
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag_category__id
 msgid "ID"
-msgstr ""
+msgstr "आईडी"
 
 #. module: website_blog
 #: model:ir.model.fields,help:website_blog.field_blog_blog__message_needaction
 #: model:ir.model.fields,help:website_blog.field_blog_post__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr ""
+msgstr "अगर यह बॉक्स चेक है, तो नए मैसेज देखने ज़रूरी हैं."
 
 #. module: website_blog
 #: model:ir.model.fields,help:website_blog.field_blog_blog__message_has_error
@@ -984,7 +1001,7 @@ msgstr ""
 #: model:ir.model.fields,help:website_blog.field_blog_post__message_has_error
 #: model:ir.model.fields,help:website_blog.field_blog_post__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr ""
+msgstr "अगर बॉक्स पर टिक है, तो कुछ मैसेज भेजने में गलती हुई है."
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_3
@@ -1026,7 +1043,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__message_is_follower
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__message_is_follower
 msgid "Is Follower"
-msgstr ""
+msgstr "फ़ॉलोवर है"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__is_published
@@ -1034,6 +1051,7 @@ msgid "Is Published"
 msgstr ""
 
 #. module: website_blog
+#. odoo-python
 #: code:addons/website_blog/models/website_snippet_filter.py:0
 #, python-format
 msgid "Islands"
@@ -1077,6 +1095,7 @@ msgid ""
 msgstr ""
 
 #. module: website_blog
+#. odoo-python
 #: code:addons/website_blog/models/website_snippet_filter.py:0
 #, python-format
 msgid "Jungle"
@@ -1093,7 +1112,7 @@ msgid "Know when to look"
 msgstr ""
 
 #. module: website_blog
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_blog/static/src/js/options.js:0
 #, python-format
 msgid "Large"
@@ -1118,7 +1137,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag__write_uid
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag_category__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "इन्होंने आखिरी बार अपडेट किया"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__write_date
@@ -1126,7 +1145,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag__write_date
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag_category__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "आखिरी बार अपडेट हुआ"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_cover_post
@@ -1186,7 +1205,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__message_main_attachment_id
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__message_main_attachment_id
 msgid "Main Attachment"
-msgstr ""
+msgstr "मेन अटैचमेंट"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
@@ -1228,7 +1247,7 @@ msgid ""
 msgstr ""
 
 #. module: website_blog
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_blog/static/src/js/options.js:0
 #, python-format
 msgid "Medium"
@@ -1238,13 +1257,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__message_has_error
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__message_has_error
 msgid "Message Delivery error"
-msgstr ""
+msgstr "मैसेज डिलीवरी में गड़बड़ी"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__message_ids
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__message_ids
 msgid "Messages"
-msgstr ""
+msgstr "संदेश"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.view_blog_post_form
@@ -1293,7 +1312,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag__name
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag_category__name
 msgid "Name"
-msgstr ""
+msgstr "नाम"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
@@ -1343,7 +1362,7 @@ msgstr ""
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.s_dynamic_snippet_options_template
 msgid "None"
-msgstr ""
+msgstr "कोई नहीं"
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_4
@@ -1372,25 +1391,25 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__message_needaction_counter
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__message_needaction_counter
 msgid "Number of Actions"
-msgstr ""
+msgstr "कार्रवाई की संख्या"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__message_has_error_counter
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__message_has_error_counter
 msgid "Number of errors"
-msgstr ""
+msgstr "गलतियों की संख्या"
 
 #. module: website_blog
 #: model:ir.model.fields,help:website_blog.field_blog_blog__message_needaction_counter
 #: model:ir.model.fields,help:website_blog.field_blog_post__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr ""
+msgid "Number of messages requiring action"
+msgstr "ऐसे मैसेज की संख्या जिनपर कार्रवाई करना ज़रूरी है"
 
 #. module: website_blog
 #: model:ir.model.fields,help:website_blog.field_blog_blog__message_has_error_counter
 #: model:ir.model.fields,help:website_blog.field_blog_post__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr ""
+msgstr "ऐसे मैसेज की संख्या जिनमें डिलीवरी की गड़बड़ी है"
 
 #. module: website_blog
 #: model_terms:blog.post,content:website_blog.blog_post_7
@@ -1404,7 +1423,16 @@ msgid ""
 msgstr ""
 
 #. module: website_blog
-#. openerp-web
+#. odoo-python
+#: code:addons/website_blog/models/ir_qweb_fields.py:0
+#, python-format
+msgid ""
+"On your default language, empty the blog post description and save to get an"
+" automated (translated) summary."
+msgstr ""
+
+#. module: website_blog
+#. odoo-javascript
 #: code:addons/website_blog/static/src/js/tours/website_blog.js:0
 #, python-format
 msgid ""
@@ -1525,6 +1553,11 @@ msgid "Publishing date"
 msgstr ""
 
 #. module: website_blog
+#: model:ir.model,name:website_blog.model_ir_qweb_field
+msgid "Qweb Field"
+msgstr ""
+
+#. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_cover_post
 msgid "Read more"
 msgstr ""
@@ -1561,7 +1594,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__message_has_sms_error
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr ""
+msgstr "एसएमएस डिलीवरी में गड़बड़ी"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.dynamic_filter_template_blog_post_big_picture
@@ -1572,25 +1605,28 @@ msgid "Sample"
 msgstr ""
 
 #. module: website_blog
+#. odoo-python
 #: code:addons/website_blog/models/website_snippet_filter.py:0
 #, python-format
 msgid "Satellites"
 msgstr ""
 
 #. module: website_blog
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_blog/static/src/js/tours/website_blog.js:0
 #, python-format
 msgid "Search for an image. (eg: type \"business\")"
 msgstr ""
 
 #. module: website_blog
+#. odoo-python
 #: code:addons/website_blog/models/website_snippet_filter.py:0
 #, python-format
 msgid "Seaside vs mountain side"
 msgstr ""
 
 #. module: website_blog
+#. odoo-python
 #: code:addons/website_blog/models/website_snippet_filter.py:0
 #, python-format
 msgid "Seeing the world from above"
@@ -1602,14 +1638,14 @@ msgid "Select Blog"
 msgstr ""
 
 #. module: website_blog
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_blog/static/src/js/tours/website_blog.js:0
 #, python-format
 msgid "Select the blog you want to add the post to."
 msgstr ""
 
 #. module: website_blog
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_blog/static/src/js/tours/website_blog.js:0
 #, python-format
 msgid "Select this menu item to create a new blog post."
@@ -1638,7 +1674,7 @@ msgid "Separate every keyword with a comma"
 msgstr ""
 
 #. module: website_blog
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_blog/static/src/js/tours/website_blog.js:0
 #, python-format
 msgid "Set a blog post <b>cover</b>."
@@ -1701,6 +1737,7 @@ msgid "Silly-Chico"
 msgstr ""
 
 #. module: website_blog
+#. odoo-python
 #: code:addons/website_blog/models/website_snippet_filter.py:0
 #, python-format
 msgid "Skies"
@@ -1757,12 +1794,14 @@ msgid "Someone famous in <cite title=\"Source Title\">Source Title</cite>"
 msgstr ""
 
 #. module: website_blog
+#. odoo-python
 #: code:addons/website_blog/models/website_snippet_filter.py:0
 #, python-format
 msgid "Spotting the fauna"
 msgstr ""
 
 #. module: website_blog
+#. odoo-python
 #: code:addons/website_blog/models/website_blog.py:0
 #, python-format
 msgid "Start writing here..."
@@ -1831,7 +1870,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_sidebar_blog_index_tags
 #: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
 msgid "Tags"
-msgstr ""
+msgstr "टैग"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
@@ -1839,6 +1878,7 @@ msgid "Tags List"
 msgstr ""
 
 #. module: website_blog
+#. odoo-python
 #: code:addons/website_blog/models/website_snippet_filter.py:0
 #, python-format
 msgid "Taking pictures in the dark"
@@ -2013,14 +2053,14 @@ msgid "This box will not be visible to your visitors"
 msgstr ""
 
 #. module: website_blog
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_blog/static/src/js/options.js:0
 #, python-format
 msgid "This tag already exists"
 msgstr ""
 
 #. module: website_blog
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_blog/static/src/js/options.js:0
 #, python-format
 msgid "Tiny"
@@ -2118,7 +2158,7 @@ msgid "Untitled Post"
 msgstr ""
 
 #. module: website_blog
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_blog/static/src/js/tours/website_blog.js:0
 #, python-format
 msgid "Use this icon to preview your blog post on <b>mobile devices</b>."
@@ -2130,6 +2170,7 @@ msgid "Used in:"
 msgstr ""
 
 #. module: website_blog
+#. odoo-python
 #: code:addons/website_blog/models/website_snippet_filter.py:0
 #, python-format
 msgid "Viewpoints"
@@ -2151,11 +2192,16 @@ msgid "Visible on current website"
 msgstr ""
 
 #. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.blog_post_content
+msgid "WRITE HERE OR DRAG BUILDING BLOCKS"
+msgstr ""
+
+#. module: website_blog
 #: model:ir.model,name:website_blog.model_website
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__website_id
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__website_id
 msgid "Website"
-msgstr ""
+msgstr "वेबसाइट"
 
 #. module: website_blog
 #: model:ir.actions.act_url,name:website_blog.action_open_website
@@ -2166,7 +2212,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__website_message_ids
 #: model:ir.model.fields,field_description:website_blog.field_blog_post__website_message_ids
 msgid "Website Messages"
-msgstr ""
+msgstr "वेबसाइट मैसेज"
 
 #. module: website_blog
 #: model:ir.model,name:website_blog.model_website_snippet_filter
@@ -2182,7 +2228,7 @@ msgstr ""
 #: model:ir.model.fields,help:website_blog.field_blog_blog__website_message_ids
 #: model:ir.model.fields,help:website_blog.field_blog_post__website_message_ids
 msgid "Website communication history"
-msgstr ""
+msgstr "वेबसाइट कम्यूनिकेशन हिस्ट्री"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_blog__website_meta_description
@@ -2228,6 +2274,7 @@ msgid ""
 msgstr ""
 
 #. module: website_blog
+#. odoo-python
 #: code:addons/website_blog/models/website_snippet_filter.py:0
 #, python-format
 msgid "With a View"
@@ -2332,6 +2379,11 @@ msgstr ""
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.posts_loop
 msgid "unpublished"
+msgstr ""
+
+#. module: website_blog
+#: model_terms:ir.ui.view,arch_db:website_blog.blogs_nav
+msgid "{{blog.name if blog else 'All Blogs'}}"
 msgstr ""
 
 #. module: website_blog

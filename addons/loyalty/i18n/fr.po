@@ -5,17 +5,18 @@
 # Translators:
 # Clo <clo@odoo.com>, 2022
 # Cécile Collart <cco@odoo.com>, 2022
-# Jolien De Paepe, 2023
 # Martin Trigaux, 2023
+# Jolien De Paepe, 2023
 # Wil Odoo, 2024
+# Manon Rondou, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"POT-Creation-Date: 2025-05-22 18:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"Last-Translator: Manon Rondou, 2025\n"
 "Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -690,7 +691,7 @@ msgstr "Société"
 #: code:addons/loyalty/models/loyalty_card.py:0
 #, python-format
 msgid "Compose Email"
-msgstr "Rédiger un email"
+msgstr "Rédiger un e-mail"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__rule_ids
@@ -938,12 +939,12 @@ msgstr "Produit de remise"
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_reward__discount_product_category_id
 msgid "Discounted Prod. Categories"
-msgstr "Catégories de produits à prix réduit"
+msgstr "Catégories de produits en promotion"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_reward__discount_product_tag_id
 msgid "Discounted Prod. Tag"
-msgstr "Étiquette de produit à prix réduit"
+msgstr "Étiquette de produit en promotion"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_reward__discount_product_ids
@@ -994,12 +995,12 @@ msgstr ""
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_mail__mail_template_id
 msgid "Email Template"
-msgstr "Modèle d'email"
+msgstr "Modèle d'e-mail"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__mail_template_id
 msgid "Email template"
-msgstr "Modèle d'email"
+msgstr "Modèle d'e-mail"
 
 #. module: loyalty
 #: model:ir.model.fields.selection,name:loyalty.selection__loyalty_rule__minimum_amount_tax_mode__excl
@@ -1010,6 +1011,14 @@ msgstr "Exclu"
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_card__expiration_date
 msgid "Expiration Date"
 msgstr "Date de fin de validité"
+
+#. module: loyalty
+#. odoo-python
+#: code:addons/loyalty/models/loyalty_card.py:0
+#, python-format
+msgid "Expiration date cannot be set on a loyalty card."
+msgstr ""
+"La date d’expiration ne peut pas être définie sur une carte de fidélité."
 
 #. module: loyalty
 #. odoo-python
@@ -1172,7 +1181,7 @@ msgid ""
 "                                    <br/>\n"
 "                                    Then, Gift Cards can be used to pay orders."
 msgstr ""
-"Les cartes-cadeaux sont créées manuellement ou envoyées automatiquement par email lorsque le client commande un produit de type carte-cadeau.\n"
+"Les cartes-cadeaux sont créées manuellement ou envoyées automatiquement par e-mail lorsque le client commande un produit de type carte-cadeau.\n"
 "<br/>\n"
 "Ensuite, les cartes-cadeaux peuvent être utilisées pour payer les commandes."
 
@@ -1550,7 +1559,7 @@ msgstr "Variante de produit"
 #. module: loyalty
 #: model:ir.model.fields,help:loyalty.field_loyalty_program__payment_program_discount_product_id
 msgid "Product used in the sales order to apply the discount."
-msgstr "Le produit utilisé dans le bon de commande pour appliquer la remise."
+msgstr "Le produit utilisé dans la commande client pour appliquer la remise."
 
 #. module: loyalty
 #: model:ir.model.fields,help:loyalty.field_loyalty_reward__discount_line_product_id
@@ -1558,8 +1567,8 @@ msgid ""
 "Product used in the sales order to apply the discount. Each reward has its "
 "own product for reporting purpose"
 msgstr ""
-"Produit utilisé dans le bon de commande auquel s'applique la remise. Chaque "
-"récompense a son propre produit à des fins de rapportage"
+"Produit utilisé dans la commande client à laquelle s'applique la remise. "
+"Chaque récompense a son propre produit pour l'établissement de rapports"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__trigger_product_ids
@@ -1694,6 +1703,7 @@ msgstr ""
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__reward_ids
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
 msgid "Rewards"
 msgstr "Récompenses"
 
@@ -1812,6 +1822,13 @@ msgstr ""
 "Les points requis pour une récompense doivent être strictement positifs."
 
 #. module: loyalty
+#. odoo-python
+#: code:addons/loyalty/models/loyalty_reward.py:0
+#, python-format
+msgid "The reward description field cannot be empty."
+msgstr "La description de la récompense ne peut pas être vide."
+
+#. module: loyalty
 #: model:ir.model.constraint,message:loyalty.constraint_loyalty_reward_product_qty_positive
 msgid "The reward product quantity must be strictly positive."
 msgstr "La quantité de produit de récompense doit être strictement positive."
@@ -1859,6 +1876,13 @@ msgstr "Nombre total de commandes"
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__trigger
 msgid "Trigger"
 msgstr "Déclencheur"
+
+#. module: loyalty
+#. odoo-python
+#: code:addons/loyalty/models/loyalty_reward.py:0
+#, python-format
+msgid "Unsupported search operator"
+msgstr "Opérateur de recherche non pris en charge"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_card__use_count

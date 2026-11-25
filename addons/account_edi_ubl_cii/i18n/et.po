@@ -5,16 +5,16 @@
 # Translators:
 # Eneli Õigus <enelioigus@gmail.com>, 2022
 # Algo Kärp <algokarp@gmail.com>, 2022
-# Andre Roomet <andreroomet@gmail.com>, 2022
 # Rivo Zängov <eraser@eraser.ee>, 2022
-# Anna, 2023
+# Andre Roomet <andreroomet@gmail.com>, 2022
+# Anna, 2024
 # Birgit Vijar, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"POT-Creation-Date: 2025-02-10 08:26+0000\n"
 "PO-Revision-Date: 2022-09-22 05:44+0000\n"
 "Last-Translator: Birgit Vijar, 2024\n"
 "Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
@@ -156,7 +156,7 @@ msgstr "EN 16931"
 #: code:addons/account_edi_ubl_cii/models/account_edi_xml_ubl_bis3.py:0
 #, python-format
 msgid "Each invoice line shall have one and only one tax."
-msgstr ""
+msgstr "Igal arve real peab olema ainult üks maks."
 
 #. module: account_edi_ubl_cii
 #. odoo-python
@@ -325,7 +325,7 @@ msgstr ""
 #: code:addons/account_edi_ubl_cii/models/account_edi_common.py:0
 #, python-format
 msgid "The element %s is required on %s."
-msgstr ""
+msgstr "Element %s on vajalik %s."
 
 #. module: account_edi_ubl_cii
 #. odoo-python
@@ -341,17 +341,6 @@ msgstr "Väli %s on nõutud %s."
 msgid ""
 "The field 'Sanitized Account Number' is required on the Recipient Bank."
 msgstr ""
-
-#. module: account_edi_ubl_cii
-#. odoo-python
-#: code:addons/account_edi_ubl_cii/models/account_edi_xml_ubl_bis3.py:0
-#, python-format
-msgid ""
-"The invoice contains line(s) with a negative unit price, which is not "
-"allowed. You might need to set a negative quantity instead."
-msgstr ""
-"Negatiivne hind ridadel ei ole lubatud. Vajadusel tuleb muuta kogus "
-"negatiivseks. "
 
 #. module: account_edi_ubl_cii
 #. odoo-python
@@ -424,11 +413,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_edi_ubl_cii.account_invoice_pdfa_3_facturx_metadata
 msgid "factur-x.xml"
 msgstr "factur-x.xml"
-
-#. module: account_edi_ubl_cii
-#: model_terms:ir.ui.view,arch_db:account_edi_ubl_cii.account_invoice_line_facturx_export_22
-msgid "false"
-msgstr "väär"
 
 #. module: account_edi_ubl_cii
 #: model_terms:ir.ui.view,arch_db:account_edi_ubl_cii.account_invoice_pdfa_3_facturx_metadata

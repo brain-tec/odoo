@@ -3,10 +3,10 @@
 # 	* im_livechat
 # 
 # Translators:
-# Martin Trigaux, 2022
 # Braulio D. López Vázquez <bdl@odoo.com>, 2023
 # Wil Odoo, 2023
-# Fernanda Alvarez, 2024
+# Martin Trigaux, 2024
+# Fernanda Alvarez, 2025
 # 
 msgid ""
 msgstr ""
@@ -14,7 +14,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-02-06 13:31+0000\n"
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Fernanda Alvarez, 2024\n"
+"Last-Translator: Fernanda Alvarez, 2025\n"
 "Language-Team: Spanish (Mexico) (https://app.transifex.com/odoo/teams/41243/es_MX/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -422,9 +422,9 @@ msgid ""
 "Chat is private and unique between 2 persons. Group is private among invited"
 " persons. Channel can be freely joined (depending on its configuration)."
 msgstr ""
-"El chat es privado y único entre 2 personas. El grupo es privado entre las "
-"personas invitadas. Unirse al canal es libre (dependiendo de su "
-"configuración)."
+"Un chat es privado y único entre 2 personas. Un grupo es privado entre las "
+"personas invitadas. Un canal es abierto y cualquier persona puede unirse "
+"(depende de la configuración)."
 
 #. module: im_livechat
 #. odoo-javascript
@@ -465,7 +465,7 @@ msgstr "Nombre del bot de chat"
 #. module: im_livechat
 #: model:ir.model,name:im_livechat.model_chatbot_script
 msgid "Chatbot Script"
-msgstr "Guión del bot de chat"
+msgstr "Guion del bot de chat"
 
 #. module: im_livechat
 #: model:ir.model,name:im_livechat.model_chatbot_script_answer
@@ -475,7 +475,7 @@ msgstr "Respuesta de guión del bot de chat"
 #. module: im_livechat
 #: model:ir.model,name:im_livechat.model_chatbot_script_step
 msgid "Chatbot Script Step"
-msgstr "Paso de guión del bot de chat"
+msgstr "Paso del guion del bot de chat"
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_chatbot_message__script_step_id
@@ -724,7 +724,7 @@ msgstr "Canal de conversaciones"
 #: model:ir.model.fields,field_description:im_livechat.field_im_livechat_report_channel__display_name
 #: model:ir.model.fields,field_description:im_livechat.field_im_livechat_report_operator__display_name
 msgid "Display Name"
-msgstr "Nombre en pantalla"
+msgstr "Mostrar nombre"
 
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_report_channel__duration
@@ -802,8 +802,9 @@ msgid ""
 "Given the order to find a matching rule. If 2 rules are matching for the "
 "given url/country, the one with the lowest sequence will be chosen."
 msgstr ""
-"Dada la orden de encontrar una regla que coincida. Si 2 reglas coinciden "
-"para el país o URL dado, se elegirá la regla con la menor secuencia."
+"En caso de que haya una orden para encontrar una regla que coincida. Si 2 "
+"reglas coinciden para el país o la URL, se elegirá la regla con la secuencia"
+" más baja."
 
 #. module: im_livechat
 #. odoo-javascript
@@ -873,7 +874,7 @@ msgstr "¿Cómo usar el widget de Chat en vivo del Sitio web?"
 #. module: im_livechat
 #: model:chatbot.script.step,message:im_livechat.chatbot_script_welcome_step_pricing_noone_available
 msgid "Hu-ho, it looks like none of our operators are available 🙁"
-msgstr "Oh, no, parece que ninguno de nuestros operadores está disponible 🙁"
+msgstr "Uy, parece que ninguno de nuestros operadores está disponible 🙁"
 
 #. module: im_livechat
 #: model:chatbot.script.answer,name:im_livechat.chatbot_script_welcome_step_dispatch_answer_just_looking
@@ -1710,7 +1711,7 @@ msgstr "Texto que invita al usuario a iniciar el chat."
 #: code:addons/im_livechat/static/src/legacy/widgets/feedback/feedback.js:0
 #, python-format
 msgid "Thank you for your feedback"
-msgstr "Gracias por su retroalimentación"
+msgstr "Gracias por sus comentarios"
 
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel_rule__channel_id
@@ -1962,6 +1963,11 @@ msgstr ""
 #, python-format
 msgid "Yesterday"
 msgstr "Ayer"
+
+#. module: im_livechat
+#: model_terms:ir.ui.view,arch_db:im_livechat.livechat_email_template
+msgid "You"
+msgstr "Usted"
 
 #. module: im_livechat
 #: model_terms:ir.actions.act_window,help:im_livechat.chatbot_script_action

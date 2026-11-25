@@ -7,14 +7,15 @@
 # Cécile Collart <cco@odoo.com>, 2022
 # Jolien De Paepe, 2024
 # Wil Odoo, 2024
+# Manon Rondou, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:32+0000\n"
+"POT-Creation-Date: 2025-02-10 08:27+0000\n"
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"Last-Translator: Manon Rondou, 2025\n"
 "Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -690,7 +691,7 @@ msgstr "Brouillon"
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__partner_email
 #: model_terms:ir.ui.view,arch_db:payment.payment_provider_onboarding_wizard_form
 msgid "Email"
-msgstr "Email"
+msgstr "E-mail"
 
 #. module: payment
 #: model:ir.model.fields.selection,name:payment.selection__payment_provider__state__enabled
@@ -1430,6 +1431,7 @@ msgstr "Razorpay"
 #. module: payment
 #. odoo-javascript
 #: code:addons/payment/static/src/xml/payment_post_processing.xml:0
+#: code:addons/payment/static/src/xml/payment_post_processing.xml:0
 #, python-format
 msgid "Reason:"
 msgstr "Motif :"
@@ -1911,8 +1913,8 @@ msgid ""
 "This partner has no email, which may cause issues with some payment providers.\n"
 "                     Setting an email for this partner is advised."
 msgstr ""
-"Ce partenaire n'a pas d'email, ce qui pourrait poser problème à certains fournisseurs de paiement. \n"
-"Il est recommandé de configurer un email pour ce partenaire."
+"Ce partenaire n'a pas d'e-mail, ce qui pourrait poser problème à certains fournisseurs de paiement. \n"
+"Il est recommandé de configurer un e-mail pour ce partenaire."
 
 #. module: payment
 #. odoo-javascript
@@ -2135,7 +2137,7 @@ msgstr "Vous n'avez pas accès à ce jeton de paiement."
 #, python-format
 msgid "You should receive an email confirming your payment in a few minutes."
 msgstr ""
-"Vous devriez recevoir un email confirmant votre paiement dans quelques "
+"Vous devriez recevoir un e-mail confirmant votre paiement dans quelques "
 "minutes."
 
 #. module: payment
@@ -2232,7 +2234,7 @@ msgstr ""
 msgid ""
 "Your payment has been successfully processed but is waiting for approval."
 msgstr ""
-"Votre paiement a été traité avec succès mais est en attente d'approbation."
+"Votre paiement a été traité avec succès mais est en attente de validation."
 
 #. module: payment
 #. odoo-python
@@ -2293,16 +2295,6 @@ msgid "Zip"
 msgstr "Code postal"
 
 #. module: payment
-#: model_terms:ir.ui.view,arch_db:payment.transaction_status
-msgid "danger"
-msgstr "danger"
-
-#. module: payment
-#: model_terms:ir.ui.view,arch_db:payment.transaction_status
-msgid "info"
-msgstr "info"
-
-#. module: payment
 #: model:ir.actions.server,name:payment.cron_post_process_payment_tx_ir_actions_server
 #: model:ir.cron,cron_name:payment.cron_post_process_payment_tx
 msgid "payment: post-process transactions"
@@ -2323,13 +2315,3 @@ msgstr "montrer moins"
 #: model_terms:ir.ui.view,arch_db:payment.icon_list
 msgid "show more"
 msgstr "montrer plus"
-
-#. module: payment
-#: model_terms:ir.ui.view,arch_db:payment.transaction_status
-msgid "success"
-msgstr "succès"
-
-#. module: payment
-#: model_terms:ir.ui.view,arch_db:payment.transaction_status
-msgid "warning"
-msgstr "avertissement"

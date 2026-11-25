@@ -8,17 +8,19 @@
 # Cozmin Candea <office@terrabit.ro>, 2023
 # Martin Trigaux, 2023
 # Foldi Robert <foldirobert@nexterp.ro>, 2023
-# Hongu Cosmin <cosmin513@gmail.com>, 2024
 # Dorin Hongu <dhongu@gmail.com>, 2024
 # Betty Keresztesi, 2024
+# Hongu Cosmin <cosmin513@gmail.com>, 2024
+# Wil Odoo, 2024
+# Larisa_nexterp, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"POT-Creation-Date: 2025-06-27 03:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Betty Keresztesi, 2024\n"
+"Last-Translator: Larisa_nexterp, 2025\n"
 "Language-Team: Romanian (https://app.transifex.com/odoo/teams/41243/ro/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -94,6 +96,20 @@ msgstr ""
 #, python-format
 msgid "%s product(s) found for \"%s\"."
 msgstr "%s produs(e) gasit(e) pentru \"%s\"."
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/pos_session.py:0
+#, python-format
+msgid "%s untaxed"
+msgstr "%s fără taxe"
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/pos_session.py:0
+#, python-format
+msgid "%s with %s"
+msgstr "%s cu %s"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -1041,7 +1057,7 @@ msgstr "Nu se poate închide sesiunea când este offline."
 #: code:addons/point_of_sale/static/src/js/Screens/ProductScreen/ProductScreen.js:0
 #, python-format
 msgid "Cannot modify a tip"
-msgstr ""
+msgstr "Nu se poate modifica bacșișul"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -1823,7 +1839,7 @@ msgstr "Clientul este necesar pentru metoda de plată %s."
 #: code:addons/point_of_sale/static/src/js/Screens/ProductScreen/ProductScreen.js:0
 #, python-format
 msgid "Customer tips, cannot be modified directly"
-msgstr ""
+msgstr "Bacșișul clientului nu poate fi modificat direct"
 
 #. module: point_of_sale
 #: model:ir.ui.menu,name:point_of_sale.menu_point_of_sale_customer
@@ -2412,7 +2428,7 @@ msgstr "Poziție fiscală"
 #: code:addons/point_of_sale/static/src/js/Screens/TicketScreen/TicketScreen.js:0
 #, python-format
 msgid "Fiscal Position not found"
-msgstr ""
+msgstr "Poziție fiscală negăsită"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__fiscal_position_ids
@@ -2905,11 +2921,14 @@ msgid "Invoice payment for %s (%s) using %s"
 msgstr "Plata facturii pentru %s (%s) folosind %s"
 
 #. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/js/Screens/TicketScreen/TicketScreen.js:0
 #: model:ir.model.fields,field_description:point_of_sale.field_report_pos_order__invoiced
 #: model:ir.model.fields.selection,name:point_of_sale.selection__pos_order__state__invoiced
 #: model:ir.model.fields.selection,name:point_of_sale.selection__report_pos_order__state__invoiced
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_order_filter
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_report_pos_order_search
+#, python-format
 msgid "Invoiced"
 msgstr "Facturat"
 
@@ -3003,7 +3022,7 @@ msgstr ""
 #: code:addons/point_of_sale/static/src/js/models.js:0
 #, python-format
 msgid "It is not allowed to mix refunds and sales"
-msgstr ""
+msgstr "Nu este permis să combinați retururi cu vânzări"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -3436,6 +3455,13 @@ msgid "More..."
 msgstr "Mai mult..."
 
 #. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/js/Screens/TicketScreen/TicketScreen.js:0
+#, python-format
+msgid "Multiple Orders Selected"
+msgstr ""
+
+#. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__my_activity_date_deadline
 msgid "My Activity Deadline"
 msgstr "Data limită a activității mele"
@@ -3595,7 +3621,7 @@ msgstr "Nu există legătură către o factură pentru %s."
 #: code:addons/point_of_sale/static/src/js/Screens/PartnerListScreen/PartnerListScreen.js:0
 #, python-format
 msgid "No more customer found for \"%s\"."
-msgstr ""
+msgstr "Nu a mai fost găsit niciun client pentru \"%s\"."
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -3794,10 +3820,11 @@ msgstr ""
 "Faceți clic pe +/- pentru a modifica cantitatea de rambursat."
 
 #. module: point_of_sale
+#. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
 #, python-format
 msgid "Only administrators can edit receipt headers and footers"
-msgstr ""
+msgstr "Numai administratorii pot edita antetul și subsolul bonului"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__only_round_cash_method
@@ -3812,6 +3839,8 @@ msgstr "Aplicați numai rotunjirea în numerar"
 msgid ""
 "Only journals of type 'Cash' or 'Bank' could be used with payment methods."
 msgstr ""
+"Doar jurnalele de tip 'Numerar' sau 'Bancă' pot fi folosite cu metodele de "
+"plată."
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
@@ -5265,6 +5294,8 @@ msgstr "Afișare actualizare"
 
 #. module: point_of_sale
 #. odoo-javascript
+#. odoo-python
+#: code:addons/point_of_sale/models/pos_session.py:0
 #: code:addons/point_of_sale/static/src/js/Screens/TicketScreen/TicketScreen.js:0
 #: code:addons/point_of_sale/static/src/xml/Screens/ProductScreen/ControlButtons/RefundButton.xml:0
 #: code:addons/point_of_sale/static/src/xml/Screens/ProductScreen/ControlButtons/RefundButton.xml:0
@@ -5290,7 +5321,7 @@ msgstr "Comenzi retur"
 #: code:addons/point_of_sale/static/src/js/models.js:0
 #, python-format
 msgid "Refund and Sales not allowed"
-msgstr ""
+msgstr "Retur și vânzare nu sunt permise"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -5543,6 +5574,13 @@ msgid "Sale line"
 msgstr "Linie vânzare"
 
 #. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/pos_session.py:0
+#, python-format
+msgid "Sales"
+msgstr "Vânzări"
+
+#. module: point_of_sale
 #: model:ir.actions.act_window,name:point_of_sale.action_report_pos_details
 #: model:ir.actions.report,name:point_of_sale.sale_details_report
 #: model:ir.ui.menu,name:point_of_sale.menu_report_order_details
@@ -5644,7 +5682,7 @@ msgstr "Caută comenzi de vânzare"
 #: code:addons/point_of_sale/static/src/xml/Screens/ProductScreen/ProductsWidget.xml:0
 #, python-format
 msgid "Search more"
-msgstr ""
+msgstr "Caută mai mult"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order__access_token
@@ -6359,9 +6397,9 @@ msgstr ""
 #: code:addons/point_of_sale/static/src/js/Screens/PaymentScreen/PaymentScreen.js:0
 #, python-format
 msgid ""
-"The amount of your payment lines must be rounded to validate the "
-"transaction."
-msgstr "Suma liniilor de plată trebuie rotunjită pentru a valida tranzacția."
+"The amount of your payment lines must be rounded to validate the transaction.\n"
+"The rounding precision is %s so you should set %s or %s as payment amount instead of %s."
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -6431,6 +6469,8 @@ msgid ""
 "The fiscal position used in the original order is not loaded. Make sure it "
 "is loaded by adding it in the pos configuration."
 msgstr ""
+"Poziția fiscală folosită în comanda originală nu este încărcată. Asigurați-"
+"vă că este adăugată în configurația POS."
 
 #. module: point_of_sale
 #. odoo-python
@@ -6476,13 +6516,15 @@ msgid ""
 "The maximum difference allowed is %s.\n"
 "Please contact your manager to accept the closing difference."
 msgstr ""
+"Valoarea maximă permisă este %s.\n"
+"Vă rugăm să contactați managerul pentru a accepta diferența la închidere."
 
 #. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_bill.py:0
 #, python-format
 msgid "The name of the Coins/Bills must be a number."
-msgstr ""
+msgstr "Numele monedelor/bancnotelor trebuie să fie un număr."
 
 #. module: point_of_sale
 #: model:ir.model.constraint,message:point_of_sale.constraint_pos_session_uniq_name
@@ -6862,6 +6904,17 @@ msgid ""
 "This journal is associated with a payment method. You cannot modify its type"
 msgstr ""
 "Acest jurnal este asociat cu o metodă de plată. Nu puteți modifica tipul său"
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/account_journal.py:0
+#, python-format
+msgid ""
+"This journal is associated with payment method %s that is being used by "
+"order %s in the active pos session %s"
+msgstr ""
+"Acest jurnal este asociat cu metoda de plată %s care este folosită de "
+"comanda %s în sesiunea POS activă %s"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -7524,6 +7577,8 @@ msgid ""
 "You can only unlink PoS order lines that are related to orders in new or "
 "cancelled state."
 msgstr ""
+"Puteți elimina liniile de comandă PoS doar dacă acestea aparțin unor comenzi"
+" în stare nouă sau anulată."
 
 #. module: point_of_sale
 #. odoo-python
@@ -7596,6 +7651,17 @@ msgstr ""
 
 #. module: point_of_sale
 #. odoo-python
+#: code:addons/point_of_sale/models/account_cash_rounding.py:0
+#, python-format
+msgid ""
+"You cannot delete a rounding method that is used in a Point of Sale "
+"configuration."
+msgstr ""
+"Nu puteți șterge o metodă de rotunjire care este folosită într-o "
+"configurație PoS."
+
+#. module: point_of_sale
+#. odoo-python
 #: code:addons/point_of_sale/models/res_partner.py:0
 #, python-format
 msgid ""
@@ -7610,9 +7676,22 @@ msgstr ""
 #: code:addons/point_of_sale/models/pos_session.py:0
 #, python-format
 msgid ""
+"You do not have permission to open a POS session. Please try opening a "
+"session with a different user"
+msgstr ""
+"Nu aveți permisiunea de a deschide o sesiune PoS. Încercați să deschideți o "
+"sesiune cu un alt utilizator."
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/pos_session.py:0
+#, python-format
+msgid ""
 "You don't have the access rights to get the point of sale closing control "
 "data."
 msgstr ""
+"Nu aveți drepturi de acces pentru a obține datele de control la închiderea "
+"punctului de vânzare."
 
 #. module: point_of_sale
 #. odoo-python
@@ -7624,6 +7703,15 @@ msgid ""
 msgstr ""
 "Ați activat opțiunea \"Identificați clientul\" pentru metoda de plată %s, "
 "dar comanda %s nu conține un client."
+
+#. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/js/Screens/TicketScreen/TicketScreen.js:0
+#, python-format
+msgid ""
+"You have selected orderlines from multiple orders. To proceed refund, please"
+" select orderlines from the same order."
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript

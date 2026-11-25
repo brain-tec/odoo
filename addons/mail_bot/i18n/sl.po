@@ -6,14 +6,15 @@
 # Matjaz Mozetic <m.mozetic@matmoz.si>, 2022
 # Martin Trigaux, 2022
 # Tadej Lupšina <tadej@hbs.si>, 2022
+# Aleš Pipan, 2025
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:02+0000\n"
+"POT-Creation-Date: 2025-02-10 08:27+0000\n"
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Tadej Lupšina <tadej@hbs.si>, 2022\n"
+"Last-Translator: Aleš Pipan, 2025\n"
 "Language-Team: Slovenian (https://app.transifex.com/odoo/teams/41243/sl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,12 +23,15 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);\n"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
 "Aaaaaw that's really cute but, you know, bots don't work that way. You're "
 "too human for me! Let's keep it professional ❤️"
 msgstr ""
+"Aaaaa, to je res luštno, ampak veš, boti ne delujejo tako. Preveč si "
+"človeška zame! Naj bo profesionalno ❤️"
 
 #. module: mail_bot
 #: model:ir.model.fields.selection,name:mail_bot.selection__res_users__odoobot_state__disabled
@@ -37,7 +41,7 @@ msgstr "Onemogočeno"
 #. module: mail_bot
 #: model:ir.model,name:mail_bot.model_mail_channel
 msgid "Discussion Channel"
-msgstr ""
+msgstr "Kanal za razprave"
 
 #. module: mail_bot
 #: model:ir.model,name:mail_bot.model_mail_thread
@@ -45,6 +49,7 @@ msgid "Email Thread"
 msgstr "Obravnava z elektronsko pošto"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -58,6 +63,7 @@ msgid "HTTP Routing"
 msgstr "HTTP usmerjanje"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/res_users.py:0
 #, python-format
 msgid ""
@@ -67,27 +73,32 @@ msgid ""
 msgstr ""
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "Hmmm..."
 msgstr "Hmmm..."
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
 "I am a simple bot, but if that's a dog, he is the cutest 😊 "
-"<br/>Congratulations, you finished this tour. You can now <b>close this chat"
-" window</b>. Enjoy discovering Odoo."
+"<br/>Congratulations, you finished this tour. You can now <b>close this "
+"conversation</b> or start the tour again with typing <span "
+"class=\"o_odoobot_command\">start the tour</span>. Enjoy discovering Odoo!"
 msgstr ""
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "I'm afraid I don't understand. Sorry!"
-msgstr ""
+msgstr "Žal ne razumem. Oprostite!"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -103,9 +114,10 @@ msgstr "Nedejaven"
 #. module: mail_bot
 #: model:ir.model,name:mail_bot.model_mail_bot
 msgid "Mail Bot"
-msgstr ""
+msgstr "Poštni bot"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -119,6 +131,7 @@ msgid "Not initialized"
 msgstr "Ni inicializirano"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -135,29 +148,30 @@ msgstr "OdooBot status"
 #. module: mail_bot
 #: model:ir.model.fields,field_description:mail_bot.field_res_users__odoobot_failed
 msgid "Odoobot Failed"
-msgstr ""
+msgstr "Odoobot ni uspel"
 
 #. module: mail_bot
 #: model:ir.model.fields.selection,name:mail_bot.selection__res_users__odoobot_state__onboarding_attachement
 msgid "Onboarding attachment"
-msgstr ""
+msgstr "Priloga za uvajanje"
 
 #. module: mail_bot
 #: model:ir.model.fields.selection,name:mail_bot.selection__res_users__odoobot_state__onboarding_command
 msgid "Onboarding command"
-msgstr ""
+msgstr "Uvodni ukaz"
 
 #. module: mail_bot
 #: model:ir.model.fields.selection,name:mail_bot.selection__res_users__odoobot_state__onboarding_emoji
 msgid "Onboarding emoji"
-msgstr ""
+msgstr "Emoji za uvajanje"
 
 #. module: mail_bot
 #: model:ir.model.fields.selection,name:mail_bot.selection__res_users__odoobot_state__onboarding_ping
 msgid "Onboarding ping"
-msgstr ""
+msgstr "Ping za uvajanje"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -167,6 +181,7 @@ msgid ""
 msgstr ""
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -175,12 +190,14 @@ msgid ""
 msgstr ""
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "That's not nice! I'm a bot but I have feelings... 💔"
-msgstr ""
+msgstr "To ni lepo! Sem bot, ampak imam čustva ... 💔"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -189,12 +206,14 @@ msgid ""
 msgstr ""
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "To start, try to send me an emoji :)"
-msgstr ""
+msgstr "Za začetek mi poskusi poslati emoji :)"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -211,6 +230,7 @@ msgid "User"
 msgstr "Uporabnik"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -220,6 +240,7 @@ msgid ""
 msgstr ""
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -228,30 +249,35 @@ msgid ""
 msgstr ""
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "fuck"
-msgstr ""
+msgstr "J....m ti"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "help"
 msgstr "pomoč"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "i love you"
-msgstr ""
+msgstr "ljubim te"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "love"
-msgstr ""
+msgstr "ljubezen"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "start the tour"

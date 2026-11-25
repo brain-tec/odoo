@@ -44,12 +44,6 @@ export class VideoSelector extends Component {
                 urlParameter: 'fs=0',
                 isHidden: () => this.state.options.filter(option => option.id === 'hide_controls')[0].value,
             },
-            hide_yt_logo: {
-                label: this.env._t("Hide Youtube logo"),
-                platforms: [this.PLATFORMS.youtube],
-                urlParameter: 'modestbranding=1',
-                isHidden: () => this.state.options.filter(option => option.id === 'hide_controls')[0].value,
-            },
             hide_dm_logo: {
                 label: this.env._t("Hide Dailymotion logo"),
                 platforms: [this.PLATFORMS.dailymotion],
@@ -89,12 +83,16 @@ export class VideoSelector extends Component {
 
         onMounted(async () => {
             await Promise.all(this.props.vimeoPreviewIds.map(async (videoId) => {
-                const { thumbnail_url: thumbnailSrc } = await this.http.get(`https://vimeo.com/api/oembed.json?url=http%3A//vimeo.com/${encodeURIComponent(videoId)}`);
-                this.state.vimeoPreviews.push({
-                    id: videoId,
-                    thumbnailSrc,
-                    src: `https://player.vimeo.com/video/${encodeURIComponent(videoId)}`
-                });
+                try {
+                    const { thumbnail_url: thumbnailSrc } = await this.http.get(`https://vimeo.com/api/oembed.json?url=http%3A//vimeo.com/${encodeURIComponent(videoId)}`);
+                    this.state.vimeoPreviews.push({
+                        id: videoId,
+                        thumbnailSrc,
+                        src: `https://player.vimeo.com/video/${encodeURIComponent(videoId)}`
+                    });
+                } catch (err) {
+                    console.warn(`Could not get video #${videoId} from vimeo: ${err}`);
+                }
             }));
         });
 

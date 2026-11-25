@@ -7,15 +7,15 @@
 # Trinh Tran Thi Phuong <trinhttp@trobz.com>, 2022
 # Vo Thanh Thuy, 2022
 # Martin Trigaux, 2022
-# Thi Huong Nguyen, 2024
+# Thi Huong Nguyen, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-23 08:23+0000\n"
+"POT-Creation-Date: 2025-02-10 08:27+0000\n"
 "PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: Thi Huong Nguyen, 2024\n"
+"Last-Translator: Thi Huong Nguyen, 2025\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -204,7 +204,7 @@ msgid ""
 "                                            <span class=\"text-muted\">Share a quiz to your attendees once a track is over</span>"
 msgstr ""
 "<br/>\n"
-"                                            <span class=\"text-muted\">Chia sẻ phần đố vui với người tham dự khi bài phát biểu kết thúc</span>"
+"                                            <span class=\"text-muted\">Chia sẻ phần quiz với người tham dự khi bài phát biểu kết thúc</span>"
 
 #. module: event
 #: model:mail.template,body_html:event.event_registration_mail_template_badge
@@ -798,7 +798,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:event.field_event_event__message_needaction
 #: model:ir.model.fields,field_description:event.field_event_registration__message_needaction
 msgid "Action Needed"
-msgstr "Hành động cần thiết"
+msgstr "Tác vụ cần thiết"
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event__active
@@ -965,7 +965,7 @@ msgstr "Số lượng tập tin đính kèm"
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.res_config_settings_view_form
 msgid "Attendance"
-msgstr "Chuyên cần"
+msgstr "Chấm công"
 
 #. module: event
 #: model:ir.model.fields.selection,name:event.selection__event_registration__state__done
@@ -1404,7 +1404,12 @@ msgstr "Tên hiển thị"
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.res_config_settings_view_form
 msgid "Display Sponsors and Exhibitors on your event pages"
-msgstr "Trưng bày Nhà tài trợ và Đơn vị triển lãm trong trang sự kiện"
+msgstr "Hiển thị Nhà tài trợ và Đơn vị triển lãm trong trang sự kiện"
+
+#. module: event
+#: model:ir.model.fields,field_description:event.field_event_event__date_tz
+msgid "Display Timezone"
+msgstr "Hiển thị múi giờ"
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_mail__sequence
@@ -1676,8 +1681,8 @@ msgid ""
 "Event stages are used to track the progress of an Event from its origin "
 "until its conclusion."
 msgstr ""
-"Các giai đoạn của sự kiện được sử dụng để theo dõi tiến trình của một sự "
-"kiện từ khi bắt đầu cho đến khi kết thúc."
+"Các giai đoạn của sự kiện được sử dụng để theo dõi tiến độ của một sự kiện "
+"từ khi bắt đầu cho đến khi kết thúc."
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.event_event_ticket_form_view
@@ -1693,7 +1698,7 @@ msgstr "Sự kiện: Trình lập lịch biểu"
 #. module: event
 #: model:mail.template,name:event.event_registration_mail_template_badge
 msgid "Event: Registration Badge"
-msgstr "Sự kiện: Huy hiệu đăng ký"
+msgstr "Sự kiện: Thẻ đăng ký"
 
 #. module: event
 #: model:mail.template,name:event.event_subscription
@@ -1867,7 +1872,7 @@ msgstr ""
 #. module: event
 #: model:event.event.ticket,name:event.event_0_ticket_0
 msgid "Free"
-msgstr "Rảnh"
+msgstr "Miễn phí"
 
 #. module: event
 #: model:event.event.ticket,description:event.event_0_ticket_0
@@ -1886,7 +1891,7 @@ msgid ""
 "From this dashboard you can report, analyze and detect trends regarding your"
 " event registrations."
 msgstr ""
-"Từ trang tổng quan này, bạn có thể báo cáo, phân tích, phát hiện xu hướng "
+"Từ bảng điều khiển này, bạn có thể báo cáo, phân tích, phát hiện xu hướng "
 "của đăng ký sự kiện. "
 
 #. module: event
@@ -2112,6 +2117,13 @@ msgstr "Thông tin vé quan trọng"
 #, python-format
 msgid "In Progress"
 msgstr "Đang thực hiện"
+
+#. module: event
+#: model:ir.model.fields,help:event.field_event_event__date_tz
+msgid ""
+"Indicates the timezone in which the event dates/times will be displayed on "
+"the website."
+msgstr "Chỉ ra múi giờ mà ngày/giờ sự kiện sẽ được hiển thị trên trang web."
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_mail__interval_nbr
@@ -2428,7 +2440,7 @@ msgstr "Âm nhạc"
 #: model:ir.model.fields,field_description:event.field_event_event__my_activity_date_deadline
 #: model:ir.model.fields,field_description:event.field_event_registration__my_activity_date_deadline
 msgid "My Activity Deadline"
-msgstr "Hạn chót hoạt động"
+msgstr "Thời hạn hoạt động"
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.view_event_search
@@ -2458,7 +2470,7 @@ msgstr "Sự kiện lịch hoạt động tiếp theo"
 #: model:ir.model.fields,field_description:event.field_event_event__activity_date_deadline
 #: model:ir.model.fields,field_description:event.field_event_registration__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Hạn chót cho hành động kế tiếp"
+msgstr "Thời hạn cho hành động kế tiếp"
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event__activity_summary
@@ -2522,7 +2534,7 @@ msgstr "Now that your event is ready, click here to move it to another stage."
 #: model:ir.model.fields,field_description:event.field_event_event__message_needaction_counter
 #: model:ir.model.fields,field_description:event.field_event_registration__message_needaction_counter
 msgid "Number of Actions"
-msgstr "Số lượng hành động"
+msgstr "Số lượng tác vụ"
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event__seats_used
@@ -2695,7 +2707,7 @@ msgstr "Vui lòng tới sớm <b>ít nhất</b> 30 phút trước khi sự kiệ
 #. module: event
 #: model_terms:event.event,description:event.event_2
 msgid "Point of Sale (POS), Introduction to report customization."
-msgstr "Điểm bán hàng (PoS), Giới thiệu về tuỳ biến báo cáo."
+msgstr "POS (PoS), Giới thiệu về tuỳ biến báo cáo."
 
 #. module: event
 #: model_terms:event.event,description:event.event_0
@@ -2851,7 +2863,7 @@ msgstr "Báo cáo"
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event_ticket__seats_reserved
 msgid "Reserved Seats"
-msgstr "Số Chỗ đã Xí"
+msgstr "Chỗ đã đặt trước"
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event__user_id
@@ -3346,7 +3358,6 @@ msgid "Tickets can be printed or scanned directly from your phone."
 msgstr "Có thể in vé hoặc quét trực tiếp từ điện thoại."
 
 #. module: event
-#: model:ir.model.fields,field_description:event.field_event_event__date_tz
 #: model:ir.model.fields,field_description:event.field_event_type__default_timezone
 msgid "Timezone"
 msgstr "Múi giờ"
@@ -3559,6 +3570,16 @@ msgstr "Tuần"
 #: model_terms:event.event,description:event.event_0
 msgid "What's new?"
 msgstr "Có gì mới?"
+
+#. module: event
+#: model:ir.model.fields,help:event.field_event_event__date_begin
+#: model:ir.model.fields,help:event.field_event_registration__event_begin_date
+msgid ""
+"When the event is scheduled to take place (expressed in your local timezone "
+"on the form view)."
+msgstr ""
+"Thời gian sự kiện diễn ra theo lịch trình (được thể hiện theo múi giờ địa "
+"phương của bạn trên chế độ xem biểu mẫu)."
 
 #. module: event
 #: model:ir.model.fields,help:event.field_event_event__is_ongoing

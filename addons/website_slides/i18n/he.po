@@ -11,26 +11,27 @@
 # Netta Waizer, 2022
 # Amit Spilman <amit@laylinetech.com>, 2022
 # Fishfur A Banter <fishfurbanter@gmail.com>, 2022
-# hed shefer <hed@laylinetech.com>, 2022
+# Hed Shefer <hed@laylinetech.com>, 2022
 # Lilach Gilliam <lilach@apprcase.com>, 2022
 # ExcaliberX <excaliberx@gmail.com>, 2022
 # Yihya Hugirat <hugirat@gmail.com>, 2022
 # Lilach Gilliam <lilach.gilliam@gmail.com>, 2022
 # Martin Trigaux, 2022
-# ZVI BLONDER <ZVIBLONDER@gmail.com>, 2022
 # Roy Sayag, 2022
 # NoaFarkash, 2022
-# Ha Ketem <haketem@gmail.com>, 2022
-# yael terner, 2023
 # Orel Nahmany, 2024
+# Ha Ketem <haketem@gmail.com>, 2024
+# yael terner, 2024
+# ZVI BLONDER <ZVIBLONDER@gmail.com>, 2025
+# or balmas, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"POT-Creation-Date: 2025-05-22 18:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:57+0000\n"
-"Last-Translator: Orel Nahmany, 2024\n"
+"Last-Translator: or balmas, 2025\n"
 "Language-Team: Hebrew (https://app.transifex.com/odoo/teams/41243/he/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -61,7 +62,7 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_tree_report
 msgid "# Questions"
-msgstr ""
+msgstr "שאלות"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_partner_view_tree
@@ -76,7 +77,7 @@ msgstr ""
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__total_views
 msgid "# Total Views"
-msgstr ""
+msgstr "סה\"כ צפיות"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_embed__count_views
@@ -307,13 +308,13 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.lesson_card
 msgid "<i class=\"fa fa-check me-1\"/>Completed"
-msgstr ""
+msgstr "<i class=\"fa fa-check me-1\"/>הושלם"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
 msgid "<i class=\"fa fa-check\"/> Completed"
-msgstr ""
+msgstr "<i class=\"fa fa-check\"/> הושלם"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
@@ -369,7 +370,7 @@ msgstr "<i class=\"fa fa-envelope\"/>שליחת מייל"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
 msgid "<i class=\"fa fa-eraser me-1\"/>Clear filters"
-msgstr ""
+msgstr "<i class=\"fa fa-eraser me-1\"/>נקה מסננים"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_all
@@ -446,12 +447,12 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_pages_kanban_view
 msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_home
 msgid "<i class=\"fa fa-graduation-cap me-1\"/>All courses"
-msgstr ""
+msgstr "<i class=\"fa fa-graduation-cap me-1\"/>כל הקורסים"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
@@ -542,6 +543,8 @@ msgid ""
 "<i class=\"fa fa-tag me-2 text-muted\"/>\n"
 "                      My Courses"
 msgstr ""
+"<i class=\"fa fa-tag me-2 text-muted\"/>\n"
+"                      הקורסים שלי"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
@@ -557,6 +560,8 @@ msgid ""
 "<small><span class=\"badge rounded-pill text-bg-success fw-normal\"><i "
 "class=\"fa fa-check\"/> Completed</span></small>"
 msgstr ""
+"<small><span class=\"badge rounded-pill text-bg-success fw-normal\"><i "
+"class=\"fa fa-check\"/> הושלם</span></small>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_sample
@@ -572,6 +577,8 @@ msgid ""
 "<span class=\"badge rounded-pill text-bg-success pull-right py-1 px-2\"><i "
 "class=\"fa fa-check\"/> Completed</span>"
 msgstr ""
+"<span class=\"badge rounded-pill text-bg-success pull-right py-1 px-2\"><i "
+"class=\"fa fa-check\"/> הושלם</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_sample
@@ -627,7 +634,7 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slides_home_user_profile_small
 msgid "<span class=\"fw-bold text-muted me-2\">Current rank:</span>"
-msgstr ""
+msgstr "<span class=\"fw-bold text-muted me-2\">דרגה נוכחית:</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_main
@@ -731,10 +738,10 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
 msgid ""
-"<span id=\"zoomout\" class=\"d-none d-sm-inline ms-2 me-2\" title=\"Zoom out\" aria-label=\"Zoom out\" role=\"button\">\n"
+"<span id=\"zoomout\" class=\"d-inline ms-2 me-2\" title=\"Zoom out\" aria-label=\"Zoom out\" role=\"button\">\n"
 "                                            <i class=\"fa fa-search-minus\"/>\n"
 "                                        </span>\n"
-"                                        <span id=\"zoomin\" class=\"d-none d-sm-inline\" title=\"Zoom in\" aria-label=\"Zoom in\" role=\"button\">\n"
+"                                        <span id=\"zoomin\" class=\"d-inline\" title=\"Zoom in\" aria-label=\"Zoom in\" role=\"button\">\n"
 "                                            <i class=\"fa fa-search-plus\"/>\n"
 "                                        </span>"
 msgstr ""
@@ -1145,7 +1152,7 @@ msgstr "כל מה שאתה צריך לדעת על יצירת רהיטים."
 msgid ""
 "Allow Attendees to like and comment your content and to submit reviews on "
 "your course."
-msgstr ""
+msgstr "אפשר למשתתפים לאהוב ולהגיב לתוכן שלך ולהגיש ביקורות על הקורס שלך."
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__slide_resource_downloadable
@@ -1165,7 +1172,7 @@ msgstr "אפשר דירוג"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
 msgid "Allow Reviews"
-msgstr ""
+msgstr "אפשר ביקורות"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__allow_comment
@@ -2147,7 +2154,7 @@ msgstr "קורסים"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.snippet_options
 msgid "Courses Page"
-msgstr ""
+msgstr "דף קורסים"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__cover_properties
@@ -2706,6 +2713,11 @@ msgstr "שם קובץ"
 #, python-format
 msgid "File is too big. File size cannot exceed 25MB"
 msgstr "הקובץ גדול מדי. גודל הקובץ לא יכול לעלות על 25MB"
+
+#. module: website_slides
+#: model:ir.model,name:website_slides.model_ir_binary
+msgid "File streaming helper model for controllers"
+msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
@@ -3965,7 +3977,7 @@ msgstr "עדיין לא נוצר קורס."
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
 msgid "No Notification"
-msgstr ""
+msgstr "אין התראות"
 
 #. module: website_slides
 #: model_terms:ir.actions.act_window,help:website_slides.slide_question_action_report
@@ -4030,7 +4042,7 @@ msgstr "אף אחד"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_pages_kanban_view
 msgid "Not Published"
-msgstr ""
+msgstr "לא פורסם"
 
 #. module: website_slides
 #. odoo-python
@@ -4105,7 +4117,7 @@ msgstr "מספר השגיאות"
 #: model:ir.model.fields,help:website_slides.field_slide_channel__message_needaction_counter
 #: model:ir.model.fields,help:website_slides.field_slide_slide__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr ""
+msgstr "מספר הודעות הדורשות פעולה"
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__message_has_error_counter
@@ -4169,14 +4181,15 @@ msgid "Once you're done, don't forget to <b>Publish</b> your course."
 msgstr "כשסיימת, לא לשכוח <b>לפרסם</b> את הקורס."
 
 #. module: website_slides
-#: model:ir.model.fields.selection,name:website_slides.selection__slide_channel__visibility__public
-msgid "Open To All"
-msgstr ""
-
-#. module: website_slides
+#. odoo-python
 #: code:addons/website_slides/controllers/mail.py:0
 #, python-format
 msgid "Only a single review can be posted per course."
+msgstr ""
+
+#. module: website_slides
+#: model:ir.model.fields.selection,name:website_slides.selection__slide_channel__visibility__public
+msgid "Open To All"
 msgstr ""
 
 #. module: website_slides
@@ -5161,7 +5174,7 @@ msgstr "מיין לפי"
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__source_type
 msgid "Source Type"
-msgstr ""
+msgstr "סוג מקור "
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
@@ -5609,7 +5622,7 @@ msgstr "סה\"כ"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_tree_report
 msgid "Total Attendees"
-msgstr ""
+msgstr "סה\"כ משתתפים"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_tree_report
@@ -5796,6 +5809,11 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:website_slides.slide_channel_tag_group_action
 msgid "Use Course Groups to classify and organize your Courses."
 msgstr ""
+
+#. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_invite_view_form
+msgid "Use template"
+msgstr "השתמש בתבנית"
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__tag_ids

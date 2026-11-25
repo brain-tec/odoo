@@ -923,9 +923,9 @@ class MrpProduction(models.Model):
             action['domain'] = [('id', 'in', self.picking_ids.ids)]
         elif self.picking_ids:
             action['res_id'] = self.picking_ids.id
-            action['views'] = [(self.env.ref('stock.view_picking_form').id, 'form')]
-            if 'views' in action:
-                action['views'] += [(state, view) for state, view in action['views'] if view != 'form']
+            picking_form = self.env.ref('stock.view_picking_form', False)
+            picking_form_view = [(picking_form and picking_form.id or False, 'form')]
+            action['views'] = picking_form_view + [(state, view) for state, view in action.get('views', []) if view != 'form']
         action['context'] = dict(self._context, default_origin=self.name)
         return action
 
@@ -1195,7 +1195,9 @@ class MrpProduction(models.Model):
         self.ensure_one()
         procurement_moves = self.procurement_group_id.stock_move_ids
         child_moves = procurement_moves.move_orig_ids
-        return (procurement_moves | child_moves).created_production_id.procurement_group_id.mrp_production_ids.filtered(lambda p: p.origin != self.origin) - self
+        return ((procurement_moves | child_moves).created_production_id.procurement_group_id.mrp_production_ids\
+                | child_moves.production_id)\
+                .filtered(lambda p: p.origin != self.origin) - self
 
     def _get_sources(self):
         self.ensure_one()
@@ -1588,7 +1590,7 @@ class MrpProduction(models.Model):
                 if workorder.state not in ('done', 'cancel'):
                     workorder.duration_expected = workorder._get_duration_expected()
                 if workorder.duration == 0.0:
-                    workorder.duration = workorder.duration_expected * order.qty_produced/order.product_qty
+                    workorder.duration = workorder.duration_expected
                     workorder.duration_unit = round(workorder.duration / max(workorder.qty_produced, 1), 2)
             order._cal_price(moves_to_do_by_order[order.id])
         moves_to_finish = self.move_finished_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
@@ -1843,7 +1845,8 @@ class MrpProduction(models.Model):
             # Adapt quantities produced
             for workorder in production.workorder_ids:
                 initial_workorder_remaining_qty.append(max(initial_qty - workorder.qty_reported_from_previous_wo - workorder.qty_produced, 0))
-                workorder.qty_produced = min(workorder.qty_produced, workorder.qty_production)
+                if workorder.production_id.id not in (self.env.context.get('mo_ids_to_backorder') or []):
+                    workorder.qty_produced = min(workorder.qty_produced, workorder.qty_production)
             workorders_len = len(production.workorder_ids)
             for index, workorder in enumerate(bo.workorder_ids):
                 remaining_qty = initial_workorder_remaining_qty[index % workorders_len]

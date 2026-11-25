@@ -1,9 +1,15 @@
 import ast
-import os
+import ctypes
 import logging
-from odoo import MIN_PY_VERSION
+import os
+import string
+from email._policybase import _PolicyBase
 from shutil import copyfileobj
 from types import CodeType
+
+from odoo import MIN_PY_VERSION
+
+from .safe_eval import _UNSAFE_ATTRIBUTES
 
 _logger = logging.getLogger(__name__)
 
@@ -14,11 +20,17 @@ except ImportError:
     _logger.warning("num2words is not available, Arabic number to words conversion will not work")
     num2words = None
 
-from werkzeug.datastructures import FileStorage
+from urllib3 import PoolManager
+from werkzeug.datastructures import FileStorage, MultiDict
 from werkzeug.routing import Rule
 from werkzeug.wrappers import Request, Response
 
 from .json import scriptsafe
+
+try:
+    from stdnum import util
+except ImportError:
+    util = None
 
 try:
     from xlrd import xlsx
@@ -40,6 +52,14 @@ else:
     xlsx.Element_has_iter = True
 
 FileStorage.save = lambda self, dst, buffer_size=1<<20: copyfileobj(self.stream, dst, buffer_size)
+
+
+def _multidict_deepcopy(self, memo=None):
+    return orig_deepcopy(self)
+
+
+orig_deepcopy = MultiDict.deepcopy
+MultiDict.deepcopy = _multidict_deepcopy
 
 Request.json_module = Response.json_module = scriptsafe
 
@@ -79,3 +99,195 @@ if MIN_PY_VERSION >= (3, 12):
 
 if num2words:
     num2words.CONVERTER_CLASSES["ar"] = Num2Word_AR_Fixed()
+
+_soap_clients = {}
+
+
+def new_get_soap_client(wsdlurl, timeout=30):
+    # stdnum library does not set the timeout for the zeep Transport class correctly
+    # (timeout is to fetch the wsdl and operation_timeout is to perform the call),
+    # requiring us to monkey patch the get_soap_client function.
+    # Can be removed when https://github.com/arthurdejong/python-stdnum/issues/444 is
+    # resolved and the version of the dependency is updated.
+    # The code is a copy of the original apart for the line related to the Transport class.
+    # This was done to keep the code as similar to the original and to reduce the possibility
+    # of introducing import errors, even though some imports are not in the requirements.
+    # See https://github.com/odoo/odoo/pull/173359 for a more thorough explanation.
+    if (wsdlurl, timeout) not in _soap_clients:
+        try:
+            from zeep.transports import Transport
+            transport = Transport(operation_timeout=timeout, timeout=timeout)  # operational_timeout added here
+            from zeep import CachingClient
+            client = CachingClient(wsdlurl, transport=transport).service
+        except ImportError:
+            # fall back to non-caching zeep client
+            try:
+                from zeep import Client
+                client = Client(wsdlurl, transport=transport).service
+            except ImportError:
+                # other implementations require passing the proxy config
+                try:
+                    from urllib import getproxies
+                except ImportError:
+                    from urllib.request import getproxies
+                # fall back to suds
+                try:
+                    from suds.client import Client
+                    client = Client(
+                        wsdlurl, proxy=getproxies(), timeout=timeout).service
+                except ImportError:
+                    # use pysimplesoap as last resort
+                    try:
+                        from pysimplesoap.client import SoapClient
+                        client = SoapClient(
+                            wsdl=wsdlurl, proxy=getproxies(), timeout=timeout)
+                    except ImportError:
+                        raise ImportError(
+                            'No SOAP library (such as zeep) found')
+        _soap_clients[(wsdlurl, timeout)] = client
+    return _soap_clients[(wsdlurl, timeout)]
+
+
+if util:
+    util.get_soap_client = new_get_soap_client
+
+
+def pool_init(self, *args, **kwargs):
+    orig_pool_init(self, *args, **kwargs)
+    self.pool_classes_by_scheme = {**self.pool_classes_by_scheme}
+
+
+orig_pool_init = PoolManager.__init__
+PoolManager.__init__ = pool_init
+
+
+def _is_safe_expr(expr):
+    return '__' not in expr and not any(att_name in expr for att_name in _UNSAFE_ATTRIBUTES)
+
+
+origin_formatter_get_field = string.Formatter.get_field
+
+
+def get_field(self, field_name, args, kwargs):
+    # Monkey-patch `get_field` to raise in case of access to a forbidden name
+    # Ref: https://github.com/python/cpython/blob/812245ecce2d8344c3748228047bab456816180a/Lib/string.py#L267
+    if not _is_safe_expr(field_name):
+        raise NameError('Access to forbidden name %r' % (field_name))
+    return origin_formatter_get_field(self, field_name, args, kwargs)
+
+
+string.Formatter.get_field = get_field
+
+
+#
+# Monkey-Patch C types
+#
+
+
+class MappingProxy(ctypes.Structure):
+    # https://github.com/python/cpython/blob/0691bd860d3de0c1feb1566d99315a0a582c62a0/Objects/descrobject.c#L1031-L1034
+    _fields_ = [
+        ('_', 2 * ctypes.c_void_p),
+        ('mapping', ctypes.py_object)
+    ]
+
+
+def patch_c_type(cls, attr, value):
+    # obtain the address of the origin dict behind the proxymapping and cast into our custom MappingProxy struct
+    # Each call to cls.__dict__ returns a new temporary mappingproxy object.
+    # If we don't keep a reference to it, it may be garbage-collected immediately after use (e.g., after calling id()).
+    # To ensure the mapping stays alive and valid when accessed (e.g., by MappingProxy), we store it in a variable first.
+    cls_dict_proxy = cls.__dict__
+    cls_dict = MappingProxy.from_address(id(cls_dict_proxy)).mapping
+
+    assert not attr.startswith("__") and not attr.endswith("__")
+
+    # replace the method in the __dict__ of the type
+    origin = cls_dict.get(attr)
+    if origin:
+        value.__name__ = origin.__name__
+        value.__qualname__ = origin.__qualname__
+
+    # apply patch function
+    cls_dict[attr] = value
+
+    # clear internal caches: https://docs.python.org/3/c-api/type.html#c.PyType_Modified
+    ctypes.pythonapi.PyType_Modified(ctypes.py_object(cls))
+
+
+# AttributeError.name / .obj were added in Python 3.10
+# https://github.com/python/cpython/commit/37494b441aced0362d7edd2956ab3ea7801e60c8
+if hasattr(AttributeError, 'obj'):
+    origin_obj_member = AttributeError.obj
+
+    class EmptyMember:
+        def __get__(self, obj, owner=None):
+            if obj is None:
+                return origin_obj_member
+            return ""
+
+        # keep original setter/deleter
+        # PyCharm's pydev debugger relies on normal AttributeError handling in
+        # its Cython frame-eval code, so overriding __init__ / write behavior
+        # can recurse and crash the debugger with stack overflow
+        # https://github.com/JetBrains/intellij-community/blob/7bc44574a8fe3a1e44425683188bd842c805fe1e/python/helpers/pydev/_pydevd_frame_eval/pydevd_frame_evaluator_39_310.pyx#L261-L266
+        __set__ = origin_obj_member.__set__
+        __delete__ = origin_obj_member.__delete__
+
+    patch_c_type(AttributeError, "obj", EmptyMember())
+
+
+def _mkpatch_str_format():
+    # keeping all refs in the closure
+    formatter = string.Formatter()  # thread-safe parsing, can be shared
+    origin_format = str.format
+    origin_format_map = str.format_map
+
+    def _safe_format_fields(s):
+        if not _is_safe_expr(s):
+            # `string.Formatter.parse` returns an iterable that contains tuples of the form:
+            # (literal_text, field_name, format_spec, conversion)
+            # https://github.com/python/cpython/blob/812245ecce2d8344c3748228047bab456816180a/Lib/string.py#L251-L259
+            for _lit, expr, format_spec, _conv in formatter.parse(s):
+                if expr and not _is_safe_expr(expr):
+                    return False
+                if format_spec and not _is_safe_expr(format_spec):
+                    # PEP 3101 says a format expression can have 2 levels
+                    # "{0:{1}}".format('abc', 's')            # works
+                    # "{0:{1:{2}}}".format('abc', 's', '')    # fails
+                    # https://github.com/python/cpython/blob/812245ecce2d8344c3748228047bab456816180a/Objects/stringlib/unicode_format.h#L944-L948
+                    # https://github.com/python/cpython/blob/812245ecce2d8344c3748228047bab456816180a/Objects/stringlib/unicode_format.h#L914-L919
+                    return False
+        return True
+
+    def format(*args, **kwargs):
+        if not _safe_format_fields(args[0]):
+            return args[0]
+        return origin_format(*args, **kwargs)
+
+    def format_map(*args, **kwargs):
+        if not _safe_format_fields(args[0]):
+            return args[0]
+        return origin_format_map(*args, **kwargs)
+
+    patch_c_type(str, "format", format)
+    patch_c_type(str, "format_map", format_map)
+
+
+_mkpatch_str_format()
+
+
+def policy_clone(self, **kwargs):
+    for arg in kwargs:
+        if arg.startswith("_") or "__" in arg or arg == "clone":
+            raise AttributeError(f"{self.__class__.__name__!r} object has no attribute {arg!r}")
+    return orig_policy_clone(self, **kwargs)
+
+
+def policy_add(self, other):
+    return policy_clone(self, **other.__dict__)
+
+
+orig_policy_clone = _PolicyBase.clone
+_PolicyBase.clone = policy_clone
+_PolicyBase.__add__ = policy_add

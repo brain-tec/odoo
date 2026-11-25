@@ -12,14 +12,17 @@
 # Dorin Hongu <dhongu@gmail.com>, 2024
 # Corina Calin, 2024
 # Flavia0320, 2024
+# Alin Miclea, 2024
+# Wil Odoo, 2025
+# Larisa_nexterp, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"POT-Creation-Date: 2025-06-13 18:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:55+0000\n"
-"Last-Translator: Flavia0320, 2024\n"
+"Last-Translator: Larisa_nexterp, 2025\n"
 "Language-Team: Romanian (https://app.transifex.com/odoo/teams/41243/ro/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1672,8 +1675,10 @@ msgstr "Calculați costurile de transport"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid "Compute shipping costs and ship with DHL"
-msgstr "Calculați costurile de transport și expediați cu DHL"
+msgid ""
+"Compute shipping costs and ship with DHL<br/>\n"
+"                                        <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -1682,8 +1687,10 @@ msgstr "Calculați costurile de transport și expediați cu Easypost"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid "Compute shipping costs and ship with FedEx"
-msgstr "Calculați costurile de transport și expediați cu FedEx"
+msgid ""
+"Compute shipping costs and ship with FedEx<br/>\n"
+"                                        <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -1692,13 +1699,17 @@ msgstr "Calculați costurile de transport și expediați cu Sendcloud"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid "Compute shipping costs and ship with UPS"
-msgstr "Calculați costurile de transport și expediați cu UPS"
+msgid ""
+"Compute shipping costs and ship with UPS<br/>\n"
+"                                        <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid "Compute shipping costs and ship with USPS"
-msgstr "Calculați costurile de transport și expediați cu USPS"
+msgid ""
+"Compute shipping costs and ship with USPS<br/>\n"
+"                                        <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -2146,6 +2157,11 @@ msgstr "Locații client"
 #: model_terms:ir.ui.view,arch_db:stock.view_location_form
 msgid "Cyclic Counting"
 msgstr "Numărare ciclică"
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid "DHL Connector"
+msgstr "Conector DHL"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_dhl
@@ -2971,6 +2987,7 @@ msgstr "Februarie"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_fedex
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "FedEx Connector"
 msgstr "Conector FedEx"
 
@@ -3280,7 +3297,7 @@ msgstr "Oferă secvența acestei linii la afișarea depozitelor."
 #: code:addons/stock/models/stock_rule.py:0
 #, python-format
 msgid "Global Visibility Days"
-msgstr ""
+msgstr "Zile de vizibilitate globală"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
@@ -3859,6 +3876,8 @@ msgstr ""
 msgid ""
 "Invalid rule's configuration, the following rule causes an endless loop: %s"
 msgstr ""
+"Configurația regulii este invalidă, următoare  regulă determină o buclă "
+"nesfârșită: %s"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_quant__inventory_quantity_auto_apply
@@ -4103,7 +4122,7 @@ msgstr "Zile de livrare JSON"
 #: code:addons/stock/static/src/widgets/json_widget.js:0
 #, python-format
 msgid "Json Popup"
-msgstr ""
+msgstr "Json Popup"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_info__json_replenishment_history
@@ -4529,6 +4548,11 @@ msgstr "Logistică"
 #: model:ir.model.fields.selection,name:stock.selection__barcode_rule__type__lot
 msgid "Lot"
 msgstr "Lot"
+
+#. module: stock
+#: model:ir.model,name:stock.model_report_stock_label_lot_template_view
+msgid "Lot Label Report"
+msgstr "Raport Etichete Lot"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__picking_label_type__label_type__lots
@@ -4961,13 +4985,13 @@ msgstr "Nume"
 #: model:ir.model.fields,field_description:stock.field_product_product__nbr_moves_in
 #: model:ir.model.fields,field_description:stock.field_product_template__nbr_moves_in
 msgid "Nbr Moves In"
-msgstr ""
+msgstr "Nr. Mutări Primite"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_product_product__nbr_moves_out
 #: model:ir.model.fields,field_description:stock.field_product_template__nbr_moves_out
 msgid "Nbr Moves Out"
-msgstr ""
+msgstr "Nr. Mutări Ieșite"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.product_template_search_form_view_stock
@@ -6370,7 +6394,7 @@ msgstr "Trage din"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_stock_rule
 msgid "Pull Rule"
-msgstr ""
+msgstr "Regulă de tragere"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_stock_rule
@@ -6655,6 +6679,9 @@ msgid ""
 "Quants are auto-deleted when appropriate. If you must manually delete them, "
 "please ask a stock manager to do it."
 msgstr ""
+"Pozițiile de stoc sunt șterse automat atunci când este cazul. Dacă trebuie "
+"să le ștergeți manual, vă rugăm să cereți unui administrator de stoc să o "
+"facă."
 
 #. module: stock
 #. odoo-python
@@ -7197,7 +7224,7 @@ msgstr ""
 #: code:addons/stock/models/stock_rule.py:0
 #, python-format
 msgid "Rule %s belongs to %s while the route belongs to %s."
-msgstr ""
+msgstr "Regula %s îi aparține %s în timp ce ruta îi aparține %s."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_rule__rule_message
@@ -8773,6 +8800,10 @@ msgid ""
 "reference values or assign the existing reference sequence to this operation"
 " type."
 msgstr ""
+"Acest prefix al secvenței este deja folosit de un alt tip de operațiune. "
+"Este recomandat să selectați un prefix unic pentru a evita problemele și/sau"
+" valorile de referință repetate sau să atribuiți secvența de referință "
+"existentă acestui tip de operațiune."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_product_product__property_stock_production
@@ -9138,11 +9169,13 @@ msgstr "Tipul activității de excepție din înregistrare."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_ups
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "UPS Connector"
 msgstr "Conector UPS"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_usps
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "USPS Connector"
 msgstr "Conector USPS"
 
@@ -9639,7 +9672,7 @@ msgstr "Greutatea tipului de pachet"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_storage_category__weight_uom_name
 msgid "Weight unit"
-msgstr ""
+msgstr "Unitatea de greutate"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_package_type__weight_uom_name
@@ -9913,6 +9946,15 @@ msgstr "Nu puteți schimba tipul unui produs care a fost deja utilizat."
 
 #. module: stock
 #. odoo-python
+#: code:addons/stock/models/stock_orderpoint.py:0
+#, python-format
+msgid ""
+"You can not create a snoozed orderpoint that is not manually triggered."
+msgstr ""
+"Nu puteți crea un punct de comandă amânat care nu este declanșat manual."
+
+#. module: stock
+#. odoo-python
 #: code:addons/stock/models/stock_move_line.py:0
 #, python-format
 msgid ""
@@ -9949,6 +9991,18 @@ msgstr "Puteți introduce doar cantități pozitive."
 #, python-format
 msgid "You can only process 1.0 %s of products with unique serial number."
 msgstr "Puteți prelucra doar 1.0%s din produse cu număr de serie unic."
+
+#. module: stock
+#. odoo-python
+#: code:addons/stock/models/stock_orderpoint.py:0
+#, python-format
+msgid ""
+"You can only snooze manual orderpoints. You should rather archive 'auto-"
+"trigger' orderpoints if you do not want them to be triggered."
+msgstr ""
+"Puteți amâna doar punctele de comandă manuale. Ar trebui să arhivați "
+"punctele de comandă „declanșate automat” dacă nu doriți ca acestea să fie "
+"declanșate."
 
 #. module: stock
 #. odoo-python
@@ -10084,6 +10138,8 @@ msgid ""
 "You cannot pack products into the same package when they are from different "
 "transfers with different operation types."
 msgstr ""
+"Nu puteți împacheta produse în același pachet când acestea sunt din "
+"transferuri diferite cu diferite tipuri de operațiuni."
 
 #. module: stock
 #. odoo-python
@@ -10208,6 +10264,8 @@ msgid ""
 "You have product(s) in stock that have lot/serial number tracking enabled. \n"
 "Switch off tracking on all the products before switching off this setting."
 msgstr ""
+"Aveți produs(e) în stoc care au activată urmărirea numărului de lot/număr de serie.\n"
+"Dezactivați urmărirea tuturor produselor înainte de a dezactiva această setare."
 
 #. module: stock
 #. odoo-python
@@ -10350,6 +10408,8 @@ msgid ""
 "Your lunch has been delivered.\n"
 "Enjoy your meal!"
 msgstr ""
+"Your lunch has been delivered.\n"
+"Enjoy your meal!"
 
 #. module: stock
 #. odoo-python

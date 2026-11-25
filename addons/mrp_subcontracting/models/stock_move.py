@@ -250,6 +250,8 @@ class StockMove(models.Model):
         view = self.env.ref('mrp_subcontracting.mrp_production_subcontracting_form_view')
         if self.env.user.has_group('base.group_portal'):
             view = self.env.ref('mrp_subcontracting.mrp_production_subcontracting_portal_form_view')
+        context = dict(self._context)
+        context.pop('skip_consumption', False)
         return {
             'name': _('Subcontract'),
             'type': 'ir.actions.act_window',
@@ -259,7 +261,7 @@ class StockMove(models.Model):
             'view_id': view.id,
             'target': 'new',
             'res_id': production.id,
-            'context': self.env.context,
+            'context': context,
         }
 
     def _get_subcontract_bom(self):
@@ -330,10 +332,13 @@ class StockMove(models.Model):
 
         # Cancel productions until reach new_quantity
         for production in (productions - wip_production):
-            if quantity_to_remove >= production.product_qty:
+            if float_compare(quantity_to_remove, production.product_qty, precision_rounding=production.product_uom_id.rounding) >= 0:
                 quantity_to_remove -= production.product_qty
                 production.with_context(skip_activity=True).action_cancel()
             else:
+                if float_is_zero(quantity_to_remove, precision_rounding=production.product_uom_id.rounding):
+                    # No need to do change_prod_qty for no change at all.
+                    break
                 self.env['change.production.qty'].with_context(skip_activity=True).create({
                     'mo_id': production.id,
                     'product_qty': production.product_qty - quantity_to_remove

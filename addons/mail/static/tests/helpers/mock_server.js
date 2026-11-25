@@ -612,6 +612,8 @@ patch(MockServer.prototype, 'mail', {
                 'id': attachment.id,
                 'mimetype': attachment.mimetype,
                 'name': attachment.name,
+                'type': attachment.type,
+                'url': attachment.url,
             };
             res['originThread'] = [['insert', {
                 'id': attachment.res_id,
@@ -2293,7 +2295,7 @@ patch(MockServer.prototype, 'mail', {
             const [relatedGuest] = this.getRecords('mail.guest', [['id', '=', volumeSettingsRecord.guest_id]]);
             const [relatedPartner] = this.getRecords('res.partner', [['id', '=', volumeSettingsRecord.partner_id]]);
             return {
-                guest_id: relatedGuest ? { id: relatedGuest.id, name: relatedGuest.name } : [['clear']],
+                guest_id: relatedGuest ? { id: relatedGuest.id } : [['clear']],
                 id: volumeSettingsRecord.id,
                 partner_id: relatedPartner ? { id: relatedPartner.id, name: relatedPartner.name } : [['clear']],
                 volume: volumeSettingsRecord.volume,

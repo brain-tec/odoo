@@ -11,14 +11,17 @@
 # Maria Muntean, 2024
 # Betty Keresztesi, 2024
 # Simonel Criste <info@erpsystems.solutions>, 2024
+# Corina Calin, 2024
+# Lyall Kindmurr, 2024
+# Larisa_nexterp, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"POT-Creation-Date: 2025-05-22 18:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:54+0000\n"
-"Last-Translator: Simonel Criste <info@erpsystems.solutions>, 2024\n"
+"Last-Translator: Larisa_nexterp, 2025\n"
 "Language-Team: Romanian (https://app.transifex.com/odoo/teams/41243/ro/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -567,7 +570,7 @@ msgstr "<span class=\"o_stat_text\">Sub-sarcini</span>"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.project_milestone_view_form
 msgid "<span class=\"o_stat_text\">Tasks</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">Sarcini</span>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
@@ -1057,8 +1060,6 @@ msgid "Assigned to"
 msgstr "Atribuit lui"
 
 #. module: project
-#. odoo-python
-#: code:addons/project/controllers/portal.py:0
 #: model:ir.model.fields,field_description:project.field_project_task__user_ids
 #: model:ir.model.fields,field_description:project.field_project_task_burndown_chart_report__user_ids
 #: model:ir.model.fields,field_description:project.field_report_project_task_user__user_ids
@@ -1068,7 +1069,6 @@ msgstr "Atribuit lui"
 #: model_terms:ir.ui.view,arch_db:project.project_sharing_project_task_view_tree
 #: model_terms:ir.ui.view,arch_db:project.view_task_project_user_search
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
-#, python-format
 msgid "Assignees"
 msgstr "Alocați"
 
@@ -1267,7 +1267,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project.view_project_kanban
 #, python-format
 msgid "Burndown Chart"
-msgstr ""
+msgstr "Grafic de ardere"
 
 #. module: project
 #: model:project.task.type,legend_done:project.project_stage_1
@@ -3251,7 +3251,7 @@ msgstr "Etapa de referință"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__milestone_count
 msgid "Milestone Count"
-msgstr ""
+msgstr "Numărătoarea etapelor"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__milestone_count_reached
@@ -3273,7 +3273,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project.view_project_kanban
 #, python-format
 msgid "Milestones"
-msgstr ""
+msgstr "Etape importante"
 
 #. module: project
 #. odoo-javascript
@@ -3693,7 +3693,6 @@ msgid "Off Track"
 msgstr ""
 
 #. module: project
-#: model:account.analytic.account,name:project.analytic_office_design
 #: model:project.project,name:project.project_project_1
 msgid "Office Design"
 msgstr ""
@@ -3911,6 +3910,8 @@ msgid ""
 "Plan resource allocation across projects and estimate deadlines more "
 "accurately"
 msgstr ""
+"Planificați alocarea resurselor pe proiecte și estimați termenele limită mai"
+" precis"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
@@ -3958,6 +3959,20 @@ msgstr ""
 #: model:ir.model.fields,field_description:project.field_project_task__access_url
 msgid "Portal Access URL"
 msgstr "Adresă URL Portal"
+
+#. module: project
+#. odoo-python
+#: code:addons/project/models/project.py:0
+#, python-format
+msgid "Portal Parent Task"
+msgstr ""
+
+#. module: project
+#. odoo-python
+#: code:addons/project/models/project.py:0
+#, python-format
+msgid "Portal Sub-tasks"
+msgstr ""
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__portal_user_names
@@ -4106,7 +4121,7 @@ msgstr "Managerul de proiect"
 #. module: project
 #: model:ir.model,name:project.model_project_milestone
 msgid "Project Milestone"
-msgstr ""
+msgstr "Etapa de referință a proiectului"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.project_view_kanban
@@ -4137,7 +4152,7 @@ msgstr ""
 #. module: project
 #: model:ir.model,name:project.model_project_project_stage
 msgid "Project Stage"
-msgstr ""
+msgstr "Etapa proiectului"
 
 #. module: project
 #: model:mail.message.subtype,name:project.mt_project_stage_change
@@ -4508,7 +4523,6 @@ msgid "Related Document Model"
 msgstr "Modelul Documentului Asociat"
 
 #. module: project
-#: model:account.analytic.account,name:project.analytic_renovations
 #: model:project.project,name:project.project_project_3
 msgid "Renovations"
 msgstr ""
@@ -4600,7 +4614,6 @@ msgid "Research"
 msgstr "Cercetare "
 
 #. module: project
-#: model:account.analytic.account,name:project.analytic_research_development
 #: model:project.project,name:project.project_project_2
 msgid "Research & Development"
 msgstr "Cercetare și dezvoltare"
@@ -5190,7 +5203,7 @@ msgstr "Sarcină creată"
 #: model:ir.model.fields,field_description:project.field_project_task__allow_task_dependencies
 #: model:ir.model.fields,field_description:project.field_res_config_settings__group_project_task_dependencies
 msgid "Task Dependencies"
-msgstr ""
+msgstr "Dependențe sarcini"
 
 #. module: project
 #: model:mail.message.subtype,name:project.mt_project_task_dependency_change
@@ -5296,6 +5309,7 @@ msgstr "Sarcină"
 
 #. module: project
 #. odoo-python
+#: code:addons/project/models/project.py:0
 #: code:addons/project/models/project.py:0
 #: model:ir.actions.act_window,name:project.act_project_project_2_project_task_all
 #: model:ir.actions.act_window,name:project.action_view_task
@@ -5482,7 +5496,7 @@ msgstr ""
 #: code:addons/project/models/project.py:0
 #, python-format
 msgid "The search does not support the %s operator or %s value."
-msgstr ""
+msgstr "Căutarea nu suportă operatorul %s sau valoarea %s."
 
 #. module: project
 #. odoo-python
@@ -5648,7 +5662,7 @@ msgstr "Titlu"
 #: code:addons/project/static/src/components/project_right_side_panel/components/project_profitability.xml:0
 #, python-format
 msgid "To Bill"
-msgstr ""
+msgstr "De facturat"
 
 #. module: project
 #: model:project.project.stage,name:project.project_project_stage_0
@@ -5887,7 +5901,7 @@ msgstr "Folosiți subsarcini"
 #. module: project
 #: model:res.groups,name:project.group_project_task_dependencies
 msgid "Use Task Dependencies"
-msgstr ""
+msgstr "Folosește dependențele sarcinii"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__label_tasks
@@ -5904,7 +5918,7 @@ msgstr "Folosiți acest lucru pentru proiectul meu"
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.project_tags_action
 msgid "Use tags to categorize your tasks."
-msgstr ""
+msgstr "Folosiți etichetele pentru a vă clasifica sarcinile."
 
 #. module: project
 #. odoo-javascript
@@ -5919,7 +5933,7 @@ msgstr ""
 #: code:addons/project/static/src/xml/project_task_kanban_examples.xml:0
 #, python-format
 msgid "Use the"
-msgstr ""
+msgstr "Folosește"
 
 #. module: project
 #. odoo-javascript
@@ -5955,12 +5969,12 @@ msgstr "Afișare"
 #: model_terms:ir.ui.view,arch_db:project.project_sharing_project_task_view_form
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
 msgid "View Task"
-msgstr ""
+msgstr "Vezi task"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.project_milestone_view_tree
 msgid "View Tasks"
-msgstr ""
+msgstr "Sarcini"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__privacy_visibility
@@ -6035,13 +6049,13 @@ msgstr "Săptămâni"
 #: model:ir.model.fields,field_description:project.field_project_task__working_days_open
 #: model:ir.model.fields,field_description:project.field_report_project_task_user__working_days_open
 msgid "Working Days to Assign"
-msgstr ""
+msgstr "Zile lucrătoare de atribuit"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__working_days_close
 #: model:ir.model.fields,field_description:project.field_report_project_task_user__working_days_close
 msgid "Working Days to Close"
-msgstr ""
+msgstr "Zile lucrătoare până la închidere"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__working_hours_open
@@ -6075,7 +6089,7 @@ msgstr "Timpul de lucru pentru închidere"
 msgid ""
 "Would you like to unarchive all of the tasks contained in these stages as "
 "well?"
-msgstr ""
+msgstr "Doriți să dezarhivați și toate tichetele conținute în aceste etape?"
 
 #. module: project
 #. odoo-javascript
@@ -6118,7 +6132,7 @@ msgstr ""
 #: code:addons/project/models/project.py:0
 #, python-format
 msgid "You can only set a personal stage on a private task."
-msgstr ""
+msgstr "Puteți seta o etapă personală doar pe sarcini private."
 
 #. module: project
 #. odoo-python
@@ -6161,14 +6175,14 @@ msgstr ""
 #: code:addons/project/models/project.py:0
 #, python-format
 msgid "You cannot read %s fields in task."
-msgstr ""
+msgstr "Nu puteți citi câmpurile %s din task"
 
 #. module: project
 #. odoo-python
 #: code:addons/project/models/project.py:0
 #, python-format
 msgid "You cannot write on %s fields in task."
-msgstr ""
+msgstr "Nu puteți scrie în câmpurile %s din sarcină."
 
 #. module: project
 #. odoo-python
@@ -6300,7 +6314,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project.project_sharing_quick_create_task_form
 #: model_terms:ir.ui.view,arch_db:project.quick_create_task_form
 msgid "e.g. Send Invitations"
-msgstr ""
+msgstr "ex: Trimite invitații"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.project_project_view_form_simplified

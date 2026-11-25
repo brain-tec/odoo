@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import datetime
+import freezegun
 
 from datetime import date, datetime, timedelta
 
 from odoo import fields, Command
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo
+from odoo.exceptions import AccessError
 from odoo.tests import Form, tagged, new_test_user
 from odoo.addons.base.tests.common import SavepointCaseWithUserDemo
 import pytz
@@ -153,6 +155,51 @@ class TestCalendar(SavepointCaseWithUserDemo):
         self.assertEqual(test_event.res_id, test_record.id)
         self.assertEqual(len(test_record.activity_ids), 1)
 
+    def test_activity_event_multiple_meetings(self):
+        # Creating multiple meetings from an activity creates additional activities
+        # ensure meeting activity type exists
+        meeting_act_type = self.env['mail.activity.type'].search([('category', '=', 'meeting')], limit=1)
+        if not meeting_act_type:
+            meeting_act_type = self.env['mail.activity.type'].create({
+                'name': 'Meeting Test',
+                'category': 'meeting',
+            })
+
+        # have a test model inheriting from activities
+        test_record = self.env['res.partner'].create({
+            'name': 'Test',
+        })
+
+        activity_id = self.env['mail.activity'].create({
+            'summary': 'Meeting with partner',
+            'activity_type_id': meeting_act_type.id,
+            'res_model_id': self.env['ir.model']._get_id('res.partner'),
+            'res_id': test_record.id,
+        })
+
+        calendar_action = activity_id.with_context(default_res_model='res.partner', default_res_id=test_record.id).action_create_calendar_event()
+        event_1 = self.env['calendar.event'].with_context(calendar_action['context']).create({
+            'name': 'Meeting 1',
+            'start': datetime(2025, 3, 10, 17),
+            'stop': datetime(2025, 3, 10, 22),
+        })
+
+        self.assertEqual(event_1.activity_ids, activity_id)
+
+        total_activities = self.env['mail.activity'].search_count(domain=[])
+
+        event_2 = self.env['calendar.event'].with_context(calendar_action['context']).create({
+            'name': 'Meeting 2',
+            'start': datetime(2025, 3, 11, 17),
+            'stop': datetime(2025, 3, 11, 22),
+        })
+        self.assertEqual(event_1.activity_ids, activity_id, "Event 1's activity should still be the first activity")
+        self.assertEqual(activity_id.calendar_event_id, event_1, "The first activity's event should still be event 1")
+        self.assertEqual(total_activities + 1, self.env['mail.activity'].search_count(domain=[]), "1 more activity record should have been created (by event 2)")
+        self.assertNotEqual(event_2.activity_ids, activity_id, "Event 2's activity should not be the first activity")
+        self.assertEqual(event_2.activity_ids.activity_type_id, activity_id.activity_type_id, "Event 2's activity should be the same activity type as the first activity")
+        self.assertEqual(test_record.activity_ids, activity_id | event_2.activity_ids, "Resource record should now have both activities")
+
     def test_event_allday(self):
         self.env.user.tz = 'Pacific/Honolulu'
 
@@ -279,13 +326,13 @@ class TestCalendar(SavepointCaseWithUserDemo):
         Check that mail have extra attachement added by the user
         """
 
-        def _test_one_mail_per_attendee(self, partners):
+        def _test_mail_per_attendee(self, partners, target=1):
             # check that every attendee receive a (single) mail for the event
             for partner in partners:
                 mail = self.env['mail.message'].sudo().search([
                     ('notified_partner_ids', 'in', partner.id),
                     ])
-                self.assertEqual(len(mail), 1)
+                self.assertEqual(len(mail), target, "This attendee has an unexpected amount of mails")
 
         def _test_emails_has_attachment(self, partners):
             # check that every email has an attachment
@@ -320,7 +367,7 @@ class TestCalendar(SavepointCaseWithUserDemo):
             })
 
         # every partner should have 1 mail sent
-        _test_one_mail_per_attendee(self, partners)
+        _test_mail_per_attendee(self, partners, target=1)
         _test_emails_has_attachment(self, partners)
 
         # adding more partners to the event
@@ -336,10 +383,10 @@ class TestCalendar(SavepointCaseWithUserDemo):
         })
 
         # more email should be sent
-        _test_one_mail_per_attendee(self, partners)
+        _test_mail_per_attendee(self, partners, target=1)
 
         # create a new event in the past
-        self.CalendarEvent.create({
+        past_event = self.CalendarEvent.create({
             'name': "NOmailTest",
             'allday': False,
             'recurrency': False,
@@ -349,8 +396,25 @@ class TestCalendar(SavepointCaseWithUserDemo):
         })
 
         # no more email should be sent
-        _test_one_mail_per_attendee(self, partners)
+        _test_mail_per_attendee(self, partners, target=1)
 
+        # adding more partners to the event in past, SHOULD NOT trigger notification
+        partners_added_after_past_date = [
+            self.env['res.partner'].create({'name': 'testuser5', 'email': 'jean@example.com'}),
+            self.env['res.partner'].create({'name': 'testuser6', 'email': 'claude@example.com'}),
+            self.env['res.partner'].create({'name': 'testuser7', 'email': 'vandamme@example.com'}),
+            ]
+        partners.extend(partners_added_after_past_date)
+        partner_ids = [(6, False, [p.id for p in partners])]
+        past_event.write({
+            'partner_ids': partner_ids,
+        })
+
+        _test_mail_per_attendee(
+            self, list(set(partners) - set(partners_added_after_past_date)), target=1)
+        _test_mail_per_attendee(self, partners_added_after_past_date, target=0)
+
+    @freezegun.freeze_time('2011-04-29 10:00:00')
     def test_event_creation_internal_user_invitation_ics(self):
         """ Check that internal user can read invitation.ics attachment """
         internal_user = new_test_user(self.env, login='internal_user', groups='base.group_user')
@@ -427,6 +491,21 @@ class TestCalendar(SavepointCaseWithUserDemo):
             'partner_ids': [Command.link(new_partner) for new_partner in new_partners]
         })
         self.assertTrue(set(new_partners) == set(self.event_tech_presentation.videocall_channel_id.channel_partner_ids.ids), 'new partners must be invited to the channel')
+
+    def test_unauthorized_user_cannot_add_attendee(self):
+        """ Check that a user that doesn't have access to a private event cannot add attendees to it """
+        attendee_model = self.env['calendar.attendee'].with_user(self.user_demo.id)
+        # event_id in values
+        with self.assertRaises(AccessError):
+            attendee_model.create([{
+                'event_id': self.event_tech_presentation.id,
+                'partner_id': self.partner_demo.id,
+            }])
+        # event_id via context (default_event_id)
+        with self.assertRaises(AccessError):
+            attendee_model.with_context(default_event_id=self.event_tech_presentation.id).create([{
+                'partner_id': self.partner_demo.id,
+            }])
 
 
 @tagged('post_install', '-at_install')

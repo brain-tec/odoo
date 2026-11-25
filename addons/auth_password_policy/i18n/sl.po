@@ -7,14 +7,15 @@
 # Grega Vavtar <grega@hbs.si>, 2022
 # Martin Trigaux, 2022
 # Matjaz Mozetic <m.mozetic@matmoz.si>, 2022
+# Aleš Pipan, 2025
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:01+0000\n"
+"POT-Creation-Date: 2024-02-06 13:31+0000\n"
 "PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: Matjaz Mozetic <m.mozetic@matmoz.si>, 2022\n"
+"Last-Translator: Aleš Pipan, 2025\n"
 "Language-Team: Slovenian (https://app.transifex.com/odoo/teams/41243/sl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -37,22 +38,25 @@ msgstr "Minimalna dolžina gesla"
 msgid ""
 "Minimum number of characters passwords must contain, set to 0 to disable."
 msgstr ""
+"Najmanjše število znakov, ki jih mora vsebovati geslo, nastavite na 0, da ga"
+" onemogočite."
 
 #. module: auth_password_policy
-#. openerp-web
+#. odoo-javascript
 #: code:addons/auth_password_policy/static/src/password_field.js:0
 #, python-format
 msgid "Password"
 msgstr "Geslo"
 
 #. module: auth_password_policy
+#. odoo-python
 #: code:addons/auth_password_policy/models/res_users.py:0
 #, python-format
 msgid "Passwords must have at least %d characters, got %d."
 msgstr ""
 
 #. module: auth_password_policy
-#. openerp-web
+#. odoo-javascript
 #: code:addons/auth_password_policy/static/src/password_meter.js:0
 #, python-format
 msgid ""
@@ -60,6 +64,9 @@ msgid ""
 "\n"
 "Hint: to increase password strength, increase length, use multiple words, and use non-letter characters."
 msgstr ""
+"Zahtevano: %s\n"
+"\n"
+"Namig: za povečanje moči gesla povečajte dolžino, uporabite več besed in znake, ki niso črke."
 
 #. module: auth_password_policy
 #: model:ir.model,name:auth_password_policy.model_res_users
@@ -67,29 +74,29 @@ msgid "User"
 msgstr "Uporabnik"
 
 #. module: auth_password_policy
-#. openerp-web
+#. odoo-javascript
 #: code:addons/auth_password_policy/static/src/password_policy.js:0
 #, python-format
 msgid "at least %s character classes"
-msgstr ""
+msgstr "najmanj %s razredi znakov"
 
 #. module: auth_password_policy
-#. openerp-web
+#. odoo-javascript
 #: code:addons/auth_password_policy/static/src/password_policy.js:0
 #, python-format
 msgid "at least %s characters"
-msgstr ""
+msgstr "najmanj %s znakov"
 
 #. module: auth_password_policy
-#. openerp-web
+#. odoo-javascript
 #: code:addons/auth_password_policy/static/src/password_policy.js:0
 #, python-format
 msgid "at least %s words"
-msgstr ""
+msgstr "najmanj %s besed"
 
 #. module: auth_password_policy
-#. openerp-web
+#. odoo-javascript
 #: code:addons/auth_password_policy/static/src/password_meter.js:0
 #, python-format
 msgid "no requirements"
-msgstr ""
+msgstr "brez zahtev"

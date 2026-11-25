@@ -446,7 +446,16 @@ class Meeting(models.Model):
         model_ids = list(filter(None, {values.get('res_model_id', defaults.get('res_model_id')) for values in vals_list}))
         model_name = defaults.get('res_model')
         valid_activity_model_ids = model_name and self.env[model_name].sudo().browse(model_ids).filtered(lambda m: 'activity_ids' in m).ids or []
-        if meeting_activity_type and not defaults.get('activity_ids'):
+
+        # if user is creating an event for an activity that already has one, create a second activity
+        existing_event = False
+        orig_activity_ids = self._context.get('orig_activity_ids', self.env['mail.activity'])
+        if len(orig_activity_ids) == 1:
+            existing_event = orig_activity_ids.calendar_event_id
+            if existing_event and orig_activity_ids.activity_type_id.category == 'meeting':
+                meeting_activity_type = orig_activity_ids.activity_type_id
+
+        if meeting_activity_type and (not defaults.get('activity_ids') or existing_event):
             for values in vals_list:
                 # created from calendar: try to create an activity on the related record
                 if values.get('activity_ids'):
@@ -612,8 +621,12 @@ class Meeting(models.Model):
 
         current_attendees = self.filtered('active').attendee_ids
         if 'partner_ids' in values:
-            # we send to all partners and not only the new ones
-            (current_attendees - previous_attendees)._send_mail_to_attendees(
+            ignore_past_event_attendees = current_attendees.filtered(
+                lambda attendee: attendee.event_id.start < fields.Datetime.now()
+            )
+            # we send to all partners and not only the new ones, but ignore attendees
+            # added AFTER the stop/end date of the event
+            (current_attendees - previous_attendees - ignore_past_event_attendees)._send_mail_to_attendees(
                 self.env.ref('calendar.calendar_template_meeting_invitation', raise_if_not_found=False)
             )
         if not self.env.context.get('is_calendar_event_new') and 'start' in values:

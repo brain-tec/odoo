@@ -58,7 +58,7 @@ class SnailmailLetter(models.Model):
              "If the letter is correctly sent, the status goes in 'Sent',\n"
              "If not, it will got in state 'Error' and the error message will be displayed in the field 'Error Message'.")
     error_code = fields.Selection([(err_code, err_code) for err_code in ERROR_CODES], string="Error")
-    info_msg = fields.Char('Information')
+    info_msg = fields.Html('Information')
     display_name = fields.Char('Display Name', compute="_compute_display_name")
 
     reference = fields.Char(string='Related Record', compute='_compute_reference', readonly=True, store=False)
@@ -128,6 +128,12 @@ class SnailmailLetter(models.Model):
         if 'attachment_id' in vals:
             self.attachment_id.check('read')
         return res
+
+    def onchange(self, values, field_name, field_onchange):
+        names = field_name if isinstance(field_name, list) else [field_name] if field_name else []
+        if 'attachment_id' in names or (not names and 'attachment_id' in field_onchange):
+            self.new(values).attachment_id.check('read')
+        return super().onchange(values, field_name, field_onchange)
 
     def _fetch_attachment(self):
         """

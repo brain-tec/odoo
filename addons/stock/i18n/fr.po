@@ -6,18 +6,18 @@
 # Thomas Deleval <thd@odoo.com>, 2022
 # Martin Trigaux, 2022
 # Cécile Collart <cco@odoo.com>, 2022
-# Maruan Aguerdouh, 2023
-# Wil Odoo, 2024
+# Maruan, 2023
 # Jolien De Paepe, 2024
-# Manon Rondou, 2024
+# Wil Odoo, 2025
+# Manon Rondou, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"POT-Creation-Date: 2025-06-13 18:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:55+0000\n"
-"Last-Translator: Manon Rondou, 2024\n"
+"Last-Translator: Manon Rondou, 2025\n"
 "Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1679,8 +1679,12 @@ msgstr "Calculer les frais de port"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid "Compute shipping costs and ship with DHL"
-msgstr "Calculer les frais d'expédition et expédier avec DHL"
+msgid ""
+"Compute shipping costs and ship with DHL<br/>\n"
+"                                        <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
+"Calculer les frais de livraison et expédier avec DHL<br/>\n"
+"                                        <strong>(allez dans Accueil > Applications pour l’installer)</strong>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -1689,8 +1693,12 @@ msgstr "Calculer les frais d'expédition et expédier avec Easypost"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid "Compute shipping costs and ship with FedEx"
-msgstr "Calculer les frais d'expédition et expédier avec FedEx"
+msgid ""
+"Compute shipping costs and ship with FedEx<br/>\n"
+"                                        <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
+"Calculer les frais de livraison et expédier avec FedEx<br/>\n"
+"                                        <strong>(allez dans Accueil > Applications pour l’installer)</strong>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -1699,13 +1707,21 @@ msgstr "Calculer les frais d'expédition et expédier avec Sendcloud"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid "Compute shipping costs and ship with UPS"
-msgstr "Calculer les frais d'expédition et expédier avec UPS"
+msgid ""
+"Compute shipping costs and ship with UPS<br/>\n"
+"                                        <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
+"Calculer les frais de livraison et expédier avec UPS<br/>\n"
+"                                        <strong>(allez dans Accueil > Applications pour l’installer)</strong>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid "Compute shipping costs and ship with USPS"
-msgstr "Calculer les frais d'expédition et expédier avec USPS"
+msgid ""
+"Compute shipping costs and ship with USPS<br/>\n"
+"                                        <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
+"Calculer les frais de livraison et expédier avec USPS<br/>\n"
+"                                        <strong>(allez dans Accueil > Applications pour l’installer)</strong>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -2157,6 +2173,11 @@ msgstr "Emplacements clients"
 #: model_terms:ir.ui.view,arch_db:stock.view_location_form
 msgid "Cyclic Counting"
 msgstr "Comptage cyclique"
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid "DHL Connector"
+msgstr "Connecteur DHL"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_dhl
@@ -2836,23 +2857,23 @@ msgstr "Date effective"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Email Confirmation"
-msgstr "Email de confirmation"
+msgstr "E-mail de confirmation"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_company__stock_move_email_validation
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__stock_move_email_validation
 msgid "Email Confirmation picking"
-msgstr "Email de confirmation du transfert"
+msgstr "E-mail de confirmation du transfert"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_company__stock_mail_confirmation_template_id
 msgid "Email Template confirmation picking"
-msgstr "Modèle d'email de confirmation du transfert"
+msgstr "Modèle d'e-mail de confirmation du transfert"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_res_company__stock_mail_confirmation_template_id
 msgid "Email sent to the customer once the order is done."
-msgstr "Email envoyé au client lorsque la commande est traitée."
+msgstr "E-mail envoyé au client lorsque la commande est traitée."
 
 #. module: stock
 #: model_terms:digest.tip,tip_description:stock.digest_tip_stock_0
@@ -2984,6 +3005,7 @@ msgstr "Février"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_fedex
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "FedEx Connector"
 msgstr "Connecteur FedEx"
 
@@ -4552,6 +4574,11 @@ msgstr "Logistique"
 #: model:ir.model.fields.selection,name:stock.selection__barcode_rule__type__lot
 msgid "Lot"
 msgstr "Lot"
+
+#. module: stock
+#: model:ir.model,name:stock.model_report_stock_label_lot_template_view
+msgid "Lot Label Report"
+msgstr "Rapport d'étiquettes de lots"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__picking_label_type__label_type__lots
@@ -7446,13 +7473,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Send an automatic confirmation email when Delivery Orders are done"
 msgstr ""
-"Envoyer un email de confirmation automatique à la validation des bons de "
+"Envoyer un e-mail de confirmation automatique à la validation des bons de "
 "livraison"
 
 #. module: stock
 #: model:ir.actions.act_window,name:stock.action_lead_mass_mail
 msgid "Send email"
-msgstr "Envoyer un email"
+msgstr "Envoyer un e-mail"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_warehouse__delivery_steps__pick_ship
@@ -7701,7 +7728,7 @@ msgstr ""
 #. module: stock
 #: model:mail.template,name:stock.mail_template_data_delivery_confirmation
 msgid "Shipping: Send by Email"
-msgstr "Expédition : Envoyer par email"
+msgstr "Expédition : Envoyer par e-mail"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse__code
@@ -8926,7 +8953,7 @@ msgstr "À traiter"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_reorder_report_search
 msgid "To Reorder"
-msgstr "À réàpprovisionner"
+msgstr "À réapprovisionner"
 
 #. module: stock
 #. odoo-javascript
@@ -9191,11 +9218,13 @@ msgstr "Type d'activité d'exception enregistrée."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_ups
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "UPS Connector"
 msgstr "Connecteur UPS"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_usps
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "USPS Connector"
 msgstr "Connecteur USPS"
 
@@ -9976,6 +10005,16 @@ msgstr ""
 
 #. module: stock
 #. odoo-python
+#: code:addons/stock/models/stock_orderpoint.py:0
+#, python-format
+msgid ""
+"You can not create a snoozed orderpoint that is not manually triggered."
+msgstr ""
+"Vous ne pouvez pas créer de point de commande reporté qui ne se déclenche "
+"pas manuellement."
+
+#. module: stock
+#. odoo-python
 #: code:addons/stock/models/stock_move_line.py:0
 #, python-format
 msgid ""
@@ -10014,6 +10053,18 @@ msgid "You can only process 1.0 %s of products with unique serial number."
 msgstr ""
 "Vous pouvez uniquement traiter 1.0 %s des produits avec un numéro de série "
 "unique."
+
+#. module: stock
+#. odoo-python
+#: code:addons/stock/models/stock_orderpoint.py:0
+#, python-format
+msgid ""
+"You can only snooze manual orderpoints. You should rather archive 'auto-"
+"trigger' orderpoints if you do not want them to be triggered."
+msgstr ""
+"Vous pouvez uniquement reporter les points de commande manuels. Archivez les"
+" points de commande déclenchés automatiquement si vous ne souhaitez pas "
+"qu'ils soient déclenchés."
 
 #. module: stock
 #. odoo-python

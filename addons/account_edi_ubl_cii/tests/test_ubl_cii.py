@@ -31,11 +31,30 @@ class TestAccountEdiUblCii(AccountTestInvoicingCommon):
         })
 
     def test_import_product(self):
+        products = self.env['product.product'].create([{
+            'name': 'XYZ',
+            'default_code': '1234',
+        }, {
+            'name': 'XYZ',
+            'default_code': '5678',
+        }, {
+            'name': 'XXX',
+            'default_code': '1111',
+            'barcode': '00001',
+        }, {
+            'name': 'YYY',
+            'default_code': '1111',
+            'barcode': '00002',
+        }])
         line_vals = [
            {'product_id': self.place_prdct.id, 'product_uom_id': self.uom_units.id},
            {'product_id': self.displace_prdct.id, 'product_uom_id': self.uom_units.id},
            {'product_id': self.displace_prdct.id, 'product_uom_id': self.uom_units.id},
-           {'product_id': self.displace_prdct.id, 'product_uom_id': self.uom_dozens.id}
+           {'product_id': self.displace_prdct.id, 'product_uom_id': self.uom_dozens.id},
+           {'product_id': products[0].id, 'product_uom_id': self.uom_units.id},
+           {'product_id': products[1].id, 'product_uom_id': self.uom_units.id},
+           {'product_id': products[2].id, 'product_uom_id': self.uom_units.id},
+           {'product_id': products[3].id, 'product_uom_id': self.uom_units.id},
         ]
         # To allow for the creation of Factur-X EDI the company must be either French or German
         company = self.company_data['company']
@@ -136,3 +155,159 @@ class TestAccountEdiUblCii(AccountTestInvoicingCommon):
         xml = self.env['account.edi.xml.ubl_bis3']._export_invoice(new_invoice)[0]
         root = etree.fromstring(xml)
         self.assertEqual(root.findtext('./{*}AccountingCustomerParty/{*}Party/{*}EndpointID'), None)
+
+    def test_import_partner_fields(self):
+        """ We are going to import the e-invoice and check partner is correctly imported."""
+        file_path = "bis3_bill_example.xml"
+        file_path = f"{self.test_module}/tests/test_files/{file_path}"
+        with file_open(file_path, 'rb') as file:
+            xml_attachment = self.env['ir.attachment'].create({
+                'mimetype': 'application/xml',
+                'name': 'test_invoice.xml',
+                'raw': file.read(),
+            })
+
+        bill = self.env['account.journal']\
+                .with_context(default_journal_id=self.company_data["default_journal_purchase"].id)\
+                ._create_document_from_attachment(xml_attachment.id)
+
+        self.assertRecordValues(bill.partner_id, [{
+            'name': "ALD Automotive LU",
+            'phone': False,
+            'email': 'adl@test.com',
+            'vat': 'LU12977109',
+            'street': '270 rte d\'Arlon',
+            'street2': False,
+            'city': 'Strassen',
+            'zip': '8010',
+        }])
+
+    def test_import_bill(self):
+        partner = self.env['res.partner'].create({
+            'name': "My Belgian Partner",
+            'vat': "BE0477472701",
+            'email': "mypartner@email.com",
+        })
+        invoice = self.env['account.move'].create({
+            'partner_id': partner.id,
+            'move_type': 'out_invoice',
+            'invoice_line_ids': [Command.create({'product_id': self.product_a.id})]
+        })
+        invoice.action_post()
+        my_invoice_raw = self.env['account.edi.xml.ubl_bis3']._export_invoice(invoice)[0]
+        my_invoice_root = etree.fromstring(my_invoice_raw)
+        modifying_xpath = """
+            <xpath expr="(//*[local-name()='PaymentMeans']/*[local-name()='PaymentID'])" position="after">
+                <PayeeFinancialAccount><ID>Test account</ID></PayeeFinancialAccount>
+            </xpath>
+            <xpath expr="(//*[local-name()='LegalMonetaryTotal']/*[local-name()='TaxExclusiveAmount'])" position="replace">
+                <TaxExclusiveAmount currencyID="EUR"><!--Some valid XML
+                comment-->1000.0</TaxExclusiveAmount>
+            </xpath>"""
+        xml_attachment = self.env['ir.attachment'].create({
+            'raw': etree.tostring(self.with_applied_xpath(my_invoice_root, modifying_xpath)),
+            'name': 'test_invoice.xml',
+        })
+        imported_invoice = self.env['account.journal']\
+                .with_context(default_journal_id=self.company_data['default_journal_purchase'].id)\
+                ._create_document_from_attachment(xml_attachment.id)
+        self.assertRecordValues(imported_invoice.invoice_line_ids, [{
+            'amount_currency': 1000.00,
+            'quantity': 1.0}])
+
+    def test_import_bill_without_tax(self):
+        """ Test that no tax is set (even the default one) when importing a bill without tax."""
+        file_path = "bis3_bill_without_tax.xml"
+        file_path = f"{self.test_module}/tests/test_files/{file_path}"
+        with file_open(file_path, 'rb') as file:
+            xml_attachment = self.env['ir.attachment'].create({
+                'mimetype': 'application/xml',
+                'name': 'test_invoice.xml',
+                'raw': file.read(),
+            })
+        purchase_tax = self.env['account.tax'].create({
+            'type_tax_use': 'purchase',
+            'name': 'purchase_tax_10',
+            'amount': 10,
+        })
+        self.company_data['company'].account_purchase_tax_id = purchase_tax
+        bill = self.env['account.journal']\
+                .with_context(default_journal_id=self.company_data['default_journal_purchase'].id)\
+                ._create_document_from_attachment(xml_attachment.id)
+
+        self.assertRecordValues(bill.invoice_line_ids, [{
+            'amount_currency': 100.00,
+            'quantity': 1.0,
+            'tax_ids': self.env['account.tax'],
+        }])
+
+    def test_ubl_line_extension_global_rounding_distribution(self):
+        """ Test that rounding errors in line extensions are distributed
+            to ensure the sum of lines equals the total.
+        """
+        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        decimal_precision_name = self.env['account.move.line']._fields['price_unit']._digits
+        decimal_precision = self.env['decimal.precision'].search([('name', '=', decimal_precision_name)])
+        decimal_precision.digits = 4
+        tax_21 = self.env['account.tax'].create({
+            'name': 'tax 21',
+            'amount': 21.0,
+        })
+        fixed_tax_1 = self.env['account.tax'].create({
+            'name': "fixed tax 1",
+            'amount_type': 'fixed',
+            'amount': 0.1488,
+            'include_base_amount': True,
+            'is_base_affected': False,
+        })
+        fixed_tax_2 = self.env['account.tax'].create({
+            'name': "fixed tax 2",
+            'amount_type': 'fixed',
+            'amount': 0.0800,
+            'include_base_amount': True,
+            'is_base_affected': False,
+        })
+
+        invoice_line_vals = [
+            (2.00, 7.3770, fixed_tax_1 | fixed_tax_2 | tax_21),
+            (2.00, 7.3770, fixed_tax_1 | fixed_tax_2 | tax_21),
+            (3.00, 7.3770, fixed_tax_1 | fixed_tax_2 | tax_21),
+            (3.00, 7.3770, fixed_tax_1 | fixed_tax_2 | tax_21),
+            (3.00, 7.3770, fixed_tax_1 | fixed_tax_2 | tax_21),
+            (3.00, 7.3770, fixed_tax_1 | fixed_tax_2 | tax_21),
+            (2.00, 3.6270, fixed_tax_1 | fixed_tax_2 | tax_21),
+            (6.00, 7.2500, tax_21),
+            (6.00, 7.2500, tax_21),
+            (12.00, 7.2500, tax_21),
+            (12.00, 7.2500, tax_21),
+            (12.00, 7.2500, tax_21),
+            (12.00, 7.2500, tax_21),
+            (12.00, 7.2500, tax_21),
+        ]
+
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': f'line {idx}',
+                    'quantity': quantity,
+                    'price_unit': price_unit,
+                    'tax_ids': [Command.set(taxes.ids)],
+                })
+                for idx, (quantity, price_unit, taxes) in enumerate(invoice_line_vals)
+            ]
+        })
+        invoice.action_post()
+        xml = self.env['account.edi.xml.ubl_bis3']._export_invoice(invoice)[0]
+
+        root = etree.fromstring(xml)
+        line_extension_amounts = [elem.text for elem in root.findall('./{*}InvoiceLine/{*}LineExtensionAmount')]
+        # Ensure the delta amount of 0.02 was distributed
+        # Expected total is 651.39
+        self.assertEqual(
+            line_extension_amounts,
+            ['15.20', '15.20', '22.82', '22.82', '22.82', '22.82', '7.71',
+             '43.50', '43.50', '87.00', '87.00', '87.00', '87.00', '87.00']
+        )
+        self.assertEqual(root.findtext('./{*}LegalMonetaryTotal/{*}LineExtensionAmount'), '651.39')

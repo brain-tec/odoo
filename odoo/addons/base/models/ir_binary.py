@@ -4,7 +4,7 @@ from datetime import datetime
 from mimetypes import guess_extension
 
 from odoo import models
-from odoo.exceptions import MissingError, UserError
+from odoo.exceptions import AccessError, MissingError, UserError
 from odoo.http import Stream, request
 from odoo.tools import file_open, replace_exceptions
 from odoo.tools.image import image_process, image_guess_size_from_field_name
@@ -73,21 +73,29 @@ class IrBinary(models.AbstractModel):
             return Stream.from_attachment(record)
 
         record.check_field_access_rights('read', [field_name])
-        field_def = record._fields[field_name]
 
-        # fields.Binary(attachment=False) or compute/related
-        if not field_def.attachment or field_def.compute or field_def.related:
-            return Stream.from_binary_field(record, field_name)
+        if record._fields[field_name].attachment:
+            field_attachment = self.env['ir.attachment'].sudo().search(
+                domain=[('res_model', '=', record._name),
+                        ('res_id', '=', record.id),
+                        ('res_field', '=', field_name)],
+                limit=1)
+            if not field_attachment:
+                raise MissingError("The related attachment does not exist.")
+            return Stream.from_attachment(field_attachment)
 
-        # fields.Binary(attachment=True)
-        field_attachment = self.env['ir.attachment'].sudo().search(
-            domain=[('res_model', '=', record._name),
-                    ('res_id', '=', record.id),
-                    ('res_field', '=', field_name)],
-            limit=1)
-        if not field_attachment:
-            raise MissingError("The related attachment does not exist.")
-        return Stream.from_attachment(field_attachment)
+        return Stream.from_binary_field(record, field_name)
+
+    def _get_filename_from_record(self, record, field_name):
+        common_fields = ('filename', '_name', '_fname', '_file')
+        if field_name == 'name' or field_name.endswith(common_fields):
+            return record[field_name]
+        # Try with the user's access rights
+        try:
+            return record.sudo(False)[field_name]
+        except AccessError:
+            pass
+        return False
 
     def _get_stream_from(
         self, record, field_name='raw', filename=None, filename_field='name',
@@ -142,7 +150,8 @@ class IrBinary(models.AbstractModel):
             if filename:
                 stream.download_name = filename
             elif filename_field in record:
-                stream.download_name = record[filename_field]
+                stream.download_name = self._get_filename_from_record(record, filename_field)
+
             if not stream.download_name:
                 stream.download_name = f'{record._table}-{record.id}-{field_name}'
 
@@ -219,6 +228,8 @@ class IrBinary(models.AbstractModel):
 
         if stream.type == 'url':
             return stream  # Rezising an external URL is not supported
+        if not stream.mimetype.startswith('image/'):
+            stream.mimetype = 'application/octet-stream'
         if isinstance(stream.etag, str):
             stream.etag += f'-{width}x{height}-crop={crop}-quality={quality}'
 

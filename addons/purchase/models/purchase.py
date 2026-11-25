@@ -11,7 +11,7 @@ from odoo import api, fields, models, _
 from odoo.osv import expression
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, format_amount, format_date, formatLang, get_lang, groupby
 from odoo.tools.float_utils import float_compare, float_is_zero, float_round
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import AccessDenied, UserError, ValidationError
 
 
 class PurchaseOrder(models.Model):
@@ -231,6 +231,8 @@ class PurchaseOrder(models.Model):
             self.order_line.filtered(lambda line: not line.display_type).date_planned = self.date_planned
 
     def write(self, vals):
+        if vals.get('state') in ('purchase', 'done'):
+            self.filtered(lambda po: po.state not in ('purchase', 'done'))._check_approval_allowed()
         vals, partner_vals = self._write_partner_values(vals)
         res = super().write(vals)
         if partner_vals:
@@ -256,6 +258,7 @@ class PurchaseOrder(models.Model):
         for order, partner_vals in zip(orders, partner_vals_list):
             if partner_vals:
                 order.sudo().write(partner_vals)  # Because the purchase user doesn't have write on `res.partner`
+        orders.filtered(lambda po: po.state in ('purchase', 'done'))._check_approval_allowed()
         return orders
 
     @api.ondelete(at_uninstall=False)
@@ -672,11 +675,7 @@ class PurchaseOrder(models.Model):
         immediately.
         """
         if not invoices:
-            # Invoice_ids may be filtered depending on the user. To ensure we get all
-            # invoices related to the purchase order, we read them in sudo to fill the
-            # cache.
             self.invalidate_model(['invoice_ids'])
-            self.sudo()._read(['invoice_ids'])
             invoices = self.invoice_ids
 
         result = self.env['ir.actions.act_window']._for_xml_id('account.action_move_in_invoice_type')
@@ -701,6 +700,8 @@ class PurchaseOrder(models.Model):
         """ This function returns the values to populate the custom dashboard in
             the purchase order views.
         """
+        if not self.env.user._is_internal():
+            raise AccessDenied()
         self.check_access_rights('read')
 
         result = {
@@ -875,6 +876,10 @@ class PurchaseOrder(models.Model):
                     self.date_order or fields.Date.today()))
             or self.user_has_groups('purchase.group_purchase_manager'))
 
+    def _check_approval_allowed(self):
+        if not self.env.su and not all(order._approval_allowed() for order in self):
+            raise UserError(_("Only a purchase manager can approve this purchase order."))
+
     def _confirm_reception_mail(self):
         for order in self:
             if order.state in ['purchase', 'done'] and not order.mail_reception_confirmed:
@@ -888,6 +893,8 @@ class PurchaseOrder(models.Model):
         date_planned = date_planned or self.date_planned
         if not date_planned:
             return False
+        if isinstance(date_planned, str):
+            date_planned = fields.Datetime.from_string(date_planned)
         tz = self.get_order_timezone()
         return date_planned.astimezone(tz)
 
@@ -1246,7 +1253,7 @@ class PurchaseOrderLine(models.Model):
             if not line.product_id or line.invoice_lines or not line.company_id:
                 continue
             line = line.with_company(line.company_id)
-            params = {'order_id': line.order_id}
+            params = line._get_select_sellers_params()
             seller = line.product_id._select_seller(
                 partner_id=line.partner_id,
                 quantity=line.product_qty,
@@ -1280,12 +1287,12 @@ class PurchaseOrderLine(models.Model):
                     False
                 )
                 line.price_unit = float_round(price_unit, precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
-                continue
 
-            price_unit = line.env['account.tax']._fix_tax_included_price_company(seller.price, line.product_id.supplier_taxes_id, line.taxes_id, line.company_id) if seller else 0.0
-            price_unit = seller.currency_id._convert(price_unit, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(line), False)
-            price_unit = float_round(price_unit, precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
-            line.price_unit = seller.product_uom._compute_price(price_unit, line.product_uom)
+            elif seller:
+                price_unit = line.env['account.tax']._fix_tax_included_price_company(seller.price, line.product_id.supplier_taxes_id, line.taxes_id, line.company_id) if seller else 0.0
+                price_unit = seller.currency_id._convert(price_unit, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(line), False)
+                price_unit = float_round(price_unit, precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
+                line.price_unit = seller.product_uom._compute_price(price_unit, line.product_uom)
 
             # record product names to avoid resetting custom descriptions
             default_names = []
@@ -1358,12 +1365,12 @@ class PurchaseOrderLine(models.Model):
 
     def _get_gross_price_unit(self):
         self.ensure_one()
-        price_unit = self.price_unit
+        price_unit = self._convert_to_tax_base_line_dict()['price_unit']
         if self.taxes_id:
             qty = self.product_qty or 1
             price_unit_prec = self.env['decimal.precision'].precision_get('Product Price')
-            price_unit = self.taxes_id.with_context(round=False).compute_all(price_unit, currency=self.order_id.currency_id, quantity=qty)['total_void']
-            price_unit = float_round(price_unit / qty, precision_digits=price_unit_prec)
+            price_unit = self.taxes_id.with_context(round=False).compute_all(price_unit, currency=self.order_id.currency_id, quantity=qty, product=self.product_id)['total_void']
+            price_unit = price_unit / qty
         if self.product_uom.id != self.product_id.uom_id.id:
             price_unit *= self.product_uom.factor / self.product_id.uom_id.factor
         return price_unit
@@ -1506,3 +1513,9 @@ class PurchaseOrderLine(models.Model):
                 'business_domain': 'purchase_order',
                 'company_id': line.company_id.id,
             })
+
+    def _get_select_sellers_params(self):
+        self.ensure_one()
+        return {
+            "order_id": self.order_id,
+        }

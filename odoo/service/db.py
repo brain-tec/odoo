@@ -3,6 +3,7 @@ import base64
 import json
 import logging
 import os
+import secrets
 import shutil
 import subprocess
 import tempfile
@@ -11,6 +12,7 @@ import traceback
 from xml.etree import ElementTree as ET
 import zipfile
 
+from datetime import datetime
 from psycopg2 import sql
 from pytz import country_timezones
 from functools import wraps
@@ -25,6 +27,7 @@ from odoo.exceptions import AccessDenied
 import odoo.release
 import odoo.sql_db
 import odoo.tools
+from odoo.modules.db import FunctionStatus, has_unaccent
 from odoo.sql_db import db_connect
 from odoo.release import version_info
 from odoo.tools import find_pg_tool, exec_pg_environ
@@ -96,6 +99,30 @@ def _initialize_db(id, db_name, demo, lang, user_password, login='admin', countr
     except Exception as e:
         _logger.exception('CREATE DATABASE failed:')
 
+
+def _check_faketime_mode(db_name):
+    if os.getenv('ODOO_FAKETIME_TEST_MODE') and db_name in odoo.tools.config['db_name'].split(','):
+        try:
+            db = odoo.sql_db.db_connect(db_name)
+            with db.cursor() as cursor:
+                cursor.execute("SELECT (pg_catalog.now() AT TIME ZONE 'UTC');")
+                server_now = cursor.fetchone()[0]
+                time_offset = (datetime.now() - server_now).total_seconds()
+
+                cursor.execute("""
+                    CREATE OR REPLACE FUNCTION public.now()
+                        RETURNS timestamp with time zone AS $$
+                            SELECT pg_catalog.now() +  %s * interval '1 second';
+                        $$ LANGUAGE sql;
+                """, (int(time_offset), ))
+                cursor.execute("SELECT (now() AT TIME ZONE 'UTC');")
+                new_now = cursor.fetchone()[0]
+                _logger.info("Faketime mode, new cursor now is %s", new_now)
+                cursor.commit()
+        except psycopg2.Error as e:
+            _logger.warning("Unable to set fakedtimed NOW() : %s", e)
+
+
 def _create_empty_database(name):
     db = odoo.sql_db.db_connect('postgres')
     with closing(db.cursor()) as cr:
@@ -103,6 +130,7 @@ def _create_empty_database(name):
         cr.execute("SELECT datname FROM pg_database WHERE datname = %s",
                    (name,), log_exceptions=False)
         if cr.fetchall():
+            _check_faketime_mode(name)
             raise DatabaseExists("database %r already exists!" % (name,))
         else:
             # database-altering operations cannot be executed inside a transaction
@@ -121,7 +149,7 @@ def _create_empty_database(name):
         db = odoo.sql_db.db_connect(name)
         with db.cursor() as cr:
             cr.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm")
-            if odoo.tools.config['unaccent']:
+            if odoo.tools.config['unaccent'] and has_unaccent(cr) != FunctionStatus.INDEXABLE:
                 cr.execute("CREATE EXTENSION IF NOT EXISTS unaccent")
                 # From PostgreSQL's point of view, making 'unaccent' immutable is incorrect
                 # because it depends on external data - see
@@ -132,6 +160,8 @@ def _create_empty_database(name):
                 cr.execute("ALTER FUNCTION unaccent(text) IMMUTABLE")
     except psycopg2.Error as e:
         _logger.warning("Unable to create PostgreSQL extensions : %s", e)
+    _check_faketime_mode(name)
+
 
 @check_db_management_enabled
 def exp_create_database(db_name, demo, lang, user_password='admin', login='admin', country_code=None, phone=None):
@@ -308,7 +338,11 @@ def restore_db(db, dump_file, copy=False, neutralize_database=False):
                     filestore_path = os.path.join(dump_dir, 'filestore')
 
             pg_cmd = 'psql'
-            pg_args = ['-q', '-f', os.path.join(dump_dir, 'dump.sql')]
+            pg_args = [
+                '-q',
+                '-c', f'\\restrict {secrets.token_hex()}',
+                '-f', os.path.join(dump_dir, 'dump.sql'),
+            ]
 
         else:
             # <= 7.0 format (raw pg_dump output)

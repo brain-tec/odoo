@@ -574,6 +574,9 @@ class Post(models.Model):
 
     def write(self, vals):
         trusted_keys = ['active', 'is_correct', 'tag_ids']  # fields where security is checked manually
+        if 'forum_id' in vals:
+            forum = self.env['forum.forum'].browse(vals['forum_id'])
+            forum.check_access_rule('write')
         if 'content' in vals:
             vals['content'] = self._update_content(vals['content'], self.forum_id.id)
 
@@ -656,7 +659,7 @@ class Post(models.Model):
         return True
 
     def reopen(self):
-        if any(post.parent_id or post.state != 'close' for post in self):
+        if any(post.parent_id or post.state != 'close' or not post.can_close for post in self):
             return False
 
         reason_offensive = self.env.ref('website_forum.reason_7')
@@ -852,6 +855,8 @@ class Post(models.Model):
         is created. Nothing is done if the comment's author already answered the
         question. """
         comment = self.env['mail.message'].sudo().browse(message_id)
+        if comment.model != 'forum.post':
+            return False
         post = self.browse(comment.res_id)
         if not comment.author_id or not comment.author_id.user_ids:  # only comment posted by users can be converted
             return False
@@ -1092,6 +1097,8 @@ class Vote(models.Model):
         if not self.env.is_admin():
             for vals in vals_list:
                 vals.pop('user_id', None)
+                vals.pop('recipient_id', None)
+            self = self.with_context({k: v for k, v in self.env.context.items() if k not in ['default_user_id', 'default_recipient_id']})  # noqa: PLW0642
 
         votes = super(Vote, self).create(vals_list)
 
@@ -1107,6 +1114,7 @@ class Vote(models.Model):
         # can't modify owner of a vote
         if not self.env.is_admin():
             values.pop('user_id', None)
+            values.pop('recipient_id', None)
 
         for vote in self:
             vote._check_general_rights(values)

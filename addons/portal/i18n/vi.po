@@ -7,14 +7,15 @@
 # Nancy Momoland <thanh.np2502@gmail.com>, 2022
 # Thang Nguyen, 2023
 # Thi Huong Nguyen, 2024
+# Wil Odoo, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:32+0000\n"
+"POT-Creation-Date: 2025-05-08 20:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Thi Huong Nguyen, 2024\n"
+"Last-Translator: Wil Odoo, 2025\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -32,7 +33,7 @@ msgstr "\" để xác thực hành động của bạn."
 #: code:addons/portal/static/src/js/portal_sidebar.js:0
 #, python-format
 msgid "%1d days overdue"
-msgstr ""
+msgstr "%1d ngày quá hạn"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -528,7 +529,7 @@ msgstr ""
 "Vô hiệu hóa tài khoản của bạn để ngăn chặn mọi hoạt động đăng nhập tiếp theo.<br/>\n"
 "                                        <b>\n"
 "                                            <i class=\"fa fa-exclamation-triangle text-danger\"/>\n"
-"                                            Bạn không thể hoàn tác hành động này.\n"
+"                                            Bạn không thể hoàn tác tác vụ này.\n"
 "                                        </b>"
 
 #. module: portal
@@ -555,7 +556,7 @@ msgstr "Tài liệu"
 #: code:addons/portal/static/src/js/portal_sidebar.js:0
 #, python-format
 msgid "Due in %1d days"
-msgstr ""
+msgstr "Đến hạn trong %1d ngày"
 
 #. module: portal
 #. odoo-javascript
@@ -923,7 +924,7 @@ msgstr "Cổng thông tin: Mời người dùng"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_record_sidebar
 msgid "Powered by"
-msgstr "Được hỗ trợ bởi"
+msgstr "Cung cấp bởi"
 
 #. module: portal
 #. odoo-javascript
@@ -1202,7 +1203,7 @@ msgstr "This document does not exist."
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_back_in_edit_mode
 msgid "This is a preview of the customer portal."
-msgstr "This is a preview of the customer portal."
+msgstr "Đây là bản xem trước của cổng thông tin khách hàng. "
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view

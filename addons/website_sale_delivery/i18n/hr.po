@@ -13,14 +13,15 @@
 # Martin Trigaux, 2022
 # Matej Mijoč, 2022
 # Antonijo Kovacevic, 2023
+# Luka Carević <luka@uvid.hr>, 2025
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:02+0000\n"
+"POT-Creation-Date: 2025-06-13 18:37+0000\n"
 "PO-Revision-Date: 2022-09-22 05:57+0000\n"
-"Last-Translator: Antonijo Kovacevic, 2023\n"
+"Last-Translator: Luka Carević <luka@uvid.hr>, 2025\n"
 "Language-Team: Croatian (https://app.transifex.com/odoo/teams/41243/hr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -42,6 +43,7 @@ msgid ""
 msgstr ""
 
 #. module: website_sale_delivery
+#. odoo-python
 #: code:addons/website_sale_delivery/controllers/main.py:0
 #: code:addons/website_sale_delivery/controllers/main.py:0
 #, python-format
@@ -62,11 +64,6 @@ msgstr "Odaberite način dostave"
 #: model:ir.model,name:website_sale_delivery.model_res_country
 msgid "Country"
 msgstr "Država"
-
-#. module: website_sale_delivery
-#: model_terms:ir.ui.view,arch_db:website_sale_delivery.res_config_settings_view_form
-msgid "DHL Shipping Methods"
-msgstr "DHL metode dostave"
 
 #. module: website_sale_delivery
 #: model:ir.model.fields,field_description:website_sale_delivery.field_sale_order__amount_delivery
@@ -99,12 +96,7 @@ msgid "Easypost Shipping Methods"
 msgstr "Easypost metoda dostave"
 
 #. module: website_sale_delivery
-#: model_terms:ir.ui.view,arch_db:website_sale_delivery.res_config_settings_view_form
-msgid "FedEx Shipping Methods"
-msgstr "FedEx metode dostave"
-
-#. module: website_sale_delivery
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_sale_delivery/static/src/js/website_sale_delivery.js:0
 #, python-format
 msgid "Free"
@@ -116,6 +108,7 @@ msgid "Is Published"
 msgstr "je objavljeno"
 
 #. module: website_sale_delivery
+#. odoo-python
 #: code:addons/website_sale_delivery/controllers/main.py:0
 #, python-format
 msgid ""
@@ -126,6 +119,7 @@ msgstr ""
 " stranicu i pokušajte ponovno."
 
 #. module: website_sale_delivery
+#. odoo-python
 #: code:addons/website_sale_delivery/controllers/main.py:0
 #, python-format
 msgid ""
@@ -136,6 +130,7 @@ msgstr ""
 "promijeniti način isporuke"
 
 #. module: website_sale_delivery
+#. odoo-python
 #: code:addons/website_sale_delivery/controllers/main.py:0
 #, python-format
 msgid ""
@@ -144,6 +139,13 @@ msgid ""
 msgstr ""
 "Nijedna metoda dostave nije definirana za Vašu trenutnu narudžbu i adresu "
 "isporuke. Molimo kontaktirajte nas za više informacija."
+
+#. module: website_sale_delivery
+#. odoo-python
+#: code:addons/website_sale_delivery/controllers/main.py:0
+#, python-format
+msgid "No shipping method is selected."
+msgstr ""
 
 #. module: website_sale_delivery
 #: model_terms:ir.ui.view,arch_db:website_sale_delivery.view_delivery_carrier_search_inherit_website_sale_delivery
@@ -178,6 +180,7 @@ msgid "Shipping Methods"
 msgstr "Načini dostave"
 
 #. module: website_sale_delivery
+#. odoo-python
 #: code:addons/website_sale_delivery/controllers/main.py:0
 #, python-format
 msgid "Sorry, we are unable to ship your order"
@@ -192,11 +195,6 @@ msgstr "Iznos bez poreza."
 #: model:ir.model.fields,help:website_sale_delivery.field_delivery_carrier__website_url
 msgid "The full URL to access the document through the website."
 msgstr "Puni URL za pristup dokumentu putem web stranice."
-
-#. module: website_sale_delivery
-#: model_terms:ir.ui.view,arch_db:website_sale_delivery.res_config_settings_view_form
-msgid "USPS Shipping Methods"
-msgstr ""
 
 #. module: website_sale_delivery
 #: model:ir.model.fields,field_description:website_sale_delivery.field_delivery_carrier__website_published
@@ -216,4 +214,4 @@ msgstr "URL web stranice"
 #. module: website_sale_delivery
 #: model_terms:ir.ui.view,arch_db:website_sale_delivery.res_config_settings_view_form
 msgid "bpost Shipping Methods"
-msgstr ""
+msgstr "bpost metoda dostave"

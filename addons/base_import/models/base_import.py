@@ -452,7 +452,8 @@ class Import(models.TransientModel):
             return self._read_xls(options)
 
         import openpyxl.cell.cell as types
-        book = load_workbook(io.BytesIO(self.file or b''), read_only=True, data_only=True)
+        import openpyxl.styles.numbers as styles  # noqa: PLC0415
+        book = load_workbook(io.BytesIO(self.file or b''), data_only=True)
         sheets = options['sheets'] = book.sheetnames
         sheet_name = options['sheet'] = options.get('sheet') or sheets[0]
         sheet = book[sheet_name]
@@ -465,15 +466,23 @@ class Import(models.TransientModel):
                         _("Invalid cell value at row %(row)s, column %(col)s: %(cell_value)s", row=rowx, col=colx, cell_value=cell.value)
                     )
 
-                if isinstance(cell.value, float):
+                if cell.value is None:
+                    values.append('')
+                elif isinstance(cell.value, float):
                     if cell.value % 1 == 0:
                         values.append(str(int(cell.value)))
                     else:
                         values.append(str(cell.value))
-                elif isinstance(cell.value, datetime.datetime):
-                    values.append(cell.value.strftime(DEFAULT_SERVER_DATETIME_FORMAT))
-                elif isinstance(cell.value, datetime.date):
-                    values.append(cell.value.strftime(DEFAULT_SERVER_DATE_FORMAT))
+                elif cell.is_date:
+                    d_fmt = styles.is_datetime(cell.number_format)
+                    if d_fmt == "datetime":
+                        values.append(cell.value.strftime(DEFAULT_SERVER_DATETIME_FORMAT))
+                    elif d_fmt == "date":
+                        values.append(cell.value.strftime(DEFAULT_SERVER_DATE_FORMAT))
+                    else:
+                        raise ValueError(
+                        _("Invalid cell format at row %(row)s, column %(col)s: %(cell_value)s, with format: %(cell_format)s, as (%(format_type)s) formats are not supported.", row=rowx, col=colx, cell_value=cell.value, cell_format=cell.number_format, format_type=d_fmt)
+                        )
                 else:
                     values.append(str(cell.value))
 
@@ -1382,7 +1391,7 @@ class Import(models.TransientModel):
             import_skip_records=options.get('import_skip_records', []),
             _import_limit=import_limit)
         import_result = model.load(import_fields, merged_data)
-        _logger.info('done')
+        _logger.info('done importing data into model: %s', model._name)
 
         # If transaction aborted, RELEASE SAVEPOINT is going to raise
         # an InternalError (ROLLBACK should work, maybe). Ignore that.
@@ -1397,6 +1406,7 @@ class Import(models.TransientModel):
                 # cancel all changes done to the registry/ormcache
                 self.pool.clear_caches()
                 self.pool.reset_changes()
+                _logger.info('Previous import was a dry/test run, changes were reset')
             else:
                 self._cr.execute('RELEASE SAVEPOINT import')
         except psycopg2.InternalError:
@@ -1623,6 +1633,7 @@ def check_patterns(patterns, values):
 def to_re(pattern):
     """ cut down version of TimeRE converting strptime patterns to regex
     """
+    pattern = re.sub(r"([\\.^$*+?\(\){}\[\]|])", r"\\\1", pattern)
     pattern = re.sub(r'\s+', r'\\s+', pattern)
     pattern = re.sub('%([a-z])', _replacer, pattern, flags=re.IGNORECASE)
     pattern = '^' + pattern + '$'

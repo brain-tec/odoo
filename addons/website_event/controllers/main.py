@@ -62,7 +62,7 @@ class WebsiteEventController(http.Controller):
         order = 'date_begin'
         if searches.get('date', 'upcoming') == 'old':
             order = 'date_begin desc'
-        order = 'is_published desc, ' + order
+        order = 'is_published desc, ' + order + ', id desc'
         search = searches.get('search')
         event_count, details, fuzzy_search_term = website._search_with_fuzzy("events", search,
             limit=page * step, order=order, options=options)
@@ -150,13 +150,11 @@ class WebsiteEventController(http.Controller):
             page = 'website_event.%s' % page
 
         view = request.env["website.event.menu"].sudo().search([
-            ("event_id", "=", event.id), ("view_id.key", "ilike", page)]).view_id
-        if not view:
-            return request.not_found()
+            ("event_id", "=", event.id), ("view_id.key", "ilike", page)], limit=1).view_id
 
         try:
             # Every event page view should have its own SEO.
-            page = view.key
+            page = view.key if view else page
             values['seo_object'] = request.website.get_template(page)
             values['main_object'] = event
         except ValueError:
@@ -263,11 +261,16 @@ class WebsiteEventController(http.Controller):
         :param form_details: posted data from frontend registration form, like
             {'1-name': 'r', '1-email': 'r@r.com', '1-phone': '', '1-event_ticket_id': '1'}
         """
+        form_details.pop("recaptcha_token_response", None)
         allowed_fields = request.env['event.registration']._get_website_registration_allowed_fields()
         registration_fields = {key: v for key, v in request.env['event.registration']._fields.items() if key in allowed_fields}
         for ticket_id in list(filter(lambda x: x is not None, [form_details[field] if 'event_ticket_id' in field else None for field in form_details.keys()])):
-            if int(ticket_id) not in event.event_ticket_ids.ids and len(event.event_ticket_ids.ids) > 0:
-                raise UserError(_("This ticket is not available for sale for this event"))
+            ticket_id = int(ticket_id)
+            # ticket_id=0 means "no ticket selected", only valid on events without tickets
+            if ticket_id or event.event_ticket_ids:
+                ticket = event.event_ticket_ids.filtered(lambda t: t.id == ticket_id)
+                if not ticket or not ticket.is_launched or ticket.is_expired:
+                    raise UserError(_("This ticket is not available for sale for this event"))
         registrations = {}
         global_values = {}
         for key, value in form_details.items():
@@ -300,9 +303,9 @@ class WebsiteEventController(http.Controller):
         registrations_to_create = []
         for registration_values in registration_data:
             registration_values['event_id'] = event.id
-            if not registration_values.get('partner_id') and visitor_sudo.partner_id:
+            if visitor_sudo.partner_id:
                 registration_values['partner_id'] = visitor_sudo.partner_id.id
-            elif not registration_values.get('partner_id'):
+            else:
                 registration_values['partner_id'] = False if request.env.user._is_public() else request.env.user.partner_id.id
 
             # update registration based on visitor
@@ -314,6 +317,8 @@ class WebsiteEventController(http.Controller):
 
     @http.route(['''/event/<model("event.event"):event>/registration/confirm'''], type='http', auth="public", methods=['POST'], website=True)
     def registration_confirm(self, event, **post):
+        if not request.env['ir.http']._verify_request_recaptcha_token('website_event_registration'):
+            raise UserError(_('Suspicious activity detected by Google reCaptcha.'))
         registrations = self._process_attendees_form(event, post)
         attendees_sudo = self._create_attendees_from_registration_post(event, registrations)
 

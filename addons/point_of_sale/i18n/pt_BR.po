@@ -15,16 +15,16 @@
 # Diego Sayron, 2023
 # Adriano Prado <adrianojprado@gmail.com>, 2023
 # a75f12d3d37ea5bf159c4b3e85eb30e7_0fa6927, 2023
-# Maitê Dietze, 2024
 # Wil Odoo, 2024
+# Maitê Dietze, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"POT-Creation-Date: 2025-06-27 03:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"Last-Translator: Maitê Dietze, 2025\n"
 "Language-Team: Portuguese (Brazil) (https://app.transifex.com/odoo/teams/41243/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -100,6 +100,20 @@ msgstr ""
 #, python-format
 msgid "%s product(s) found for \"%s\"."
 msgstr "%s produto(s) encontrado(s) para \"%s\"."
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/pos_session.py:0
+#, python-format
+msgid "%s untaxed"
+msgstr "%s untaxed"
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/pos_session.py:0
+#, python-format
+msgid "%s with %s"
+msgstr "%s com %s"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -2907,11 +2921,14 @@ msgid "Invoice payment for %s (%s) using %s"
 msgstr "Pagamento de fatura para%s (%s) usando %s"
 
 #. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/js/Screens/TicketScreen/TicketScreen.js:0
 #: model:ir.model.fields,field_description:point_of_sale.field_report_pos_order__invoiced
 #: model:ir.model.fields.selection,name:point_of_sale.selection__pos_order__state__invoiced
 #: model:ir.model.fields.selection,name:point_of_sale.selection__report_pos_order__state__invoiced
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_order_filter
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_report_pos_order_search
+#, python-format
 msgid "Invoiced"
 msgstr "Faturado"
 
@@ -3438,6 +3455,13 @@ msgid "More..."
 msgstr "Mais..."
 
 #. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/js/Screens/TicketScreen/TicketScreen.js:0
+#, python-format
+msgid "Multiple Orders Selected"
+msgstr ""
+
+#. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__my_activity_date_deadline
 msgid "My Activity Deadline"
 msgstr "Prazo da Minha Atividade"
@@ -3796,6 +3820,7 @@ msgstr ""
 "Clique em +/- para modificar a quantidade a ser reembolsada."
 
 #. module: point_of_sale
+#. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
 #, python-format
 msgid "Only administrators can edit receipt headers and footers"
@@ -4612,7 +4637,7 @@ msgstr "Categoria de Produto de PdV"
 #: code:addons/point_of_sale/models/pos_session.py:0
 #, python-format
 msgid "PoS order %s can not be processed"
-msgstr ""
+msgstr "PoS order %s can not be processed"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_partner_property_form
@@ -5270,6 +5295,8 @@ msgstr "Atualizar exibição"
 
 #. module: point_of_sale
 #. odoo-javascript
+#. odoo-python
+#: code:addons/point_of_sale/models/pos_session.py:0
 #: code:addons/point_of_sale/static/src/js/Screens/TicketScreen/TicketScreen.js:0
 #: code:addons/point_of_sale/static/src/xml/Screens/ProductScreen/ControlButtons/RefundButton.xml:0
 #: code:addons/point_of_sale/static/src/xml/Screens/ProductScreen/ControlButtons/RefundButton.xml:0
@@ -5545,6 +5572,13 @@ msgstr "Contagem de linhas de venda"
 #: model:ir.actions.act_window,name:point_of_sale.action_pos_order_line_form
 msgid "Sale line"
 msgstr "Linha de Venda"
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/pos_session.py:0
+#, python-format
+msgid "Sales"
+msgstr "Vendas"
 
 #. module: point_of_sale
 #: model:ir.actions.act_window,name:point_of_sale.action_report_pos_details
@@ -6365,11 +6399,11 @@ msgstr ""
 #: code:addons/point_of_sale/static/src/js/Screens/PaymentScreen/PaymentScreen.js:0
 #, python-format
 msgid ""
-"The amount of your payment lines must be rounded to validate the "
-"transaction."
+"The amount of your payment lines must be rounded to validate the transaction.\n"
+"The rounding precision is %s so you should set %s or %s as payment amount instead of %s."
 msgstr ""
-"O valor de suas linhas de pagamento deve ser arredondado para validar a "
-"transação."
+"The amount of your payment lines must be rounded to validate the transaction.\n"
+"The rounding precision is %s so you should set %s or %s as payment amount instead of %s."
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -6879,6 +6913,17 @@ msgid ""
 msgstr ""
 "Esse diário está associado a um método de pagamento. Não é possível "
 "modificar seu tipo"
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/account_journal.py:0
+#, python-format
+msgid ""
+"This journal is associated with payment method %s that is being used by "
+"order %s in the active pos session %s"
+msgstr ""
+"This journal is associated with payment method %s that is being used by "
+"order %s in the active pos session %s"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -7616,6 +7661,17 @@ msgstr ""
 
 #. module: point_of_sale
 #. odoo-python
+#: code:addons/point_of_sale/models/account_cash_rounding.py:0
+#, python-format
+msgid ""
+"You cannot delete a rounding method that is used in a Point of Sale "
+"configuration."
+msgstr ""
+"You cannot delete a rounding method that is used in a Point of Sale "
+"configuration."
+
+#. module: point_of_sale
+#. odoo-python
 #: code:addons/point_of_sale/models/res_partner.py:0
 #, python-format
 msgid ""
@@ -7624,6 +7680,17 @@ msgid ""
 msgstr ""
 "Você não pode excluir contatos enquanto houver sessões de PdV ativas. Feche "
 "as sessões %s primeiro."
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/pos_session.py:0
+#, python-format
+msgid ""
+"You do not have permission to open a POS session. Please try opening a "
+"session with a different user"
+msgstr ""
+"Você não tem permissão para abrir uma sessão do PDV. Tente abrir uma sessão "
+"com um usuário diferente"
 
 #. module: point_of_sale
 #. odoo-python
@@ -7646,6 +7713,15 @@ msgid ""
 msgstr ""
 "Você ativou a opção \"Identificar cliente\" para o %s método de pagamento, "
 "mas o pedido%s não possui um cliente."
+
+#. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/js/Screens/TicketScreen/TicketScreen.js:0
+#, python-format
+msgid ""
+"You have selected orderlines from multiple orders. To proceed refund, please"
+" select orderlines from the same order."
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript

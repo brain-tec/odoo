@@ -136,6 +136,12 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
         self.assertEqual(mail_server, self.server_notification, 'Should take the notification email')
         self.assertEqual(mail_from, 'notifications@test.com')
 
+        # test if notification server is selected if email_from = False
+        mail_server, mail_from = self.env['ir.mail_server']._find_mail_server(email_from=False)
+        self.assertEqual(mail_server, self.server_notification,
+                         'Should select the notification email server if passed FROM address was False')
+        self.assertEqual(mail_from, 'notifications@test.com')
+
         # remove the notifications email to simulate a mis-configured Odoo database
         # so we do not have the choice, we have to spoof the FROM
         # (otherwise we can not send the email)
@@ -283,6 +289,25 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
             message_from='"specific_user" <test@custom_domain.com>',
             from_filter='random.domain',
         )
+
+    @patch.dict(config.options, {'smtp_user': 'config-user', 'smtp_password': 'config-password', 'smtp_server': 'config-host.com'})
+    def test_mail_server_send_email_explicit_host(self):
+        # use the CLI server
+        with self.subTest("Use CLI server"), self.mock_smtplib_connection(), patch.object(self.testing_smtp_session, 'login') as login:
+            message = self._build_email(mail_from='specific_user@test.com')
+            self.env['ir.mail_server'].send_email(message, smtp_server='config-host.com')
+            login.assert_called_once_with('config-user', 'config-password')
+
+        # don't use the CLI server
+        for user in (None, 'explicit-user'):
+            with self.subTest(user=user), self.mock_smtplib_connection(), patch.object(self.testing_smtp_session, 'login') as login:
+                message = self._build_email(mail_from='specific_user@test.com')
+                self.env['ir.mail_server'].send_email(message, smtp_server='example.com', smtp_user=user)
+                if user:
+                    login.assert_called_once_with(user, '')
+                else:
+                    login.assert_not_called()
+                self.assertEqual(len(self.emails), 1)
 
     @mute_logger('odoo.models.unlink')
     def test_mail_server_send_email_smtp_session(self):
@@ -498,3 +523,30 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
             message_from='specific_user@example.com',
             from_filter='example.com',
         )
+
+    def test_eml_attachment_encoding(self):
+        """Test that message/rfc822 attachments are encoded using 7bit, 8bit, or binary encoding."""
+        IrMailServer = self.env['ir.mail_server']
+
+        # Create a sample .eml file content
+        eml_content = b"From: user@example.com\nTo: user2@example.com\nSubject: Test Email\n\nThis is a test email."
+        attachments = [('test.eml', eml_content, 'message/rfc822')]
+
+        # Build the email with the .eml attachment
+        message = IrMailServer.build_email(
+            email_from='john.doe@from.example.com',
+            email_to='destinataire@to.example.com',
+            subject='Subject with .eml attachment',
+            body='This email contains a .eml attachment.',
+            attachments=attachments,
+        )
+
+        # Verify that the attachment is correctly encoded
+        acceptable_encodings = {'7bit', '8bit', 'binary'}
+        for part in message.iter_attachments():
+            if part.get_content_type() == 'message/rfc822':
+                self.assertIn(
+                    part.get('Content-Transfer-Encoding'),
+                    acceptable_encodings,
+                    "The message/rfc822 attachment should be encoded using 7bit, 8bit, or binary encoding.",
+                )

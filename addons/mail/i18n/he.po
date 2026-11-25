@@ -7,7 +7,7 @@
 # Moshe Flam <pashute@gmail.com>, 2022
 # Mor Kir <morki@013.net.il>, 2022
 # Jonathan Spier, 2022
-# hed shefer <hed@laylinetech.com>, 2022
+# Hed Shefer <hed@laylinetech.com>, 2022
 # Fishfur A Banter <fishfurbanter@gmail.com>, 2022
 # david danilov, 2022
 # Ofir Blum <ofir.blum@gmail.com>, 2022
@@ -16,23 +16,27 @@
 # Martin Trigaux, 2022
 # ExcaliberX <excaliberx@gmail.com>, 2022
 # Netta Waizer, 2022
-# NoaFarkash, 2022
 # Yihya Hugirat <hugirat@gmail.com>, 2022
 # דודי מלכה <Dudimalka6@gmail.com>, 2022
-# Ha Ketem <haketem@gmail.com>, 2023
 # ZVI BLONDER <ZVIBLONDER@gmail.com>, 2023
-# Lilach Gilliam <lilach.gilliam@gmail.com>, 2023
 # Roy Sayag, 2024
 # yael terner, 2024
 # MichaelHadar, 2024
+# tomerlayline, 2024
+# Uri Segman, 2024
+# NoaFarkash, 2024
+# Lilach Gilliam <lilach.gilliam@gmail.com>, 2025
+# Ha Ketem <haketem@gmail.com>, 2025
+# Yoram Lavi, 2025
+# or balmas, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"POT-Creation-Date: 2025-05-06 20:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: MichaelHadar, 2024\n"
+"Last-Translator: or balmas, 2025\n"
 "Language-Team: Hebrew (https://app.transifex.com/odoo/teams/41243/he/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -62,7 +66,7 @@ msgstr ""
 #: code:addons/mail/models/mail_activity.py:0
 #, python-format
 msgid "\"%(activity_name)s: %(summary)s\" assigned to you"
-msgstr ""
+msgstr "\"%(activity_name)s:%(summary)s\" הקצה אותך ל"
 
 #. module: mail
 #. odoo-javascript
@@ -83,7 +87,7 @@ msgstr "\"%s\" דורש הרשאת מיקרופון"
 #: code:addons/mail/static/src/models/channel_member_list_category_view.js:0
 #, python-format
 msgid "%(categoryText)s - %(memberCount)s"
-msgstr ""
+msgstr "%(categoryText)s - %(memberCount)s"
 
 #. module: mail
 #. odoo-python
@@ -99,7 +103,7 @@ msgstr "%(email)s לא מוכר ככתובת מייל מאומתת. זה דרו�
 #: code:addons/mail/static/src/models/notification_request_view.js:0
 #, python-format
 msgid "%(odoobotName)s has a request"
-msgstr ""
+msgstr "ל-%(odoobotName)s יש בקשה"
 
 #. module: mail
 #. odoo-python
@@ -120,7 +124,7 @@ msgstr "הוזמנת על-ידי %(user_name)s לעקוב אחרי מסמך חד
 #: code:addons/mail/models/ir_mail_server.py:0
 #, python-format
 msgid "%s (Email Template)"
-msgstr ""
+msgstr "%s(תבנית דוא\"ל)"
 
 #. module: mail
 #. odoo-python
@@ -265,6 +269,8 @@ msgid ""
 ",\n"
 "    <br/><br/>"
 msgstr ""
+",\n"
+" <br/><br/>"
 
 #. module: mail
 #. odoo-javascript
@@ -317,14 +323,14 @@ msgstr "0 היום"
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "00"
-msgstr ""
+msgstr "00"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "1.30"
-msgstr ""
+msgstr "1.30"
 
 #. module: mail
 #. odoo-javascript
@@ -339,28 +345,28 @@ msgstr "10"
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "10.30"
-msgstr ""
+msgstr "10.30"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "100"
-msgstr ""
+msgstr "100"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "10:00"
-msgstr ""
+msgstr "10:00"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "10:30"
-msgstr ""
+msgstr "10:30"
 
 #. module: mail
 #. odoo-javascript
@@ -375,21 +381,21 @@ msgstr "11"
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "11.30"
-msgstr ""
+msgstr "11.30"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "11:00"
-msgstr ""
+msgstr "11:00"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "11:30"
-msgstr ""
+msgstr "11:30"
 
 #. module: mail
 #. odoo-javascript
@@ -404,28 +410,28 @@ msgstr "12"
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "12.30"
-msgstr ""
+msgstr "12.30"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "1234"
-msgstr ""
+msgstr "1234"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "12:00"
-msgstr ""
+msgstr "12:00"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "12:30"
-msgstr ""
+msgstr "12:30"
 
 #. module: mail
 #. odoo-javascript
@@ -439,14 +445,14 @@ msgstr "18"
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "1:00"
-msgstr ""
+msgstr "1:00"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "1:30"
-msgstr ""
+msgstr "1:30"
 
 #. module: mail
 #. odoo-javascript
@@ -461,21 +467,21 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "2.30"
-msgstr ""
+msgstr "2.30"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "2:00"
-msgstr ""
+msgstr "2:00"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "2:30"
-msgstr ""
+msgstr "2:30"
 
 #. module: mail
 #. odoo-javascript
@@ -490,21 +496,21 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "3.30"
-msgstr ""
+msgstr "3.30"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "3:00"
-msgstr ""
+msgstr "3:00"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "3:30"
-msgstr ""
+msgstr "3:30"
 
 #. module: mail
 #. odoo-javascript
@@ -519,21 +525,21 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "4.30"
-msgstr ""
+msgstr "4.30"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "4:00"
-msgstr ""
+msgstr "4:00"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "4:30"
-msgstr ""
+msgstr "4:30"
 
 #. module: mail
 #. odoo-javascript
@@ -554,105 +560,105 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "5.30"
-msgstr ""
+msgstr "5.30"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "5:00"
-msgstr ""
+msgstr "5:00"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "5:30"
-msgstr ""
+msgstr "5:30"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "6.30"
-msgstr ""
+msgstr "6.30"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "6:00"
-msgstr ""
+msgstr "6:00"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "6:30"
-msgstr ""
+msgstr "6:30"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "7.30"
-msgstr ""
+msgstr "7.30"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "7:00"
-msgstr ""
+msgstr "7:00"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "7:30"
-msgstr ""
+msgstr "7:30"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "8.30"
-msgstr ""
+msgstr "8.30"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "8:00"
-msgstr ""
+msgstr "8:00"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "8:30"
-msgstr ""
+msgstr "8:30"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "9.30"
-msgstr ""
+msgstr "9.30"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "9:00"
-msgstr ""
+msgstr "9:00"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "9:30"
-msgstr ""
+msgstr "9:30"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_template_preview_view_form
@@ -1184,7 +1190,7 @@ msgstr "סוג פעילות"
 #: code:addons/mail/models/mail_activity.py:0
 #, python-format
 msgid "Activity: %s"
-msgstr ""
+msgstr "פעילות: %s"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_blacklist_view_form
@@ -1417,7 +1423,7 @@ msgstr "הכל"
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "Americas"
-msgstr ""
+msgstr "אמריקאות "
 
 #. module: mail
 #. odoo-python
@@ -1483,7 +1489,7 @@ msgstr "ועוד משתמש/ת 1."
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "Animals & Nature"
-msgstr ""
+msgstr "בע\"ח & טבע"
 
 #. module: mail
 #. odoo-javascript
@@ -1731,9 +1737,22 @@ msgid "Auto subscription"
 msgstr "מנוי אוטומטי"
 
 #. module: mail
+#: model:ir.model.fields.selection,name:mail.selection__mail_compose_message__message_type__auto_comment
+#: model:ir.model.fields.selection,name:mail.selection__mail_message__message_type__auto_comment
+msgid "Automated Targeted Notification"
+msgstr ""
+
+#. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity__automated
 msgid "Automated activity"
 msgstr "פעולה אוטומטית"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/models/message.js:0
+#, python-format
+msgid "Automated message"
+msgstr "הודעות אוטומטיות "
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_activity_type__triggered_next_type_id
@@ -1818,14 +1837,14 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "BACK"
-msgstr ""
+msgstr "חזור"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "BACK arrow"
-msgstr ""
+msgstr "חץ בחזרה"
 
 #. module: mail
 #. odoo-javascript
@@ -1851,12 +1870,12 @@ msgstr "בסיס"
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_template__template_category__base_template
 msgid "Base Template"
-msgstr ""
+msgstr "תבנית בסיס "
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_email_template_search
 msgid "Base Templates"
-msgstr ""
+msgstr "תבניות בסיס"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_thread_blacklist__is_blacklisted
@@ -1889,6 +1908,8 @@ msgid ""
 "Blocked by deletion of portal account %(portal_user_name)s by %(user_name)s "
 "(#%(user_id)s)"
 msgstr ""
+"%(portal_user_name)sנחסם עקב מחיקת חשבון פורטל "
+"ע\"י%(user_name)s(#%(user_id)s)"
 
 #. module: mail
 #. odoo-javascript
@@ -2017,7 +2038,7 @@ msgstr "המצלמה כבויה"
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_resend_message__can_cancel
 msgid "Can Cancel"
-msgstr ""
+msgstr "יכול לבטל"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__can_edit_body
@@ -2028,7 +2049,7 @@ msgstr "ניתן לערוך גוף"
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_resend_message__can_resend
 msgid "Can Resend"
-msgstr ""
+msgstr "יכול לשלוח"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity__can_write
@@ -2085,7 +2106,7 @@ msgstr "בוטל"
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "Cancer"
-msgstr ""
+msgstr "סרטן"
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_shortcode
@@ -2389,7 +2410,7 @@ msgstr "סגור"
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_compose_message__reply_to_mode__new
 msgid "Collect replies on a specific email address"
-msgstr ""
+msgstr "איסוף תגובות לכתובת אימייל ספציפית"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_template_form
@@ -2440,9 +2461,11 @@ msgstr "חברות"
 
 #. module: mail
 #. odoo-javascript
+#. odoo-python
 #: code:addons/mail/static/src/js/activity.js:0
 #: code:addons/mail/static/src/models/composer_view.js:0
 #: code:addons/mail/static/src/models/mail_template.js:0
+#: code:addons/mail/wizard/mail_compose_message.py:0
 #: model:ir.actions.act_window,name:mail.action_email_compose_message_wizard
 #: model_terms:ir.ui.view,arch_db:mail.email_compose_message_wizard_form
 #, python-format
@@ -2782,12 +2805,12 @@ msgstr "הודעה מותאמת אישית להודעות שגויות"
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_template__template_category__custom_template
 msgid "Custom Template"
-msgstr ""
+msgstr "תבנית מותאמת  אישית"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_email_template_search
 msgid "Custom Templates"
-msgstr ""
+msgstr "תבניות מותאמות אישית"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_channel_member__custom_channel_name
@@ -2864,7 +2887,7 @@ msgstr "תאריך יעד"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.message_activity_assigned
 msgid "Deadline:"
-msgstr ""
+msgstr "מועד אחרון:"
 
 #. module: mail
 #. odoo-python
@@ -2889,7 +2912,7 @@ msgstr "יקר"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.message_notification_limit_email
 msgid "Dear Sender,"
-msgstr ""
+msgstr "שולח יקר,"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity__activity_decoration
@@ -3193,7 +3216,7 @@ msgstr "שם מסמך"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.message_activity_assigned
 msgid "Document: \""
-msgstr ""
+msgstr "מסמך: \""
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
@@ -3370,7 +3393,7 @@ msgstr "ערוך מנוי"
 #: code:addons/mail/static/src/views/fields/many2many_tags_email/many2many_tags_email.js:0
 #, python-format
 msgid "Edit: %s"
-msgstr ""
+msgstr "עריכה: %s"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_blacklist_remove__email
@@ -3997,7 +4020,7 @@ msgstr "פונט מדהים למשל עבור משימות fa-tasks"
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "Food & Drink"
-msgstr ""
+msgstr "מזון ומשקאות"
 
 #. module: mail
 #. odoo-python
@@ -4011,7 +4034,7 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_message_schedule_view_form
 msgid "Force Send"
-msgstr ""
+msgstr "אלץ שליחה"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_res_company__email_formatted
@@ -4025,7 +4048,7 @@ msgstr "דוא\"ל מעוצב"
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "French"
-msgstr ""
+msgstr "צרפתית"
 
 #. module: mail
 #. odoo-javascript
@@ -4302,10 +4325,11 @@ msgstr "נסתר"
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_template__template_category__hidden_template
 msgid "Hidden Template"
-msgstr ""
+msgstr "תבנית חבויה"
 
 #. module: mail
 #. odoo-javascript
+#: code:addons/mail/static/src/components/chat_window_header/chat_window_header.xml:0
 #: code:addons/mail/static/src/components/thread_view_topbar/thread_view_topbar.xml:0
 #, python-format
 msgid "Hide Call Settings"
@@ -4313,7 +4337,6 @@ msgstr ""
 
 #. module: mail
 #. odoo-javascript
-#: code:addons/mail/static/src/components/chat_window_header/chat_window_header.xml:0
 #: code:addons/mail/static/src/components/chat_window_header/chat_window_header.xml:0
 #: code:addons/mail/static/src/components/thread_view_topbar/thread_view_topbar.xml:0
 #, python-format
@@ -4600,7 +4623,7 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_resend_message_view_form
 msgid "Ignore all"
-msgstr ""
+msgstr "התעלם מהכל"
 
 #. module: mail
 #. odoo-javascript
@@ -4967,7 +4990,7 @@ msgstr "יפן"
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "Japanese"
-msgstr ""
+msgstr "יפנית"
 
 #. module: mail
 #. odoo-javascript
@@ -5157,7 +5180,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "Jewish"
-msgstr ""
+msgstr "יהודי"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_view_kanban
@@ -5203,7 +5226,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "Judaism"
-msgstr ""
+msgstr "יהדות"
 
 #. module: mail
 #. odoo-javascript
@@ -5392,7 +5415,7 @@ msgstr "פעילויות באיחור"
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "Latin"
-msgstr ""
+msgstr "לטינית"
 
 #. module: mail
 #. odoo-javascript
@@ -5447,7 +5470,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "Libra"
-msgstr ""
+msgstr "מאזניים"
 
 #. module: mail
 #: model:ir.actions.act_window,name:mail.mail_link_preview_action
@@ -5463,7 +5486,7 @@ msgstr ""
 #: code:addons/mail/static/src/models/channel_invitation_form.js:0
 #, python-format
 msgid "Link copied!"
-msgstr ""
+msgstr "קישור הועתק!"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_wizard_invite__partner_ids
@@ -6422,7 +6445,7 @@ msgstr "אין שגיאה"
 #: code:addons/mail/static/src/components/follower_list_menu/follower_list_menu.xml:0
 #, python-format
 msgid "No Followers"
-msgstr ""
+msgstr "אין עוקבים"
 
 #. module: mail
 #. odoo-javascript
@@ -6657,7 +6680,7 @@ msgstr "מספר השגיאות"
 #: model:ir.model.fields,help:mail.field_res_partner__message_needaction_counter
 #: model:ir.model.fields,help:mail.field_res_users__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr ""
+msgstr "מספר הודעות הדורשות פעולה"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_blacklist__message_has_error_counter
@@ -6738,7 +6761,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "Objects"
-msgstr ""
+msgstr "אובייקטים"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_notification_layout
@@ -6909,6 +6932,14 @@ msgstr "פתח"
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_form
 msgid "Open Document"
 msgstr "פתיחת מסמך"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/components/attachment_card/attachment_card.xml:0
+#: code:addons/mail/static/src/components/attachment_card/attachment_card.xml:0
+#, python-format
+msgid "Open Link"
+msgstr "פתיחת קישור"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_alias_form
@@ -7431,12 +7462,12 @@ msgstr "הוסרה הגישה לפורטל"
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__ir_actions_server__mail_post_method__comment
 msgid "Post as Message"
-msgstr ""
+msgstr "שלח בהודעה"
 
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__ir_actions_server__mail_post_method__note
 msgid "Post as Note"
-msgstr ""
+msgstr "פרסם הערה"
 
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_compose_message__composition_mode__mass_post
@@ -7540,7 +7571,7 @@ msgstr "פרטיות"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_template_reset_view_form
 msgid "Proceed"
-msgstr ""
+msgstr "המשך"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_fetchmail_server__object_id
@@ -7986,7 +8017,7 @@ msgstr ""
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_template_form
 msgid "Reset Template"
-msgstr ""
+msgstr "אפס תבנית"
 
 #. module: mail
 #. odoo-javascript
@@ -8216,7 +8247,7 @@ msgstr "תאריך מתוזמן"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_message_schedule_view_form
 msgid "Scheduled Message"
-msgstr ""
+msgstr "הודעה מתוזמנת"
 
 #. module: mail
 #: model:ir.actions.act_window,name:mail.mail_message_schedule_action
@@ -8240,7 +8271,7 @@ msgstr "תזמון מועד שליחה"
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "Scorpio"
-msgstr ""
+msgstr "עקרב"
 
 #. module: mail
 #. odoo-javascript
@@ -8350,7 +8381,7 @@ msgstr "נצפה על-ידי כולם"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_template_preview_view_form
 msgid "Select a language"
-msgstr ""
+msgstr "בחירת שפה"
 
 #. module: mail
 #. odoo-javascript
@@ -8379,7 +8410,7 @@ msgstr "שלח"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_resend_message_view_form
 msgid "Send & close"
-msgstr ""
+msgstr "שלח & סגור"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_wizard_invite__send_mail
@@ -8425,7 +8456,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:mail.field_ir_actions_server__mail_post_method
 #: model:ir.model.fields,field_description:mail.field_ir_cron__mail_post_method
 msgid "Send as"
-msgstr ""
+msgstr "שליחה בתור"
 
 #. module: mail
 #: model:ir.actions.act_window,name:mail.action_partner_mass_mail
@@ -8599,6 +8630,7 @@ msgstr ""
 
 #. module: mail
 #. odoo-javascript
+#: code:addons/mail/static/src/components/chat_window_header/chat_window_header.xml:0
 #: code:addons/mail/static/src/components/thread_view_topbar/thread_view_topbar.xml:0
 #, python-format
 msgid "Show Call Settings"
@@ -8613,7 +8645,6 @@ msgstr "הצגת עוקבים"
 
 #. module: mail
 #. odoo-javascript
-#: code:addons/mail/static/src/components/chat_window_header/chat_window_header.xml:0
 #: code:addons/mail/static/src/components/chat_window_header/chat_window_header.xml:0
 #: code:addons/mail/static/src/components/thread_view_topbar/thread_view_topbar.xml:0
 #, python-format
@@ -9051,7 +9082,7 @@ msgstr "תבנית"
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_template__template_category
 msgid "Template Category"
-msgstr ""
+msgstr "קטגורית תבנית"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_template__template_fs
@@ -9328,7 +9359,7 @@ msgstr ""
 #: code:addons/mail/models/fetchmail.py:0
 #, python-format
 msgid "The server \"%s\" cannot be used because it is archived."
-msgstr ""
+msgstr "השרת \"%s\" לא ניתן לשימוש היות והוא בארכיון."
 
 #. module: mail
 #. odoo-javascript
@@ -10357,7 +10388,7 @@ msgstr "כתוב משוב"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.email_compose_message_wizard_form
 msgid "Write your message here..."
-msgstr ""
+msgstr "כתיבת הודעה כאן..."
 
 #. module: mail
 #. odoo-python
@@ -11301,7 +11332,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "assistance"
-msgstr ""
+msgstr "עזרה"
 
 #. module: mail
 #. odoo-javascript
@@ -11423,7 +11454,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "autumn"
-msgstr ""
+msgstr "סתיו"
 
 #. module: mail
 #. odoo-javascript
@@ -11431,7 +11462,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "avocado"
-msgstr ""
+msgstr "אבוקדו"
 
 #. module: mail
 #. odoo-javascript
@@ -11439,7 +11470,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "axe"
-msgstr ""
+msgstr "גרזן"
 
 #. module: mail
 #. odoo-javascript
@@ -11454,7 +11485,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "baby"
-msgstr ""
+msgstr "תינוק"
 
 #. module: mail
 #. odoo-javascript
@@ -11468,7 +11499,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "baby bottle"
-msgstr ""
+msgstr "בקבוק תינוק"
 
 #. module: mail
 #. odoo-javascript
@@ -11598,7 +11629,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "bag"
-msgstr ""
+msgstr "תיק"
 
 #. module: mail
 #. odoo-javascript
@@ -11606,7 +11637,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "bagel"
-msgstr ""
+msgstr "בייגל"
 
 #. module: mail
 #. odoo-javascript
@@ -11813,7 +11844,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "bank"
-msgstr ""
+msgstr "בנק"
 
 #. module: mail
 #. odoo-javascript
@@ -11962,7 +11993,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "bathroom"
-msgstr ""
+msgstr "חדר אמבט"
 
 #. module: mail
 #. odoo-javascript
@@ -11994,7 +12025,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "beach"
-msgstr ""
+msgstr "חוף ים"
 
 #. module: mail
 #. odoo-javascript
@@ -12077,7 +12108,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "beauty"
-msgstr ""
+msgstr "יופי"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.message_notification_limit_email
@@ -17192,7 +17223,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "engineer"
-msgstr ""
+msgstr "מהנדס"
 
 #. module: mail
 #. odoo-javascript
@@ -17223,7 +17254,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "entry"
-msgstr ""
+msgstr "רשומה"
 
 #. module: mail
 #. odoo-javascript
@@ -17472,7 +17503,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "eye"
-msgstr ""
+msgstr "עין "
 
 #. module: mail
 #. odoo-javascript
@@ -18845,7 +18876,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "folder"
-msgstr ""
+msgstr "תיקיה"
 
 #. module: mail
 #. odoo-javascript
@@ -18933,7 +18964,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "forever"
-msgstr ""
+msgstr "לתמיד"
 
 #. module: mail
 #. odoo-javascript
@@ -19830,7 +19861,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "grapes"
-msgstr ""
+msgstr "ענבים"
 
 #. module: mail
 #. odoo-javascript
@@ -19840,7 +19871,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "graph"
-msgstr ""
+msgstr "גרף"
 
 #. module: mail
 #. odoo-javascript
@@ -19880,7 +19911,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "green"
-msgstr ""
+msgstr "ירוק"
 
 #. module: mail
 #. odoo-javascript
@@ -20071,7 +20102,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "guide"
-msgstr ""
+msgstr "מדריך"
 
 #. module: mail
 #. odoo-javascript
@@ -20094,7 +20125,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "guitar"
-msgstr ""
+msgstr "גיטרה"
 
 #. module: mail
 #. odoo-javascript
@@ -25014,7 +25045,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "muscle"
-msgstr ""
+msgstr "שריר"
 
 #. module: mail
 #. odoo-javascript
@@ -25022,7 +25053,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "museum"
-msgstr ""
+msgstr "מוזיאון "
 
 #. module: mail
 #. odoo-javascript
@@ -25030,7 +25061,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "mushroom"
-msgstr ""
+msgstr "פטריה"
 
 #. module: mail
 #. odoo-javascript
@@ -25049,7 +25080,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "music"
-msgstr ""
+msgstr "מוזיקה"
 
 #. module: mail
 #. odoo-javascript
@@ -25057,7 +25088,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "musical keyboard"
-msgstr ""
+msgstr "מקלדת מוזיקלית"
 
 #. module: mail
 #. odoo-javascript
@@ -25065,7 +25096,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "musical note"
-msgstr ""
+msgstr "תו מוזיקלי"
 
 #. module: mail
 #. odoo-javascript
@@ -25089,7 +25120,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "mute"
-msgstr ""
+msgstr "השתק"
 
 #. module: mail
 #. odoo-javascript
@@ -25105,7 +25136,7 @@ msgstr "מושתק"
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "muted speaker"
-msgstr ""
+msgstr "רמקול מושתק "
 
 #. module: mail
 #. odoo-javascript
@@ -25205,7 +25236,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "necklace"
-msgstr ""
+msgstr "שרשרת"
 
 #. module: mail
 #. odoo-javascript
@@ -25213,7 +25244,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "necktie"
-msgstr ""
+msgstr "עניבה"
 
 #. module: mail
 #. odoo-javascript
@@ -25242,7 +25273,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "nervous"
-msgstr ""
+msgstr "לחוץ"
 
 #. module: mail
 #. odoo-javascript
@@ -25256,14 +25287,14 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "neutral"
-msgstr ""
+msgstr "נטרלי"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "neutral face"
-msgstr ""
+msgstr "פנים נטרליות "
 
 #. module: mail
 #. odoo-javascript
@@ -25287,7 +25318,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "news"
-msgstr ""
+msgstr "חדשות"
 
 #. module: mail
 #. odoo-javascript
@@ -25296,7 +25327,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "newspaper"
-msgstr ""
+msgstr "עיתון"
 
 #. module: mail
 #. odoo-javascript
@@ -25334,7 +25365,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "night"
-msgstr ""
+msgstr "לילה"
 
 #. module: mail
 #. odoo-javascript
@@ -25342,7 +25373,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "night with stars"
-msgstr ""
+msgstr "לילה עם כוכבים"
 
 #. module: mail
 #. odoo-javascript
@@ -25393,7 +25424,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "no entry"
-msgstr ""
+msgstr "אין כניסה"
 
 #. module: mail
 #. odoo-javascript
@@ -25409,7 +25440,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "no mobile phones"
-msgstr ""
+msgstr "השימוש בטלפונים אסור"
 
 #. module: mail
 #. odoo-javascript
@@ -25425,14 +25456,14 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "no pedestrians"
-msgstr ""
+msgstr "כניסת הולכי רגל אסורה"
 
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "no smoking"
-msgstr ""
+msgstr "העישון אסור"
 
 #. module: mail
 #. odoo-javascript
@@ -25531,7 +25562,7 @@ msgstr "הערה"
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "notebook"
-msgstr ""
+msgstr "מחברת"
 
 #. module: mail
 #. odoo-javascript
@@ -25539,7 +25570,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "notebook with decorative cover"
-msgstr ""
+msgstr "מחברת עם כריכה מעוצבת"
 
 #. module: mail
 #. odoo-javascript
@@ -25569,7 +25600,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "nurse"
-msgstr ""
+msgstr "אחות"
 
 #. module: mail
 #. odoo-javascript
@@ -25622,7 +25653,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "octopus"
-msgstr ""
+msgstr "תמנון"
 
 #. module: mail
 #. odoo-javascript
@@ -25660,7 +25691,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "office worker"
-msgstr ""
+msgstr "עובד משרדי"
 
 #. module: mail
 #. odoo-javascript
@@ -25738,7 +25769,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "older person"
-msgstr ""
+msgstr "אדם מבוגר יותר"
 
 #. module: mail
 #. odoo-javascript
@@ -25868,7 +25899,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "onion"
-msgstr ""
+msgstr "בצל"
 
 #. module: mail
 #. odoo-javascript
@@ -28028,7 +28059,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "print"
-msgstr ""
+msgstr "הדפס"
 
 #. module: mail
 #. odoo-javascript
@@ -28036,7 +28067,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "printer"
-msgstr ""
+msgstr "מדפסת"
 
 #. module: mail
 #. odoo-javascript
@@ -28118,7 +28149,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "public address"
-msgstr ""
+msgstr "כתובת מפורסמת"
 
 #. module: mail
 #. odoo-javascript
@@ -28568,7 +28599,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "receipt"
-msgstr ""
+msgstr "קבלב"
 
 #. module: mail
 #. odoo-javascript
@@ -31368,7 +31399,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "split"
-msgstr ""
+msgstr "פצל"
 
 #. module: mail
 #. odoo-javascript
@@ -34659,7 +34690,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "white flower"
-msgstr ""
+msgstr "פרח לבן"
 
 #. module: mail
 #. odoo-javascript
@@ -34979,7 +35010,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "woman"
-msgstr ""
+msgstr "אישה"
 
 #. module: mail
 #. odoo-javascript
@@ -35674,7 +35705,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "worker"
-msgstr ""
+msgstr "עובד"
 
 #. module: mail
 #. odoo-javascript
@@ -35773,7 +35804,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "write"
-msgstr ""
+msgstr "כתיבה"
 
 #. module: mail
 #. odoo-javascript
@@ -35856,7 +35887,7 @@ msgstr ""
 #: code:addons/mail/static/src/models_data/emoji_data.js:0
 #, python-format
 msgid "yellow heart"
-msgstr ""
+msgstr "לב צהוב"
 
 #. module: mail
 #. odoo-javascript

@@ -3,6 +3,8 @@
 
 from odoo import models, fields, api, _
 from odoo.addons.l10n_ch.models.res_bank import _is_l10n_ch_postal
+from odoo.tools.misc import str2bool
+
 
 class AccountBankStatementLine(models.Model):
 
@@ -14,7 +16,9 @@ class AccountBankStatementLine(models.Model):
                 [('company_id', '=', self.company_id.id),
                  ('sanitized_acc_number', 'like', self.account_number + '%'),
                  ('partner_id', '=', self.partner_id.id)])
-            if not bank_account:
+            if not bank_account and not str2bool(
+                    self.env['ir.config_parameter'].sudo().get_param("account.skip_create_bank_account_on_reconcile")
+            ):
                 bank_account = self.env['res.partner.bank'].create({
                     'company_id': self.company_id.id,
                     'acc_number': self.account_number + " " + self.partner_id.name,

@@ -117,7 +117,10 @@ class AccountMoveReversal(models.TransientModel):
         # Create default values.
         default_values_list = []
         for move in moves:
-            default_values_list.append(self._prepare_default_reversal(move))
+            default_values_list.append({
+                'partner_bank_id': False,  # Resets the partner_bank_id as we'll force its recomputation
+                **self._prepare_default_reversal(move),
+            })
 
         batches = [
             [self.env['account.move'], [], True],   # Moves to be cancelled by the reverses.
@@ -134,12 +137,14 @@ class AccountMoveReversal(models.TransientModel):
         moves_to_redirect = self.env['account.move']
         for moves, default_values_list, is_cancel_needed in batches:
             new_moves = moves._reverse_moves(default_values_list, cancel=is_cancel_needed)
+            new_moves._compute_partner_bank_id()
 
             if self.refund_method == 'modify':
                 moves_vals_list = []
                 for move in moves.with_context(include_business_fields=True):
                     moves_vals_list.append(move.copy_data({'date': self.date if self.date_mode == 'custom' else move.date})[0])
                 new_moves = self.env['account.move'].create(moves_vals_list)
+                new_moves._compute_partner_bank_id()
 
             moves_to_redirect |= new_moves
 

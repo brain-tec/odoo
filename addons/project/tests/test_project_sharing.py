@@ -159,6 +159,16 @@ class TestProjectSharing(TestProjectSharingCommon):
                 task = form.save()
 
         Task = Task.with_user(self.user_portal)
+
+        # Allow to set as parent a task he has access to
+        task = Task.create({'name': 'foo', 'parent_id': self.task_portal.id})
+        self.assertEqual(task.parent_id, self.task_portal)
+        # Disallow to set as parent a task he doesn't have access to
+        with self.assertRaises(AccessError, msg="Should not accept the portal user to set a parent task he doesn't have access to."):
+            Task.create({'name': 'foo', 'parent_id': self.task_no_collabo.id})
+        with self.assertRaises(AccessError, msg="Should not accept the portal user to set a parent task he doesn't have access to."):
+            task = Task.with_context(default_parent_id=self.task_no_collabo.id).create({'name': 'foo'})
+
         # Create/Update a forbidden task through child_ids
         with self.assertRaisesRegex(AccessError, "You cannot write on description"):
             Task.create({'name': 'foo', 'child_ids': [Command.create({'name': 'Foo', 'description': 'Foo'})]})
@@ -178,6 +188,11 @@ class TestProjectSharing(TestProjectSharingCommon):
             Task.with_context(default_child_ids=[Command.create({'name': 'Foo', 'description': 'Foo'})]).create({'name': 'foo'})
         with self.assertRaisesRegex(AccessError, "not allowed to modify 'Task'"):
             Task.with_context(default_child_ids=[Command.update(self.task_no_collabo.id, {'name': 'Foo'})]).create({'name': 'foo'})
+        with self.assertRaisesRegex(AccessError, "not allowed to modify 'Task'"):
+            self.task_no_collabo.parent_id = self.task_no_collabo.create({'name': 'parent collabo'})
+            task = Task.with_context(default_child_ids=[Command.unlink(self.task_no_collabo.id)]).create({'name': 'foo'})
+            task.env.invalidate_all()
+            self.assertTrue(self.task_no_collabo.parent_id, "Task should still be there, no delete is sent")
         with self.assertRaisesRegex(AccessError, "not allowed to delete 'Task'"):
             Task.with_context(default_child_ids=[Command.delete(self.task_no_collabo.id)]).create({'name': 'foo'})
         with self.assertRaisesRegex(AccessError, "not allowed to modify 'Task'"):
@@ -199,9 +214,13 @@ class TestProjectSharing(TestProjectSharingCommon):
         with self.assertRaisesRegex(AccessError, "not allowed to create 'Project Tags'"):
             Task.with_context(default_tag_ids=[Command.create({'name': 'Bar'})]).create({'name': 'foo'})
         with self.assertRaisesRegex(AccessError, "not allowed to modify 'Project Tags'"):
-            Task.with_context(default_tag_ids=[Command.update(self.task_tag.id, {'name': 'Bar'})]).create({'name': 'foo'})
+            task = Task.with_context(default_tag_ids=[Command.update(self.task_tag.id, {'name': 'Bar'})]).create({'name': 'foo'})
+            task.env.invalidate_all()
+            self.assertNotEqual(self.task_tag.name, 'Bar')
         with self.assertRaisesRegex(AccessError, "not allowed to delete 'Project Tags'"):
             Task.with_context(default_tag_ids=[Command.delete(self.task_tag.id)]).create({'name': 'foo'})
+            task.env.invalidate_all()
+            self.assertTrue(self.task_tag.exists())
 
         task = Task.create({'name': 'foo', 'tag_ids': [Command.link(self.task_tag.id)]})
         self.assertEqual(task.tag_ids, self.task_tag)
@@ -279,6 +298,13 @@ class TestProjectSharing(TestProjectSharingCommon):
             with form.child_ids.new() as subtask_form:
                 subtask_form.name = 'Test Subtask'
         self.assertEqual(len(task.child_ids), 2, 'Check 2 subtasks has correctly been created by the user portal.')
+
+        # Allow to set as parent a task he has access to
+        task.write({'parent_id': self.task_portal.id})
+        self.assertEqual(task.parent_id, self.task_portal)
+        # Disallow to set as parent a task he doesn't have access to
+        with self.assertRaises(AccessError, msg="Should not accept the portal user to set a parent task he doesn't have access to."):
+            task.write({'parent_id': self.task_no_collabo.id})
 
         # Create/Update a forbidden task through child_ids
         with self.assertRaisesRegex(AccessError, "You cannot write on description"):

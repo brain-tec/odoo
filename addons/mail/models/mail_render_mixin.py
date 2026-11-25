@@ -19,6 +19,9 @@ from odoo.tools.rendering_tools import convert_inline_template_to_qweb, parse_in
 
 _logger = logging.getLogger(__name__)
 
+BYPASS_RESTRICTED_RENDERING = object()
+
+
 def format_date(env, date, pattern=False, lang_code=False):
     try:
         return tools.format_date(env, date, date_format=pattern, lang_code=lang_code)
@@ -148,7 +151,7 @@ class MailRenderMixin(models.AbstractModel):
 
         _sub_relative2absolute.base_url = base_url
         html = re.sub(r"""(<(?:img|v:fill|v:image)(?=\s)[^>]*\ssrc=")(/[^/][^"]+)""", _sub_relative2absolute, html)
-        html = re.sub(r"""(<a(?=\s)[^>]*\shref=")(/[^/][^"]+)""", _sub_relative2absolute, html)
+        html = re.sub(r"""(<(?:a|v:roundrect|v:rect)(?=\s)[^>]*\shref=")(/[^/][^"]+)""", _sub_relative2absolute, html)
         html = re.sub(r"""(<[\w-]+(?=\s)[^>]*\sbackground=")(/[^/][^"]+)""", _sub_relative2absolute, html)
         html = re.sub(re.compile(
             r"""( # Group 1: element up to url in style
@@ -206,6 +209,14 @@ class MailRenderMixin(models.AbstractModel):
     # ------------------------------------------------------------
     # SECURITY
     # ------------------------------------------------------------
+
+    def _is_restricted(self):
+        return (
+            not self._unrestricted_rendering
+            and self.env.context.get("bypass_restricted_rendering") is not BYPASS_RESTRICTED_RENDERING
+            and not self.env.is_admin()
+            and not self.env.user.has_group('mail.group_mail_template_editor')
+        )
 
     def _is_dynamic(self):
         for template in self.sudo():
@@ -296,15 +307,13 @@ class MailRenderMixin(models.AbstractModel):
         if add_context:
             variables.update(**add_context)
 
-        is_restricted = not self._unrestricted_rendering and not self.env.is_admin() and not self.env.user.has_group('mail.group_mail_template_editor')
-
         for record in self.env[model].browse(res_ids):
             variables['object'] = record
             try:
                 render_result = self.env['ir.qweb']._render(
                     html.fragment_fromstring(template_src, create_parent='div'),
                     variables,
-                    raise_on_code=is_restricted,
+                    raise_on_code=self._is_restricted(),
                     **(options or {})
                 )
                 # remove the rendered tag <div> that was added in order to wrap potentially multiples nodes into one.
@@ -394,8 +403,7 @@ class MailRenderMixin(models.AbstractModel):
         template_instructions = parse_inline_template(str(template_txt))
         is_dynamic = len(template_instructions) > 1 or template_instructions[0][1]
 
-        if (not self._unrestricted_rendering and is_dynamic and not self.env.is_admin() and
-           not self.env.user.has_group('mail.group_mail_template_editor')):
+        if is_dynamic and self._is_restricted():
             group = self.env.ref('mail.group_mail_template_editor')
             raise AccessError(_('Only users belonging to the "%s" group can modify dynamic templates.', group.name))
 
@@ -433,8 +441,14 @@ class MailRenderMixin(models.AbstractModel):
 
         :return dict: updated version of rendered per record ID;
         """
+        # TODO make this a parameter
+        model = self.env.context.get('mail_render_postprocess_model')
+        res_ids = list(rendered.keys())
         for res_id, rendered_html in rendered.items():
-            rendered[res_id] = self._replace_local_links(rendered_html)
+            base_url = None
+            if model:
+                base_url = self.env[model].browse(res_id).with_prefetch(res_ids).get_base_url()
+            rendered[res_id] = self._replace_local_links(rendered_html, base_url)
         return rendered
 
     @api.model
@@ -475,7 +489,7 @@ class MailRenderMixin(models.AbstractModel):
             rendered = self._render_template_inline_template(template_src, model, res_ids,
                                                              add_context=add_context, options=options)
         if post_process:
-            rendered = self._render_template_postprocess(rendered)
+            rendered = self.with_context(mail_render_postprocess_model=model)._render_template_postprocess(rendered)
 
         return rendered
 

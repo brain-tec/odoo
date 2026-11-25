@@ -14,7 +14,9 @@ class PortalShare(models.TransientModel):
         result['res_id'] = self._context.get('active_id', False)
         if result['res_model'] and result['res_id']:
             record = self.env[result['res_model']].browse(result['res_id'])
-            result['share_link'] = record.get_base_url() + record._get_share_url(redirect=True)
+            share_url = record._get_share_url(redirect=True)
+            base_url = record.get_base_url()
+            result['share_link'] = base_url + share_url
         return result
 
     @api.model
@@ -73,6 +75,7 @@ class PortalShare(models.TransientModel):
                 values={'partner': partner, 'note': self.note, 'record': self.resource_ref,
                         'share_link': share_link},
                 subject=_("You are invited to access %s", self.resource_ref.display_name),
+                message_type='comment',
                 subtype_id=note.id,
                 email_layout_xmlid='mail.mail_notification_light',
                 partner_ids=[(6, 0, partner.ids)])
@@ -92,6 +95,7 @@ class PortalShare(models.TransientModel):
                 values={'partner': partner, 'note': self.note, 'record': self.resource_ref,
                         'share_link': share_link},
                 subject=_("You are invited to access %s", self.resource_ref.display_name),
+                message_type='comment',
                 subtype_id=note.id,
                 email_layout_xmlid='mail.mail_notification_light',
                 partner_ids=[(6, 0, partner.ids)])

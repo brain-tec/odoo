@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from markupsafe import Markup
-from datetime import datetime, timedelta
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs, urlencode
 
 from odoo import api, fields, models, tools, SUPERUSER_ID, _
-from odoo.exceptions import UserError, AccessError
+from odoo.exceptions import UserError, AccessError, RedirectWarning
 from odoo.tools.safe_eval import safe_eval, time
-from odoo.tools.misc import find_in_path, format_datetime, ustr
+from odoo.tools.misc import find_in_path, ustr
 from odoo.tools import check_barcode_encoding, config, is_html_empty, parse_version
 from odoo.http import request
 from odoo.osv.expression import NEGATIVE_TERM_OPERATORS, FALSE_DOMAIN
@@ -24,6 +23,7 @@ import json
 from lxml import etree
 from contextlib import closing
 from reportlab.graphics.barcode import createBarcodeDrawing
+from reportlab.pdfbase.pdfmetrics import getFont, TypeFace
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from collections import OrderedDict
 from collections.abc import Iterable
@@ -43,8 +43,17 @@ _logger = logging.getLogger(__name__)
 # before rendering a barcode (done in a C extension) and this part is not thread safe. We attempt
 # here to init the T1 fonts cache at the start-up of Odoo so that rendering of barcode in multiple
 # thread does not lock the server.
+_DEFAULT_BARCODE_FONT = 'Courier'
 try:
-    createBarcodeDrawing('Code128', value='foo', format='png', width=100, height=100, humanReadable=1).asString('png')
+    available = TypeFace(_DEFAULT_BARCODE_FONT).findT1File()
+    if not available:
+        substitution_font = 'NimbusMonoPS-Regular'
+        fnt = getFont(substitution_font)
+        if fnt:
+            _DEFAULT_BARCODE_FONT = substitution_font
+            fnt.ascent = 629
+            fnt.descent = -157
+    createBarcodeDrawing('Code128', value='foo', format='png', width=100, height=100, humanReadable=1, fontName=_DEFAULT_BARCODE_FONT).asString('png')
 except Exception:
     pass
 
@@ -195,7 +204,7 @@ class IrActionsReport(models.Model):
         attachment_name = safe_eval(self.attachment, {'object': record, 'time': time}) if self.attachment else ''
         if not attachment_name:
             return None
-        return self.env['ir.attachment'].search([
+        return record.env['ir.attachment'].search([
                 ('name', '=', attachment_name),
                 ('res_model', '=', self.model),
                 ('res_id', '=', record.id)
@@ -336,6 +345,13 @@ class IrActionsReport(models.Model):
         if not layout:
             return {}
         base_url = self._get_report_url(layout=layout)
+        url = urlparse(base_url)
+        query = parse_qs(url.query or "")
+        debug = self.env.context.get("debug")
+        if not isinstance(debug, str):
+            debug = "1" if debug else "0"
+        query["debug"] = debug
+        base_url = url._replace(query=urlencode(query)).geturl()
 
         root = lxml.html.fromstring(html, parser=lxml.html.HTMLParser(encoding='utf-8'))
         match_klass = "//div[contains(concat(' ', normalize-space(@class), ' '), ' {} ')]"
@@ -368,7 +384,8 @@ class IrActionsReport(models.Model):
                     'subst': False,
                     'body': Markup(lxml.html.tostring(node, encoding='unicode')),
                     'base_url': base_url,
-                    'report_xml_id' : self.xml_id
+                    'report_xml_id': self.xml_id,
+                    'debug': self.env.context.get("debug"),
                 }, raise_if_not_found=False)
             bodies.append(body)
             if node.get('data-oe-model') == report_model:
@@ -390,12 +407,14 @@ class IrActionsReport(models.Model):
         header = self.env['ir.qweb']._render(layout.id, {
             'subst': True,
             'body': Markup(lxml.html.tostring(header_node, encoding='unicode')),
-            'base_url': base_url
+            'base_url': base_url,
+            'debug': self.env.context.get("debug"),
         })
         footer = self.env['ir.qweb']._render(layout.id, {
             'subst': True,
             'body': Markup(lxml.html.tostring(footer_node, encoding='unicode')),
-            'base_url': base_url
+            'base_url': base_url,
+            'debug': self.env.context.get("debug"),
         })
 
         return bodies, res_ids, header, footer, specific_paperformat_args
@@ -437,12 +456,9 @@ class IrActionsReport(models.Model):
 
         # Passing the cookie to wkhtmltopdf in order to resolve internal links.
         if request and request.db:
-            expiration = datetime.now() + timedelta(hours=1)
-            # Use format_datetime to force locale
-            expiration = format_datetime(self.env, expiration, "UTC", "E, d-M-Y H:m:s z", "en_US")
             base_url = self._get_report_url()
             domain = urlparse(base_url).hostname
-            cookie = f'session_id={request.session.sid}; HttpOnly; expires={expiration}; domain={domain}; path=/;'
+            cookie = f'session_id={request.session.sid}; HttpOnly; domain={domain}; path=/;'
             cookie_jar_file_fd, cookie_jar_file_path = tempfile.mkstemp(suffix='.txt', prefix='report.cookie_jar.tmp.')
             temporary_files.append(cookie_jar_file_path)
             with closing(os.fdopen(cookie_jar_file_fd, 'wb')) as cookie_jar_file:
@@ -562,6 +578,11 @@ class IrActionsReport(models.Model):
         }
         kwargs = {k: validator(kwargs.get(k, v)) for k, (v, validator) in defaults.items()}
         kwargs['humanReadable'] = kwargs.pop('humanreadable')
+        if kwargs['humanReadable']:
+            kwargs['fontName'] = _DEFAULT_BARCODE_FONT
+
+        if kwargs['width'] * kwargs['height'] > 1200000 or max(kwargs['width'], kwargs['height']) > 10000:
+            raise ValueError("Barcode too large")
 
         if barcode_type == 'UPCA' and len(value) in (11, 12, 13):
             barcode_type = 'EAN13'
@@ -650,6 +671,11 @@ class IrActionsReport(models.Model):
                 reader = PdfFileReader(stream)
                 writer.appendPagesFromReader(reader)
             except (PdfReadError, TypeError, NotImplementedError, ValueError):
+                # TODO : make custom_error_handler a parameter in master
+                custom_error_handler = self.env.context.get('custom_error_handler')
+                if custom_error_handler:
+                    custom_error_handler(stream)
+                    continue
                 raise UserError(_("Odoo is unable to merge the generated PDFs."))
         result_stream = io.BytesIO()
         streams.append(result_stream)
@@ -719,6 +745,7 @@ class IrActionsReport(models.Model):
             # because the resources files are not loaded in time.
             # https://github.com/wkhtmltopdf/wkhtmltopdf/issues/2083
             additional_context = {'debug': False}
+            data.setdefault("debug", False)
 
             # As the assets are generated during the same transaction as the rendering of the
             # templates calling them, there is a scenario where the assets are unreachable: when
@@ -847,7 +874,7 @@ class IrActionsReport(models.Model):
 
             # if res_id is false
             # we are unable to fetch the record, it won't be saved as we can't split the documents unambiguously
-            if not res_id:
+            if not res_id or not stream_data['stream']:
                 _logger.warning(
                     "These documents were not saved as an attachment because the template of %s doesn't "
                     "have any headers seperating different instances of it. If you want it saved,"
@@ -898,13 +925,38 @@ class IrActionsReport(models.Model):
                 else:
                     _logger.info("The PDF documents %r are now saved in the database", attachment_names)
 
+        stream_to_ids = {v['stream']: k for k, v in collected_streams.items() if v['stream']}
         # Merge all streams together for a single record.
-        streams_to_merge = [x['stream'] for x in collected_streams.values() if x['stream']]
+        streams_to_merge = list(stream_to_ids.keys())
+        error_record_ids = []
+
         if len(streams_to_merge) == 1:
             pdf_content = streams_to_merge[0].getvalue()
         else:
-            with self._merge_pdfs(streams_to_merge) as pdf_merged_stream:
+            with self.with_context(
+                    custom_error_handler=lambda error_stream: error_record_ids.append(stream_to_ids[error_stream])
+            )._merge_pdfs(streams_to_merge) as pdf_merged_stream:
                 pdf_content = pdf_merged_stream.getvalue()
+
+        if error_record_ids:
+            action = {
+                'type': 'ir.actions.act_window',
+                'name': _('Problematic record(s)'),
+                'res_model': report_sudo.model,
+                'domain': [('id', 'in', error_record_ids)],
+                'views': [(False, 'tree'), (False, 'form')],
+            }
+            num_errors = len(error_record_ids)
+            if num_errors == 1:
+                action.update({
+                    'views': [(False, 'form')],
+                    'res_id': error_record_ids[0],
+                })
+            raise RedirectWarning(
+                message=_('Odoo is unable to merge the generated PDFs because of %(num_errors)s corrupted file(s)', num_errors=num_errors),
+                action=action,
+                button_text=_('View Problematic Record(s)'),
+            )
 
         for stream in streams_to_merge:
             stream.close()

@@ -6,14 +6,15 @@
 # Martin Trigaux, 2022
 # Leonardo J. Caballero G. <leonardocaballero@gmail.com>, 2022
 # Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2022
+# Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:02+0000\n"
+"POT-Creation-Date: 2025-06-13 18:37+0000\n"
 "PO-Revision-Date: 2022-09-22 05:57+0000\n"
-"Last-Translator: Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2022\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -38,6 +39,7 @@ msgstr ""
 "de cliente."
 
 #. module: website_sale_delivery
+#. odoo-python
 #: code:addons/website_sale_delivery/controllers/main.py:0
 #: code:addons/website_sale_delivery/controllers/main.py:0
 #, python-format
@@ -58,11 +60,6 @@ msgstr "Elegir un método de entrega"
 #: model:ir.model,name:website_sale_delivery.model_res_country
 msgid "Country"
 msgstr "País"
-
-#. module: website_sale_delivery
-#: model_terms:ir.ui.view,arch_db:website_sale_delivery.res_config_settings_view_form
-msgid "DHL Shipping Methods"
-msgstr "Métodos de envío de DHL"
 
 #. module: website_sale_delivery
 #: model:ir.model.fields,field_description:website_sale_delivery.field_sale_order__amount_delivery
@@ -96,12 +93,7 @@ msgid "Easypost Shipping Methods"
 msgstr "Métodos de envío Easypost"
 
 #. module: website_sale_delivery
-#: model_terms:ir.ui.view,arch_db:website_sale_delivery.res_config_settings_view_form
-msgid "FedEx Shipping Methods"
-msgstr "Métodos de envio FedEx"
-
-#. module: website_sale_delivery
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_sale_delivery/static/src/js/website_sale_delivery.js:0
 #, python-format
 msgid "Free"
@@ -113,6 +105,7 @@ msgid "Is Published"
 msgstr "Está publicado"
 
 #. module: website_sale_delivery
+#. odoo-python
 #: code:addons/website_sale_delivery/controllers/main.py:0
 #, python-format
 msgid ""
@@ -123,6 +116,7 @@ msgstr ""
 "la página y vuelva a intentarlo."
 
 #. module: website_sale_delivery
+#. odoo-python
 #: code:addons/website_sale_delivery/controllers/main.py:0
 #, python-format
 msgid ""
@@ -133,6 +127,7 @@ msgstr ""
 "cambiar el método de entrega"
 
 #. module: website_sale_delivery
+#. odoo-python
 #: code:addons/website_sale_delivery/controllers/main.py:0
 #, python-format
 msgid ""
@@ -141,6 +136,13 @@ msgid ""
 msgstr ""
 "No hay un método de envío disponible para su pedido y dirección de envío. "
 "Por favor, contáctese con nosotros para más información."
+
+#. module: website_sale_delivery
+#. odoo-python
+#: code:addons/website_sale_delivery/controllers/main.py:0
+#, python-format
+msgid "No shipping method is selected."
+msgstr "No se ha seleccionado ningún método de envío."
 
 #. module: website_sale_delivery
 #: model_terms:ir.ui.view,arch_db:website_sale_delivery.view_delivery_carrier_search_inherit_website_sale_delivery
@@ -175,6 +177,7 @@ msgid "Shipping Methods"
 msgstr "Métodos de envío"
 
 #. module: website_sale_delivery
+#. odoo-python
 #: code:addons/website_sale_delivery/controllers/main.py:0
 #, python-format
 msgid "Sorry, we are unable to ship your order"
@@ -189,11 +192,6 @@ msgstr "El importe sin impuestos."
 #: model:ir.model.fields,help:website_sale_delivery.field_delivery_carrier__website_url
 msgid "The full URL to access the document through the website."
 msgstr "La URL completa para acceder al documento a través del sitio web."
-
-#. module: website_sale_delivery
-#: model_terms:ir.ui.view,arch_db:website_sale_delivery.res_config_settings_view_form
-msgid "USPS Shipping Methods"
-msgstr "Métodos de envío USPS"
 
 #. module: website_sale_delivery
 #: model:ir.model.fields,field_description:website_sale_delivery.field_delivery_carrier__website_published

@@ -15,7 +15,7 @@ ProductScreen.exec.addOrderline('Whiteboard Pen', '2');
 ProductScreen.do.clickPartnerButton();
 ProductScreen.do.clickCustomer('Test Partner AAA');
 PosLoyalty.check.orderTotalIs('6.40');
-PosLoyalty.exec.finalizeOrder('Cash', '10');
+PosLoyalty.exec.finalizeOrder('Cash');
 
 // Order2: Consumes points to get free product.
 ProductScreen.do.clickPartnerButton();
@@ -31,7 +31,7 @@ ProductScreen.check.selectedOrderlineHas('Whiteboard Pen', '3.00');
 PosLoyalty.check.hasRewardLine('Free Product - Whiteboard Pen', '-3.20', '1.00');
 PosLoyalty.check.isRewardButtonHighlighted(false);
 PosLoyalty.check.orderTotalIs('6.40');
-PosLoyalty.exec.finalizeOrder('Cash', '10');
+PosLoyalty.exec.finalizeOrder('Cash');
 
 // Order3: Generate 4 points.
 // - Initially gets free product, but was removed automatically by changing the
@@ -63,7 +63,7 @@ ProductScreen.check.selectedOrderlineHas('Whiteboard Pen', '4.00');
 PosLoyalty.check.isRewardButtonHighlighted(true);
 
 PosLoyalty.check.orderTotalIs('12.80');
-PosLoyalty.exec.finalizeOrder('Cash', '20');
+PosLoyalty.exec.finalizeOrder('Cash');
 
 Tour.register('PosLoyaltyLoyaltyProgram1', { test: true, url: '/pos/web' }, getSteps());
 
@@ -85,7 +85,7 @@ ProductScreen.do.clickDisplayedProduct('Whiteboard Pen');
 PosLoyalty.check.hasRewardLine('Free Product - Whiteboard Pen', '-3.20', '1.00');
 PosLoyalty.check.isRewardButtonHighlighted(false);
 PosLoyalty.check.orderTotalIs('3.20');
-PosLoyalty.exec.finalizeOrder('Cash', '10');
+PosLoyalty.exec.finalizeOrder('Cash');
 
 // Order2: Generate 4 points for Test Partner CCC.
 // - Reference: Order2_CCC
@@ -107,7 +107,7 @@ ProductScreen.do.clickPartnerButton();
 ProductScreen.do.clickCustomer('Test Partner CCC');
 PosLoyalty.check.customerIs('Test Partner CCC');
 PosLoyalty.check.orderTotalIs('12.80');
-PosLoyalty.exec.finalizeOrder('Cash', '20');
+PosLoyalty.exec.finalizeOrder('Cash');
 
 // Order3: Generate 3 points for Test Partner BBB.
 // - Reference: Order3_BBB
@@ -120,7 +120,7 @@ ProductScreen.do.clickPartnerButton();
 ProductScreen.do.clickCustomer('Test Partner BBB');
 PosLoyalty.check.customerIs('Test Partner BBB');
 PosLoyalty.check.orderTotalIs('9.60');
-PosLoyalty.exec.finalizeOrder('Cash', '10');
+PosLoyalty.exec.finalizeOrder('Cash');
 
 // Order4: Should not have reward because the customer will be removed.
 // - Reference: Order4_no_reward
@@ -137,7 +137,7 @@ ProductScreen.do.clickPartnerButton();
 PosLoyalty.do.unselectPartner();
 PosLoyalty.check.customerIs('Customer');
 PosLoyalty.check.orderTotalIs('6.40');
-PosLoyalty.exec.finalizeOrder('Cash', '10');
+PosLoyalty.exec.finalizeOrder('Cash');
 
 Tour.register('PosLoyaltyLoyaltyProgram2', { test: true, url: '/pos/web' }, getSteps());
 
@@ -159,7 +159,7 @@ PosLoyalty.do.clickRewardButton();
 PosLoyalty.check.hasRewardLine('Free Product - Whiteboard Pen', '0.0', '1.00');
 
 PosLoyalty.check.orderTotalIs('10.2');
-PosLoyalty.exec.finalizeOrder('Cash', '10.2');
+PosLoyalty.exec.finalizeOrder('Cash');
 
 Tour.register('PosLoyaltyLoyaltyProgram3', { test: true, url: '/pos/web' }, getSteps());
 
@@ -182,7 +182,7 @@ ProductScreen.do.clickHomeCategory();
 
 // Generates 10.2 points and use points to get the reward product with zero sale price
 ProductScreen.exec.addOrderline('Desk Organizer', '3');
-PosLoyalty.exec.finalizeOrder('Cash', '15.3');
+PosLoyalty.exec.finalizeOrder('Cash');
 
 Tour.register('PosLoyaltyNextOrderCouponExpirationDate', { test: true, url: '/pos/web' }, getSteps());
 
@@ -200,6 +200,6 @@ ProductScreen.exec.addOrderline('Whiteboard Pen', '1');
 PosLoyalty.do.clickRewardButton();
 
 PosLoyalty.check.orderTotalIs('5.10');
-PosLoyalty.exec.finalizeOrder('Cash', '5.10');
+PosLoyalty.exec.finalizeOrder('Cash');
 
 Tour.register('PosLoyaltyDontGrantPointsForRewardOrderLines', { test: true, url: '/pos/web' }, getSteps());

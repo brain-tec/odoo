@@ -147,6 +147,11 @@ class HolidaysAllocation(models.Model):
         ('duration_check', "CHECK( ( number_of_days > 0 AND allocation_type='regular') or (allocation_type != 'regular'))", "The duration must be greater than 0."),
     ]
 
+    @api.constrains('date_from', 'date_to')
+    def _check_date_from_date_to(self):
+        if any(allocation.date_to and allocation.date_from > allocation.date_to for allocation in self):
+            raise UserError(_("The Start Date of the Validity Period must be anterior to the End Date."))
+
     # The compute does not get triggered without a depends on record creation
     # aka keep the 'useless' depends
     @api.depends_context('uid')
@@ -627,7 +632,7 @@ class HolidaysAllocation(models.Model):
             'date_from': self.date_from,
             'date_to': self.date_to,
             'accrual_plan_id': self.accrual_plan_id.id,
-        } for employee in employees]
+        } for employee in employees if (not employee.resource_calendar_id) or employee.resource_calendar_id.hours_per_day]
 
     def action_draft(self):
         if any(holiday.state not in ['confirm', 'refuse'] for holiday in self):

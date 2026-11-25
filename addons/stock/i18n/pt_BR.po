@@ -12,16 +12,16 @@
 # Adriano Prado <adrianojprado@gmail.com>, 2023
 # a75f12d3d37ea5bf159c4b3e85eb30e7_0fa6927, 2023
 # Éder Brito <britoederr@gmail.com>, 2023
-# Wil Odoo, 2024
-# Maitê Dietze, 2024
+# Wil Odoo, 2025
+# Maitê Dietze, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"POT-Creation-Date: 2025-06-13 18:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:55+0000\n"
-"Last-Translator: Maitê Dietze, 2024\n"
+"Last-Translator: Maitê Dietze, 2025\n"
 "Language-Team: Portuguese (Brazil) (https://app.transifex.com/odoo/teams/41243/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1336,7 +1336,7 @@ msgstr "Por Lotes"
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__product_template__tracking__serial
 msgid "By Unique Serial Number"
-msgstr "Por Número de Série Único"
+msgstr "Por número de série exclusivo"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move__procure_method
@@ -1347,12 +1347,11 @@ msgid ""
 "current stock) to gather products. If we want to chain moves and have this "
 "one to wait for the previous, this second option should be chosen."
 msgstr ""
-"Por padrão, o sistema terá de o estoque no local de origem e passivamente "
-"esperar por disponibilidade. A outra possibilidade permite-lhe criar "
-"directamente um contrato sobre o local de origem (e, portanto, ignorar o seu"
-" estoque atual) para reunir produtos. Se quisermos movimentos de cadeia e "
-"ter um presente para esperar o anterior, esta segunda opção deve ser "
-"escolhido."
+"Por padrão, o sistema irá retirar do estoque no local de origem e aguardar "
+"passivamente a disponibilidade. A outra possibilidade permite que você crie "
+"diretamente uma compra no local de origem (e, portanto, ignorar seu estoque "
+"atual) para coletar produtos. Se quiser vincular movimentações e fazer com "
+"que uma espere pela anterior, a segunda opção deve ser escolhida."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_location__active
@@ -1677,8 +1676,10 @@ msgstr "Computar custos de envio"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid "Compute shipping costs and ship with DHL"
-msgstr "Calcular o custo de envio e enviar com DHL"
+msgid ""
+"Compute shipping costs and ship with DHL<br/>\n"
+"                                        <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -1687,8 +1688,10 @@ msgstr "Calcular custos de envio e enviar com Easypost"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid "Compute shipping costs and ship with FedEx"
-msgstr "Calcular o custo de envio e enviar pelo FedEx"
+msgid ""
+"Compute shipping costs and ship with FedEx<br/>\n"
+"                                        <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -1697,13 +1700,17 @@ msgstr "Calcular custos de envio e enviar pelo Sendcloud"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid "Compute shipping costs and ship with UPS"
-msgstr "Calcular o custo de envio e enviar pela UPS"
+msgid ""
+"Compute shipping costs and ship with UPS<br/>\n"
+"                                        <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
-msgid "Compute shipping costs and ship with USPS"
-msgstr "Calcular o custo de envio e enviar pela USPS"
+msgid ""
+"Compute shipping costs and ship with USPS<br/>\n"
+"                                        <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -2153,6 +2160,11 @@ msgstr "Local do Cliente"
 #: model_terms:ir.ui.view,arch_db:stock.view_location_form
 msgid "Cyclic Counting"
 msgstr "Contagem cíclica"
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid "DHL Connector"
+msgstr "Conector DHL"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_dhl
@@ -2977,6 +2989,7 @@ msgstr "Fevereiro"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_fedex
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "FedEx Connector"
 msgstr "Conector FedEx"
 
@@ -4543,6 +4556,11 @@ msgid "Lot"
 msgstr "Lote"
 
 #. module: stock
+#: model:ir.model,name:stock.model_report_stock_label_lot_template_view
+msgid "Lot Label Report"
+msgstr "Relatório de etiqueta de lote"
+
+#. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__picking_label_type__label_type__lots
 msgid "Lot/SN Labels"
 msgstr "Etiquetas de lote/números de série"
@@ -6050,7 +6068,7 @@ msgstr "Operações de processo em transferências de ondas"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Process transfers in batch per worker"
-msgstr "Processar transferências em lote por trabalhador"
+msgstr "Processar transferências em lote por prestador de serviços"
 
 #. module: stock
 #: model:ir.model,name:stock.model_procurement_group
@@ -6411,7 +6429,7 @@ msgstr ""
 #. module: stock
 #: model:ir.model,name:stock.model_stock_putaway_rule
 msgid "Putaway Rule"
-msgstr "Regra de Armazenamento"
+msgstr "Regra de entrada em depósito"
 
 #. module: stock
 #. odoo-python
@@ -6432,7 +6450,7 @@ msgstr "Regra de Armazenamento"
 #: model_terms:ir.ui.view,arch_db:stock.view_putaway_search
 #, python-format
 msgid "Putaway Rules"
-msgstr "Regras de Armazenamento"
+msgstr "Regras de entrada em depósito"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_stock_rule
@@ -6442,7 +6460,7 @@ msgstr "Jogue fora:"
 #. module: stock
 #: model:ir.actions.act_window,name:stock.action_putaway_tree
 msgid "Putaways Rules"
-msgstr "Regras de Armazenamentos"
+msgstr "Regras de entrada em depósito"
 
 #. module: stock
 #: model:ir.model.constraint,message:stock.constraint_stock_warehouse_orderpoint_qty_multiple_check
@@ -6679,7 +6697,7 @@ msgstr ""
 #: code:addons/stock/models/stock_quant.py:0
 #, python-format
 msgid "Quants cannot be created for consumables or services."
-msgstr "Os quants não podem ser criados para consumíveis ou serviços."
+msgstr "Não é possível criar quantidades para consumíveis ou serviços."
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_picking__state__assigned
@@ -9156,11 +9174,13 @@ msgstr "Tipo de atividade de exceção registrada."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_ups
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "UPS Connector"
 msgstr "Conector UPS"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_usps
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "USPS Connector"
 msgstr "Conector USPS"
 
@@ -9933,6 +9953,16 @@ msgstr "Não é possível alterar o tipo de um produto que já foi usado."
 
 #. module: stock
 #. odoo-python
+#: code:addons/stock/models/stock_orderpoint.py:0
+#, python-format
+msgid ""
+"You can not create a snoozed orderpoint that is not manually triggered."
+msgstr ""
+"Não é possível criar um ponto de pedido em espera que não seja acionado "
+"manualmente."
+
+#. module: stock
+#. odoo-python
 #: code:addons/stock/models/stock_move_line.py:0
 #, python-format
 msgid ""
@@ -9970,6 +10000,17 @@ msgstr "Só é possível inserir quantidades positivas."
 msgid "You can only process 1.0 %s of products with unique serial number."
 msgstr ""
 "Você só pode processar 1,0 %s de produtos com número de série exclusivo."
+
+#. module: stock
+#. odoo-python
+#: code:addons/stock/models/stock_orderpoint.py:0
+#, python-format
+msgid ""
+"You can only snooze manual orderpoints. You should rather archive 'auto-"
+"trigger' orderpoints if you do not want them to be triggered."
+msgstr ""
+"Você só pode adiar pontos de pedidos manuais. Você deve arquivar os pontos "
+"de pedido de \"acionamento automático\" se não quiser que sejam acionados."
 
 #. module: stock
 #. odoo-python

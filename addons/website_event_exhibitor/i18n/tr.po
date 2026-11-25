@@ -21,14 +21,15 @@
 # Murat Kaplan <muratk@projetgrup.com>, 2022
 # Halil, 2023
 # Melih Melik Sonmez, 2023
+# Deniz Guvener_Odoo <degu@odoo.com>, 2025
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-10 10:24+0000\n"
+"POT-Creation-Date: 2025-02-10 08:28+0000\n"
 "PO-Revision-Date: 2022-09-22 05:56+0000\n"
-"Last-Translator: Melih Melik Sonmez, 2023\n"
+"Last-Translator: Deniz Guvener_Odoo <degu@odoo.com>, 2025\n"
 "Language-Team: Turkish (https://app.transifex.com/odoo/teams/41243/tr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -37,7 +38,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. module: website_event_exhibitor
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_event_exhibitor/static/src/xml/event_exhibitor_connect.xml:0
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
 #, python-format
@@ -236,7 +237,7 @@ msgid "Chat Room"
 msgstr "Sohbet Odası"
 
 #. module: website_event_exhibitor
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_event_exhibitor/static/src/xml/event_exhibitor_connect.xml:0
 #, python-format
 msgid "Come back between"
@@ -382,7 +383,7 @@ msgid "End hour"
 msgstr "Bitiş saati"
 
 #. module: website_event_exhibitor
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_event_exhibitor/static/src/xml/event_exhibitor_connect.xml:0
 #: code:addons/website_event_exhibitor/static/src/xml/event_exhibitor_connect.xml:0
 #: model:ir.model,name:website_event_exhibitor.model_event_event
@@ -432,6 +433,7 @@ msgid "Exhibitor"
 msgstr "Sergileyici"
 
 #. module: website_event_exhibitor
+#. odoo-python
 #: code:addons/website_event_exhibitor/models/event_event.py:0
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_search
 #, python-format
@@ -540,6 +542,15 @@ msgid "Image URL"
 msgstr "URL Resmi"
 
 #. module: website_event_exhibitor
+#: model:ir.model.fields,help:website_event_exhibitor.field_event_sponsor__event_date_tz
+msgid ""
+"Indicates the timezone in which the event dates/times will be displayed on "
+"the website."
+msgstr ""
+"Etkinlik tarih ve saatlerinin web sitesinde hangi saat diliminde "
+"görüntüleneceğini belirtir."
+
+#. module: website_event_exhibitor
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
@@ -603,7 +614,7 @@ msgid "Jitsi Name"
 msgstr "Jitsi Adı"
 
 #. module: website_event_exhibitor
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_event_exhibitor/static/src/xml/event_exhibitor_connect.xml:0
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
 #, python-format
@@ -925,6 +936,7 @@ msgid "Slogan"
 msgstr "Slogan"
 
 #. module: website_event_exhibitor
+#. odoo-python
 #: code:addons/website_event_exhibitor/models/event_sponsor.py:0
 #, python-format
 msgid "Sponsor"
@@ -1032,6 +1044,7 @@ msgid "Talent Management"
 msgstr "Yetenek Yönetimi"
 
 #. module: website_event_exhibitor
+#. odoo-python
 #: code:addons/website_event_exhibitor/controllers/website_event_main.py:0
 #, python-format
 msgid ""
@@ -1113,7 +1126,7 @@ msgid "Within opening hours"
 msgstr "Çalışma saatleri içinde"
 
 #. module: website_event_exhibitor
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_event_exhibitor/static/src/xml/event_exhibitor_connect.xml:0
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
 #, python-format
@@ -1147,7 +1160,7 @@ msgid "e.g. Your best choice for your home"
 msgstr "örn. : Eviniz için en iyi seçiminiz"
 
 #. module: website_event_exhibitor
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_event_exhibitor/static/src/xml/event_exhibitor_connect.xml:0
 #: code:addons/website_event_exhibitor/static/src/xml/event_exhibitor_connect.xml:0
 #, python-format
@@ -1155,7 +1168,7 @@ msgid "is not available right now."
 msgstr "şu anda mevcut değil."
 
 #. module: website_event_exhibitor
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_event_exhibitor/static/src/xml/event_exhibitor_connect.xml:0
 #, python-format
 msgid "is over."
@@ -1176,7 +1189,7 @@ msgid "search."
 msgstr "arama."
 
 #. module: website_event_exhibitor
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_event_exhibitor/static/src/xml/event_exhibitor_connect.xml:0
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
 #, python-format
@@ -1184,7 +1197,7 @@ msgid "starts in"
 msgstr "içinde başlar"
 
 #. module: website_event_exhibitor
-#. openerp-web
+#. odoo-javascript
 #: code:addons/website_event_exhibitor/static/src/xml/event_exhibitor_connect.xml:0
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
 #, python-format

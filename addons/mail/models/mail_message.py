@@ -8,7 +8,7 @@ from binascii import Error as binascii_error
 from collections import defaultdict
 
 from odoo import _, api, Command, fields, models, modules, tools
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, MissingError
 from odoo.osv import expression
 from odoo.tools.misc import clean_context
 
@@ -521,13 +521,18 @@ class Message(models.Model):
             # TDE: probably clean me
             parent_ids = [message.get('parent_id') for message in message_values.values()
                           if message.get('parent_id')]
-            self._cr.execute("""SELECT DISTINCT m.id, partner_rel.res_partner_id FROM "%s" m
+            self._cr.execute("""SELECT DISTINCT m.id, m.model, m.res_id, partner_rel.res_partner_id
+                FROM "%s" m
                 LEFT JOIN "mail_message_res_partner_rel" partner_rel
                 ON partner_rel.mail_message_id = m.id AND partner_rel.res_partner_id = (%%s)
-                WHERE m.id = ANY (%%s)""" % self._table, (self.env.user.partner_id.id, parent_ids,))
-            not_parent_ids = [mid[0] for mid in self._cr.fetchall() if mid[1]]
-            notified_ids += [mid for mid, message in message_values.items()
-                             if message.get('parent_id') in not_parent_ids]
+                WHERE m.id = ANY (%%s) AND m.message_type != 'user_notification'""" % self._table, (self.env.user.partner_id.id, parent_ids))
+            notified_parents = {
+                mid: (rmod, rid) for mid, rmod, rid, partner_id in self._cr.fetchall() if partner_id
+            }
+            notified_ids += [
+                mid for mid, message in message_values.items()
+                if notified_parents.get(message.get("parent_id")) == (message.get("model"), message.get("res_id"))
+            ]
 
         messages_to_check = messages_to_check.difference(set(notified_ids))
         if not messages_to_check:
@@ -563,6 +568,10 @@ class Message(models.Model):
     def create(self, values_list):
         tracking_values_list = []
         for values in values_list:
+            if not (self.env.su or self.env.user.has_group('base.group_user')):
+                values.pop('author_id', None)
+                values.pop('email_from', None)
+                self = self.with_context({k: v for k, v in self.env.context.items() if k not in ['default_author_id', 'default_email_from']})  # noqa: PLW0642
             if 'email_from' not in values:  # needed to compute reply_to
                 _author_id, email_from = self.env['mail.thread']._message_compute_author(values.get('author_id'), email_from=None, raise_on_email=False)
                 values['email_from'] = email_from
@@ -650,7 +659,7 @@ class Message(models.Model):
                 if vals_lst:
                     self.env['mail.tracking.value'].sudo().create(vals_lst)
                 if other_cmd:
-                    message.sudo().write({'tracking_value_ids': tracking_values_cmd})
+                    message.write({'tracking_value_ids': other_cmd})
 
             if message.is_thread_message(values):
                 message._invalidate_documents(values.get('model'), values.get('res_id'))
@@ -664,6 +673,9 @@ class Message(models.Model):
         return super(Message, self).read(fields=fields, load=load)
 
     def write(self, vals):
+        if not (self.env.su or self.env.user.has_group('base.group_user')):
+            vals.pop('author_id', None)
+            vals.pop('email_from', None)
         record_changed = 'model' in vals or 'res_id' in vals
         if record_changed or 'message_type' in vals:
             self._invalidate_documents()
@@ -846,6 +858,9 @@ class Message(models.Model):
         for message in self:
             if message.model and message.res_id:
                 thread_ids_by_model_name[message.model].add(message.res_id)
+        # filter missing records
+        for model_name, record_ids in thread_ids_by_model_name.items():
+            thread_ids_by_model_name[model_name] = self.env[model_name].browse(record_ids).exists().ids
 
         for vals in vals_list:
             message_sudo = self.browse(vals['id']).sudo().with_prefetch(self.ids)
@@ -857,12 +872,8 @@ class Message(models.Model):
                 'id': message_sudo.author_guest_id.id,
                 'name': message_sudo.author_guest_id.name,
             } if message_sudo.author_guest_id else [('clear',)]
-            if message_sudo.model and message_sudo.res_id:
-                record_name = self.env[message_sudo.model] \
-                    .browse(message_sudo.res_id) \
-                    .sudo() \
-                    .with_prefetch(thread_ids_by_model_name[message_sudo.model]) \
-                    .display_name
+            if message_sudo.model and message_sudo.res_id and message_sudo.res_id in thread_ids_by_model_name[message_sudo.model]:
+                record_name = self.env[message_sudo.model].browse(message_sudo.res_id).sudo().with_prefetch(thread_ids_by_model_name[message_sudo.model]).display_name
             else:
                 record_name = False
             reactions_per_content = defaultdict(self.env['mail.message.reaction'].sudo().browse)
@@ -1015,7 +1026,9 @@ class Message(models.Model):
                 try:
                     record.check_access_rights('read')
                     record.check_access_rule('read')
-                except AccessError:
+                except (MissingError, AccessError):
+                    # record has been removed from db without cascading notif -> avoid crash at least
+                    # access error -> just skip
                     continue
                 else:
                     messages += message
@@ -1084,7 +1097,7 @@ class Message(models.Model):
             records = self.env[model].browse([res_id])
         else:
             records = self.env[model] if model else self.env['mail.thread']
-        return records._notify_get_reply_to(default=email_from)[res_id]
+        return records.sudo()._notify_get_reply_to(default=email_from)[res_id]
 
     @api.model
     def _get_message_id(self, values):

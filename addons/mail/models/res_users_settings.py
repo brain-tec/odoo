@@ -9,7 +9,7 @@ class ResUsersSettings(models.Model):
     _description = 'User Settings'
     _rec_name = 'user_id'
 
-    user_id = fields.Many2one('res.users', string="User", required=True, readonly=True, ondelete='cascade')
+    user_id = fields.Many2one('res.users', string="User", required=True, ondelete='cascade', domain=[("res_users_settings_id", "=", False)])
     is_discuss_sidebar_category_channel_open = fields.Boolean(string="Is discuss sidebar category channel open?", default=True)
     is_discuss_sidebar_category_chat_open = fields.Boolean(string="Is discuss sidebar category chat open?", default=True)
 
@@ -60,6 +60,9 @@ class ResUsersSettings(models.Model):
         :param int guest_id:
         """
         self.ensure_one()
+        # Skip a guest id that matches no partner, as the volume stores the guest in a res.partner field.
+        if guest_id and not self.env['res.partner'].browse(guest_id).exists():
+            return
         volume_setting = self.env['res.users.settings.volumes'].search([
             ('user_setting_id', '=', self.id), ('partner_id', '=', partner_id), ('guest_id', '=', guest_id)
         ])

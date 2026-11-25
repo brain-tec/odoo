@@ -5,14 +5,15 @@
 # Translators:
 # Tadej Lupšina <tadej@hbs.si>, 2022
 # Matjaz Mozetic <m.mozetic@matmoz.si>, 2022
+# Aleš Pipan, 2025
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:02+0000\n"
+"POT-Creation-Date: 2025-02-10 08:27+0000\n"
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Matjaz Mozetic <m.mozetic@matmoz.si>, 2022\n"
+"Last-Translator: Aleš Pipan, 2025\n"
 "Language-Team: Slovenian (https://app.transifex.com/odoo/teams/41243/sl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -21,20 +22,23 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);\n"
 
 #. module: im_livechat_mail_bot
+#. odoo-python
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
 "Good, you can customize canned responses in the live chat "
-"application.<br/><br/><b>It's the end of this overview</b>, enjoy "
-"discovering Odoo!"
+"application.<br/><br/><b>It's the end of this overview</b>, you can now "
+"<b>close this conversation</b> or start the tour again with typing <span "
+"class=\"o_odoobot_command\">start the tour</span>. Enjoy discovering Odoo!"
 msgstr ""
 
 #. module: im_livechat_mail_bot
 #: model:ir.model,name:im_livechat_mail_bot.model_mail_bot
 msgid "Mail Bot"
-msgstr ""
+msgstr "Poštni bot"
 
 #. module: im_livechat_mail_bot
+#. odoo-python
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -51,17 +55,18 @@ msgstr "OdooBot status"
 #. module: im_livechat_mail_bot
 #: model:ir.model.fields.selection,name:im_livechat_mail_bot.selection__res_users__odoobot_state__onboarding_canned
 msgid "Onboarding canned"
-msgstr ""
-
-#. module: im_livechat_mail_bot
-#: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
-#, python-format
-msgid ""
-"That's me! 🎉<br/>Try typing <span class=\"o_odoobot_command\">:</span> to "
-"use canned responses."
-msgstr ""
+msgstr "Uvajanje končano"
 
 #. module: im_livechat_mail_bot
 #: model:ir.model,name:im_livechat_mail_bot.model_res_users
 msgid "User"
 msgstr "Uporabnik"
+
+#. module: im_livechat_mail_bot
+#. odoo-python
+#: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
+#, python-format
+msgid ""
+"Wonderful! 😇<br/>Try typing <span class=\"o_odoobot_command\">:</span> to "
+"use canned responses."
+msgstr ""

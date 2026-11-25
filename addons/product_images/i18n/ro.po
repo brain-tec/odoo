@@ -5,14 +5,15 @@
 # Translators:
 # Martin Trigaux, 2022
 # Dorin Hongu <dhongu@gmail.com>, 2023
+# Larisa_nexterp, 2025
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:02+0000\n"
+"POT-Creation-Date: 2024-02-06 13:32+0000\n"
 "PO-Revision-Date: 2022-09-22 05:54+0000\n"
-"Last-Translator: Dorin Hongu <dhongu@gmail.com>, 2023\n"
+"Last-Translator: Larisa_nexterp, 2025\n"
 "Language-Team: Romanian (https://app.transifex.com/odoo/teams/41243/ro/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -21,12 +22,15 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));\n"
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
 msgid ""
 "%(matching_images_count)s matching images have been found for "
 "%(product_count)s products."
 msgstr ""
+"%(matching_images_count)s imagini potrivite au fost găsite pentru "
+"%(product_count)s produse."
 
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.product_fetch_image_wizard_view_form
@@ -38,6 +42,7 @@ msgid ""
 msgstr ""
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
 msgid ""
@@ -95,7 +100,7 @@ msgstr "Obțineți imagini"
 #: model:ir.actions.act_window,name:product_images.product_product_action_get_pic_with_barcode
 #: model:ir.actions.act_window,name:product_images.product_template_action_get_pic_with_barcode
 msgid "Get Pictures from Google Images"
-msgstr ""
+msgstr "Obține imagini din Google Images"
 
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_res_config_settings__google_custom_search_key
@@ -154,7 +159,6 @@ msgstr ""
 #. module: product_images
 #: model:ir.actions.server,name:product_images.ir_cron_fetch_image_ir_actions_server
 #: model:ir.cron,cron_name:product_images.ir_cron_fetch_image
-#: model:ir.cron,name:product_images.ir_cron_fetch_image
 msgid "Product Images: Get product images from Google"
 msgstr "Imagini produs: Obțineți imagini produs din Google"
 
@@ -164,6 +168,7 @@ msgid "Product Variant"
 msgstr "Variantă produs"
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
 msgid "Product images"
@@ -175,6 +180,7 @@ msgid "Products To Process"
 msgstr "Produse de procesat"
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
 msgid ""
@@ -189,6 +195,7 @@ msgid "Search Engine ID"
 msgstr "ID motor de căutare"
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
 msgid "The API Key and Search Engine ID must be set in the General Settings."
@@ -197,6 +204,7 @@ msgstr ""
 "generale."
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
 msgid ""
@@ -224,6 +232,7 @@ msgstr ""
 " nu au imagine)"
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
@@ -237,6 +246,7 @@ msgstr ""
 " acțiunea sau pentru a reinstala modulul \"product_images\"."
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/models/ir_cron_trigger.py:0
 #, python-format
 msgid "This action is already scheduled. Please try again later."
@@ -262,6 +272,7 @@ msgid "You selected"
 msgstr "Ați selectat"
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
 msgid "Your API Key or your Search Engine ID is incorrect."

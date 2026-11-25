@@ -4,8 +4,8 @@
 from odoo import http, _
 from odoo.http import request
 from odoo.addons.payment import utils as payment_utils
-from odoo.addons.website_sale.controllers.main import WebsiteSale
-from odoo.exceptions import UserError
+from odoo.addons.website_sale.controllers.main import WebsiteSale, PaymentPortal
+from odoo.exceptions import UserError, ValidationError
 
 
 class WebsiteSaleDelivery(WebsiteSale):
@@ -14,15 +14,15 @@ class WebsiteSaleDelivery(WebsiteSale):
     @http.route()
     def shop_payment(self, **post):
         order = request.website.sale_get_order()
-        if order and not order.only_services and (request.httprequest.method == 'POST' or not order.carrier_id):
+        if order and not order.only_services:
             # Update order's carrier_id (will be the one of the partner if not defined)
             # If a carrier_id is (re)defined, redirect to "/shop/payment" (GET method to avoid infinite loop)
             carrier_id = post.get('carrier_id')
-            keep_carrier = post.get('keep_carrier', False)
-            if keep_carrier:
-                keep_carrier = bool(int(keep_carrier))
+            keep_carrier = False
             if carrier_id:
                 carrier_id = int(carrier_id)
+            elif order.carrier_id:  # If a carrier is selected.
+                keep_carrier = True  # Check availability of selected carrier and recompute rate.
             order._check_carrier_quotation(force_carrier_id=carrier_id, keep_carrier=keep_carrier)
             if carrier_id:
                 return request.redirect("/shop/payment")
@@ -41,7 +41,9 @@ class WebsiteSaleDelivery(WebsiteSale):
 
     @http.route(['/shop/carrier_rate_shipment'], type='json', auth='public', methods=['POST'], website=True)
     def cart_carrier_rate_shipment(self, carrier_id, **kw):
-        order = request.website.sale_get_order(force_create=True)
+        order = request.website.sale_get_order()
+        if not order:
+            raise ValidationError(_("Your cart is empty."))
 
         if not int(carrier_id) in order._get_delivery_methods().ids:
             raise UserError(_('It seems that a delivery method is not compatible with your address. Please refresh the page and try again.'))
@@ -65,6 +67,9 @@ class WebsiteSaleDelivery(WebsiteSale):
     @http.route()
     def cart(self, **post):
         order = request.website.sale_get_order()
+        if order and order.state != 'draft':
+            request.session['sale_order_id'] = None
+            order = request.website.sale_get_order()
         if order and order.carrier_id:
             # Express checkout is based on the amout of the sale order. If there is already a
             # delivery line, Express Checkout form will display and compute the price of the
@@ -322,3 +327,13 @@ class WebsiteSaleDelivery(WebsiteSale):
                 'new_amount_total_raw': order.amount_total,
             }
         return {}
+
+
+class PaymentPortalDelivery(PaymentPortal):
+
+    @http.route()
+    def shop_payment_transaction(self, *args, **kwargs):
+        order = request.website.sale_get_order()
+        if not order.only_services and not order.carrier_id:
+            raise ValidationError(_("No shipping method is selected."))
+        return super().shop_payment_transaction(*args, **kwargs)

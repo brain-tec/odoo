@@ -32,6 +32,7 @@ from .misc import file_open, unquote, ustr, SKIPPED_ELEMENT_TYPES
 from .translate import _
 from odoo import SUPERUSER_ID, api
 from odoo.exceptions import ValidationError
+from odoo.tools.safe_eval import _UNSAFE_ATTRIBUTES
 
 _logger = logging.getLogger(__name__)
 
@@ -184,7 +185,9 @@ def _eval_xml(self, node, env):
     elif node.tag == "function":
         model_str = node.get('model')
         model = env[model_str]
-        method_name = node.get('name')
+        method_name = node.get('name') or ''
+        if '__' in method_name or method_name in _UNSAFE_ATTRIBUTES:
+            raise NameError(f'Access to forbidden name {method_name!r}')
         # determine arguments
         args = []
         kwargs = {}
@@ -513,6 +516,14 @@ form: module.record_id""" % (xml_id,)
                 return None
 
             record = env['ir.model.data']._load_xmlid(xid)
+            for child in rec.xpath('.//record[@id]'):
+                sub_xid = child.get("id")
+                self._test_xml_id(sub_xid)
+                sub_xid = self.make_xml_id(sub_xid)
+                sub_record = env['ir.model.data']._load_xmlid(sub_xid)
+                if sub_record:
+                    self.idref[sub_xid] = sub_record.id
+
             if record:
                 # if the resource already exists, don't update it but store
                 # its database id (can be useful)

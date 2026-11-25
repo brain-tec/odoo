@@ -24,8 +24,8 @@
 # Arunas V. <arunas@devoro.com>, 2023
 # digitouch UAB <digitouchagencyeur@gmail.com>, 2023
 # Martin Trigaux, 2023
-# Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2023
 # Linas Versada <linaskrisiukenas@gmail.com>, 2024
+# Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2024
 # Gailius Kazlauskas <gailius@vialaurea.lt>, 2024
 # 
 msgid ""
@@ -338,7 +338,7 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_rating_options
 msgid "<i class=\"fa fa-fw fa-star\"/> Stars"
-msgstr ""
+msgstr "<i class=\"fa fa-fw fa-star\"/> Žvaigždės"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_rating_options
@@ -3281,7 +3281,7 @@ msgstr "Klaidų kiekis"
 #: model:ir.model.fields,help:mass_mailing.field_mailing_contact__message_needaction_counter
 #: model:ir.model.fields,help:mass_mailing.field_mailing_mailing__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr ""
+msgstr "Pranešimų, kuriems reikia imtis veiksmų, skaičius"
 
 #. module: mass_mailing
 #: model:ir.model.fields,help:mass_mailing.field_mailing_contact__message_has_error_counter

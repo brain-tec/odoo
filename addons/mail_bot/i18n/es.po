@@ -4,16 +4,17 @@
 # 
 # Translators:
 # Martin Trigaux, 2022
-# Leonardo J. Caballero G. <leonardocaballero@gmail.com>, 2022
-# Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2024
+# Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2022
+# Wil Odoo, 2024
+# David Vidal <david.vidal@tecnativa.com>, 2025
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:02+0000\n"
+"POT-Creation-Date: 2025-02-10 08:27+0000\n"
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2024\n"
+"Last-Translator: David Vidal <david.vidal@tecnativa.com>, 2025\n"
 "Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,14 +23,15 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
 "Aaaaaw that's really cute but, you know, bots don't work that way. You're "
 "too human for me! Let's keep it professional ❤️"
 msgstr ""
-"Aaaaaw eso es muy lindo, pero los robots no funcionan así. ¡Usted es "
-"demasiado humano para mí! Mantengámoslo profesional ❤️"
+"Aaaaaw, ¡qué lindo!, pero los bots no funcionan así. ¡Usted es demasiado "
+"humano para mí! Mantengámoslo profesional ❤️"
 
 #. module: mail_bot
 #: model:ir.model.fields.selection,name:mail_bot.selection__res_users__odoobot_state__disabled
@@ -44,9 +46,10 @@ msgstr "Canal de conversaciones"
 #. module: mail_bot
 #: model:ir.model,name:mail_bot.model_mail_thread
 msgid "Email Thread"
-msgstr "Hilo de mensajes"
+msgstr "Hilo de correo electrónico"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -59,9 +62,10 @@ msgstr ""
 #. module: mail_bot
 #: model:ir.model,name:mail_bot.model_ir_http
 msgid "HTTP Routing"
-msgstr "Ruta HTTP "
+msgstr "Enrutamiento HTTP "
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/res_users.py:0
 #, python-format
 msgid ""
@@ -74,12 +78,14 @@ msgstr ""
 "un emoji</b> <span class=\"o_odoobot_command\">:)</span>"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "Hmmm..."
 msgstr "Hmmm..."
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -90,17 +96,19 @@ msgid ""
 msgstr ""
 "Soy un simple bot, pero si eso es un perro, es el más adorable 😊 "
 "<br/>Enhorabuena, esto es el final de de este tour</b>. Ahora puede "
-"<b>cerrar esta conversación</b> o comenzar el tour otra vez tecleando <span "
-"class=\"o_odoobot_command\">start the tour</span>. ¡Disfrute descubriendo "
-"Odoo!"
+"<b>cerrar esta conversación</b> o comenzar el recorrido otra vez tecleando "
+"<span class=\"o_odoobot_command\">comenzar el recorrido</span>. ¡Disfrute "
+"descubriendo Odoo!"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "I'm afraid I don't understand. Sorry!"
 msgstr "Me temo que no entiendo. Lo siento!"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -108,7 +116,7 @@ msgid ""
 "<span class=\"o_odoobot_command\">start the tour</span>."
 msgstr ""
 "No soy lo suficientemente inteligente para contestar su pregunta.<br/>Para "
-"seguir mi guía, diga: <span class=\"o_odoobot_command\">iniciar el "
+"seguir mi guía, diga: <span class=\"o_odoobot_command\">comenzar el "
 "recorrido</span>."
 
 #. module: mail_bot
@@ -119,9 +127,10 @@ msgstr "Inactivo"
 #. module: mail_bot
 #: model:ir.model,name:mail_bot.model_mail_bot
 msgid "Mail Bot"
-msgstr "Bot de Correo"
+msgstr "Bot de correo"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -137,6 +146,7 @@ msgid "Not initialized"
 msgstr "No inicializado"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -161,24 +171,25 @@ msgstr "Odoobot falló"
 #. module: mail_bot
 #: model:ir.model.fields.selection,name:mail_bot.selection__res_users__odoobot_state__onboarding_attachement
 msgid "Onboarding attachment"
-msgstr "Archivo adjunto de orientación"
+msgstr "Archivo adjunto de incorporación"
 
 #. module: mail_bot
 #: model:ir.model.fields.selection,name:mail_bot.selection__res_users__odoobot_state__onboarding_command
 msgid "Onboarding command"
-msgstr "Mando de orientación"
+msgstr "Mando de incorporación"
 
 #. module: mail_bot
 #: model:ir.model.fields.selection,name:mail_bot.selection__res_users__odoobot_state__onboarding_emoji
 msgid "Onboarding emoji"
-msgstr "Emoji de orientación"
+msgstr "Emoji de incorporación"
 
 #. module: mail_bot
 #: model:ir.model.fields.selection,name:mail_bot.selection__res_users__odoobot_state__onboarding_ping
 msgid "Onboarding ping"
-msgstr "Silvido de orientación"
+msgstr "Ping de incorporación"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -188,9 +199,10 @@ msgid ""
 msgstr ""
 "Disculpe, tengo sueño. ¡O no! Tal vez solo estoy tratando de ocultar mi "
 "ignorancia del lenguaje humano...<br/>Puedo mostrarle las funciones si "
-"escribe: <span class=\"o_odoobot_command\">iniciar el recorrido</span>."
+"escribe: <span class=\"o_odoobot_command\">comenzar el recorrido</span>."
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -202,12 +214,14 @@ msgstr ""
 "class=\"o_odoobot_command\">@OdooBot</span> y seleccióneme."
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "That's not nice! I'm a bot but I have feelings... 💔"
 msgstr "¡Eso no es agradable! Soy un robot, pero tengo sentimientos... 💔"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -215,15 +229,17 @@ msgid ""
 "aria-hidden=\"true\"></i> icon and select a file."
 msgstr ""
 "Para <b>enviar un archivo adjunto</b>, haga clic en el icono <i class=\"fa "
-"fa-paperclip\" aria-hidden=\"true\"></i> y seleccione un archivo"
+"fa-paperclip\" aria-hidden=\"True\"></i> y seleccione un archivo"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "To start, try to send me an emoji :)"
-msgstr "Para empezar, intenta enviarme un emoji :)"
+msgstr "Para empezar, intente enviarme un emoji :)"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -237,7 +253,7 @@ msgstr ""
 "descubrir nuestro producto, revise <a "
 "href=\"https://www.odoo.com/documentation\" target=\"_blank\">nuestra "
 "documentación</a> o <a href=\"https://www.odoo.com/slides\" "
-"target=\"_blank\">nuestros videos</a>."
+"target=\"_blank\">nuestros vídeos</a>."
 
 #. module: mail_bot
 #: model:ir.model,name:mail_bot.model_res_users
@@ -245,6 +261,7 @@ msgid "User"
 msgstr "Usuario"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
@@ -252,47 +269,53 @@ msgid ""
 "attention. <b>Try to ping me using</b> <span "
 "class=\"o_odoobot_command\">@OdooBot</span> in a sentence."
 msgstr ""
-"¡Guau, tiene talento natural!<br/>Envíele una notificación a alguien usando "
+"¡Uy, tiene talento natural!<br/>Envíele una notificación a alguien usando "
 "@nombre-de-usuario para llamar su atención. <b>Intente etiquetarme "
 "utilizando</b> <span class=\"o_odoobot_command\">@OdooBot</span> en una "
 "oración."
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
 "Yep, I am here! 🎉 <br/>Now, try <b>sending an attachment</b>, like a picture"
 " of your cute dog..."
 msgstr ""
-"¡Sí, estoy aquí! 🎉 <br/>Ahora intente<b>enviar un archivo adjunto</b>, como "
-"una foto de tu perro adorable..."
+"¡Sí, aquí estoy! 🎉 <br/>Ahora intente <b>enviar un archivo adjunto</b>, como"
+" una foto de su adorable perro..."
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "fuck"
-msgstr "carajo"
+msgstr "joder"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "help"
 msgstr "ayuda"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "i love you"
 msgstr "te amo"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "love"
 msgstr "amor"
 
 #. module: mail_bot
+#. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 #, python-format
 msgid "start the tour"
-msgstr "inicia el tour"
+msgstr "comenzar el recorrido"

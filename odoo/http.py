@@ -133,7 +133,7 @@ from datetime import datetime
 from io import BytesIO
 from os.path import join as opj
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlsplit
 from zlib import adler32
 
 import babel.core
@@ -167,6 +167,7 @@ from .service import security, model as service_model
 from .tools import (config, consteq, date_utils, file_path, parse_version,
                     profiler, submap, unique, ustr,)
 from .tools.geoipresolver import GeoIPResolver
+from .tools.facade import Proxy, ProxyAttr, ProxyFunc
 from .tools.func import filter_kwargs, lazy_property
 from .tools.mimetypes import guess_mimetype
 from .tools.misc import pickle
@@ -284,10 +285,25 @@ STATIC_CACHE_LONG = 60 * 60 * 24 * 365
 class SessionExpiredException(Exception):
     pass
 
-def content_disposition(filename):
-    return "attachment; filename*=UTF-8''{}".format(
+
+def content_disposition(filename, disposition_type='attachment'):
+    """
+    Craft a ``Content-Disposition`` header, see :rfc:`6266`.
+
+    :param filename: The name of the file, should that file be saved on
+        disk by the browser.
+    :param disposition_type: Tell the browser what to do with the file,
+        either ``"attachment"`` to save the file on disk,
+        either ``"inline"`` to display the file.
+    """
+    if disposition_type not in ('attachment', 'inline'):
+        e = f"Invalid disposition_type: {disposition_type!r}"
+        raise ValueError(e)
+    return "{}; filename*=UTF-8''{}".format(
+        disposition_type,
         url_quote(filename, safe='', unsafe='()<>@,;:"/[]?={}\\*\'%') # RFC6266
     )
+
 
 def db_list(force=False, host=None):
     """
@@ -439,6 +455,8 @@ class Stream:
     public = False
 
     def __init__(self, **kwargs):
+        # Remove class methods from the instances
+        self.from_path = self.from_attachment = self.from_binary_field = None
         self.__dict__.update(kwargs)
 
     @classmethod
@@ -458,6 +476,7 @@ class Stream:
         return cls(
             type='path',
             path=path,
+            mimetype=mimetypes.guess_type(path)[0],
             download_name=os.path.basename(path),
             etag=f'{int(stat.st_mtime)}-{stat.st_size}-{check}',
             last_modified=stat.st_mtime,
@@ -517,8 +536,21 @@ class Stream:
     @classmethod
     def from_binary_field(cls, record, field_name):
         """ Create a :class:`~Stream`: from a binary field. """
-        data_b64 = record[field_name]
-        data = base64.b64decode(data_b64) if data_b64 else b''
+        data = record[field_name] or b''
+
+        # Image fields enforce base64 encoding. Binary fields don't
+        # enforce anything: raw bytes are fine, expected even.
+        # People nonetheless write base64 encoded bytes inside binary
+        # fields, and expect automatic decoding when read, crazy!
+        with contextlib.suppress(ValueError):
+            data = base64.b64decode(
+                # Some libs add linefeed every X (where X < 79) char in
+                # the base64, for email mime. validate=True would raise
+                # an error for those linefeeds so stip them.
+                data.replace(b'\r', b'').replace(b'\n', b''),
+                validate=True,
+            )
+
         return cls(
             type='data',
             data=data,
@@ -539,16 +571,27 @@ class Stream:
         with open(self.path, 'rb') as file:
             return file.read()
 
-    def get_response(self, as_attachment=None, immutable=None, **send_file_kwargs):
+    def get_response(
+        self,
+        as_attachment=None,
+        immutable=None,
+        content_security_policy="default-src 'none'",
+        **send_file_kwargs
+    ):
         """
         Create the corresponding :class:`~Response` for the current stream.
 
         :param bool as_attachment: Indicate to the browser that it
             should offer to save the file instead of displaying it.
-        :param bool immutable: Add the ``immutable`` directive to the
-            ``Cache-Control`` response header, allowing intermediary
-            proxies to aggressively cache the response. This option
-            also set the ``max-age`` directive to 1 year.
+        :param bool|None immutable: Add the ``immutable`` directive to
+            the ``Cache-Control`` response header, allowing intermediary
+            proxies to aggressively cache the response. This option also
+            set the ``max-age`` directive to 1 year.
+        :param str|None content_security_policy: Optional value for the
+            ``Content-Security-Policy`` (CSP) header. This header is
+            used by browsers to allow/restrict the downloaded resource
+            to itself perform new http requests. By default CSP is set
+            to ``"default-scr 'none'"`` which restrict all requests.
         :param send_file_kwargs: Other keyword arguments to send to
             :func:`odoo.tools._vendor.send_file.send_file` instead of
             the stream sensitive values. Discouraged.
@@ -588,7 +631,6 @@ class Stream:
                     send_file_kwargs['use_x_sendfile'] = True
 
             res = _send_file(self.path, **send_file_kwargs)
-
             if 'X-Sendfile' in res.headers:
                 res.headers['X-Accel-Redirect'] = x_accel_redirect
 
@@ -596,6 +638,11 @@ class Stream:
                 # yet werkzeug gives the length of the file. This makes
                 # NGINX wait for content that'll never arrive.
                 res.headers['Content-Length'] = '0'
+
+        res.headers['X-Content-Type-Options'] = 'nosniff'
+
+        if content_security_policy:  # see also Application.set_csp()
+            res.headers['Content-Security-Policy'] = content_security_policy
 
         if self.public:
             if (res.cache_control.max_age or 0) > 0:
@@ -700,7 +747,7 @@ def route(route=None, **routing):
         # Sanitize the routing
         assert routing.get('type', 'http') in _dispatchers.keys()
         if route:
-            routing['routes'] = route if isinstance(route, list) else [route]
+            routing['routes'] = [route] if isinstance(route, str) else route
         wrong = routing.pop('method', None)
         if wrong is not None:
             _logger.warning("%s defined with invalid routing parameter 'method', assuming 'methods'", fname)
@@ -1049,15 +1096,81 @@ def make_request_wrap_methods(attr):
     return getter, setter
 
 
+class Authorization(Proxy):
+    _wrapped__ = werkzeug.datastructures.Authorization
+
+    if hasattr(_wrapped__, 'to_header'):
+        to_header = ProxyFunc(str)
+    password = ProxyAttr(str)
+    token = ProxyAttr(str)
+    type = ProxyAttr(str)
+    username = ProxyAttr(str)
+    algorithm = ProxyAttr(str)
+    cnonce = ProxyAttr(str)
+    nc = ProxyAttr(str)
+    nonce = ProxyAttr(str)
+    opaque = ProxyAttr(str)
+    qop = ProxyAttr(str)
+    realm = ProxyAttr(str)
+    response = ProxyAttr(str)
+    uri = ProxyAttr(str)
+    userhash = ProxyAttr(str)
+
+    __contains__ = ProxyFunc(bool)
+    __getitem__ = ProxyFunc()
+    get = ProxyFunc()
+
+    @property
+    def parameters(self):
+        authorization = self._wrapped__
+        parameters = (
+            authorization
+            if isinstance(authorization, dict)
+            else authorization.parameters
+        )
+        return dict(parameters)
+
+    def __bool__(self):
+        return bool(self._wrapped__)
+
+    def __eq__(self, other):
+        if isinstance(other, Authorization):
+            other = other._wrapped__
+        return self._wrapped__ == other
+
+    def __hash__(self):
+        return hash(self._wrapped__)
+
+    def __iter__(self):
+        return iter(self.parameters)
+
+    def __len__(self):
+        return len(self.parameters)
+
+    def copy(self):
+        return self.parameters
+
+    def items(self):
+        return self.parameters.items()
+
+    def keys(self):
+        return self.parameters.keys()
+
+    def values(self):
+        return self.parameters.values()
+
+
 class HTTPRequest:
     def __init__(self, environ):
         httprequest = werkzeug.wrappers.Request(environ)
         httprequest.user_agent_class = UserAgent  # use vendored userAgent since it will be removed in 2.1
-        httprequest.parameter_storage_class = werkzeug.datastructures.ImmutableOrderedMultiDict
+        httprequest.parameter_storage_class = werkzeug.datastructures.ImmutableMultiDict
+        httprequest.max_form_memory_size = 10 * 1024 * 1024  # 10 MB
+        self._session_id__ = httprequest.cookies.get('session_id')
 
         self.__wrapped = httprequest
         self.__environ = self.__wrapped.environ
-        self.environ = {
+        self.environ = self.headers.environ = {
             key: value
             for key, value in self.__environ.items()
             if (not key.startswith(('werkzeug.', 'wsgi.', 'socket')) or key in ['wsgi.url_scheme', 'werkzeug.proxy_fix.orig'])
@@ -1066,10 +1179,23 @@ class HTTPRequest:
     def __enter__(self):
         return self
 
+    @property
+    def authorization(self):
+        authorization = self.__wrapped.authorization
+        if authorization is None:
+            return None
+        return Authorization(authorization)
+
+    @authorization.setter
+    def authorization(self, value):
+        if isinstance(value, Authorization):
+            value = value._wrapped__
+        self.__wrapped.authorization = value
+
 
 HTTPREQUEST_ATTRIBUTES = [
     '__str__', '__repr__', '__exit__',
-    'accept_charsets', 'accept_languages', 'accept_mimetypes', 'access_route', 'args', 'authorization', 'base_url',
+    'accept_charsets', 'accept_languages', 'accept_mimetypes', 'access_route', 'args', 'base_url',
     'charset', 'content_encoding', 'content_length', 'content_md5', 'content_type', 'cookies', 'data', 'date',
     'encoding_errors', 'files', 'form', 'full_path', 'get_data', 'get_json', 'headers', 'host', 'host_url', 'if_match',
     'if_modified_since', 'if_none_match', 'if_range', 'if_unmodified_since', 'is_json', 'is_secure', 'json', 'method',
@@ -1081,7 +1207,7 @@ for attr in HTTPREQUEST_ATTRIBUTES:
     setattr(HTTPRequest, attr, property(*make_request_wrap_methods(attr)))
 
 
-class Response(werkzeug.wrappers.Response):
+class _Response(werkzeug.wrappers.Response):
     """
     Outgoing HTTP response with body, status, headers and qweb support.
     In addition to the :class:`werkzeug.wrappers.Response` parameters,
@@ -1171,6 +1297,166 @@ class Response(werkzeug.wrappers.Response):
         super().set_cookie(key, value=value, max_age=max_age, expires=expires, path=path, domain=domain, secure=secure, httponly=httponly, samesite=samesite)
 
 
+class Headers(Proxy):
+    _wrapped__ = werkzeug.datastructures.Headers
+
+    __getitem__ = ProxyFunc()
+    __repr__ = ProxyFunc(str)
+    __setitem__ = ProxyFunc(None)
+    __str__ = ProxyFunc(str)
+    __contains__ = ProxyFunc(bool)
+    add = ProxyFunc(None)
+    add_header = ProxyFunc(None)
+    clear = ProxyFunc(None)
+    copy = ProxyFunc(lambda v: Headers(v))  # noqa: PLW0108
+    extend = ProxyFunc(None)
+    get = ProxyFunc()
+    get_all = ProxyFunc()
+    getlist = ProxyFunc()
+    items = ProxyFunc()
+    keys = ProxyFunc()
+    pop = ProxyFunc()
+    popitem = ProxyFunc()
+    remove = ProxyFunc(None)
+    set = ProxyFunc(None)
+    setdefault = ProxyFunc()
+    to_wsgi_list = ProxyFunc()
+    values = ProxyFunc()
+    if hasattr(werkzeug.datastructures.Headers, "setlist"):
+        # werkzeug >= 1.0
+        setlist = ProxyFunc(None)
+        setlistdefault = ProxyFunc()
+        update = ProxyFunc(None)
+
+
+class ResponseCacheControl(Proxy):
+    _wrapped__ = werkzeug.datastructures.ResponseCacheControl
+
+    __getitem__ = ProxyFunc()
+    __setitem__ = ProxyFunc(None)
+    immutable = ProxyAttr(bool)
+    max_age = ProxyAttr(int)
+    must_revalidate = ProxyAttr(bool)
+    no_cache = ProxyAttr(bool)
+    no_store = ProxyAttr(bool)
+    no_transform = ProxyAttr(bool)
+    public = ProxyAttr(bool)
+    private = ProxyAttr(bool)
+    proxy_revalidate = ProxyAttr(bool)
+    s_maxage = ProxyAttr(int)
+    pop = ProxyFunc()
+
+
+class ResponseStream(Proxy):
+    _wrapped__ = werkzeug.wrappers.ResponseStream
+
+    write = ProxyFunc(int)
+    writelines = ProxyFunc(None)
+    tell = ProxyFunc(int)
+
+
+class Response(Proxy):
+    _wrapped__ = _Response
+
+    # werkzeug.wrappers.Response attributes
+    __call__ = ProxyFunc()
+    add_etag = ProxyFunc(None)
+    age = ProxyAttr()
+    autocorrect_location_header = ProxyAttr(bool)
+    cache_control = ProxyAttr(ResponseCacheControl)
+    call_on_close = ProxyFunc()
+    charset = ProxyAttr(str)
+    content_encoding = ProxyAttr(str)
+    content_length = ProxyAttr(int)
+    content_location = ProxyAttr(str)
+    content_md5 = ProxyAttr(str)
+    content_type = ProxyAttr(str)
+    data = ProxyAttr()
+    default_mimetype = ProxyAttr(str)
+    default_status = ProxyAttr(int)
+    delete_cookie = ProxyFunc(None)
+    direct_passthrough = ProxyAttr(bool)
+    expires = ProxyAttr()
+    force_type = ProxyFunc(lambda v: Response(v))  # noqa: PLW0108
+    freeze = ProxyFunc(None)
+    get_data = ProxyFunc()
+    get_etag = ProxyFunc()
+    headers = ProxyAttr(Headers)
+    is_json = ProxyAttr(bool)
+    is_sequence = ProxyAttr(bool)
+    is_streamed = ProxyAttr(bool)
+    iter_encoded = ProxyFunc()
+    json = ProxyAttr()
+    last_modified = ProxyAttr()
+    location = ProxyAttr(str)
+    make_conditional = ProxyFunc(lambda v: Response(v))  # noqa: PLW0108
+    make_sequence = ProxyFunc(None)
+    max_cookie_size = ProxyAttr(int)
+    mimetype = ProxyAttr(str)
+    response = ProxyAttr()
+    retry_after = ProxyAttr()
+    set_cookie = ProxyFunc(None)
+    set_data = ProxyFunc(None)
+    set_etag = ProxyFunc(None)
+    status = ProxyAttr(str)
+    status_code = ProxyAttr(int)
+    stream = ProxyAttr(ResponseStream)
+    if hasattr(_Response, "get_json"):
+        # werkzeug >= 2.3.0
+        get_json = ProxyFunc()
+
+    # odoo.http._response attributes
+    load = ProxyFunc()
+    set_default = ProxyFunc(None)
+    qcontext = ProxyAttr()
+    template = ProxyAttr(str)
+    is_qweb = ProxyAttr(bool)
+    render = ProxyFunc()
+    flatten = ProxyFunc(None)
+
+    def __init__(self, *args, **kwargs):
+        response = None
+        if len(args) == 1:
+            arg = args[0]
+            if isinstance(arg, Response):
+                response = arg._wrapped__
+            elif isinstance(arg, _Response):
+                response = arg
+            elif isinstance(arg, werkzeug.wrappers.Response):
+                response = _Response.load(arg)
+        if response is None:
+            response = _Response(*args, **kwargs)
+
+        super().__init__(response)
+        if 'set_cookie' in response.__dict__:
+            self.__dict__['set_cookie'] = response.__dict__['set_cookie']
+
+
+__wz_get_response = HTTPException.get_response
+
+
+def get_response(self, environ=None, scope=None):
+    if scope is None:  # compatible with werkzeug 0.16.x
+        return Response(__wz_get_response(self, environ))
+    else:
+        return Response(__wz_get_response(self, environ, scope))  # werkzeug 2.0.2
+
+
+HTTPException.get_response = get_response
+
+
+werkzeug_abort = werkzeug.exceptions.abort
+
+
+def abort(status, *args, **kwargs):
+    if isinstance(status, Response):
+        status = status._wrapped__
+    werkzeug_abort(status, *args, **kwargs)
+
+
+werkzeug.exceptions.abort = abort
+
+
 class FutureResponse:
     """
     werkzeug.Response mock class that only serves as placeholder for
@@ -1212,9 +1498,10 @@ class Request:
 
     def _post_init(self):
         self.session, self.db = self._get_session_and_dbname()
+        self._post_init = None
 
     def _get_session_and_dbname(self):
-        sid = self.httprequest.cookies.get('session_id')
+        sid = self.httprequest._session_id__
         if not sid or not root.session_store.is_valid_key(sid):
             session = root.session_store.new()
         else:
@@ -1446,7 +1733,7 @@ class Request:
                         profile_session=self.session.profile_session,
                         collectors=self.session.profile_collectors,
                         params=self.session.profile_params,
-                    )
+                    )._get_cm_proxy()
                 except Exception:
                     _logger.exception("Failure during Profiler creation")
                     self.session.profile_session = None
@@ -1511,7 +1798,8 @@ class Request:
         if isinstance(location, URL):
             location = location.to_url()
         if local:
-            location = '/' + url_parse(location).replace(scheme='', netloc='').to_url().lstrip('/')
+            location = url_parse(location).replace(scheme='', netloc='').to_url().lstrip('/\\')
+            location = '/' + urlsplit(location).geturl().lstrip('/\\')
         if self.db:
             return self.env['ir.http']._redirect(location, code)
         return werkzeug.utils.redirect(location, code, Response=Response)
@@ -1579,8 +1867,13 @@ class Request:
         try:
             directory = root.statics[module]
             filepath = werkzeug.security.safe_join(directory, path)
+            debug = (
+                'assets' in self.session.debug and
+                ' wkhtmltopdf ' not in self.httprequest.user_agent.string
+            )
             res = Stream.from_path(filepath, public=True).get_response(
-                max_age=0 if 'assets' in self.session.debug else STATIC_CACHE,
+                max_age=0 if debug else STATIC_CACHE,
+                content_security_policy=None,
             )
             root.set_csp(res)
             return res
@@ -1609,6 +1902,7 @@ class Request:
         """
         try:
             self.registry = Registry(self.db).check_signaling()
+            threading.current_thread().dbname = self.registry.db_name
         except (AttributeError, psycopg2.OperationalError, psycopg2.ProgrammingError):
             # psycopg2 error or attribute error while constructing
             # the registry. That means either
@@ -1633,7 +1927,8 @@ class Request:
             except Exception as exc:
                 if isinstance(exc, HTTPException) and exc.code is None:
                     raise  # bubble up to odoo.http.Application.__call__
-                exc.error_response = self.registry['ir.http']._handle_error(exc)
+                if not hasattr(exc, 'error_response'):
+                    exc.error_response = self.registry['ir.http']._handle_error(exc)
                 raise
 
     def _serve_ir_http(self):
@@ -1941,15 +2236,16 @@ class Application:
         """
 
         netloc, path = urlparse(url)[1:3]
+        path = os.path.normpath(os.path.normcase(path))
         try:
-            path_netloc, module, static, resource = path.split('/', 3)
+            path_netloc, module, static, resource = path.split(os.sep, 3)
         except ValueError:
             return None
 
         if ((netloc and netloc != host) or (path_netloc and path_netloc != host)):
             return None
 
-        if (module not in self.statics or static != 'static' or not resource):
+        if (static != 'static' or not resource or module not in self.statics):
             return None
 
         try:
@@ -1963,7 +2259,7 @@ class Application:
         for url, endpoint in _generate_routing_rules([''] + odoo.conf.server_wide_modules, nodb_only=True):
             routing = submap(endpoint.routing, ROUTING_KEYS)
             if routing['methods'] is not None and 'OPTIONS' not in routing['methods']:
-                routing['methods'] = routing['methods'] + ['OPTIONS']
+                routing['methods'] = [*routing['methods'], 'OPTIONS']
             rule = werkzeug.routing.Rule(url, endpoint=endpoint, **routing)
             rule.merge_slashes = False
             nodb_routing_map.add(rule)
