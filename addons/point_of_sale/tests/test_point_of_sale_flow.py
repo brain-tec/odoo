@@ -1316,6 +1316,16 @@ class TestPointOfSaleFlow(CommonPosTest):
             "Invoice should not use journal bank account when not allowed."
         )
 
+    def test_invoiced_order_keeps_preset_slot(self):
+        preset = self.env['pos.preset'].create({'name': 'Delivery'})
+        self.pos_config_usd.open_ui()
+        self.pos_config_usd.current_session_id.set_opening_control(0, None)
+        slot = '2026-01-01 12:00:00'
+        order = self._create_and_invoice_order().pos_order_ids
+        order.write({'preset_id': preset.id, 'preset_time': slot})
+        usage = preset.get_available_slots()['usage_utc']
+        self.assertEqual(usage[slot], [order.id])
+
     def test_order_invoiced_after_session_closed(self):
         """Test that an order can be invoiced after its session is closed.
         Scenario:
@@ -2216,6 +2226,57 @@ class TestPointOfSaleFlow(CommonPosTest):
             self.pos_config_usd.id, [('id', '=', template.id)],
         )
         self.assertEqual([v['id'] for v in data['product.template.attribute.value']], [merlot.id])
+
+    def test_incremental_load_pricelist_of_changed_item(self):
+        """The PoS only applies the rules listed in the item_ids of its cached
+        pricelist: a rule created or edited after the last sync must resend its pricelist."""
+        pricelist = self.env['product.pricelist'].create({'name': 'Premium'})
+        edited_pricelist = self.env['product.pricelist'].create({
+            'name': 'Edited',
+            'item_ids': [Command.create({'compute_price': 'fixed', 'fixed_price': 10})],
+        })
+        other_pricelist = self.env['product.pricelist'].create({'name': 'Other'})
+        pricelists = pricelist | edited_pricelist | other_pricelist
+        self.pos_config_usd.write({
+            'use_pricelist': True,
+            'available_pricelist_ids': [Command.set(pricelists.ids)],
+            'pricelist_id': other_pricelist.id,
+        })
+        self.pos_config_usd.open_ui()
+        session = self.pos_config_usd.current_session_id
+        now = fields.Datetime.now()
+        pricelists.flush_model()
+        pricelists.item_ids.flush_model()
+        old_date = now - timedelta(days=30)
+        self.env.cr.execute(
+            "UPDATE product_pricelist SET write_date = %s WHERE id IN %s",
+            (old_date, tuple(pricelists.ids)),
+        )
+        self.env.cr.execute(
+            "UPDATE product_pricelist_item SET write_date = %s WHERE id IN %s",
+            (old_date, tuple(pricelists.item_ids.ids)),
+        )
+        self.env.invalidate_all()
+        last_server_date = fields.Datetime.to_string(now - timedelta(days=10))
+
+        item = self.env['product.pricelist.item'].create({
+            'pricelist_id': pricelist.id,
+            'compute_price': 'fixed',
+            'fixed_price': 12,
+        })
+        edited_pricelist.item_ids.fixed_price = 15
+
+        data = session.with_context(pos_last_server_date=last_server_date).load_data([])
+        self.assertIn(item.id, {i['id'] for i in data['product.pricelist.item']})
+        loaded_pricelists = {p['id']: p for p in data['product.pricelist']}
+        self.assertIn(pricelist.id, loaded_pricelists,
+            "pricelist of a rule created after the last sync must be resent")
+        self.assertIn(item.id, loaded_pricelists[pricelist.id]['item_ids'])
+        self.assertIn(edited_pricelist.id, loaded_pricelists,
+            "pricelist of a rule edited after the last sync must be resent")
+        self.assertIn(edited_pricelist.item_ids.id, {i['id'] for i in data['product.pricelist.item']})
+        self.assertNotIn(other_pricelist.id, loaded_pricelists,
+            "unchanged pricelist is not part of the incremental load")
 
     def test_sequence_dynamic_prefix_suffix(self):
         """Test that sequence_number is correctly extracted when sequence has dynamic prefix/suffix."""
