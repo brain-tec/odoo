@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from unittest.mock import patch
+from zoneinfo import ZoneInfo
 
 from odoo.exceptions import ValidationError
 from odoo.tests import tagged
@@ -77,6 +78,27 @@ class TestLeaveOutsideSchedule(TestHrHolidaysCommon):
                 'type': 'danger',
                 'message': 'The time off is outside the working schedule of the employee',
             })
+
+    def test_leave_without_allocation_dropped_by_time_off_responsible(self):
+        """ The time off manager of the employee (without officer rights) creating a group time off:
+        the time off not covered by an allocation are dropped, although they can not delete them """
+        allocation_type = self.env['hr.work.entry.type'].create({
+            'name': 'Test Absence with allocation',
+            'code': 'TESTABSENCEALLOC',
+            'count_as': 'absence',
+            'request_unit': 'day',
+            'requires_allocation': True,
+        })
+        monday = _next_weekday(date.today() + timedelta(days=7), 0)
+        with patch.object(self.env.registry['bus.bus'], '_sendone') as mock_send:
+            leaves = self.env['hr.leave'].with_user(self.user_responsible).with_context(multi_leave_request=True).create([{
+                'employee_id': self.employee_emp.id,
+                'work_entry_type_id': allocation_type.id,
+                'request_date_from': monday,
+                'request_date_to': monday,
+            }])
+            self.assertFalse(leaves.exists(), "the time off without allocation should have been dropped")
+            self.assertEqual(mock_send.call_args.args[2]['type'], 'danger')
 
     def test_absence_outside_schedule_kept_without_multi_leave_request(self):
         leave = self.env['hr.leave'].with_context(leave_fast_create=True).create({
@@ -168,8 +190,10 @@ class TestLeaveOutsideSchedule(TestHrHolidaysCommon):
             'request_duration': 'full',
             'number_of_hours': 8,
         })
-        self.assertEqual(leave.request_hour_from, 8.0)
-        self.assertEqual(leave.request_hour_to, 16.0)
+        # the hours of the request may be left unset (0, 0): the dates say where it stands
+        local_dates = [dt.replace(tzinfo=UTC).astimezone(ZoneInfo(leave.tz)) for dt in (leave.date_from, leave.date_to)]
+        self.assertEqual([(dt.date(), dt.hour) for dt in local_dates], [(self.saturday, 8), (self.saturday, 16)])
+        self.assertEqual(leave.number_of_hours, 8)
 
     def test_hour_unit_working_time_night_shift_crossing_midnight(self):
         """ A night shift running from 22:00 to 02:00 keeps its four hours across the

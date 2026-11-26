@@ -264,7 +264,7 @@ test("plugin filter narrows a tab's content, ANDed with the chip filter", async 
     ]);
     pyEnv["mail.notification"].create(
         [aliceUnreadId, aliceReadId, bobUnreadId].map((mail_message_id) => ({
-            is_read: mail_message_id === aliceReadId,
+            read_date: mail_message_id === aliceReadId ? "2019-01-01 10:30:00" : false,
             mail_message_id,
             notification_status: "sent",
             notification_type: "inbox",
@@ -761,6 +761,29 @@ test("bookmark tab is only shown when there are bookmarked messages", async () =
     await waitFor(
         ".o-mail-MessagingMenuItem .o-mail-NotificationItem-text:text('You: Hello there!'):count(1)"
     );
+});
+
+test("undo a bookmark removed from the bookmark tab", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    pyEnv["mail.message"].create({
+        author_id: serverState.partnerId,
+        body: "<p>Hello there!</p>",
+        bookmarked_partner_ids: [serverState.partnerId],
+        model: "discuss.channel",
+        res_id: channelId,
+    });
+    await start();
+    await openDiscuss(MENU_ACTIVE_IDS.BOOKMARK);
+    await hover(
+        await waitFor(".o-mail-MessagingMenuItem:has(:text('You: Hello there!')):count(1)")
+    );
+    await click(".o-mail-MessagingMenuItem [title='Message Actions']");
+    await click(".o-dropdown-item:text('Remove from Bookmarks')");
+    await waitFor(".o_notification:has(:text('Bookmark removed')):count(1)");
+    await click(".o_notification button:text('Undo')");
+    await waitFor(".o-mail-MessagingMenu-tab:has(:text('Bookmarks')):has(.badge:text(1)):count(1)");
+    await waitForNone(".o_notification");
 });
 
 test("active tab is assigned again when another flow writes it", async () => {

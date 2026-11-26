@@ -306,7 +306,7 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
         # To add queries here you must ask the permission to al
         queries = {
             'res_company': 1,
-            'product_pricelist': 3,
+            'product_pricelist': 2,
             'product_template': 3,
             'product_tag': 1,
             'product_public_category': 2,
@@ -315,7 +315,6 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
             'product_category': 1,
             'product_pricelist_item': 1,
             'account_tax': 1,
-            'res_currency': 1,
             'product_ribbon': 1,
             'product_attribute_value': 3,
             'product_attribute': 1,
@@ -383,10 +382,6 @@ class TestWebsiteAllPerformanceShop(TestWebsiteAllPerformance):
         queries = self._get_queries_shop()
 
         queries['account_tax'] += 1
-        queries['account_account_tag'] = 2
-        queries['res_company'] += 1
-        queries['res_users'] = 1
-        queries['res_partner'] = 1
 
         if self.env['res.groups']._is_feature_enabled('uom.group_uom'):
             queries['uom_uom'] += 1

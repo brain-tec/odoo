@@ -1111,10 +1111,15 @@ class PosOrder(models.Model):
             refund_order = order.copy(
                 order._prepare_refund_values(current_session),
             )
+            line_mapping = {}
             for line in order.lines:
                 if line.refunded_qty < line.qty:
                     refund_line = line.copy(line._prepare_refund_data(refund_order))
                     refund_line._onchange_amount_line_all()
+                    line_mapping[line] = refund_line
+            for line, refund_line in line_mapping.items():
+                if line.combo_parent_id:
+                    refund_line.combo_parent_id = line_mapping.get(line.combo_parent_id, False)
             refund_order._compute_prices()
             refund_orders |= refund_order
             refund_order.config_id.notify_synchronisation(current_session.id, 0)
@@ -1305,6 +1310,10 @@ class PosOrder(models.Model):
         """ Overriden in pos_stock, as the quantity update is handled through the stock module.
         """
         return True
+
+    def snooze_notification(self):
+        self.ensure_one()
+        self.config_id._notify('SNOOZE_NOTIFICATION', self.id)
 
     ##############################################################
     #                 Accounting related methods                 #

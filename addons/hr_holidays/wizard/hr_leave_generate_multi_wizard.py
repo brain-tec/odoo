@@ -45,9 +45,16 @@ class HrLeaveGenerateMultiWizard(models.TransientModel):
 
     @api.depends('company_id')
     def _compute_allowed_work_entry_type_ids(self):
+        # as on the time off, only the time off administrators can use the time types not selectable in time off
+        selectable_domain = (
+            Domain.TRUE
+            if self.env.user.has_group('hr_holidays.group_hr_holidays_manager')
+            else Domain('time_off_selectable', '=', True)
+        )
         for wizard in self:
             country = wizard.company_id.country_id or self.env.company.country_id
-            wizard.allowed_work_entry_type_ids = self.env['hr.work.entry.type'].search([('country_id', '=', country.id)])
+            wizard.allowed_work_entry_type_ids = self.env['hr.work.entry.type'].search(
+                selectable_domain & Domain('country_id', '=', country.id))
 
     def _prepare_employees_holiday_values(self, employees, date_from_tz, date_to_tz):
         self.ensure_one()
@@ -101,7 +108,8 @@ class HrLeaveGenerateMultiWizard(models.TransientModel):
             if invalid_time_off:
                 raise UserError(self.env._('Some employees already have time off requests in hours that overlap with the selected period, Odoo cannot automatically adjust or split hourly leaves during batch generation. Conflicting time off:\n%s', '\n'.join(f"- {l.display_name}" for l in invalid_time_off)))
             one_day_leaves = conflicting_leaves.filtered(lambda leave: leave.request_date_from == leave.request_date_to)
-            one_day_leaves.action_refuse()
+            one_day_leaves.check_access('write')
+            one_day_leaves.sudo().action_refuse()
             (conflicting_leaves - one_day_leaves)._split_leaves(self.date_from, self.date_to + timedelta(days=1))
 
         vals_list = self._prepare_employees_holiday_values(employees, date_from_tz, date_to_tz)
@@ -131,11 +139,12 @@ class HrLeaveGenerateMultiWizard(models.TransientModel):
             },
         }
 
-    @api.depends("employee_ids", "date_from")
+    @api.depends("employee_ids", "date_from", "date_to")
     def _compute_valid_work_entry_type_ids(self):
-        alloc_types, no_alloc_types = self.env["hr.work.entry.type"].search([
-            ('time_off_selectable', '=', True),
-        ]).partitioned('requires_allocation')
+        """The time types without allocation, and the ones with a valid allocation for all the selected employees.
+        Without employee, the time off is generated for all of them: only the time types without allocation.
+        The time types selectable in time off are the allowed ones, ``time_off_selectable`` is not checked here."""
+        alloc_types, no_alloc_types = self.env["hr.work.entry.type"].search([]).partitioned('requires_allocation')
         allocations = self.env['hr.leave.allocation'].search([
             ('work_entry_type_id', 'in', alloc_types.ids),
             ('employee_id', 'in', self.employee_ids.ids),
