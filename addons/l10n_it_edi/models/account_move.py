@@ -356,6 +356,8 @@ class AccountMove(models.Model):
             # from products, while in Italian EDI, taxes are generally explicited in the XML file
             # while the product may not be labelled exactly the same as in the database.
             def decoder(invoice, file_data, new=False):
+                if invoice.invoice_line_ids:
+                    return invoice._reason_cannot_decode_has_invoice_lines()
                 self.with_context(disable_onchange_name_predictive=True)._l10n_it_edi_import_invoice(invoice, file_data, new)
             return {
                 'priority': 20,
@@ -1530,7 +1532,7 @@ class AccountMove(models.Model):
             else:
                 message = _("Withholding tax not found")
             if message:
-                message_to_log.append(Markup("%s<br/>%s") % (message, self._compose_info_message(body_tree, '.')))
+                message_to_log.append(Markup("%s<br/>%s") % (message, self._compose_info_message(withholding, '.')))
 
         extra_info["withholding_taxes"] = withholding_taxes
 
@@ -1557,7 +1559,7 @@ class AccountMove(models.Model):
             else:
                 message_to_log.append(Markup("%s<br/>%s") % (
                     _("Pension Fund tax not found"),
-                    self.env['account.move']._compose_info_message(body_tree, '.'),
+                    self._compose_info_message(pension_fund, '.'),
                 ))
         extra_info["pension_fund_taxes"] = pension_fund_taxes
 

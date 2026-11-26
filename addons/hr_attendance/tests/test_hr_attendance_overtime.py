@@ -1,5 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from freezegun import freeze_time
 
 from odoo import Command
@@ -935,6 +935,110 @@ class TestHrAttendanceOvertime(HttpCase):
         ])
         for att in attendances:
             self.assertEqual(att.overtime_hours, 0)
+
+    def test_expected_hours_flexible_resource_weekly_limit(self):
+        base_date = datetime(2024, 4, 1)  # Monday
+        flexible_employee = self.env['hr.employee'].create({
+            'name': 'Weekly Flexi',
+            'company_id': self.company.id,
+            'tz': 'UTC',
+            'date_version': base_date.date(),
+            'contract_date_start': base_date.date(),
+            'resource_calendar_id': False,
+            'hours_per_day': 8,
+            'hours_per_week': 32,
+            'ruleset_id': self.ruleset.id,
+        })
+
+        self.env['hr.attendance'].create([
+            {
+                'employee_id': flexible_employee.id,
+                'check_in': base_date + timedelta(days=i, hours=9),
+                'check_out': base_date + timedelta(days=i, hours=17),
+            }
+            for i in range(1, 5)
+        ])
+        attendances = self.env['hr.attendance'].search([('employee_id', '=', flexible_employee.id)], order='check_in')
+        self.assertEqual(attendances.mapped('expected_hours'), [8, 8, 8, 8])
+
+        self.env['hr.attendance'].create({
+            'employee_id': flexible_employee.id,
+            'check_in': base_date + timedelta(hours=9),
+            'check_out': base_date + timedelta(hours=17),
+        })
+        attendances = self.env['hr.attendance'].search([('employee_id', '=', flexible_employee.id)], order='check_in')
+        self.assertEqual(attendances.mapped('expected_hours'), [8, 8, 8, 8, 0])
+        self.assertEqual(attendances.mapped('overtime_hours'), [0, 0, 0, 0, 8])
+
+    def test_expected_hours_flexible_resource_weekly_limit_public_holiday(self):
+        base_date = datetime(2026, 5, 25)  # Monday
+        company_calendar = self.company.resource_calendar_id.copy({'company_id': self.company.id})
+        self.company.resource_calendar_id = company_calendar
+        flexible_employee = self.env['hr.employee'].create({
+            'name': 'Weekly Holiday Flexi',
+            'company_id': self.company.id,
+            'tz': 'UTC',
+            'date_version': base_date.date(),
+            'contract_date_start': base_date.date(),
+            'resource_calendar_id': False,
+            'hours_per_day': 8,
+            'hours_per_week': 40,
+            'ruleset_id': self.ruleset.id,
+        })
+        self.env['resource.calendar.leaves'].with_company(self.company).create({
+            'name': 'Public Holiday',
+            'calendar_id': company_calendar.id,
+            'date_from': base_date,
+            'date_to': base_date.replace(hour=23, minute=59, second=59),
+        })
+
+        self.env['hr.attendance'].create([
+            {
+                'employee_id': flexible_employee.id,
+                'check_in': base_date + timedelta(days=i, hours=9),
+                'check_out': base_date + timedelta(days=i, hours=17),
+            }
+            for i in range(1, 6)
+        ])
+
+        attendances = self.env['hr.attendance'].search([('employee_id', '=', flexible_employee.id)], order='check_in')
+        self.assertEqual(attendances.mapped('expected_hours'), [8, 8, 8, 8, 0])
+        self.assertEqual(attendances.mapped('overtime_hours'), [0, 0, 0, 0, 8])
+
+    @freeze_time('2026-09-14')
+    def test_expected_hours_flexible_resource_weekly_limit_historical_version(self):
+        base_date = datetime(2024, 4, 1)  # Monday
+        flexible_employee = self.env['hr.employee'].create({
+            'name': 'Historical Weekly Flexi',
+            'company_id': self.company.id,
+            'tz': 'UTC',
+            'date_version': base_date.date(),
+            'contract_date_start': base_date.date(),
+            'resource_calendar_id': False,
+            'hours_per_day': 8,
+            'hours_per_week': 32,
+            'ruleset_id': self.ruleset.id,
+        })
+        flexible_employee.create_version({
+            'date_version': date(2026, 1, 1),
+            'resource_calendar_id': False,
+            'hours_per_day': 8,
+            'hours_per_week': 40,
+            'ruleset_id': self.ruleset.id,
+        })
+
+        self.env['hr.attendance'].create([
+            {
+                'employee_id': flexible_employee.id,
+                'check_in': base_date + timedelta(days=i, hours=9),
+                'check_out': base_date + timedelta(days=i, hours=17),
+            }
+            for i in range(5)
+        ])
+
+        attendances = self.env['hr.attendance'].search([('employee_id', '=', flexible_employee.id)], order='check_in')
+        self.assertEqual(attendances.mapped('expected_hours'), [8, 8, 8, 8, 0])
+        self.assertEqual(attendances.mapped('overtime_hours'), [0, 0, 0, 0, 8])
 
     def test_refuse_timeoff(self):
         self.company.write({
@@ -2028,6 +2132,27 @@ class TestHrAttendanceOvertime(HttpCase):
             "An attendance ending at midnight should not be recomputed "
             "when updating overtime for the following day.",
         )
+
+    def test_overtime_recomputation_consecutive_night_shifts(self):
+        self.env['hr.attendance'].create({
+            'employee_id': self.employee.id,
+            'check_in': datetime(2021, 1, 4, 22, 0),
+            'check_out': datetime(2021, 1, 5, 2, 0),
+        })
+        attendance = self.env['hr.attendance'].create({
+            'employee_id': self.employee.id,
+            'check_in': datetime(2021, 1, 5, 14, 0),
+            'check_out': datetime(2021, 1, 6, 1, 0),
+        })
+        self.assertEqual(attendance.overtime_hours, 4.0, "The 5th has 12 worked hours over two attendances.")
+
+        self.env['hr.attendance'].create({
+            'employee_id': self.employee.id,
+            'check_in': datetime(2021, 1, 6, 8, 0),
+            'check_out': datetime(2021, 1, 6, 17, 0),
+        })
+        self.assertEqual(attendance.overtime_hours, 4.0,
+                         "The overtime of the 5th should still count the previous night shift.")
 
     @freeze_time('2026-07-30 00:00:00')
     def test_update_overtime_hours_on_absence_attendance(self):
