@@ -32,13 +32,16 @@
 # Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025
 # Jessica Jakara, 2025
 # "Jessica Tuulia Sade Jäkärä (jtsj)" <jtsj@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
+# Saara Hakanen <sahak@odoo.com>, 2026.
+# Deleted User <noreply+18@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2025-08-21 14:30+0000\n"
-"Last-Translator: \"Jessica Tuulia Sade Jäkärä (jtsj)\" <jtsj@odoo.com>\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
+"PO-Revision-Date: 2026-11-04 12:35+0000\n"
+"Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
 "Language-Team: Finnish <https://translate.odoo.com/projects/odoo-18/"
 "hr_expense/fi/>\n"
 "Language: fi\n"
@@ -46,27 +49,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "$100.00"
-msgstr "100.00 USD"
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "$120.00"
-msgstr "120.00 USD"
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "$500.00"
-msgstr "500.00 USD"
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "$600.00"
-msgstr "600.00 USD"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: hr_expense
 #. odoo-python
@@ -124,11 +107,6 @@ msgstr "(mukaan lukien"
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid "1 %(exp_cur)s = %(rate)s %(comp_cur)s"
 msgstr "1 %(exp_cur)s = %(rate)s %(comp_cur)s"
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "2023-08-11"
-msgstr "2023-08-11"
 
 #. module: hr_expense
 #. odoo-javascript
@@ -285,7 +263,7 @@ msgstr "Kaikki maksutavat on sallittu"
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__amount_residual
 msgid "Amount Due"
-msgstr "Erääntynyt summa"
+msgstr "Maksettava summa"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
@@ -318,24 +296,24 @@ msgstr "Kuluraportti voi sisältää vain yhden yrityksen rivejä."
 #. module: hr_expense
 #: model:ir.model,name:hr_expense.model_account_analytic_account
 msgid "Analytic Account"
-msgstr "Analyyttinen tili"
+msgstr "Laskentakohde"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__analytic_distribution
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split__analytic_distribution
 msgid "Analytic Distribution"
-msgstr "Analyyttinen jakelu"
+msgstr "Laskentakohteiden kohdistus"
 
 #. module: hr_expense
 #: model:ir.model,name:hr_expense.model_account_analytic_applicability
 msgid "Analytic Plan's Applicabilities"
-msgstr "Analyysisuunnitelman sovellettavuus"
+msgstr "Laskentakohderyhmän sovellettavuus"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__analytic_precision
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split__analytic_precision
 msgid "Analytic Precision"
-msgstr "Analyyttinen tarkkuus"
+msgstr "Laskennallinen tarkkuus"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__approval_date
@@ -467,7 +445,7 @@ msgstr "Syy, miksi ei voida hyväksyä"
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__product_ids
 msgid "Categories"
-msgstr "Tuoteryhmä(t)"
+msgstr "Kategoriat"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__product_id
@@ -489,7 +467,7 @@ msgstr "Luokka: ei löydy"
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__message_main_attachment_checksum
 msgid "Checksum/SHA1"
-msgstr "Checksum/SHA1"
+msgstr "Tarkistussumma/SHA1"
 
 #. module: hr_expense
 #: model:product.template,name:hr_expense.expense_product_communication_product_template
@@ -669,7 +647,7 @@ msgstr "Näyttönimi"
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__distribution_analytic_account_ids
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split__distribution_analytic_account_ids
 msgid "Distribution Analytic Account"
-msgstr "Jakelun analyyttinen tili"
+msgstr "Laskentakohteen kohdistus"
 
 #. module: hr_expense
 #: model_terms:digest.tip,tip_description:hr_expense.digest_tip_hr_expense_0
@@ -1057,7 +1035,7 @@ msgstr "Luo kuluja"
 #. module: hr_expense
 #: model:product.template,name:hr_expense.expense_product_gift_product_template
 msgid "Gifts"
-msgstr "Lahja"
+msgstr "Lahjat"
 
 #. module: hr_expense
 #: model_terms:product.template,description:hr_expense.expense_product_gift_product_template
@@ -1098,6 +1076,11 @@ msgid "Hotel, plane ticket, taxi, etc."
 msgstr "Hotelli, lentolippu, taksi jne."
 
 #. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_account_tax__hr_expense_ids
+msgid "Hr Expense"
+msgstr ""
+
+#. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_res_config_settings__hr_expense_alias_domain_id
 msgid "Hr Expense Alias Domain"
 msgstr "Matkalaskujen verkko-osoitteen alias"
@@ -1128,7 +1111,7 @@ msgstr "Kuvake joka kertoo poikkeustoiminnosta."
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__message_needaction
 #: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "Jos valittu, uudet viestit vaativat huomiotasi."
+msgstr "Jos ruksittu, uudet viestit vaativat huomiotasi."
 
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__message_has_error
@@ -1136,7 +1119,7 @@ msgstr "Jos valittu, uudet viestit vaativat huomiotasi."
 #: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__message_has_error
 #: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "Jos valittu, joitakin viestejä ei ole toimitettu."
+msgstr "Jos ruksittu, joissain viesteissä on toimitusvirhe."
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.view_hr_expense_sheet_form
@@ -1220,7 +1203,7 @@ msgstr "Päiväkirjamerkinnän nollaus luonnokseen"
 #. module: hr_expense
 #: model:ir.model,name:hr_expense.model_account_move_line
 msgid "Journal Item"
-msgstr "Päiväkirjamerkintä"
+msgstr "Kirjausrivi"
 
 #. module: hr_expense
 #. odoo-python
@@ -1370,13 +1353,13 @@ msgstr "Omat kulut"
 #: model:ir.ui.menu,name:hr_expense.menu_hr_expense_sheet_my_reports
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_sheet_view_search
 msgid "My Reports"
-msgstr "Omat raportit"
+msgstr "Omat raporttini"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_sheet_view_search
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_search
 msgid "My Team"
-msgstr "Oma tiimi"
+msgstr "Oma tiimini"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
@@ -1418,7 +1401,7 @@ msgstr "Seuraavan toimenpiteen eräpäivä"
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__activity_summary
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__activity_summary
 msgid "Next Activity Summary"
-msgstr "Seuraavan toimenpiteen kuvaus"
+msgstr "Seuraavan toimenpiteen yhteenveto"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__activity_type_id
@@ -1701,12 +1684,12 @@ msgstr "Tuotteen nimi"
 #. module: hr_expense
 #: model:ir.model,name:hr_expense.model_product_product
 msgid "Product Variant"
-msgstr "Tuotevariaatio"
+msgstr "Tuotevariantti"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_tree_view
 msgid "Product Variants"
-msgstr "Tuotevariaatiot"
+msgstr "Tuotevariantit"
 
 #. module: hr_expense
 #: model:ir.model,name:hr_expense.model_hr_employee_public
@@ -1798,7 +1781,7 @@ msgstr "Hyvitä palkassa"
 #. module: hr_expense
 #: model:ir.model,name:hr_expense.model_ir_actions_report
 msgid "Report Action"
-msgstr "Raporttin"
+msgstr "Raporttitoiminto"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__company_currency_id
@@ -1968,10 +1951,10 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
-"Tila aktiviteetin perusteella\n"
-"Myöhässä: Eräpäivä on menneisyydessä\n"
-"Tänään: Eräpäivä on tänään\n"
-"Suunniteltu: Tulevaisuudessa."
+"Tila toimenpiteiden perusteella\n"
+"Myöhässä: Eräpäivä on jo mennyt\n"
+"Tänään: Toimenpiteen päivämäärä on tänään\n"
+"Suunniteltu: Tulevat toimenpiteet."
 
 #. module: hr_expense
 #. odoo-javascript
@@ -2061,6 +2044,16 @@ msgstr "Tiimin hyväksyjä"
 msgid ""
 "The account used to record the outstanding amount of the company expenses."
 msgstr "Tili, jolle kirjataan yrityksen kulujen jäljellä oleva määrä."
+
+#. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/ir_actions_report.py:0
+msgid ""
+"The attachment (%(attachment_name)s) has not been added to the report due to "
+"the following error: '%(error)s'"
+msgstr ""
+"Liitettä (%(attachment_name)s) ei lisätty raporttiin seuraavan virheen "
+"takia: '%(error)s'"
 
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_res_company__expense_journal_id
@@ -2235,7 +2228,7 @@ msgstr "Matkailu ja majoitus"
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__activity_exception_decoration
 #: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr "Poikkeusaktiviteetin tyyppi tietueella."
+msgstr "Kirjatun poikkeustoimenpiteen tyyppi."
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_search
@@ -2270,7 +2263,7 @@ msgstr "Mittayksikön luokka"
 #: code:addons/hr_expense/static/src/views/kanban.xml:0
 #: code:addons/hr_expense/static/src/views/list.xml:0
 msgid "Upload"
-msgstr "Lähetä"
+msgstr "Lataa"
 
 #. module: hr_expense
 #: model_terms:ir.actions.act_window,help:hr_expense.hr_expense_actions_my_all
@@ -2323,7 +2316,7 @@ msgstr "Verkkosivun ilmoitukset"
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__website_message_ids
 #: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__website_message_ids
 msgid "Website communication history"
-msgstr "Verkkosivun viestihistoria"
+msgstr "Verkkosivun viestintähistoria"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_form_view
@@ -2427,7 +2420,7 @@ msgstr "Et voi perua kirjattua tai maksettua kulua."
 #. odoo-python
 #: code:addons/hr_expense/models/analytic.py:0
 msgid "You cannot delete an analytic account that is used in an expense."
-msgstr "Et voi poistaa analytiikkatiliä, jota käytetään kuluissa."
+msgstr "Et voi poistaa laskentakohdetta, jota käytetään kulussa."
 
 #. module: hr_expense
 #. odoo-python
@@ -2631,7 +2624,7 @@ msgstr "ei veroja"
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_form_view
 msgid "per"
-msgstr "kohti"
+msgstr "per"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
@@ -2665,3 +2658,18 @@ msgstr "käytä OCR-toimintoa lukemaan tiedot kuitin kuvasta"
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
 msgid "with the same receipt already exists."
 msgstr "samalla kuitilla, joka on jo olemassa."
+
+#~ msgid "$100.00"
+#~ msgstr "100.00 USD"
+
+#~ msgid "$120.00"
+#~ msgstr "120.00 USD"
+
+#~ msgid "$500.00"
+#~ msgstr "500.00 USD"
+
+#~ msgid "$600.00"
+#~ msgstr "600.00 USD"
+
+#~ msgid "2023-08-11"
+#~ msgstr "2023-08-11"

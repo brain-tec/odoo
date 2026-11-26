@@ -3,7 +3,18 @@
 import babel
 import requests
 
+from odoo import _
 from odoo.http import request, route, Controller
+
+# Google Translate rejects an unlisted region instead of falling back to the language.
+GOOGLE_LANG_CODES = {
+    "fr_CA": "fr-CA",
+    "pt_AO": "pt-PT",
+    "pt_PT": "pt-PT",
+    "zh_CN": "zh-CN",
+    "zh_HK": "zh-TW",
+    "zh_TW": "zh-TW",
+}
 
 
 class GoogleTranslateController(Controller):
@@ -12,13 +23,14 @@ class GoogleTranslateController(Controller):
         message = request.env["mail.message"].search([("id", "=", message_id)])
         if not message:
             raise request.not_found()
-        domain = [("message_id", "=", message.id), ("target_lang", "=", request.env.user.lang.split("_")[0])]
+        lang = request.env.user.lang
+        target_lang = GOOGLE_LANG_CODES.get(lang, lang.split("_")[0])
+        domain = [("message_id", "=", message.id), ("target_lang", "=", target_lang)]
         # sudo: mail.message.translation - searching translations of a message that can be read with standard ACL
         translation = request.env["mail.message.translation"].sudo().search(domain)
         if not translation:
             try:
                 source_lang = self._detect_source_lang(message)
-                target_lang = request.env.user.lang.split("_")[0]
                 # sudo: mail.message.translation - create translation of a message that can be read with standard ACL
                 vals = {
                     "body": self._get_translation(str(message.body), source_lang, target_lang),
@@ -27,8 +39,8 @@ class GoogleTranslateController(Controller):
                     "target_lang": target_lang,
                 }
                 translation = request.env["mail.message.translation"].sudo().create(vals)
-            except requests.exceptions.HTTPError as err:
-                return {"error": err.response.json()["error"]["message"]}
+            except requests.exceptions.RequestException:
+                return {"error": _("Translation service unavailable")}
         try:
             lang_name = babel.Locale(translation.source_lang).get_display_name(request.env.user.lang)
         except babel.UnknownLocaleError:

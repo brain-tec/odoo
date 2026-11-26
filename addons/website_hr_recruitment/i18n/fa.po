@@ -1,25 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_hr_recruitment
+# * website_hr_recruitment
 #
 # Translators:
 # zakariya moradi, 2025
 # Tiffany Chang, 2025
 # Naser mars, 2025
 #
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Naser mars, 2025\n"
-"Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
+"POT-Creation-Date: 2026-04-10 18:37+0000\n"
+"PO-Revision-Date: 2026-10-20 15:27+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Persian <https://translate.odoo.com/projects/odoo-18/"
+"website_hr_recruitment/fa/>\n"
 "Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website_hr_recruitment
 #. odoo-python
@@ -35,12 +38,24 @@ msgid ""
 "            <h6>4 Days after Interview</h6>\n"
 "        "
 msgstr ""
+"\n"
+"            <span class=\"text-muted small\">زمان تا پاسخ</span>\n"
+"            <h6>2 روز کاری</h6>\n"
+"            <span class=\"text-muted small\">فرآیند</span>\n"
+"            <h6>1 تماس تلفنی</h6>\n"
+"            <h6>1 مصاحبه در محل</h6>\n"
+"            <span class=\"text-muted small\">تعداد روز تا دریافت پیشنهاد</"
+"span>\n"
+"            <h6>4 روز بعد از مصاحبه</h6>\n"
+"        "
 
 #. module: website_hr_recruitment
 #. odoo-python
 #: code:addons/website_hr_recruitment/controllers/main.py:0
 msgid " In case of issue, contact %(contact_infos)s"
 msgstr ""
+" در صورت وجود هرگونه مشکل در فرآیند ثبت درخواست، می‌توانید با %(contact_infos)"
+"s تماس بگیرید"
 
 #. module: website_hr_recruitment
 #. odoo-python
@@ -52,11 +67,6 @@ msgstr "درخواست %s"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid "'. Showing results for '"
 msgstr "'. نمایش نتایج برای'"
-
-#. module: website_hr_recruitment
-#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
-msgid "+1 (650) 555-0187"
-msgstr "+1 (650) 555-0187"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -274,6 +284,8 @@ msgid ""
 "An application already exists for %(value)s. Duplicates might be rejected. %"
 "(recruiter_contact)s"
 msgstr ""
+"قبلاً برای %(value)s درخواست استخدام ثبت شده است و درخواست‌های تکراری ممکن است "
+"رد شوند. %(recruiter_contact)s"
 
 #. module: website_hr_recruitment
 #: model:ir.model,name:website_hr_recruitment.model_hr_applicant
@@ -283,7 +295,7 @@ msgstr "متقاضی"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.hr_job_form_inherit
 msgid "Application Info"
-msgstr ""
+msgstr "اطلاعات تقاضا"
 
 #. module: website_hr_recruitment
 #. odoo-javascript
@@ -327,10 +339,10 @@ msgstr ""
 "کنار رهبران برجسته را ارائه می‌دهد. ما به دنبال یک عضو باتجربه و برجسته از "
 "کارکنان هستیم.\n"
 "                        <br/><br/>\n"
-"                        این موقعیت هم <b>خلاقانه و هم دقیق</b> است و به "
-"طبیعت شما نیاز دارد که خارج از چارچوب فکر کنید. ما انتظار داریم که کاندیدا "
-"پیش‌فعال باشد و روحیه \"انجامش بده\" داشته باشد. برای موفقیت، شما نیاز به "
-"مهارت‌های قوی در حل مشکلات خواهید داشت."
+"                        این موقعیت هم <b>خلاقانه و هم دقیق</b> است و به طبیعت "
+"شما نیاز دارد که خارج از چارچوب فکر کنید. ما انتظار داریم که کاندیدا پیش‌فعال "
+"باشد و روحیه \"انجامش بده\" داشته باشد. برای موفقیت، شما نیاز به مهارت‌های "
+"قوی در حل مشکلات خواهید داشت."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -436,6 +448,11 @@ msgid ""
 "                    sports sessions, team building events, monthly drink, "
 "and much more"
 msgstr ""
+"هر کارمند فرصتی برای دیدن تأثیر کار خود دارد.\n"
+"                    شما می‌توانید به موفقیت شرکت کمک واقعی کنید.\n"
+"                    <br/>\n"
+"                    فعالیت‌های مختلفی در طول سال برگزار می‌شود، مانند جلسات "
+"ورزشی هفتگی، رویدادهای تیم‌سازی، نوشیدنی‌های ماهانه و بسیاری دیگر."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -511,9 +528,9 @@ msgstr ""
 "                                                مرحله بعدی یا تماس تلفنی است "
 "یا جلسه‌ای در دفاتر ما.\n"
 "                                                <br/><br/>\n"
-"                                                در صورت تمایل به "
-"<strong>دریافت پاسخ سریع‌تر با من تماس بگیرید</strong> یا اگر به اندازه کافی "
-"سریع خبری از من دریافت نکردید."
+"                                                در صورت تمایل به <strong>"
+"دریافت پاسخ سریع‌تر با من تماس بگیرید</strong> یا اگر به اندازه کافی سریع "
+"خبری از من دریافت نکردید."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -646,7 +663,8 @@ msgstr "هیچ نتیجه‌ای برای این موارد یافت نشد"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid ""
 "No waste of time in enterprise processes, real responsibilities and autonomy"
-msgstr "در فرآیندهای سازمانی زمان زیادی تلف نمی‌شود، مسئولیت‌های واقعی و استقلال"
+msgstr ""
+"در فرآیندهای سازمانی زمان زیادی تلف نمی‌شود، مسئولیت‌های واقعی و استقلال"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.snippet_options
@@ -778,7 +796,7 @@ msgstr "تنظیم کنید که آیا درخواست در وب‌سایت شر
 #. odoo-javascript
 #: code:addons/website_hr_recruitment/static/src/js/widgets/copy_link_menuitem.js:0
 msgid "Share Job"
-msgstr ""
+msgstr "اشتراک‌گذاری شغل"
 
 #. module: website_hr_recruitment
 #. odoo-javascript
@@ -820,7 +838,7 @@ msgstr "آدرس URL کامل برای دسترسی سند در وبسایت."
 #. odoo-javascript
 #: code:addons/website_hr_recruitment/static/src/js/widgets/copy_link_menuitem.js:0
 msgid "The job link has been copied to the clipboard."
-msgstr ""
+msgstr "لینک این شغل در کلیپ‌بورد کپی شد."
 
 #. module: website_hr_recruitment
 #. odoo-python
@@ -832,7 +850,7 @@ msgstr "پیشنهاد شغلی بسته شده است."
 #. odoo-javascript
 #: code:addons/website_hr_recruitment/static/src/js/website_hr_applicant_form.js:0
 msgid "The profile that you gave us doesn't seems like a linkedin profile"
-msgstr ""
+msgstr "پروفایلی که ارائه کرده‌اید به نظر می‌رسد پروفایل لینکدین نباشد"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
@@ -854,7 +872,7 @@ msgstr ""
 #. module: website_hr_recruitment
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_recruitment_source__url
 msgid "Tracker URL"
-msgstr ""
+msgstr "URL ردیاب"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -886,8 +904,8 @@ msgid ""
 msgstr ""
 "ما تیمی از افراد پرشوری هستیم که هدفشان بهبود زندگی همه از طریق محصولات "
 "نوآورانه است.\n"
-"                                ما محصولات بزرگی می‌سازیم تا مشکلات "
-"کسب‌وکارتان را حل کنیم."
+"                                ما محصولات بزرگی می‌سازیم تا مشکلات کسب‌وکارتان "
+"را حل کنیم."
 
 #. module: website_hr_recruitment
 #. odoo-python
@@ -896,6 +914,8 @@ msgid ""
 "We found a recent application with a similar name, email, phone number. You "
 "can continue if it's not a mistake."
 msgstr ""
+"ما یک درخواست اخیر با نام، ایمیل و شماره تلفن مشابه پیدا کردیم. اگر اشتباهی "
+"در کار نیست، می‌توانید ادامه دهید."
 
 #. module: website_hr_recruitment
 #. odoo-python
@@ -904,6 +924,8 @@ msgid ""
 "We've found a previous closed application in our system within the last 6 "
 "months. Please consider before applying in order not to duplicate efforts."
 msgstr ""
+"یک درخواست قبلی که در ۶ ماه گذشته بسته شده است، در سیستم پیدا کرده‌ایم. لطفاً "
+"قبل از درخواست، این موضوع را در نظر بگیرید تا از تکرار تلاش‌ها جلوگیری شود."
 
 #. module: website_hr_recruitment
 #: model:ir.model,name:website_hr_recruitment.model_website
@@ -957,6 +979,11 @@ msgid "What's great in the job?"
 msgstr "چه چیزهایی در شغل عالی است؟"
 
 #. module: website_hr_recruitment
+#: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
+msgid "X"
+msgstr ""
+
+#. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.thankyou_ir_ui_view
 msgid "Your <b>contact</b> information is:"
 msgstr "اطلاعات <b>تماس</b> شما به شرح زیر است:"
@@ -993,11 +1020,13 @@ msgid ""
 "e.g. Summarize the position in one or two lines that will be displayed on "
 "the Jobs list page..."
 msgstr ""
+"مثال: جایگاه شغلی را در یک یا دو سطر خلاصه کنید که در صفحه لیست مشاغل نمایش "
+"داده شود."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid "e.g. https://www.linkedin.com/in/fpodoo"
-msgstr ""
+msgstr "مثال: https://www.linkedin.com/in/fpodoo"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
@@ -1007,12 +1036,12 @@ msgstr "info@yourcompany.example.com"
 #. module: website_hr_recruitment
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_job__full_url
 msgid "job URL"
-msgstr ""
+msgstr "آدرس URL شغل"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid "open position"
-msgstr ""
+msgstr "موقعیت شغلی باز"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
@@ -1023,3 +1052,6 @@ msgstr "موقعیت‌های باز"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid "unpublished"
 msgstr "منتشر نشده"
+
+#~ msgid "+1 (650) 555-0187"
+#~ msgstr "+1 (650) 555-0187"

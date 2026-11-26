@@ -24,6 +24,7 @@ import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { useService } from "@web/core/utils/hooks";
 import { useMessageSearch } from "@mail/core/common/message_search_hook";
 import { usePopoutAttachment } from "@mail/core/common/attachment_view";
+import { isMobileOS } from "@web/core/browser/feature_detection";
 
 export const DELAY_FOR_SPINNER = 1000;
 
@@ -95,6 +96,9 @@ patch(Chatter.prototype, {
         this.followerListDropdown = useDropdownState();
         /** @type {number|null} */
         this.loadingAttachmentTimeout = null;
+        /** @type {Map<string, Function>} */
+        this.uploadHandlers = new Map();
+        this.isMobileOS = isMobileOS();
         useCustomDropzone(this.rootRef, MailAttachmentDropzone, {
             extraClass: "o-mail-Chatter-dropzone",
             /** @param {Event} ev */
@@ -119,7 +123,7 @@ patch(Chatter.prototype, {
                     );
                     this.state.isAttachmentBoxOpened = true;
                 }
-            }
+            },
         });
         useEffect(
             () => {
@@ -338,21 +342,39 @@ patch(Chatter.prototype, {
         this.load(thread, ["suggestedRecipients"]);
     },
 
-    async onUploaded(data) {
-        await this.attachmentUploader.uploadData(data);
-        if (this.props.hasParentReloadOnAttachmentsChanged) {
-            this.reloadParentView();
+    /**
+     * @param {string} data deprecated, passing thread is enough
+     * @param {import("models").Thread} thread
+     */
+    onUploaded(data, { thread } = {}) {
+        const threadLocalId = thread.localId;
+        if (!this.uploadHandlers.has(threadLocalId)) {
+            const self = this;
+            this.uploadHandlers.set(threadLocalId, async function handleUpload(data) {
+                try {
+                    await self.attachmentUploader.uploadData(data, { thread });
+                    if (!thread.eq(self.state.thread)) {
+                        return;
+                    }
+                    if (self.props.hasParentReloadOnAttachmentsChanged) {
+                        self.reloadParentView();
+                    }
+                    self.state.isAttachmentBoxOpened = true;
+                    if (self.rootRef.el) {
+                        self.rootRef.el.scrollTop = 0;
+                    }
+                    self.state.thread.scrollTop = "bottom";
+                } finally {
+                    self.uploadHandlers.delete(threadLocalId);
+                }
+            });
         }
-        this.state.isAttachmentBoxOpened = true;
-        if (this.rootRef.el) {
-            this.rootRef.el.scrollTop = 0;
-        }
-        this.state.thread.scrollTop = "bottom";
+        return this.uploadHandlers.get(threadLocalId);
     },
 
     async reloadParentView() {
-        await this.props.saveRecord?.();
-        if (this.props.webRecord) {
+        const saved = await this.props.saveRecord?.();
+        if (this.props.webRecord && saved) {
             await this.props.webRecord.load();
         }
     },
@@ -401,6 +423,14 @@ patch(Chatter.prototype, {
         if (this.props.hasParentReloadOnAttachmentsChanged) {
             this.reloadParentView();
         }
+    },
+
+    get showsAttachmentPopout() {
+        return (
+            !this.isMobileOS &&
+            this.props.hasAttachmentPreview &&
+            Boolean(this.state.thread.attachmentsInWebClientView.length)
+        );
     },
 
     popoutAttachment() {

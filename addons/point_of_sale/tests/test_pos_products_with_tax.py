@@ -551,7 +551,6 @@ class TestPoSProductsWithTax(TestPoSCommon):
         tax_pos = self.product1.taxes_id
         self.assertFalse(tax_pos.is_used)
         self.test_orders_no_invoiced()
-        tax_pos.invalidate_model(fnames=['is_used'])
         self.assertTrue(tax_pos.is_used)
 
     def test_pos_loaded_product_taxes_on_branch(self):
@@ -710,3 +709,25 @@ class TestPoSProductsWithTax(TestPoSCommon):
         with self.assertRaises(UserError):
             with Form(self.variant_product.product_tmpl_id) as product:
                 product.type = "combo"
+
+    def test_tax_change_blocked_when_open_pos_session(self):
+        """Changing a POS sale tax must be blocked when a POS session is open"""
+        tax = self.taxes['tax7']
+
+        self.open_new_session()
+        self.assertEqual(self.pos_session.state, 'opened')
+
+        self.env['pos.order'].sync_from_ui([self.create_ui_order_data([
+            (self.product1, 1),
+        ])])
+
+        self.assertTrue(self.pos_session.order_ids)
+        self.assertTrue(self.env['pos.order.line'].search([
+            ('order_id.session_id', '=', self.pos_session.id),
+            ('tax_ids', 'in', tax.ids),
+        ], limit=1))
+
+        with self.assertRaises(UserError):
+            tax.write({
+                'price_include_override': 'tax_included',
+            })

@@ -6,14 +6,15 @@
 # Wil Odoo, 2025
 # Larissa Manderfeld, 2025
 #
-# "Larissa Manderfeld (lman)" <lman@odoo.com>, 2025.
-# "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2025.
+# "Larissa Manderfeld (lman)" <lman@odoo.com>, 2025, 2026.
+# "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-12-19 11:31+0000\n"
+"POT-Creation-Date: 2026-05-15 17:38+0000\n"
+"PO-Revision-Date: 2026-11-19 19:36+0000\n"
 "Last-Translator: \"Noemi Pla Garcia (nopl)\" <nopl@odoo.com>\n"
 "Language-Team: Spanish <https://translate.odoo.com/projects/odoo-18/"
 "website_slides/es/>\n"
@@ -23,7 +24,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
 "0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__members_engaged_count
@@ -197,7 +198,7 @@ msgstr ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        Hola:<br/><br/>\n"
-"        Se ha inscrito a un nuevo curso: <t t-out=\"object.channel_id.name "
+"        Te has inscrito a un nuevo curso: <t t-out=\"object.channel_id.name "
 "or ''\">«Fundamentos de jardinería»</t>.\n"
 "    </p>\n"
 "</div>\n"
@@ -219,8 +220,8 @@ msgstr ""
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        Hola:<br/><br/>\n"
 "        Le invitamos a adentrarse en el mundo de la jardinería mediante el "
-"curso: <t t-out=\"object.channel_id.name or ''\">«Fundamentos de "
-"jardinería»</t>.\n"
+"curso: <t t-out=\"object.channel_id.name or ''\">«Fundamentos de jardinería"
+"»</t>.\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -259,8 +260,8 @@ msgid ""
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <div style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
+"                    <div style=\"margin: 0px; padding: 0px; font-size: "
+"13px;\">\n"
 "                        <p style=\"margin: 0px;\">Hola <t t-"
 "out=\"object.partner_id.name or ''\">Brandon Freeman</t>,</p><br/>\n"
 "                        <p><b>¡Felicidades!</b></p>\n"
@@ -326,8 +327,8 @@ msgid ""
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">"
+"\n"
 "                        Hola<br/><br/>\n"
 "                        <t t-out=\"user.name or ''\">Mitchell Admin</t> "
 "compartió el <strong t-out=\"object.name or ''\">documento</strong> con "
@@ -335,9 +336,9 @@ msgstr ""
 "                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
 "align: center;\">\n"
 "                            <a t-att-href=\"object.website_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-"
-"src=\"{{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/"
-"image_256\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{"
+"{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/image_256\" "
+"style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
@@ -346,8 +347,8 @@ msgstr ""
 "style=\"background-color: #875a7b; padding: 8px 16px 8px "
 "16px;                                 text-decoration: none; color: #fff; "
 "border-radius: 5px;\">\n"
-"                                Ver <strong t-out=\"object.name or "
-"''\">documento</strong></a>\n"
+"                                Ver <strong t-out=\"object.name or ''\">"
+"documento</strong></a>\n"
 "                        </div>\n"
 "                        <t t-if=\"user.signature\" data-o-mail-quote-"
 "container=\"1\">\n"
@@ -397,25 +398,25 @@ msgid ""
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">"
+"\n"
 "                        Hola<br/><br/>\n"
 "                        <t t-out=\"user.name or ''\">Mitchell Admin</t> "
 "compartió el <t t-out=\"object.slide_category or ''\">documento</t> <strong "
 "t-out=\"object.name or ''\">Árboles</strong> con usted.\n"
 "                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
 "align: center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?"
-"fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-"
-"src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/"
-"image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                            <a t-att-href=\"(object.website_share_url + "
+"'?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{"
+"{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" "
+"style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
 "center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?"
-"fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" "
+"                            <a t-att-href=\"(object.website_share_url + "
+"'?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" "
 "style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-"
 "decoration: none; color: #fff; border-radius: 5px;\">Ver <strong t-"
 "out=\"object.name or ''\">Árboles</strong></a>\n"
@@ -470,21 +471,21 @@ msgid ""
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
-"                        Hola<br/><br/>\n"
-"                        Hay nuevo contenido en el curso <strong t-"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">"
+"\n"
+"                        Hola:<br/><br/>\n"
+"                        Hay novedades en el curso <strong t-"
 "out=\"object.channel_id.name or ''\">Árboles, madera y jardines</strong> que "
-"está siguiendo:<br/><br/>\n"
-"                        </p><center><strong t-out=\"object.name or "
-"''\">Árboles</strong></center>\n"
+"estás siguiendo:<br/><br/>\n"
+"                        </p><center><strong t-out=\"object.name or ''\">"
+"Árboles</strong></center>\n"
 "                        <t t-if=\"object.image_1024\">\n"
 "                            <div style=\"padding: 16px 8px 16px 8px; text-"
 "align: center;\">\n"
 "                                <a t-att-href=\"object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-"
-"src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/"
-"image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{"
+"{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" "
+"style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        </t>\n"
@@ -494,7 +495,7 @@ msgstr ""
 "style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-"
 "decoration: none; color: #fff; border-radius: 5px;\">Ver contenido</a>\n"
 "                        </div>\n"
-"                        ¡Disfrute de este contenido exclusivo!\n"
+"                        ¡Disfruta de este contenido exclusivo!\n"
 "                        <t t-if=\"user.signature\" data-o-mail-quote-"
 "container=\"1\">\n"
 "                            <br/>\n"
@@ -521,8 +522,8 @@ msgid ""
 "<i class=\"fa fa-bars\"/><span class=\"d-none d-md-inline-block "
 "ms-1\">Lessons</span>"
 msgstr ""
-"<i class=\"fa fa-bars\"/><span class=\"d-none d-md-inline-block "
-"ms-1\">Lecciones</span>"
+"<i class=\"fa fa-bars\"/><span class=\"d-none d-md-inline-block ms-1\">"
+"Lecciones</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.lesson_card
@@ -654,8 +655,8 @@ msgid ""
 "<i class=\"fa fa-flag me-2\" aria-label=\"Quiz\" role=\"img\" title=\"Quiz\"/"
 ">"
 msgstr ""
-"<i class=\"fa fa-flag me-2\" aria-label=\"Quiz\" role=\"img\" title=\"Quiz\"/"
-">"
+"<i class=\"fa fa-flag me-2\" aria-label=\"Quiz\" role=\"img\" "
+"title=\"Quiz\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_aside_training_category
@@ -703,8 +704,8 @@ msgid ""
 "<i class=\"fa fa-home\"/><span class=\"d-none d-md-inline-block ms-1\">Back "
 "to course</span>"
 msgstr ""
-"<i class=\"fa fa-home\"/><span class=\"d-none d-md-inline-block "
-"ms-1\">Volver al curso</span>"
+"<i class=\"fa fa-home\"/><span class=\"d-none d-md-inline-block ms-1\">"
+"Volver al curso</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
@@ -721,8 +722,8 @@ msgid ""
 "<i class=\"fa fa-plus me-1\"/> <span class=\"d-none d-md-inline-block\">Add "
 "Content</span>"
 msgstr ""
-"<i class=\"fa fa-plus me-1\"/> <span class=\"d-none d-md-inline-"
-"block\">Añadir contenido</span>"
+"<i class=\"fa fa-plus me-1\"/> <span class=\"d-none d-md-inline-block\">"
+"Añadir contenido</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list
@@ -782,8 +783,8 @@ msgid ""
 "span>"
 msgstr ""
 "<i class=\"fa fa-share-alt\"/>\n"
-"                        <span class=\"d-none d-md-inline-block "
-"ms-2\">Compartir</span>"
+"                        <span class=\"d-none d-md-inline-block ms-2\">"
+"Compartir</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_sidebar
@@ -796,8 +797,8 @@ msgid ""
 "<i class=\"fa fa-sign-out\"/><span class=\"d-none d-md-inline-block "
 "ms-1\">Exit Fullscreen</span>"
 msgstr ""
-"<i class=\"fa fa-sign-out\"/><span class=\"d-none d-md-inline-block "
-"ms-1\">Salir de pantalla completa</span>"
+"<i class=\"fa fa-sign-out\"/><span class=\"d-none d-md-inline-block ms-1\">"
+"Salir de pantalla completa</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_all
@@ -876,14 +877,13 @@ msgid ""
 "<span class=\"badge text-bg-success fw-normal m-1\"><span>Preview</span></"
 "span>"
 msgstr ""
-"<span class=\"badge text-bg-success fw-normal m-1\"><span>Vista previa</"
-"span></span>"
+"<span class=\"badge text-bg-success fw-normal m-1\"><span>Vista previa</span>"
+"</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_sample
 msgid "<span class=\"badge text-bg-success fw-normal m-1\">Preview</span>"
-msgstr ""
-"<span class=\"badge text-bg-success fw-normal m-1\">Vista previa</span>"
+msgstr "<span class=\"badge text-bg-success fw-normal m-1\">Vista previa</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_card
@@ -891,8 +891,8 @@ msgid ""
 "<span class=\"badge text-bg-success pull-right\"><i class=\"fa fa-check\"/> "
 "Completed</span>"
 msgstr ""
-"<span class=\"badge text-bg-success pull-right\"><i class=\"fa fa-check\"/"
-">Completado</span>"
+"<span class=\"badge text-bg-success pull-right\"><i class=\"fa fa-check\"/>"
+"Completado</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
@@ -929,14 +929,8 @@ msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
-msgid ""
-"<span class=\"o_form_label\">Slides</span>\n"
-"                    <span class=\"fa fa-lg fa-globe\" title=\"Values set "
-"here are website-specific.\" groups=\"website.group_multi_website\"/>"
+msgid "<span class=\"o_form_label\">Slides</span>"
 msgstr ""
-"<span class=\"o_form_label\">Diapositivas</span>\n"
-"                    <span class=\"fa fa-lg fa-globe\" title=\"Values set "
-"here are website-specific.\" groups=\"website.group_multi_website\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
@@ -1062,11 +1056,11 @@ msgstr ""
 "                                        <span id=\"previous\" class=\"mx-1 "
 "mx-sm-2\" title=\"Previous slide\" aria-label=\"Previous slide\" "
 "role=\"button\"><i class=\"fa fa-arrow-circle-left\"/></span>\n"
-"                                        <span id=\"next\" class=\"mx-1 mx-"
-"sm-2\" title=\"Next slide\" aria-label=\"Next slide\" role=\"button\"><i "
+"                                        <span id=\"next\" class=\"mx-1 mx-sm-"
+"2\" title=\"Next slide\" aria-label=\"Next slide\" role=\"button\"><i "
 "class=\"fa fa-arrow-circle-right\"/></span>\n"
-"                                        <span id=\"last\" class=\"mx-1 mx-"
-"sm-2\" title=\"Last slide\" aria-label=\"Last slide\" role=\"button\"><i "
+"                                        <span id=\"last\" class=\"mx-1 mx-sm-"
+"2\" title=\"Last slide\" aria-label=\"Last slide\" role=\"button\"><i "
 "class=\"fa fa-step-forward\"/></span>"
 
 #. module: website_slides
@@ -1098,13 +1092,13 @@ msgid ""
 msgstr ""
 "<span id=\"zoomout\" class=\"d-inline ms-2 me-2\" title=\"Zoom out\" aria-"
 "label=\"Zoom out\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-minus\"/"
-">\n"
+"                                            <i class=\"fa fa-search-minus\"/>"
+"\n"
 "                                        </span>\n"
 "                                        <span id=\"zoomin\" class=\"d-"
 "inline\" title=\"Zoom in\" aria-label=\"Zoom in\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-plus\"/"
-">\n"
+"                                            <i class=\"fa fa-search-plus\"/>"
+"\n"
 "                                        </span>"
 
 #. module: website_slides
@@ -1113,8 +1107,8 @@ msgid ""
 "<span name=\"done_members_count_label\" class=\"text-muted text-truncate "
 "mw-100\" title=\"Finished\">Finished</span>"
 msgstr ""
-"<span name=\"done_members_count_label\" class=\"text-muted text-truncate "
-"mw-100\" title=\"Finished\">Finalizado</span>"
+"<span name=\"done_members_count_label\" class=\"text-muted text-truncate mw-"
+"100\" title=\"Finished\">Finalizado</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
@@ -1122,8 +1116,8 @@ msgid ""
 "<span name=\"members_completed_count_label\" class=\"o_stat_text\">Finished</"
 "span>"
 msgstr ""
-"<span name=\"members_completed_count_label\" "
-"class=\"o_stat_text\">Finalizado</span>"
+"<span name=\"members_completed_count_label\" class=\"o_stat_text\">"
+"Finalizado</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
@@ -1229,8 +1223,8 @@ msgstr "Una fruta"
 msgid ""
 "A good course has a structure. Pick a name for your first <b>Section</b>."
 msgstr ""
-"Un buen curso tiene una estructura. Póngale un nombre a su primera "
-"<b>sección</b>."
+"Un buen curso tiene una estructura. Póngale un nombre a su primera <b>"
+"sección</b>."
 
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_slide_demo_1_4
@@ -1395,7 +1389,7 @@ msgstr "Actividades"
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "Decoración de Actividad de Excepción"
+msgstr "Indicador de excepción de actividad"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__activity_state
@@ -1405,7 +1399,7 @@ msgstr "Estado de la actividad"
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__activity_type_icon
 msgid "Activity Type Icon"
-msgstr "Icono de tipo de actvidad"
+msgstr "Icono de tipo de actividad"
 
 #. module: website_slides
 #. odoo-javascript
@@ -3643,8 +3637,8 @@ msgid ""
 "content, you can add a Quiz on the lesson. Click on <b>Add Quiz</b>."
 msgstr ""
 "Si desea asegurarse de que los asistentes entendieron y memorizaron el "
-"contenido, puede añadir un cuestionario en esta lección. Haga clic en "
-"<b>añadir cuestionario</b>."
+"contenido, puede añadir un cuestionario en esta lección. Haga clic en <b>"
+"añadir cuestionario</b>."
 
 #. module: website_slides
 #. odoo-javascript
@@ -4265,8 +4259,7 @@ msgstr "Marcar como no hecho"
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/tours/slides_tour.js:0
 msgid "Mark the correct answer by checking the <b>correct</b> mark."
-msgstr ""
-"Marque la respuesta correcta al seleccionar la casilla <b>correcta</b>."
+msgstr "Marque la respuesta correcta al seleccionar la casilla <b>correcta</b>."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_sidebar
@@ -4290,6 +4283,16 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_tag_group_view_tree
 msgid "Menu Entry"
 msgstr "Entrada de menú"
+
+#. module: website_slides
+#: model:ir.model,name:website_slides.model_base_partner_merge_automatic_wizard
+msgid "Merge Partner Wizard"
+msgstr "Asistente de fusión de contactos"
+
+#. module: website_slides
+#: model:ir.model,name:website_slides.model_mail_message
+msgid "Message"
+msgstr "Mensaje"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__message_has_error
@@ -4720,7 +4723,7 @@ msgstr "En cuanto acabe, no olvide <b>publicar</b> su curso."
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_channel_partner__member_status__ongoing
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_partner_view_search
 msgid "Ongoing"
-msgstr "En progreso"
+msgstr "En curso"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.user_profile_content
@@ -4755,8 +4758,8 @@ msgstr ""
 "Idioma de traducción opcional (código ISO) a seleccionar para el envío de "
 "correos electrónicos. Si no se selecciona esta opción, se utilizará la "
 "versión en inglés. Por lo general, se usa una expresión de marcador de "
-"posición para indicar el idioma adecuado, por ejemplo, "
-"{{ object.partner_id.lang }}."
+"posición para indicar el idioma adecuado, por ejemplo, {{ "
+"object.partner_id.lang }}."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
@@ -4869,7 +4872,7 @@ msgstr "Usuario experto"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.mail_notification_channel_invite
 msgid "Powered by"
-msgstr "Con tecnología de"
+msgstr "Con la tecnología de"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__prerequisite_of_channel_ids
@@ -5492,8 +5495,7 @@ msgstr "Enviado a asistentes potenciales para que revisen el curso. "
 #. module: website_slides
 #: model:mail.template,description:website_slides.slide_template_shared
 msgid "Sent when attendees share the course by email"
-msgstr ""
-"Enviado cuando los asistentes comparten el curso por correo electrónico"
+msgstr "Enviado cuando los asistentes comparten el curso por correo electrónico"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__seo_name
@@ -6215,8 +6217,8 @@ msgstr ""
 "Con Google Drive, somos compatibles con la mayoría de los tipos más comunes "
 "de documentos.\n"
 "                                        Esto incluye documentos regulares "
-"(Google Doc, .docx), hojas de cálculo (Google Sheet, .xlsx), "
-"presentaciones, ..."
+"(Google Doc, .docx), hojas de cálculo (Google Sheet, .xlsx), presentaciones, "
+"..."
 
 #. module: website_slides
 #. odoo-javascript
@@ -6302,7 +6304,7 @@ msgstr "Árboles"
 #. module: website_slides
 #: model:slide.channel,name:website_slides.slide_channel_demo_2_gard2
 msgid "Trees, Wood and Gardens"
-msgstr "Árboles, Madera y Jardines"
+msgstr "Árboles, madera y jardines"
 
 #. module: website_slides
 #. odoo-javascript
@@ -6456,6 +6458,11 @@ msgstr "Votos de usuarios"
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_question_view_form
 msgid "Validation error"
 msgstr "Error de validación"
+
+#. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
+msgid "Values set here are website-specific."
+msgstr ""
 
 #. module: website_slides
 #. odoo-javascript
@@ -6872,6 +6879,16 @@ msgstr ""
 
 #. module: website_slides
 #. odoo-python
+#: code:addons/website_slides/models/base_partner_merge.py:0
+msgid ""
+"You cannot merge these contacts because multiple contacts are enrolled in "
+"the same courses: %s"
+msgstr ""
+"No puedes fusionar estos contactos porque hay varios contactos inscritos en "
+"los mismos cursos: %s"
+
+#. module: website_slides
+#. odoo-python
 #: code:addons/website_slides/controllers/main.py:0
 msgid "You cannot upload on this channel."
 msgstr "No puede subir contenido a este canal."
@@ -7260,7 +7277,7 @@ msgstr "únase a"
 #: code:addons/website_slides/static/src/xml/slide_course_join.xml:0
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_social_email
 msgid "login"
-msgstr "inicíe sesión"
+msgstr "iniciar sesión"
 
 #. module: website_slides
 #. odoo-javascript
@@ -7404,3 +7421,12 @@ msgstr "¡ {{ user.name }} compartió {{ object.slide_category }} con usted!"
 #: model_terms:ir.ui.view,arch_db:website_slides.course_nav
 msgid "└<span class=\"ms-1\">Uncategorized</span>"
 msgstr "└<span class=\"ms-1\">Sin categorizar</span>"
+
+#~ msgid ""
+#~ "<span class=\"o_form_label\">Slides</span>\n"
+#~ "                    <span class=\"fa fa-lg fa-globe\" title=\"Values set "
+#~ "here are website-specific.\" groups=\"website.group_multi_website\"/>"
+#~ msgstr ""
+#~ "<span class=\"o_form_label\">Diapositivas</span>\n"
+#~ "                    <span class=\"fa fa-lg fa-globe\" title=\"Values set "
+#~ "here are website-specific.\" groups=\"website.group_multi_website\"/>"

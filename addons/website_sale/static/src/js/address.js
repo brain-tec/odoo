@@ -101,6 +101,8 @@ publicWidget.registry.websiteSaleAddress = publicWidget.Widget.extend({
                 });
                 this._showInput('state_id');
             } else {
+                // empty existing options, only keep the placeholder.
+                selectStates.options.length = 1;
                 this._hideInput('state_id');
             }
         }
@@ -188,7 +190,11 @@ publicWidget.registry.websiteSaleAddress = publicWidget.Widget.extend({
             const result = await this.http.post(
                 '/shop/address/submit',
                 new FormData(this.addressForm),
-            )
+            ).finally(() => {
+                submitButton.disabled = false;
+                spinner.remove();
+            });
+
             if (result.redirectUrl) {
                 redirect(result.redirectUrl);
             } else {
@@ -215,10 +221,6 @@ publicWidget.registry.websiteSaleAddress = publicWidget.Widget.extend({
                 });
 
                 this.errorsDiv.replaceChildren(...newErrors);
-
-                // Re-enable button and remove spinner
-                submitButton.disabled = false;
-                spinner.remove();
             }
         }
     },

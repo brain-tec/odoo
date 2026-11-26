@@ -4,14 +4,14 @@
 #
 # Translators:
 # Martin Trigaux, 2022
-# Dragan Vukosavljevic <dragan.vukosavljevic@gmail.com>, 2022, 2025.
+# Dragan Vukosavljevic <dragan.vukosavljevic@gmail.com>, 2022, 2025, 2026.
 # Uros Kalajdzic <ukalajdzic@gmail.com>, 2023
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-08-14 13:55+0000\n"
+"POT-Creation-Date: 2026-03-20 18:37+0000\n"
+"PO-Revision-Date: 2026-10-20 15:27+0000\n"
 "Last-Translator: Dragan Vukosavljevic <dragan.vukosavljevic@gmail.com>\n"
 "Language-Team: Serbian (Latin script) <https://translate.odoo.com/projects/"
 "odoo-18/calendar/sr_Latn/>\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_res_partner__meeting_count
@@ -116,16 +116,6 @@ msgid ""
 "        </t>\n"
 "    </p>\n"
 "    <div style=\"text-align: center; padding: 16px 0px 16px 0px;\">\n"
-"        <a t-attf-href=\"/calendar/meeting/accept?"
-"token={{ object.access_token }}&amp;id={{ object.event_id.id }}\" "
-"style=\"padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-"
-"color: #875A7B; border: 1px solid #875A7B; border-radius: 3px\">\n"
-"            Accept</a>\n"
-"        <a t-attf-href=\"/calendar/meeting/decline?"
-"token={{ object.access_token }}&amp;id={{ object.event_id.id }}\" "
-"style=\"padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-"
-"color: #875A7B; border: 1px solid #875A7B; border-radius: 3px\">\n"
-"            Decline</a>\n"
 "        <a t-attf-href=\"/calendar/meeting/view?"
 "token={{ object.access_token }}&amp;id={{ object.event_id.id }}\" "
 "style=\"padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-"
@@ -288,16 +278,6 @@ msgid ""
 "\n"
 "    </p>\n"
 "    <div style=\"text-align: center; padding: 16px 0px 16px 0px;\">\n"
-"        <a t-attf-href=\"/calendar/meeting/accept?"
-"token={{object.access_token}}&amp;id={{object.event_id.id}}\" "
-"style=\"padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-"
-"color: #875A7B; border: 1px solid #875A7B; border-radius: 3px\">\n"
-"            Accept</a>\n"
-"        <a t-attf-href=\"/calendar/meeting/decline?"
-"token={{object.access_token}}&amp;id={{object.event_id.id}}\" "
-"style=\"padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-"
-"color: #875A7B; border: 1px solid #875A7B; border-radius: 3px\">\n"
-"            Decline</a>\n"
 "        <a t-attf-href=\"/calendar/meeting/view?token={{object.access_token}}"
 "&amp;id={{object.event_id.id}}\" style=\"padding: 5px 10px; color: #FFFFFF; "
 "text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; "
@@ -555,18 +535,6 @@ msgid ""
 "        This is a reminder for the below event:\n"
 "    </p>\n"
 "    <div style=\"text-align: center; padding: 16px 0px 16px 0px;\">\n"
-"        <a t-attf-href=\"/calendar/{{ 'recurrence' if recurrent else "
-"'meeting' }}/accept?token={{ object.access_token }}"
-"&amp;id={{ object.event_id.id }}\" style=\"padding: 5px 10px; color: "
-"#FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid "
-"#875A7B; border-radius: 3px\">\n"
-"            Accept</a>\n"
-"        <a t-attf-href=\"/calendar/{{ 'recurrence' if recurrent else "
-"'meeting' }}/decline?token={{ object.access_token }}"
-"&amp;id={{ object.event_id.id }}\" style=\"padding: 5px 10px; color: "
-"#FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid "
-"#875A7B; border-radius: 3px\">\n"
-"            Decline</a>\n"
 "        <a t-attf-href=\"/calendar/meeting/view?"
 "token={{ object.access_token }}&amp;id={{ object.event_id.id }}\" "
 "style=\"padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-"
@@ -769,6 +737,7 @@ msgid "A user cannot have the same contact twice."
 msgstr "Korisnik ne može imati isti kontakt dva puta."
 
 #. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.invitation_page_anonymous
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
 msgid "Accept"
 msgstr "Prihvati"
@@ -1212,6 +1181,7 @@ msgid "Days"
 msgstr "Dana"
 
 #. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.invitation_page_anonymous
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
 msgid "Decline"
 msgstr "Odbij"
@@ -1481,8 +1451,7 @@ msgstr ""
 #: code:addons/calendar/models/calendar_recurrence.py:0
 msgid ""
 "Every %(interval)s Months on the %(position)s %(weekday)s until %(until)s"
-msgstr ""
-"Svakih %(interval)s meseci na %(position)s %(weekday)s sve do %(until)s"
+msgstr "Svakih %(interval)s meseci na %(position)s %(weekday)s sve do %(until)s"
 
 #. module: calendar
 #. odoo-python

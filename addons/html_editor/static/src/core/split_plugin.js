@@ -1,3 +1,4 @@
+import { callbacksForCursorUpdate } from "@html_editor/utils/selection";
 import { Plugin } from "../plugin";
 import { isBlock } from "../utils/blocks";
 import { fillEmpty, splitTextNode } from "../utils/dom";
@@ -11,6 +12,7 @@ import { prepareUpdate } from "../utils/dom_state";
 import { childNodes, closestElement, firstLeaf, lastLeaf } from "../utils/dom_traversal";
 import { DIRECTIONS, childNodeIndex, nodeSize } from "../utils/position";
 import { isProtected, isProtecting } from "@html_editor/utils/dom_info";
+import { isBrowserSafari } from "@web/core/browser/feature_detection";
 
 /**
  * @typedef { Object } SplitShared
@@ -74,6 +76,13 @@ export class SplitPlugin extends Plugin {
             (node) => node.nodeName === "SECTION",
         ],
     };
+
+    setup() {
+        super.setup();
+        if (isBrowserSafari()) {
+            this.addDomListener(this.editable, "keydown", this.onKeyDown);
+        }
+    }
 
     // --------------------------------------------------------------------------
     // commands
@@ -177,19 +186,30 @@ export class SplitPlugin extends Plugin {
      * @returns {[HTMLElement, HTMLElement]}
      */
     splitElement(element, offset) {
+        const cursor = this.dependencies.selection.preserveSelection();
         this.dispatchTo("clean_handlers", element);
         // const before = /** @type {HTMLElement} **/ (element.cloneNode());
         /** @type {HTMLElement} **/
         const before = element.cloneNode();
         const after = /** @type {HTMLElement} **/ (element.cloneNode());
+        cursor.update(callbacksForCursorUpdate.before(element, before));
         element.before(before);
+        cursor.update(callbacksForCursorUpdate.after(element, after));
         element.after(after);
         let index = 0;
         for (const child of childNodes(element)) {
-            index < offset ? before.appendChild(child) : after.appendChild(child);
+            if (index < offset) {
+                cursor.update(callbacksForCursorUpdate.append(before, child));
+                before.appendChild(child);
+            } else {
+                cursor.update(callbacksForCursorUpdate.append(after, child));
+                after.appendChild(child);
+            }
             index++;
         }
+        cursor.update(callbacksForCursorUpdate.remove(element));
         element.remove();
+        cursor.restore();
         return [before, after];
     }
 
@@ -319,8 +339,19 @@ export class SplitPlugin extends Plugin {
     onBeforeInput(e) {
         if (e.inputType === "insertParagraph") {
             e.preventDefault();
+            // Safari reports Shift+Enter as "insertParagraph" instead of "insertLineBreak"
+            // Track it on keydown to handle it properly
+            if (this.forceLineBreak) {
+                this.forceLineBreak = false;
+                this.dependencies.lineBreak.insertLineBreak();
+                return;
+            }
             this.splitBlock();
             this.dependencies.history.addStep();
         }
+    }
+
+    onKeyDown(e) {
+        this.forceLineBreak = e.key === "Enter" && e.shiftKey;
     }
 }

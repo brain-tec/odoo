@@ -26,13 +26,13 @@
 # Katrin Kampura, 2024
 # Siim Raasuke, 2025
 # Birgit Vijar, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-11-21 06:44+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-28 03:34+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Estonian <https://translate.odoo.com/projects/odoo-18/product/"
 "et/>\n"
@@ -41,7 +41,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: product
 #. odoo-python
@@ -66,16 +66,6 @@ msgstr "Tootevariandid"
 #: model:ir.model.fields,field_description:product.field_product_category__product_count
 msgid "# Products"
 msgstr "Tooted"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
-msgid "$14.00"
-msgstr "$14.00"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
-msgid "$15.00"
-msgstr "$15.00"
 
 #. module: product
 #. odoo-python
@@ -195,19 +185,9 @@ msgid "1 year warranty extension"
 msgstr "1 aasta garantii pikendust"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
-msgid "10"
-msgstr "10"
-
-#. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
 msgid "10 Units"
 msgstr "10 ühikut"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
-msgid "123456789012"
-msgstr "123456789012"
 
 #. module: product
 #: model:product.template,description_sale:product.product_product_4_product_template
@@ -1979,6 +1959,11 @@ msgid "Kilograms"
 msgstr "Kilogrammid"
 
 #. module: product
+#: model:product.attribute.value,name:product.size_attribute_l
+msgid "L"
+msgstr ""
+
+#. module: product
 #: model:product.template,name:product.product_product_6_product_template
 msgid "Large Cabinet"
 msgstr "Suur lauakomplekt"
@@ -2094,6 +2079,11 @@ msgid ""
 msgstr ""
 "Kas otsite kohandatud bambuse peitsi, mis sobiks olemasoleva mööbliga? "
 "Hinnapakkumise saamiseks võtke meiega ühendust."
+
+#. module: product
+#: model:product.attribute.value,name:product.size_attribute_m
+msgid "M"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_template_attribute_value__exclude_for
@@ -3163,6 +3153,11 @@ msgid "Rule Tip"
 msgstr "Reegli vihje"
 
 #. module: product
+#: model:product.attribute.value,name:product.size_attribute_s
+msgid "S"
+msgstr ""
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__sale_ok
 #: model:ir.model.fields,field_description:product.field_product_template__sale_ok
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
@@ -3250,6 +3245,12 @@ msgstr ""
 #: model:product.attribute,name:product.size_attribute
 msgid "Size"
 msgstr "Suurus"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/report/product_pricelist_report.py:0
+msgid "Sorry, you are not allowed to access this document."
+msgstr "Vabadust, Sul puudub õigus ligipääsuks sellele dokumendile."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_res_partner__specific_property_product_pricelist
@@ -4473,3 +4474,15 @@ msgstr "kuni"
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "xlsx"
 msgstr "xlsx"
+
+#~ msgid "$14.00"
+#~ msgstr "$14.00"
+
+#~ msgid "$15.00"
+#~ msgstr "$15.00"
+
+#~ msgid "10"
+#~ msgstr "10"
+
+#~ msgid "123456789012"
+#~ msgstr "123456789012"

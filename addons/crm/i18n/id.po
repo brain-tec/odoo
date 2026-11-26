@@ -1,24 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* crm
+# * crm
 #
 # Translators:
 # Wil Odoo, 2024
 # Abe Manyo, 2025
 #
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
+# "Nurul Aini Akrima Sabila (nuaas)" <nuaas@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-29 18:36+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Abe Manyo, 2025\n"
-"Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
+"POT-Creation-Date: 2026-02-20 18:37+0000\n"
+"PO-Revision-Date: 2026-10-20 10:10+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-18/crm/"
+"id/>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__lead_all_assigned_month_count
@@ -43,7 +47,7 @@ msgstr "# Opportunities Terlambat"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__lead_unassigned_count
 msgid "# Unassigned Leads"
-msgstr "# Lead yang Tidak Ditugaskan"
+msgstr "# Lead yang Belum Ditugaskan"
 
 #. module: crm
 #. odoo-python
@@ -156,8 +160,8 @@ msgid ""
 "invisible=\"not partner_email_update\"/>"
 msgstr ""
 "<span class=\"fa fa-exclamation-triangle text-warning oe_edit_only\" "
-"title=\"Dengan menyimpan perubahan ini, email pelanggan juga akan diupdate."
-"\" invisible=\"not partner_email_update\"/>"
+"title=\"Dengan menyimpan perubahan ini, email pelanggan juga akan "
+"diupdate.\" invisible=\"not partner_email_update\"/>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -191,8 +195,8 @@ msgid ""
 "invisible=\"use_leads\">Opportunities</span>"
 msgstr ""
 "<span class=\"o_stat_text\" invisible=\"not use_leads\">Lead</span>\n"
-"                        <span class=\"o_stat_text\" "
-"invisible=\"use_leads\">Opportunities</span>"
+"                        <span class=\"o_stat_text\" invisible=\"use_leads\">"
+"Opportunities</span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lost_reason_view_form
@@ -203,19 +207,6 @@ msgstr "<span class=\"o_stat_text\"> Lead</span>"
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid "<span class=\"oe_grey p-2 text-nowrap d-none d-sm-block\"> at </span>"
 msgstr ""
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
-msgid ""
-"<span class=\"oe_grey p-2\" groups=\"crm.group_use_recurring_revenues\"> + </"
-"span>\n"
-"                                        <span class=\"oe_grey p-2\" "
-"groups=\"!crm.group_use_recurring_revenues\"> at </span>"
-msgstr ""
-"<span class=\"oe_grey p-2\" groups=\"crm.group_use_recurring_revenues\"> + </"
-"span>\n"
-"                                        <span class=\"oe_grey p-2\" "
-"groups=\"!crm.group_use_recurring_revenues\"> pada </span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -244,7 +235,7 @@ msgstr ""
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
 msgid "<span>Expected Revenues:</span>"
-msgstr "<span>Pendapatan yang DIharapkan:</span>"
+msgstr "<span>Perkiraan Pendapatan:</span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
@@ -497,7 +488,7 @@ msgstr "Dekorasi Pengecualian Aktivitas"
 #. module: crm
 #: model:ir.ui.menu,name:crm.mail_activity_plan_menu_config_lead
 msgid "Activity Plans"
-msgstr "Rencana-Rencana Kegiatan"
+msgstr "Rencana Aktivitas"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__activity_state
@@ -513,7 +504,7 @@ msgstr "Tipe Aktivitas"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__activity_type_icon
 msgid "Activity Type Icon"
-msgstr "Ikon Jenis Aktifitas"
+msgstr "Ikon Jenis Aktivitas"
 
 #. module: crm
 #: model:ir.ui.menu,name:crm.crm_team_menu_config_activity_types
@@ -922,8 +913,7 @@ msgstr "Tanggal penutupan"
 #. odoo-python
 #: code:addons/crm/wizard/crm_lead_to_opportunity.py:0
 msgid "Closed/Dead leads cannot be converted into opportunities."
-msgstr ""
-"Prospek yang sudah ditutup/mati tidak dapat dikonversi menjadi peluang."
+msgstr "Prospek yang sudah ditutup/mati tidak dapat dikonversi menjadi peluang."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead_lost__lost_feedback
@@ -1217,7 +1207,7 @@ msgstr "Crm: Forecast"
 #. module: crm
 #: model:ir.actions.server,name:crm.action_your_pipeline
 msgid "Crm: My Pipeline"
-msgstr "Crm: My Pipeline"
+msgstr "Crm: Pipeline Saya"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__company_currency
@@ -1477,8 +1467,7 @@ msgstr ""
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid "Enrich your leads with company data based on their email addresses"
-msgstr ""
-"Enrich lead Anda dengan data perusahaan berdasarkan alamat email mereka"
+msgstr "Enrich lead Anda dengan data perusahaan berdasarkan alamat email mereka"
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_stage__requirements
@@ -1524,17 +1513,17 @@ msgstr "MRR yang Diharapkan"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__expected_revenue
 msgid "Expected Revenue"
-msgstr "Perkiraan Omzet"
+msgstr "Perkiraan Pendapatan"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_tree_view_oppor
 msgid "Expected Revenues"
-msgstr "Perkiraan Omzet"
+msgstr "Perkiraan Pendapatan"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_search
 msgid "Extended Filters"
-msgstr "Penyaring Tambahan"
+msgstr "Filter Tambahan"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -1608,6 +1597,10 @@ msgid ""
 "targeted to your needs: company size, industry, etc. To help you test the "
 "feature, we offer you 20 credits for free."
 msgstr ""
+"Untuk tim sales, prospek yang sepi adalah sebuah berita buruk. Untungnya, "
+"hanya dengan beberapa klik, Anda dapat membuat prospek yang secara spesifik "
+"menarget kebutuhan Anda: ukuran perusahaan, industri, dsb. Untuk mempermudah "
+"pengujian fitur ini, kami memberikan Anda 20 kredit gratis."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead2opportunity_partner__force_assignment
@@ -1643,7 +1636,7 @@ msgstr "Dari %(source_name)s: %(source_subject)s"
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_my_activities_filter
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
 msgid "Future Activities"
-msgstr "Kegiatan - Kegiatan Mendatang"
+msgstr "Aktivitas Mendatang"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__module_crm_iap_mine
@@ -1960,7 +1953,7 @@ msgstr "Terakhir Diperbarui pada"
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_my_activities_filter
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
 msgid "Late Activities"
-msgstr "Aktifitas terakhir"
+msgstr "Aktivitas Terlambat"
 
 #. module: crm
 #: model:ir.model.fields.selection,name:crm.selection__crm_activity_report__lead_type__lead
@@ -2005,7 +1998,7 @@ msgstr "Lead Mining"
 #. module: crm
 #: model:ir.actions.act_window,name:crm.mail_activity_plan_action_lead
 msgid "Lead Plans"
-msgstr "Rencana-Rencana Lead"
+msgstr "Rencana Lead"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__lead_properties_definition
@@ -2496,7 +2489,7 @@ msgstr "Aktivitas Saya"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__my_activity_date_deadline
 msgid "My Activity Deadline"
-msgstr "Deadline Kegiatan Saya"
+msgstr "Tenggat Aktivitas Saya"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_tree_view_oppor
@@ -2513,7 +2506,7 @@ msgstr "Prospekku"
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_search
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
 msgid "My Pipeline"
-msgstr "My Pipeline"
+msgstr "Pipeline Saya"
 
 #. module: crm
 #: model:crm.stage,name:crm.stage_lead1
@@ -2549,7 +2542,7 @@ msgstr "Kalender Acara Aktivitas Berikutnya"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Batas Waktu Aktivitas Berikutnya"
+msgstr "Tenggat Aktivitas Berikutnya"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__activity_summary
@@ -3001,7 +2994,7 @@ msgstr "Telepon:"
 #: model:ir.ui.menu,name:crm.crm_opportunity_report_menu
 #: model:ir.ui.menu,name:crm.menu_crm_config_lead
 msgid "Pipeline"
-msgstr "Saluran"
+msgstr "Pipeline"
 
 #. module: crm
 #: model:ir.actions.act_window,name:crm.crm_activity_report_action_team
@@ -3015,7 +3008,7 @@ msgstr "Kegiatan Pipeline"
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_graph
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_pivot
 msgid "Pipeline Analysis"
-msgstr "Analisis Saluran"
+msgstr "Analisis Pipeline"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_recurring_plan__name
@@ -3128,7 +3121,7 @@ msgstr "Pendapatan Prorata"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_tree_forecast
 msgid "Prorated Revenues"
-msgstr "Pendapatan-Pendapatan Prorata"
+msgstr "Pendapatan Prorata"
 
 #. module: crm
 #: model:crm.stage,name:crm.stage_lead2
@@ -3160,7 +3153,7 @@ msgstr "Rencana Berulang"
 #: model:ir.actions.act_window,name:crm.crm_recurring_plan_action
 #: model:ir.ui.menu,name:crm.crm_recurring_plan_menu_config
 msgid "Recurring Plans"
-msgstr "Rencana-Rencana Berulang"
+msgstr "Rencana Berulang"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_tree_view_oppor
@@ -3171,7 +3164,7 @@ msgstr "Pendapatan Berulang"
 #: model:ir.model.fields,field_description:crm.field_crm_lead__recurring_revenue
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__group_use_recurring_revenues
 msgid "Recurring Revenues"
-msgstr "Pendapatan-Pendapatan Berulang"
+msgstr "Pendapatan Berulang"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__referred
@@ -3286,7 +3279,7 @@ msgstr "Tim Sales:"
 #. module: crm
 #: model:ir.ui.menu,name:crm.crm_team_config
 msgid "Sales Teams"
-msgstr "Penjualan Tim"
+msgstr "Tim Penjualan"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__user_id
@@ -3893,7 +3886,7 @@ msgstr "UX: Batasi ke perusahaan lead atau bila tidak ada perusahaan"
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_leads_filter
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
 msgid "Unassigned"
-msgstr "Tak diserah-tugaskan"
+msgstr "Belum Ditugaskan"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_team_view_kanban_dashboard
@@ -3903,7 +3896,7 @@ msgstr "Prospek tak diserah-tugaskan"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_team_view_kanban_dashboard
 msgid "Unassigned Leads"
-msgstr "Prospek tak diserah-tugaskan"
+msgstr "Lead yang Belum Ditugaskan"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
@@ -4189,6 +4182,11 @@ msgid "alias"
 msgstr "alias"
 
 #. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
+msgid "at"
+msgstr "pada"
+
+#. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
 msgid "e.g. \"0123456789\""
 msgstr "contoh \"0123456789\""
@@ -4266,6 +4264,17 @@ msgstr ""
 #: code:addons/crm/models/crm_lead.py:0
 msgid "unknown"
 msgstr "tak diketahui"
+
+#~ msgid ""
+#~ "<span class=\"oe_grey p-2\" groups=\"crm.group_use_recurring_revenues\"> "
+#~ "+ </span>\n"
+#~ "                                        <span class=\"oe_grey p-2\" "
+#~ "groups=\"!crm.group_use_recurring_revenues\"> at </span>"
+#~ msgstr ""
+#~ "<span class=\"oe_grey p-2\" groups=\"crm.group_use_recurring_revenues\"> "
+#~ "+ </span>\n"
+#~ "                                        <span class=\"oe_grey p-2\" "
+#~ "groups=\"!crm.group_use_recurring_revenues\"> pada </span>"
 
 #~ msgid ""
 #~ "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-"

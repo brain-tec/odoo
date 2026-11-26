@@ -558,7 +558,13 @@ class ProductTemplate(models.Model):
         })
 
         if combination_info['prevent_zero_price_sale']:
-            combination_info['compare_list_price'] = 0
+            # If price is zero and prevent_zero_price_sale is enabled we don't want to send any
+            # price information regarding the product, including the price before discount
+            combination_info.update({
+                'compare_list_price': 0,
+                'has_discounted_price': False,
+                'list_price': combination_info['price'],
+            })
 
         return combination_info
 
@@ -842,7 +848,10 @@ class ProductTemplate(models.Model):
             list_price = self.env['ir.qweb.field.monetary'].value_to_html(
                 combination_info['list_price'], monetary_options
             )
-        if combination_info['compare_list_price']:
+        if (
+            combination_info["compare_list_price"]
+            and combination_info["compare_list_price"] > combination_info["price"]
+        ):
             list_price = self.env['ir.qweb.field.monetary'].value_to_html(
                 combination_info['compare_list_price'], monetary_options
             )
@@ -948,3 +957,18 @@ class ProductTemplate(models.Model):
                 "target_type": "public",
             }
         return super()._get_access_action(access_uid=access_uid, force_website=force_website)
+
+    @api.model
+    def _get_mail_message_access(self, res_ids, operation, model_name=None):
+        if (
+            (not model_name or model_name == 'product.template')
+            and operation == 'create'
+            and not self.env.user._is_internal()
+        ):
+            website = self.env['website'].get_current_website()
+            if (
+                self.env.user._is_public()
+                or not website.with_context(website_id=website.id).is_view_active('website_sale.product_comment')
+            ):
+                return 'write'
+        return super()._get_mail_message_access(res_ids, operation, model_name=model_name)

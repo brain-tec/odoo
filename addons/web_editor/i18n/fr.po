@@ -8,14 +8,14 @@
 # Wil Odoo, 2024
 # Fabien Pinckaers <fp@openerp.com>, 2025
 # Manon Rondou, 2025
-# "Manon Rondou (ronm)" <ronm@odoo.com>, 2025.
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# "Manon Rondou (ronm)" <ronm@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:38+0000\n"
-"PO-Revision-Date: 2025-12-09 08:20+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-28 03:33+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: French <https://translate.odoo.com/projects/odoo-18/"
 "web_editor/fr/>\n"
@@ -25,7 +25,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
 "1000000 == 0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: web_editor
 #. odoo-javascript
@@ -81,17 +81,7 @@ msgstr "(Etiquette TITRE)"
 #. odoo-javascript
 #: code:addons/web_editor/static/src/components/media_dialog/video_selector.xml:0
 msgid "(URL or Embed)"
-msgstr "(URL ou code incorporé)"
-
-#. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
-msgid "100%"
-msgstr "100%"
-
-#. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
-msgid "1977"
-msgstr "1977"
+msgstr "(URL ou code intégré)"
 
 #. module: web_editor
 #. odoo-javascript
@@ -105,16 +95,6 @@ msgstr "1x"
 #: code:addons/web_editor/static/src/js/wysiwyg/wysiwyg.js:0
 msgid "2 columns"
 msgstr "2 colonnes"
-
-#. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
-msgid "25"
-msgstr "25"
-
-#. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
-msgid "25%"
-msgstr "25%"
 
 #. module: web_editor
 #. odoo-javascript
@@ -162,21 +142,11 @@ msgid "5 Stars"
 msgstr "5 étoiles"
 
 #. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
-msgid "50%"
-msgstr "50%"
-
-#. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 msgid "5x"
 msgstr "5x"
-
-#. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
-msgid "90"
-msgstr "90"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
@@ -562,7 +532,7 @@ msgstr "Blocks & Rainy"
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "Blur"
-msgstr "Blur"
+msgstr "Flou"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
@@ -797,6 +767,12 @@ msgstr "Convertir en 4 colonnes"
 #: code:addons/web_editor/static/src/components/media_dialog/video_selector.xml:0
 msgid "Copy-paste your URL or embed code here"
 msgstr "Copiez-collez votre URL ou votre code incorporé ici"
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Correct"
+msgstr "Corriger"
 
 #. module: web_editor
 #. odoo-javascript
@@ -1236,6 +1212,12 @@ msgstr "Pour des raisons techniques, ce bloc ne peut pas être déposé ici"
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "Format"
 msgstr "Format"
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Friendly"
+msgstr "Amical"
 
 #. module: web_editor
 #. odoo-javascript
@@ -1756,6 +1738,12 @@ msgstr "Gauche"
 
 #. module: web_editor
 #. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Lengthen"
+msgstr "Allonger"
+
+#. module: web_editor
+#. odoo-javascript
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 msgid "Light"
 msgstr "Léger"
@@ -2080,6 +2068,12 @@ msgid "Patterns"
 msgstr "Motifs"
 
 #. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Persuasive"
+msgstr "Persuasif"
+
+#. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
 msgid "Position"
@@ -2091,6 +2085,12 @@ msgstr "Poste"
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 msgid "Preview"
 msgstr "Aperçu"
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Professional"
+msgstr "Professionnel"
 
 #. module: web_editor
 #. odoo-javascript
@@ -2548,6 +2548,12 @@ msgstr "Forme : Vignette"
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 msgid "Shapes"
 msgstr "Formes"
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Shorten"
+msgstr "Raccourcir"
 
 #. module: web_editor
 #. odoo-javascript
@@ -3370,6 +3376,24 @@ msgstr "traitement des messages du websocket "
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 msgid "www.example.com"
 msgstr "www.example.com"
+
+#~ msgid "100%"
+#~ msgstr "100%"
+
+#~ msgid "1977"
+#~ msgstr "1977"
+
+#~ msgid "25"
+#~ msgstr "25"
+
+#~ msgid "25%"
+#~ msgstr "25%"
+
+#~ msgid "50%"
+#~ msgstr "50%"
+
+#~ msgid "90"
+#~ msgstr "90"
 
 #~ msgid "Hide Dailymotion logo"
 #~ msgstr "Masquer le logo Dailymotion"

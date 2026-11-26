@@ -7,14 +7,15 @@
 # Wil Odoo, 2025
 # Sarah Park, 2025
 #
-# "Kwanghee Park (kwpa)" <kwpa@odoo.com>, 2025.
+# "Kwanghee Park (kwpa)" <kwpa@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-22 18:36+0000\n"
-"PO-Revision-Date: 2025-11-19 14:30+0000\n"
-"Last-Translator: \"Kwanghee Park (kwpa)\" <kwpa@odoo.com>\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
+"PO-Revision-Date: 2026-10-28 06:33+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Korean <https://translate.odoo.com/projects/odoo-18/"
 "website_sale/ko/>\n"
 "Language: ko\n"
@@ -22,7 +23,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products
@@ -74,29 +75,14 @@ msgid "'. Showing results for '"
 msgstr "'. 다음에 대한 결과 표시 중 '"
 
 #. module: website_sale
-#: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_image_width__100_pc
-msgid "100 %"
-msgstr "100 %"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "100 percent"
 msgstr "100 퍼센트"
 
 #. module: website_sale
-#: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_image_width__50_pc
-msgid "50 %"
-msgstr "50 %"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "50 percent"
 msgstr "50 퍼센트"
-
-#. module: website_sale
-#: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_image_width__66_pc
-msgid "66 %"
-msgstr "66 %"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -345,15 +331,6 @@ msgstr ""
 "<span class=\"d-md-none fa fa-shopping-cart\"/>\n"
 "                            <span class=\"d-none d-md-inline\">장바구니에 추"
 "가</span>"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
-"specific.\" groups=\"website.group_multi_website\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
-"specific.\" groups=\"website.group_multi_website\"/>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_dynamic_snippet_products_preview_data
@@ -2315,7 +2292,7 @@ msgstr ""
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_website__fiscal_position_id
 msgid "Fiscal Position"
-msgstr "재정 위치"
+msgstr "재정 포지션"
 
 #. module: website_sale
 #: model:product.public.category,name:website_sale.public_category_desks_foldable
@@ -4281,6 +4258,14 @@ msgstr "품절"
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/controllers/main.py:0
+msgid ""
+"Some products in your cart are not available for purchase in your country. "
+"Please remove them or contact us."
+msgstr ""
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
 msgid "Some required fields are empty."
 msgstr "필수 입력란이 비어 있습니다."
 
@@ -4410,6 +4395,14 @@ msgid "Taxes"
 msgstr "세금"
 
 #. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+msgid ""
+"Taxes have been updated based on your address. Your payment method has not "
+"been charged."
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "Text"
 msgstr "문자"
@@ -4505,6 +4498,14 @@ msgid ""
 msgstr ""
 "선택한 모드는 새로 생성한 품목의 청구서를 발행할 때 적용됩니다. 기존 품목에"
 "는 적용되지 않습니다."
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/combo_configurator.py:0
+msgid ""
+"The number of selected combo items must match the number of available combo "
+"choices."
+msgstr "선택한 콤보 아이템의 수는 사용 가능한 콤보 선택의 수와 일치해야 합니다."
 
 #. module: website_sale
 #. odoo-python
@@ -4605,10 +4606,22 @@ msgid "This product is no longer available."
 msgstr "이 상품은 더 이상 제공되지 않습니다."
 
 #. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+msgid "This product is not available for purchase in your country."
+msgstr ""
+
+#. module: website_sale
 #. odoo-javascript
 #: code:addons/website_sale/static/src/js/website_sale_reorder.js:0
 msgid "This product is not available for purchase."
 msgstr "구매할 수 없는 품목입니다."
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+msgid "This product is part of a combo and can't be updated individually."
+msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products_item
@@ -4756,6 +4769,11 @@ msgstr "Google Places API를 사용하여 방문자가 입력한 주소를 검�
 #: code:addons/website_sale/controllers/main.py:0
 msgid "VAT"
 msgstr "부가가치세"
+
+#. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
+msgid "Values set here are website-specific."
+msgstr "웹사이트별로 다르게 설정됩니다."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_add_to_cart_options
@@ -5053,6 +5071,11 @@ msgid "With three feet"
 msgstr "3 피트"
 
 #. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.product_share_buttons
+msgid "X"
+msgstr "X"
+
+#. module: website_sale
 #. odoo-javascript
 #: code:addons/website_sale/static/src/xml/website_sale_reorder_modal.xml:0
 msgid "Yes"
@@ -5278,6 +5301,30 @@ msgstr "이용 &amp; 약관"
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 msgid "to follow your order."
 msgstr "귀하의 주문에 따릅니다."
+
+#. module: website_sale
+#. odoo-javascript
+#: code:addons/website_sale/static/src/xml/website_sale_reorder_modal.xml:0
+#: model_terms:ir.ui.view,arch_db:website_sale.cart_combo_item_line
+#: model_terms:ir.ui.view,arch_db:website_sale.checkout_layout
+msgid "x"
+msgstr "x"
+
+#~ msgid "100 %"
+#~ msgstr "100 %"
+
+#~ msgid "50 %"
+#~ msgstr "50 %"
+
+#~ msgid "66 %"
+#~ msgstr "66 %"
+
+#~ msgid ""
+#~ "<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
+#~ "specific.\" groups=\"website.group_multi_website\"/>"
+#~ msgstr ""
+#~ "<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
+#~ "specific.\" groups=\"website.group_multi_website\"/>"
 
 #~ msgid ""
 #~ "Your Dynamic Snippet will be displayed here...\n"

@@ -16,15 +16,16 @@
 # Lasse L, 2024
 # Martin Trigaux, 2024
 # Anders Wallenquist <anders.wallenquist@vertel.se>, 2024
-# Jakob Krabbe <jakob.krabbe@vertel.se>, 2024, 2025.
+# Jakob Krabbe <jakob.krabbe@vertel.se>, 2024, 2025, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2026.
+# Hanna Kharraziha <hakha@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-05 18:38+0000\n"
-"PO-Revision-Date: 2026-02-07 18:00+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-11-05 10:33+0000\n"
+"Last-Translator: Hanna Kharraziha <hakha@odoo.com>\n"
 "Language-Team: Swedish <https://translate.odoo.com/projects/odoo-18/"
 "spreadsheet/sv/>\n"
 "Language: sv\n"
@@ -32,7 +33,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -267,37 +268,21 @@ msgstr "%s matcher i alla ark"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
-"(0) Exact match. \n"
-"        (-1) Return next smaller item if no match. \n"
-"        (1) Return next greater item if no match. \n"
-"        (2) Wildcard match."
+"(0) Exact match.         (-1) Return next smaller item if no match.         "
+"(1) Return next greater item if no match.         (2) Wildcard match."
 msgstr ""
-"(0) Exakt matchning.\n"
-"        (-1) Returnerar nästa mindre artikel om ingen matchning.\n"
-"        (1) Returnerar nästa större objekt om ingen matchning.\n"
-"        (2) Matchning med jokertecken."
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
-"(1) Search starting at first item. \n"
-"      (-1) Search starting at last item. \n"
-"      (2) Perform a binary search that relies on lookup_array being sorted "
-"in ascending order. If not sorted, invalid results will be returned. \n"
-"      (-2) Perform a binary search that relies on lookup_array being sorted "
-"in descending order. If not sorted, invalid results will be returned.\n"
-"      "
+"(1) Search starting at first item.       (-1) Search starting at last "
+"item.       (2) Perform a binary search that relies on lookup_array being "
+"sorted in ascending order. If not sorted, invalid results will be "
+"returned.       (-2) Perform a binary search that relies on lookup_array "
+"being sorted in descending order. If not sorted, invalid results will be "
+"returned.      "
 msgstr ""
-"(1) Sökningen börjar vid första objektet.\n"
-"      (-1) Sök med början på det sista objektet.\n"
-"      (2) Utför en binär sökning som är beroende av att lookup_array är "
-"sorterad i stigande ordning. Om den inte är sorterad kommer ogiltiga "
-"resultat att returneras.\n"
-"      (-2) Utför en binär sökning som förlitar sig på att lookup_array "
-"sorteras i fallande ordning. Om den inte är sorterad kommer ogiltiga "
-"resultat att returneras.\n"
-"      "
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -358,6 +343,12 @@ msgstr "2 kolumner"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "2 rows"
 msgstr "2 rader"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "A"
+msgstr "A"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1063,17 +1054,6 @@ msgstr "Ett oväntat fel inträffade under bildöverföringen"
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid ""
-"An unexpected error occurred while pasting content.\n"
-"          This is probably due to a spreadsheet version mismatch."
-msgstr ""
-"Ett oväntat fel uppstod när du klistrade in innehåll.\n"
-"          Detta beror förmodligen på att kalkylbladets version inte stämmer "
-"överens."
-
-#. module: spreadsheet
-#. odoo-javascript
-#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "An unexpected error occurred. Submit a support ticket at odoo.com/help."
 msgstr ""
 "Ett oväntat fel har inträffat. Skicka in ett supportärende på odoo.com/help."
@@ -1508,7 +1488,7 @@ msgstr "Undre"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "COUNT"
-msgstr "RÄKNA"
+msgstr "ANTAL"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1702,6 +1682,13 @@ msgstr "Det går inte att dölja alla rader i ett ark."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Cannot open the link because the linked sheet is hidden."
 msgstr "Det går inte att öppna länken eftersom det länkade arket är dolt."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid ""
+"Cannot perform this action on merged cells. Unmerge the cells and try again."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3169,7 +3156,7 @@ msgstr "Kopiera"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Duration"
-msgstr "Varaktighet"
+msgstr "Tidsperiod"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -3692,25 +3679,6 @@ msgstr "Funktionen [[FUNCTION_NAME]] gav inget resultat."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
-"Function [[FUNCTION_NAME]] expects criteria_range and criterion to be in "
-"pairs."
-msgstr ""
-"Funktionen [[FUNCTION_NAME]] förväntar sig att criteria_range och criterion "
-"ska vara i par."
-
-#. module: spreadsheet
-#. odoo-javascript
-#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid ""
-"Function [[FUNCTION_NAME]] expects criteria_range to have the same dimension"
-msgstr ""
-"Funktionen [[FUNCTION_NAME]] förväntar sig att criteria_range har samma "
-"dimension"
-
-#. module: spreadsheet
-#. odoo-javascript
-#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid ""
 "Function [[FUNCTION_NAME]] expects number values for %s, but got a boolean."
 msgstr ""
 
@@ -4148,12 +4116,8 @@ msgstr "I utvärderingen av [[FUNCTION_NAME]] kan inte '%s' hittas inom '%s'."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
 "In [[FUNCTION_NAME]], the number of columns of the first matrix (%s) must be "
-"equal to the \n"
-"        number of rows of the second matrix (%s)."
+"equal to the         number of rows of the second matrix (%s)."
 msgstr ""
-"I [[FUNCTION_NAME]] måste antalet kolumner i den första matrisen (%s) vara "
-"lika med\n"
-"        antalet rader i den andra matrisen (%s)."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -5318,6 +5282,12 @@ msgstr "Ny pivot"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Next coupon date after the settlement date."
 msgstr "Nästa kupongdag efter avräkningsdagen."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/hooks.js:0
+msgid "No"
+msgstr "Nej"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -6548,7 +6518,7 @@ msgstr "Inställningar"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/components/share_button/share_button.xml:0
 msgid "Share"
-msgstr "Dela Dokument"
+msgstr "Dela"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -10770,11 +10740,9 @@ msgstr "Denna åtgärd är inte tillåten med flera val."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
-"This operation is not possible due to a merge. Please remove the merges "
-"first than try again."
+"This operation would cause tables to overlap. Move or remove the conflicting "
+"table and try again."
 msgstr ""
-"Denna operation är inte möjlig på grund av en sammanslagning. Ta bort "
-"sammanslagningarna först och försök sedan igen."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -11478,14 +11446,9 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
 "Whether or not to remove empty text messages from the split results. The "
-"default behavior is to treat \n"
-"        consecutive delimiters as one (if TRUE). If FALSE, empty cells "
-"values are added between consecutive delimiters."
+"default behavior is to treat         consecutive delimiters as one (if "
+"TRUE). If FALSE, empty cells values are added between consecutive delimiters."
 msgstr ""
-"Om tomma textmeddelanden ska tas bort från splitresultaten eller inte. "
-"Standardbeteendet är att behandla\n"
-"        på varandra följande avgränsare som en (om SANT). Om FALSK läggs "
-"tomma cellvärden till mellan på varandra följande avgränsare."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -11500,12 +11463,8 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
 "Whether the array should be scanned by column. True scans the array by "
-"column and false (default) \n"
-"      scans the array by row."
+"column and false (default)       scans the array by row."
 msgstr ""
-"Om matrisen ska skannas per kolumn. True skannar matrisen efter kolumn och "
-"false (standard)\n"
-"      skannar matrisen per rad."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -11661,7 +11620,13 @@ msgstr "År som anges av ett givet datum."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/helpers/constants.js:0
 msgid "Year to Date"
-msgstr "År till dags dato"
+msgstr "Det här året till dagens datum"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/hooks.js:0
+msgid "Yes"
+msgstr "Ja"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -11674,6 +11639,14 @@ msgstr "Du kan inte slå samman celler inuti ett befintligt filter."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "You cannot create overlapping tables."
 msgstr "Du kan inte skapa överlappande tabeller."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid ""
+"You copied content from a different version of the application. Only text "
+"content will be pasted."
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -11956,6 +11929,12 @@ msgstr "imorgon"
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/public_readonly_app/public_readonly.xml:0
+msgid "x"
+msgstr "x"
+
+#. module: spreadsheet
+#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "yesterday"
 msgstr "igår"
@@ -11965,6 +11944,96 @@ msgstr "igår"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "zero"
 msgstr "noll"
+
+#~ msgid ""
+#~ "This operation is not possible due to a merge. Please remove the merges "
+#~ "first than try again."
+#~ msgstr ""
+#~ "Denna operation är inte möjlig på grund av en sammanslagning. Ta bort "
+#~ "sammanslagningarna först och försök sedan igen."
+
+#~ msgid ""
+#~ "(0) Exact match. \n"
+#~ "        (-1) Return next smaller item if no match. \n"
+#~ "        (1) Return next greater item if no match. \n"
+#~ "        (2) Wildcard match."
+#~ msgstr ""
+#~ "(0) Exakt matchning.\n"
+#~ "        (-1) Returnerar nästa mindre artikel om ingen matchning.\n"
+#~ "        (1) Returnerar nästa större objekt om ingen matchning.\n"
+#~ "        (2) Matchning med jokertecken."
+
+#~ msgid ""
+#~ "(1) Search starting at first item. \n"
+#~ "      (-1) Search starting at last item. \n"
+#~ "      (2) Perform a binary search that relies on lookup_array being "
+#~ "sorted in ascending order. If not sorted, invalid results will be "
+#~ "returned. \n"
+#~ "      (-2) Perform a binary search that relies on lookup_array being "
+#~ "sorted in descending order. If not sorted, invalid results will be "
+#~ "returned.\n"
+#~ "      "
+#~ msgstr ""
+#~ "(1) Sökningen börjar vid första objektet.\n"
+#~ "      (-1) Sök med början på det sista objektet.\n"
+#~ "      (2) Utför en binär sökning som är beroende av att lookup_array är "
+#~ "sorterad i stigande ordning. Om den inte är sorterad kommer ogiltiga "
+#~ "resultat att returneras.\n"
+#~ "      (-2) Utför en binär sökning som förlitar sig på att lookup_array "
+#~ "sorteras i fallande ordning. Om den inte är sorterad kommer ogiltiga "
+#~ "resultat att returneras.\n"
+#~ "      "
+
+#~ msgid ""
+#~ "An unexpected error occurred while pasting content.\n"
+#~ "          This is probably due to a spreadsheet version mismatch."
+#~ msgstr ""
+#~ "Ett oväntat fel uppstod när du klistrade in innehåll.\n"
+#~ "          Detta beror förmodligen på att kalkylbladets version inte "
+#~ "stämmer överens."
+
+#~ msgid ""
+#~ "Function [[FUNCTION_NAME]] expects criteria_range and criterion to be in "
+#~ "pairs."
+#~ msgstr ""
+#~ "Funktionen [[FUNCTION_NAME]] förväntar sig att criteria_range och "
+#~ "criterion ska vara i par."
+
+#~ msgid ""
+#~ "Function [[FUNCTION_NAME]] expects criteria_range to have the same "
+#~ "dimension"
+#~ msgstr ""
+#~ "Funktionen [[FUNCTION_NAME]] förväntar sig att criteria_range har samma "
+#~ "dimension"
+
+#~ msgid ""
+#~ "In [[FUNCTION_NAME]], the number of columns of the first matrix (%s) must "
+#~ "be equal to the \n"
+#~ "        number of rows of the second matrix (%s)."
+#~ msgstr ""
+#~ "I [[FUNCTION_NAME]] måste antalet kolumner i den första matrisen (%s) "
+#~ "vara lika med\n"
+#~ "        antalet rader i den andra matrisen (%s)."
+
+#~ msgid ""
+#~ "Whether or not to remove empty text messages from the split results. The "
+#~ "default behavior is to treat \n"
+#~ "        consecutive delimiters as one (if TRUE). If FALSE, empty cells "
+#~ "values are added between consecutive delimiters."
+#~ msgstr ""
+#~ "Om tomma textmeddelanden ska tas bort från splitresultaten eller inte. "
+#~ "Standardbeteendet är att behandla\n"
+#~ "        på varandra följande avgränsare som en (om SANT). Om FALSK läggs "
+#~ "tomma cellvärden till mellan på varandra följande avgränsare."
+
+#~ msgid ""
+#~ "Whether the array should be scanned by column. True scans the array by "
+#~ "column and false (default) \n"
+#~ "      scans the array by row."
+#~ msgstr ""
+#~ "Om matrisen ska skannas per kolumn. True skannar matrisen efter kolumn "
+#~ "och false (standard)\n"
+#~ "      skannar matrisen per rad."
 
 #~ msgid ""
 #~ "Function [[FUNCTION_NAME]] expects number values for %s, but got a %s."

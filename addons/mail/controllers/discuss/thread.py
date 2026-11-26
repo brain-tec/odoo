@@ -1,10 +1,21 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from werkzeug.exceptions import NotFound
+
 from odoo.http import request
 from odoo.addons.mail.controllers.thread import ThreadController
 
 
 class DiscussThreadController(ThreadController):
+    def _prepare_post_data(self, post_data, thread, **kwargs):
+        if thread._name == "discuss.channel":
+            partner, guest = request.env["res.partner"]._get_current_persona()
+            if not partner and not guest:
+                raise NotFound()
+            if thread.channel_type != "chat":
+                thread._find_or_create_member_for_self()
+        return super()._prepare_post_data(post_data, thread, **kwargs)
+
     def _filter_message_post_partners(self, thread, partners):
         if thread._name == "discuss.channel":
             domain = [("channel_id", "=", thread.id), ("partner_id", "in", partners.ids)]

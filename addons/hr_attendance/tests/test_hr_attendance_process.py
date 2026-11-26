@@ -6,11 +6,11 @@ from unittest.mock import patch
 
 from odoo import fields
 from odoo.tests import new_test_user
-from odoo.tests.common import tagged, TransactionCase, freeze_time
+from odoo.tests.common import HttpCase, tagged, TransactionCase, freeze_time
 
 
 @tagged('attendance_process')
-class TestHrAttendance(TransactionCase):
+class TestHrAttendance(HttpCase, TransactionCase):
     """Test for presence validity"""
 
     @classmethod
@@ -26,6 +26,14 @@ class TestHrAttendance(TransactionCase):
         cls.employee_kiosk = cls.env['hr.employee'].create({
             'name': "Machiavel",
             'pin': '5678',
+        })
+        cls.hr_user = cls.env['res.users'].create({
+            'name': 'HR Officer',
+            'login': 'hr_officer',
+            'groups_id': [(6, 0, [
+                cls.env.ref('hr.group_hr_user').id,
+                # Explicitly NOT adding: hr_attendance.group_hr_attendance_user
+            ])]
         })
 
     def setUp(self):
@@ -131,3 +139,74 @@ class TestHrAttendance(TransactionCase):
         self.assertEqual(attendance.in_mode, 'manual')
         self.assertEqual(attendance.out_mode, 'manual')
         self.assertEqual(attendance.color, 0)
+
+    def test_attendance_checkout_while_employee_archived(self):
+        """An employee should be checked out by the system, if employee is getting archive."""
+        test_attendance = self.env['hr.attendance'].create({
+            'check_in': datetime(2024, 1, 1, 8, 0),
+            'employee_id': self.test_employee.id,
+        })
+
+        with freeze_time("2024-01-01 17:00:00"):
+            self.test_employee.action_archive()
+            self.assertEqual(test_attendance.check_out, fields.Datetime.now())
+            self.assertEqual(test_attendance.worked_hours, 8.0)
+
+    def test_attendance_checkout_while_employee_archived_without_rights(self):
+        """Test that archiving employee by HR user closes attendance even if lacks of attendance permissions"""
+
+        test_attendance = self.env['hr.attendance'].create({
+            'employee_id': self.test_employee.id,
+            'check_in': '2024-01-15 08:00:00',
+        })
+
+        with freeze_time("2024-01-15 17:00:00"):
+            self.test_employee.with_user(self.hr_user).action_archive()
+            self.assertTrue(not self.test_employee.active, "Employee should be archived successfully with sudo()")
+            self.assertEqual(test_attendance.check_out, fields.Datetime.now(), "Attendance should be checked out at the time of archiving")
+
+    def test_attendance_multicompany(self):
+        """Test that the attendance is for the currently selected company, not default company of user"""
+
+        first_company = self.user.employee_id.company_id
+        self.assertTrue(first_company)
+
+        other_company = self.env["res.company"].create({
+            "name": "Test"
+        })
+        other_employee = self.env["hr.employee"].create({
+            "name": self.user.name,
+            "company_id": other_company.id,
+            "user_id": self.user.id
+        })
+
+        self.user.password = 'password'
+        self.authenticate(self.user.login, 'password')
+
+        # first case check when no cids sent, second case check when cids included
+        test_cases = [
+            ("", self.user.employee_id.id),
+            (f"{other_company.id}-{first_company.id}", other_employee.id),
+        ]
+
+        for cids, expected_employee_id in test_cases:
+            with self.subTest(expected_employee_id=expected_employee_id):
+                self.opener.cookies.set('cids', cids)
+                employee = self.make_jsonrpc_request("/hr_attendance/systray_check_in_out", {})
+                self.assertEqual(employee["id"], expected_employee_id)
+
+    def test_write_multi_attendance(self):
+        attendance_1 = self.env['hr.attendance'].create({
+            'employee_id': self.test_employee.id,
+            'check_in': '2024-01-15 08:00:00',
+        })
+        attendance_2 = self.env['hr.attendance'].create({
+            'employee_id': self.employee_kiosk.id,
+            'check_in': '2024-01-15 08:00:00',
+        })
+        (attendance_1 + attendance_2).write({'check_in': '2024-01-15 09:00:00'})
+        self.assertEqual(attendance_1.in_mode, "manual")
+        self.assertEqual(attendance_2.in_mode, "manual")
+        (attendance_1 + attendance_2).write({'check_out': '2024-01-15 10:00:00'})
+        self.assertEqual(attendance_1.out_mode, "manual")
+        self.assertEqual(attendance_2.out_mode, "manual")

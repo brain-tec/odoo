@@ -20,14 +20,14 @@
 # tserendavaa tsogtoo <tseegii011929@gmail.com>, 2024
 # Martin Trigaux, 2024
 # Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2025, 2026.
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2026-01-10 09:15+0000\n"
-"Last-Translator: Lodoikhuu <baskhuujacara@gmail.com>\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
+"PO-Revision-Date: 2026-10-27 17:57+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Mongolian <https://translate.odoo.com/projects/odoo-18/"
 "mass_mailing/mn/>\n"
 "Language: mn\n"
@@ -35,7 +35,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: mass_mailing
 #. odoo-python
@@ -55,11 +55,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:mass_mailing.field_mailing_mailing__mailing_filter_count
 msgid "# Favorite Filters"
 msgstr ""
-
-#. module: mass_mailing
-#: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
-msgid "$18"
-msgstr "18 доллар"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_list_view_form
@@ -122,12 +117,6 @@ msgid "(scheduled for %s)"
 msgstr ""
 
 #. module: mass_mailing
-#: model_terms:ir.ui.view,arch_db:mass_mailing.s_hr_options
-#: model_terms:ir.ui.view,arch_db:mass_mailing.snippet_options
-msgid "100%"
-msgstr "100%"
-
-#. module: mass_mailing
 #: model:ir.model.fields,field_description:mass_mailing.field_res_config_settings__mass_mailing_reports
 msgid "24H Stat Mailing Reports"
 msgstr ""
@@ -139,27 +128,9 @@ msgid "24H Stats of %(mailing_type)s \"%(mailing_name)s\""
 msgstr ""
 
 #. module: mass_mailing
-#: model_terms:ir.ui.view,arch_db:mass_mailing.s_hr_options
-#: model_terms:ir.ui.view,arch_db:mass_mailing.snippet_options
-msgid "25%"
-msgstr "25%"
-
-#. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.snippet_options
 msgid "400px"
 msgstr ""
-
-#. module: mass_mailing
-#: model_terms:ir.ui.view,arch_db:mass_mailing.s_hr_options
-#: model_terms:ir.ui.view,arch_db:mass_mailing.snippet_options
-msgid "50%"
-msgstr "50%"
-
-#. module: mass_mailing
-#: model_terms:ir.ui.view,arch_db:mass_mailing.s_hr_options
-#: model_terms:ir.ui.view,arch_db:mass_mailing.snippet_options
-msgid "75%"
-msgstr "75%"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.snippet_options
@@ -273,14 +244,6 @@ msgid ""
 "<font style=\"font-size: 62px; font-weight: bold;\">Catchy Headline</font>"
 msgstr ""
 "<font style=\"font-size: 62px; font-weight: bold;\">Catchy Headline</font>"
-
-#. module: mass_mailing
-#: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_subscription_view_form
-msgid ""
-"<i class=\"fa fa-ban text-danger\" role=\"img\" title=\"This email is "
-"blacklisted for mass mailings\" aria-label=\"Blacklisted\" invisible=\"not "
-"is_blacklisted\" groups=\"base.group_user\"/>"
-msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
@@ -981,7 +944,7 @@ msgstr "Өөр нэг шийдэл"
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.unsubscribe_form
 msgid "Apply changes"
-msgstr ""
+msgstr "Өөрчлөлтийг хэрэгжүүлэх"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_kanban
@@ -1032,6 +995,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
 msgid "Attach a file"
 msgstr "Файл хавсаргах"
+
+#. module: mass_mailing
+#: model:ir.model,name:mass_mailing.model_ir_attachment
+msgid "Attachment"
+msgstr "Хавсралт"
 
 #. module: mass_mailing
 #: model:ir.model.fields,field_description:mass_mailing.field_mailing_contact__message_attachment_count
@@ -1128,6 +1096,7 @@ msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_contact_view_search
+#: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_subscription_view_form
 msgid "Blacklisted"
 msgstr ""
 
@@ -1408,7 +1377,7 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_mailing_schedule_date_view_form
 msgid "Choose a date"
-msgstr ""
+msgstr "Огноо сонгох"
 
 #. module: mass_mailing
 #. odoo-javascript
@@ -1800,7 +1769,7 @@ msgstr "Хүргэгдсэн"
 #: model_terms:ir.ui.view,arch_db:mass_mailing.utm_campaign_view_form
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_tree
 msgid "Delivered (%)"
-msgstr ""
+msgstr "Хүргэсэн (%)"
 
 #. module: mass_mailing
 #. odoo-javascript
@@ -2117,7 +2086,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:mass_mailing.mailing_filter_action
 #: model:ir.ui.menu,name:mass_mailing.mailing_filter_menu_action
 msgid "Favorite Filters"
-msgstr ""
+msgstr "Дуртай шүүлтүүр"
 
 #. module: mass_mailing
 #: model:ir.model.fields,field_description:mass_mailing.field_mailing_mailing__mailing_filter_domain
@@ -2271,7 +2240,7 @@ msgstr "Бүтэн дэлгэц"
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_product_list
 msgid "Furniture"
-msgstr ""
+msgstr "Тавилга"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_image_text
@@ -2779,7 +2748,7 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.model,name:mass_mailing.model_mail_render_mixin
 msgid "Mail Render Mixin"
-msgstr ""
+msgstr "Мэйл дүрслэх Mixin"
 
 #. module: mass_mailing
 #: model:ir.model,name:mass_mailing.model_ir_mail_server
@@ -3218,7 +3187,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/mass_mailing/static/src/js/mailing_m2o_filter.js:0
 msgid "Model field"
-msgstr ""
+msgstr "Моделийн талбар"
 
 #. module: mass_mailing
 #: model:ir.model,name:mass_mailing.model_ir_model
@@ -3637,6 +3606,9 @@ msgid ""
 "a placeholder expression that provides the appropriate language, e.g. "
 "{{ object.partner_id.lang }}."
 msgstr ""
+"Имэйл илгээх үед ашиглах орчуулгын нэмэлт хэл (ISO код). Хэрэв тохируулаагүй "
+"бол англи хувилбарыг ашиглана. Ихэвчлэн тохирох хэлийг заах placeholder "
+"илэрхийлэл ашиглана. Жишээ нь: `{{ object.partner_id.lang }}`."
 
 #. module: mass_mailing
 #: model:ir.actions.act_window,name:mass_mailing.mailing_subscription_optout_action
@@ -3721,7 +3693,7 @@ msgstr "Зураг"
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.email_designer_themes
 msgid "Plain Text"
-msgstr ""
+msgstr "Энгийн текст"
 
 #. module: mass_mailing
 #. odoo-javascript
@@ -3777,7 +3749,7 @@ msgstr "Үйл ажиллагаа"
 #: model:ir.model.fields.selection,name:mass_mailing.selection__mailing_trace__trace_status__process
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_trace_view_search
 msgid "Processing"
-msgstr ""
+msgstr "Боловсруулж байна"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.email_designer_snippets
@@ -3938,7 +3910,7 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.model.fields,field_description:mass_mailing.field_mailing_mailing__render_model
 msgid "Rendering Model"
-msgstr ""
+msgstr "Загварын дүрслэл"
 
 #. module: mass_mailing
 #: model:ir.model.fields,field_description:mass_mailing.field_mailing_mailing__replied
@@ -4671,6 +4643,11 @@ msgid ""
 msgstr ""
 
 #. module: mass_mailing
+#: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_subscription_view_form
+msgid "This email is blacklisted for mass mailings"
+msgstr ""
+
+#. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_contact_view_form
 msgid "This email is blacklisted for mass mailings. Click to unblacklist."
 msgstr ""
@@ -5083,6 +5060,11 @@ msgid "Write what the customer would like to know, not what you want to show."
 msgstr ""
 
 #. module: mass_mailing
+#: model_terms:ir.ui.view,arch_db:mass_mailing.social_links
+msgid "X"
+msgstr "X"
+
+#. module: mass_mailing
 #. odoo-python
 #: code:addons/mass_mailing/controllers/main.py:0
 msgid "You are no longer part of our mailing list(s)."
@@ -5336,3 +5318,18 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_rating_options
 msgid "⌙ Inactive"
 msgstr ""
+
+#~ msgid "$18"
+#~ msgstr "18 доллар"
+
+#~ msgid "100%"
+#~ msgstr "100%"
+
+#~ msgid "25%"
+#~ msgstr "25%"
+
+#~ msgid "50%"
+#~ msgstr "50%"
+
+#~ msgid "75%"
+#~ msgstr "75%"

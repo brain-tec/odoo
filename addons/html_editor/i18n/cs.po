@@ -14,8 +14,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2026-02-07 18:00+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 10:33+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Czech <https://translate.odoo.com/projects/odoo-18/"
 "html_editor/cs/>\n"
@@ -23,9 +23,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : "
-"(n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
-"X-Generator: Weblate 5.14.3\n"
+"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n "
+"<= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: html_editor
 #. odoo-javascript
@@ -264,12 +264,6 @@ msgstr "Automatické přehrávání"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/column_plugin.js:0
-msgid "Back to one column"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/color_plugin.js:0
 #: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
 msgid "Background Color"
@@ -363,7 +357,7 @@ msgstr "Změnit popis médií a tooltip"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
 msgid "ChatGPT"
-msgstr ""
+msgstr "ChatGPT"
 
 #. module: html_editor
 #. odoo-javascript
@@ -418,6 +412,12 @@ msgstr "Obsah"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_dialog.js:0
 msgid "Content generated"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/column_plugin.js:0
+msgid "Convert columns to regular content"
 msgstr ""
 
 #. module: html_editor
@@ -732,7 +732,7 @@ msgstr "Formát"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.js:0
 msgid "Friendly"
-msgstr ""
+msgstr "Přátelský"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1178,7 +1178,7 @@ msgstr "Chybí soubor"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/powerbox/powerbox_plugin.js:0
+#: code:addons/html_editor/static/src/main/powerbox/search_powerbox_plugin.js:0
 msgid "More options"
 msgstr "Další možnosti"
 
@@ -1263,6 +1263,12 @@ msgstr "Číslovaný seznam"
 #. module: html_editor
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
+msgid "Only internal users can use AI text generation."
+msgstr ""
+
+#. module: html_editor
+#. odoo-python
+#: code:addons/html_editor/controllers/main.py:0
 msgid "Oops, it looks like our AI is unreachable!"
 msgstr ""
 
@@ -1327,7 +1333,7 @@ msgstr "Vložit adresu URL"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.js:0
 msgid "Persuasive"
-msgstr ""
+msgstr "Přesvědčivý"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1400,8 +1406,8 @@ msgstr "Odebrat odkaz"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
-msgid "Remove columns"
-msgstr "Odebrat sloupec"
+msgid "Remove column layout"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -1941,6 +1947,7 @@ msgstr ""
 msgid ""
 "You need to select a model before opening the dynamic placeholder selector."
 msgstr ""
+"Před otevřením dynamického výběru zástupných symbolů je třeba vybrat model."
 
 #. module: html_editor
 #. odoo-python
@@ -2019,6 +2026,15 @@ msgstr "nebo"
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "videos"
 msgstr "videa"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/table/table_picker.xml:0
+msgid "x"
+msgstr "x"
+
+#~ msgid "Remove columns"
+#~ msgstr "Odebrat sloupec"
 
 #~ msgid "Hide Dailymotion logo"
 #~ msgstr "Skrýt logo Dailymotion"

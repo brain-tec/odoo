@@ -808,6 +808,51 @@ class TestSaleMrpKitBom(TransactionCase):
             {'product_id': comp.id, 'product_uom_qty': 25.0},
         ])
 
+    def test_sale_kit_duplicated_component_qty_change(self):
+        """
+        Check that repeatedly increasing the ordered quantity of a kit that lists the same
+        component on two of its BoM lines updates each component demand proportionally.
+        """
+        partner = self.env['res.partner'].create({'name': 'Test Partner'})
+        kit_product = self._create_product('Kit', True, 1)
+        comp = self._create_product('Component', True, 1)
+        bom = self.env['mrp.bom'].create({
+            'product_tmpl_id': kit_product.product_tmpl_id.id,
+            'product_qty': 1.0,
+            'type': 'phantom',
+            'bom_line_ids': [
+                Command.create({'product_id': comp.id, 'product_qty': 1}),
+                Command.create({'product_id': comp.id, 'product_qty': 2}),
+            ],
+        })
+        so = self.env['sale.order'].create({
+            'partner_id': partner.id,
+            'order_line': [
+                Command.create({
+                    'name': kit_product.name,
+                    'product_id': kit_product.id,
+                    'product_uom_qty': 1,
+                }),
+            ],
+        })
+        so.action_confirm()
+        self.assertRecordValues(so.picking_ids.move_ids.sorted(lambda m: m.bom_line_id.id), [
+            {'product_id': comp.id, 'bom_line_id': bom.bom_line_ids[0].id, 'product_uom_qty': 1.0},
+            {'product_id': comp.id, 'bom_line_id': bom.bom_line_ids[1].id, 'product_uom_qty': 2.0},
+        ])
+
+        so.order_line.product_uom_qty = 2
+        self.assertRecordValues(so.picking_ids.move_ids.sorted(lambda m: m.bom_line_id.id), [
+            {'product_id': comp.id, 'bom_line_id': bom.bom_line_ids[0].id, 'product_uom_qty': 2.0},
+            {'product_id': comp.id, 'bom_line_id': bom.bom_line_ids[1].id, 'product_uom_qty': 4.0},
+        ])
+
+        so.order_line.product_uom_qty = 3
+        self.assertRecordValues(so.picking_ids.move_ids.sorted(lambda m: m.bom_line_id.id), [
+            {'product_id': comp.id, 'bom_line_id': bom.bom_line_ids[0].id, 'product_uom_qty': 3.0},
+            {'product_id': comp.id, 'bom_line_id': bom.bom_line_ids[1].id, 'product_uom_qty': 6.0},
+        ])
+
     def test_inter_company_qty_delivered_with_kit(self):
         """
         Test that the delivered quantity is updated on a sale order line when selling a kit
@@ -914,7 +959,7 @@ class TestSaleMrpKitBom(TransactionCase):
         # check that after validating, if the packages was changed to a package of the component the quantity is good
         so.picking_ids.button_validate()
         aggr_prod_qty = so.picking_ids.move_ids.move_line_ids[0]._get_aggregated_product_quantities(kit_name='Kit')
-        key = f"{comp_product.id}_{comp_product.display_name}__{comp_product.uom_id.id}_{packaging_comp}_{kit_product.bom_ids.id}"
+        key = f"{comp_product.id}_{comp_product.display_name}_{comp_product.stock_move_ids[0].description_bom_line}_{comp_product.uom_id.id}_{packaging_comp}_{kit_product.bom_ids.id}"
         self.assertEqual(aggr_prod_qty[key]['packaging_quantity'], 2)
 
     def test_product_packaging_qty_no_packaging(self):

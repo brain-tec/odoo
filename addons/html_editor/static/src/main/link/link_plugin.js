@@ -1,13 +1,9 @@
 import { Plugin } from "@html_editor/plugin";
-import { cleanTrailingBR, unwrapContents } from "@html_editor/utils/dom";
-import {
-    childNodes,
-    closestElement,
-    descendants,
-    selectElements,
-} from "@html_editor/utils/dom_traversal";
+import { cleanTrailingBR, mergeAdjacentTextNodes, unwrapContents } from "@html_editor/utils/dom";
+import { childNodes, closestElement, selectElements } from "@html_editor/utils/dom_traversal";
 import { findInSelection, callbacksForCursorUpdate } from "@html_editor/utils/selection";
 import { _t } from "@web/core/l10n/translation";
+import { isBrowserSafari } from "@web/core/browser/feature_detection";
 import { LinkPopover } from "./link_popover";
 import { DIRECTIONS, leftPos, nodeSize, rightPos } from "@html_editor/utils/position";
 import { prepareUpdate } from "@html_editor/utils/dom_state";
@@ -231,8 +227,15 @@ export class LinkPlugin extends Plugin {
         power_buttons: { commandId: "toggleLinkTools" },
 
         /** Handlers */
-        beforeinput_handlers: withSequence(5, this.onBeforeInput.bind(this)),
-        input_handlers: this.onInputDeleteNormalizeLink.bind(this),
+        beforeinput_handlers: [
+            withSequence(5, this.onBeforeInputPrepareConvertToLink.bind(this)),
+            this.onBeforeInputFixFirefoxSelection.bind(this),
+            withSequence(20, this.onBeforeInputConvertToLink.bind(this)),
+        ],
+        input_handlers: [
+            this.onInputDeleteNormalizeLink.bind(this),
+            this.onInputConvertToLink.bind(this),
+        ],
         before_delete_handlers: this.updateCurrentLinkSyncState.bind(this),
         delete_handlers: this.onInputDeleteNormalizeLink.bind(this),
         before_paste_handlers: this.updateCurrentLinkSyncState.bind(this),
@@ -259,11 +262,50 @@ export class LinkPlugin extends Plugin {
                 this.toggleLinkTools({ link: target });
             }
         });
-        this.addDomListener(this.editable, "mousedown", () => {
-            this._isNavigatingByMouse = true;
-        });
-        this.addDomListener(this.editable, "keydown", () => {
-            delete this._isNavigatingByMouse;
+        this.addDomListener(this.editable, "pointerdown", (ev) => {
+            const clickedEl = this.document.elementFromPoint(ev.clientX, ev.clientY);
+            if (!clickedEl) {
+                return;
+            }
+            let caretPosition = {};
+            if (this.document.caretPositionFromPoint) {
+                // Firefox API
+                const pos = this.document.caretPositionFromPoint(ev.clientX, ev.clientY);
+                caretPosition = pos;
+            } else if (this.document.caretRangeFromPoint) {
+                // Chrome / Safari API
+                const range = document.caretRangeFromPoint(ev.clientX, ev.clientY);
+                caretPosition.offsetNode = range?.startContainer;
+                caretPosition.offset = range?.startOffset;
+            }
+            const link = caretPosition?.offsetNode && closestElement(caretPosition.offsetNode, "A");
+            if (clickedEl.closest("a") && isZwnbsp(caretPosition.offsetNode)) {
+                // This handles the case of clicking at the start of the button
+                const isFirstFeff = !caretPosition.offsetNode.previousSibling;
+                if (isFirstFeff && caretPosition.offset === 0) {
+                    ev.preventDefault();
+                    this.dependencies.selection.setSelection({
+                        anchorNode: clickedEl,
+                        anchorOffset: 1,
+                    });
+                    this.dependencies.selection.focusEditable();
+                }
+            } else if (!clickedEl.closest("a") && link) {
+                // This handles the case of clicking outside the link that is
+                // at the start/end of paragraph
+                const anchorFeff =
+                    nodeSize(caretPosition.offsetNode) === caretPosition.offset
+                        ? link.nextSibling
+                        : link.previousSibling;
+                if (anchorFeff) {
+                    ev.preventDefault();
+                    this.dependencies.selection.setSelection({
+                        anchorNode: anchorFeff,
+                        anchorOffset: 1,
+                    });
+                    this.dependencies.selection.focusEditable();
+                }
+            }
         });
         // link creation is added to the command service because of a shortcut conflict,
         // as ctrl+k is used for invoking the command palette
@@ -416,48 +458,6 @@ export class LinkPlugin extends Plugin {
             type: this.type || "",
             LinkPopoverState: this.LinkPopoverState,
         };
-        if (
-            this._isNavigatingByMouse &&
-            selection.isCollapsed &&
-            selectionData.documentSelectionIsInEditable
-        ) {
-            delete this._isNavigatingByMouse;
-            const { startContainer, startOffset, endContainer, endOffset } = selection;
-            const linkElement = closestElement(startContainer, "a");
-            if (
-                linkElement &&
-                linkElement.textContent.startsWith("\uFEFF") &&
-                linkElement.textContent.endsWith("\uFEFF")
-            ) {
-                const linkDescendants = descendants(linkElement);
-
-                // Check if the cursor is positioned at the begining of link.
-                const isCursorAtStartOfLink = isZwnbsp(startContainer)
-                    ? linkDescendants.indexOf(startContainer) === 0
-                    : startContainer.nodeType === Node.TEXT_NODE &&
-                      linkDescendants.indexOf(startContainer) === 1 &&
-                      startOffset === 0;
-
-                // Check if the cursor is positioned at the end of link.
-                const isCursorAtEndOfLink = isZwnbsp(endContainer)
-                    ? linkDescendants.indexOf(endContainer) === linkDescendants.length - 1
-                    : endContainer.nodeType === Node.TEXT_NODE &&
-                      linkDescendants.indexOf(endContainer) === linkDescendants.length - 2 &&
-                      endOffset === nodeSize(endContainer);
-
-                // Handle selection movement.
-                if (isCursorAtStartOfLink || isCursorAtEndOfLink) {
-                    const [targetNode, targetOffset] = isCursorAtStartOfLink
-                        ? leftPos(linkElement)
-                        : rightPos(linkElement);
-                    this.dependencies.selection.setSelection({
-                        anchorNode: targetNode,
-                        anchorOffset: isCursorAtStartOfLink ? targetOffset - 1 : targetOffset + 1,
-                    });
-                    return;
-                }
-            }
-        }
         if (!selectionData.documentSelectionIsInEditable) {
             // note that data-prevent-closing-overlay also used in color picker but link popover
             // and color picker don't open at the same time so it's ok to query like this
@@ -813,36 +813,43 @@ export class LinkPlugin extends Plugin {
         }
     }
 
-    onBeforeInput(ev) {
-        if (ev.inputType === "insertParagraph" || ev.inputType === "insertLineBreak") {
-            const nodeForSelectionRestore = this.handleAutomaticLinkInsertion();
-            if (nodeForSelectionRestore) {
-                this.dependencies.selection.setCursorStart(nodeForSelectionRestore);
-                this.dependencies.history.addStep();
-            }
-        }
-        if (ev.inputType === "insertText" && ev.data === " ") {
-            const nodeForSelectionRestore = this.handleAutomaticLinkInsertion();
-            if (nodeForSelectionRestore) {
-                // Since we manually insert a space here, we will be adding a history step
-                // after link creation with selection at the end of the link and another
-                // after inserting the space. So first undo will remove the space, and the
-                // second will undo the link creation.
+    onBeforeInputPrepareConvertToLink(ev) {
+        if (
+            ev.inputType === "insertParagraph" ||
+            ev.inputType === "insertLineBreak" ||
+            (ev.inputType === "insertText" && ev.data === " ")
+        ) {
+            this.convertToLink = this.prepareConvertToLink();
+            if (this.convertToLink && ev.inputType === "insertText" && isBrowserSafari()) {
+                // The splitText calls in prepareConvertToLink leave Safari's
+                // native selection anchored on an empty text node, so letting
+                // the browser insert the space would put it in the wrong node
+                // and leave the selection with an out-of-range offset
+                // (IndexSizeError). Instead, take over: cancel the native
+                // insertion and perform the conversion, the space insertion
+                // and the selection placement ourselves.
+                ev.preventDefault();
+                // prepareConvertToLink left the selection collapsed on the
+                // text node following the future link.
+                const { anchorNode } = this.dependencies.selection.getEditableSelection();
+                // Use a non-breaking space: a regular space at the end of a
+                // block would be collapsed by the HTML whitespace rules.
+                anchorNode.textContent = "\u00a0" + anchorNode.textContent;
                 this.dependencies.selection.setSelection({
-                    anchorNode: nodeForSelectionRestore,
-                    anchorOffset: 0,
-                });
-                this.dependencies.history.addStep();
-                nodeForSelectionRestore.textContent =
-                    "\u00A0" + nodeForSelectionRestore.textContent;
-                this.dependencies.selection.setSelection({
-                    anchorNode: nodeForSelectionRestore,
+                    anchorNode,
                     anchorOffset: 1,
                 });
+                // Two steps, so that undo reverts the link conversion but
+                // keeps the typed space, as with the native insertion.
                 this.dependencies.history.addStep();
-                ev.preventDefault();
+                this.convertToLink();
+                this.dependencies.history.addStep();
+                delete this.convertToLink;
             }
         }
+    }
+
+    onBeforeInputFixFirefoxSelection(ev) {
         // Firefox: avoid corrupted selection inside link.
         const selection = this.document.getSelection();
         if (
@@ -857,6 +864,26 @@ export class LinkPlugin extends Plugin {
             selection.collapse(selection.anchorNode, offset);
         }
         this.updateCurrentLinkSyncState();
+    }
+
+    onBeforeInputConvertToLink(ev) {
+        if (this.convertToLink) {
+            if (ev.inputType === "insertParagraph" || ev.inputType === "insertLineBreak") {
+                this.convertToLink();
+                this.dependencies.history.addStep();
+                delete this.convertToLink;
+            }
+        }
+    }
+
+    onInputConvertToLink(ev) {
+        if (this.convertToLink) {
+            if (ev.inputType === "insertText" && ev.data === " ") {
+                this.convertToLink();
+                this.dependencies.history.addStep();
+                delete this.convertToLink;
+            }
+        }
     }
 
     onInputDeleteNormalizeLink() {
@@ -894,8 +921,23 @@ export class LinkPlugin extends Plugin {
     /**
      * Inserts a link in the editor. Called after pressing space or (shif +) enter.
      * Performs a regex check to determine if the url has correct syntax.
+     * TODO Delete in master: kept for stable
      */
     handleAutomaticLinkInsertion() {
+        const convertToLink = this.prepareConvertToLink();
+        if (convertToLink) {
+            return convertToLink();
+        }
+    }
+
+    /**
+     * If a link must be inserted after pressing space or (shift +) enter,
+     * returns information that will be needed to insert the link.
+     * Performs a regex check to determine if the url has correct syntax.
+     *
+     * @returns {Function} that performs the link conversion
+     */
+    prepareConvertToLink() {
         let selection = this.dependencies.selection.getEditableSelection();
         if (
             isHtmlContentSupported(selection.anchorNode) &&
@@ -903,30 +945,54 @@ export class LinkPlugin extends Plugin {
             selection.anchorNode.nodeType === Node.TEXT_NODE
         ) {
             // Merge adjacent text nodes.
-            selection.anchorNode.parentNode.normalize();
+            const cursor = this.dependencies.selection.preserveSelection();
+            mergeAdjacentTextNodes(selection.anchorNode.parentNode, cursor);
+            cursor.restore();
             selection = this.dependencies.selection.getEditableSelection();
             const textSliced = selection.anchorNode.textContent.slice(0, selection.anchorOffset);
             const textNodeSplitted = textSliced.split(/\s/);
             const potentialUrl = textNodeSplitted.pop();
             // In case of multiple matches, only the last one will be converted.
-            const match = [...potentialUrl.matchAll(new RegExp(URL_REGEX, "g"))].pop();
+            const match = [
+                ...potentialUrl.matchAll(new RegExp(URL_REGEX.source, URL_REGEX.flags + "g")),
+            ].pop();
 
-            if (match && !EMAIL_REGEX.test(match[0])) {
+            if (match) {
                 const nodeForSelectionRestore = selection.anchorNode.splitText(
                     selection.anchorOffset
                 );
-                const url = match[2] ? match[0] : "http://" + match[0];
+                let url;
+                if (!EMAIL_REGEX.test(match[0])) {
+                    url = match[2] ? match[0] : "http://" + match[0];
+                } else {
+                    url = "mailto:" + match[0];
+                }
+
                 const startOffset = selection.anchorOffset - potentialUrl.length + match.index;
                 const text = selection.anchorNode.textContent.slice(
                     startOffset,
                     startOffset + match[0].length
                 );
-                const link = this.createLink(url, text);
                 // split the text node and replace the url text with the link
                 const textNodeToReplace = selection.anchorNode.splitText(startOffset);
                 textNodeToReplace.splitText(match[0].length);
-                selection.anchorNode.parentElement.replaceChild(link, textNodeToReplace);
-                return nodeForSelectionRestore;
+                // The splitText calls above leave Safari's native selection
+                // anchored on an empty text node with stale offsets. Anything
+                // reading the selection afterwards (e.g. splitBlock when
+                // converting through Enter) would then throw an
+                // IndexSizeError. Re-anchor the selection at the caret
+                // position, right after the future link.
+                this.dependencies.selection.setSelection(
+                    { anchorNode: nodeForSelectionRestore, anchorOffset: 0 },
+                    { normalize: false }
+                );
+                const link = this.createLink(url, text);
+                return () => {
+                    textNodeToReplace.splitText(match[0].length); // this will keep the space (that will have been added in the meantime)
+                    textNodeToReplace.parentNode.replaceChild(link, textNodeToReplace);
+                    // TODO Remove in master: kept for stable
+                    return nodeForSelectionRestore;
+                };
             }
         }
     }
@@ -991,7 +1057,10 @@ export class LinkPlugin extends Plugin {
         if (startContainer.nodeType !== Node.TEXT_NODE || startContainer.textContent != "\uFEFF") {
             return;
         }
-        if (!startContainer.previousSibling?.matches("a.btn")) {
+        const previousSibling = startContainer.previousSibling;
+        // We must ensure that previous sibling is an element node before
+        // calling `matches` (text nodes do not implement this method).
+        if (previousSibling?.nodeType !== Node.ELEMENT_NODE || !previousSibling.matches("a.btn")) {
             return;
         }
         // Move before inner FEFF of the button.

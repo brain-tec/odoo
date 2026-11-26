@@ -23,23 +23,24 @@
 # Anders Wallenquist <anders.wallenquist@vertel.se>, 2024
 # Simon S, 2024
 # Martin Trigaux, 2024
-# Jakob Krabbe <jakob.krabbe@vertel.se>, 2025
+# Jakob Krabbe <jakob.krabbe@vertel.se>, 2025, 2026.
 # Wil Odoo, 2025
-# Mikael Akerberg <mikael.akerberg@mariaakerberg.com>, 2025.
+# Mikael Akerberg <mikael.akerberg@mariaakerberg.com>, 2025, 2026.
+# Hanna Kharraziha <hakha@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2025-11-03 21:50+0000\n"
-"Last-Translator: Mikael Akerberg <mikael.akerberg@mariaakerberg.com>\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
+"PO-Revision-Date: 2026-11-05 10:33+0000\n"
+"Last-Translator: Hanna Kharraziha <hakha@odoo.com>\n"
 "Language-Team: Swedish <https://translate.odoo.com/projects/odoo-18/hr/sv/>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_company__hr_presence_control_email_amount
@@ -337,7 +338,7 @@ msgstr "Aktiviteter"
 #: model:ir.model.fields,field_description:hr.field_hr_department__activity_exception_decoration
 #: model:ir.model.fields,field_description:hr.field_hr_employee__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "Aktivitet undantaget dekoration"
+msgstr "Stilmarkeringar för undantagsaktiviteter"
 
 #. module: hr
 #: model:ir.model,name:hr.model_mail_activity_plan
@@ -349,7 +350,7 @@ msgstr "Aktivitetsplan"
 #: model:ir.model.fields,field_description:hr.field_hr_department__activity_state
 #: model:ir.model.fields,field_description:hr.field_hr_employee__activity_state
 msgid "Activity State"
-msgstr "Aktivitetstillstånd"
+msgstr "Aktivitetsstatus"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__activity_type_icon
@@ -513,7 +514,7 @@ msgstr "Arkiv"
 #: model_terms:ir.ui.view,arch_db:hr.view_hr_job_form
 #: model_terms:ir.ui.view,arch_db:hr.view_job_filter
 msgid "Archived"
-msgstr "Arkiverad"
+msgstr "Arkiverade"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -770,7 +771,7 @@ msgstr "Underavdelning"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_department_view_kanban
 msgid "Child departments"
-msgstr "Avdelningar för barn"
+msgstr "Underordnade avdelningar"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
@@ -823,7 +824,7 @@ msgstr "Färgindex"
 #: model:ir.model,name:hr.model_res_company
 #: model_terms:ir.ui.view,arch_db:hr.view_department_tree
 msgid "Companies"
-msgstr "Bolag"
+msgstr "Företag"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__company_id
@@ -835,7 +836,7 @@ msgstr "Bolag"
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_search
 #: model_terms:ir.ui.view,arch_db:hr.view_job_filter
 msgid "Company"
-msgstr "Bolag"
+msgstr "Företag"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__company_country_id
@@ -871,7 +872,7 @@ msgstr "Inställningar"
 #: model:ir.ui.menu,name:hr.menu_human_resources_configuration
 #: model_terms:ir.ui.view,arch_db:hr.hr_department_view_kanban
 msgid "Configuration"
-msgstr "Konfiguration"
+msgstr "Inställningar"
 
 #. module: hr
 #: model:hr.job,name:hr.job_consultant
@@ -1194,7 +1195,7 @@ msgstr "Leda underordnade"
 #. module: hr
 #: model:ir.ui.menu,name:hr.menu_hr_employee
 msgid "Directory"
-msgstr "Katalog"
+msgstr "Register"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_departure_wizard_view_form
@@ -1418,6 +1419,11 @@ msgstr "Den anställdes bankkontonummer"
 #: model:ir.model.fields,field_description:hr.field_res_users__employee_country_id
 msgid "Employee's Country"
 msgstr "Den anställdes land"
+
+#. module: hr
+#: model:ir.model.fields,field_description:hr.field_res_users__employee_country_code
+msgid "Employee's Country Code"
+msgstr ""
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_kanban
@@ -1817,7 +1823,9 @@ msgstr "Identifikations Nr"
 #: model:ir.model.fields,help:hr.field_hr_employee__message_needaction
 #: model:ir.model.fields,help:hr.field_hr_job__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "Om markerad så finns det meddelanden som kräver din uppmärksamhet."
+msgstr ""
+"Om rutan är markerad, så finns det nya meddelanden som kräver din "
+"uppmärksamhet."
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_department__message_has_error
@@ -1827,7 +1835,7 @@ msgstr "Om markerad så finns det meddelanden som kräver din uppmärksamhet."
 #: model:ir.model.fields,help:hr.field_hr_job__message_has_error
 #: model:ir.model.fields,help:hr.field_hr_job__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "Om markerad, en del meddelanden har leveransfel."
+msgstr "Om rutan är markerad, så har vissa meddelanden leveransfel."
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__active
@@ -2191,7 +2199,7 @@ msgstr "Meny"
 #: model:ir.model.fields,field_description:hr.field_hr_employee__message_has_error
 #: model:ir.model.fields,field_description:hr.field_hr_job__message_has_error
 msgid "Message Delivery error"
-msgstr "Fel vid leverans meddelande"
+msgstr "Leveransfel för meddelande"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__message_ids
@@ -2283,13 +2291,13 @@ msgstr "Nästa Kalenderhändelse för aktivitet"
 #: model:ir.model.fields,field_description:hr.field_hr_department__activity_date_deadline
 #: model:ir.model.fields,field_description:hr.field_hr_employee__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Nästa slutdatum för aktivitet"
+msgstr "Tidsgräns för nästa aktivitet"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__activity_summary
 #: model:ir.model.fields,field_description:hr.field_hr_employee__activity_summary
 msgid "Next Activity Summary"
-msgstr "Nästa aktivitetssammanställning"
+msgstr "Sammanfattning av nästa aktivitet"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__activity_type_id
@@ -2396,7 +2404,7 @@ msgstr "Antal fel"
 #: model:ir.model.fields,help:hr.field_hr_employee__message_needaction_counter
 #: model:ir.model.fields,help:hr.field_hr_job__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr "Antal meddelanden som kräver åtgärd"
+msgstr "Antal meddelanden som kräver åtgärder"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_department__message_has_error_counter
@@ -2639,7 +2647,7 @@ msgstr "Planeringar"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__plans_count
 msgid "Plans Count"
-msgstr "Planer Räkna"
+msgstr "Antal planer"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -2986,7 +2994,7 @@ msgstr "Personnummer"
 #: model:ir.model.fields,field_description:hr.field_hr_employee__message_has_sms_error
 #: model:ir.model.fields,field_description:hr.field_hr_job__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr "Fel vid leverans av SMS"
+msgstr "Leveransfel för sms"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__ssnid
@@ -3150,10 +3158,10 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
-"Status baserad på aktiviteter\n"
-"Försenade: Leveranstidpunkten har passerat\n"
-"Idag: Aktivitetsdatum är idag\n"
-"Kommande: Framtida aktiviteter."
+"Status baserat på aktivitetsdatum:\n"
+"Försenade: Aktivitetsdatum har redan passerat.\n"
+"Idag: Aktivitetsdatum är dagens datum.\n"
+"Planerade: Kommande aktiviteter."
 
 #. module: hr
 #: model:hr.contract.type,name:hr.contract_type_statutaire
@@ -3249,16 +3257,6 @@ msgid "Temporary"
 msgstr "Tillfälligt"
 
 #. module: hr
-#. odoo-python
-#: code:addons/hr/models/hr_employee.py:0
-msgid ""
-"The Badge ID must be alphanumeric without any accents and no longer than 18 "
-"characters."
-msgstr ""
-"Märkets ID måste vara alfanumeriskt utan några accenter och inte längre än "
-"18 tecken."
-
-#. module: hr
 #: model:ir.model.constraint,message:hr.constraint_hr_employee_barcode_uniq
 msgid ""
 "The Badge ID must be unique, this one is already assigned to another "
@@ -3267,13 +3265,22 @@ msgstr ""
 "Badge-ID måste vara unikt, detta ID har redan tilldelats en annan anställd."
 
 #. module: hr
+#. odoo-python
+#: code:addons/hr/models/hr_employee.py:0
+msgid ""
+"The Badge ID must contain only printable ASCII characters, without spaces, "
+"and be no longer than 18 characters."
+msgstr ""
+
+#. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__company_country_code
+#: model:ir.model.fields,help:hr.field_res_users__employee_country_code
 msgid ""
 "The ISO country code in two chars. \n"
 "You can use this field for quick search."
 msgstr ""
-"ISO-landskoden med två tecken\n"
-"Du kan använda det här fältet för snabb sökning."
+"ISO-landskod angiven med två tecken.\n"
+"Fältet kan användas för snabbsökning."
 
 #. module: hr
 #: model_terms:hr.job,description:hr.job_marketing
@@ -3574,14 +3581,14 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr.field_hr_employee__website_message_ids
 #: model:ir.model.fields,field_description:hr.field_hr_job__website_message_ids
 msgid "Website Messages"
-msgstr "Webbplatsmeddelanden"
+msgstr "Hemsidesmeddelanden"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_department__website_message_ids
 #: model:ir.model.fields,help:hr.field_hr_employee__website_message_ids
 #: model:ir.model.fields,help:hr.field_hr_job__website_message_ids
 msgid "Website communication history"
-msgstr "Webbplatsens kommunikationshistorik"
+msgstr "Hemsidans kommunikationshistorik"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -3935,3 +3942,10 @@ msgstr "begränsat till anställda"
 #: model:ir.model.fields,field_description:hr.field_hr_employee__work_permit_name
 msgid "work_permit_name"
 msgstr "work_permit_name"
+
+#~ msgid ""
+#~ "The Badge ID must be alphanumeric without any accents and no longer than "
+#~ "18 characters."
+#~ msgstr ""
+#~ "Märkets ID måste vara alfanumeriskt utan några accenter och inte längre "
+#~ "än 18 tecken."

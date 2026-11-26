@@ -20,11 +20,13 @@ def get_demo_vendor_bill(user):
         'direction': 'incoming',
         'receiver': user.edi_identification,
         'uuid': f'{user.company_id.id}_demo_vendor_bill',
+        'origin_message_uuid': f'{user.company_id.id}_demo_vendor_bill',
         'accounting_supplier_party': '0208:2718281828',
         'state': 'done',
         'filename': f'{user.company_id.id}_demo_vendor_bill',
         'enc_key': file_open(DEMO_ENC_KEY, mode='rb').read(),
         'document': file_open(DEMO_BILL_PATH, mode='rb').read(),
+        'document_type': 'Invoice',
     }
 
 
@@ -54,7 +56,11 @@ def _mock_call_peppol_proxy(func, self, *args, **kwargs):
         message_uuid = args[1]['message_uuids'][0]
         if message_uuid.endswith('_demo_vendor_bill'):
             return {message_uuid: get_demo_vendor_bill(user)}
-        return {message_uuid: {'state': 'done'}}
+        return {message_uuid: {
+            'state': 'done',
+            'origin_message_uuid': message_uuid,
+            'document_type': 'Invoice',
+        }}
 
     def _mock_send_document(user, args, kwargs):
         # Trigger the reception of vendor bills
@@ -98,6 +104,7 @@ def _mock_call_peppol_proxy(func, self, *args, **kwargs):
         'get_document': _mock_get_document,
         'participant_status': _mock_participant_status,
         'send_document': _mock_send_document,
+        'get_services': lambda _user, _args, _kwargs: {'services': []},
         'add_services': lambda _user, _args, _kwargs: {},
         'remove_services': lambda _user, _args, _kwargs: {},
         'cancel_peppol_registration': lambda _user, _args, _kwargs: {},
@@ -182,7 +189,7 @@ def _mock_deregister_participant(func, self, *args, **kwargs):
     self.env['account.move'].search([
         ('company_id', '=', self.company_id.id),
         ('peppol_message_uuid', '=', f'{self.company_id.id}_demo_vendor_bill'),
-    ]).unlink()
+    ]).with_context(force_delete=True).unlink()
 
     mode_constraint = self.env['ir.config_parameter'].get_param('account_peppol.mode_constraint')
     if 'account_peppol_edi_user' in self._fields:
@@ -206,8 +213,41 @@ def _mock_check_company_on_peppol(func, self, *args, **kwargs):
     pass
 
 
+def _mock_peppol_deregister_participant(func, self, *args, **kwargs):
+    self.company_id._reset_peppol_configuration()
+    self.unlink()
+
+
+def _mock_can_receive_self_billing(func, self, *args, **kwargs):
+    return True
+
+
+def _mock_peppol_can_connect(func, self, *args, **kwargs):
+    return {'auth_required': False}
+
+
+def _mock_peppol_create_connection(func, self, *args, **kwargs):
+    peppol_identifier = kwargs['peppol_identifier'] if 'peppol_identifier' in kwargs else args[0]
+    edi_user = self.env['account_edi_proxy_client.user'].sudo().create({
+        'id_client': f'demo{self.id}peppol',
+        'company_id': self.id,
+        'proxy_type': 'peppol',
+        'edi_mode': 'demo',
+        'edi_identification': peppol_identifier,
+        'private_key_id': self.env['certificate.key'].create({
+            'content': b64encode(file_open(DEMO_PRIVATE_KEY, 'rb').read()),
+            'company_id': self.id,
+        }).id,
+        'refresh_token': 'demo',
+    })
+    self.account_peppol_proxy_state = 'receiver'
+    return edi_user
+
+
 _demo_behaviour = {
     '_call_peppol_proxy': _mock_call_peppol_proxy,
+    '_peppol_can_connect': _mock_peppol_can_connect,
+    '_peppol_create_connection': _mock_peppol_create_connection,
     'button_account_peppol_check_partner_endpoint': _mock_button_verify_partner_endpoint,
     '_get_peppol_verification_state': _mock_get_peppol_verification_state,
     '_peppol_migrate_registration': _mock_migrate_participant,
@@ -218,6 +258,8 @@ _demo_behaviour = {
     'button_check_peppol_verification_code': _mock_check_verification_code,
     'button_register_peppol_participant': _mock_user_creation,
     '_check_company_on_peppol': _mock_check_company_on_peppol,
+    '_peppol_deregister_participant': _mock_peppol_deregister_participant,
+    '_can_receive_self_billing': _mock_can_receive_self_billing,
 }
 
 # -------------------------------------------------------------------------

@@ -24,7 +24,7 @@ registry.category("web_tour.tours").add("mail/static/tests/tours/mail_composer_t
         {
             content: "Write something in composer",
             trigger: ".o-mail-Composer-input",
-            run: "edit blahblah @Not && click body",
+            run: "edit blahblah @Not",
         },
         {
             content: "Mention a partner",
@@ -75,7 +75,7 @@ registry.category("web_tour.tours").add("mail/static/tests/tours/mail_composer_t
                 const bodyContent = document.querySelector(
                     '.o_field_html[name="body"]'
                 ).textContent;
-                if (!bodyContent.includes("blahblah @Not A Demo User")) {
+                if (!bodyContent.replace(/\uFEFF/g, "").includes("blahblah @Not A Demo User")) {
                     console.error(
                         `Full composer should contain text from small composer ("blahblah @Not A Demo User") in body input (actual: ${bodyContent})`
                     );
@@ -97,6 +97,38 @@ registry.category("web_tour.tours").add("mail/static/tests/tours/mail_composer_t
                     console.error("Full composer should contain the user's signature once.");
                 }
             },
+        },
+        {
+            content: "Trigger channel mention with #",
+            trigger: ".odoo-editor-editable",
+            run() {
+                this.anchor.dispatchEvent(
+                    new InputEvent("beforeinput", {
+                        inputType: "insertText",
+                        data: "#",
+                        bubbles: true,
+                    })
+                );
+            },
+        },
+        {
+            content: "Search for general channel",
+            trigger: ".o-mail-MentionList input",
+            run: "edit gen",
+        },
+        {
+            content: "Select channel from suggestion",
+            trigger: ".o-mail-Composer-suggestion:contains(general)",
+            run: "click",
+        },
+        {
+            content: "Check channel mention is present in body",
+            trigger: '.o_field_html[name="body"] .o_channel_redirect:contains(general)',
+        },
+        {
+            // Wait for the mention popover to close, as the composer shows no
+            // dropzone while the popover owns the UI active element.
+            trigger: "body:not(:has(.o-mail-MentionList))",
         },
         {
             content: "Drop a file on the full composer",

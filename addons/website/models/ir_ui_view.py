@@ -78,6 +78,16 @@ class View(models.Model):
                     raise ValueError(f"Trying to create a view for website {new_website_id} from a website {website_id} environment")
         return super().create(vals_list)
 
+    def copy_data(self, default=None):
+        vals_list = super().copy_data(default=default)
+        # `visibility_password` has "copy=False" because reading it requires
+        # `base.group_system`, which the website designer may not have.
+        # The (hashed) password is copied here with sudo().
+        for view, vals in zip(self, vals_list):
+            if view.visibility == 'password' and 'visibility_password' not in vals:
+                vals['visibility_password'] = view.sudo().visibility_password
+        return vals_list
+
     @api.depends('website_id', 'key')
     @api.depends_context('display_key', 'display_website')
     def _compute_display_name(self):
@@ -277,10 +287,10 @@ class View(models.Model):
         # get_related_views can be called through website=False routes
         # (e.g. /web_editor/get_assets_editor_resources), so website
         # dispatch_parameters may not be added. Manually set
-        # website_id. (It will then always fallback on a website, this
-        # method should never be called in a generic context, even for
-        # tests)
-        current_website = self.env['website'].get_current_website()
+        # website_id. (In the website environment, this method should
+        # never be called in a generic context, even for tests)
+        is_customization_code = self._context.get('is_customization_code', True)
+        current_website = self.env['website'].get_current_website(fallback=is_customization_code)
         return super(View, self.with_context(
             website_id=current_website.id
         )).get_related_views(key, bundles=bundles).with_context(
@@ -423,7 +433,11 @@ class View(models.Model):
             elif visibility == 'password' and \
                     (request.website.is_public_user() or self.id not in request.session.get('views_unlock', [])):
                 pwd = request.params.get('visibility_password')
-                if pwd and self.env.user._crypt_context().verify(
+                # Guard against a falsy visibility_password which would make
+                # crypt_context().verify() raise. Old databases can contain
+                # such views, because duplication of a password-protected
+                # page did not copy the password.
+                if pwd and self.visibility_password and self.env.user._crypt_context().verify(
                         pwd, self.visibility_password):
                     request.session.setdefault('views_unlock', list()).append(self.id)
                 else:

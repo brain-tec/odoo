@@ -8,13 +8,15 @@
 # Thi Huong Nguyen, 2025
 #
 # "Thi Huong Nguyen (thng)" <thng@odoo.com>, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
+# Deleted User <noreply+31@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-22 18:36+0000\n"
-"PO-Revision-Date: 2026-01-10 09:10+0000\n"
-"Last-Translator: \"Thi Huong Nguyen (thng)\" <thng@odoo.com>\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
+"PO-Revision-Date: 2026-10-28 06:33+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-18/"
 "website_sale/vi/>\n"
 "Language: vi\n"
@@ -22,7 +24,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products
@@ -74,29 +76,14 @@ msgid "'. Showing results for '"
 msgstr "'. Hiển thị kết quả cho '"
 
 #. module: website_sale
-#: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_image_width__100_pc
-msgid "100 %"
-msgstr "100%"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "100 percent"
 msgstr "100%"
 
 #. module: website_sale
-#: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_image_width__50_pc
-msgid "50 %"
-msgstr "50%"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "50 percent"
 msgstr "50%"
-
-#. module: website_sale
-#: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_image_width__66_pc
-msgid "66 %"
-msgstr "66%"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -347,15 +334,6 @@ msgstr ""
 "<span class=\"d-md-none fa fa-shopping-cart\"/>\n"
 "                            <span class=\"d-none d-md-inline\">Thêm vào giỏ "
 "hàng</span>"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
-"specific.\" groups=\"website.group_multi_website\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-globe\" title=\"Giá trị đặt ở đây áp dụng cho "
-"website cụ thể. \" groups=\"website.group_multi_website\"/>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_dynamic_snippet_products_preview_data
@@ -4316,6 +4294,14 @@ msgstr "Hết hàng"
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/controllers/main.py:0
+msgid ""
+"Some products in your cart are not available for purchase in your country. "
+"Please remove them or contact us."
+msgstr ""
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
 msgid "Some required fields are empty."
 msgstr "Một số trường bắt buộc vẫn đang để trống."
 
@@ -4445,6 +4431,14 @@ msgid "Taxes"
 msgstr "Thuế"
 
 #. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+msgid ""
+"Taxes have been updated based on your address. Your payment method has not "
+"been charged."
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "Text"
 msgstr "Văn bản"
@@ -4540,6 +4534,16 @@ msgid ""
 msgstr ""
 "Chế độ được chọn ở đây áp dụng như chính sách xuất hóa đơn của bất kỳ sản "
 "phẩm mới nào được tạo nhưng không phải của sản phẩm đã tồn tại."
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/combo_configurator.py:0
+msgid ""
+"The number of selected combo items must match the number of available combo "
+"choices."
+msgstr ""
+"Số lượng sản phẩm combo đã chọn phải khớp với số lượng các lựa chọn combo có "
+"sẵn."
 
 #. module: website_sale
 #. odoo-python
@@ -4642,10 +4646,22 @@ msgid "This product is no longer available."
 msgstr "Sản phẩm này không còn tồn tại."
 
 #. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+msgid "This product is not available for purchase in your country."
+msgstr ""
+
+#. module: website_sale
 #. odoo-javascript
 #: code:addons/website_sale/static/src/js/website_sale_reorder.js:0
 msgid "This product is not available for purchase."
 msgstr "Không thể mua sản phẩm này."
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+msgid "This product is part of a combo and can't be updated individually."
+msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products_item
@@ -4794,6 +4810,11 @@ msgstr ""
 #: code:addons/website_sale/controllers/main.py:0
 msgid "VAT"
 msgstr "Thuế GTGT"
+
+#. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
+msgid "Values set here are website-specific."
+msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_add_to_cart_options
@@ -5094,6 +5115,11 @@ msgid "With three feet"
 msgstr "Có 3 chân"
 
 #. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.product_share_buttons
+msgid "X"
+msgstr "X"
+
+#. module: website_sale
 #. odoo-javascript
 #: code:addons/website_sale/static/src/xml/website_sale_reorder_modal.xml:0
 msgid "Yes"
@@ -5321,6 +5347,30 @@ msgstr "điều khoản &amp; điều kiện"
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 msgid "to follow your order."
 msgstr "để theo dõi đơn hàng của bạn."
+
+#. module: website_sale
+#. odoo-javascript
+#: code:addons/website_sale/static/src/xml/website_sale_reorder_modal.xml:0
+#: model_terms:ir.ui.view,arch_db:website_sale.cart_combo_item_line
+#: model_terms:ir.ui.view,arch_db:website_sale.checkout_layout
+msgid "x"
+msgstr ""
+
+#~ msgid "100 %"
+#~ msgstr "100%"
+
+#~ msgid "50 %"
+#~ msgstr "50%"
+
+#~ msgid "66 %"
+#~ msgstr "66%"
+
+#~ msgid ""
+#~ "<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
+#~ "specific.\" groups=\"website.group_multi_website\"/>"
+#~ msgstr ""
+#~ "<span class=\"fa fa-lg fa-globe\" title=\"Giá trị đặt ở đây áp dụng cho "
+#~ "website cụ thể. \" groups=\"website.group_multi_website\"/>"
 
 #~ msgid ""
 #~ "Your Dynamic Snippet will be displayed here...\n"

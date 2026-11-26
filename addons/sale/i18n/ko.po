@@ -7,23 +7,23 @@
 # Wil Odoo, 2025
 # Sarah Park, 2025
 #
-# "Kwanghee Park (kwpa)" <kwpa@odoo.com>, 2025.
+# "Kwanghee Park (kwpa)" <kwpa@odoo.com>, 2025, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-29 18:37+0000\n"
-"PO-Revision-Date: 2026-02-14 09:13+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Korean <https://translate.odoo.com/projects/odoo-18/sale/ko/>"
-"\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 18:11+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"Language-Team: Korean <https://translate.odoo.com/projects/odoo-18/sale/ko/"
+">\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_payment_provider_onboarding_wizard___data_fetched
@@ -75,21 +75,6 @@ msgid ""
 msgstr ""
 "(object.state in ('draft', 'sent') and '견적 - %s' % (object.name)) or '주문 "
 "- %s' % (object.name)"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
-msgid "2023-12-31"
-msgstr "2023-12-31"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
-msgid "27.00"
-msgstr "27.00"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
-msgid "31.05"
-msgstr "31.05"
 
 #. module: sale
 #. odoo-javascript
@@ -1141,15 +1126,6 @@ msgstr ""
 "is_product_archived\"/>"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-building-o p-2\" title=\"Values set here are "
-"company-specific.\" groups=\"base.group_multi_company\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-building-o p-2\" title=\"Values set here are "
-"company-specific.\" groups=\"base.group_multi_company\"/>"
-
-#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.crm_team_salesteams_view_form
 msgid "<span class=\"flex-grow-1\">/ Month</span>"
 msgstr "<span class=\"flex-grow-1\">/ 월</span>"
@@ -1276,7 +1252,7 @@ msgstr "<strong>만료</strong>"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 msgid "<strong>Fiscal Position Remark:</strong>"
-msgstr "<strong>재정 위치 참고 사항 :</strong>"
+msgstr "<strong>재정 포지션 참고 사항 :</strong>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -2800,7 +2776,7 @@ msgstr "FedEx 배송"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__fiscal_position_id
 msgid "Fiscal Position"
-msgstr "재정 위치"
+msgstr "재정 포지션"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__fiscal_position_id
@@ -2808,8 +2784,8 @@ msgid ""
 "Fiscal positions are used to adapt taxes and accounts for particular "
 "customers or sales orders/invoices.The default value comes from the customer."
 msgstr ""
-"재정 위치는 특정 고객이나 판매주문서/청구서용으로 세금 및 계정을 조정할 때 사"
-"용합니다. 기본값은 고객 정보에서 가져옵니다."
+"재정 포지션은 특정 고객이나 판매주문서/청구서용으로 세금 및 계정을 조정할 때 "
+"사용합니다. 기본값은 고객 정보에서 가져옵니다."
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_discount__discount_type__amount
@@ -2952,7 +2928,7 @@ msgstr "주문이 확인되었습니다"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__show_update_fpos
 msgid "Has Fiscal Position Changed"
-msgstr "재정 위치가 변경되었습니다."
+msgstr "재정 포지션이 변경되었습니다."
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__has_message
@@ -4258,7 +4234,7 @@ msgstr "품목 가격이 다시 계산되었습니다."
 #. odoo-python
 #: code:addons/sale/models/sale_order.py:0
 msgid "Product taxes have been recomputed according to fiscal position %s."
-msgstr "품목 관련 세금이 재정 위치 %s 기준으로 다시 계산되었습니다."
+msgstr "품목 관련 세금이 재정 포지션 %s 기준으로 다시 계산되었습니다."
 
 #. module: sale
 #: model:ir.actions.act_window,name:sale.product_template_action
@@ -4465,7 +4441,7 @@ msgstr "이 가격표를 기준하여 모든 가격 재계산"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Recompute all taxes based on this fiscal position"
-msgstr "이 재정 상태를 기준으로 모든 세금 내역을 다시 계산합니다."
+msgstr "이 재정 포지션을 기준으로 모든 세금 내역을 다시 계산합니다."
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__origin
@@ -5652,7 +5628,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid ""
 "This will update all taxes based on the currently selected fiscal position."
-msgstr "현재 설정된 재정 위치를 기준으로 모든 세금을 업데이트합니다."
+msgstr "현재 설정된 재정 포지션을 기준으로 모든 세금을 업데이트합니다."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -5914,9 +5890,14 @@ msgstr ""
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__validity_date
 msgid ""
-"Validity of the order, after that you will not able to sign & pay the "
-"quotation."
-msgstr "주문의 유효 기간이 지나면 견적서에 서명하고 결제할 수 없습니다."
+"Validity of the quotation. After this date, you will no longer be able to "
+"sign and pay it."
+msgstr ""
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
+msgid "Values set here are company-specific."
+msgstr "회사별로 다르게 설정됩니다."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -6044,15 +6025,6 @@ msgstr "확정된 주문의 가격표는 변경할 수 없습니다!"
 
 #. module: sale
 #. odoo-python
-#: code:addons/sale/models/product_product.py:0
-#: code:addons/sale/models/product_template.py:0
-msgid ""
-"You cannot change the product's type because it is already used in sales "
-"orders."
-msgstr "품목 유형을 변경할 수 없습니다. 판매주문서에서 이미 사용 중입니다."
-
-#. module: sale
-#. odoo-python
 #: code:addons/sale/models/sale_order_line.py:0
 msgid ""
 "You cannot change the type of a sale order line. Instead you should delete "
@@ -6084,6 +6056,16 @@ msgid ""
 msgstr ""
 "판매 또는 구매할 품목을 반드시 모두 지정해야 합니다.\n"
 "                저장 가능 품목이나 소모품, 서비스 중에서 지정하세요."
+
+#. module: sale
+#. odoo-python
+#: code:addons/sale/models/product_product.py:0
+#: code:addons/sale/models/product_template.py:0
+msgid ""
+"You should not change the product type because this product is already used "
+"in sales orders. Changing it may affect how the related order lines are "
+"delivered."
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.portal_my_home_sale
@@ -6210,6 +6192,12 @@ msgid "units"
 msgstr "단위"
 
 #. module: sale
+#. odoo-javascript
+#: code:addons/sale/static/src/xml/sale_product_field.xml:0
+msgid "x"
+msgstr "x"
+
+#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
 msgid "you confirm acceptance on the behalf of"
 msgstr " 귀하는 다음을 대신하여 동의함을 확인합니다."
@@ -6245,3 +6233,29 @@ msgid ""
 msgstr ""
 "{{ object.company_id.name }} {{ object.type_name }} Cancelled (Ref "
 "{{ object.name or 'n/a' }})"
+
+#~ msgid ""
+#~ "Validity of the order, after that you will not able to sign & pay the "
+#~ "quotation."
+#~ msgstr "주문의 유효 기간이 지나면 견적서에 서명하고 결제할 수 없습니다."
+
+#~ msgid ""
+#~ "You cannot change the product's type because it is already used in sales "
+#~ "orders."
+#~ msgstr "품목 유형을 변경할 수 없습니다. 판매주문서에서 이미 사용 중입니다."
+
+#~ msgid "2023-12-31"
+#~ msgstr "2023-12-31"
+
+#~ msgid "27.00"
+#~ msgstr "27.00"
+
+#~ msgid "31.05"
+#~ msgstr "31.05"
+
+#~ msgid ""
+#~ "<span class=\"fa fa-lg fa-building-o p-2\" title=\"Values set here are "
+#~ "company-specific.\" groups=\"base.group_multi_company\"/>"
+#~ msgstr ""
+#~ "<span class=\"fa fa-lg fa-building-o p-2\" title=\"Values set here are "
+#~ "company-specific.\" groups=\"base.group_multi_company\"/>"

@@ -32,13 +32,14 @@
 # Wil Odoo, 2025
 # Jessica Jakara, 2025
 # myacc-pro, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Odoo Translation Bot <c3p@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-12 18:38+0000\n"
-"PO-Revision-Date: 2025-11-11 17:26+0000\n"
+"POT-Creation-Date: 2026-07-31 17:39+0000\n"
+"PO-Revision-Date: 2026-11-11 18:33+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Lithuanian <https://translate.odoo.com/projects/odoo-18/"
 "website/lt/>\n"
@@ -47,9 +48,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < "
-"11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? "
-"1 : n % 1 != 0 ? 2: 3);\n"
-"X-Generator: Weblate 5.12.2\n"
+"11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 "
+": n % 1 != 0 ? 2: 3);\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website
 #. odoo-javascript
@@ -117,6 +118,9 @@ msgid ""
 "\"Homepage URL\" field in the website settings or the page properties on any "
 "custom page."
 msgstr ""
+"„URL į“ negalima nustatyti kaip „/“. Norėdami pakeisti pagrindinio puslapio "
+"turinį, naudokite lauką „Pagrindinio puslapio URL“ svetainės nustatymuose "
+"arba bet kurio pasirinktinio puslapio savybių lange."
 
 #. module: website
 #. odoo-python
@@ -188,96 +192,11 @@ msgid "$ 32M"
 msgstr ""
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$1.50"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$12.00"
-msgstr "$12.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$13.00"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$13.50"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$14.50"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$15.00"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$16.00"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$25.00"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$26.00"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$28.00"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$3.00"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$3.50"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$4.00"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$4.10"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$4.25"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$4.50"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$5.00"
-msgstr ""
-
-#. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/components/views/page_list.js:0
 msgid "%s record(s) selected, are you sure you want to publish them all?"
 msgstr ""
+"%s Pasirinkta (-os) įrašas (-ai), ar tikrai norite juos visus paskelbti?"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -333,35 +252,6 @@ msgid "+ New Website"
 msgstr ""
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.footer_custom
-#: model_terms:ir.ui.view,arch_db:website.template_footer_centered
-#: model_terms:ir.ui.view,arch_db:website.template_footer_contact
-#: model_terms:ir.ui.view,arch_db:website.template_footer_descriptive
-#: model_terms:ir.ui.view,arch_db:website.template_footer_headline
-msgid "+1 555-555-5556"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.template_footer_links
-msgid "+1 555-555-5556\""
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_masonry_block_mosaic_template
-msgid "+12"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_contact_info
-msgid "+1555-555-5556"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
-msgid "+25.000"
-msgstr ""
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.show_website_info
 msgid ", author:"
 msgstr ", autorius:"
@@ -383,44 +273,9 @@ msgid "/contactus"
 msgstr "/susisiekite_su_mumis"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_key_images
-msgid "01"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_key_images
-msgid "02"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_key_images
-msgid "03"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_key_images
-msgid "04"
-msgstr ""
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "1 km"
 msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_media_list_options
-msgid "1/2 - 1/2"
-msgstr "1/2 - 1/2"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_media_list_options
-msgid "1/3 - 2/3"
-msgstr "1/3 - 2/3"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_media_list_options
-msgid "1/4 - 3/4"
-msgstr "1/4 - 3/4"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
@@ -438,20 +293,9 @@ msgid "100 m"
 msgstr ""
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_hr_options
-#: model_terms:ir.ui.view,arch_db:website.snippet_options
-msgid "100%"
-msgstr "100%"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "1000 km"
 msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_image_gallery_options
-msgid "12"
-msgstr "12"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_showcase
@@ -462,11 +306,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "15 km"
 msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_countdown
-msgid "16"
-msgstr "16"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -504,11 +343,6 @@ msgid "2000 km"
 msgstr ""
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_masonry_block_mosaic_template
-msgid "22%"
-msgstr ""
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features_wave
 msgid "24/7 Customer Support"
 msgstr ""
@@ -517,13 +351,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid "24/7 Support"
 msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
-#: model_terms:ir.ui.view,arch_db:website.s_hr_options
-#: model_terms:ir.ui.view,arch_db:website.snippet_options
-msgid "25%"
-msgstr "25%"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_links
@@ -537,11 +364,6 @@ msgstr ""
 msgid ""
 "250 Executive Park Blvd, Suite 3400 • San Francisco CA 94134 • United States"
 msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_countdown
-msgid "30"
-msgstr "30"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
@@ -601,16 +423,6 @@ msgid "404 Not Found"
 msgstr "404 Puslapis nerastas"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_countdown
-msgid "45"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_numbers_showcase
-msgid "45%"
-msgstr ""
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "5 m"
 msgstr ""
@@ -624,12 +436,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "50 m"
 msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_hr_options
-#: model_terms:ir.ui.view,arch_db:website.snippet_options
-msgid "50%"
-msgstr "50%"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cta_card
@@ -653,13 +459,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_cta_mockups
 msgid "50,000+ companies trust Odoo."
 msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_hr_options
-#: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
-#: model_terms:ir.ui.view,arch_db:website.snippet_options
-msgid "75%"
-msgstr "75%"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
@@ -703,8 +502,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/js/tours/tour_utils.js:0
 msgid "<b>Click on a snippet</b> to access its options menu."
-msgstr ""
-"<b>Paspauskite ant fragmento</b>, kad patektumėte į jo parinkčių meniu."
+msgstr "<b>Paspauskite ant fragmento</b>, kad patektumėte į jo parinkčių meniu."
 
 #. module: website
 #. odoo-javascript
@@ -737,6 +535,8 @@ msgid ""
 "<b>Customize</b> any block through this menu. Try to change the background "
 "color of this block."
 msgstr ""
+"<b>Per šį meniu galite pritaikyti bet kurį „</b> “ bloką. Pabandykite "
+"pakeisti šio bloko fono spalvą."
 
 #. module: website
 #. odoo-javascript
@@ -745,6 +545,8 @@ msgid ""
 "<b>Customize</b> any block through this menu. Try to change the background "
 "image of this block."
 msgstr ""
+"<b>Per šį meniu galite pritaikyti bet kurį „</b> “ bloką. Pabandykite "
+"pakeisti šio bloko fono paveikslėlį."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_headline
@@ -779,7 +581,7 @@ msgstr "<b>Pasirinkite</b> %s."
 #. odoo-javascript
 #: code:addons/website/static/src/js/tours/tour_utils.js:0
 msgid "<b>Select</b> a Color Palette."
-msgstr ""
+msgstr "<b>Pasirinkite „</b> “ spalvų paletę."
 
 #. module: website
 #. odoo-javascript
@@ -885,6 +687,9 @@ msgid ""
 "the steps, including setup, inventory management, and payment processing.<br/"
 ">"
 msgstr ""
+"<br/>Parduokite internetu lengvai naudodamiesi patogia platforma, kuri "
+"supaprastina visus etapus, įskaitant sąranką, inventorių ir mokėjimų "
+"apdorojimą.<br/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
@@ -902,6 +707,13 @@ msgid ""
 "preferences, adding any necessary payment information, and selecting the "
 "initial features or modules you wish to use."
 msgstr ""
+"<br/>Pirmasis prisijungimo proceso žingsnis yra „ <b>“ paskyros sukūrimas</b>"
+". Tai reiškia, kad turite užsiregistruoti mūsų platformoje naudodami savo "
+"el. pašto adresą arba socialinių tinklų paskyras. Sukūrę paskyrą, gausite "
+"patvirtinimo el. laišką su nuoroda, kuria galėsite aktyvuoti savo paskyrą. "
+"Aktyvavus paskyrą, jums bus pasiūlyta užpildyti savo profilį, įskaitant "
+"nustatymų konfigūravimą, reikiamos mokėjimo informacijos įvedimą ir pradinių "
+"funkcijų ar modulių, kuriuos norite naudoti, pasirinkimą."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_banner
@@ -918,6 +730,11 @@ msgid ""
 "staying current with updates, you can take advantage of the latest tools and "
 "features, ensuring your business remains competitive and efficient."
 msgstr ""
+"<br/>Vartotojai gali dalyvauti beta testavimo programose, teikti "
+"atsiliepimus apie būsimus atnaujinimus ir daryti įtaką platformos ateities "
+"krypčiai. Laiku atnaujinant programą, galite pasinaudoti naujausiais "
+"įrankiais ir funkcijomis, užtikrindami, kad jūsų verslas išliktų "
+"konkurencingas ir efektyvus."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_big_number
@@ -1697,6 +1514,8 @@ msgid ""
 "<span class=\"o_footer_copyright_name me-2\">Copyright &amp;copy; Company "
 "name</span>"
 msgstr ""
+"<span class=\"o_footer_copyright_name me-2\">Autorinės teisės &amp;copy; "
+"Įmonės pavadinimas</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.header_text_element
@@ -1902,7 +1721,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_controller_pages_form_view
 msgid "<span invisible=\"name_slugified\" class=\"bg-300\">...</span>"
-msgstr ""
+msgstr "<span invisible=\"name_slugified\" class=\"bg-300\">...</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_page_properties_view_form
@@ -2017,12 +1836,18 @@ msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_opening_hours
-msgid "<u>Wednesday</u><br/>8.00am-12.00am"
+msgid "<u>Wednesday</u><br/>8.00am-12.00pm"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_opening_hours
 msgid "<u>info@yourcompany.example.com</u>"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/website_loader/website_loader.xml:0
+msgid "A"
 msgstr ""
 
 #. module: website
@@ -2305,7 +2130,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_menus_logos
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_odoo_menu
 msgid "Accessories"
-msgstr ""
+msgstr "Priedai"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -2412,7 +2237,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_media_list_options
 msgid "Add Media"
-msgstr ""
+msgstr "Pridėti mediją"
 
 #. module: website
 #. odoo-javascript
@@ -3057,7 +2882,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_image_gallery_options
 #: model_terms:ir.ui.view,arch_db:website.snippet_options_carousel
 msgid "Arrows"
-msgstr ""
+msgstr "Rodyklės"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
@@ -3071,6 +2896,8 @@ msgstr ""
 #: code:addons/website/static/src/snippets/s_countdown/options.xml:0
 msgid "As promised, we will offer 4 free tickets to our next summit."
 msgstr ""
+"Kaip ir žadėta, padovanosime 4 nemokamus bilietus į mūsų kitą viršūnių "
+"susitikimą."
 
 #. module: website
 #: model:ir.model,name:website.model_ir_asset
@@ -3156,6 +2983,12 @@ msgstr "Pasiekiama svetainėje"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/components/website_loader/website_loader.xml:0
+msgid "B"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "BSgzTvR5L1GB9jriT451iTN4huVPxHmltG6T6eo"
 msgstr ""
@@ -3168,7 +3001,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_popup_options
 msgid "Backdrop"
-msgstr ""
+msgstr "Kontekstas"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_about_s_features
@@ -3188,13 +3021,13 @@ msgstr "Fonas"
 #. odoo-javascript
 #: code:addons/website/static/src/js/tours/configurator_tour.js:0
 msgid "Background Shape"
-msgstr ""
+msgstr "Fono forma"
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.background.video.xml:0
 msgid "Background video"
-msgstr ""
+msgstr "Fono vaizdo įrašas"
 
 #. module: website
 #. odoo-javascript
@@ -3565,7 +3398,7 @@ msgstr "Mygtuko pozicija"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_tabs_options
 msgid "Buttons"
-msgstr ""
+msgstr "Mygtukai"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_landing_1_s_banner
@@ -3578,6 +3411,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.view_edit_third_party_domains
 msgid "By default, the domains of the following services are already blocked:"
 msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/dialog/seo.xml:0
+#: code:addons/website/static/src/components/website_loader/website_loader.xml:0
+msgid "C"
+msgstr "C"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__cdn_url
@@ -3754,7 +3594,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Cards"
-msgstr ""
+msgstr "Kortelės"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -3782,7 +3622,7 @@ msgstr ""
 #: code:addons/website/static/src/snippets/s_dynamic_snippet_carousel/000.xml:0
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Carousel"
-msgstr ""
+msgstr "Karuselė"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -3800,7 +3640,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_quotes_carousel
 #: model_terms:ir.ui.view,arch_db:website.s_quotes_carousel_minimal
 msgid "Carousel indicator"
-msgstr ""
+msgstr "Karuselės indikatorius"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_catalog
@@ -3892,7 +3732,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_dynamic_snippet_template
 msgid "Check out what's new in our company !"
-msgstr ""
+msgstr "Sužinokite, kas naujo mūsų įmonėje!"
 
 #. module: website
 #. odoo-javascript
@@ -3969,18 +3809,20 @@ msgid ""
 "Choose a vibrant image and write an inspiring paragraph about it. It does "
 "not have to be long, but it should reinforce your image."
 msgstr ""
+"Pasirinkite išraiškingą paveikslėlį ir parašykite apie jį įkvepiantį "
+"pastraipą. Ji neturi būti ilga, bet turėtų sustiprinti paveikslėlio įspūdį."
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "Choose an anchor name"
-msgstr ""
+msgstr "Pasirinkite nuorodos pavadinimą"
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "Choose from list"
-msgstr ""
+msgstr "Pasirinkite iš sąrašo"
 
 #. module: website
 #. odoo-javascript
@@ -4036,12 +3878,16 @@ msgid ""
 "elements right on the page, streamlining your workflow and maintaining "
 "control over your content."
 msgstr ""
+"Spustelėkite ir keiskite turinį tiesiogiai iš vartotojo sąsajos, išvengdami "
+"sudėtingų užkulisių procesų. Šis įrankis leidžia greitai atnaujinti tekstą, "
+"vaizdus ir elementus tiesiogiai puslapyje, supaprastindamas jūsų darbo eigą "
+"ir užtikrindamas turinio kontrolę."
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/js/tours/tour_utils.js:0
 msgid "Click here to go back to block tab."
-msgstr ""
+msgstr "Spustelėkite čia, kad grįžtumėte į skilties skirtuką."
 
 #. module: website
 #. odoo-javascript
@@ -4186,6 +4032,10 @@ msgid ""
 "resize and duplicate the blocks to create your own layout. Add images or "
 "icons to customize the blocks."
 msgstr ""
+"Spalvų blokai yra paprastas ir veiksmingas būdas <b>pateikti ir išryškinti "
+"savo turinį</b>. Pasirinkite paveikslėlį arba spalvą fonui. Galite netgi "
+"keisti blokų dydį ir juos kopijuoti, kad sukurtumėte savo išdėstymą. "
+"Pridėkite paveikslėlių ar piktogramų, kad pritaikytumėte blokus."
 
 #. module: website
 #. odoo-javascript
@@ -4219,6 +4069,8 @@ msgid ""
 "Comma-separated list of website type/purpose for which this feature should "
 "be pre-selected"
 msgstr ""
+"Kableliais atskirtas sąrašas svetainių tipų ir paskirties, kurioms ši "
+"funkcija turėtų būti iš anksto pasirinkta"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_masonry_block_default_template
@@ -4465,7 +4317,7 @@ msgstr "Turinio pristatymo tinklas (CDN)"
 #: model_terms:ir.ui.view,arch_db:website.s_carousel_intro_options
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Content Width"
-msgstr ""
+msgstr "Turinio plotis"
 
 #. module: website
 #. odoo-javascript
@@ -4728,6 +4580,8 @@ msgid ""
 "Created in 2021, the company is young and dynamic. Discover the composition "
 "of the team and their skills."
 msgstr ""
+"Įkurta 2021 m., įmonė yra jauna ir dinamiška. Susipažinkite su komandos "
+"sudėtimi ir jos narių įgūdžiais."
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_theme_ir_asset__create_date
@@ -4875,6 +4729,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:website.field_theme_ir_ui_view__customize_show
 msgid "Customize Show"
 msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/dialog/seo.xml:0
+#: model_terms:ir.ui.view,arch_db:website.s_countdown_options
+msgid "D"
+msgstr "D"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
@@ -5342,7 +5203,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_images_mosaic
 msgid "Discover our latest solutions for your business."
-msgstr ""
+msgstr "Atraskite mūsų naujausius sprendimus jūsų verslui."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_big_icons_subtitles
@@ -5363,7 +5224,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_images_subtitles
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 msgid "Discover our team"
-msgstr ""
+msgstr "Susipažinkite su mūsų komanda"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
@@ -6156,6 +6017,9 @@ msgid ""
 "Experience the power of our software without breaking the bank – choose a "
 "plan that suits you best and start unlocking its full potential today."
 msgstr ""
+"Išbandykite mūsų programinės įrangos galimybes neišleidžiant daug pinigų – "
+"pasirinkite jums labiausiai tinkantį planą ir jau šiandien pradėkite "
+"išnaudoti visą jos potencialą."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_intro_pill
@@ -6169,6 +6033,9 @@ msgid ""
 "enhancing<br/>technology with this latest innovation, crafted to elevate "
 "every athlete's journey."
 msgstr ""
+"Patirkite neprilygstamą komfortą, pažangiausią dizainą ir našumą didinančią "
+"„<br/>“ technologiją su šia naujausia inovacija, sukurta siekiant pagerinti "
+"kiekvieno sportininko kelionę."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_framed_intro
@@ -6258,6 +6125,8 @@ msgstr ""
 msgid ""
 "Explore our curated selection of coffee, tea, and more. Delight in every sip!"
 msgstr ""
+"Atraskite mūsų kruopščiai atrinktą kavos, arbatos ir kitų produktų "
+"asortimentą. Mėgaukitės kiekvienu gurkšniu!"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_showcase
@@ -6439,7 +6308,7 @@ msgstr "Laukas"
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_snippet_filter__field_names
 msgid "Field Names"
-msgstr ""
+msgstr "Laukų pavadinimai"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_ir_model__website_form_default_field_id
@@ -6651,7 +6520,7 @@ msgstr "Sekite mus"
 #: model_terms:ir.ui.view,arch_db:website.template_footer_links
 #: model_terms:ir.ui.view,arch_db:website.template_footer_minimalist
 msgid "Follow us"
-msgstr ""
+msgstr "Sekite mus"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -6684,13 +6553,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/js/editor/snippets.options.js:0
 msgid "Font name already used"
-msgstr ""
+msgstr "Šrifto pavadinimas jau naudojamas"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_theme_website_page__footer_visible
 #: model:ir.model.fields,field_description:website.field_website_page__footer_visible
 msgid "Footer Visible"
-msgstr ""
+msgstr "Matomas apačios antraštė"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -6996,7 +6865,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/components/views/theme_preview.xml:0
 msgid "Go Back"
-msgstr ""
+msgstr "Grįžti atgal"
 
 #. module: website
 #. odoo-javascript
@@ -7007,7 +6876,7 @@ msgstr "Eiti į"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus_thanks_ir_ui_view
 msgid "Go to Homepage"
-msgstr ""
+msgstr "Eiti į pagrindinį puslapį"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.view_view_form_extend
@@ -7072,6 +6941,7 @@ msgstr "Google Analytics raktas"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
+#: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Google Map"
 msgstr "Google žemėlapis"
 
@@ -7079,6 +6949,14 @@ msgstr "Google žemėlapis"
 #: model:ir.model.fields,field_description:website.field_website__google_maps_api_key
 msgid "Google Maps API Key"
 msgstr "Google Maps API raktas"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/js/editor/snippets.editor.js:0
+msgid ""
+"Google Maps configuration has changed. Please reload the page for changes to "
+"take effect."
+msgstr ""
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__has_google_search_console
@@ -7285,7 +7163,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website.field_theme_website_page__header_visible
 #: model:ir.model.fields,field_description:website.field_website_page__header_visible
 msgid "Header Visible"
-msgstr ""
+msgstr "Matomas antraštės tekstas"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -7524,7 +7402,7 @@ msgstr "Namų puslapis"
 #: model:ir.model.fields,field_description:website.field_res_config_settings__website_homepage_url
 #: model:ir.model.fields,field_description:website.field_website__homepage_url
 msgid "Homepage Url"
-msgstr ""
+msgstr "Pagrindinio puslapio URL"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_menus_logos
@@ -7605,6 +7483,9 @@ msgid ""
 "skills, coupled with effective communication, enable me to lead cross-"
 "functional teams to success."
 msgstr ""
+"Esu „full-stack“ programuotojas, turintis vadybos patirties. Mano "
+"analitiniai įgūdžiai, kartu su veiksmingu bendravimu, leidžia man vadovauti "
+"įvairių sričių komandoms ir pasiekti sėkmę."
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_theme_ir_asset__id
@@ -8017,7 +7898,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Inline"
-msgstr ""
+msgstr "Tekste"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
@@ -8306,7 +8187,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_page_properties_base_view_form
 msgid "Is Homepage"
-msgstr ""
+msgstr "Ar tai pagrindinis puslapis"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_pages_tree_view
@@ -8458,6 +8339,9 @@ msgid ""
 "It's time to elevate your fitness journey with coaching that's as unique as "
 "you are. Choose your path, embrace the guidance, and transform your life."
 msgstr ""
+"Atėjo laikas pakelti savo fitneso kelionę į naują lygį su treniravimu, kuris "
+"yra toks pat unikalus kaip ir jūs. Pasirinkite savo kelią, pasinaudokite "
+"patarimais ir pakeiskite savo gyvenimą."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -8635,7 +8519,7 @@ msgstr "Kalba"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Language Selector"
-msgstr ""
+msgstr "Kalbos pasirinkimas"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_visitor__lang_id
@@ -8772,18 +8656,18 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_timeline
 msgid "Latest Feature"
-msgstr ""
+msgstr "Naujausia funkcija"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_timeline
 msgid "Latest news"
-msgstr ""
+msgstr "Naujausios naujienos"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_big_icons_subtitles
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_images_subtitles
 msgid "Latests news and case studies"
-msgstr ""
+msgstr "Naujausios naujienos ir atvejų analizės"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
@@ -8804,12 +8688,12 @@ msgstr "Išdėstymas"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
 msgid "Layout Background"
-msgstr ""
+msgstr "Išdėstymo fonas"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
 msgid "Layout Background Color"
-msgstr ""
+msgstr "Fono spalva"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -9292,7 +9176,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_media_list_options
 msgid "Media"
-msgstr ""
+msgstr "Žiniasklaida"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -9356,7 +9240,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_menu_image_menu
 msgid "Mega menu default image"
-msgstr ""
+msgstr "Mega meniu numatytasis paveikslėlis"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_menus_logos
@@ -9716,7 +9600,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Move Backward"
-msgstr ""
+msgstr "Grįžti atgal"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -9824,7 +9708,7 @@ msgstr "Pavadinimas (A-Z)"
 #. odoo-javascript
 #: code:addons/website/static/src/js/backend/view_hierarchy/hierarchy_navbar.xml:0
 msgid "Name, id or key"
-msgstr ""
+msgstr "Pavadinimas, identifikatorius arba raktas"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -10237,7 +10121,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "On Hover"
-msgstr ""
+msgstr "Pele užvedus"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -10329,8 +10213,8 @@ msgid ""
 "(<xpath/>) are applied, and the result is used as if it were this view's\n"
 "actual arch.\n"
 msgstr ""
-"Galioja tik jei šis rodinys paveldimas iš kito (inherit_id nėra False/"
-"Null).\n"
+"Galioja tik jei šis rodinys paveldimas iš kito (inherit_id nėra False/Null)"
+".\n"
 "\n"
 "* Jei plėtinys (standartiškai), jei šis rodinys yra užklausiamas, tikrinamas "
 "artimiausias\n"
@@ -10559,7 +10443,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_list
 msgid "Our finest selection"
-msgstr ""
+msgstr "Mūsų geriausias pasirinkimas"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_table_of_content
@@ -10581,7 +10465,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_dynamic_snippet_template
 msgid "Our latest content"
-msgstr ""
+msgstr "Mūsų naujausias turinys"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_about_s_three_columns
@@ -10721,7 +10605,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Overlay"
-msgstr ""
+msgstr "Perklotė"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -10898,8 +10782,8 @@ msgid ""
 "Paragraph with <strong>bold</strong>, <span class=\"text-muted\">muted</"
 "span> and <em>italic</em> texts"
 msgstr ""
-"Pastraipa su <strong>pastorintu</strong>, <span class=\"text-"
-"muted\">išblukusiu</span> ir <em>pasviru</em> tekstais"
+"Pastraipa su <strong>pastorintu</strong>, <span class=\"text-muted\">"
+"išblukusiu</span> ir <em>pasviru</em> tekstais"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
@@ -11037,7 +10921,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_tabs_options
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Pills"
-msgstr ""
+msgstr "Tabletės"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_share
@@ -11052,7 +10936,7 @@ msgstr "Vietaženklis"
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Places API"
+msgid "Places API (NEW)"
 msgstr ""
 
 #. module: website
@@ -11161,7 +11045,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
 msgid "Preset"
-msgstr ""
+msgstr "Iš anksto nustatyta"
 
 #. module: website
 #. odoo-javascript
@@ -11314,6 +11198,9 @@ msgid ""
 "Proficient in backend development, specializing in Python, Django, and "
 "database management to create efficient and scalable solutions."
 msgstr ""
+"Puikiai išmano backend programavimą, specializuojasi Python, Django ir "
+"duomenų bazių valdymo srityse, siekdamas kurti efektyvius ir mastelio "
+"keitimui pritaikytus sprendimus."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_tabs
@@ -11416,7 +11303,7 @@ msgstr ""
 #. module: website
 #: model:website.configurator.feature,description:website.feature_module_event
 msgid "Publish on-site and online events"
-msgstr ""
+msgstr "Skelbkite renginius vietoje ir internete"
 
 #. module: website
 #. odoo-javascript
@@ -11550,7 +11437,7 @@ msgstr "Santykis"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Re-order"
-msgstr ""
+msgstr "Pakeisti tvarką"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_masonry_block_default_template
@@ -11862,7 +11749,7 @@ msgstr ""
 #: model:ir.model.fields,help:website.field_website_published_multi_mixin__website_id
 #: model:ir.model.fields,help:website.field_website_snippet_filter__website_id
 msgid "Restrict to a specific website."
-msgstr ""
+msgstr "Apriboti iki konkrečios svetainės."
 
 #. module: website
 #: model:res.groups,name:website.group_website_restricted_editor
@@ -12257,12 +12144,12 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_dynamic_snippet_template
 msgid "See All"
-msgstr ""
+msgstr "Peržiūrėti viską"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_dynamic_snippet_template
 msgid "See all <i class=\"fa fa-long-arrow-right ms-2\"/>"
-msgstr ""
+msgstr "Peržiūrėti viską <i class=\"fa fa-long-arrow-right ms-2\"/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cta_badge
@@ -12285,7 +12172,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "Select a Google Font..."
-msgstr ""
+msgstr "Pasirinkite „Google Font“ šriftą..."
 
 #. module: website
 #. odoo-javascript
@@ -12296,12 +12183,13 @@ msgstr "Pasirinkite paveikslėlį pasidalijimui"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features_grid
 msgid "Select and delete blocks to remove features."
-msgstr ""
+msgstr "Pasirinkite ir ištrinkite blokus, kad pašalintumėte funkcijas."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_process_steps
 msgid "Select and delete blocks to remove some steps."
 msgstr ""
+"Pasirinkite ir ištrinkite blokus, kad pašalintumėte kai kuriuos žingsnius."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
@@ -12311,7 +12199,7 @@ msgstr "Pasirinkimas"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
 msgid "Selection type"
-msgstr ""
+msgstr "Pasirinkimo tipas"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_text_cover
@@ -12842,9 +12730,15 @@ msgid "Sourdough Bread"
 msgstr ""
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/dialog/edit_menu.xml:0
+msgid "Spaces are not allowed in URL."
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Spacing"
-msgstr ""
+msgstr "Tarpai"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.grid_layout_options
@@ -12863,6 +12757,9 @@ msgid ""
 "talks on various topics. Stay on top of the latest business management "
 "trends &amp; technologies"
 msgstr ""
+"Pranešėjai iš viso pasaulio prisijungs prie mūsų ekspertų, kad pateiktų "
+"įkvepiančius pranešimus įvairiomis temomis. Būkite informuoti apie "
+"naujausias verslo vadybos tendencijas &amp; technologijas"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website__specific_user_account
@@ -12910,7 +12807,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_menus_logos
 msgid "Spring collection has arrived!"
-msgstr ""
+msgstr "Pavasario kolekcija jau čia!"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_card_options
@@ -12953,7 +12850,7 @@ msgstr "Pradėti dabar"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_banner
 msgid "Start Now <span class=\"fa fa-angle-right ms-2\"/>"
-msgstr ""
+msgstr "Pradėti <span class=\"fa fa-angle-right ms-2\"/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_card_offset
@@ -12983,6 +12880,8 @@ msgid ""
 "Stay informed of our latest news and discover what will happen in the next "
 "weeks."
 msgstr ""
+"Būkite informuoti apie mūsų naujausias naujienas ir sužinokite, kas vyks per "
+"artimiausias savaites."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_picture
@@ -13116,7 +13015,7 @@ msgstr "Pateikti"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_list
 msgid "Subtle"
-msgstr ""
+msgstr "Subtilus"
 
 #. module: website
 #. odoo-javascript
@@ -13168,6 +13067,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/js/editor/snippets.options.js:0
 msgid "System Fonts"
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/dialog/seo.xml:0
+msgid "T"
 msgstr ""
 
 #. module: website
@@ -13335,7 +13240,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Text Color"
-msgstr ""
+msgstr "Teksto spalva"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -13379,7 +13284,7 @@ msgstr "Ačiū!"
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website_form_editor.xml:0
 msgid "Thank you for your feedback!"
-msgstr ""
+msgstr "Dėkojame už jūsų atsiliepimą!"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mockup_image
@@ -13390,13 +13295,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/snippets/s_instagram_page/options.js:0
 msgid "The Instagram page name is not valid"
-msgstr ""
+msgstr "„Instagram“ puslapio pavadinimas yra neteisingas"
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "The chosen name already exists"
-msgstr ""
+msgstr "Pasirinktas vardas jau egzistuoja"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_landing_s_showcase
@@ -13499,6 +13404,7 @@ msgstr "Pilnas URL serverio veiksmo pasiekimui per svetainę."
 #: code:addons/website/models/website.py:0
 msgid "The homepage URL should be relative and start with '/'."
 msgstr ""
+"Pagrindinio puslapio URL turėtų būti santykinis ir prasidėti simboliu „/“."
 
 #. module: website
 #. odoo-javascript
@@ -13578,7 +13484,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/js/editor/snippets.options.js:0
 msgid "The selected font cannot be accessed."
-msgstr ""
+msgstr "Pasirinkto šrifto negalima atidaryti."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.qweb_500
@@ -13589,7 +13495,7 @@ msgstr "Pasirinkti šablonai bus atstatyti į gamyklinius parametrus."
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_images_subtitles
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 msgid "The team"
-msgstr ""
+msgstr "Komanda"
 
 #. module: website
 #. odoo-javascript
@@ -13828,7 +13734,7 @@ msgstr ""
 #. module: website
 #: model:ir.ui.view,website_meta_description:website.homepage
 msgid "This is the homepage of the website"
-msgstr ""
+msgstr "Tai yra svetainės pagrindinis puslapis"
 
 #. module: website
 #. odoo-python
@@ -13929,7 +13835,7 @@ msgstr "Miniatiūros"
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_odoo_menu
 #: model_terms:ir.ui.view,arch_db:website.s_social_media
 msgid "TikTok"
-msgstr ""
+msgstr "„TikTok“"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website__social_tiktok
@@ -14237,7 +14143,7 @@ msgstr "Išversti atributą"
 #. odoo-javascript
 #: code:addons/website/static/src/components/translator/translator.js:0
 msgid "Translate Selection Option"
-msgstr ""
+msgstr "Pasirinkto teksto vertimo parinktis"
 
 #. module: website
 #. odoo-javascript
@@ -14443,7 +14349,7 @@ msgstr "Nepaskelbtas"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_visitor_view_search
 msgid "Unregistered"
-msgstr ""
+msgstr "Neregistruotas"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -14548,6 +14454,8 @@ msgstr ""
 #: code:addons/website/static/src/components/fields/fields.js:0
 msgid "Use an array to list the images to use in the radio selection."
 msgstr ""
+"Naudokite masyvą, kad išvardytumėte paveikslėlius, kuriuos norite naudoti "
+"radijo pasirinkime."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.theme_view_kanban
@@ -14868,7 +14776,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website.field_website_visitor__page_ids
 #: model_terms:ir.ui.view,arch_db:website.website_visitor_view_kanban
 msgid "Visited Pages"
-msgstr ""
+msgstr "Apsilankytos puslapiai"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_visitor__website_track_ids
@@ -14968,6 +14876,9 @@ msgid ""
 "We also provide regular updates and new features based on user feedback, "
 "ensuring that our platform continues to evolve to meet your needs."
 msgstr ""
+"Taip pat reguliariai teikiame atnaujinimus ir naujas funkcijas, remdamiesi "
+"vartotojų atsiliepimais, užtikrindami, kad mūsų platforma toliau tobulėtų ir "
+"atitiktų jūsų poreikius."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.footer_custom
@@ -14998,7 +14909,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_progress_bar
 msgid "We are almost done!"
-msgstr ""
+msgstr "Beveik baigėme!"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -15006,6 +14917,9 @@ msgid ""
 "We are committed to continuous improvement, regularly releasing updates and "
 "new features based on user feedback and technological advancements."
 msgstr ""
+"Esame įsipareigoję nuolat tobulėti, reguliariai išleisdami atnaujinimus ir "
+"naujas funkcijas, remdamiesi vartotojų atsiliepimais ir technologiniais "
+"pasiekimais."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -15114,6 +15028,9 @@ msgid ""
 "We offer cutting-edge products and services to tackle modern challenges. "
 "Leveraging the latest technology, we help you achieve your goals."
 msgstr ""
+"Siūlome pažangiausius produktus ir paslaugas, padedančius įveikti "
+"šiuolaikinius iššūkius. Pasinaudodami naujausiomis technologijomis, padedame "
+"jums pasiekti užsibrėžtus tikslus."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
@@ -15185,6 +15102,10 @@ msgid ""
 "provided. Our team is here to help and will respond as soon as possible. "
 "Thank you for getting in touch!"
 msgstr ""
+"Mums būtų malonu išgirsti jūsų nuomonę! Jei turite klausimų, pastabų ar "
+"reikalinga pagalba, nedvejodami susisiekite su mumis naudodamiesi pateiktais "
+"kontaktiniais duomenimis. Mūsų komanda yra pasiruošusi padėti ir atsakys kuo "
+"greičiau. Dėkojame už susisiekimą!"
 
 #. module: website
 #. odoo-javascript
@@ -15246,7 +15167,7 @@ msgstr "Svetainės įmonė"
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_configurator_feature__website_config_preselection
 msgid "Website Config Preselection"
-msgstr ""
+msgstr "Išankstinis svetainės konfigūracijos pasirinkimas"
 
 #. module: website
 #: model:ir.actions.client,name:website.website_configurator
@@ -15692,8 +15613,29 @@ msgid ""
 msgstr ""
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/snippets/s_social_media/options.js:0
+#: model_terms:ir.ui.view,arch_db:website.footer_custom
+#: model_terms:ir.ui.view,arch_db:website.header_social_links
+#: model_terms:ir.ui.view,arch_db:website.s_mega_menu_odoo_menu
+#: model_terms:ir.ui.view,arch_db:website.s_references_social
+#: model_terms:ir.ui.view,arch_db:website.s_share
+#: model_terms:ir.ui.view,arch_db:website.s_social_media
+#: model_terms:ir.ui.view,arch_db:website.snippet_options
+#: model_terms:ir.ui.view,arch_db:website.template_footer_centered
+#: model_terms:ir.ui.view,arch_db:website.template_footer_headline
+#: model_terms:ir.ui.view,arch_db:website.template_footer_links
+msgid "X"
+msgstr "X"
+
+#. module: website
 #: model:ir.model.fields,field_description:website.field_website__social_twitter
 msgid "X Account"
+msgstr ""
+
+#. module: website
+#: model_terms:ir.ui.view,arch_db:website.snippet_options
+msgid "Y"
 msgstr ""
 
 #. module: website
@@ -15719,11 +15661,17 @@ msgid ""
 "                            Each browser is a little different, so look at "
 "your browser's Help menu to learn the correct way to modify your cookies."
 msgstr ""
+"Galite pasirinkti, kad kompiuteris įspėtų jus kiekvieną kartą, kai "
+"siunčiamas slapukas, arba galite išjungti visus slapukus.\n"
+"                            Kiekviena naršyklė šiek tiek skiriasi, todėl "
+"peržiūrėkite savo naršyklės „Pagalba“ meniu, kad sužinotumėte, kaip "
+"teisingai keisti slapukų nustatymus."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features_grid
 msgid "You can edit colors and backgrounds to highlight features."
 msgstr ""
+"Galite redaguoti spalvas ir fonus, kad išryškintumėte tam tikras savybes."
 
 #. module: website
 #. odoo-python
@@ -15746,6 +15694,9 @@ msgid ""
 "chat on our website. Our dedicated team is available 24/7 to assist with any "
 "inquiries or issues."
 msgstr ""
+"Su mūsų klientų aptarnavimo komanda galite susisiekti el. paštu "
+"info@mededu.lt, telefonu ﻿﻿+370 686 99731. Mūsų komanda pasirengusi atsakyti į "
+"jūsų klausimus ir padėti išspręsti kilusias problemas."
 
 #. module: website
 #. odoo-javascript
@@ -15773,6 +15724,8 @@ msgid ""
 "You cannot delete this website menu as this serves as the default parent "
 "menu for new websites (e.g., /shop, /event, ...)."
 msgstr ""
+"Šio svetainės meniu negalima ištrinti, nes jis veikia kaip numatytasis "
+"pagrindinis meniu naujoms svetainėms (pvz., /shop, /event, ...)."
 
 #. module: website
 #. odoo-javascript
@@ -16105,6 +16058,8 @@ msgid ""
 "cite, testimonials, endorsements, reviews, feedback, statements, references, "
 "sayings, comments, appreciations, citations"
 msgstr ""
+"cituoti, atsiliepimai, rekomendacijos, apžvalgos, grįžtamasis ryšys, "
+"pareiškimai, nuorodos, posakiai, komentarai, įvertinimai, citatos"
 
 #. module: website
 #. odoo-javascript
@@ -16303,7 +16258,7 @@ msgstr "eMokymas"
 #. odoo-python
 #: code:addons/website/controllers/form.py:0
 msgid "email"
-msgstr ""
+msgstr "el. paštas"
 
 #. module: website
 #. odoo-javascript
@@ -16524,6 +16479,9 @@ msgid ""
 "history, story, events, milestones, chronology, sequence, progression, "
 "achievements, changelog, updates, announcements, recent, latest"
 msgstr ""
+"istorija, pasakojimas, įvykiai, svarbiausi įvykiai, chronologija, seka, "
+"raida, pasiekimai, pakeitimų sąrašas, atnaujinimai, pranešimai, naujausi, "
+"paskutiniai"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -16946,3 +16904,36 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid "✽  What We Offer"
 msgstr ""
+
+#~ msgid "$12.00"
+#~ msgstr "$12.00"
+
+#~ msgid "1/2 - 1/2"
+#~ msgstr "1/2 - 1/2"
+
+#~ msgid "1/3 - 2/3"
+#~ msgstr "1/3 - 2/3"
+
+#~ msgid "1/4 - 3/4"
+#~ msgstr "1/4 - 3/4"
+
+#~ msgid "100%"
+#~ msgstr "100%"
+
+#~ msgid "12"
+#~ msgstr "12"
+
+#~ msgid "16"
+#~ msgstr "16"
+
+#~ msgid "25%"
+#~ msgstr "25%"
+
+#~ msgid "30"
+#~ msgstr "30"
+
+#~ msgid "50%"
+#~ msgstr "50%"
+
+#~ msgid "75%"
+#~ msgstr "75%"

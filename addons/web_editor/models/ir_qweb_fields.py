@@ -61,7 +61,7 @@ class IrQWeb(models.AbstractModel):
                 if len(el_children) == 1:
                     sub_call = el_children[0].get('t-call')
                     if sub_call:
-                        el_children[0].set('t-options', f"{{'snippet-key': '{snippet_key}', 'snippet-sub-call-key': '{sub_call}'}}")
+                        el_children[0].set('t-options', f"{{'snippet-key': {snippet_key!r}, 'snippet-sub-call-key': {sub_call!r}}}")
         # If it already has a data-snippet it is a saved or an
         # inherited snippet. Do not override it.
         if 'data-snippet' not in snippet_base_node.attrib:
@@ -81,7 +81,7 @@ class IrQWeb(models.AbstractModel):
         el.set('t-call', key)
         snippet_lang = self._context.get('snippet_lang')
         if snippet_lang:
-            el.set('t-lang', f"'{snippet_lang}'")
+            el.set('t-lang', repr(snippet_lang))
 
         el.set('t-options', f"{{'snippet-key': {key!r}}}")
         view = self.env['ir.ui.view']._get(key).sudo()

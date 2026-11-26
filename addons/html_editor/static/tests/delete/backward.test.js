@@ -1,8 +1,15 @@
-import { beforeEach, describe, expect, test } from "@odoo/hoot";
-import { manuallyDispatchProgrammaticEvent, microTick, press } from "@odoo/hoot-dom";
-import { animationFrame, tick } from "@odoo/hoot-mock";
-import { patchWithCleanup } from "@web/../tests/web_test_helpers";
-import { browser } from "@web/core/browser/browser";
+import {
+    animationFrame,
+    beforeEach,
+    describe,
+    expect,
+    manuallyDispatchProgrammaticEvent,
+    microTick,
+    mockUserAgent,
+    press,
+    test,
+    tick,
+} from "@odoo/hoot";
 import { setupEditor, testEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
 import { getContent, setSelection } from "../_helpers/selection";
@@ -62,6 +69,14 @@ describe("Selection collapsed", () => {
                 contentBefore: "<p>ab[]c</p>",
                 stepFunction: deleteBackward,
                 contentAfter: "<p>a[]c</p>",
+            });
+        });
+
+        test("should correctly place cursor when backspacing inside a <t> tag", async () => {
+            await testEditor({
+                contentBefore: "<p><t>ab[]c</t></p>",
+                stepFunction: deleteBackward,
+                contentAfter: "<p><t>a[]c</t></p>",
             });
         });
 
@@ -1536,6 +1551,17 @@ describe("Selection not collapsed", () => {
         });
     });
 
+    test("should convert space to nbsp", async () => {
+        await testEditor({
+            contentBefore: "<div>a<span> [b]</span></div>",
+            stepFunction: async (editor) => {
+                deleteBackward(editor);
+                await insertText(editor, "x");
+            },
+            contentAfter: "<div>a<span>&nbsp;x[]</span></div>",
+        });
+    });
+
     test("should merge node correctly (1)", async () => {
         await testEditor({
             contentBefore: '<div>a<span class="a">b[c</span><p>d]e</p>f<br>g</div>',
@@ -2066,6 +2092,14 @@ describe("Selection not collapsed", () => {
         });
     });
 
+    test("should not remove blockquote when it contains content on Backspace", async () => {
+        await testEditor({
+            contentBefore: `<blockquote><img>[]</blockquote>`,
+            stepFunction: deleteBackward,
+            contentAfter: `<blockquote>[]<br></blockquote>`,
+        });
+    });
+
     test("should delete if first element and append in paragraph (1)", async () => {
         await testEditor({
             contentBefore: `<h1><br>[]</h1>`,
@@ -2263,12 +2297,7 @@ describe("Selection not collapsed", () => {
     });
 
     describe("Android Chrome", () => {
-        beforeEach(() => {
-            patchWithCleanup(browser.navigator, {
-                userAgent:
-                    "Mozilla/5.0 (Linux; Android 10; Pixel 3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Mobile Safari/537.36",
-            });
-        });
+        beforeEach(() => mockUserAgent("android"));
 
         // This simulates the sequence of events that happens in Android Chrome
         // when pressing backspace. Some random stuff might happen, and
@@ -2333,6 +2362,148 @@ describe("Selection not collapsed", () => {
             await insertText(editor, "nderful ");
             await tick(); // Wait for the selection change to be handled
             expect(getContent(el)).toBe("<p>wonderful []</p>");
+        });
+
+        test.tags("mobile");
+        test("should not break Gboard correction", async () => {
+            const dispatch = (type, eventInit) =>
+                manuallyDispatchProgrammaticEvent(editor.editable, type, eventInit);
+            const { editor, el } = await setupEditor("<p>Gxf[]</p>");
+            // Roughly as observed on Android Chrome with Gboard:
+            // - selection change
+            // - keydown event
+            // - input deleteContentBackward
+            // - keydown event
+            // - input insertText
+            const selection = editor.document.getSelection();
+            await dispatch("keydown", { key: "Unidentified" });
+            for (let i = 0; i < 2; i++) {
+                selection.modify("extend", "backward", "character");
+            }
+            await backspaceAndroid(editor);
+            await dispatch("keydown", { key: "Unidentified" });
+            await insertText(editor, "if ");
+            await tick(); // Wait for the selection change to be handled
+            expect(getContent(el)).toBe("<p>Gif []</p>");
+        });
+
+        // This simulates the sequence of events that happens when pressing
+        // the Backspace key on the Microsoft Swiftkey keyboard on Android.
+        // The change of selection that Swiftkey is doing can be mocked
+        // differently for each case if needed.
+        const swiftkeyBackspace = async (
+            editor,
+            { mockSelectionChange } = {
+                mockSelectionChange: (selection) =>
+                    selection.modify("extend", "backward", "character"),
+            }
+        ) => {
+            const dispatch = (type, eventInit) =>
+                manuallyDispatchProgrammaticEvent(editor.editable, type, eventInit);
+            await dispatch("keydown", { key: "Unidentified" });
+            const selection = editor.document.getSelection();
+            if (selection.isCollapsed) {
+                mockSelectionChange(selection);
+            }
+            await dispatch("beforeinput", {
+                inputType: "deleteContentBackward",
+            });
+            // Swiftkey deletes the content even if the beforeinput is default prevented.
+            selection.getRangeAt(0).deleteContents();
+            await dispatch("input", { inputType: "deleteContentBackward" });
+            await dispatch("keyup", { key: "Unidentified" });
+            await animationFrame();
+        };
+
+        test.tags("mobile");
+        test("should handle tables correctly on backspace with Unidentified key", async () => {
+            const { editor, el } = await setupEditor(
+                `<table><tbody><tr><td><br></td><td>[]<br></td><td><br></td></tr><tr><td>a</td><td>b</td><td>c</td></tr></tbody></table>`
+            );
+            await swiftkeyBackspace(editor);
+            expect(getContent(el)).toBe(
+                `<table><tbody><tr><td><br></td><td>[]<br></td><td><br></td></tr><tr><td>a</td><td>b</td><td>c</td></tr></tbody></table>`
+            );
+            await tick(); // Wait for the release of the Android Chrome selection change hack, see "onAndroidChromeSelectionChange".
+            const tds = [...editor.editable.querySelectorAll("td")];
+            setSelection({
+                anchorNode: tds[4],
+                anchorOffset: 0,
+                focusNode: tds[5],
+                focusOffset: 1,
+            });
+            await tick(); // Wait for the selectionchange event.
+            expect(getContent(el)).toBe(
+                `<table class="o_selected_table"><tbody><tr><td><br></td><td><br></td><td><br></td></tr><tr><td>a</td><td class="o_selected_td">[b</td><td class="o_selected_td">c]</td></tr></tbody></table>`
+            );
+            await swiftkeyBackspace(editor);
+            expect(getContent(el)).toBe(
+                `<table><tbody><tr><td><br></td><td><br></td><td><br></td></tr><tr><td>a</td><td><p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p></td><td><p><br></p></td></tr></tbody></table>`
+            );
+        });
+
+        test.tags("mobile");
+        test("should handle lists correctly on backspace with Unidentified key", async () => {
+            const { editor, el } = await setupEditor(
+                `<ul><li>abc</li><li>[def]</li><li>ghi</li></ul>`
+            );
+            await swiftkeyBackspace(editor);
+            expect(getContent(el)).toBe(
+                `<ul><li>abc</li><li placeholder="List" class="o-we-hint">[]<br></li><li>ghi</li></ul>`
+            );
+            await swiftkeyBackspace(editor);
+            expect(getContent(el)).toBe(
+                `<ul><li>abc</li></ul><p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p><ul><li>ghi</li></ul>`
+            );
+        });
+
+        test.tags("mobile");
+        test("should remove separator on backspace with Unidentified key", async () => {
+            const { editor, el } = await setupEditor(`<p>abc</p><hr><p>[]<br></p>`);
+            expect(getContent(el)).toBe(
+                `<p>abc</p><hr contenteditable="false"><p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p>`
+            );
+            await swiftkeyBackspace(editor);
+            expect(getContent(el)).toBe(
+                `<p>abc</p><p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p>`
+            );
+        });
+
+        test.tags("mobile");
+        test("should remove separator after banner on backspace with Unidentified key", async () => {
+            const { editor, el } = await setupEditor(
+                unformat(`
+                    <p>abc</p>
+                    <div class="o_editor_banner user-select-none o-contenteditable-false lh-1 d-flex align-items-center alert alert-info pb-0 pt-3" data-oe-role="status" contenteditable="false" role="status">
+                        <i class="o_editor_banner_icon mb-3 fst-normal" data-oe-aria-label="Banner Info" aria-label="Banner Info">💡</i>
+                        <div class="o_editor_banner_content o-contenteditable-true w-100 px-3" contenteditable="true">
+                            <p placeholder='Type "/" for commands' class="o-we-hint"><br></p>
+                        </div>
+                    </div>
+                    <hr>
+                    <p>[]<br></p>
+                `)
+            );
+            await swiftkeyBackspace(editor, {
+                mockSelectionChange: (selection) => {
+                    // Swiftkey moves the selection inside of the banner because
+                    // the hr element is not editable and neither is the banner.
+                    const p = editor.editable.querySelector(".o_editor_banner_content p");
+                    selection.setPosition(p, 0);
+                },
+            });
+            expect(getContent(el)).toBe(
+                unformat(`
+                    <p>abc</p>
+                    <div class="o_editor_banner user-select-none o-contenteditable-false lh-1 d-flex align-items-center alert alert-info pb-0 pt-3" data-oe-role="status" contenteditable="false" role="status">
+                        <i class="o_editor_banner_icon mb-3 fst-normal" data-oe-aria-label="Banner Info" aria-label="Banner Info">💡</i>
+                        <div class="o_editor_banner_content o-contenteditable-true w-100 px-3" contenteditable="true">
+                            <p placeholder='Type "/" for commands' class="o-we-hint"><br></p>
+                        </div>
+                    </div>
+                    <p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p>
+                `)
+            );
         });
     });
 });

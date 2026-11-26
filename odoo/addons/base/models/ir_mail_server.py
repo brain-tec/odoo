@@ -12,9 +12,8 @@ from email.utils import make_msgid
 from socket import gaierror, timeout
 
 import idna
-import OpenSSL
-from OpenSSL import crypto as SSLCrypto
-from OpenSSL.crypto import FILETYPE_PEM
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from cryptography.x509 import load_pem_x509_certificate
 from OpenSSL.crypto import Error as SSLCryptoError
 from OpenSSL.SSL import Error as SSLError
 from urllib3.contrib.pyopenssl import PyOpenSSLContext
@@ -28,22 +27,7 @@ from odoo.tools import (
     encapsulate_email,
     formataddr,
     human_size,
-    parse_version,
 )
-
-if parse_version(OpenSSL.__version__) >= parse_version('24.3.0'):
-    from cryptography.hazmat.primitives.serialization import load_pem_private_key
-    from cryptography.x509 import load_pem_x509_certificate
-else:
-    from OpenSSL import crypto as SSLCrypto
-    from OpenSSL.crypto import FILETYPE_PEM
-    from OpenSSL.crypto import Error as SSLCryptoError
-
-    def load_pem_private_key(pem_key, password):
-        return SSLCrypto.load_privatekey(FILETYPE_PEM, pem_key)
-
-    def load_pem_x509_certificate(pem_cert):
-        return SSLCrypto.load_certificate(FILETYPE_PEM, pem_cert)
 
 
 _logger = logging.getLogger(__name__)
@@ -88,14 +72,20 @@ smtplib.SMTP._print_debug = _print_debug
 
 # Python 3: workaround for bpo-35805, only partially fixed in Python 3.8.
 RFC5322_IDENTIFICATION_HEADERS = {'message-id', 'in-reply-to', 'references', 'resent-msg-id'}
+USER_DEFINED_HEADERS = {'bcc', 'cc', 'from', 'reply-to', 'subject', 'to', 'list-unsubscribe'}
 _noFoldPolicy = email.policy.SMTP.clone(max_line_length=None)
+_maxFoldPolicy = email.policy.SMTP.clone(max_line_length=998)  # rfc5322#section-2.1.1
 class IdentificationFieldsNoFoldPolicy(email.policy.EmailPolicy):
     # Override _fold() to avoid folding identification fields, excluded by RFC2047 section 5
     # These are particularly important to preserve, as MTAs will often rewrite non-conformant
     # Message-ID headers, causing a loss of thread information (replies are lost)
+    # Also override _fold() for user-defined headers that may not fit on 78 characters,
+    # as Python's folding algorithm is unreliable and fail to handle all weird cases.
     def _fold(self, name, value, *args, **kwargs):
         if name.lower() in RFC5322_IDENTIFICATION_HEADERS:
             return _noFoldPolicy._fold(name, value, *args, **kwargs)
+        if name.lower() in USER_DEFINED_HEADERS:
+            return _maxFoldPolicy._fold(name, value, *args, **kwargs)
         return super()._fold(name, value, *args, **kwargs)
 
 # Global monkey-patch for our preferred SMTP policy, preserving the non-default linesep
@@ -206,7 +196,7 @@ class IrMailServer(models.Model):
                 server.smtp_authentication_info = _(
                     'Use the SMTP configuration set in the "Command Line Interface" arguments.')
             else:
-                server.smtp_authentication = False
+                server.smtp_authentication_info = False
 
     @api.constrains('smtp_authentication', 'smtp_ssl_certificate', 'smtp_ssl_private_key')
     def _check_smtp_ssl_files(self):
@@ -440,8 +430,9 @@ class IrMailServer(models.Model):
             # we were passed individual smtp parameters or nothing and there is no default server
             smtp_server = host or tools.config.get('smtp_server')
             smtp_port = tools.config.get('smtp_port', 25) if port is None else port
-            smtp_user = user or tools.config.get('smtp_user')
-            smtp_password = password or tools.config.get('smtp_password')
+            is_cli_server = smtp_server == tools.config.get('smtp_server') and smtp_port == tools.config.get('smtp_port', 25)
+            smtp_user = user if (user or not is_cli_server) else tools.config.get('smtp_user')
+            smtp_password = password if (password or not is_cli_server) else tools.config.get('smtp_password')
             if mail_server:
                 from_filter = mail_server.from_filter
             else:
@@ -450,8 +441,8 @@ class IrMailServer(models.Model):
             smtp_encryption = encryption
             if smtp_encryption is None and tools.config.get('smtp_ssl'):
                 smtp_encryption = 'starttls' # smtp_ssl => STARTTLS as of v7
-            smtp_ssl_certificate_filename = ssl_certificate or tools.config.get('smtp_ssl_certificate_filename')
-            smtp_ssl_private_key_filename = ssl_private_key or tools.config.get('smtp_ssl_private_key_filename')
+            smtp_ssl_certificate_filename = ssl_certificate if (ssl_certificate or not is_cli_server) else tools.config.get('smtp_ssl_certificate_filename')
+            smtp_ssl_private_key_filename = ssl_private_key if (ssl_private_key or not is_cli_server) else tools.config.get('smtp_ssl_private_key_filename')
 
             if smtp_ssl_certificate_filename and smtp_ssl_private_key_filename:
                 try:
@@ -504,6 +495,7 @@ class IrMailServer(models.Model):
         # need to change the FROM headers or not when we will prepare the mail message
         connection.from_filter = from_filter
         connection.smtp_from = smtp_from
+        connection.mail_server_name = mail_server.display_name if mail_server else smtp_server
 
         return connection
 
@@ -776,7 +768,7 @@ class IrMailServer(models.Model):
         except Exception as e:
             msg = _(
                 "Mail delivery failed via SMTP server '%(server)s'.\n%(exception_name)s: %(message)s",
-                server=smtp_server,
+                server=getattr(smtp, 'mail_server_name', smtp_server),
                 exception_name=e.__class__.__name__,
                 message=e,
             )

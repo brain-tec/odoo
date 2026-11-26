@@ -291,6 +291,61 @@ class TestBatchPicking(TransactionCase):
         self.assertFalse(sum(quant_A.mapped('quantity')))
         self.assertFalse(sum(quant_B.mapped('quantity')))
 
+    def test_batch_with_backorder_wizard_partially_done(self):
+        """ Validate a batch when only one picking has done quantities.
+            Scenario:
+            - Two pickings are auto-batched together (same partner).
+            - Only one move line in the first picking has a done quantity; the other move lines are removed.
+            - The second picking has no move lines.
+            Expectation:
+            - The backorder wizard must include only the picking with done quantities.
+            - The backorder created for that picking must NOT be linked to the batch currently being validated.
+            - The other picking must remain assigned (not validated).
+        """
+        self.env['stock.picking.type'].browse(self.picking_type_in).write({
+            'auto_batch': True,
+            'batch_group_by_partner': True
+        })
+        partner = self.env['res.partner'].create({'name': 'Supplier'})
+        pickings = self.env['stock.picking'].create([{
+            'partner_id': partner_id,
+            'picking_type_id': type_id,
+            'location_id': from_loc.id,
+            'location_dest_id': to_loc.id,
+            'move_ids': [(0, 0, {
+                'name': '/',
+                'product_id': product.id,
+                'product_uom': product.uom_id.id,
+                'product_uom_qty': 10,
+                'location_id': from_loc.id,
+                'location_dest_id': to_loc.id,
+            }) for product in [self.productA, self.productB]],
+        } for partner_id, type_id, from_loc, to_loc in [
+            # receipts
+            (partner.id, self.picking_type_in, self.supplier_location, self.stock_location),
+            (partner.id, self.picking_type_in, self.supplier_location, self.stock_location),
+        ]])
+        pickings.action_confirm()
+        batch = pickings.mapped('batch_id')
+        # Ask to assign, so pickings should be assigned now.
+        batch.action_assign()
+        self.assertEqual(pickings[0].state, 'assigned', 'Picking 1 should be ready')
+        self.assertEqual(pickings[1].state, 'assigned', 'Picking 2 should be ready')
+
+        pickings[0].move_line_ids[0].write({'quantity': 4})
+        pickings[0].move_line_ids[1].unlink()
+        pickings[1].move_ids.move_line_ids.unlink()
+        # There should be a wizard asking to process backorder
+        back_order_wizard_dict = batch.action_done()
+        self.assertTrue(back_order_wizard_dict, "A backorder wizard action should be returned")
+        back_order_wizard = Form.from_action(self.env, back_order_wizard_dict).save()
+        self.assertEqual(len(back_order_wizard.pick_ids), 1, "Only one picking should be in the wizard")
+        back_order_wizard.process()
+        self.assertEqual(pickings[1].state, 'assigned', 'Picking 2 should remain assigned')
+        self.assertEqual(pickings[0].state, 'done', 'Picking 1 should be done')
+        self.assertEqual(pickings[0].move_ids.product_uom_qty, 4, 'initial demand should be 4 after picking split')
+        self.assertTrue(self.env['stock.picking'].search([('backorder_id', '=', pickings[0].id)]), 'no back order created')
+
     def test_batch_with_immediate_transfer_and_backorder_wizard_with_manual_operations(self):
         """ Test a simple batch picking with only one quantity fully available.
         The user set the quantity done only for the partially available picking.
@@ -602,6 +657,49 @@ class TestBatchPicking(TransactionCase):
         delivery.move_ids.quantity = 1
         self.assertEqual(delivery.state, 'assigned')
         self.assertTrue(delivery.batch_id)
+
+    def test_auto_batch_skip_batch_with_done_picking(self):
+        """ A picking must not be auto-batched into a batch holding a done picking. """
+        warehouse = self.env['stock.warehouse'].search([], limit=1)
+        warehouse.out_type_id.write({
+            'auto_batch': True,
+            'batch_group_by_partner': True,
+        })
+        partner = self.env['res.partner'].create({'name': 'Lovely partner'})
+
+        def create_assigned_delivery():
+            delivery = self.env['stock.picking'].create({
+                'location_id': warehouse.lot_stock_id.id,
+                'location_dest_id': self.customer_location.id,
+                'picking_type_id': warehouse.out_type_id.id,
+                'partner_id': partner.id,
+                'move_ids': [Command.create({
+                    'name': 'lovely move',
+                    'product_id': self.productA.id,
+                    'product_uom_qty': 1,
+                    'product_uom': self.productA.uom_id.id,
+                    'location_id': warehouse.lot_stock_id.id,
+                    'location_dest_id': self.customer_location.id,
+                })],
+            })
+            delivery.action_confirm()
+            delivery.move_ids.quantity = 1
+            return delivery
+
+        delivery_1 = create_assigned_delivery()
+        delivery_2 = create_assigned_delivery()
+        batch = delivery_1.batch_id
+        self.assertTrue(batch)
+        self.assertEqual(delivery_2.batch_id, batch)
+
+        delivery_1.move_ids.picked = True
+        delivery_1._action_done()
+        self.assertRecordValues(delivery_1, [{'state': 'done', 'batch_id': batch.id}])
+
+        delivery_3 = create_assigned_delivery()
+        self.assertTrue(delivery_3.batch_id)
+        self.assertNotEqual(delivery_3.batch_id, batch)
+        self.assertEqual(batch.picking_ids, delivery_1 | delivery_2)
 
     def test_remove_all_transfers_from_confirmed_batch(self):
         """

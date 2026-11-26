@@ -11,12 +11,16 @@ class TestCIIFR(TestUBLCommon):
     def setUpClass(cls):
         super().setUpClass()
 
+        cls.is_l10n_fr_pdp_installed = cls.env['ir.module.module']._get('l10n_fr_pdp').state == 'installed'
+
         cls.partner_1 = cls.env['res.partner'].create({
             'name': "partner_1",
             'street': "Rue Jean Jaurès, 42",
             'zip': "75000",
             'city': "Paris",
             'vat': 'FR05677404089',
+            'peppol_eas': '9957',
+            'peppol_endpoint': 'FR05677404089',
             'country_id': cls.env.ref('base.fr').id,
             'bank_ids': [(0, 0, {'acc_number': 'FR15001559627230', 'allow_out_payment': True})],
             'phone': '+1 (650) 555-0111',
@@ -31,6 +35,8 @@ class TestCIIFR(TestUBLCommon):
             'zip': "52330",
             'city': "Colombey-les-Deux-Églises",
             'vat': 'FR35562153452',
+            'peppol_eas': '9957',
+            'peppol_endpoint': 'FR35562153452',
             'country_id': cls.env.ref('base.fr').id,
             'bank_ids': [(0, 0, {'acc_number': 'FR90735788866632', 'allow_out_payment': True})],
             'ref': 'ref_partner_2',
@@ -109,9 +115,30 @@ class TestCIIFR(TestUBLCommon):
             **kwargs,
         )
 
+    def _adapt_expected_etree_to_installed_modules(self, expected_etree):
+        super()._adapt_expected_etree_to_installed_modules(expected_etree)
+        if not self.is_l10n_fr_pdp_installed:
+            ns = {'ram': 'urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100'}
+            for note in expected_etree.findall('.//ram:IncludedNote', namespaces=ns):
+                subject_code = note.findtext('ram:SubjectCode', namespaces=ns)
+                if subject_code in ('PMT', 'PMD', 'AAB'):
+                    note.getparent().remove(note)
+
     ####################################################
     # Test export - import
     ####################################################
+
+    def test_compute_siren_from_vat(self):
+        partner = self.env['res.partner'].create({
+            'name': 'French partner with only a VAT number',
+            'country_id': self.env.ref('base.fr').id,
+            'vat': 'FR23334175221',
+        })
+
+        self.assertRecordValues(partner, [{
+            'peppol_eas': '0225',
+            'peppol_endpoint': '334175221',
+        }])
 
     def test_export_pdf(self):
         acc_bank = self.env['res.partner.bank'].create({
@@ -140,6 +167,10 @@ class TestCIIFR(TestUBLCommon):
         self.assertEqual(pdf_attachment['name'], facturx_filename)
 
     def test_export_import_invoice(self):
+        company = self.company_data['company']
+        if "predict_bill_product" in company._fields:
+            company.predict_bill_product = True
+
         invoice = self._generate_move(
             self.partner_1,
             self.partner_2,
@@ -189,6 +220,10 @@ class TestCIIFR(TestUBLCommon):
         self._assert_imported_invoice_from_etree(invoice, attachment)
 
     def test_export_import_refund(self):
+        company = self.company_data['company']
+        if "predict_bill_product" in company._fields:
+            company.predict_bill_product = True
+
         refund = self._generate_move(
             self.partner_1,
             self.partner_2,
@@ -378,6 +413,10 @@ class TestCIIFR(TestUBLCommon):
     def test_import_and_create_partner_facturx(self):
         """ Tests whether the partner is created at import if no match is found when decoding the EDI attachment
         """
+        self.env['res.partner.bank'].sudo().create({
+            'acc_number': 'FR15001559627230',
+            'partner_id': self.company_data['company'].partner_id.id,
+        })
         partner_vals = {
             'name': "Buyer",
             'email': "buyer@yahoo.com",
@@ -429,7 +468,7 @@ class TestCIIFR(TestUBLCommon):
             'invoice_lines': [
                 {'price_unit': 95.24, 'price_subtotal': 95.24, 'quantity': 1, 'discount': 0, 'tax_ids': self.tax_5_purchase.ids},
                 {'price_unit': 100, 'price_subtotal': 100, 'quantity': 1, 'discount': 0, 'tax_ids': self.tax_5_purchase.ids},
-                {'price_unit': 190.48, 'price_subtotal': 171.43, 'quantity': 1, 'discount': 10.001049979000411, 'tax_ids': self.tax_5_purchase.ids},
+                {'price_unit': 171.43 + 19.05, 'price_subtotal': 171.43, 'quantity': 1, 'discount': 10.001049979000426, 'tax_ids': self.tax_5_purchase.ids},
                 {'price_unit': 200, 'price_subtotal': 180, 'quantity': 1, 'discount': 10.0, 'tax_ids': self.tax_5_purchase.ids},
             ]
         }
@@ -438,19 +477,23 @@ class TestCIIFR(TestUBLCommon):
             filename='facturx_out_invoice_tax_incl.xml',
             # Discount of line 3: when exporting the invoice, we compute the price tax excluded = 200/1.05 ~= 190.48
             # then, when computing the discount amount: 190.48 * 0.1 ~= 19.05 => price net amount = 171.43
-            # Thus, at import: price_unit = 190.48, and discount = 100 * (1 - 171.43 / 190.48) = 10.001049979
+            # Thus, at import: price_unit = 171.43 + 19.05, and discount = 100 * (1 - 171.43 / 190.48) = 10.001049979
             move_type='in_invoice',
             invoice_vals=invoice_vals,
         )
 
     def test_import_fnfe_examples(self):
+        self.env['res.partner.bank'].sudo().create({
+            'acc_number': 'FR76 1254 2547 2569 8542 5874 698',
+            'partner_id': self.company_data['company'].partner_id.id,
+        })
         # Source: official documentation of the FNFE (subdirectory: "5. FACTUR-X 1.0.06 - Examples")
         subfolder = 'tests/test_files/from_factur-x_doc'
         # the 2 following files have the same pdf but one is labelled as an invoice and the other as a refund
         invoice_vals = {
             'amount_total': 233.47,
             'amount_tax': 14.99,
-            'invoice_lines': [{'price_subtotal': 20.48}, {'price_subtotal': 198}]
+            'invoice_lines': [{'price_subtotal': 20.48}, {'price_subtotal': 198.0}]
         }
         # source: Avoir_FR_type380_EN16931.pdf
         self._assert_imported_invoice_from_file(
@@ -479,7 +522,7 @@ class TestCIIFR(TestUBLCommon):
             invoice_vals={
                 'amount_total': 100,
                 'amount_tax': 0,
-                'invoice_lines': [{'price_subtotal': p} for p in (-5, 10, 60, 30, 5)],
+                'invoice_lines': [{'price_subtotal': p} for p in (10.0, -5.0, 60.0, 30.0, 5.0)],
             },
             move_type='in_refund',
         )
@@ -489,6 +532,10 @@ class TestCIIFR(TestUBLCommon):
         See the tests above to create these xml attachments ('test_export_with_fixed_taxes_case_[X]').
         NB: use move_type = 'out_invoice' s.t. we can retrieve the taxes used to create the invoices.
         """
+        self.env['res.partner.bank'].sudo().create({
+            'acc_number': 'FR15001559627230',
+            'partner_id': self.company_data['company'].partner_id.id,
+        })
         subfolder = "tests/test_files/from_odoo"
         kwargs = {
             'subfolder': subfolder,

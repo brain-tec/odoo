@@ -44,14 +44,15 @@
 # Wil Odoo, 2025
 # Jessica Jakara, 2025
 # "Jessica Tuulia Sade Jäkärä (jtsj)" <jtsj@odoo.com>, 2025.
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
-# Saara Hakanen <sahak@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Saara Hakanen <sahak@odoo.com>, 2025, 2026.
+# Deleted User <noreply+18@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-12 18:38+0000\n"
-"PO-Revision-Date: 2025-11-21 07:48+0000\n"
+"POT-Creation-Date: 2026-07-31 17:39+0000\n"
+"PO-Revision-Date: 2026-11-05 10:33+0000\n"
 "Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
 "Language-Team: Finnish <https://translate.odoo.com/projects/odoo-18/website/"
 "fi/>\n"
@@ -60,7 +61,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website
 #. odoo-javascript
@@ -102,8 +103,8 @@ msgid ""
 "\" Write a quote here from one of your customers. Quotes are a great way to "
 "build confidence in your products or services. \""
 msgstr ""
-"\"Kirjoita asiakkaasi siteeraus tähän. Sitaatit ja lainaukset ovat mainio "
-"tapa rakentaa luottamusta palveluihin ja tuotteisiin.\""
+"\"Kirjoita tähän sitaatti asiakkaaltasi. Asiakaspalaute on hyvä tapa lisätä "
+"luottamusta tuotteisiisi tai palveluihisi.\""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -216,92 +217,6 @@ msgid "$ 32M"
 msgstr "$ 32M"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$1.50"
-msgstr "$1.50"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$12.00"
-msgstr "$12.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$13.00"
-msgstr "$13.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$13.50"
-msgstr "$13.50"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$14.50"
-msgstr "$14.50"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$15.00"
-msgstr "$15.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$16.00"
-msgstr "$16.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$25.00"
-msgstr "$25.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$26.00"
-msgstr "$26.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$28.00"
-msgstr "$28.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$3.00"
-msgstr "$ 3.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$3.50"
-msgstr "$3.50"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$4.00"
-msgstr "$4.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$4.10"
-msgstr "$4.10"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$4.25"
-msgstr "$4.25"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$4.50"
-msgstr "$4.50"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$5.00"
-msgstr "$ 5.00"
-
-#. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/components/views/page_list.js:0
 msgid "%s record(s) selected, are you sure you want to publish them all?"
@@ -365,35 +280,6 @@ msgid "+ New Website"
 msgstr "+ Uusi verkkosivu"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.footer_custom
-#: model_terms:ir.ui.view,arch_db:website.template_footer_centered
-#: model_terms:ir.ui.view,arch_db:website.template_footer_contact
-#: model_terms:ir.ui.view,arch_db:website.template_footer_descriptive
-#: model_terms:ir.ui.view,arch_db:website.template_footer_headline
-msgid "+1 555-555-5556"
-msgstr "+1 555-555-5556"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.template_footer_links
-msgid "+1 555-555-5556\""
-msgstr "+1 555-555-5556\""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_masonry_block_mosaic_template
-msgid "+12"
-msgstr "+12"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_contact_info
-msgid "+1555-555-5556"
-msgstr "+1555-555-5556"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
-msgid "+25.000"
-msgstr "+25.000"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.show_website_info
 msgid ", author:"
 msgstr ", tekijä:"
@@ -418,44 +304,9 @@ msgid "/contactus"
 msgstr "/yhteys"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_key_images
-msgid "01"
-msgstr "01"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_key_images
-msgid "02"
-msgstr "02"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_key_images
-msgid "03"
-msgstr "03"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_key_images
-msgid "04"
-msgstr "04"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "1 km"
 msgstr "1 km"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_media_list_options
-msgid "1/2 - 1/2"
-msgstr "1/2 - 1/2"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_media_list_options
-msgid "1/3 - 2/3"
-msgstr "1/3 - 2/3"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_media_list_options
-msgid "1/4 - 3/4"
-msgstr "1/4 - 3/4"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
@@ -473,20 +324,9 @@ msgid "100 m"
 msgstr "100 m"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_hr_options
-#: model_terms:ir.ui.view,arch_db:website.snippet_options
-msgid "100%"
-msgstr "100%"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "1000 km"
 msgstr "1000 km"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_image_gallery_options
-msgid "12"
-msgstr "12"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_showcase
@@ -497,11 +337,6 @@ msgstr "12k"
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "15 km"
 msgstr "15 km"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_countdown
-msgid "16"
-msgstr "16"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -539,11 +374,6 @@ msgid "2000 km"
 msgstr "2000 km"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_masonry_block_mosaic_template
-msgid "22%"
-msgstr "22%"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features_wave
 msgid "24/7 Customer Support"
 msgstr "24/7 asiakastuki"
@@ -554,20 +384,13 @@ msgid "24/7 Support"
 msgstr "24/7 Tukipalvelu"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
-#: model_terms:ir.ui.view,arch_db:website.s_hr_options
-#: model_terms:ir.ui.view,arch_db:website.snippet_options
-msgid "25%"
-msgstr "25%"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_links
 msgid ""
 "250 Executive Park Blvd, Suite 3400 <br/> San Francisco CA 94134 <br/>United "
 "States"
 msgstr ""
-"250 Executive Park Blvd, Suite 3400 <br/> San Francisco CA 94134 <br/"
-">Yhdysvallat"
+"250 Executive Park Blvd, Suite 3400 <br/> San Francisco CA 94134 <br/>"
+"Yhdysvallat"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_centered
@@ -575,11 +398,6 @@ msgid ""
 "250 Executive Park Blvd, Suite 3400 • San Francisco CA 94134 • United States"
 msgstr ""
 "250 Executive Park Blvd, Suite 3400 • San Francisco CA 94134 • Yhdysvallat"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_countdown
-msgid "30"
-msgstr "30"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
@@ -639,16 +457,6 @@ msgid "404 Not Found"
 msgstr "404 Ei löydy"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_countdown
-msgid "45"
-msgstr "45"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_numbers_showcase
-msgid "45%"
-msgstr "45%"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "5 m"
 msgstr "5 m"
@@ -664,19 +472,13 @@ msgid "50 m"
 msgstr "50 m"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_hr_options
-#: model_terms:ir.ui.view,arch_db:website.snippet_options
-msgid "50%"
-msgstr "50%"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cta_card
 msgid ""
 "50,000+ companies run Odoo <br class=\"d-none d-lg-inline\"/>to grow their "
 "businesses."
 msgstr ""
-"Yli 50 000 yritystä Odoota <br class=\"d-none d-lg-inline\"/"
-">liiketoimintansa kasvattamiseen."
+"Yli 50 000 yritystä Odoota <br class=\"d-none d-lg-inline\"/>"
+"liiketoimintansa kasvattamiseen."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_call_to_action
@@ -694,13 +496,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_cta_mockups
 msgid "50,000+ companies trust Odoo."
 msgstr "50,000+ yritystä luottavat Odoon palveluihin."
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_hr_options
-#: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
-#: model_terms:ir.ui.view,arch_db:website.snippet_options
-msgid "75%"
-msgstr "75%"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
@@ -934,9 +729,9 @@ msgid ""
 "<br/>Our product line offers a range of innovative solutions designed to "
 "meet your needs. Each product is crafted for quality and reliability."
 msgstr ""
-"<br/>Tuoteryhmämme tarjoaa valikoiman innovatiivisia ratkaisuja, jotka on "
-"suunniteltu vastaamaan tarpeitasi. Jokainen tuote on valmistettu laadun ja "
-"luotettavuuden takaamiseksi."
+"<br/>Tuotevalikoimamme tarjoaa joukon innovatiivisia ratkaisuja, jotka on "
+"suunniteltu vastaamaan tarpeitasi. Jokainen tuote valmistetaan laadukkaaksi "
+"ja luotettavaksi."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_text_cover
@@ -980,8 +775,8 @@ msgid ""
 "calling extra attention to featured content or information.<br/><br/>"
 msgstr ""
 "<br/>Tämä on yksinkertainen sankariosio, jumbotron-tyylinen osa, jossa "
-"esillä olevaan sisältöön tai tärkeään tietoon tulee kiinnittää huomiota.<br/"
-"><br/>"
+"esillä olevaan sisältöön tai tärkeään tietoon tulee kiinnittää huomiota.<br/>"
+"<br/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -1005,8 +800,8 @@ msgid ""
 "                            87%\n"
 "                        </font>"
 msgstr ""
-"<font class=\"text-gradient\" style=\"background-image: linear-"
-"gradient(0deg, rgb(222, 222, 222) 25%, rgb(29, 32, 48) 80%);\">\n"
+"<font class=\"text-gradient\" style=\"background-image: linear-gradient"
+"(0deg, rgb(222, 222, 222) 25%, rgb(29, 32, 48) 80%);\">\n"
 "                            87%\n"
 "                        </font>"
 
@@ -1017,8 +812,8 @@ msgid ""
 "<i class=\"fa fa-1x fa-fw fa-envelope me-2\"/"
 "><span>info@yourcompany.example.com</span>"
 msgstr ""
-"<i class=\"fa fa-1x fa-fw fa-envelope me-2\"/"
-"><span>info@yourcompany.example.com</span>"
+"<i class=\"fa fa-1x fa-fw fa-envelope me-2\"/><span>"
+"info@yrityksesi.esimerkki.fi</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_call_to_action
@@ -1278,8 +1073,8 @@ msgid ""
 "<i class=\"fa fa-phone fa-fw me-2\"/><span class=\"o_force_ltr\">+1 "
 "555-555-5556</span>"
 msgstr ""
-"<i class=\"fa fa-phone fa-fw me-2\"/><span class=\"o_force_ltr\">+1 "
-"555-555-5556</span>"
+"<i class=\"fa fa-phone fa-fw me-2\"/><span class=\"o_force_ltr\">+1 555-555-"
+"5556</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
@@ -1586,7 +1381,7 @@ msgid ""
 msgstr ""
 "<small>\n"
 "                           <i class=\"fa fa-1x fa-fw fa-envelope me-1\"/>\n"
-"                            info@yourcompany.example.com\n"
+"                            info@yrityksesi.esimerkki.fi\n"
 "                        </small>"
 
 #. module: website
@@ -1596,7 +1391,7 @@ msgid ""
 "info@yourcompany.example.com</small>"
 msgstr ""
 "<small><i class=\"fa fa-1x fa-fw fa-envelope me-1\"/> "
-"info@yourcompany.example.com</small>"
+"info@yrityksesi.esimerkki.fi</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.header_text_element
@@ -1834,8 +1629,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
 "rounded-circle pe-none text-o-color-1\" contenteditable=\"false\"/>\n"
-"                        <small class=\"text-muted\">Huhtikuu 03, 2024</"
-"small>\n"
+"                        <small class=\"text-muted\">Huhtikuu 03, 2024</small>"
+"\n"
 "                        <strong>Uusia työpöydän ominaisuuksia mukautetuille "
 "raporteille</strong>"
 
@@ -1864,8 +1659,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
 "rounded-circle pe-none text-o-color-1\" contenteditable=\"false\"/>\n"
-"                        <small class=\"text-muted\">Joulukuu 22, 2024</"
-"small>\n"
+"                        <small class=\"text-muted\">Joulukuu 22, 2024</small>"
+"\n"
 "                        <strong>Edistyneiden analytiikkatyökalujen esittely</"
 "strong>"
 
@@ -1880,8 +1675,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
 "rounded-circle pe-none text-o-color-1\" contenteditable=\"false\"/>\n"
-"                        <small class=\"text-muted\">Helmikuu 11, 2024</"
-"small>\n"
+"                        <small class=\"text-muted\">Helmikuu 11, 2024</small>"
+"\n"
 "                        <strong>Paranneltu käyttöliittymä, jotta navigointi "
 "on tehokkaampaa ja helpompaa</strong>"
 
@@ -1896,8 +1691,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
 "rounded-circle pe-none text-o-color-1\" contenteditable=\"false\"/>\n"
-"                        <small class=\"text-muted\">Kesäkuu 15, 2024</"
-"small>\n"
+"                        <small class=\"text-muted\">Kesäkuu 15, 2024</small>"
+"\n"
 "                        <strong>Monikielinen tukipalvelu on integroitu ja "
 "lisätty</strong>"
 
@@ -1911,8 +1706,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
 "rounded-circle pe-none text-o-color-1\" contenteditable=\"false\"/>\n"
-"                        <small class=\"text-muted\">Lokakuu 09, 2024</"
-"small>\n"
+"                        <small class=\"text-muted\">Lokakuu 09, 2024</small>"
+"\n"
 "                        <strong>Mobiilisovellusten yhteensopivuutta "
 "laajennettiin</strong>"
 
@@ -2151,7 +1946,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form
 msgid "<span class=\"s_website_form_label_content\">Your Company</span>"
-msgstr "<span class=\"s_website_form_label_content\">Yritys</span>"
+msgstr "<span class=\"s_website_form_label_content\">Yrityksesi</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form
@@ -2159,7 +1954,7 @@ msgid ""
 "<span class=\"s_website_form_label_content\">Your Email</span>\n"
 "                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
-"<span class=\"s_website_form_label_content\">Sähköpostiosoitteesi</span>\n"
+"<span class=\"s_website_form_label_content\">Sähköpostisi</span>\n"
 "                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website
@@ -2313,13 +2108,19 @@ msgstr "<u>Tiistai</u><br/>8.00-18.00"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_opening_hours
-msgid "<u>Wednesday</u><br/>8.00am-12.00am"
-msgstr "<u>Keskiviikko</u><br/>8.00-12.00"
+msgid "<u>Wednesday</u><br/>8.00am-12.00pm"
+msgstr "<u>Keskiviikko</u><br/>08.00-12.00"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_opening_hours
 msgid "<u>info@yourcompany.example.com</u>"
-msgstr "<u>info@yourcompany.example.com</u>"
+msgstr "<u>info@yrityksesi.esimerkki.fi</u>"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/website_loader/website_loader.xml:0
+msgid "A"
+msgstr "A"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -2502,7 +2303,7 @@ msgstr "Käynti lasketaan uudeksi, jos edellisestä yhteydestä on yli 8 tuntia.
 #. odoo-python
 #: code:addons/website/models/website_controller_page.py:0
 msgid "A page must be set to display a concrete model."
-msgstr ""
+msgstr "Sivu on määritettävä konkreettisen mallin näyttämiseksi."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -2699,7 +2500,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/components/website_loader/website_loader.xml:0
 msgid "Adapting Building Blocks."
-msgstr "Designelementtien mukauttaminen."
+msgstr "Rakennuspalikoiden mukauttaminen."
 
 #. module: website
 #. odoo-javascript
@@ -2716,8 +2517,8 @@ msgid ""
 "Add 3rd-party service domains <em>(\"www.example.com\" or \"example.com\")</"
 "em>, one per line."
 msgstr ""
-"Lisää kolmannen osapuolen palveluiden verkkotunnukset "
-"<em>(\"www.example.com\" or \"example.com\")</em>, yksi per rivi."
+"Lisää kolmannen osapuolen palveluiden verkkotunnukset <em>"
+"(\"www.example.com\" or \"example.com\")</em>, yksi per rivi."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_options
@@ -3239,7 +3040,7 @@ msgstr "Mahtavat sivut"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map
 msgid "An address must be specified for a map to be embedded"
-msgstr "Osoite on määritettävä, jotta kartta voidaan upottaa"
+msgstr "Osoite on määritettävä kartan upottamiseksi"
 
 #. module: website
 #. odoo-javascript
@@ -3521,6 +3322,12 @@ msgstr "Saatavana verkkosivustolla"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/components/website_loader/website_loader.xml:0
+msgid "B"
+msgstr "B"
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "BSgzTvR5L1GB9jriT451iTN4huVPxHmltG6T6eo"
 msgstr "BSgzTvR5L1GB9jriT451iTN4huVPxHmltG6T6eo"
@@ -3649,8 +3456,8 @@ msgid ""
 "Benefit from tax-free shopping, simplifying your purchase and enhancing your "
 "savings without any extra costs."
 msgstr ""
-"Hyödynnä verovapaata shoppailua, joka yksinkertaistaa ostosten tekemistä ja "
-"tekee säästämisestä helpompaa ilman ylimääräisiä kustannuksia."
+"Hyödy verovapaasta shoppailusta, joka yksinkertaistaa ostoksia sekä "
+"kartuttaa säästöjäsi ilman ylimääräisiä kuluja."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -3881,7 +3688,7 @@ msgstr "Rakenna verkkosivustoni"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_table_of_content
 msgid "Building blocks system"
-msgstr "Rakennuspalikoiden järjestelmä"
+msgstr "Rakennuspalikoihin perustuva järjestelmä"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_masonry_block_alternation_text_template
@@ -3951,6 +3758,13 @@ msgid "By default, the domains of the following services are already blocked:"
 msgstr "Seuraavien palveluiden verkkotunnukset on jo estetty oletuksena:"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/dialog/seo.xml:0
+#: code:addons/website/static/src/components/website_loader/website_loader.xml:0
+msgid "C"
+msgstr "C"
+
+#. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__cdn_url
 #: model:ir.model.fields,field_description:website.field_website__cdn_url
 msgid "CDN Base URL"
@@ -3960,7 +3774,7 @@ msgstr "CDN perus-URL"
 #: model:ir.model.fields,field_description:website.field_res_config_settings__cdn_filters
 #: model:ir.model.fields,field_description:website.field_website__cdn_filters
 msgid "CDN Filters"
-msgstr "CDN suotimet"
+msgstr "CDN-suodattimet"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -4024,12 +3838,12 @@ msgstr "Soita asiakaspalveluun"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Call to Action"
-msgstr "Kehotustoiminta"
+msgstr "Toimintakehote"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Call to Action Mockups"
-msgstr "Toimintakehotusten testimallit"
+msgstr "Toimintakehotteiden testimallit"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_contact
@@ -4198,7 +4012,7 @@ msgstr "Tapaustutkimuksia"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Categories"
-msgstr "Tuoteryhmä(t)"
+msgstr "Kategoriat"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.theme_view_search
@@ -4407,8 +4221,8 @@ msgid ""
 "Classic pizza with fresh mozzarella, San Marzano tomatoes, and basil leaves, "
 "drizzled with extra virgin olive oil."
 msgstr ""
-"Klassinen pizza, jonka päällä on tuoretta mozzarellaa, San Marzano "
-"-tomaatteja ja basilikanlehtiä, viimeisteltynä ekstra-neitsytoliiviöljyllä."
+"Klassinen pizza, jonka päällä on tuoretta mozzarellaa, San Marzano -"
+"tomaatteja ja basilikanlehtiä, viimeisteltynä ekstra-neitsytoliiviöljyllä."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
@@ -4750,9 +4564,9 @@ msgid ""
 "Consistent performance and uptime ensure efficient, reliable service with "
 "minimal interruptions and quick response times."
 msgstr ""
-"Johdonmukainen tehokkuus ja käyttöaika varmistavat, että palvelu on kyvykäs "
-"ja luotettava, ja että keskeytysten osuus on minimaalinen ja vastausajat "
-"nopeat."
+"Johdonmukainen suorituskyky ja käyttöaika takaavat tehokkaan sekä "
+"luotettavan palvelun minimaalisilla keskeytyksillä ja nopeilla "
+"vastausajoilla."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_landing_s_features
@@ -4895,8 +4709,7 @@ msgstr "Kännettävä sisältö"
 #: model_terms:ir.ui.view,arch_db:website.s_media_list
 msgid ""
 "Continue reading <i class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
-msgstr ""
-"Jatka lukemista <i class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
+msgstr "Jatka lukemista <i class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_ir_ui_view__controller_page_ids
@@ -5301,6 +5114,13 @@ msgid "Customize Show"
 msgstr "Mukauta näkymää"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/dialog/seo.xml:0
+#: model_terms:ir.ui.view,arch_db:website.s_countdown_options
+msgid "D"
+msgstr "D"
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
 msgid "D - H - M"
 msgstr "Päivä - Tunti - Minuutti"
@@ -5392,7 +5212,7 @@ msgstr "Päivää"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Debug"
-msgstr "Virheenkorjaus"
+msgstr "Viankorjaus"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
@@ -5726,7 +5546,7 @@ msgstr "Hylkää"
 #: model_terms:ir.ui.view,arch_db:website.s_quadrant
 #: model_terms:ir.ui.view,arch_db:website.s_striped_top
 msgid "Discover"
-msgstr "Löydä"
+msgstr "Tutustu"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_text
@@ -6060,7 +5880,7 @@ msgstr "Pisteviiva"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options_border_line_widgets
 msgid "Double"
-msgstr "Tuplaviiva"
+msgstr "Kaksinkertainen"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features_grid
@@ -6697,8 +6517,7 @@ msgstr "Tutki"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_showcase
 msgid "Explore a vast array of practical and beneficial choices."
-msgstr ""
-"Tutustu laajaan valikoimaan käytännöllisiä ja hyödyllisiä vaihtoehtoja."
+msgstr "Tutustu laajaan valikoimaan käytännöllisiä ja hyödyllisiä vaihtoehtoja."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_quadrant
@@ -6755,7 +6574,7 @@ msgstr "Lisäosan näkymä"
 #: model:ir.model.fields,field_description:website.field_website_controller_page__xml_id
 #: model:ir.model.fields,field_description:website.field_website_page__xml_id
 msgid "External ID"
-msgstr "Ulkoinen ID"
+msgstr "Ulkoinen tunnus"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_popup_options
@@ -6898,7 +6717,7 @@ msgstr "Aalto-toiminto"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_showcase
 msgid "Features showcase"
-msgstr "Esittely-toiminto"
+msgstr "Ominaisuuksien esittely"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cards_grid
@@ -7122,7 +6941,7 @@ msgstr "Kukoistamista yhdessä vuodesta 2016"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_masonry_block_mosaic_template
 msgid "Focus"
-msgstr "Focus"
+msgstr "Tarkennus"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_headline
@@ -7539,7 +7358,7 @@ msgstr "Siirry näkymään"
 #. odoo-javascript
 #: code:addons/website/static/src/client_actions/website_dashboard/website_dashboard.xml:0
 msgid "Go to Website"
-msgstr "Siirry verkkosivustolle"
+msgstr "Siirry verkkosivulle"
 
 #. module: website
 #. odoo-javascript
@@ -7587,6 +7406,7 @@ msgstr "Google Analytics -avain"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
+#: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Google Map"
 msgstr "Google kartta"
 
@@ -7594,6 +7414,14 @@ msgstr "Google kartta"
 #: model:ir.model.fields,field_description:website.field_website__google_maps_api_key
 msgid "Google Maps API Key"
 msgstr "Google Maps API Key"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/js/editor/snippets.editor.js:0
+msgid ""
+"Google Maps configuration has changed. Please reload the page for changes to "
+"take effect."
+msgstr ""
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__has_google_search_console
@@ -7884,7 +7712,7 @@ msgstr "Hei, olen Tony Fred"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_images_subtitles
 msgid "Help center"
-msgstr "Ohjekeskus"
+msgstr "Tukikeskus"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
@@ -8210,8 +8038,7 @@ msgstr "Jos tosi, uudet tilit liittyvät nykyseen verkkosivuun"
 #. module: website
 #: model:ir.model.fields,help:website.field_website_configurator_feature__menu_sequence
 msgid "If set, a website menu will be created for the feature."
-msgstr ""
-"Jos tämä asetetaan, ominaisuutta varten luodaan verkkosivuston valikko."
+msgstr "Jos tämä asetetaan, ominaisuutta varten luodaan verkkosivuston valikko."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_configurator_feature__menu_company
@@ -8236,8 +8063,8 @@ msgid ""
 "If this error is caused by a change of yours in the templates, you have the "
 "possibility to reset the template to its <strong>factory settings</strong>."
 msgstr ""
-"Jos tämä virhe johtuu siitä, että olet muuttanut malleja, voit palauttaa "
-"mallin <strong>tehdasasetukset</strong>."
+"Jos tämä virhe johtuu tekemistäsi muutoksista mallipohjiin, voit palauttaa "
+"mallipohjan <strong>tehdasasetukset</strong>."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_controller_page__groups_id
@@ -8500,7 +8327,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_accordion_image
 #: model_terms:ir.ui.view,arch_db:website.s_faq_list
 msgid "In this section, you can address common questions efficiently."
-msgstr "Tässä osiossa voit käsitellä yleisiä kysymyksiä tehokkaasti."
+msgstr "Tässä osiossa voit vastata yleisiin kysymyksiin tehokkaasti."
 
 #. module: website
 #: model:ir.model.fields.selection,name:website.selection__theme_ir_asset__directive__include
@@ -9489,7 +9316,7 @@ msgstr "Auta asiakkaita ymmärtämään prosessiasi."
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_title_form
 msgid "Let's Connect"
-msgstr "Vaihdetaan kontaktitietoja"
+msgstr "Verkostoidutaan"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_call_to_action_about
@@ -9531,7 +9358,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_opening_hours
 msgid "Let’s get in touch"
-msgstr "Ollaan yhteyksissä"
+msgstr "Ota yhteyttä"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -9689,13 +9516,13 @@ msgstr "Reaaliaikainen keskustelu"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "Livechat"
-msgstr "Live-tuki"
+msgstr "Livechat"
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/systray_items/new_content.js:0
 msgid "Livechat Widget"
-msgstr "Livechat-osio"
+msgstr "Ohjattu livechat-toiminto"
 
 #. module: website
 #. odoo-javascript
@@ -9706,7 +9533,7 @@ msgstr "Livechat-osio"
 #: code:addons/website/static/src/xml/web_editor.xml:0
 #: code:addons/website/static/src/xml/website.background.video.xml:0
 msgid "Loading..."
-msgstr "Lataa..."
+msgstr "Ladataan..."
 
 #. module: website
 #. odoo-javascript
@@ -10044,13 +9871,12 @@ msgstr "Valikoilla ei voi olla enempää kuin kaksi hierarkiatasoa."
 #. odoo-python
 #: code:addons/website/models/website_menu.py:0
 msgid "Menus with child menus cannot be added as a submenu."
-msgstr ""
-"Valikoita, joilla on alisteisia valikoita, ei voi lisätä alivalikoiksi."
+msgstr "Valikoita, joilla on alisteisia valikoita, ei voi lisätä alivalikoiksi."
 
 #. module: website
 #: model:ir.model,name:website.model_base_partner_merge_automatic_wizard
 msgid "Merge Partner Wizard"
-msgstr "Kumppanin yhdistämistyökalu"
+msgstr "Ohjattu kumppaneiden yhdistämistoiminto"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_facebook_page_options
@@ -10112,7 +9938,7 @@ msgstr "Keskellä"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_list_options
 msgid "Milestones"
-msgstr "Virstanpylväät"
+msgstr "Välitavoitteet"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_chart_options
@@ -10267,8 +10093,8 @@ msgid ""
 "push notification. If they have completed one of your forms, you can send "
 "them an SMS, or call them right away while they are browsing your website."
 msgstr ""
-"Seuraa kävijöitäsi, kun he selaavat verkkosivustoasi Odoo Social "
-"-sovelluksella. Ota heihin yhteyttä vain yhdellä klikkauksella live-chat-"
+"Seuraa kävijöitäsi, kun he selaavat verkkosivustoasi Odoo Social -"
+"sovelluksella. Ota heihin yhteyttä vain yhdellä klikkauksella live-chat-"
 "pyynnön tai push-ilmoituksen avulla. Jos he ovat täyttäneet jonkin "
 "lomakkeistasi, voit lähettää heille tekstiviestin tai soittaa heille heti, "
 "kun he selaavat verkkosivustoasi."
@@ -10554,10 +10380,10 @@ msgid ""
 "will help you configure essential settings such as language, time zone, and "
 "notifications."
 msgstr ""
-"Seuraavaksi tutustut <b>asennuksen helppokäyttötoimintoon</b>, joka on "
-"suunniteltu opastamaan sinua alustan peruskonfiguraatiossa. "
-"Helppokäyttötoiminta auttaa sinua määrittämään olennaiset asetukset, kuten "
-"kielen, aikavyöhykkeen ja ilmoitukset."
+"Seuraavaksi tutustut <b>ohjattuun käyttöönottotoimintoon</b>, joka on "
+"suunniteltu opastamaan sinua alustan perusasetusten kanssa. Ohjattu toiminto "
+"auttaa sinua määrittämään olennaiset asetukset, kuten kielen, aikavyöhykkeen "
+"ja ilmoitukset."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.step_wizard
@@ -11308,8 +11134,8 @@ msgid ""
 "Our support team is available 24/7 to assist with any inquiries or issues, "
 "ensuring you get help whenever you need it."
 msgstr ""
-"Tukitiimimme on käytettävissä 24/7 ja auttaa sinua kaikissa kysymyksissä ja "
-"ongelmissa, jotta saat apua aina kun tarvitset sitä."
+"Tukitiimimme on tavoitettavissa 24/7 auttaakseen sinua missä tahansa "
+"kysymyksissä tai ongelmissa silloin, kun sitä tarvitset."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -11581,8 +11407,8 @@ msgid ""
 "Paragraph with <strong>bold</strong>, <span class=\"text-muted\">muted</"
 "span> and <em>italic</em> texts"
 msgstr ""
-"Kohta, jossa on <strong>lihavoituja</strong>, <span class=\"text-"
-"muted\">vaimennettuja</span> ja <em>kursiivisia</em> tekstejä"
+"Kohta, jossa on <strong>lihavoituja</strong>, <span class=\"text-muted\">"
+"vaimennettuja</span> ja <em>kursiivisia</em> tekstejä"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
@@ -11733,13 +11559,13 @@ msgstr "Pinterest"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
 msgid "Placeholder"
-msgstr "Paikanpitäjä"
+msgstr "Paikkamerkki"
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Places API"
-msgstr "Places API"
+msgid "Places API (NEW)"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
@@ -11775,7 +11601,7 @@ msgstr "Plausible tunnistusavain"
 #. odoo-javascript
 #: code:addons/website/static/src/snippets/s_website_form/000.js:0
 msgid "Please fill in the form correctly."
-msgstr "Täytä lomakkeen vaaditut kentät."
+msgstr "Ole hyvä ja täytä lomake oikein."
 
 #. module: website
 #. odoo-javascript
@@ -12198,7 +12024,7 @@ msgstr "Qweb"
 #. module: website
 #: model:ir.model,name:website.model_ir_qweb_field_contact
 msgid "Qweb Field Contact"
-msgstr "Qweb kentän kontakti"
+msgstr "Qweb-kentän yhteystieto"
 
 #. module: website
 #: model:ir.model,name:website.model_ir_qweb_field_html
@@ -12780,8 +12606,8 @@ msgid ""
 "Savor our fresh, local cuisine with a modern twist.<br/>Deliciously crafted "
 "for every taste!"
 msgstr ""
-"Nauti tuoreesta, paikallisesta keittiöstämme, jossa on moderni twisti.<br/"
-">Herkullisesti valmistettu jokaiseen makuun!"
+"Nauti tuoreesta, paikallisesta keittiöstämme, jossa on moderni twisti.<br/>"
+"Herkullisesti valmistettu jokaiseen makuun!"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features
@@ -12964,7 +12790,7 @@ msgstr "Turvallinen ja mukava istuvuus"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_dynamic_snippet_template
 msgid "See All"
-msgstr "Näytä kaikki"
+msgstr "Katso kaikki"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_dynamic_snippet_template
@@ -13475,7 +13301,7 @@ msgstr "Älypuhelimet"
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_about_s_text_cover
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Social"
-msgstr "Some"
+msgstr "Sosiaalinen"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
@@ -13555,6 +13381,12 @@ msgstr "Ääni"
 #: model_terms:ir.ui.view,arch_db:website.s_product_catalog
 msgid "Sourdough Bread"
 msgstr "Hapanleipä"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/dialog/edit_menu.xml:0
+msgid "Spaces are not allowed in URL."
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -13900,6 +13732,12 @@ msgid "System Fonts"
 msgstr "Järjestelmän fontit"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/dialog/seo.xml:0
+msgid "T"
+msgstr "T"
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_menus_logos
 msgid "T-shirts"
 msgstr "T-paidat"
@@ -14016,13 +13854,13 @@ msgstr "Televisiot"
 #: model_terms:ir.ui.view,arch_db:website.s_masonry_block_options
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Template"
-msgstr "Malli"
+msgstr "Mallipohja"
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/components/resource_editor/resource_editor.js:0
 msgid "Template ID: %s"
-msgstr "Mallipohjan ID: %s"
+msgstr "Mallipohjan tunnus: %s"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.qweb_500
@@ -14240,8 +14078,7 @@ msgstr "Täydellinen URL palvelintoimintoon verkkosivun kautta."
 #. odoo-python
 #: code:addons/website/models/website.py:0
 msgid "The homepage URL should be relative and start with '/'."
-msgstr ""
-"Kotisivun URL-osoitteen tulisi olla suhteellinen ja alkaa '/'-merkillä."
+msgstr "Kotisivun URL-osoitteen tulisi olla suhteellinen ja alkaa '/'-merkillä."
 
 #. module: website
 #. odoo-javascript
@@ -14532,8 +14369,8 @@ msgid ""
 msgstr ""
 "Tämä kenttä tallentaa nykyisen `arch_db`-tietokannan ennen kuin siihen "
 "kirjoitetaan.\n"
-"                                                                         Hyödyllinen "
-"rikkinäisen näkymän (pehmeään) nollaamiseen."
+"                                                                         "
+"Hyödyllinen rikkinäisen näkymän (pehmeään) nollaamiseen."
 
 #. module: website
 #. odoo-javascript
@@ -14578,9 +14415,9 @@ msgid ""
 "This is a simple hero unit, a simple jumbotron-style component for calling "
 "extra attention to featured content or information."
 msgstr ""
-"Tämä on yksinkertainen sankariyksikkö. Yksinkertainen jumbotron-tyylinen "
-"komponentti, jolla kiinnitetään erityistä huomiota esillä olevaan sisältöön "
-"tai tietoon."
+"Tämä on yksinkertainen hero-yksikkö. Yksinkertainen jumbotron-tyylinen "
+"komponentti, jolla kiinnitetään huomiota esillä olevaan sisältöön tai "
+"tietoon."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_key_images
@@ -14875,9 +14712,9 @@ msgid ""
 "list view and click on 'Portal Access Management' option in the dropdown "
 "menu *Action*."
 msgstr ""
-"Lähettääksesi kutsuja B2B-tilassa, avaa kontakti tai valitse useita "
-"listanäkymässä, ja klikkaa \"Portaalin käyttöoikeuksien hallinta\" "
-"\"Toiminto\"-pudotusvalikosta."
+"Lähetä kutsuja B2B-tilassa avaamalla yhteystieto tai valitsemalla useita "
+"listanäkymässä. Klikkaa pudotusvalikossa \"Portaalin käyttöoikeuksien "
+"hallinta\"."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -14907,7 +14744,7 @@ msgstr "Tony Fred, toimitusjohtaja"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_chart_options
 msgid "Tooltip"
-msgstr "Työkaluvinkki"
+msgstr "Työkaluvihje"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_card_options
@@ -15057,7 +14894,7 @@ msgstr "Käännetty sisältö"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Trigger"
-msgstr "Liipaisin"
+msgstr "Laukaisin"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website__configurator_done
@@ -15295,7 +15132,7 @@ msgstr "Päivitykset ja parannukset"
 #. odoo-javascript
 #: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
 msgid "Upload"
-msgstr "Lähetä"
+msgstr "Lataa"
 
 #. module: website
 #. odoo-javascript
@@ -15571,7 +15408,7 @@ msgstr "Video"
 #: model:ir.model.fields,field_description:website.field_website_page__view_id
 #: model_terms:ir.ui.view,arch_db:website.website_controller_pages_form_view
 msgid "View"
-msgstr "Näytä"
+msgstr "Katso"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_controller_page__arch
@@ -15927,8 +15764,8 @@ msgid ""
 "We deliver personalized solutions, ensuring that every customer receives top-"
 "tier service tailored to their needs."
 msgstr ""
-"Tarjoamme yksilöllisiä ratkaisuja, joilla varmistamme, että jokainen asiakas "
-"saa tarpeidensa mukaista huippupalvelua."
+"Tarjoamme yksilöllisiä ratkaisuja varmistaaksemme, että jokainen asiakas saa "
+"tarpeidensa mukaista huippupalvelua."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_striped_center_top
@@ -16021,8 +15858,8 @@ msgid ""
 "We provide 24/7 support through various channels, including live chat, "
 "email, and phone, to assist with any queries."
 msgstr ""
-"Tarjoamme 24/7-tukea eri kanavien, kuten live-chatin, sähköpostin ja "
-"puhelimen, kautta, jotta voimme auttaa kaikissa kysymyksissä."
+"Tarjoamme tukea 24/7 eri kanavien, kuten live-chatin, sähköpostin ja "
+"puhelimen kautta, jotta voimme auttaa kaikissa kysymyksissä."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cards_grid
@@ -16041,9 +15878,8 @@ msgid ""
 "We provide transparent pricing that offers great value, ensuring you always "
 "get the best deal without hidden costs."
 msgstr ""
-"Tarjoamme läpinäkyvää hinnoittelua, joka tarjoaa erinomaista vastinetta, ja "
-"varmistamme, että saat aina parhaan mahdollisen tarjouksen ilman "
-"piilokustannuksia."
+"Läpinäkyvä hinnoittelumme tarjoaa vastinetta rahoillesi sekä varmistaa, että "
+"saat aina parhaan mahdollisen tarjouksen ilman piilokukuluja."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -16054,8 +15890,8 @@ msgid ""
 msgstr ""
 "Ymmärrämme, että alkuasetukset voivat olla pelottavia, varsinkin jos olet "
 "uusi käyttäjämme, joten olemme suunnitelleet vaiheittaisen oppaan, joka "
-"opastaa sinut jokaisen vaiheen läpi ja varmistaa, että pääset heti alkuun."
-"<br/>"
+"opastaa sinut jokaisen vaiheen läpi ja varmistaa, että pääset heti "
+"alkuun.<br/>"
 
 #. module: website
 #. odoo-javascript
@@ -16302,7 +16138,7 @@ msgstr "Verkkosivun teemasivu"
 #: model:ir.model.fields,field_description:website.field_website_published_multi_mixin__website_url
 #: model:ir.model.fields,field_description:website.field_website_snippet_filter__website_url
 msgid "Website URL"
-msgstr "Verkkosivuston osoite"
+msgstr "Verkkosivun URL"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_ir_actions_server__website_url
@@ -16623,9 +16459,30 @@ msgstr ""
 "lukijoille.<br/><br/>"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/snippets/s_social_media/options.js:0
+#: model_terms:ir.ui.view,arch_db:website.footer_custom
+#: model_terms:ir.ui.view,arch_db:website.header_social_links
+#: model_terms:ir.ui.view,arch_db:website.s_mega_menu_odoo_menu
+#: model_terms:ir.ui.view,arch_db:website.s_references_social
+#: model_terms:ir.ui.view,arch_db:website.s_share
+#: model_terms:ir.ui.view,arch_db:website.s_social_media
+#: model_terms:ir.ui.view,arch_db:website.snippet_options
+#: model_terms:ir.ui.view,arch_db:website.template_footer_centered
+#: model_terms:ir.ui.view,arch_db:website.template_footer_headline
+#: model_terms:ir.ui.view,arch_db:website.template_footer_links
+msgid "X"
+msgstr "X"
+
+#. module: website
 #: model:ir.model.fields,field_description:website.field_website__social_twitter
 msgid "X Account"
 msgstr "X Tili"
+
+#. module: website
+#: model_terms:ir.ui.view,arch_db:website.snippet_options
+msgid "Y"
+msgstr "Y"
 
 #. module: website
 #. odoo-javascript
@@ -16686,10 +16543,10 @@ msgid ""
 "inquiries or issues."
 msgstr ""
 "Voit ottaa yhteyttä asiakastukitiimiimme lähettämällä sähköpostia "
-"osoitteeseen info@yourcompany.example.com, soittamalla numeroon +1 "
-"555-555-5556 tai käyttämällä verkkosivustomme live-chattia. Asiantunteva "
-"tiimimme on käytettävissä ympäri vuorokauden ja auttaa kaikissa "
-"tiedusteluissa ja ongelmissa."
+"osoitteeseen info@yrityksesi.esimerkki.fi, soittamalla numeroon +1 555-555-"
+"5556 tai käyttämällä verkkosivustomme live-chattia. Asiantunteva tiimimme on "
+"käytettävissäsi ympäri vuorokauden ja auttaa kaikissa tiedusteluissa sekä "
+"ongelmissa."
 
 #. module: website
 #. odoo-javascript
@@ -16794,8 +16651,8 @@ msgid ""
 "Your Dynamic Snippet will be displayed here... This message is displayed "
 "because you did not provide both a filter and a template to use.<br/>"
 msgstr ""
-"Dynaaminen pätkäsi näytetään tässä... Tämä viesti näytetään, koska et ole "
-"antanut sekä suodatinta että mallia käytettäväksi.<br/>"
+"Dynaaminen katkelmasi näytetään tässä... Näet tämän viestin, koska et "
+"antanut suodatinta tai käytettävää mallipohjaa.<br/>"
 
 #. module: website
 #. odoo-javascript
@@ -17290,7 +17147,7 @@ msgstr "kehittää brändiä"
 #. odoo-javascript
 #: code:addons/website/static/src/components/website_loader/website_loader.js:0
 msgid "e-learning platform"
-msgstr "verkko-oppimisalusta"
+msgstr "verkko-oppimisen alusta"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
@@ -17483,7 +17340,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.template_footer_contact
 #: model_terms:ir.ui.view,arch_db:website.template_footer_descriptive
 msgid "hello@mycompany.com"
-msgstr "hello@mycompany.com"
+msgstr "hei@yritykseni.fi"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -17587,7 +17444,7 @@ msgid ""
 "history, story, events, milestones, chronology, sequence, progression, "
 "achievements"
 msgstr ""
-"historia, tarina, tapahtumat, virstanpylväät, kronologia, järjestys, "
+"historia, tarina, tapahtumat, välitavoitteet, kronologia, sekvenssi, "
 "eteneminen, saavutukset"
 
 #. module: website
@@ -17596,9 +17453,9 @@ msgid ""
 "history, story, events, milestones, chronology, sequence, progression, "
 "achievements, changelog, updates, announcements, recent, latest"
 msgstr ""
-"historia, tarina, tapahtumat, virstanpylväät, kronologia, järjestys, "
-"eteneminen, saavutukset, muutospäiväkirja, päivitykset, ilmoitukset, "
-"viimeisimmät, uusimmat, viimeisimmät"
+"historia, tarina, tapahtumat, välitavoitteet, kronologia, sekvenssi, "
+"eteneminen, saavutukset, muutosloki, päivitykset, ilmoitukset, viimeisimmät, "
+"uusimmat"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -17641,7 +17498,7 @@ msgstr "info@yourcompany.com"
 #: model_terms:ir.ui.view,arch_db:website.template_footer_centered
 #: model_terms:ir.ui.view,arch_db:website.template_footer_headline
 msgid "info@yourcompany.example.com"
-msgstr "info@yourcompany.example.com"
+msgstr "info@yrityksesi.esimerkki.fi"
 
 #. module: website
 #. odoo-javascript
@@ -17724,7 +17581,7 @@ msgstr "odoo.official"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.step_wizard
 msgid "of"
-msgstr "of"
+msgstr " "
 
 #. module: website
 #. odoo-javascript
@@ -17799,7 +17656,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
 msgid "placeholder"
-msgstr "paikanvaraaja"
+msgstr "paikkamerkki"
 
 #. module: website
 #. odoo-javascript
@@ -17966,9 +17823,9 @@ msgid ""
 "skills, achievements, benchmarks, milestones, indicators, data, "
 "measurements, reports, trends, results"
 msgstr ""
-"tilastot, tilastot, KPI, mittarit, kojelauta, analytiikka, kohokohdat, "
-"luvut, taidot, saavutukset, vertailuarvot, virstanpylväät, indikaattorit, "
-"tiedot, mittaukset, raportit, trendit, tulokset"
+"statistiikka, tilastot, suorituskykymittarit, KPI, mittarit, koontinäyttö, "
+"analytiikka, kohokohdat, luvut, taidot, saavutukset, vertailuarvot, "
+"välitavoitteet, indikaattorit, data, mittaukset, raportit, trendit, tulokset"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -17978,10 +17835,10 @@ msgid ""
 "measurements, reports, trends, results, analytics, cta, call to action, "
 "button"
 msgstr ""
-"tilastot, tilastot, KPI, mittarit, kojelauta, analytiikka, kohokohdat, "
-"luvut, taidot, saavutukset, vertailuarvot, virstanpylväät, indikaattorit, "
-"tiedot, mittaukset, raportit, trendit, tulokset, analytiikka, cta, "
-"toimintakutsu, painike, painike"
+"statistiikka, tilastot, suorituskykymittarit, KPI, mittarit, koontinäyttö, "
+"analytiikka, kohokohdat, luvut, taidot, saavutukset, vertailuarvot, "
+"välitavoitteet, indikaattorit, data, mittaukset, raportit, trendit, "
+"tulokset, analytiikka, cta, toimintakehote, painike"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -17990,10 +17847,10 @@ msgid ""
 "skills, achievements, benchmarks, milestones, indicators, data, "
 "measurements, reports, trends, results, analytics, summaries, summary"
 msgstr ""
-"tilastot, tilastot, KPI, mittarit, kojelauta, analytiikka, kohokohdat, "
-"luvut, taidot, saavutukset, vertailuarvot, virstanpylväät, indikaattorit, "
-"tiedot, mittaukset, raportit, trendit, tulokset, analytiikka, yhteenvedot, "
-"yhteenveto, yhteenveto"
+"statistiikka, tilastot, suorituskykymittarit, KPI, mittarit, koontinäyttö, "
+"analytiikka, kohokohdat, luvut, taidot, saavutukset, vertailuarvot, "
+"välitavoitteet, indikaattorit, data, mittaukset, raportit, trendit, "
+"tulokset, analytiikka, yhteenvedot, yhteenveto"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -18003,10 +17860,11 @@ msgid ""
 "measurements, reports, trends, results, analytics, summaries, summary, large-"
 "figures, prominent, standout"
 msgstr ""
-"tilastot, tilastot, KPI, mittarit, kojelauta, analytiikka, kohokohdat, "
-"luvut, taidot, saavutukset, vertailuarvot, virstanpylväät, indikaattorit, "
-"tiedot, mittaukset, raportit, trendit, tulokset, analytiikka, yhteenvedot, "
-"yhteenveto, yhteenveto, suuret luvut, näkyvä, erottuva, erottuva"
+"statistiikka, tilastot, suorituskykymittarit, KPI, mittarit, koontinäyttö, "
+"analytiikka, kohokohdat, luvut, taidot, saavutukset, vertailuarvot, "
+"välitavoitteet, indikaattorit, data, mittaukset, raportit, trendit, "
+"tulokset, analytiikka, yhteenvedot, yhteenveto, suuret luvut, merkittävä, "
+"erottuva"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
@@ -18066,7 +17924,7 @@ msgstr "⌙ Viive"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_rating_options
 msgid "⌙ Inactive"
-msgstr "⌙ Passiivinen"
+msgstr "⌙ Epäaktiivinen"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_google_map_options
@@ -18087,3 +17945,126 @@ msgstr "✽ Pizzat"
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid "✽  What We Offer"
 msgstr "✽ Mitä tarjoamme"
+
+#~ msgid "Places API"
+#~ msgstr "Places API"
+
+#~ msgid "<u>Wednesday</u><br/>8.00am-12.00am"
+#~ msgstr "<u>Keskiviikko</u><br/>8.00-12.00"
+
+#~ msgid "$1.50"
+#~ msgstr "$1.50"
+
+#~ msgid "$12.00"
+#~ msgstr "$12.00"
+
+#~ msgid "$13.00"
+#~ msgstr "$13.00"
+
+#~ msgid "$13.50"
+#~ msgstr "$13.50"
+
+#~ msgid "$14.50"
+#~ msgstr "$14.50"
+
+#~ msgid "$15.00"
+#~ msgstr "$15.00"
+
+#~ msgid "$16.00"
+#~ msgstr "$16.00"
+
+#~ msgid "$25.00"
+#~ msgstr "$25.00"
+
+#~ msgid "$26.00"
+#~ msgstr "$26.00"
+
+#~ msgid "$28.00"
+#~ msgstr "$28.00"
+
+#~ msgid "$3.00"
+#~ msgstr "$ 3.00"
+
+#~ msgid "$3.50"
+#~ msgstr "$3.50"
+
+#~ msgid "$4.00"
+#~ msgstr "$4.00"
+
+#~ msgid "$4.10"
+#~ msgstr "$4.10"
+
+#~ msgid "$4.25"
+#~ msgstr "$4.25"
+
+#~ msgid "$4.50"
+#~ msgstr "$4.50"
+
+#~ msgid "$5.00"
+#~ msgstr "$ 5.00"
+
+#~ msgid "+1 555-555-5556"
+#~ msgstr "+1 555-555-5556"
+
+#~ msgid "+1 555-555-5556\""
+#~ msgstr "+1 555-555-5556\""
+
+#~ msgid "+12"
+#~ msgstr "+12"
+
+#~ msgid "+1555-555-5556"
+#~ msgstr "+1555-555-5556"
+
+#~ msgid "+25.000"
+#~ msgstr "+25.000"
+
+#~ msgid "01"
+#~ msgstr "01"
+
+#~ msgid "02"
+#~ msgstr "02"
+
+#~ msgid "03"
+#~ msgstr "03"
+
+#~ msgid "04"
+#~ msgstr "04"
+
+#~ msgid "1/2 - 1/2"
+#~ msgstr "1/2 - 1/2"
+
+#~ msgid "1/3 - 2/3"
+#~ msgstr "1/3 - 2/3"
+
+#~ msgid "1/4 - 3/4"
+#~ msgstr "1/4 - 3/4"
+
+#~ msgid "100%"
+#~ msgstr "100%"
+
+#~ msgid "12"
+#~ msgstr "12"
+
+#~ msgid "16"
+#~ msgstr "16"
+
+#~ msgid "22%"
+#~ msgstr "22%"
+
+#~ msgid "25%"
+#~ msgstr "25%"
+
+#~ msgid "30"
+#~ msgstr "30"
+
+#~ msgid "45"
+#~ msgstr "45"
+
+#~ msgid "45%"
+#~ msgstr "45%"
+
+#~ msgid "50%"
+#~ msgstr "50%"
+
+#~ msgid "75%"
+#~ msgstr "75%"

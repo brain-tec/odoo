@@ -7,13 +7,13 @@
 # Wil Odoo, 2025
 # Rasareeyar Lappiam, 2025
 #
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:38+0000\n"
-"PO-Revision-Date: 2025-11-21 06:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-28 03:34+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Thai <https://translate.odoo.com/projects/odoo-18/web_editor/"
 "th/>\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: web_editor
 #. odoo-javascript
@@ -79,16 +79,6 @@ msgid "(URL or Embed)"
 msgstr "(URL หรือ ฝัง)"
 
 #. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
-msgid "100%"
-msgstr "100%"
-
-#. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
-msgid "1977"
-msgstr "1977"
-
-#. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
@@ -100,16 +90,6 @@ msgstr "1x"
 #: code:addons/web_editor/static/src/js/wysiwyg/wysiwyg.js:0
 msgid "2 columns"
 msgstr "2 คอลัมน์"
-
-#. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
-msgid "25"
-msgstr "25"
-
-#. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
-msgid "25%"
-msgstr "25%"
 
 #. module: web_editor
 #. odoo-javascript
@@ -157,21 +137,11 @@ msgid "5 Stars"
 msgstr "5 ดาว"
 
 #. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
-msgid "50%"
-msgstr "50%"
-
-#. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 msgid "5x"
 msgstr "5x"
-
-#. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
-msgid "90"
-msgstr "90"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
@@ -795,6 +765,12 @@ msgstr "คัดลอกและวาง URL หรือโค้ดสำ�
 
 #. module: web_editor
 #. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Correct"
+msgstr "ถูกต้อง"
+
+#. module: web_editor
+#. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/snippets.editor.js:0
 msgid "Could not install module %s"
 msgstr "ไม่สามารถติดตั้งโมดูล %s ได้"
@@ -1229,6 +1205,12 @@ msgstr "สำหรับเหตุผลทางเทคนิค บล�
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "Format"
 msgstr "รูปแบบ"
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Friendly"
+msgstr "เป็นมิตร"
 
 #. module: web_editor
 #. odoo-javascript
@@ -1749,6 +1731,12 @@ msgstr "ซ้าย"
 
 #. module: web_editor
 #. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Lengthen"
+msgstr ""
+
+#. module: web_editor
+#. odoo-javascript
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 msgid "Light"
 msgstr "อ่อน"
@@ -2073,6 +2061,12 @@ msgid "Patterns"
 msgstr "แบบแผน"
 
 #. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Persuasive"
+msgstr "การโน้มน้าว"
+
+#. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
 msgid "Position"
@@ -2084,6 +2078,12 @@ msgstr "ตำแหน่ง"
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 msgid "Preview"
 msgstr "ตัวอย่าง"
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Professional"
+msgstr "มืออาชีพ"
 
 #. module: web_editor
 #. odoo-javascript
@@ -2541,6 +2541,12 @@ msgstr "รูปร่าง: ภาพขนาดเล็ก"
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 msgid "Shapes"
 msgstr "รูปร่าง"
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Shorten"
+msgstr ""
 
 #. module: web_editor
 #. odoo-javascript
@@ -3347,6 +3353,24 @@ msgstr "การจัดการข้อความของ websocket"
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 msgid "www.example.com"
 msgstr "www.example.com"
+
+#~ msgid "100%"
+#~ msgstr "100%"
+
+#~ msgid "1977"
+#~ msgstr "1977"
+
+#~ msgid "25"
+#~ msgstr "25"
+
+#~ msgid "25%"
+#~ msgstr "25%"
+
+#~ msgid "50%"
+#~ msgstr "50%"
+
+#~ msgid "90"
+#~ msgstr "90"
 
 #~ msgid "Hide Dailymotion logo"
 #~ msgstr "ซ่อนโลโก้ Dailymotion"

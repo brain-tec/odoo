@@ -3,14 +3,14 @@
 # * stock_account
 #
 # Translators:
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-12-31 16:39+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-04-10 18:38+0000\n"
+"PO-Revision-Date: 2026-10-20 17:34+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Kabyle <https://translate.odoo.com/projects/odoo-18/"
 "stock_account/kab/>\n"
 "Language: kab\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: stock_account
 #. odoo-python
@@ -67,11 +67,6 @@ msgid ""
 ")\n"
 "                            <small class=\"mx-2 fst-italic\">Use a negative "
 "added value to record a decrease in the product value</small>"
-msgstr ""
-
-#. module: stock_account
-#: model_terms:ir.ui.view,arch_db:stock_account.stock_account_report_invoice_document
-msgid "6.00"
 msgstr ""
 
 #. module: stock_account
@@ -606,6 +601,14 @@ msgid ""
 "Product %(product)s has quantity in valued location %(location)s without any "
 "lot.\n"
 "Please assign lots to all your quantities before enabling lot valuation."
+msgstr ""
+
+#. module: stock_account
+#. odoo-python
+#: code:addons/stock_account/models/stock_move_line.py:0
+msgid ""
+"Product %(product)s is valuated by lot: an explicit Lot/Serial number is "
+"required."
 msgstr ""
 
 #. module: stock_account

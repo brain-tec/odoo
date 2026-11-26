@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { registries } from "@odoo/o-spreadsheet";
+import { constants, registries, Model, helpers } from "@odoo/o-spreadsheet";
 import { createSpreadsheetWithChart } from "@spreadsheet/../tests/helpers/chart";
 import {
     addGlobalFilter,
@@ -9,7 +9,12 @@ import {
     setGlobalFilterValue,
 } from "@spreadsheet/../tests/helpers/commands";
 import { defineSpreadsheetModels } from "@spreadsheet/../tests/helpers/data";
-import { getCell, getEvaluatedCell } from "@spreadsheet/../tests/helpers/getters";
+import {
+    getCell,
+    getEvaluatedCell,
+    getComputedStyle,
+    getComputedBorder,
+} from "@spreadsheet/../tests/helpers/getters";
 import { THIS_YEAR_GLOBAL_FILTER } from "@spreadsheet/../tests/helpers/global_filter";
 import { createModelWithDataSource } from "@spreadsheet/../tests/helpers/model";
 import { createSpreadsheetWithPivot } from "@spreadsheet/../tests/helpers/pivot";
@@ -17,6 +22,8 @@ import { freezeOdooData, waitForDataLoaded } from "@spreadsheet/helpers/model";
 import { OdooPivot, OdooPivotRuntimeDefinition } from "@spreadsheet/pivot/odoo_pivot";
 
 const { pivotRegistry } = registries;
+const { PIVOT_TABLE_CONFIG } = constants;
+const { toXC } = helpers;
 
 import { getMenuServerData } from "@spreadsheet/../tests/links/menu_data_utils";
 import { createSpreadsheetWithList } from "../helpers/list";
@@ -261,9 +268,9 @@ test("odoo links are replaced with their label", async function () {
         serverData: getMenuServerData(),
     });
     const frozenData = await freezeOdooData(model);
-    expect(frozenData.sheets[0].cells.A1.content).toBe("menu_xml");
-    expect(frozenData.sheets[0].cells.A2.content).toBe("menu_id");
-    expect(frozenData.sheets[0].cells.A3.content).toBe("odoo_view");
+    expect(frozenData.sheets[0].cells.A1.content).toBe("[menu_xml](neutralized:link)");
+    expect(frozenData.sheets[0].cells.A2.content).toBe("[menu_id](neutralized:link)");
+    expect(frozenData.sheets[0].cells.A3.content).toBe("[odoo_view](neutralized:link)");
     expect(frozenData.sheets[0].cells.A4.content).toBe("[external_link](https://odoo.com)");
     expect(frozenData.sheets[0].cells.A5.content).toBe("[internal_link](o-spreadsheet://Sheet1)");
 });
@@ -296,7 +303,37 @@ test("spilled pivot table", async function () {
     );
 });
 
-test("empty string computed measure is exported as =\"\"", async function () {
+test("Dynamic table of an array odoo formula is frozen", async function () {
+    const { model } = await createSpreadsheetWithPivot({
+        arch: /* xml */ `
+          <pivot>
+              <field name="probability" type="measure"/>
+          </pivot>
+        `,
+    });
+    const sheetId = model.getters.getActiveSheetId();
+    setCellContent(model, "A10", "=PIVOT(1)");
+    model.dispatch("CREATE_TABLE", {
+        tableType: "dynamic",
+        sheetId,
+        ranges: [model.getters.getRangeDataFromXc(sheetId, "A10:B12")],
+        config: { ...PIVOT_TABLE_CONFIG },
+    });
+    setCellStyle(model, "B12", { bold: true });
+    const data = await freezeOdooData(model);
+
+    const importedModel = new Model(data);
+    expect(importedModel.getters.getTables(sheetId)).toHaveLength(0);
+    for (let row = 9; row <= 11; row++) {
+        for (let col = 0; col <= 1; col++) {
+            const xc = toXC(col, row);
+            expect(getComputedStyle(importedModel, xc)).toEqual(getComputedStyle(model, xc));
+            expect(getComputedBorder(importedModel, xc)).toEqual(getComputedBorder(model, xc));
+        }
+    }
+});
+
+test('empty string computed measure is exported as =""', async function () {
     const { model } = await createSpreadsheetWithPivot();
     setCellContent(model, "A10", "=PIVOT(1)");
     expect(getEvaluatedCell(model, "B12").value).toBe(""); // empty value

@@ -1,24 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_sale
+# * website_sale
 #
 # Translators:
 # Wil Odoo, 2025
 # Rasareeyar Lappiam, 2025
 #
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
+# Nusara Boonma <nuboo@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-22 18:36+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Rasareeyar Lappiam, 2025\n"
-"Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
+"PO-Revision-Date: 2026-10-28 06:33+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Thai <https://translate.odoo.com/projects/odoo-18/"
+"website_sale/th/>\n"
 "Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products
@@ -69,29 +73,14 @@ msgid "'. Showing results for '"
 msgstr "กำลังแสดงผลลัพธ์สำหรับ "
 
 #. module: website_sale
-#: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_image_width__100_pc
-msgid "100 %"
-msgstr "100 %"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "100 percent"
 msgstr "100 เปอร์เซ็นต์"
 
 #. module: website_sale
-#: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_image_width__50_pc
-msgid "50 %"
-msgstr "50 %"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "50 percent"
 msgstr "50 เปอร์เซ็นต์"
-
-#. module: website_sale
-#: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_image_width__66_pc
-msgid "66 %"
-msgstr "66 %"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -333,15 +322,6 @@ msgstr ""
 "<span class=\"d-md-none fa fa-shopping-cart\"/>\n"
 "                            <span class=\"d-none d-md-inline\">หยิบใส่ตะกร้า</"
 "span>"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
-"specific.\" groups=\"website.group_multi_website\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-globe\" title=\"ค่าที่ตั้งไว้นี้เป็นค่าเฉพาะเว็บไซต์\" "
-"groups=\"website.group_multi_website\"/>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_dynamic_snippet_products_preview_data
@@ -1911,12 +1891,12 @@ msgstr "รายละเอียดสำหรับเว็บไซต์
 #. module: website_sale
 #: model:product.public.category,name:website_sale.public_category_services_design_and_planning
 msgid "Design and Planning"
-msgstr ""
+msgstr "การออกแบบและการวางแผน"
 
 #. module: website_sale
 #: model:product.public.category,name:website_sale.public_category_lamps_desk
 msgid "Desk Lamps"
-msgstr ""
+msgstr "โคมไฟตั้งโต๊ะ"
 
 #. module: website_sale
 #: model:product.public.category,name:website_sale.public_category_desks
@@ -2281,7 +2261,7 @@ msgstr ""
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_website__fiscal_position_id
 msgid "Fiscal Position"
-msgstr "ฐานะทางการเงิน"
+msgstr "เงื่อนไขภาษี"
 
 #. module: website_sale
 #: model:product.public.category,name:website_sale.public_category_desks_foldable
@@ -3305,7 +3285,7 @@ msgstr "หมายเลขโทรศัพท์"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "Pills"
-msgstr "ทรงยา"
+msgstr "ปุ่มขอบมน"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_share_buttons
@@ -3721,7 +3701,7 @@ msgstr "ปริมาณ"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "Radio"
-msgstr "คลื่นวิทยุ"
+msgstr "ปุ่มตัวเลือก"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -4241,6 +4221,14 @@ msgstr "ขายหมดแล้ว"
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/controllers/main.py:0
+msgid ""
+"Some products in your cart are not available for purchase in your country. "
+"Please remove them or contact us."
+msgstr ""
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
 msgid "Some required fields are empty."
 msgstr "ช่องที่ต้องกรอกบางช่องว่างเปล่า"
 
@@ -4369,6 +4357,14 @@ msgid "Taxes"
 msgstr "ภาษี"
 
 #. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+msgid ""
+"Taxes have been updated based on your address. Your payment method has not "
+"been charged."
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "Text"
 msgstr "ข้อความ"
@@ -4466,6 +4462,14 @@ msgstr ""
 
 #. module: website_sale
 #. odoo-python
+#: code:addons/website_sale/controllers/combo_configurator.py:0
+msgid ""
+"The number of selected combo items must match the number of available combo "
+"choices."
+msgstr "จำนวนไอเทมคอมโบที่เลือกจะต้องตรงกับจำนวนตัวเลือกคอมโบที่มีให้เลือก"
+
+#. module: website_sale
+#. odoo-python
 #: code:addons/website_sale/controllers/payment.py:0
 msgid "The order has been cancelled."
 msgstr "คำสั่งซื้อถูกยกเลิก"
@@ -4560,10 +4564,22 @@ msgid "This product is no longer available."
 msgstr "สินค้านี้ไม่มีจำหน่ายแล้ว"
 
 #. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+msgid "This product is not available for purchase in your country."
+msgstr ""
+
+#. module: website_sale
 #. odoo-javascript
 #: code:addons/website_sale/static/src/js/website_sale_reorder.js:0
 msgid "This product is not available for purchase."
 msgstr "สินค้านี้ไม่มีจำหน่าย"
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+msgid "This product is part of a combo and can't be updated individually."
+msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products_item
@@ -4710,6 +4726,11 @@ msgstr "ใช้ Google Places API เพื่อตรวจสอบที�
 #: code:addons/website_sale/controllers/main.py:0
 msgid "VAT"
 msgstr "ภาษีมูลค่าเพิ่ม (VAT)"
+
+#. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
+msgid "Values set here are website-specific."
+msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_add_to_cart_options
@@ -5007,6 +5028,11 @@ msgid "With three feet"
 msgstr "ด้วยสามขา"
 
 #. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.product_share_buttons
+msgid "X"
+msgstr "X"
+
+#. module: website_sale
 #. odoo-javascript
 #: code:addons/website_sale/static/src/xml/website_sale_reorder_modal.xml:0
 msgid "Yes"
@@ -5230,6 +5256,30 @@ msgstr "ข้อกำหนดและเงื่อนไข"
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 msgid "to follow your order."
 msgstr "เพื่อปฏิบัติตามคำสั่งของคุณ"
+
+#. module: website_sale
+#. odoo-javascript
+#: code:addons/website_sale/static/src/xml/website_sale_reorder_modal.xml:0
+#: model_terms:ir.ui.view,arch_db:website_sale.cart_combo_item_line
+#: model_terms:ir.ui.view,arch_db:website_sale.checkout_layout
+msgid "x"
+msgstr "x"
+
+#~ msgid "100 %"
+#~ msgstr "100 %"
+
+#~ msgid "50 %"
+#~ msgstr "50 %"
+
+#~ msgid "66 %"
+#~ msgstr "66 %"
+
+#~ msgid ""
+#~ "<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
+#~ "specific.\" groups=\"website.group_multi_website\"/>"
+#~ msgstr ""
+#~ "<span class=\"fa fa-lg fa-globe\" title=\"ค่าที่ตั้งไว้นี้เป็นค่าเฉพาะเว็บไซต์\" "
+#~ "groups=\"website.group_multi_website\"/>"
 
 #~ msgid ""
 #~ "Your Dynamic Snippet will be displayed here...\n"

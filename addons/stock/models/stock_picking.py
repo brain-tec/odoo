@@ -889,13 +889,14 @@ class Picking(models.Model):
                 volume += move.product_uom._compute_quantity(move.quantity, move.product_id.uom_id) * move.product_id.volume
             picking.shipping_volume = volume
 
-    @api.depends('move_ids.date_deadline', 'move_type')
+    @api.depends('move_ids.date_deadline', 'move_ids.state', 'move_type')
     def _compute_date_deadline(self):
         for picking in self:
+            moves = picking.move_ids.filtered(lambda m: m.state != 'cancel' and m.date_deadline)
             if picking.move_type == 'direct':
-                picking.date_deadline = min(picking.move_ids.filtered('date_deadline').mapped('date_deadline'), default=False)
+                picking.date_deadline = min(moves.mapped('date_deadline'), default=False)
             else:
-                picking.date_deadline = max(picking.move_ids.filtered('date_deadline').mapped('date_deadline'), default=False)
+                picking.date_deadline = max(moves.mapped('date_deadline'), default=False)
 
     def _set_scheduled_date(self):
         for picking in self:
@@ -947,6 +948,9 @@ class Picking(models.Model):
 
     @api.depends('picking_type_id', 'partner_id')
     def _compute_location_id(self):
+        ir_default_get = self.env['ir.default'].sudo()._get
+        default_customer_location_id = ir_default_get('res.partner', 'property_stock_customer')
+        default_supplier_location_id = ir_default_get('res.partner', 'property_stock_supplier')
         for picking in self:
             if picking.state in ('cancel', 'done') or picking.return_id:
                 continue
@@ -954,10 +958,14 @@ class Picking(models.Model):
             if picking.picking_type_id:
                 location_src = picking.picking_type_id.default_location_src_id
                 if location_src.usage == 'supplier' and picking.partner_id:
-                    location_src = picking.partner_id.property_stock_supplier
+                    supplier_location = picking.partner_id.property_stock_supplier
+                    if supplier_location and supplier_location.id != default_supplier_location_id:
+                        location_src = supplier_location
                 location_dest = picking.picking_type_id.default_location_dest_id
                 if location_dest.usage == 'customer' and picking.partner_id:
-                    location_dest = picking.partner_id.property_stock_customer
+                    customer_location = picking.partner_id.property_stock_customer
+                    if customer_location and customer_location.id != default_customer_location_id:
+                        location_dest = customer_location
                 picking.location_id = location_src.id
                 picking.location_dest_id = location_dest.id
 
@@ -1209,7 +1217,7 @@ class Picking(models.Model):
             'type': 'ir.actions.act_window',
             'res_model': 'stock.move.line',
             'views': [(view_id, 'list')],
-            'domain': [('id', 'in', self.move_line_ids.ids)],
+            'domain': [('picking_id', '=', self.id)],
             'context': {
                 'sml_specific_default': True,
                 'default_picking_id': self.id,
@@ -1264,8 +1272,23 @@ class Picking(models.Model):
         done_incoming_moves = self.filtered(lambda p: p.picking_type_id.code in ('incoming', 'internal')).move_ids.filtered(lambda m: m.state == 'done')
         done_incoming_moves._trigger_assign()
 
+        self._intercompany_unpack()
         self._send_confirmation_email()
         return True
+
+    def _intercompany_unpack(self):
+        if not self.env.user.has_group('stock.group_tracking_lot') or\
+           not self.env['ir.config_parameter'].sudo().get_param('stock.intercompany_auto_unpack'):
+            return
+        for picking in self:
+            if not picking.partner_id:
+                continue
+            destination_company = self.env['res.company'].sudo().search([('partner_id', 'parent_of', picking.partner_id.id)], limit=1)
+            if (
+                    picking.location_dest_id.usage == 'transit'
+                    and destination_company != picking.company_id
+            ):
+                picking.move_line_ids.result_package_id.unpack()
 
     def _send_confirmation_email(self):
         subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
@@ -1277,8 +1300,11 @@ class Picking(models.Model):
                 subtype_id=subtype_id,
             )
 
+    def _check_move_lines_map_quant(self, move_lines, package):
+        return package._check_move_lines_map_quant(move_lines.filtered(lambda ml: ml.product_id.is_storable))
+
     def _check_move_lines_map_quant_package(self, package):
-        return package._check_move_lines_map_quant(self.move_line_ids.filtered(lambda ml: ml.package_id == package and ml.product_id.is_storable))
+        return self._check_move_lines_map_quant(self.move_line_ids.filtered(lambda ml: ml.package_id == package), package)
 
     def _get_entire_pack_location_dest(self, move_line_ids):
         location_dest_ids = move_line_ids.mapped('location_dest_id')
@@ -1288,11 +1314,13 @@ class Picking(models.Model):
 
     def _check_entire_pack(self):
         """ This function check if entire packs are moved in the picking"""
-        for package in self.move_line_ids.package_id:
-            pickings = self.move_line_ids.filtered(lambda ml: ml.package_id == package).picking_id
-            if pickings._check_move_lines_map_quant_package(package):
+        for package, package_move_lines in self.move_line_ids.grouped('package_id').items():
+            if not package:
+                continue
+            pickings = package_move_lines.picking_id
+            if pickings._check_move_lines_map_quant(package_move_lines, package):
                 package_level_ids = pickings.package_level_ids.filtered(lambda pl: pl.package_id == package)
-                move_lines_to_pack = pickings.move_line_ids.filtered(lambda ml: ml.package_id == package and not ml.result_package_id and ml.state not in ('done', 'cancel'))
+                move_lines_to_pack = package_move_lines.filtered(lambda ml: not ml.result_package_id and ml.state not in ('done', 'cancel'))
                 if not package_level_ids:
                     if len(pickings) == 1:
                         package_location = pickings._get_entire_pack_location_dest(move_lines_to_pack) or pickings.location_dest_id.id
@@ -1312,13 +1340,16 @@ class Picking(models.Model):
                     move_lines_without_package_level = move_lines_to_pack - move_lines_in_package_level
                     if package.package_use == 'disposable':
                         (move_lines_in_package_level | move_lines_without_package_level).result_package_id = package
-                    move_lines_in_package_level.result_package_id = package
                     for ml in move_lines_in_package_level:
                         ml.package_level_id = ml.move_id.package_level_id.id
                     move_lines_without_package_level.package_level_id = package_level_ids[0].id
 
+                    move_line_ids_by_package_level = package_move_lines.grouped(lambda ml: ml.package_level_id.id)
                     for pl in package_level_ids:
-                        pl.location_dest_id = pickings._get_entire_pack_location_dest(pl.move_line_ids) or pickings.location_dest_id.id
+                        pl_move_line_ids = move_line_ids_by_package_level.get(pl.id, self.env['stock.move.line'])
+                        pl_location_dest_id = pickings._get_entire_pack_location_dest(pl_move_line_ids) or pickings.location_dest_id.id
+                        if pl.location_dest_id.id != pl_location_dest_id:
+                            pl.location_dest_id = pl_location_dest_id
                     for move in move_lines_to_pack.move_id:
                         if all(line.package_level_id for line in move.move_line_ids) \
                                 and len(move.move_line_ids.package_level_id) == 1:
@@ -1576,6 +1607,7 @@ class Picking(models.Model):
             'move_ids': [],
             'move_line_ids': [],
             'backorder_id': self.id,
+            'return_id': self.return_id.id,
         })
 
     def _create_backorder(self, backorder_moves=None):

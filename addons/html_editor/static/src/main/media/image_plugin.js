@@ -258,7 +258,17 @@ export class ImagePlugin extends Plugin {
             downloadUrl: targetedImg.src,
         };
         this.document.getSelection().collapseToEnd();
-        this.fileViewer.open(fileModel);
+        this.document.activeElement.blur();
+        const onClose = () => {
+            this.dependencies.selection.focusEditable();
+        };
+        this.fileViewer.open(fileModel, undefined, onClose);
+        Promise.resolve().then(() => {
+            // Clear the selection after editor focus has been restored by
+            // onButtonClick(), otherwise the selection reappears.
+            const selection = this.document.getSelection();
+            selection.removeAllRanges();
+        });
     }
 
     deleteImage() {
@@ -349,10 +359,15 @@ export class ImagePlugin extends Plugin {
     }
 
     resetImageTransformation(image) {
-        image.setAttribute(
-            "style",
-            (image.getAttribute("style") || "").replace(/[^;]*transform[\w:]*;?/g, "")
-        );
+        const stylePropertiesToRemove = [
+            "transform",
+            "transform-box",
+            "transform-origin",
+            "transform-style",
+        ];
+        for (const styleProperty of stylePropertiesToRemove) {
+            image.style.removeProperty(styleProperty);
+        }
         this.dependencies.history.addStep();
     }
 

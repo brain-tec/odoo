@@ -19,13 +19,13 @@
 # digitouch UAB <digitouchagencyeur@gmail.com>, 2024
 # Linas Versada <linaskrisiukenas@gmail.com>, 2024
 # Jessica Jakara, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:38+0000\n"
-"PO-Revision-Date: 2025-11-21 06:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-28 03:33+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Lithuanian <https://translate.odoo.com/projects/odoo-18/"
 "web_editor/lt/>\n"
@@ -34,9 +34,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < "
-"11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? "
-"1 : n % 1 != 0 ? 2: 3);\n"
-"X-Generator: Weblate 5.12.2\n"
+"11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 "
+": n % 1 != 0 ? 2: 3);\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: web_editor
 #. odoo-javascript
@@ -94,16 +94,6 @@ msgid "(URL or Embed)"
 msgstr "(URL arba Embed kodas)"
 
 #. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
-msgid "100%"
-msgstr "100%"
-
-#. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
-msgid "1977"
-msgstr ""
-
-#. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
@@ -115,16 +105,6 @@ msgstr ""
 #: code:addons/web_editor/static/src/js/wysiwyg/wysiwyg.js:0
 msgid "2 columns"
 msgstr ""
-
-#. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
-msgid "25"
-msgstr "25"
-
-#. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
-msgid "25%"
-msgstr "25%"
 
 #. module: web_editor
 #. odoo-javascript
@@ -172,20 +152,10 @@ msgid "5 Stars"
 msgstr ""
 
 #. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
-msgid "50%"
-msgstr "50%"
-
-#. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 msgid "5x"
-msgstr ""
-
-#. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
-msgid "90"
 msgstr ""
 
 #. module: web_editor
@@ -465,7 +435,7 @@ msgstr "Automatinis paleidimas"
 #. odoo-javascript
 #: code:addons/web_editor/static/src/js/wysiwyg/wysiwyg.js:0
 msgid "Back to one column"
-msgstr ""
+msgstr "Grįžti į vieną stulpelį"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
@@ -482,12 +452,12 @@ msgstr "Fono spalva"
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
 msgid "Background Position"
-msgstr ""
+msgstr "Fono pozicija"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
 msgid "Background Shapes"
-msgstr ""
+msgstr "Fono figūros"
 
 #. module: web_editor
 #. odoo-javascript
@@ -685,7 +655,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/snippets.options.js:0
 msgid "Choose a record..."
-msgstr ""
+msgstr "Pasirinkite įrašą..."
 
 #. module: web_editor
 #. odoo-javascript
@@ -807,6 +777,12 @@ msgstr ""
 #: code:addons/web_editor/static/src/components/media_dialog/video_selector.xml:0
 msgid "Copy-paste your URL or embed code here"
 msgstr "Nukopijuokite savo URL arba embed kodą čia"
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Correct"
+msgstr "Teisingai"
 
 #. module: web_editor
 #. odoo-javascript
@@ -1061,7 +1037,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web_editor/static/src/js/backend/html_field.js:0
 msgid "Dynamic Placeholder"
-msgstr ""
+msgstr "Dinaminis vietos laikiklis"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
@@ -1244,6 +1220,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "Format"
 msgstr "Formatas"
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Friendly"
+msgstr ""
 
 #. module: web_editor
 #. odoo-javascript
@@ -1762,6 +1744,12 @@ msgstr "Kairė"
 
 #. module: web_editor
 #. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Lengthen"
+msgstr ""
+
+#. module: web_editor
+#. odoo-javascript
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 msgid "Light"
 msgstr ""
@@ -1870,7 +1858,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/js/wysiwyg/wysiwyg.js:0
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 msgid "Media"
-msgstr ""
+msgstr "Žiniasklaida"
 
 #. module: web_editor
 #. odoo-javascript
@@ -2050,7 +2038,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/snippets.options.js:0
 msgid "Overlay"
-msgstr ""
+msgstr "Perklotė"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
@@ -2086,6 +2074,12 @@ msgid "Patterns"
 msgstr ""
 
 #. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Persuasive"
+msgstr ""
+
+#. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
 msgid "Position"
@@ -2097,6 +2091,12 @@ msgstr "Pareigos"
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 msgid "Preview"
 msgstr "Peržiūra"
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Professional"
+msgstr "Profesionalas"
 
 #. module: web_editor
 #. odoo-javascript
@@ -2285,7 +2285,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web_editor/static/src/xml/add_snippet_dialog.xml:0
 msgid "Rename the block"
-msgstr ""
+msgstr "Pervardyti bloką"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
@@ -2488,13 +2488,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/snippets.editor.js:0
 msgid "Select a block on your page to style it."
-msgstr ""
+msgstr "Pasirinkite bloką savo puslapyje, kad nustatytumėte jo stilių."
 
 #. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/components/media_dialog/media_dialog.xml:0
 msgid "Select a media"
-msgstr ""
+msgstr "Pasirinkite mediją"
 
 #. module: web_editor
 #. odoo-javascript
@@ -2553,6 +2553,12 @@ msgstr "Forma: Miniatūra"
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 msgid "Shapes"
+msgstr ""
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Shorten"
 msgstr ""
 
 #. module: web_editor
@@ -2737,7 +2743,7 @@ msgstr "Tekstas"
 #. odoo-javascript
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 msgid "Text Color"
-msgstr ""
+msgstr "Teksto spalva"
 
 #. module: web_editor
 #. odoo-javascript
@@ -3346,6 +3352,18 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 msgid "www.example.com"
 msgstr ""
+
+#~ msgid "100%"
+#~ msgstr "100%"
+
+#~ msgid "25"
+#~ msgstr "25"
+
+#~ msgid "25%"
+#~ msgstr "25%"
+
+#~ msgid "50%"
+#~ msgstr "50%"
 
 #~ msgid "Hide Dailymotion logo"
 #~ msgstr "Slėpti Dailymotion logotipą"

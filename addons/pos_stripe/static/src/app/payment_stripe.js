@@ -3,6 +3,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { PaymentInterface } from "@point_of_sale/app/payment/payment_interface";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { roundCurrency } from "@point_of_sale/app/models/utils/currency";
 
 export class PaymentStripe extends PaymentInterface {
     setup() {
@@ -29,7 +30,7 @@ export class PaymentStripe extends PaymentInterface {
             return data.secret;
         } catch (error) {
             const message = error.code === 200 ? error.data.message : error.message;
-            this._showError(message, "Fetch Token");
+            this._showError(message, _t("Fetch Token"));
             this.terminal = false;
         }
     }
@@ -84,6 +85,8 @@ export class PaymentStripe extends PaymentInterface {
 
     async connectReader() {
         const line = this.pos.get_order().get_selected_paymentline();
+        this.pos.discoveredReaders = "[]";
+        await this.discoverReaders();
         const discoveredReaders = JSON.parse(this.pos.discoveredReaders);
         for (const selectedReader of discoveredReaders) {
             if (selectedReader.serial_number == this.payment_method_id.stripe_serial_number) {
@@ -151,7 +154,15 @@ export class PaymentStripe extends PaymentInterface {
             return false;
         }
         line.set_payment_status("waitingCard");
-        const collectPaymentMethod = await this.terminal.collectPaymentMethod(clientSecret);
+        const config = this.pos.config;
+        const collectPaymentMethod = await this.terminal.collectPaymentMethod(clientSecret, {
+            config_override: {
+                enable_customer_cancellation: true,
+                skip_tipping:
+                    config.set_tip_after_payment ||
+                    !(config.iface_tipproduct && config.tip_product_id),
+            },
+        });
         if (collectPaymentMethod.error) {
             this._showError(collectPaymentMethod.error.message, collectPaymentMethod.error.code);
             line.set_payment_status("retry");
@@ -168,6 +179,7 @@ export class PaymentStripe extends PaymentInterface {
                 return false;
             } else if (processPayment.paymentIntent) {
                 line.set_payment_status("waitingCapture");
+                await this.addTerminalTip(line, processPayment.paymentIntent);
 
                 const [captured_card_type, captured_transaction_id] =
                     this._getCapturedCardAndTransactionId(processPayment);
@@ -175,12 +187,30 @@ export class PaymentStripe extends PaymentInterface {
                     line.card_type = captured_card_type;
                     line.transaction_id = captured_transaction_id;
                 } else {
-                    await this.captureAfterPayment(processPayment, line);
+                    if (!(await this.captureAfterPayment(processPayment, line))) {
+                        line.set_payment_status("retry");
+                        return false;
+                    }
                 }
 
                 line.set_payment_status("done");
                 return true;
             }
+        }
+    }
+
+    async addTerminalTip(line, paymentIntent) {
+        const tip = paymentIntent.amount_details?.tip?.amount;
+        if (tip > 0) {
+            const currency = line.pos_order_id.currency;
+            const tipProduct = this.pos.config.tip_product_id;
+            const existingTip = line.pos_order_id.lines.find(
+                (orderLine) => orderLine.product_id.id === tipProduct.id
+            );
+            await this.pos.set_tip(
+                (existingTip?.price_unit ?? 0) + roundCurrency(tip * currency.rounding, currency)
+            );
+            line.set_amount(paymentIntent.amount * currency.rounding);
         }
     }
 
@@ -190,7 +220,6 @@ export class PaymentStripe extends PaymentInterface {
                 onFetchConnectionToken: this.stripeFetchConnectionToken.bind(this),
                 onUnexpectedReaderDisconnect: this.stripeUnexpectedDisconnect.bind(this),
             });
-            this.discoverReaders();
             return true;
         } catch (error) {
             this._showError(_t("Failed to load resource: net::ERR_INTERNET_DISCONNECTED."), error);
@@ -213,12 +242,16 @@ export class PaymentStripe extends PaymentInterface {
 
     async captureAfterPayment(processPayment, line) {
         const capturePayment = await this.capturePayment(processPayment.paymentIntent.id);
+        if (!capturePayment) {
+            return false;
+        }
         if (capturePayment.charges) {
             line.card_type = this.getCardBrandFromPaymentMethodDetails(
                 capturePayment.charges.data[0].payment_method_details
             );
         }
         line.transaction_id = capturePayment.id;
+        return true;
     }
 
     async capturePayment(paymentIntentId) {
@@ -242,7 +275,7 @@ export class PaymentStripe extends PaymentInterface {
             return data;
         } catch (error) {
             const message = error.code === 200 ? error.data.message : error.message;
-            this._showError(message, "Capture Payment");
+            this._showError(message, _t("Capture Payment"));
             return false;
         }
     }
@@ -260,7 +293,7 @@ export class PaymentStripe extends PaymentInterface {
             return data.client_secret;
         } catch (error) {
             const message = error.code === 200 ? error.data.message : error.message;
-            this._showError(message, "Fetch Secret");
+            this._showError(message, _t("Fetch Secret"));
             return false;
         }
     }

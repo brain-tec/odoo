@@ -7,13 +7,14 @@
 # Junko Augias, 2025
 #
 # "Junko Augias (juau)" <juau@odoo.com>, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2026-02-07 10:34+0000\n"
-"Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
+"POT-Creation-Date: 2026-06-12 17:37+0000\n"
+"PO-Revision-Date: 2026-10-20 10:32+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-18/"
 "hr_timesheet/ja/>\n"
 "Language: ja\n"
@@ -21,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.portal_timesheet_table
@@ -109,11 +110,6 @@ msgid "2 hours"
 msgstr "2時間"
 
 #. module: hr_timesheet
-#: model_terms:ir.ui.view,arch_db:hr_timesheet.timesheet_table
-msgid "2021-09-01"
-msgstr "2021-09-01"
-
-#. module: hr_timesheet
 #: model_terms:digest.tip,tip_description:hr_timesheet.digest_tip_hr_timesheet_0
 msgid "<b class=\"tip_title\">Tip: Record your Timesheets faster</b>"
 msgstr "<b class=\"tip_title\">ヒント：タイムシートの記録速度を上げる</b>"
@@ -146,36 +142,10 @@ msgstr "<span class=\"text-nowrap\">サブタスクの消費時間:</span>"
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.hr_employee_delete_wizard_form
 msgid ""
-"<span invisible=\"not has_timesheet\">\n"
-"                        You cannot delete employees who have timesheets.\n"
-"                        <span invisible=\"not has_active_employee\">\n"
-"                            You can either archive these employees or first "
-"delete all of their timesheets.\n"
-"                        </span>\n"
-"                        <span invisible=\"has_active_employee\" "
-"groups=\"hr_timesheet.group_hr_timesheet_approver\">\n"
-"                            Please first delete all of their timesheets.\n"
-"                        </span>\n"
-"                    </span>\n"
-"                    <span invisible=\"has_timesheet\">\n"
+"<span invisible=\"has_timesheet\">\n"
 "                        Are you sure you want to delete these employees?\n"
 "                    </span>"
 msgstr ""
-"<span invisible=\"not has_timesheet\">\n"
-"                        タイムシートのある従業員を削除することはできませ"
-"ん。 \n"
-"                        <span invisible=\"not has_active_employee\">\n"
-"                            これらの従業員をアーカイブするか、最初に全てのタ"
-"イムシートを削除することができます。\n"
-"                        </span>\n"
-"                        <span invisible=\"has_active_employee\" "
-"groups=\"hr_timesheet.group_hr_timesheet_approver\">\n"
-"                            先に全てタイムシートを削除して下さい。\n"
-"</span>\n"
-"                    </span>\n"
-"                    <span invisible=\"has_timesheet\">\n"
-"                       これらの従業員を本当に削除しますか？\n"
-"                    </span>"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.timesheet_table
@@ -357,7 +327,7 @@ msgstr "会社"
 #. module: hr_timesheet
 #: model:ir.model,name:hr_timesheet.model_res_config_settings
 msgid "Config Settings"
-msgstr "コンフィグ設定"
+msgstr "構成設定"
 
 #. module: hr_timesheet
 #: model:ir.ui.menu,name:hr_timesheet.hr_timesheet_menu_configuration
@@ -513,6 +483,11 @@ msgstr "従業員リマインダ"
 #: code:addons/hr_timesheet/wizard/hr_employee_delete_wizard.py:0
 msgid "Employee Termination"
 msgstr "従業員解雇"
+
+#. module: hr_timesheet
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.view_kanban_account_analytic_line
+msgid "Employee's image"
+msgstr "従業員画像"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -742,6 +717,11 @@ msgid "Partner"
 msgstr "取引先"
 
 #. module: hr_timesheet
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.hr_employee_delete_wizard_form
+msgid "Please first delete all of their timesheets."
+msgstr ""
+
+#. module: hr_timesheet
 #: model:ir.model,name:hr_timesheet.model_uom_uom
 msgid "Product Unit of Measure"
 msgstr "プロダクト単位"
@@ -801,8 +781,8 @@ msgid ""
 "Record your timesheets in an instant by pressing Shift + the corresponding "
 "hotkey to add 15min to your projects."
 msgstr ""
-"シフトキー ＋ 対応するホットキーを押すことで、瞬時にタイムシートを記録し、プ"
-"ロジェクトに15分を追加することができます。"
+"シフトキー ＋ 対応するホットキーを押すことで、瞬時にタイムシートを記録し、"
+"プロジェクトに15分を追加することができます。"
 
 #. module: hr_timesheet
 #: model:ir.ui.menu,name:hr_timesheet.menu_timesheets_reports
@@ -881,8 +861,8 @@ msgid ""
 "Send a periodical email reminder to timesheets users that still have "
 "timesheets to encode"
 msgstr ""
-"まだエンコード対象のタイムシートがあるタイムシートユーザに定期的にリマインド"
-"メールを送る"
+"まだエンコード対象のタイムシートがあるタイムシートユーザに定期的に"
+"リマインドメールを送る"
 
 #. module: hr_timesheet
 #: model:ir.actions.act_window,name:hr_timesheet.hr_timesheet_config_settings_action
@@ -950,8 +930,9 @@ msgid ""
 "These projects have some timesheet entries referencing them. Before removing "
 "these projects, you have to remove these timesheet entries."
 msgstr ""
-"プロジェクトにそれらを参照するタイムシートエントリがあります。これらのプロ"
-"ジェクトを削除する前に、そのタイムシートエントリを削除する必要があります。"
+"プロジェクトにそれらを参照するタイムシートエントリがあります。これらの"
+"プロジェクトを削除する前に、そのタイムシートエントリを削除する必要があります"
+"。"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1001,16 +982,16 @@ msgid ""
 "This project has some timesheet entries referencing it. Before removing this "
 "project, you have to remove these timesheet entries."
 msgstr ""
-"このプロジェクトにはそれを参照するタイムシートエントリがあります。このプロ"
-"ジェクトを削除する前に、そのタイムシートエントリを削除する必要があります。"
+"このプロジェクトにはそれを参照するタイムシートエントリがあります。この"
+"プロジェクトを削除する前に、そのタイムシートエントリを削除する必要があります"
+"。"
 
 #. module: hr_timesheet
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_task.py:0
 msgid ""
 "This task cannot be private because there are some timesheets linked to it."
-msgstr ""
-"リンクしたタイムシートがいくつかあるため、このタスクは非公開にできません。"
+msgstr "リンクしたタイムシートがいくつかあるため、このタスクは非公開にできません。"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1271,8 +1252,8 @@ msgid ""
 "Timesheets must be created with at least an active analytic account defined "
 "in the plan '%(plan_name)s'."
 msgstr ""
-"タイムシートは、計画 '%(plan_name)s' で有効化された少なくとも1つの分析アカウ"
-"ントを定義して作成する必要があります。 "
+"タイムシートは、計画 '%(plan_name)s' で有効化された少なくとも1つの分析"
+"アカウントを定義して作成する必要があります。 "
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1341,8 +1322,7 @@ msgstr "合計:"
 msgid ""
 "Track your working hours by projects every day and invoice this time to your "
 "customers."
-msgstr ""
-"プロジェクトごとに毎日、作業時間を記録し、その時間を顧客に請求しましょう。"
+msgstr "プロジェクトごとに毎日、作業時間を記録し、その時間を顧客に請求しましょう。"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1420,6 +1400,16 @@ msgid "You cannot delete employees who have timesheets."
 msgstr "タイムシートを持つ従業員を削除できません。"
 
 #. module: hr_timesheet
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.hr_employee_delete_wizard_form
+msgid ""
+"You cannot delete employees who have timesheets.\n"
+"                        <span invisible=\"not has_active_employee\">\n"
+"                            You can either archive these employees or first "
+"delete all of their timesheets.\n"
+"                        </span>"
+msgstr ""
+
+#. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_invoice_form
 msgid ""
 "You cannot log timesheets on this project since it is linked to an inactive "
@@ -1429,8 +1419,8 @@ msgid ""
 msgstr ""
 "無効な分析勘定にリンクされているためこのプロジェクトでタイムシートを記録する"
 "ことができません。<br/>\n"
-"                            別の勘定に変えるか、現在の勘定をプロジェクトのタ"
-"イムシートに対して再度有効化して下さい。"
+"                            別の勘定に変えるか、現在の勘定をプロジェクトの"
+"タイムシートに対して再度有効化して下さい。"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.view_task_form2_inherited
@@ -1440,8 +1430,8 @@ msgid ""
 "one to timesheet on the project."
 msgstr ""
 "無効な分析勘定にリンクされているためこのプロジェクトでタイムシートを記録する"
-"ことができません。<br/>この勘定を変えるか、現在の勘定をプロジェクトのタイム"
-"シートに対して再度有効化して下さい。"
+"ことができません。<br/>この勘定を変えるか、現在の勘定をプロジェクトの"
+"タイムシートに対して再度有効化して下さい。"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1479,3 +1469,38 @@ msgstr ""
 "　\n"
 "                            <span class=\"fw-bold text-dark\"> サブタスク</"
 "span>)上"
+
+#~ msgid "2021-09-01"
+#~ msgstr "2021-09-01"
+
+#~ msgid ""
+#~ "<span invisible=\"not has_timesheet\">\n"
+#~ "                        You cannot delete employees who have timesheets.\n"
+#~ "                        <span invisible=\"not has_active_employee\">\n"
+#~ "                            You can either archive these employees or "
+#~ "first delete all of their timesheets.\n"
+#~ "                        </span>\n"
+#~ "                        <span invisible=\"has_active_employee\" "
+#~ "groups=\"hr_timesheet.group_hr_timesheet_approver\">\n"
+#~ "                            Please first delete all of their timesheets.\n"
+#~ "                        </span>\n"
+#~ "                    </span>\n"
+#~ "                    <span invisible=\"has_timesheet\">\n"
+#~ "                        Are you sure you want to delete these employees?\n"
+#~ "                    </span>"
+#~ msgstr ""
+#~ "<span invisible=\"not has_timesheet\">\n"
+#~ "                        タイムシートのある従業員を削除することはできませ"
+#~ "ん。 \n"
+#~ "                        <span invisible=\"not has_active_employee\">\n"
+#~ "                            これらの従業員をアーカイブするか、最初に全ての"
+#~ "タイムシートを削除することができます。\n"
+#~ "                        </span>\n"
+#~ "                        <span invisible=\"has_active_employee\" "
+#~ "groups=\"hr_timesheet.group_hr_timesheet_approver\">\n"
+#~ "                            先に全てタイムシートを削除して下さい。\n"
+#~ "</span>\n"
+#~ "                    </span>\n"
+#~ "                    <span invisible=\"has_timesheet\">\n"
+#~ "                       これらの従業員を本当に削除しますか？\n"
+#~ "                    </span>"

@@ -11,12 +11,13 @@
 # Ujjawal Pathak, 2025
 #
 # Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# "Ujjawal Pathak (pauj)" <pauj@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-29 18:37+0000\n"
-"PO-Revision-Date: 2026-02-07 10:40+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-11-06 17:57+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Hindi <https://translate.odoo.com/projects/odoo-18/web/hi/>\n"
 "Language: hi\n"
@@ -24,7 +25,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: web
 #. odoo-javascript
@@ -85,7 +86,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/formatters.js:0
 msgid "%s records"
-msgstr ""
+msgstr "%s रिकॉर्ड"
 
 #. module: web
 #. odoo-javascript
@@ -165,132 +166,8 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "00"
-msgstr ""
-
-#. module: web
-#: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "07/08/2020"
-msgstr ""
-
-#. module: web
-#: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "08/07/2020"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/fields/formatters.js:0
 msgid "1 record"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "1.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "10"
-msgstr "10"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "10.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "100"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "10:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "10:30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "11"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "11.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "11:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "11:30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "12"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "12.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "1234"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "12:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "12:30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "18"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "1:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "1:30"
 msgstr ""
 
 #. module: web
@@ -302,67 +179,13 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "2.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "2:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "2:30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "2nd place medal"
 msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "3.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "3:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "3:30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "3rd place medal"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "4.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "4:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "4:30"
 msgstr ""
 
 #. module: web
@@ -375,96 +198,6 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "4x4"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "5.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "5:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "5:30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "6.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "6:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "6:30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "7.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "7:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "7:30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "8.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "8:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "8:30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "9.30"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "9:00"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "9:30"
 msgstr ""
 
 #. module: web
@@ -672,6 +405,12 @@ msgid ""
 "                        font-family: \"font\";\n"
 "                        src: url(data:font/ttf;base64,"
 msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "A"
+msgstr "A"
 
 #. module: web
 #. odoo-javascript
@@ -963,7 +702,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/signature/signature_dialog.xml:0
 msgid "Adopt Your Signature"
-msgstr ""
+msgstr "अपना हस्ताक्षर अपनाएं"
 
 #. module: web
 #. odoo-javascript
@@ -1234,7 +973,7 @@ msgstr "ऑटो"
 #: code:addons/web/static/src/views/fields/priority/priority_field.js:0
 #: code:addons/web/static/src/views/fields/state_selection/state_selection_field.js:0
 msgid "Autosave"
-msgstr ""
+msgstr "ऑटोसेव"
 
 #. module: web
 #. odoo-javascript
@@ -1248,6 +987,12 @@ msgstr ""
 #: code:addons/web/static/src/views/kanban/kanban_renderer.xml:0
 msgid "Avatar"
 msgstr "अवतार"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "B"
+msgstr "B"
 
 #. module: web
 #. odoo-javascript
@@ -1323,7 +1068,7 @@ msgstr "बैज"
 #. odoo-javascript
 #: code:addons/web/static/src/views/graph/graph_controller.xml:0
 msgid "Bar Chart"
-msgstr ""
+msgstr "बार चार्ट"
 
 #. module: web
 #. odoo-javascript
@@ -1430,6 +1175,9 @@ msgid ""
 "all purposes when it is used on documents, including legally binding "
 "contracts."
 msgstr ""
+"'स्वीकार करें और हस्ताक्षर करें' पर क्लिक करके, मैं सहमत हूं कि चुना गया हस्ताक्षर/इनिशियल "
+"दस्तावेज़ों (कानूनी अनुबंधों सहित) पर उपयोग किए जाने पर मेरे हाथ से किए गए हस्ताक्षर/"
+"इनिशियल का एक मान्य इलेक्ट्रॉनिक रूप होगा।"
 
 #. module: web
 #. odoo-javascript
@@ -1451,6 +1199,12 @@ msgstr ""
 #: code:addons/web/static/src/core/utils/binary.js:0
 msgid "Bytes|Kb|Mb|Gb|Tb|Pb|Eb|Zb|Yb"
 msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "C"
+msgstr "C"
 
 #. module: web
 #. odoo-javascript
@@ -1716,7 +1470,7 @@ msgstr "बंद करें (Esc)"
 #: code:addons/web/static/src/webclient/burger_menu/burger_menu.xml:0
 #: code:addons/web/static/src/webclient/navbar/navbar.xml:0
 msgid "Close menu"
-msgstr ""
+msgstr "मेन्यू बंद करें"
 
 #. module: web
 #. odoo-javascript
@@ -1788,7 +1542,7 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.frontend_layout
 msgid "Company name"
-msgstr ""
+msgstr "कंपनी का नाम"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.external_layout_bold
@@ -2405,13 +2159,13 @@ msgstr "खारिज करें"
 #. odoo-javascript
 #: code:addons/web/static/src/views/form/form_status_indicator/form_status_indicator.xml:0
 msgid "Discard all changes"
-msgstr ""
+msgstr "सभी बदलाव रद्द करें"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/form/form_error_dialog/form_error_dialog.xml:0
 msgid "Discard changes"
-msgstr ""
+msgstr "परिवर्तन रद्द करें"
 
 #. module: web
 #. odoo-javascript
@@ -2485,7 +2239,7 @@ msgstr ""
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__external_report_layout_id
 msgid "Document Template"
-msgstr ""
+msgstr "दस्तावेज़ टेम्पलेट"
 
 #. module: web
 #. odoo-javascript
@@ -2568,7 +2322,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/kanban/kanban_record.xml:0
 msgid "Dropdown menu"
-msgstr ""
+msgstr "ड्रॉपडाउन मेन्यू"
 
 #. module: web
 #. odoo-javascript
@@ -2990,12 +2744,12 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "Footer"
-msgstr ""
+msgstr "फ़ुटर"
 
 #. module: web
 #: model:ir.model.fields,help:web.field_base_document_layout__report_footer
 msgid "Footer text displayed at the bottom of all reports."
-msgstr ""
+msgstr "सभी रिपोर्ट के नीचे फ़ुटर टेक्स्ट दिखाई देगा।"
 
 #. module: web
 #. odoo-javascript
@@ -3383,7 +3137,7 @@ msgstr ""
 #: code:addons/web/static/src/webclient/actions/action_install_kiosk_pwa.xml:0
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
 msgid "Install App"
-msgstr ""
+msgstr "ऐप्लिकेशन इंस्टॉल करें"
 
 #. module: web
 #. odoo-javascript
@@ -3417,7 +3171,7 @@ msgstr "इंटरवल"
 #. odoo-javascript
 #: code:addons/web/static/src/core/errors/error_dialogs.js:0
 msgid "Invalid Operation"
-msgstr ""
+msgstr "अमान्य ऑपरेशन"
 
 #. module: web
 #. odoo-javascript
@@ -3473,7 +3227,7 @@ msgstr ""
 #: code:addons/web/static/src/model/relational_model/record.js:0
 #: code:addons/web/static/src/views/kanban/kanban_record_quick_create.js:0
 msgid "Invalid fields: "
-msgstr ""
+msgstr "अमान्य फ़ील्ड: "
 
 #. module: web
 #. odoo-python
@@ -3868,7 +3622,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/graph/graph_controller.xml:0
 msgid "Line Chart"
-msgstr ""
+msgstr "लाइन चार्ट"
 
 #. module: web
 #. odoo-javascript
@@ -3906,7 +3660,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/domain/domain_field.xml:0
 #: code:addons/web/static/src/webclient/loading_indicator/loading_indicator.xml:0
 msgid "Loading"
-msgstr ""
+msgstr "लोडिंग"
 
 #. module: web
 #. odoo-javascript
@@ -3922,7 +3676,7 @@ msgstr "लोडिंग..।"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login
 msgid "Log in"
-msgstr ""
+msgstr "लॉग इन करें"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login
@@ -3959,6 +3713,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:web.field_base_document_layout__logo_secondary_color
 msgid "Logo Secondary Color"
 msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "M"
+msgstr "M"
 
 #. module: web
 #. odoo-javascript
@@ -4033,14 +3793,14 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
 #: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 msgid "Many2one"
-msgstr ""
+msgstr "Many2one"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
 #: code:addons/web/static/src/views/fields/domain/domain_field.xml:0
 msgid "Match"
-msgstr ""
+msgstr "मैच करें"
 
 #. module: web
 #. odoo-javascript
@@ -4105,7 +3865,7 @@ msgstr "मेन्यू"
 #: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 #: code:addons/web/static/src/views/debug_items.js:0
 msgid "Metadata"
-msgstr ""
+msgstr "मेटाडेटा"
 
 #. module: web
 #. odoo-javascript
@@ -4342,7 +4102,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/text/text_field.js:0
 msgid "Multiline Text"
-msgstr ""
+msgstr "मल्टीलाइन टेक्स्ट"
 
 #. module: web
 #. odoo-javascript
@@ -4409,7 +4169,7 @@ msgstr "नया"
 #: code:addons/web/static/src/views/calendar/calendar_controller.js:0
 #: code:addons/web/static/src/views/calendar/quick_create/calendar_quick_create.js:0
 msgid "New Event"
-msgstr ""
+msgstr "नया इवेंट"
 
 #. module: web
 #. odoo-javascript
@@ -4680,6 +4440,12 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "O"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "O button (blood type)"
 msgstr ""
 
@@ -4788,7 +4554,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/errors/error_dialogs.js:0
 msgid "Odoo Server Error"
-msgstr ""
+msgstr "Odoo सर्वर में गड़बड़ी"
 
 #. module: web
 #. odoo-javascript
@@ -4939,7 +4705,7 @@ msgstr ""
 #: code:addons/web/static/src/views/calendar/calendar_controller.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 msgid "Open: %s"
-msgstr ""
+msgstr "ओपन: %s"
 
 #. module: web
 #. odoo-javascript
@@ -4986,6 +4752,12 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "P"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "P button"
 msgstr ""
 
@@ -5006,7 +4778,7 @@ msgstr ""
 #: code:addons/web/static/src/core/file_viewer/file_viewer.xml:0
 #: code:addons/web/static/src/views/fields/pdf_viewer/pdf_viewer_field.xml:0
 msgid "PDF file"
-msgstr ""
+msgstr "पीडीएफ़ फ़ाइल"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.external_layout_bold
@@ -5080,7 +4852,7 @@ msgstr "फ़ोन"
 #. odoo-javascript
 #: code:addons/web/static/src/views/graph/graph_controller.xml:0
 msgid "Pie Chart"
-msgstr ""
+msgstr "पाई चार्ट"
 
 #. module: web
 #. odoo-javascript
@@ -5286,7 +5058,7 @@ msgstr "प्रॉयरिटी"
 #. odoo-javascript
 #: code:addons/web/static/src/core/file_upload/file_upload_progress_record.js:0
 msgid "Processing..."
-msgstr ""
+msgstr "प्रोसेस किया जा रहा है..।"
 
 #. module: web
 #. odoo-javascript
@@ -5364,7 +5136,7 @@ msgstr "क्वार्टर"
 #. odoo-javascript
 #: code:addons/web/static/src/views/kanban/kanban_header.xml:0
 msgid "Quick add"
-msgstr ""
+msgstr "क्विक ऐड"
 
 #. module: web
 #. odoo-javascript
@@ -5382,9 +5154,15 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "R"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/colorpicker/colorpicker.xml:0
 msgid "RGB"
-msgstr ""
+msgstr "आरजीबी"
 
 #. module: web
 #. odoo-javascript
@@ -5408,7 +5186,7 @@ msgstr "रेंज"
 #. odoo-javascript
 #: code:addons/web/static/src/core/colorlist/colorlist.js:0
 msgid "Raspberry"
-msgstr ""
+msgstr "रास्पबेरी"
 
 #. module: web
 #. odoo-javascript
@@ -5766,6 +5544,12 @@ msgstr "डिफ़ॉल्ट रूप में सहेजें"
 #. odoo-javascript
 #: code:addons/web/static/src/views/form/form_status_indicator/form_status_indicator.xml:0
 msgid "Save manually"
+msgstr "मैन्युअल रूप से सेव करें"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/translation_button.js:0
+msgid "Save this record and its parent to translate"
 msgstr ""
 
 #. module: web
@@ -5801,6 +5585,12 @@ msgstr "सर्च"
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 msgid "Search More..."
 msgstr "ज़्यादा खोजें..।"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/reference/reference_field.js:0
+msgid "Search a record..."
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -5917,7 +5707,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/model_field_selector/model_field_selector_popover.js:0
 msgid "Select a field"
-msgstr ""
+msgstr "एक फ़ील्ड चुनें"
 
 #. module: web
 #. odoo-javascript
@@ -6182,6 +5972,8 @@ msgid ""
 "Something went wrong... If you really are stuck, share the report with your "
 "friendly support service"
 msgstr ""
+"कुछ गलत हो गया... अगर आप वाकई अटक गए हैं, तो रिपोर्ट को अपनी सहायता सेवा के साथ "
+"साझा करें"
 
 #. module: web
 #. odoo-javascript
@@ -6335,7 +6127,7 @@ msgstr ""
 #: code:addons/web/static/src/core/commands/command_items.xml:0
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 msgid "TIP"
-msgstr ""
+msgstr "सलाह"
 
 #. module: web
 #. odoo-javascript
@@ -6530,6 +6322,12 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/errors/error_dialogs.js:0
+msgid "The request sent to the server was too large"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/utils/files.js:0
 msgid "The resizing of the image failed"
 msgstr ""
@@ -6682,6 +6480,12 @@ msgstr "समय"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/webclient/debug/profiling/profiling_item.xml:0
+msgid "Time Limit (seconds)"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 msgid "Time interval"
 msgstr ""
@@ -6785,7 +6589,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/debug/debug_menu_basic.js:0
 msgid "Tools"
-msgstr ""
+msgstr "टूल"
 
 #. module: web
 #. odoo-javascript
@@ -6963,7 +6767,7 @@ msgstr "अभी तक तय नहीं"
 #. odoo-javascript
 #: code:addons/web/static/src/views/kanban/kanban_header.xml:0
 msgid "Unfold"
-msgstr ""
+msgstr "अनफ़ोल्ड"
 
 #. module: web
 #. odoo-javascript
@@ -7162,7 +6966,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/errors/error_dialogs.js:0
 msgid "Validation Error"
-msgstr ""
+msgstr "पुष्टिकरण में गड़बड़ी"
 
 #. module: web
 #. odoo-javascript
@@ -7186,14 +6990,14 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 msgid "Values"
-msgstr ""
+msgstr "वैल्यू"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/form/form_label.js:0
 #: code:addons/web/static/src/views/form/setting/setting.xml:0
 msgid "Values set here are company-specific."
-msgstr ""
+msgstr "यहां जो आप सेट करेंगे, वह सिर्फ इसी कंपनी के लिए है।"
 
 #. module: web
 #. odoo-javascript
@@ -7617,7 +7421,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "access"
-msgstr ""
+msgstr "ऐक्सेस"
 
 #. module: web
 #. odoo-javascript
@@ -8879,7 +8683,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "black"
-msgstr ""
+msgstr "ब्लैक"
 
 #. module: web
 #. odoo-javascript
@@ -9029,7 +8833,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "blue"
-msgstr ""
+msgstr "ब्लू"
 
 #. module: web
 #. odoo-javascript
@@ -9683,7 +9487,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "can"
-msgstr ""
+msgstr "कर सकता है"
 
 #. module: web
 #. odoo-javascript
@@ -10247,7 +10051,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "city"
-msgstr ""
+msgstr "शहर"
 
 #. module: web
 #. odoo-javascript
@@ -13174,7 +12978,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "first"
-msgstr ""
+msgstr "पहला"
 
 #. module: web
 #. odoo-javascript
@@ -14152,7 +13956,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "green"
-msgstr ""
+msgstr "ग्रीन"
 
 #. module: web
 #. odoo-javascript
@@ -15112,7 +14916,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "houses"
-msgstr ""
+msgstr "हाउस"
 
 #. module: web
 #. odoo-javascript
@@ -15172,6 +14976,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "hóngbāo"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "i"
 msgstr ""
 
 #. module: web
@@ -17260,7 +17070,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "map"
-msgstr ""
+msgstr "मैप"
 
 #. module: web
 #. odoo-javascript
@@ -17446,7 +17256,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "medium"
-msgstr ""
+msgstr "मध्यम"
 
 #. module: web
 #. odoo-javascript
@@ -18514,6 +18324,12 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "o"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "ocean"
 msgstr ""
 
@@ -18817,7 +18633,7 @@ msgstr " "
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "orange"
-msgstr ""
+msgstr "नारंगी"
 
 #. module: web
 #. odoo-javascript
@@ -19225,7 +19041,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "password"
-msgstr ""
+msgstr "पासवर्ड"
 
 #. module: web
 #. odoo-javascript
@@ -19735,7 +19551,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "phone"
-msgstr ""
+msgstr "फ़ोन"
 
 #. module: web
 #. odoo-javascript
@@ -20581,6 +20397,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "quiet"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "r"
 msgstr ""
 
 #. module: web
@@ -21711,7 +21533,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "second"
-msgstr ""
+msgstr "दूसरा"
 
 #. module: web
 #. odoo-javascript
@@ -22049,7 +21871,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "shower"
-msgstr ""
+msgstr "शॉवर"
 
 #. module: web
 #. odoo-javascript
@@ -22901,7 +22723,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "split"
-msgstr ""
+msgstr "स्प्लिट करें"
 
 #. module: web
 #. odoo-javascript
@@ -24011,7 +23833,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "ticket"
-msgstr ""
+msgstr "टिकट"
 
 #. module: web
 #. odoo-javascript
@@ -24233,7 +24055,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "traffic"
-msgstr ""
+msgstr "ट्रैफ़िक"
 
 #. module: web
 #. odoo-javascript
@@ -24299,7 +24121,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "tree"
-msgstr ""
+msgstr "ट्री"
 
 #. module: web
 #. odoo-javascript
@@ -24796,6 +24618,12 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "v"
+msgstr "v"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "vague"
 msgstr ""
 
@@ -25217,7 +25045,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "web"
-msgstr ""
+msgstr "वेब"
 
 #. module: web
 #. odoo-javascript
@@ -26176,6 +26004,12 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "x"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "yacht"
 msgstr ""
 
@@ -26460,3 +26294,102 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "ココ"
 msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "サ"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "割"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "可"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "合"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "営"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "得"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "指"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "月"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "有"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "満"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "無"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "申"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "祝"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "禁"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "秘"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "空"
+msgstr ""
+
+#~ msgid "10"
+#~ msgstr "10"

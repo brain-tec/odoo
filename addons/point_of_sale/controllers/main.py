@@ -90,10 +90,11 @@ class PosController(PortalAccount):
         form_values = {}
         if request.httprequest.method == 'POST':
             for field in ['pos_reference', 'date_order', 'ticket_code']:
-                if not kwargs.get(field):
+                value = (kwargs.get(field) or '').strip()
+                if not value:
                     errors[field] = " "
                 else:
-                    form_values[field] = kwargs.get(field)
+                    form_values[field] = value
 
             if errors:
                 errors['generic'] = _("Please fill all the required fields.")
@@ -102,7 +103,7 @@ class PosController(PortalAccount):
             else:
                 date_order = datetime(*[int(i) for i in form_values['date_order'].split('-')])
                 order = request.env['pos.order'].sudo().search([
-                    ('pos_reference', '=like', '%' + form_values['pos_reference'].strip().replace('%', r'\%').replace('_', r'\_')),
+                    ('pos_reference', '=like', '%' + form_values['pos_reference'].replace('%', r'\%').replace('_', r'\_')),
                     ('date_order', '>=', date_order - timedelta(days=1)),
                     ('date_order', '<', date_order + timedelta(days=2)),
                     ('ticket_code', '=', form_values['ticket_code']),
@@ -133,6 +134,14 @@ class PosController(PortalAccount):
                     res[field.name] = val
                     res_prefixed[key] = val
             return res, res_prefixed
+
+        def _validate_connected_user_data(partner):
+            error, error_message = {}, []
+            for field in self._get_mandatory_fields():
+                if not partner[field]:
+                    error[field] = 'error'
+                    error_message.append(_('The %s must be filled in your details.', request.env['ir.model.fields']._get('res.partner', field).field_description))
+            return error, error_message
 
         # If the route is called directly, return a 404
         if not access_token:
@@ -171,16 +180,12 @@ class PosController(PortalAccount):
             invoice_values, prefixed_invoice_values = _parse_additional_values(additional_invoice_fields, 'invoice_', kwargs)
             form_values['extra_field_values'].update(prefixed_invoice_values)
             # Check the basic form fields if the user is not connected as we will need these information to create the new user.
-            if not user_is_connected:
+            if not user_is_connected or pos_order.partner_id:
                 error, error_message = self.details_form_validate(kwargs, partner_creation=True)
             else:
                 # Check that the billing information of the user are filled.
-                error, error_message = {}, []
-                partner = request.env.user.partner_id
-                for field in self._get_mandatory_fields():
-                    if not partner[field]:
-                        error[field] = 'error'
-                        error_message.append(_('The %s must be filled in your details.', request.env['ir.model.fields']._get('res.partner', field).field_description))
+                error, error_message = _validate_connected_user_data(request.env.user.partner_id)
+
             # Check that the "optional" additional fields are filled.
             error, error_message = self.extra_details_form_validate(partner_values, additional_partner_fields, error, error_message)
             error, error_message = self.extra_details_form_validate(invoice_values, additional_invoice_fields, error, error_message)
@@ -190,6 +195,16 @@ class PosController(PortalAccount):
                 form_values.update({'error': error, 'error_message': error_message})
 
         elif user_is_connected:
+            error, error_message = {}, {}
+            partner_to_check = pos_order.partner_id or request.env.user.partner_id
+            if self._user_can_edit_partner(partner_to_check, request.env.user.partner_id):
+                error, error_message = _validate_connected_user_data(partner_to_check)
+
+            if not error:
+                return self._get_invoice({}, {}, pos_order, additional_invoice_fields, kwargs)
+            else:
+                form_values.update({'error': error, 'error_message': error_message})
+        elif pos_order.partner_id:
             return self._get_invoice({}, {}, pos_order, additional_invoice_fields, kwargs)
 
         # Most of the time, the country of the customer will be the same as the order. We can prefill it by default with the country of the company.
@@ -197,8 +212,9 @@ class PosController(PortalAccount):
             form_values['country_id'] = pos_order_country.id
 
         partner = request.env['res.partner']
+        has_order_partner = bool(pos_order.partner_id)
         # Prefill the customer extra values if there is any and an user is connected
-        partner = (user_is_connected and request.env.user.partner_id) or pos_order.partner_id
+        partner = (user_is_connected and pos_order.partner_id or request.env.user.partner_id) or pos_order.partner_id
         if partner:
             if additional_partner_fields:
                 form_values['extra_field_values'] = {'partner_' + field.name: partner[field.name] for field in additional_partner_fields if field.name not in form_values['extra_field_values']}
@@ -212,6 +228,7 @@ class PosController(PortalAccount):
 
         return request.render("point_of_sale.ticket_validation_screen", {
             'partner': partner,
+            'has_order_partner': has_order_partner,
             'address_url': f'/my/account?redirect=/pos/ticket/validate?access_token={access_token}',
             'user_is_connected': user_is_connected,
             'format_amount': format_amount,
@@ -244,7 +261,8 @@ class PosController(PortalAccount):
         # If the user is connected, then we can update if needed its fields with the additional localized fields if any, then proceed.
         else:
             partner = pos_order.partner_id or (not request.env.user._is_public() and request.env.user.partner_id)
-            partner.write(partner_values)  # In this case, partner_values only contains the additional fields that can be updated.
+            if not request.env.user._is_public() and self._user_can_edit_partner(partner, request.env.user.partner_id):
+                partner.write(partner_values)  # In this case, partner_values only contains the additional fields that can be updated.
 
         pos_order.partner_id = partner
         # Get the required fields for the invoice and add them to the context as default values.
@@ -254,3 +272,10 @@ class PosController(PortalAccount):
         # Allowing default values for moves is important for some localizations that would need specific fields to be set on the invoice, such as Mexico.
         pos_order.with_context(with_context).action_pos_order_invoice()
         return request.redirect('/my/invoices/%s?access_token=%s' % (pos_order.account_move.id, pos_order.account_move._portal_ensure_token()))
+
+    def _user_can_edit_partner(self, partner_to_edit, partner_edited_by):
+        children_partner_ids = request.env['res.partner']._search([
+            ('id', 'child_of', partner_edited_by.commercial_partner_id.id),
+            ('type', 'in', ('invoice', 'delivery', 'other')),
+        ])
+        return partner_to_edit == partner_edited_by or partner_to_edit.id in children_partner_ids

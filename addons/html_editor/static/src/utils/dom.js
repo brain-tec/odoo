@@ -1,5 +1,13 @@
 import { closestBlock, isBlock } from "./blocks";
-import { isEmptyTextNode, isParagraphRelatedElement, isShrunkBlock, isVisible } from "./dom_info";
+import {
+    isElement,
+    isEmptyTextNode,
+    isParagraphRelatedElement,
+    isShrunkBlock,
+    isTextNode,
+    isVisible,
+    nextLeaf,
+} from "./dom_info";
 import { callbacksForCursorUpdate } from "./selection";
 import { isEmptyBlock, isPhrasingContent } from "../utils/dom_info";
 import { childNodes } from "./dom_traversal";
@@ -168,6 +176,20 @@ export function removeClass(element, ...classNames) {
 }
 
 /**
+ * Removes the specified CSS properties from an element's inline styles.
+ * If no inline styles remain afterward, the `style` attribute is removed.
+ *
+ * @param {Element} element
+ * @param {...string} styleProperties
+ */
+export function removeStyle(element, ...styleProperties) {
+    styleProperties.forEach((prop) => element.style.removeProperty(prop));
+    if (element.getAttribute("style") === "") {
+        element.removeAttribute("style");
+    }
+}
+
+/**
  * Add a BR in the given node if its closest ancestor block has nothing to make
  * it visible, and/or add a zero-width space in the given node if it's an empty
  * inline so the cursor can stay in it.
@@ -215,7 +237,8 @@ export function fillShrunkPhrasingParent(el) {
 /**
  * Removes a trailing BR if it is unnecessary:
  * in a non-empty block, if the last childNode is a BR and its previous sibling
- * is not a BR, remove the BR.
+ * is not a BR, remove the BR. A BR at the end of an inline `el` with some
+ * content after that inline in its block is a real line break, so it is kept.
  *
  * @param {HTMLElement} el
  * @param {Array} predicates exceptions where a trailing BR should not be removed
@@ -227,6 +250,7 @@ export function cleanTrailingBR(el, predicates = []) {
         candidate?.nodeName === "BR" &&
         candidate.previousSibling?.nodeName !== "BR" &&
         !isEmptyBlock(el) &&
+        !nextLeaf(candidate, closestBlock(el), true) &&
         !predicates.some((predicate) => predicate(candidate))
     ) {
         candidate.remove();
@@ -323,4 +347,37 @@ export function splitTextNode(textNode, offset, originalNodeSide = DIRECTIONS.RI
         }
     }
     return parentOffset;
+}
+
+/**
+ * This is used as a replacement for `node.normalize()` which in Safari
+ * incorrectly moves the selection to the parent element instead of
+ * restoring it to the correct offset in the merged text node.
+ *
+ * @param {HTMLElement} node
+ * @param {Cursors} cursor
+ */
+export function mergeAdjacentTextNodes(node, cursor) {
+    let child = node.firstChild;
+    while (child) {
+        if (isElement(child)) {
+            mergeAdjacentTextNodes(child, cursor);
+        }
+
+        const next = child.nextSibling;
+        if (isTextNode(child) && next && isTextNode(next)) {
+            if (cursor.anchor.node === next) {
+                cursor.anchor.node = child;
+                cursor.anchor.offset = child.textContent.length + cursor.anchor.offset;
+            }
+            if (cursor.focus.node === next) {
+                cursor.focus.node = child;
+                cursor.focus.offset = child.textContent.length + cursor.focus.offset;
+            }
+            child.textContent += next.textContent;
+            next.remove();
+        } else {
+            child = next;
+        }
+    }
 }

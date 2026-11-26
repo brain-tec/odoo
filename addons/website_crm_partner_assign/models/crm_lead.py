@@ -42,9 +42,15 @@ class CrmLead(models.Model):
 
     def _get_partner_email_update(self, force_void=True):
         self.ensure_one()
-        if self.env.user._is_portal() and self.partner_id.user_id:
+        if 'lead_no_partner_update' in self.env.context:
             return False
         return super()._get_partner_email_update(force_void)
+
+    def _get_partner_phone_update(self, force_void=True):
+        self.ensure_one()
+        if 'lead_no_partner_update' in self.env.context:
+            return False
+        return super()._get_partner_phone_update(force_void)
 
     def write(self, vals):
         if self.env.user._is_portal() and not self.env.su:
@@ -226,7 +232,7 @@ class CrmLead(models.Model):
             message = Markup('<p>%s</p>') % _('I am not interested by this lead. I have not contacted the lead.')
         partner_ids = self.env['res.partner'].search(
             [('id', 'child_of', self.env.user.partner_id.commercial_partner_id.id)])
-        self.message_unsubscribe(partner_ids=partner_ids.ids)
+        self.sudo().message_unsubscribe(partner_ids=partner_ids.ids)
         if comment:
             message += Markup('<p>%s</p>') % comment
         self.sudo().message_post(body=message)
@@ -236,7 +242,7 @@ class CrmLead(models.Model):
 
         if spam:
             tag_spam = self.env.ref('website_crm_partner_assign.tag_portal_lead_is_spam', False)
-            if tag_spam and tag_spam not in self.tag_ids:
+            if tag_spam and tag_spam not in self.sudo().tag_ids:
                 values['tag_ids'] = [(4, tag_spam.id, False)]
         if partner_ids:
             values['partner_declined_ids'] = [(4, p, 0) for p in partner_ids.ids]
@@ -282,7 +288,7 @@ class CrmLead(models.Model):
             'city', 'zip', 'state_id', 'country_id']
         if any([key not in fields for key in values]):
             raise UserError(_("Not allowed to update the following field(s): %s.", ", ".join([key for key in values if not key in fields])))
-        return self.sudo().write(values)
+        return self.sudo().with_context(lead_no_partner_update=True).write(values)
 
     @api.model
     def create_opp_portal(self, values):

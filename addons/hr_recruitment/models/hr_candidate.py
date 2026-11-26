@@ -116,15 +116,20 @@ class HrCandidate(models.Model):
             if not candidate.partner_id:
                 if not candidate.partner_name:
                     raise UserError(_('You must define a Contact Name for this candidate.'))
-                candidate.partner_id = self.env['res.partner'].with_context(default_lang=self.env.lang).find_or_create(candidate.email_from)
+                candidate.partner_id = self.env['res.partner'].with_context(
+                    default_lang=self.env.lang,
+                    default_phone=candidate.partner_phone,
+                ).find_or_create(candidate.email_from)
+            else:
+                if tools.email_normalize(candidate.email_from) != tools.email_normalize(candidate.partner_id.email):
+                    # change email on a partner will trigger other heavy code, so avoid to change the email when
+                    # it is the same. E.g. "email@example.com" vs "My Email" <email@example.com>""
+                    candidate.partner_id.email = candidate.email_from
+                if candidate.partner_phone:
+                    candidate.partner_id.phone = candidate.partner_phone
+
             if candidate.partner_name and (not candidate.partner_id.name or candidate.partner_id.name == candidate.email_normalized):
                 candidate.partner_id.name = candidate.partner_name
-            if tools.email_normalize(candidate.email_from) != tools.email_normalize(candidate.partner_id.email):
-                # change email on a partner will trigger other heavy code, so avoid to change the email when
-                # it is the same. E.g. "email@example.com" vs "My Email" <email@example.com>""
-                candidate.partner_id.email = candidate.email_from
-            if candidate.partner_phone:
-                candidate.partner_id.phone = candidate.partner_phone
 
     @api.depends('email_from', 'partner_phone_sanitized')
     def _compute_similar_candidates_count(self):
@@ -340,7 +345,7 @@ class HrCandidate(models.Model):
             })
 
         action = self.env['ir.actions.act_window']._for_xml_id('hr.open_view_employee_list')
-        employee = self.env['hr.employee'].create(self._get_employee_create_vals())
+        employee = self.env['hr.employee'].with_company(self.company_id).create(self._get_employee_create_vals())
         action['res_id'] = employee.id
         return action
 

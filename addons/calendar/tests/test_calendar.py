@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import datetime
+import logging
 
 from datetime import date, datetime, timedelta
 
@@ -14,6 +15,14 @@ import freezegun
 import pytz
 import re
 import base64
+
+_logger = logging.getLogger(__name__)
+
+try:
+    import vobject
+except ImportError:
+    _logger.warning("`vobject` Python module not found, iCal file generation disabled. Consider installing this module if you want to generate iCal files")
+    vobject = None
 
 
 class TestCalendar(SavepointCaseWithUserDemo):
@@ -381,13 +390,13 @@ class TestCalendar(SavepointCaseWithUserDemo):
         Check that mail have extra attachement added by the user
         """
 
-        def _test_one_mail_per_attendee(self, partners):
+        def _test_mail_per_attendee(self, partners, target=1):
             # check that every attendee receive a (single) mail for the event
             for partner in partners:
                 mail = self.env['mail.message'].sudo().search([
                     ('notified_partner_ids', 'in', partner.id),
                     ])
-                self.assertEqual(len(mail), 1)
+                self.assertEqual(len(mail), target, "This attendee has an unexpected amount of mails")
 
         def _test_emails_has_attachment(self, partners, attachments_names=["fileText_attachment.txt"]):
             # check that every email has specified extra attachments
@@ -425,7 +434,7 @@ class TestCalendar(SavepointCaseWithUserDemo):
             })
 
         # every partner should have 1 mail sent
-        _test_one_mail_per_attendee(self, partners)
+        _test_mail_per_attendee(self, partners, target=1)
         _test_emails_has_attachment(self, partners)
 
         # adding more partners to the event
@@ -441,10 +450,10 @@ class TestCalendar(SavepointCaseWithUserDemo):
         })
 
         # more email should be sent
-        _test_one_mail_per_attendee(self, partners)
+        _test_mail_per_attendee(self, partners, target=1)
 
         # create a new event in the past
-        self.CalendarEvent.create({
+        past_event = self.CalendarEvent.create({
             'name': "NOmailTest",
             'allday': False,
             'recurrency': False,
@@ -454,7 +463,23 @@ class TestCalendar(SavepointCaseWithUserDemo):
         })
 
         # no more email should be sent
-        _test_one_mail_per_attendee(self, partners)
+        _test_mail_per_attendee(self, partners, target=1)
+
+        # adding more partners to the event in past, SHOULD NOT trigger notification
+        partners_added_after_past_date = [
+            self.env['res.partner'].create({'name': 'testuser5', 'email': 'jean@example.com'}),
+            self.env['res.partner'].create({'name': 'testuser6', 'email': 'claude@example.com'}),
+            self.env['res.partner'].create({'name': 'testuser7', 'email': 'vandamme@example.com'}),
+            ]
+        partners.extend(partners_added_after_past_date)
+        partner_ids = [(6, False, [p.id for p in partners])]
+        past_event.write({
+            'partner_ids': partner_ids,
+        })
+
+        _test_mail_per_attendee(
+            self, list(set(partners) - set(partners_added_after_past_date)), target=1)
+        _test_mail_per_attendee(self, partners_added_after_past_date, target=0)
 
         partner_staff, new_partner = self.env['res.partner'].create([{
             'name': 'partner_staff',
@@ -477,6 +502,7 @@ class TestCalendar(SavepointCaseWithUserDemo):
         })
         _test_emails_has_attachment(self, partners=[partner_staff, new_partner], attachments_names=[a.name for a in attachments])
 
+    @freezegun.freeze_time('2011-04-29 10:00:00')
     def test_event_creation_internal_user_invitation_ics(self):
         """ Check that internal user can read invitation.ics attachment """
         internal_user = new_test_user(self.env, login='internal_user', groups='base.group_user')
@@ -698,6 +724,49 @@ class TestCalendar(SavepointCaseWithUserDemo):
             attendee_model.with_context(default_event_id=self.event_tech_presentation.id).create([{
                 'partner_id': self.partner_demo.id,
             }])
+
+    @freezegun.freeze_time('2024-01-01 08:00:00')
+    def test_ics_file_videocall_location(self):
+        """ The videocall_location should be exported as a URL property in the invitation.ics
+        attachment sent to attendees, without overriding the physical LOCATION when both are set. """
+        if not vobject:
+            self.skipTest("`vobject` Python module is not installed.")
+
+        cases = [
+            ('no videocall_location', {}, False, False),
+            (
+                'videocall_location only',
+                {'videocall_location': 'https://meet.example.com/test-meeting'},
+                'https://meet.example.com/test-meeting',
+                False,
+            ),
+            (
+                'videocall_location and location',
+                {'location': 'Conference Room A', 'videocall_location': 'https://meet.example.com/room-a'},
+                'https://meet.example.com/room-a',
+                'Conference Room A',
+            ),
+        ]
+        for index, (description, values, expected_url, expected_location) in enumerate(cases):
+            with self.subTest(description=description):
+                partner = self.env['res.partner'].create({
+                    'name': f"Attendee {index}",
+                    'email': f"attendee-{index}@example.com",
+                })
+                self.env['calendar.event'].create({
+                    'name': 'Test Meeting',
+                    'start': datetime(2024, 1, 1, 10, 0),
+                    'stop': datetime(2024, 1, 1, 11, 0),
+                    'partner_ids': [Command.link(partner.id)],
+                    **values,
+                })
+                msg = self.env['mail.message'].sudo().search([('notified_partner_ids', 'in', partner.id)])
+                attachment = msg.attachment_ids.filtered(lambda attachment: attachment.name == 'invitation.ics')
+                self.assertEqual(len(attachment), 1, "The invitation email should have exactly one invitation.ics attachment")
+
+                vevent = vobject.readOne(attachment.raw.decode('utf-8')).vevent
+                self.assertEqual(vevent.getChildValue('url', False), expected_url)
+                self.assertEqual(vevent.getChildValue('location', False), expected_location)
 
 @tagged('post_install', '-at_install')
 class TestCalendarTours(HttpCaseWithUserDemo):

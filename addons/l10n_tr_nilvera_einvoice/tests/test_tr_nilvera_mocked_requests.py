@@ -1,4 +1,5 @@
 import re
+from base64 import b64encode
 from functools import wraps
 from io import BytesIO
 from unittest.mock import MagicMock, call, patch
@@ -99,7 +100,10 @@ def mock_requests_request(method, url, *args, **kwargs):
                 response = xml.read()
         elif '/pdf' in url:
             with file_open('l10n_tr_nilvera_einvoice/tests/test_files/fetching/invoice.pdf', 'rb') as pdf:
-                response = pdf.read()
+                # Nilvera's /pdf endpoint returns the PDF base64-encoded inside a JSON
+                # string body. NilveraClient.request() calls response.json() by default,
+                # so the caller receives a base64 str, not raw bytes.
+                response = b64encode(pdf.read()).decode()
         else:
             response.get.return_value = [
                 {'UUID': 'invoice_uuid'},
@@ -117,8 +121,7 @@ def patch_nilvera_request(function):
             # If the test expects the mock as an argument, pass it
             if 'mocked_request' in function.__code__.co_varnames:
                 return function(*args, mocked_request, **kwargs)
-            else:
-                return function(*args, **kwargs)
+            return function(*args, **kwargs)
     return wrapper
 
 
@@ -134,12 +137,27 @@ class TestTRNilveraMockedRequests(TestUBLTRCommon):
         cls.einvoice_partner.flush_recordset()
         cls.earchive_partner.flush_recordset()
 
+    def test_amount_in_words_rounds_subunit(self):
+        note = self.env['account.edi.xml.ubl.tr']._l10n_tr_get_amount_integer_partn_text_note(
+            3989.33, self.env.ref('base.TRY'),
+        )
+        self.assertEqual(note, 'YALNIZ : ÜÇBINDOKUZYÜZSEKSENDOKUZ TRY OTUZÜÇ KURUS')
+
+    def test_amount_in_words_ignores_sign(self):
+        note_model = self.env["account.edi.xml.ubl.tr"]
+        try_currency = self.env.ref("base.TRY")
+        note = note_model._l10n_tr_get_amount_integer_partn_text_note(-158.40, try_currency)
+        self.assertEqual(note, note_model._l10n_tr_get_amount_integer_partn_text_note(158.40, try_currency))
+        self.assertNotIn("EKSI", note)
+
     @patch_nilvera_request
     def test_which_service_to_call(self):
         _, invoice = self._generate_invoice_xml(self.einvoice_partner, include_invoice=True)
 
         invoices_data = {
-            invoice: {**invoice.read()[0], 'extra_edis': {'tr_nilvera'}}
+            invoice: {
+                **self.env['account.move.send']._get_default_sending_settings(invoice),
+            }
         }
 
         with patch('odoo.addons.l10n_tr_nilvera_einvoice.models.account_move.AccountMove._l10n_tr_nilvera_submit_einvoice') as mock_submit_einvoice, \
@@ -226,6 +244,21 @@ class TestTRNilveraMockedRequests(TestUBLTRCommon):
             "The invoice status couldn't be retrieved from Nilvera."
         )
 
+    def test_cancel_succeeded_invoice(self):
+        _, invoice = self._generate_invoice_xml(self.einvoice_partner, include_invoice=True)
+        invoice.l10n_tr_nilvera_send_status = "succeed"
+
+        self.assertFalse(invoice.show_reset_to_draft_button)
+        invoice.with_context(l10n_tr_nilvera_force_cancel=True).button_cancel()
+        self.assertEqual(invoice.state, "cancel")
+        self.assertFalse(invoice.show_reset_to_draft_button)
+
+    def test_sent_invoice_cannot_be_reset_to_draft(self):
+        _, invoice = self._generate_invoice_xml(self.einvoice_partner, include_invoice=True)
+        invoice.l10n_tr_nilvera_send_status = "succeed"
+        with self.assertRaisesRegex(UserError, "reset to draft an entry that has been sent to Nilvera"):
+            invoice.button_draft()
+
     @patch_nilvera_request
     def test_fetching_einvoices(self, mocked_request):
         with patch.object(self.env.cr, 'commit', autospec=True):
@@ -241,4 +274,11 @@ class TestTRNilveraMockedRequests(TestUBLTRCommon):
 
             invoice = self.env['account.move'].search([('l10n_tr_nilvera_uuid', '=', 'invoice_uuid')])
             self.assertEqual(len(invoice), 1)
-            self.assertListEqual(sorted(invoice.attachment_ids.mapped('mimetype')), ['application/pdf', 'application/xml'])
+            self.assertListEqual(
+                [invoice.attachment_ids.mimetype, invoice.ubl_cii_xml_id.mimetype],
+                ['application/pdf', 'application/xml']
+            )
+            self.assertTrue(
+                invoice.attachment_ids.raw.startswith(b'%PDF-'),
+                "PDF attachment must contain decoded PDF bytes, not base64 text",
+            )

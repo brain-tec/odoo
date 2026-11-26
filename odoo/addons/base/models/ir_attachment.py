@@ -136,10 +136,10 @@ class IrAttachment(models.Model):
         fname, full_path = self._get_path(bin_value, checksum)
         if not os.path.exists(full_path):
             try:
-                with open(full_path, 'wb') as fp:
-                    fp.write(bin_value)
                 # add fname to checklist, in case the transaction aborts
                 self._mark_for_gc(fname)
+                with open(full_path, 'wb') as fp:
+                    fp.write(bin_value)
             except IOError:
                 _logger.info("_file_write writing %s", full_path, exc_info=True)
         return fname
@@ -454,6 +454,15 @@ class IrAttachment(models.Model):
                 if not any(has_group(g) for g in attachment.get_serving_groups()):
                     raise ValidationError(_("Sorry, you are not allowed to write on this document"))
 
+    @api.constrains('res_model', 'res_id')
+    def _check_circular_attachment(self):
+        for record in self.sudo():
+            if record.res_model == 'ir.attachment' and record.id == record.res_id:
+                raise ValidationError(_(
+                    "You cannot attach an attachment to itself.\n"
+                    "Attachment %(record)s cannot have res_id: %(res_id)s",
+                    record=record, res_id=record))
+
     @api.model
     def check(self, mode, values=None):
         """ Restricts the access to an ir.attachment, according to referred mode """
@@ -482,7 +491,8 @@ class IrAttachment(models.Model):
                     continue
                 model_ids[res_model].add(res_id)
         if values and values.get('res_model') and values.get('res_id'):
-            model_ids[values['res_model']].add(values['res_id'])
+            res_id = self._fields["res_id"].convert_to_cache(values["res_id"], self)
+            model_ids[values["res_model"]].add(res_id)
 
         # check access rights on the records
         for res_model, res_ids in model_ids.items():
@@ -600,6 +610,14 @@ class IrAttachment(models.Model):
 
     def write(self, vals):
         self.check('write', values=vals)
+        if ("res_model" in vals) != ("res_id" in vals):
+            Attachments = self.browse()
+            targets = {
+                (vals.get("res_model", record.res_model), vals.get("res_id", record.res_id))
+                for record in self
+            }
+            for res_model, res_id in targets:
+                Attachments.check("write", values={"res_model": res_model, "res_id": res_id})
         # remove computed field depending of datas
         for field in ('file_size', 'checksum', 'store_fname'):
             vals.pop(field, False)
@@ -634,14 +652,12 @@ class IrAttachment(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        record_tuple_set = set()
-
         # remove computed field depending of datas
         vals_list = [{
-            key: value
-            for key, value
-            in vals.items()
-            if key not in ('file_size', 'checksum', 'store_fname')
+            **vals,
+            'file_size': 0,
+            'checksum': False,
+            'store_fname': False,
         } for vals in vals_list]
 
         for values in vals_list:
@@ -655,18 +671,17 @@ class IrAttachment(models.Model):
                     raw or base64.b64decode(datas or b''),
                     values['mimetype']
                 ))
-
-            # 'check()' only uses res_model and res_id from values, and make an exists.
-            # We can group the values by model, res_id to make only one query when
-            # creating multiple attachments on a single record.
-            record_tuple = (values.get('res_model'), values.get('res_id'))
-            record_tuple_set.add(record_tuple)
-
-        # don't use possible contextual recordset for check, see commit for details
-        Attachments = self.browse()
-        for res_model, res_id in record_tuple_set:
-            Attachments.check('create', values={'res_model':res_model, 'res_id':res_id})
         return super().create(vals_list)
+
+    def _prepare_create_values(self, vals_list):
+        vals_list = super()._prepare_create_values(vals_list)
+        # 'check()' only uses res_model and res_id from values, and make an exists.
+        # We can group the values by model, res_id to make only one query when
+        # creating multiple attachments on a single record.
+        record_tuple_set = {(values.get('res_model'), values.get('res_id')) for values in vals_list}
+        for res_model, res_id in record_tuple_set:
+            self.check('create', values={'res_model': res_model, 'res_id': res_id})
+        return vals_list
 
     def _post_add_create(self, **kwargs):
         # TODO master: rename to _post_upload, better indicating its usage
@@ -699,10 +714,17 @@ class IrAttachment(models.Model):
                 ['file_size', '=', len(bin_data)],
                 ['mimetype', '=', values['mimetype']],
             ]
-            existing = self.sudo().search(existing_domain)
-            if existing:
-                for attachment in existing:
-                    ids.append(attachment.id)
+            existing_ids = []
+            for attachment in self.sudo().search(existing_domain).sudo(False):
+                # Only reuse the attachments the current user can write, as callers may
+                # link new attachments to them (e.g. the resized variants of an image).
+                try:
+                    attachment.check('write')
+                except AccessError:
+                    continue
+                existing_ids.append(attachment.id)
+            if existing_ids:
+                ids.extend(existing_ids)
             else:
                 attachment = self.create(values)
                 ids.append(attachment.id)

@@ -23,6 +23,8 @@ def patch_all():
     patch_mimetypes()
     from .pytz import patch_pytz
     patch_pytz()
+    from .babel import patch_module as patch_babel
+    patch_babel()
     from .literal_eval import patch_literal_eval
     patch_literal_eval()
     from .lxml import patch_lxml
@@ -37,3 +39,11 @@ def patch_all():
     patch_werkzeug()
     from .zeep import patch_zeep
     patch_zeep()
+    from .markupsafe import patch_markup
+    patch_markup()
+    from .requests import patch_requests
+    patch_requests()
+    from .pyopenssl import patch_pyopenssl
+    patch_pyopenssl()
+    from ._cpython import patch_cpython
+    patch_cpython()

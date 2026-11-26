@@ -6,13 +6,14 @@
 # Wil Odoo, 2025
 # Tony Ng, 2025
 #
-# "Tony Ng (ngto)" <ngto@odoo.com>, 2025.
+# "Tony Ng (ngto)" <ngto@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-09-23 18:56+0000\n"
+"POT-Creation-Date: 2026-06-12 17:37+0000\n"
+"PO-Revision-Date: 2026-11-09 07:42+0000\n"
 "Last-Translator: \"Tony Ng (ngto)\" <ngto@odoo.com>\n"
 "Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
 "projects/odoo-18/hr_timesheet/zh_Hant/>\n"
@@ -21,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.portal_timesheet_table
@@ -109,11 +110,6 @@ msgid "2 hours"
 msgstr "2 小時"
 
 #. module: hr_timesheet
-#: model_terms:ir.ui.view,arch_db:hr_timesheet.timesheet_table
-msgid "2021-09-01"
-msgstr "2021 年 9 月 1 日"
-
-#. module: hr_timesheet
 #: model_terms:digest.tip,tip_description:hr_timesheet.digest_tip_hr_timesheet_0
 msgid "<b class=\"tip_title\">Tip: Record your Timesheets faster</b>"
 msgstr "<b class=\"tip_title\">提示: 更快的紀錄您的工時表</b>"
@@ -146,35 +142,10 @@ msgstr "<span class=\"text-nowrap\">子任務所用工時：</span>"
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.hr_employee_delete_wizard_form
 msgid ""
-"<span invisible=\"not has_timesheet\">\n"
-"                        You cannot delete employees who have timesheets.\n"
-"                        <span invisible=\"not has_active_employee\">\n"
-"                            You can either archive these employees or first "
-"delete all of their timesheets.\n"
-"                        </span>\n"
-"                        <span invisible=\"has_active_employee\" "
-"groups=\"hr_timesheet.group_hr_timesheet_approver\">\n"
-"                            Please first delete all of their timesheets.\n"
-"                        </span>\n"
-"                    </span>\n"
-"                    <span invisible=\"has_timesheet\">\n"
+"<span invisible=\"has_timesheet\">\n"
 "                        Are you sure you want to delete these employees?\n"
 "                    </span>"
 msgstr ""
-"<span invisible=\"not has_timesheet\">\n"
-"                        不能刪除有考勤表的員工。\n"
-"                       <span invisible=\"not has_active_employee\">\n"
-"                            您可以將這些員工封存，或者先刪除他們的所有工時"
-"表。\n"
-"                       </span>\n"
-"                       <span invisible=\"has_active_employee\" "
-"groups=\"hr_timesheet.group_hr_timesheet_approver\">\n"
-"                            請先刪除所有工時表。\n"
-"                       </span>\n"
-"                    </span>\n"
-"                    <span invisible=\"has_timesheet\">\n"
-"                        確定要刪除這些員工嗎？\n"
-"                    </span>"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.timesheet_table
@@ -436,8 +407,7 @@ msgstr "刪除員工"
 msgid ""
 "Deliver your services automatically when a milestone is reached by linking "
 "it to a sales order item."
-msgstr ""
-"將里程碑連結至銷售訂單項目，當達到里程碑時，可以自動執行和提供你的服務。"
+msgstr "將里程碑連結至銷售訂單項目，當達到里程碑時，可以自動執行和提供你的服務。"
 
 #. module: hr_timesheet
 #: model:ir.model.fields,field_description:hr_timesheet.field_account_analytic_line__department_id
@@ -463,7 +433,7 @@ msgstr "說明"
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.hr_employee_delete_wizard_form
 msgid "Discard"
-msgstr "捨棄"
+msgstr "取消"
 
 #. module: hr_timesheet
 #: model:ir.model.fields,field_description:hr_timesheet.field_hr_employee_delete_wizard__display_name
@@ -511,6 +481,11 @@ msgstr "員工提醒"
 #: code:addons/hr_timesheet/wizard/hr_employee_delete_wizard.py:0
 msgid "Employee Termination"
 msgstr "員工終止日"
+
+#. module: hr_timesheet
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.view_kanban_account_analytic_line
+msgid "Employee's image"
+msgstr "員工圖片"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -740,6 +715,11 @@ msgid "Partner"
 msgstr "業務夥伴"
 
 #. module: hr_timesheet
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.hr_employee_delete_wizard_form
+msgid "Please first delete all of their timesheets."
+msgstr ""
+
+#. module: hr_timesheet
 #: model:ir.model,name:hr_timesheet.model_uom_uom
 msgid "Product Unit of Measure"
 msgstr "產品計量單位"
@@ -818,7 +798,7 @@ msgstr "研究與開發 － 新門戶系統"
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.portal_my_home_timesheet
 msgid "Review all timesheets related to your projects"
-msgstr "審查與您的專案項目有關的所有工時表"
+msgstr "審核你的專案項目的所有工時表"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -940,8 +920,8 @@ msgid ""
 "These projects have some timesheet entries referencing them. Before removing "
 "these projects, you have to remove these timesheet entries."
 msgstr ""
-"這些專案有一些引用它們的工時表項目。在刪除這些專案之前，您必須刪除這些工時"
-"表。"
+"這些專案有一些引用它們的工時表項目。在刪除這些專案之前，您必須刪除這些工時表"
+"。"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -950,8 +930,8 @@ msgid ""
 "These tasks have some timesheet entries referencing them. Before removing "
 "these tasks, you have to remove these timesheet entries."
 msgstr ""
-"這些任務有一些引用它們的工時表項目。在刪除這些任務之前，您必須刪除這些工時"
-"表。"
+"這些任務有一些引用它們的工時表項目。在刪除這些任務之前，您必須刪除這些工時表"
+"。"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -990,8 +970,7 @@ msgstr "該搜尋方法不支援該運算符 %s。"
 msgid ""
 "This project has some timesheet entries referencing it. Before removing this "
 "project, you have to remove these timesheet entries."
-msgstr ""
-"該專案有一些引用它的工時表項目。在刪除此專案之前，您必須刪除這些工時表項目。"
+msgstr "該專案有一些引用它的工時表項目。在刪除此專案之前，您必須刪除這些工時表項目。"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1006,8 +985,7 @@ msgstr "該任務不能設為私密，因為有一些工時表已連結至它。
 msgid ""
 "This task has some timesheet entries referencing it. Before removing this "
 "task, you have to remove these timesheet entries."
-msgstr ""
-"此任務有一些引用它的工時表項目。在刪除此任務之前，您必須刪除這些工時表項目。"
+msgstr "此任務有一些引用它的工時表項目。在刪除此任務之前，您必須刪除這些工時表項目。"
 
 #. module: hr_timesheet
 #: model:ir.model.fields,help:hr_timesheet.field_res_company__project_time_mode_id
@@ -1401,6 +1379,16 @@ msgid "You cannot delete employees who have timesheets."
 msgstr "不能刪除有工時表的員工。"
 
 #. module: hr_timesheet
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.hr_employee_delete_wizard_form
+msgid ""
+"You cannot delete employees who have timesheets.\n"
+"                        <span invisible=\"not has_active_employee\">\n"
+"                            You can either archive these employees or first "
+"delete all of their timesheets.\n"
+"                        </span>"
+msgstr ""
+
+#. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_invoice_form
 msgid ""
 "You cannot log timesheets on this project since it is linked to an inactive "
@@ -1456,3 +1444,37 @@ msgid ""
 msgstr ""
 "在\n"
 "                        <span class=\"fw-bold text-dark\">子任務</span>）"
+
+#~ msgid "2021-09-01"
+#~ msgstr "2021 年 9 月 1 日"
+
+#~ msgid ""
+#~ "<span invisible=\"not has_timesheet\">\n"
+#~ "                        You cannot delete employees who have timesheets.\n"
+#~ "                        <span invisible=\"not has_active_employee\">\n"
+#~ "                            You can either archive these employees or "
+#~ "first delete all of their timesheets.\n"
+#~ "                        </span>\n"
+#~ "                        <span invisible=\"has_active_employee\" "
+#~ "groups=\"hr_timesheet.group_hr_timesheet_approver\">\n"
+#~ "                            Please first delete all of their timesheets.\n"
+#~ "                        </span>\n"
+#~ "                    </span>\n"
+#~ "                    <span invisible=\"has_timesheet\">\n"
+#~ "                        Are you sure you want to delete these employees?\n"
+#~ "                    </span>"
+#~ msgstr ""
+#~ "<span invisible=\"not has_timesheet\">\n"
+#~ "                        不能刪除有考勤表的員工。\n"
+#~ "                       <span invisible=\"not has_active_employee\">\n"
+#~ "                            您可以將這些員工封存，或者先刪除他們的所有工時"
+#~ "表。\n"
+#~ "                       </span>\n"
+#~ "                       <span invisible=\"has_active_employee\" "
+#~ "groups=\"hr_timesheet.group_hr_timesheet_approver\">\n"
+#~ "                            請先刪除所有工時表。\n"
+#~ "                       </span>\n"
+#~ "                    </span>\n"
+#~ "                    <span invisible=\"has_timesheet\">\n"
+#~ "                        確定要刪除這些員工嗎？\n"
+#~ "                    </span>"

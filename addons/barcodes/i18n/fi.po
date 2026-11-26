@@ -15,13 +15,14 @@
 # Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024
 # Jessica Jakara, 2025
 # Weblate <noreply-mt-weblate@weblate.org>, 2026.
+# Saara Hakanen <sahak@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2026-01-24 09:02+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"PO-Revision-Date: 2026-10-20 09:40+0000\n"
+"Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
 "Language-Team: Finnish <https://translate.odoo.com/projects/odoo-18/barcodes/"
 "fi/>\n"
 "Language: fi\n"
@@ -29,7 +30,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: barcodes
 #. odoo-python
@@ -51,8 +52,8 @@ msgid ""
 msgstr ""
 "<i>Viivakoodit nimikkeistöissä</i> määritellään, miten viivakoodit "
 "tunnistetaan ja luokitellaan.\n"
-"                                Kun viivakoodi skannataan, se liitetään "
-"<i>ensimmäiseen</i> sääntöön, jolla on vastaava viivakoodi.\n"
+"                                Kun viivakoodi skannataan, se liitetään <i>"
+"ensimmäiseen</i> sääntöön, jolla on vastaava viivakoodi.\n"
 "                                Kuvion syntaksi on regexp-lauseke, ja "
 "viivakoodia vastataan seuraavasti\n"
 "                                jos regexp vastaa viivakoodin etuliitettä."
@@ -247,8 +248,8 @@ msgid ""
 msgstr ""
 "Kuviot voivat myös määritellä, miten numeeriset arvot, kuten paino tai "
 "hinta, voidaan olla\n"
-"                                koodata viivakoodiin. Ne osoitetaan "
-"<code>{NNN}</code> jossa N:t\n"
+"                                koodata viivakoodiin. Ne osoitetaan <code>"
+"{NNN}</code> jossa N:t\n"
 "                                määrittelevät, mihin numeron numerot "
 "koodataan. Liukulukuja on myös mahdollista käyttää kirjoittamalla\n"
 "                                desimaaleja, jotka on merkitty D-"
@@ -287,7 +288,7 @@ msgstr "Pöydät"
 #. odoo-javascript
 #: code:addons/barcodes/static/src/components/barcode_scanner.xml:0
 msgid "Tap to scan"
-msgstr "Skannaa"
+msgstr "Napauta skannataksesi"
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_rule__pattern
@@ -299,8 +300,7 @@ msgstr "Viivakoodin vastaavuusmalli"
 #: code:addons/barcodes/models/barcode_rule.py:0
 msgid ""
 "The barcode pattern %(pattern)s does not lead to a valid regular expression."
-msgstr ""
-"Viivakoodikuvio %(pattern)s ei johda kelvolliseen regexp-lausekkeeseen."
+msgstr "Viivakoodikuvio %(pattern)s ei johda kelvolliseen regexp-lausekkeeseen."
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_nomenclature__rule_ids

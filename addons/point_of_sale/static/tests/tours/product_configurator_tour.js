@@ -85,6 +85,30 @@ registry.category("web_tour.tours").add("ProductConfiguratorTour", {
         ].flat(),
 });
 
+registry.category("web_tour.tours").add("test_single_value_multi_attribute_configurator", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+
+            // A product whose only attribute is a multi-select with a single value
+            // must still open the configurator so the value can be (de)selected.
+            ProductScreen.clickDisplayedProduct("Single Multi Product"),
+            Dialog.is({ title: "Attribute selection" }),
+
+            // Pick the single multi value and confirm
+            ProductConfigurator.pickMulti("Extra Cheese"),
+            Dialog.confirm("Add"),
+
+            ProductScreen.selectedOrderlineHas(
+                "Single Multi Product (Extra Cheese)",
+                "1.0",
+                "15.0"
+            ),
+            Chrome.endTour(),
+        ].flat(),
+});
+
 registry.category("web_tour.tours").add("test_combo_variant_mix", {
     steps: () =>
         [
@@ -99,5 +123,15 @@ registry.category("web_tour.tours").add("test_combo_variant_mix", {
             Dialog.confirm("Add"),
             Dialog.confirm(),
             inLeftSide([...ProductScreen.orderLineHas("Test Product (Large) (Blue)", 1)]),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_single_attribute_value_products", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickDisplayedProduct("Whiteboard Pen"),
+            inLeftSide([...ProductScreen.orderLineHas("Whiteboard Pen (add 2)", 1)]),
         ].flat(),
 });

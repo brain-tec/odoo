@@ -840,11 +840,13 @@
     <!-- Top-Nav Categories -->
     <template id="website_sale.filmstrip_categories" name="Categories Filmstrip">
         <t t-if="category.id">
-            <t t-set="entries" t-value="not search and category.child_id or category.child_id.filtered(lambda c: category.id in search_categories_ids)"/>
+            <t t-set="available_categories" t-value="category.child_id.filtered(lambda c: c.can_access_from_current_website())"/>
+            <t t-set="entries" t-value="not search and available_categories or available_categories.filtered(lambda c: c.id in search_categories_ids)"/>
 
             <t t-if="not entries">
                 <t t-set="parent" t-value="category.parent_id"/>
-                <t t-set="entries" t-value="not search and parent.child_id or parent.child_id.filtered(lambda c: parent.id in search_categories_ids)"/>
+                <t t-set="available_categories" t-value="parent.child_id.filtered(lambda c: c.can_access_from_current_website())"/>
+                <t t-set="entries" t-value="not search and available_categories or available_categories.filtered(lambda c: c.id in search_categories_ids)"/>
             </t>
         </t>
         <t t-else="">
@@ -1920,7 +1922,7 @@
             <t t-set="show_qty" t-value="is_view_active('website_sale.product_quantity')"/>
             <div t-foreach="website_sale_order.website_order_line"
                  t-as="line"
-                 t-attf-class="o_cart_product d-flex align-items-stretch gap-3 #{line.linked_line_id and 'optional_product info'} #{not line_last and 'border-bottom pb-4'} #{line_index &gt; 0 and 'pt-4'}"
+                 t-attf-class="o_cart_product d-flex align-items-stretch gap-3 #{line.linked_line_id and 'optional_product info' or ''} #{not line_last and 'border-bottom pb-4'} #{line_index &gt; 0 and 'pt-4'}"
                  t-attf-data-product-id="#{line.product_id and line.product_id.id}">
                 <t t-if="line.product_id">
                     <div style="width: 64px">
@@ -2201,7 +2203,7 @@
             method="post" name="coupon_code">
             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" t-nocache="The csrf token must always be up to date."/>
             <div class="input-group w-100 my-2">
-                <input name="promo" class="form-control" type="text" placeholder="Discount code..." t-att-value="website_sale_order.pricelist_id.code or None"/>
+                <input name="promo" class="form-control" type="text" placeholder="Discount code..."/>
                 <a href="#" role="button" class="btn btn-secondary a-submit ps-2">Apply</a>
             </div>
         </form>
@@ -2954,7 +2956,7 @@
                     </h5>
                 </div>
             </t>
-            <t t-if="request.env['res.users']._get_signup_invitation_scope() == 'b2c' and request.website.is_public_user()">
+            <t t-if="request.env['res.users']._get_signup_invitation_scope() == 'b2c' and request.website.is_public_user() and not order.partner_id.user_ids">
                 <p class="alert alert-info mt-3" role="status">
                     <a role="button" t-att-href="order.partner_id.signup_prepare() and order.partner_id.with_context(relative_url=True)._get_signup_url()" class="btn btn-primary">Sign Up</a>
                     to follow your order.
@@ -3062,8 +3064,9 @@
             <tr t-if="not hide_promotions">
                 <td colspan="3" class="text-end text-xl-end border-0 p-0">
                 <span>
+                    <!-- force_coupon to be removed in master -->
                     <t t-set="force_coupon" t-value="website_sale_order.pricelist_id.code"/>
-                    <div t-if="not force_coupon" class="coupon_form">
+                    <div class="coupon_form">
                         <t t-call="website_sale.coupon_form"/>
                     </div>
                 </span>

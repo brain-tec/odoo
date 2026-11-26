@@ -26,9 +26,8 @@ class ProductTemplate(models.Model):
     @api.model
     def _get_buy_route(self):
         buy_route = self.env.ref('purchase_stock.route_warehouse0_buy', raise_if_not_found=False)
-        if buy_route:
-            return self.env['stock.route'].search([('id', '=', buy_route.id)]).ids
-        return []
+        # Use sudo to check the route company even when the user cannot access it.
+        return buy_route.sudo().filtered(lambda route: not route.company_id or route.company_id in self.env.companies).ids
 
     route_ids = fields.Many2many(default=lambda self: self._get_buy_route())
 
@@ -139,7 +138,11 @@ class SupplierInfo(models.Model):
         if not orderpoint:
             return
         if 'buy' not in orderpoint.route_id.rule_ids.mapped('action'):
-            orderpoint.route_id = self.env['stock.rule'].search([('action', '=', 'buy')], limit=1).route_id.id
+            # `_create_buy_rules()` assures always have a default `buy_pull_id` value on the warehouse
+            buy_route = orderpoint.warehouse_id.buy_pull_id.route_id
+            if not buy_route:
+                buy_route = self.env['stock.rule'].search([('action', '=', 'buy')], limit=1).route_id
+            orderpoint.route_id = buy_route.id
         orderpoint.supplier_id = self
         supplier_min_qty = self.product_uom._compute_quantity(self.min_qty, orderpoint.product_id.uom_id)
         if orderpoint.qty_to_order < supplier_min_qty:

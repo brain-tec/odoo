@@ -6,15 +6,15 @@
 # Chill Liao <chill421@qq.com>, 2024
 # Wil Odoo, 2025
 # Tony Ng, 2025
-# "Tony Ng (ngto)" <ngto@odoo.com>, 2025.
-# "Junko Augias (juau)" <juau@odoo.com>, 2025.
+# "Tony Ng (ngto)" <ngto@odoo.com>, 2025, 2026.
+# "Junko Augias (juau)" <juau@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2025-12-26 14:00+0000\n"
-"Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
+"POT-Creation-Date: 2026-04-10 18:37+0000\n"
+"PO-Revision-Date: 2026-11-09 07:43+0000\n"
+"Last-Translator: \"Tony Ng (ngto)\" <ngto@odoo.com>\n"
 "Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
 "projects/odoo-18/mrp/zh_Hant/>\n"
 "Language: zh_TW\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__state
@@ -56,8 +56,8 @@ msgid ""
 " <br/><br/> The manufactured products will be moved towards <b>%"
 "(destination)s</b>, <br/> as specified from <b>%(operation)s</b> destination."
 msgstr ""
-" <br/><br/>製成的產品將會移至 <b>%(destination)s</b>，<br/>即 <b>%"
-"(operation)s</b> 所指定之目的地。"
+" <br/><br/>製成的產品將會移至 <b>%(destination)s</b>，<br/>即 <b>%(operation)"
+"s</b> 所指定之目的地。"
 
 #. module: mrp
 #: model:ir.model.fields.selection,name:mrp.selection__mrp_bom__ready_to_produce__all_available
@@ -223,55 +223,14 @@ msgstr ""
 "庫存。"
 
 #. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "100"
-msgstr "100"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrp_production_components
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrp_workorder
-msgid "12345678901"
-msgstr "12345678901"
-
-#. module: mrp
 #: model_terms:product.template,description:mrp.product_product_computer_desk_leg_product_template
 msgid "18″ x 2½″ Square Leg"
 msgstr "18″ x 2½″ 方形脚"
 
 #. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "2023-09-15"
-msgstr "2023-09-15"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrp_production_components
-msgid "25"
-msgstr "25"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "50"
-msgstr "50"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "58"
-msgstr "58"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "60"
-msgstr "60"
-
-#. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.report_mrp_production_components
 msgid "8 GB RAM"
 msgstr "8 GB RAM 記憶體"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "987654321098"
-msgstr "987654321098"
 
 #. module: mrp
 #. odoo-javascript
@@ -283,23 +242,21 @@ msgstr ":  小時"
 #: model_terms:ir.ui.view,arch_db:mrp.workcenter_line_kanban
 msgid ""
 "<i class=\"fa fa-pause\" role=\"img\" aria-label=\"Pause\" title=\"Pause\"/>"
-msgstr ""
-"<i class=\"fa fa-pause\" role=\"img\" aria-label=\"暫停\" title=\"暫停\"/>"
+msgstr "<i class=\"fa fa-pause\" role=\"img\" aria-label=\"暫停\" title=\"暫停\"/>"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.workcenter_line_kanban
 msgid ""
 "<i class=\"fa fa-play fs-6\" role=\"img\" aria-label=\"Run\" title=\"Run\"/>"
 msgstr ""
-"<i class=\"fa fa-play fs-6\" role=\"img\" aria-label=\"運行\" title=\"運行\"/"
-">"
+"<i class=\"fa fa-play fs-6\" role=\"img\" aria-label=\"運行\" title=\"運"
+"行\"/>"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.workcenter_line_kanban
 msgid ""
 "<i class=\"fa fa-stop\" role=\"img\" aria-label=\"Stop\" title=\"Stop\"/>"
-msgstr ""
-"<i class=\"fa fa-stop\" role=\"img\" aria-label=\"停止\" title=\"停止\"/>"
+msgstr "<i class=\"fa fa-stop\" role=\"img\" aria-label=\"停止\" title=\"停止\"/>"
 
 #. module: mrp
 #. odoo-python
@@ -612,8 +569,8 @@ msgid ""
 "its components when:"
 msgstr ""
 "類型為\"套件\"的用料清單（BoM）並非在生產訂單下生產。<br/>\n"
-"                                相反，在以下情況下，用於將物料清單分解為組"
-"件："
+"                                相反，在以下情況下，用於將物料清單分解為組件"
+"："
 
 #. module: mrp
 #. odoo-python
@@ -771,7 +728,7 @@ msgstr "製造訂單的分配報告"
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__allow_workorder_dependencies
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder__allow_workorder_dependencies
 msgid "Allow Work Order Dependencies"
-msgstr "允許工單依賴"
+msgstr "允許工作單相依關係"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
@@ -1203,7 +1160,7 @@ msgstr "阻塞原因"
 #: model:ir.model.fields,field_description:mrp.field_mrp_routing_workcenter__needed_by_operation_ids
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder__needed_by_workorder_ids
 msgid "Blocks"
-msgstr "阻塞區塊"
+msgstr "阻塞因素"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_bom_byproduct__bom_id
@@ -1760,8 +1717,8 @@ msgid ""
 "enough time to replenish components or manufacture semi-finished products.\n"
 "Note that security lead times will also be considered when appropriate."
 msgstr ""
-"提前創建並確認製造訂單這麼多天，以確保有足夠的時間來補充零部件或製造半成"
-"品。\n"
+"提前創建並確認製造訂單這麼多天，以確保有足夠的時間來補充零部件或製造半成品"
+"。\n"
 "請注意，在適當的情況下，還將考慮安全提前時間。"
 
 #. module: mrp
@@ -2062,7 +2019,7 @@ msgstr "拆卸順序"
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_split_form
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_split_multi_form
 msgid "Discard"
-msgstr "捨棄"
+msgstr "取消"
 
 #. module: mrp
 #. odoo-javascript
@@ -2376,7 +2333,7 @@ msgstr "關注人（業務夥伴）"
 #: model:ir.model.fields,help:mrp.field_mrp_routing_workcenter__activity_type_icon
 #: model:ir.model.fields,help:mrp.field_mrp_unbuild__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr "Font awesome 圖示，例如，fa-task"
+msgstr "Font Awesome 圖示，例如 fa-tasks"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_consumption_warning_form
@@ -2687,8 +2644,7 @@ msgstr "如果啟用欄位設定為未啟用，它將允許您隱藏資源記錄
 msgid ""
 "If this checkbox is ticked, Odoo will automatically print the allocation "
 "report labels of a MO when it is done."
-msgstr ""
-"如果勾選此方格，Odoo 將在製造訂單（MO）完成後，自動列印 MO 的分配報告標籤。"
+msgstr "如果勾選此方格，Odoo 將在製造訂單（MO）完成後，自動列印 MO 的分配報告標籤。"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_stock_picking_type__auto_print_mrp_reception_report
@@ -2704,24 +2660,21 @@ msgstr ""
 msgid ""
 "If this checkbox is ticked, Odoo will automatically print the lot/SN label "
 "of a MO when it is done."
-msgstr ""
-"如果勾選此方格，Odoo 將在製造訂單（MO）完成後，自動列印 MO 的批次/序號標籤。"
+msgstr "如果勾選此方格，Odoo 將在製造訂單（MO）完成後，自動列印 MO 的批次/序號標籤。"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_stock_picking_type__auto_print_done_mrp_product_labels
 msgid ""
 "If this checkbox is ticked, Odoo will automatically print the product labels "
 "of a MO when it is done."
-msgstr ""
-"如果勾選此方格，Odoo 將在製造訂單（MO）完成後，自動列印 MO 的產品標籤。"
+msgstr "如果勾選此方格，Odoo 將在製造訂單（MO）完成後，自動列印 MO 的產品標籤。"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_stock_picking_type__auto_print_done_production_order
 msgid ""
 "If this checkbox is ticked, Odoo will automatically print the production "
 "order of a MO when it is done."
-msgstr ""
-"如果勾選此方格，Odoo 將在製造訂單（MO）完成後，自動列印 MO 的生產訂單。"
+msgstr "如果勾選此方格，Odoo 將在製造訂單（MO）完成後，自動列印 MO 的生產訂單。"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.exception_on_mo
@@ -2983,8 +2936,7 @@ msgstr "MO工單延遲或物料延遲交貨"
 msgid ""
 "Latest component availability status for this MO. If green, then the MO's "
 "readiness status is ready, as per BOM configuration."
-msgstr ""
-"此 MO 的最新物料可用性狀態. 如果為綠色,則根據 BOM 配置,MO 的就緒狀態為就緒."
+msgstr "此 MO 的最新物料可用性狀態. 如果為綠色,則根據 BOM 配置,MO 的就緒狀態為就緒."
 
 #. module: mrp
 #: model_terms:product.template,description:mrp.product_product_wood_ply_product_template
@@ -3017,8 +2969,8 @@ msgid ""
 "when this product is in a bill of material."
 msgstr ""
 "如果文件只能在產品表單存取，可繼續保持隱藏。\n"
-"若產品屬於用料清單中項目，請選擇「用料清單」，以將此文件視覺化呈現為產品附"
-"件。"
+"若產品屬於用料清單中項目，請選擇「用料清單」，以將此文件視覺化呈現為產品附件"
+"。"
 
 #. module: mrp
 #: model:ir.model,name:mrp.model_mrp_consumption_warning_line
@@ -3708,8 +3660,7 @@ msgstr ""
 msgid ""
 "Note that product(s): '%s' is/are still linked to active Bill of Materials, "
 "which means that the product can still be used on it/them."
-msgstr ""
-"注意!! 產品: '%s' 仍然鏈接到有效的物料清單, 這意味著該產品仍可用於它/它們."
+msgstr "注意!! 產品: '%s' 仍然鏈接到有效的物料清單, 這意味著該產品仍可用於它/它們."
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_bom__message_needaction_counter
@@ -3819,8 +3770,8 @@ msgstr ""
 "Odoo 預設開啟 PDF 預覽。若想立即列印，\n"
 "                                請在條碼操作器的同一區域網絡（local network）"
 "的電腦上\n"
-"                                安裝 IoT 物聯網應用程式，並設定報告的路由走"
-"向。"
+"                                安裝 IoT 物聯網應用程式，並設定報告的路由走向"
+"。"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter__oee
@@ -4826,7 +4777,7 @@ msgstr "補給"
 #. odoo-python
 #: code:addons/mrp/models/stock_warehouse.py:0
 msgid "Replenish on Order (MTO)"
-msgstr "訂單補給（特別訂製）"
+msgstr "按訂單補貨（特別訂製）"
 
 #. module: mrp
 #. odoo-javascript
@@ -5395,7 +5346,7 @@ msgstr "桌腿"
 #. module: mrp
 #: model:product.template,name:mrp.product_product_computer_desk_head_product_template
 msgid "Table Top"
-msgstr "桌頂部"
+msgstr "桌面"
 
 #. module: mrp
 #: model_terms:product.template,description:mrp.product_product_table_kit_product_template
@@ -5537,8 +5488,7 @@ msgstr ""
 msgid ""
 "The percentage of the final production cost for this by-product. The total "
 "of all by-products' cost share must be smaller or equal to 100."
-msgstr ""
-"此副產品在最終生產成本中的百分比.所有副產品的總成本份額必須小於或等於 100."
+msgstr "此副產品在最終生產成本中的百分比.所有副產品的總成本份額必須小於或等於 100."
 
 #. module: mrp
 #. odoo-python
@@ -5725,8 +5675,7 @@ msgid ""
 "This should be the smallest quantity that this product can be produced in. "
 "If the BOM contains operations, make sure the work center capacity is "
 "accurate."
-msgstr ""
-"這應該是該產品可以生產的最小數量.如果 BOM 包含製程, 請確保工作中心產能準確."
+msgstr "這應該是該產品可以生產的最小數量.如果 BOM 包含製程, 請確保工作中心產能準確."
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder__time_ids
@@ -6108,7 +6057,7 @@ msgstr "取消預留"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_tree_view
 msgid "UoM"
-msgstr "計量單位"
+msgstr "量度單位"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
@@ -6377,7 +6326,7 @@ msgstr "拆分製程引導"
 #. module: mrp
 #: model:ir.model,name:mrp.model_mrp_production_backorder
 msgid "Wizard to mark as done or create back order"
-msgstr "標記為完成或建立延期訂單的引導"
+msgstr "標記完成或建立缺貨訂單精靈"
 
 #. module: mrp
 #: model:product.template,name:mrp.product_product_wood_panel_product_template
@@ -6461,7 +6410,7 @@ msgstr "工單"
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_res_config_settings__group_mrp_workorder_dependencies
 msgid "Work Order Dependencies"
-msgstr "生產工單依賴"
+msgstr "工作單相依關係"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
@@ -6977,3 +6926,27 @@ msgstr "拆分"
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_routing_workcenter_form_view
 msgid "work orders"
 msgstr "工單"
+
+#~ msgid "100"
+#~ msgstr "100"
+
+#~ msgid "12345678901"
+#~ msgstr "12345678901"
+
+#~ msgid "2023-09-15"
+#~ msgstr "2023-09-15"
+
+#~ msgid "25"
+#~ msgstr "25"
+
+#~ msgid "50"
+#~ msgstr "50"
+
+#~ msgid "58"
+#~ msgstr "58"
+
+#~ msgid "60"
+#~ msgstr "60"
+
+#~ msgid "987654321098"
+#~ msgstr "987654321098"

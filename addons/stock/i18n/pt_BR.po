@@ -1,26 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* stock
+# * stock
 #
 # Translators:
 # Wil Odoo, 2024
 # Maitê Dietze, 2025
 #
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Maitê Dietze, 2025\n"
-"Language-Team: Portuguese (Brazil) (https://app.transifex.com/odoo/teams/"
-"41243/pt_BR/)\n"
+"POT-Creation-Date: 2026-04-10 18:37+0000\n"
+"PO-Revision-Date: 2026-10-20 14:15+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/odoo-"
+"18/stock/pt_BR/>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % "
-"1000000 == 0 ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
+"1000000 == 0) ? 1 : 2);\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: stock
 #. odoo-python
@@ -45,6 +47,16 @@ msgid ""
 msgstr ""
 "\n"
 "(%(serial_number)s) existe no local %(location)s"
+
+#. module: stock
+#. odoo-python
+#: code:addons/stock/models/stock_move.py:0
+msgid ""
+"\n"
+"Package: %s"
+msgstr ""
+"\n"
+"Pacote: %s"
 
 #. module: stock
 #. odoo-python
@@ -197,9 +209,8 @@ msgid ""
 "%(product_name)s --> Product UoM is %(product_uom)s (%"
 "(product_uom_category)s) - Move UoM is %(move_uom)s (%(move_uom_category)s)"
 msgstr ""
-"%(product_name)s --> UM do produto é %(product_uom)s (%"
-"(product_uom_category)s) - UM da movimentação é %(move_uom)s (%"
-"(move_uom_category)s)"
+"%(product_name)s --> UM do produto é %(product_uom)s (%(product_uom_category)"
+"s) - UM da movimentação é %(move_uom)s (%(move_uom_category)s)"
 
 #. module: stock
 #. odoo-python
@@ -438,46 +449,9 @@ msgid "1 Week"
 msgstr "1 semana"
 
 #. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_package_barcode
-msgid "12.0"
-msgstr "12.0"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_generic_barcode
-msgid "1234567890"
-msgstr "1234567890"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_lot_label
-msgid "12345678901"
-msgstr "12345678901"
-
-#. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_picking_type__product_label_format__2x7xprice
 msgid "2 x 7 with price"
 msgstr "2 x 7 com preço"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_package_barcode
-msgid "2021-9-01"
-msgstr "01-09-2021"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_package_barcode_small
-msgid "2023-01-01"
-msgstr "2023-01-01"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_picking
-msgid "2023-09-24"
-msgstr "24-09-2023"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_delivery_document
-#: model_terms:ir.ui.view,arch_db:stock.report_package_barcode
-#: model_terms:ir.ui.view,arch_db:stock.report_picking
-msgid "3.00"
-msgstr "3,00"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__lot_label_layout__print_format__4x12
@@ -504,11 +478,6 @@ msgstr "4 x 12 com preço"
 #: model:ir.model.fields.selection,name:stock.selection__stock_picking_type__product_label_format__4x7xprice
 msgid "4 x 7 with price"
 msgstr "4 x 7 com preço"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_package_barcode
-msgid "54326786758"
-msgstr "54326786758"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_warn_insufficient_qty_form_view
@@ -605,8 +574,8 @@ msgid ""
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        Olá <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>,"
-"<br/><br/>\n"
+"        Olá <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>"
+",<br/><br/>\n"
 "        Temos o prazer de informar que seu pedido foi enviado.\n"
 "        <t t-if=\"hasattr(object, 'carrier_tracking_ref') and "
 "object.carrier_tracking_ref\">\n"
@@ -616,8 +585,8 @@ msgstr ""
 "                <t t-set=\"multiple_carrier_tracking\" t-"
 "value=\"object.get_multiple_carrier_tracking()\"/>\n"
 "                <t t-if=\"multiple_carrier_tracking\">\n"
-"                    <t t-foreach=\"multiple_carrier_tracking\" t-"
-"as=\"line\">\n"
+"                    <t t-foreach=\"multiple_carrier_tracking\" t-as=\"line\">"
+"\n"
 "                        <br/><a t-att-href=\"line[1]\" target=\"_blank\" t-"
 "out=\"line[0] or ''\"/>\n"
 "                    </t>\n"
@@ -633,8 +602,8 @@ msgstr ""
 "            </strong>\n"
 "        </t>\n"
 "        <br/><br/>\n"
-"        Confira o pedido de entrega em anexo para mais informações.<br/><br/"
-">\n"
+"        Confira o pedido de entrega em anexo para mais informações.<br/><br/>"
+"\n"
 "        Obrigado,\n"
 "        <t t-if=\"user.signature\" data-o-mail-quote-container=\"1\">\n"
 "            <br/>\n"
@@ -1116,9 +1085,9 @@ msgid ""
 "bins, racks)."
 msgstr ""
 "Adicione e personalize operações de rota para processar movimentações de "
-"produtos em seus armazéns: por exemplo, descarregar > controle de qualidade "
-"> estoque para produtos recebidos, separar > embalar > enviar para produtos "
-"enviados. \n"
+"produtos em seus armazéns: por exemplo, descarregar > controle de "
+"qualidade > estoque para produtos recebidos, separar > embalar > enviar para "
+"produtos enviados. \n"
 "Você também pode definir estratégias de entrada em armazém, a fim de enviar "
 "produtos recebidos para locais secundários específicos imediatamente (por "
 "exemplo, compartimentos específicos, racks)."
@@ -1133,11 +1102,11 @@ msgid ""
 "specific child locations straight away (e.g. specific bins, racks)."
 msgstr ""
 "Adicione e personalize operações de rota para processar movimentações de "
-"produtos em seus armazéns: por exemplo, descarregar > controle de qualidade "
-"> estoque para produtos recebidos, separar > embalar > enviar para produtos "
-"enviados. Você também pode definir estratégias de entrada em armazém, a fim "
-"de enviar produtos recebidos para locais secundários específicos "
-"imediatamente (por exemplo, compartimentos específicos, racks)."
+"produtos em seus armazéns: por exemplo, descarregar > controle de "
+"qualidade > estoque para produtos recebidos, separar > embalar > enviar para "
+"produtos enviados. Você também pode definir estratégias de entrada em "
+"armazém, a fim de enviar produtos recebidos para locais secundários "
+"específicos imediatamente (por exemplo, compartimentos específicos, racks)."
 
 #. module: stock
 #. odoo-javascript
@@ -1712,8 +1681,7 @@ msgstr ""
 #: model:ir.model.fields,help:stock.field_stock_location__active
 msgid ""
 "By unchecking the active field, you may hide a location without deleting it."
-msgstr ""
-"Ao desmarcar o campo 'ativo', você pode esconder o local sem excluí-lo."
+msgstr "Ao desmarcar o campo 'ativo', você pode esconder o local sem excluí-lo."
 
 #. module: stock
 #. odoo-python
@@ -3686,8 +3654,8 @@ msgid ""
 "Otherwise, this includes goods stored in any Stock Location with 'internal' "
 "type."
 msgstr ""
-"Quantidade prevista (calculado como quantidade em mãos - saída + "
-"recebimento)\n"
+"Quantidade prevista (calculado como quantidade em mãos - saída + recebimento)"
+"\n"
 "Em um contexto com um único local de estoque, isso inclui mercadorias "
 "armazenadas neste local, ou qualquer um de seus secundários.\n"
 "Em um contexto com um único armazém, isso inclui mercadorias armazenadas no "
@@ -4824,8 +4792,7 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__move_type
 msgid "It specifies goods to be deliver partially or all at once"
-msgstr ""
-"Especifica se mercadorias serão entregues parcialmente ou integralmente"
+msgstr "Especifica se mercadorias serão entregues parcialmente ou integralmente"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__move_type
@@ -5156,8 +5123,7 @@ msgstr "Etiqueta de unidade de medida de comprimento"
 #: model:ir.model.fields,help:stock.field_stock_quant__company_id
 #: model:ir.model.fields,help:stock.field_stock_quant_relocate__company_id
 msgid "Let this field empty if this location is shared between companies"
-msgstr ""
-"Deixe este campo em branco se este local é compartilhado entre empresas"
+msgstr "Deixe este campo em branco se este local é compartilhado entre empresas"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_move_form
@@ -5957,8 +5923,8 @@ msgid ""
 "No rule has been found to replenish \"%(product)s\" in \"%(location)s\".\n"
 "Verify the routes configuration on the product."
 msgstr ""
-"Nenhuma regra foi encontrada para repor \"%(product)s\" em \"%"
-"(location)s\".\n"
+"Nenhuma regra foi encontrada para repor \"%(product)s\" em \"%(location)"
+"s\".\n"
 "Verifique a configuração das rotas no produto."
 
 #. module: stock
@@ -8560,8 +8526,8 @@ msgid ""
 "Serial number (%(serial_number)s) already exists in location(s): %"
 "(location_list)s. Please correct the serial number encoded."
 msgstr ""
-"O número de série (%(serial_number)s) já existe nos locais: %"
-"(location_list)s. Corrija o número de série codificado."
+"O número de série (%(serial_number)s) já existe nos locais: %(location_list)"
+"s. Corrija o número de série codificado."
 
 #. module: stock
 #. odoo-python
@@ -8573,8 +8539,8 @@ msgid ""
 "Please correct this to prevent inconsistent data."
 msgstr ""
 "O número de série (%(serial_number)s) não está localizado em %"
-"(source_location)s, mas está localizado no(s) local(is): %"
-"(other_locations)s.\n"
+"(source_location)s, mas está localizado no(s) local(is): %(other_locations)"
+"s.\n"
 "\n"
 "Corrija isso para evitar dados inconsistentes."
 
@@ -8588,8 +8554,8 @@ msgid ""
 "Source location for this move will be changed to %(recommended_location)s"
 msgstr ""
 "O número de série (%(serial_number)s) não está localizado em %"
-"(source_location)s, mas está localizado no(s) local(is): %"
-"(other_locations)s.\n"
+"(source_location)s, mas está localizado no(s) local(is): %(other_locations)"
+"s.\n"
 "\n"
 "O local de origem dessa movimentação será alterado para %"
 "(recommended_location)s"
@@ -9851,8 +9817,7 @@ msgstr ""
 #: code:addons/stock/models/stock_move_line.py:0
 msgid ""
 "This lot %(lot_name)s is incompatible with this product %(product_name)s"
-msgstr ""
-"Este lote %(lot_name)s é incompatível com este produto %(product_name)s"
+msgstr "Este lote %(lot_name)s é incompatível com este produto %(product_name)s"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_quant_tree_inventory_editable
@@ -11084,8 +11049,8 @@ msgid ""
 "(suffix)s"
 msgstr ""
 "When products are needed in <b>%(destination)s</b>, <br> <b>%(operation)s</"
-"b> are created from <b>%(source_location)s</b> to fulfill the need. %"
-"(suffix)s"
+"b> are created from <b>%(source_location)s</b> to fulfill the need. %(suffix)"
+"s"
 
 #. module: stock
 #. odoo-python
@@ -11094,8 +11059,8 @@ msgid ""
 "When products arrive in <b>%(source_location)s</b>, <br> <b>%(operation)s</"
 "b> are created to send them to <b>%(destination)s</b>."
 msgstr ""
-"Quando os produtos chegam em <b>%(source_location)s</b>, <br> <b>%"
-"(operation)s</b> são criadas para enviá-los para <b>%(destination)s</b>."
+"Quando os produtos chegam em <b>%(source_location)s</b>, <br> <b>%(operation)"
+"s</b> são criadas para enviá-los para <b>%(destination)s</b>."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_rule__location_dest_from_rule
@@ -12063,6 +12028,30 @@ msgid ""
 msgstr ""
 " Pedido de entrega de {{ object.company_id.name }} (Ref. {{ object.name or "
 "'n/d' }})"
+
+#~ msgid "12.0"
+#~ msgstr "12.0"
+
+#~ msgid "1234567890"
+#~ msgstr "1234567890"
+
+#~ msgid "12345678901"
+#~ msgstr "12345678901"
+
+#~ msgid "2021-9-01"
+#~ msgstr "01-09-2021"
+
+#~ msgid "2023-01-01"
+#~ msgstr "2023-01-01"
+
+#~ msgid "2023-09-24"
+#~ msgstr "24-09-2023"
+
+#~ msgid "3.00"
+#~ msgstr "3,00"
+
+#~ msgid "54326786758"
+#~ msgstr "54326786758"
 
 #~ msgid ""
 #~ "You cannot validate a transfer if no quantities are reserved. To force "

@@ -1,5 +1,4 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 from datetime import timedelta
 
 from freezegun import freeze_time
@@ -410,9 +409,6 @@ class TestPurchase(AccountTestInvoicingCommon):
         correctly handled when creating a purchase order i-e product having a price of 100 usd
         and when purchasing in EUR company the correct conversion should be applied
         """
-        self.env['decimal.precision'].search([
-            ('name', '=', 'Product Price'),
-        ]).digits = 5
         product = self.env['product.product'].create({
             'name': 'product_test',
             'uom_id': self.env.ref('uom.product_uom_unit').id,
@@ -1155,6 +1151,15 @@ class TestPurchase(AccountTestInvoicingCommon):
 
         self.assertEqual(po.order_line[0].product_uom, uom_test)
 
+    def test_base_line_product_uom(self):
+        """ The uom of the line must reach the taxes computation, some taxes are based on it. """
+        po = self.env['purchase.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({'product_id': self.product_a.id, 'product_qty': 1.0})],
+        })
+        base_line = po.order_line._prepare_base_line_for_taxes_computation()
+        self.assertEqual(base_line['product_uom_id'], po.order_line.product_uom)
+
     def test_product_price_on_purchase_order_view_catalog(self):
         """
         Ensure vendor price & discount from supplierinfo are applied
@@ -1177,3 +1182,88 @@ class TestPurchase(AccountTestInvoicingCommon):
         self.assertRecordValues(purchase_order.order_line, [
             {'price_unit': 100, 'discount': 10, 'price_unit_discounted': 90},
         ])
+
+    def test_orderline_description_change_on_partner_change(self):
+        """Test that The Vendor Code and/or Vendor Name does change correctly in the product description when changing the partner"""
+        supplierinfo_vals = {
+            'min_qty': 1,
+            'product_id': self.product_a.id,
+            'product_tmpl_id': self.product_a.product_tmpl_id.id,
+        }
+
+        self.env["product.supplierinfo"].create([
+            {
+                **supplierinfo_vals,
+                'price': 10,
+                'product_name': 'Name 1',
+                'product_code': 'Code 1',
+                'partner_id': self.partner_a.id,
+            },
+            {
+                **supplierinfo_vals,
+                'price': 20,
+                'product_name': 'Name 2',
+                'product_code': 'Code 2',
+                'partner_id': self.partner_b.id,
+            },
+            {
+                **supplierinfo_vals,
+                'price': 15,
+                'partner_id': self.partner.id,
+            }
+        ])
+
+        partner_c = self.env['res.partner'].create({'name': 'Partner not in sellers'})
+
+        custom_desc = "This is a custom description that should not be touched"
+        po = self.env['purchase.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({
+                    'product_id': self.product_a.id,
+                    'product_qty': 1,
+                    'name': "[Code 1] Name 1\nSome Variant: Some Value: Some Text"
+                }), Command.create({
+                    'product_id': self.product_a.id,
+                    'product_qty': 1,
+                }), Command.create({
+                    'product_id': self.product_a.id,
+                    'product_qty': 1,
+                    'name': custom_desc
+                })
+            ],
+        })
+
+        self.assertEqual(po.order_line[0].name, "[Code 1] Name 1\nSome Variant: Some Value: Some Text")
+        self.assertEqual(po.order_line[1].name, "[Code 1] Name 1")
+        self.assertEqual(po.order_line[2].name, custom_desc)
+        po.partner_id = self.partner.id
+        self.assertEqual(po.order_line[0].name, "product_a\nSome Variant: Some Value: Some Text")
+        self.assertEqual(po.order_line[1].name, "product_a")
+        self.assertEqual(po.order_line[2].name, custom_desc)
+        po.partner_id = self.partner_b.id
+        self.assertEqual(po.order_line[0].name, "[Code 2] Name 2\nSome Variant: Some Value: Some Text")
+        self.assertEqual(po.order_line[1].name, "[Code 2] Name 2")
+        self.assertEqual(po.order_line[2].name, custom_desc)
+        po.partner_id = partner_c.id
+        self.assertEqual(po.order_line[0].name, "product_a\nSome Variant: Some Value: Some Text")
+        self.assertEqual(po.order_line[1].name, "product_a")
+        self.assertEqual(po.order_line[2].name, custom_desc)
+        po.partner_id = self.partner_a.id
+        self.assertEqual(po.order_line[0].name, "[Code 1] Name 1\nSome Variant: Some Value: Some Text")
+        self.assertEqual(po.order_line[1].name, "[Code 1] Name 1")
+        self.assertEqual(po.order_line[2].name, custom_desc)
+
+    def test_prevent_partner_deletion(self):
+        """Check that alt PO correctly copies the original PO values"""
+        subcontractor, client = self.env["res.partner"].create([
+            {"name": "subcontractor"},
+            {"name": "client"},
+        ])
+
+        po = self.env["purchase.order"].create([{
+            "partner_id": subcontractor.id,
+            "dest_address_id": client.id,
+        }])
+        po.button_confirm()
+        with self.assertRaises(UserError):
+            client.unlink()

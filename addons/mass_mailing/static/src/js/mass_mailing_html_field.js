@@ -94,6 +94,24 @@ export class MassMailingHtmlField extends HtmlField {
             },
             dropImageAsAttachment: false,
             useResponsiveFontSizes: false,
+            validateUrl: (url) =>
+                new Promise((resolve) => {
+                    const image = new Image();
+                    image.onload = () => {
+                        try {
+                            const canvas = document.createElement("canvas");
+                            canvas.width = image.naturalWidth || 1;
+                            canvas.height = image.naturalHeight || 1;
+                            canvas.getContext("2d").drawImage(image, 0, 0);
+                            canvas.toDataURL(); // throws SecurityError if tainted
+                            resolve(true);
+                        } catch {
+                            resolve(false);
+                        }
+                    };
+                    image.onerror = () => resolve(false);
+                    image.src = url;
+                }),
             ...this.props.wysiwygOptions,
         };
     }
@@ -357,6 +375,7 @@ export class MassMailingHtmlField extends HtmlField {
                 template: values.body_arch,
                 userId: values.user_id[0],
                 userName: values.user_id[1],
+                is_favorite: true,
             };
         });
 
@@ -674,41 +693,56 @@ export class MassMailingHtmlField extends HtmlField {
 
         const old_layout = this.wysiwyg.$editable.find('.o_layout')[0];
 
-        let $newWrapper;
-        let $newWrapperContent;
-        if (themeParams.nowrap) {
-            $newWrapper = $('<div/>', {
-                class: 'oe_structure'
-            });
-            $newWrapperContent = $newWrapper;
+        const templateDoc = new DOMParser().parseFromString(themeParams.template, "text/html");
+        const templateEl = templateDoc.body.firstElementChild;
+        const expectedClasses = [
+            'o_layout',
+            'oe_unremovable',
+            'oe_unmovable',
+            themeParams.className,
+        ].filter(Boolean);
+        const hasAllClasses = templateEl && expectedClasses.every(cls => templateEl.classList.contains(cls));
+        if (themeParams?.is_favorite && hasAllClasses) {
+            // Avoid applying multiple time the wrapper elements
+            old_layout && old_layout.remove();
+            this.wysiwyg.odooEditor.resetContent(templateEl.outerHTML);
         } else {
-            // This wrapper structure is the only way to have a responsive
-            // and centered fixed-width content column on all mail clients
-            $newWrapper = $('<div/>', {
-                class: 'container o_mail_wrapper o_mail_regular oe_unremovable',
-            });
-            $newWrapperContent = $('<div/>', {
-                class: 'col o_mail_no_options o_mail_wrapper_td bg-white oe_structure o_editable'
-            });
-            $newWrapper.append($('<div class="row"/>').append($newWrapperContent));
+            let $newWrapper;
+            let $newWrapperContent;
+            if (themeParams.nowrap) {
+                $newWrapper = $('<div/>', {
+                    class: 'oe_structure'
+                });
+                $newWrapperContent = $newWrapper;
+            } else {
+                // This wrapper structure is the only way to have a responsive
+                // and centered fixed-width content column on all mail clients
+                $newWrapper = $('<div/>', {
+                    class: 'container o_mail_wrapper o_mail_regular oe_unremovable',
+                });
+                $newWrapperContent = $('<div/>', {
+                    class: 'col o_mail_no_options o_mail_wrapper_td bg-white oe_structure o_editable'
+                });
+                $newWrapper.append($('<div class="row"/>').append($newWrapperContent));
+            }
+            const $newLayout = $('<div/>', {
+                class: 'o_layout oe_unremovable oe_unmovable bg-200 ' + themeParams.className,
+                style: themeParams.layoutStyles,
+                'data-name': 'Mailing',
+            }).append($newWrapper);
+
+            $newWrapperContent.append(themeParams.template);
+
+            this._switchImages(themeParams, $newWrapperContent);
+            old_layout && old_layout.remove();
+            this.wysiwyg.odooEditor.resetContent($newLayout[0].outerHTML);
+
+            $newWrapperContent.find('*').addBack()
+                .contents()
+                .filter(function () {
+                    return this.nodeType === 3 && this.textContent.match(/\S/);
+                }).parent().addClass('o_default_snippet_text');
         }
-        const $newLayout = $('<div/>', {
-            class: 'o_layout oe_unremovable oe_unmovable bg-200 ' + themeParams.className,
-            style: themeParams.layoutStyles,
-            'data-name': 'Mailing',
-        }).append($newWrapper);
-
-        const $contents = themeParams.template;
-        $newWrapperContent.append($contents);
-        this._switchImages(themeParams, $newWrapperContent);
-        old_layout && old_layout.remove();
-        this.wysiwyg.odooEditor.resetContent($newLayout[0].outerHTML);
-
-        $newWrapperContent.find('*').addBack()
-            .contents()
-            .filter(function () {
-                return this.nodeType === 3 && this.textContent.match(/\S/);
-            }).parent().addClass('o_default_snippet_text');
 
         if (themeParams.name === 'basic') {
             this.wysiwyg.$editable[0].focus();

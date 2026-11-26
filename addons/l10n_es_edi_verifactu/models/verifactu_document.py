@@ -383,7 +383,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
                 errors.append(_("A tax with value '%(tax_type)s' as %(field)s is not supported.",
                                 field=tax_type_description['string'],
                                 tax_type=dict(tax_type_description['selection'])[tax_type]))
-            elif tax_type in ('no_sujeto', 'no_sujeto_loc'):
+            elif tax_type == 'no_sujeto':
                 tax_percentage = key['amount']
                 tax_amount = tax_detail['tax_amount']
                 if float_round(tax_percentage, precision_digits=2) or float_round(tax_amount, precision_digits=2):
@@ -472,7 +472,10 @@ class L10nEsEdiVerifactuDocument(models.Model):
             if not document_vals.get('errors'):
                 chain_sequence = record_values['company'].sudo()._l10n_es_edi_verifactu_get_chain_sequence()
                 try:
-                    document_vals['chain_index'] = chain_sequence.next_by_id()
+                    document_vals['chain_index'] = int(chain_sequence.next_by_id())
+                except ValueError:
+                    errors = [_("The Veri*Factu chain sequence must not have a prefix or suffix. Please remove it from the sequence configuration.")]
+                    document_vals['errors'] = self._format_errors(error_title, errors)
                 except OperationalError as e:
                     # We chain all the created documents per company in generation order.
                     # (indexed by `chain_index`).
@@ -588,7 +591,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
         rectified_document = vals['refunded_document'] or vals['substituted_document']
         if vals['verifactu_move_type'] == 'invoice':
             tipo_rectificativa = None
-            tipo_factura = 'F2' if vals['is_simplified'] else 'F1'
+            tipo_factura = 'F2' if vals['is_simplified'] else 'F3' if vals.get('was_simplified_invoice') else 'F1'
             delivery_date = self._format_date_type(vals['delivery_date'])
             fecha_operacion = delivery_date if delivery_date and delivery_date != invoice_date else None
         elif vals['verifactu_move_type'] == 'reversal_for_substitution':
@@ -690,6 +693,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
 
         sign = vals['sign']
         sujeto_tax_types = self.env['account.tax']._l10n_es_get_sujeto_tax_types()
+        no_sujeto_types = ('no_sujeto', 'no_sujeto_loc')
 
         recargo_tax_details_key = {}  # dict (tax_key -> recargo_tax_key)
         for record_tax_details in vals['tax_details']['tax_details_per_record'].values():
@@ -735,7 +739,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
                         'tax_percentage': recargo_tax_percentage,
                         'tax_amount': recargo_tax_amount,
                     })
-            elif tax_type in ('no_sujeto', 'no_sujeto_loc'):
+            elif tax_type in no_sujeto_types:
                 calificacion_operacion = 'N2' if tax_type == 'no_sujeto_loc' else 'N1'
             else:
                 # tax_type == 'exento' (see `_check_record_values`)
@@ -783,6 +787,12 @@ class L10nEsEdiVerifactuDocument(models.Model):
 
         total_amount = sign * (vals['tax_details']['base_amount'] + vals['tax_details']['tax_amount'])
         tax_amount = sign * (vals['tax_details']['tax_amount'])
+        no_sujeto_tax_amount = sign * sum(
+            detail['tax_amount'] for detail in vals['tax_details']['tax_details'].values()
+            if detail['grouping_key']['l10n_es_type'] in no_sujeto_types
+        )
+        total_amount -= no_sujeto_tax_amount
+        tax_amount -= no_sujeto_tax_amount
 
         render_vals = {
             'Macrodato': 'S' if abs(total_amount) >= 100000000 else None,

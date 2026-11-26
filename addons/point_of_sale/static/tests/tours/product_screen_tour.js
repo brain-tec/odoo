@@ -819,3 +819,55 @@ registry.category("web_tour.tours").add("test_orderline_merge_with_higher_price_
             Chrome.endTour(),
         ].flat(),
 });
+
+registry.category("web_tour.tours").add("test_barcode_scan_preselect_always_variant", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+
+            scan_barcode("VAR_RED_001"),
+            {
+                content: "Configurator opens after scanning Red variant barcode",
+                trigger: ".modal .section-product-info-title:contains('Variant Barcode Product')",
+            },
+
+            ProductConfiguratorPopup.pickRadio("Large"),
+            Dialog.confirm("Add"),
+            ProductScreen.selectedOrderlineHas("Variant Barcode Product (Red) (Large)", "1.0"),
+
+            scan_barcode("VAR_BLUE_001"),
+            {
+                content: "Configurator opens after scanning Blue variant barcode",
+                trigger: ".modal .section-product-info-title:contains('Variant Barcode Product')",
+            },
+            Dialog.confirm("Add"),
+            ProductScreen.selectedOrderlineHas("Variant Barcode Product (Blue) (Small)", "1.0"),
+
+            Chrome.endTour(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_barcode_scan_no_variant_extra_price", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+
+            // no_variant extra must be added even when reached by barcode
+            scan_barcode("MULTI_001"),
+            {
+                content: "Configurator opens after scanning the multi-select product barcode",
+                trigger: ".modal .section-product-info-title:contains('Multi Attr Product')",
+            },
+            ProductConfiguratorPopup.pickMulti("Bacon"),
+            Dialog.confirm("Add"),
+            ProductScreen.selectedOrderlineHas("Multi Attr Product (Bacon)", "1.0", "13.0"),
+
+            // dbc23b106c8b guard: "always" variant extra must be added once, not twice
+            scan_barcode("ALWAYS_BLACK_001"),
+            ProductScreen.selectedOrderlineHas("Always Variant Product (Black)", "1.0", "30.0"),
+
+            Chrome.endTour(),
+        ].flat(),
+});

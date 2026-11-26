@@ -1,10 +1,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import json
+
 from odoo.fields import Command
 from odoo.exceptions import ValidationError
 from odoo.tests import tagged
 
+from odoo.addons.website.tools import MockRequest
 from odoo.addons.website_sale_collect.tests.common import ClickAndCollectCommon
+from odoo.addons.website_sale.controllers.delivery import Delivery
 
 
 @tagged('post_install', '-at_install')
@@ -14,6 +18,7 @@ class TestSaleOrder(ClickAndCollectCommon):
     def setUpClass(cls):
         super().setUpClass()
         cls.product_2 = cls._create_product()
+        cls.Controller = Delivery()
 
     def test_warehouse_is_updated_when_changing_delivery_line(self):
         self.warehouse_2 = self._create_warehouse()
@@ -63,6 +68,40 @@ class TestSaleOrder(ClickAndCollectCommon):
         so.fiscal_position_id = fp_us
         so._set_delivery_method(self.free_delivery)
         self.assertNotEqual(so.fiscal_position_id, fp_us)
+
+    def test_changing_delivery_method_recomputes_taxes(self):
+        country_fr = self.env.ref('base.fr')
+        self.env.company.country_id = country_fr
+        self.warehouse.partner_id.country_id = country_fr
+        tax_20 = self.env['account.tax'].create({'name': "20%", 'amount': 20})
+        fp_jp = self.env['account.fiscal.position'].create({
+            'name': "Test JP fiscal position",
+            'country_id': self.env.ref('base.jp').id,
+            'auto_apply': True,
+            'tax_ids': [Command.create({'tax_src_id': tax_20.id})],  # Removes 20% tax
+        })
+        self.env['account.fiscal.position'].create({
+            'name': "Test FR fiscal position",
+            'country_id': country_fr.id,
+            'auto_apply': True,
+        })
+        self.storable_product.write({
+            'list_price': 100,
+            'taxes_id': [Command.set(tax_20.ids)],
+        })
+        so = self._create_so(
+            partner_id=self.default_partner.id,
+            partner_shipping_id=self.default_partner.id,
+            fiscal_position_id=fp_jp.id,
+            carrier_id=self.free_delivery.id,
+            order_line=[Command.create({
+                'product_id': self.storable_product.id,
+                'product_uom_qty': 1,
+            })],
+        )
+        so._set_delivery_method(self.in_store_dm)
+        so._set_pickup_location(json.dumps({'id': self.warehouse.id}))
+        self.assertEqual(so.amount_tax, 20)
 
     def test_free_qty_calculated_from_order_wh_if_dm_is_in_store(self):
         self.warehouse_2 = self._create_warehouse()
@@ -117,3 +156,72 @@ class TestSaleOrder(ClickAndCollectCommon):
         )
         unavailable_ol = cart._get_unavailable_order_lines(self.warehouse_2.id)
         self.assertIn(self.storable_product.id, unavailable_ol.product_id.ids)
+
+    def test_archive_pick_up_location_address_after_ecommerce_creation(self):
+        """Store pickup location address should be archived if created on during eCommerce flow."""
+        wh_partner = self.warehouse.partner_id
+        new_so = self._create_in_store_delivery_order()
+        new_so._set_pickup_location(json.dumps({
+            'id': self.warehouse.id,
+            'name': wh_partner.name,
+            'street': "New test street",
+            'zip_code': wh_partner.zip,
+            'city': "New test city",
+            'state': wh_partner.state_id.code,
+            'country_code': wh_partner.country_code,
+        }))
+        new_so._action_confirm()
+        self.assertTrue(new_so.partner_shipping_id)
+        self.assertFalse(new_so.partner_shipping_id.active)
+
+    def test_picking_follower_is_active_parent_partner(self):
+        """Parent partner is subscribed to in_store delivery."""
+        wh_partner = self.warehouse.partner_id
+        new_so = self._create_in_store_delivery_order()
+        new_so._set_pickup_location(json.dumps({
+            'id': self.warehouse.id,
+            'name': wh_partner.name,
+            'street': "New test street",
+            'zip_code': wh_partner.zip,
+            'city': "New test city",
+            'state': wh_partner.state_id.code,
+            'country_code': wh_partner.country_code,
+        }))
+        new_so.action_confirm()
+        self.assertEqual(
+            new_so.picking_ids.message_partner_ids, new_so.picking_ids.partner_id.parent_id
+        )
+
+    def test_so_confirmation_preserves_selected_pickup_location(self):
+        """Ensure pickup location is not reset when calling shop/confirm_order route."""
+        with MockRequest(self.env, website=self.website):
+            order = self.website.sale_get_order(force_create=True)
+            order.partner_id.write({
+                "street": "215 Vine St",
+                "city": "Scranton",
+                "zip": "18503",
+                "state_id": self.env["res.country.state"].search([
+                    ("code", "=", "PA"), ("country_id", "=", self.env.ref("base.us").id),
+                ]).id,
+                "country_id": self.env.ref("base.us").id,
+                "phone": "+1 555-555-5555",
+                "email": "test@example.com",
+            })
+            order.order_line = [
+                Command.create({
+                    "product_id": self.product.id,
+                    "product_uom_qty": 1.0,
+                }),
+            ]
+            order._set_delivery_method(self.in_store_dm)
+            order._set_pickup_location(json.dumps({
+                "id": self.warehouse.id,
+                "name": self.warehouse.partner_id.name,
+                "street": "New test street",
+                "zip_code": self.warehouse.partner_id.zip,
+                "city": "New test city",
+                "state": self.warehouse.partner_id.state_id.code,
+                "country_code": self.warehouse.partner_id.country_code,
+            }))
+            self.Controller.shop_confirm_order()
+        self.assertTrue(order.pickup_location_data)

@@ -222,7 +222,7 @@ const PopupWidget = publicWidget.Widget.extend(ObservingCookieWidgetMixin, {
             tabableEls[0].focus();
             this.el.querySelector(".modal").scrollTop = 0;
         } else {
-            this.el.focus();
+            this.el.querySelector(".modal").focus();
         }
         // The focus should stay free for no backdrop popups.
         if (this.el.querySelector(".s_popup_no_backdrop")) {
@@ -455,6 +455,9 @@ publicWidget.registry.cookies_bar = PopupWidget.extend({
         // TODO: In master, update the #tracking_code_config script via XML.
         const trackingCodeConfigScriptEl = document.querySelector("#tracking_code_config");
         if (trackingCodeConfigScriptEl) {
+            // Remove the one-time event listener added by the original script
+            document.removeEventListener("optionalCookiesAccepted", window.allConsentsGranted);
+
             const updatedTrackingScript = `
                 window.dataLayer = window.dataLayer || [];
                 function gtag() {
@@ -470,11 +473,9 @@ publicWidget.registry.cookies_bar = PopupWidget.extend({
                     });
                 }
 
-                // Run our handler first and block the original script's handler
-                document.addEventListener("optionalCookiesAccepted", (ev) => {
-                    ev.stopImmediatePropagation();
+                document.addEventListener("optionalCookiesAccepted", () => {
                     updateConsents("granted");
-                }, { capture: true });
+                });
 
                 document.addEventListener("optionalCookiesDenied", () => {
                     updateConsents("denied");
@@ -540,8 +541,6 @@ publicWidget.registry.cookies_bar = PopupWidget.extend({
      * @private
      */
     _toggleCookiesBar() {
-        this.cookieValue = cookie.get(this.el.id);
-
         const popupEl = this.el.querySelector(".modal");
         $(popupEl).modal("toggle");
         // As we're using Bootstrap's events, the PopupWidget prevents the modal
@@ -608,6 +607,11 @@ publicWidget.registry.cookies_bar = PopupWidget.extend({
      * @override
      */
     _onHideModal() {
+        // cookieValue starts as true and is only replaced after consent.
+        // If it is still true here, the modal closed without a choice.
+        if (this.cookieValue === true) {
+            return;
+        }
         this._super(...arguments);
         const params = new URLSearchParams(window.location.search);
         const trackingFields = {

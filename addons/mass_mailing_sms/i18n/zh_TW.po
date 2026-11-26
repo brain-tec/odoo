@@ -6,13 +6,13 @@
 # Wil Odoo, 2025
 # Tony Ng, 2025
 #
-# "Tony Ng (ngto)" <ngto@odoo.com>, 2025.
+# "Tony Ng (ngto)" <ngto@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-09-15 09:29+0000\n"
+"POT-Creation-Date: 2026-04-10 18:37+0000\n"
+"PO-Revision-Date: 2026-11-09 07:42+0000\n"
 "Last-Translator: \"Tony Ng (ngto)\" <ngto@odoo.com>\n"
 "Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
 "projects/odoo-18/mass_mailing_sms/zh_Hant/>\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: mass_mailing_sms
 #. odoo-javascript
@@ -40,15 +40,6 @@ msgstr " （包括連結追蹤器）"
 #: code:addons/mass_mailing_sms/static/src/components/sms_widget/fields_sms_widget.js:0
 msgid " (including opt-out link)"
 msgstr " （包括選擇退出連結）"
-
-#. module: mass_mailing_sms
-#: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_sms_test_view_form
-msgid ""
-"+32 495 85 85 77\n"
-"+33 545 55 55 55"
-msgstr ""
-"+32 495 85 85 77\n"
-"+33 545 55 55 55"
 
 #. module: mass_mailing_sms
 #. odoo-python
@@ -120,8 +111,8 @@ msgid ""
 "<span name=\"sent_sms\" invisible=\"mailing_type != 'sms'\">SMS Text "
 "Messages have been sent.</span>"
 msgstr ""
-"<span name=\"sent_sms\" invisible=\"mailing_type != 'sms'\">已發送 SMS 短訊。"
-"</span>"
+"<span name=\"sent_sms\" invisible=\"mailing_type != 'sms'\">已發送 SMS 短訊"
+"。</span>"
 
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_trace_view_form_sms
@@ -154,8 +145,8 @@ msgid ""
 "                        </strong>"
 msgstr ""
 "<strong>\n"
-"                            你的短訊帳戶似乎未註冊。按一下此處以設置你的帳"
-"戶。\n"
+"                            你的短訊帳戶似乎未註冊。按一下此處以設置你的帳戶"
+"。\n"
 "                        </strong>"
 
 #. module: mass_mailing_sms
@@ -236,8 +227,7 @@ msgstr "彈回 (%i)"
 msgid ""
 "Blacklist through SMS Marketing unsubscribe (mailing ID: %(mailing_id)s - "
 "model: %(model)s)"
-msgstr ""
-"短訊推廣取消訂閱黑名單（郵寄清單識別碼：%(mailing_id)s，模型：%(model)s）"
+msgstr "短訊推廣取消訂閱黑名單（郵寄清單識別碼：%(mailing_id)s，模型：%(model)s）"
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__sms_blacklist
@@ -354,7 +344,7 @@ msgstr "日期"
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_sms_test_view_form
 msgid "Discard"
-msgstr "捨棄"
+msgstr "取消"
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_sms_test__display_name
@@ -459,8 +449,7 @@ msgstr "勾選代表有訊息發生傳送錯誤。"
 msgid ""
 "If the sanitized phone number is on the blacklist, the contact won't receive "
 "mass mailing sms anymore, from any list"
-msgstr ""
-"如果已清理的電話號碼在黑名單中，則該聯絡人將不會再收到來自任何列表的群發簡訊"
+msgstr "如果已清理的電話號碼在黑名單中，則該聯絡人將不會再收到來自任何列表的群發簡訊"
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields,help:mass_mailing_sms.field_mailing_mailing__sms_force_send
@@ -663,8 +652,7 @@ msgstr "暫無資料！"
 msgid ""
 "No need to import mailing lists, you can send SMS to contacts saved in other "
 "Odoo apps."
-msgstr ""
-"無需匯入郵寄清單，你可將電話短訊發送給儲存在其他 Odoo 應用程式的聯絡人。"
+msgstr "無需匯入郵寄清單，你可將電話短訊發送給儲存在其他 Odoo 應用程式的聯絡人。"
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__sms_not_allowed
@@ -917,7 +905,7 @@ msgstr "立即發送"
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_list_view_form
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.utm_campaign_view_form
 msgid "Send SMS"
-msgstr "發送簡訊"
+msgstr "傳送短訊"
 
 #. module: mass_mailing_sms
 #: model:ir.model,name:mass_mailing_sms.model_sms_composer
@@ -1113,6 +1101,13 @@ msgstr "已成功列入黑名單"
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.blacklist_number
 msgid "has been successfully removed from"
 msgstr "已成功移除從"
+
+#~ msgid ""
+#~ "+32 495 85 85 77\n"
+#~ "+33 545 55 55 55"
+#~ msgstr ""
+#~ "+32 495 85 85 77\n"
+#~ "+33 545 55 55 55"
 
 #~ msgid "Test SMS could not be sent to %(destination)s: %(state)s"
 #~ msgstr "測試簡訊未能發送至 %(destination)s：%(state)s"

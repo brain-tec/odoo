@@ -33,13 +33,16 @@
 # Wil Odoo, 2025
 # Jessica Jakara, 2025
 # "Jessica Tuulia Sade Jäkärä (jtsj)" <jtsj@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
+# Saara Hakanen <sahak@odoo.com>, 2026.
+# Deleted User <noreply+18@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-22 18:36+0000\n"
-"PO-Revision-Date: 2025-08-18 12:32+0000\n"
-"Last-Translator: \"Jessica Tuulia Sade Jäkärä (jtsj)\" <jtsj@odoo.com>\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
+"PO-Revision-Date: 2026-11-19 13:34+0000\n"
+"Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
 "Language-Team: Finnish <https://translate.odoo.com/projects/odoo-18/"
 "website_sale/fi/>\n"
 "Language: fi\n"
@@ -47,7 +50,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products
@@ -99,29 +102,14 @@ msgid "'. Showing results for '"
 msgstr "'. Tulokset haulle '"
 
 #. module: website_sale
-#: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_image_width__100_pc
-msgid "100 %"
-msgstr "100%"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "100 percent"
 msgstr "100 prosenttia"
 
 #. module: website_sale
-#: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_image_width__50_pc
-msgid "50 %"
-msgstr "50%"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "50 percent"
 msgstr "50 prosenttia"
-
-#. module: website_sale
-#: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_image_width__66_pc
-msgid "66 %"
-msgstr "66 %"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -372,15 +360,6 @@ msgstr ""
 "<span class=\"d-md-none fa fa-shopping-cart\"/>\n"
 "                            <span class=\"d-none d-md-inline\">Lisää "
 "ostoskoriin</span>"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
-"specific.\" groups=\"website.group_multi_website\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
-"specific.\" groups=\"website.group_multi_website\"/>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_dynamic_snippet_products_preview_data
@@ -902,7 +881,7 @@ msgstr "Lisää ostoskoriin -painike"
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_res_config_settings__module_website_sale_autocomplete
 msgid "Address Autocomplete"
-msgstr "Osoitteen automaattinen täydentäminen"
+msgstr "Osoitteen automaattinen täydennys"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
@@ -1278,7 +1257,7 @@ msgstr "Aika jonka jälkeen ostoskori merkitään hylätyksi"
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_view_tree_website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "Categories"
-msgstr "Tuoteryhmä(t)"
+msgstr "Kategoriat"
 
 #. module: website_sale
 #: model_terms:ir.actions.act_window,help:website_sale.product_public_category_action
@@ -1419,12 +1398,12 @@ msgstr "Kaupunki"
 #: model_terms:ir.ui.view,arch_db:website_sale.o_wsale_offcanvas
 #: model_terms:ir.ui.view,arch_db:website_sale.products_attributes
 msgid "Clear Filters"
-msgstr "Nollaa suotimet"
+msgstr "Tyhjennä suodattimet"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_res_config_settings__module_website_sale_collect
 msgid "Click & Collect"
-msgstr "Osta verkosta ja nouda myymälästä"
+msgstr "Click & collect"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products
@@ -1907,7 +1886,8 @@ msgstr "Oletuslajittelu"
 #: model:ir.model.fields,help:website_sale.field_website_base_unit__name
 msgid "Define a custom unit to display in the price per unit of measure field."
 msgstr ""
-"Määritä mukautettu yksikkö, joka näytetään hinta per mittayksikkö -kentässä."
+"Määrittele mukautetu yksikkö 'hinta per mittayksikkö' -kenttään "
+"näytettäväksi."
 
 #. module: website_sale
 #: model_terms:ir.actions.act_window,help:website_sale.product_public_category_action
@@ -2105,7 +2085,7 @@ msgstr "Dokumentaatio"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product
 msgid "Documents"
-msgstr "Dokumentit"
+msgstr "Asiakirjat"
 
 #. module: website_sale
 #. odoo-python
@@ -2307,7 +2287,7 @@ msgstr "Lisävarianttimedia"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.extra_info
 msgid "Extra info"
-msgstr "Lisätieto"
+msgstr "Lisätiedot"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_share_buttons
@@ -2318,7 +2298,7 @@ msgstr "Facebook"
 #. odoo-python
 #: code:addons/website_sale/models/website.py:0
 msgid "Featured"
-msgstr "Suosituimmat"
+msgstr "Suositellut"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
@@ -2366,7 +2346,7 @@ msgstr ""
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_website__fiscal_position_id
 msgid "Fiscal Position"
-msgstr "Verokanta"
+msgstr "Verokantasääntö"
 
 #. module: website_sale
 #: model:product.public.category,name:website_sale.public_category_desks_foldable
@@ -2508,13 +2488,13 @@ msgstr "Jos kuva on asetettu, väriä ei käytetä verkkokaupassa."
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_product_template__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "Jos valittu, uudet viestit vaativat huomiotasi."
+msgstr "Jos ruksittu, uudet viestit vaativat huomiotasi."
 
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_product_template__message_has_error
 #: model:ir.model.fields,help:website_sale.field_product_template__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "Jos valittu, joitakin viestejä ei ole toimitettu."
+msgstr "Jos ruksittu, joissain viesteissä on toimitusvirhe."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
@@ -2635,7 +2615,8 @@ msgstr "Välitön sirtyminen kassalle ostoskoriin lisäämisen sijaan"
 #. odoo-python
 #: code:addons/website_sale/controllers/main.py:0
 msgid "Invalid Email! Please enter a valid email address."
-msgstr "Sähköpostiosoite on virheellinen. Anna oikean muotoinen osoite."
+msgstr ""
+"Virheellinen sähköposti! Ole hyvä ja syötä kelvollinen sähköpostiosoite."
 
 #. module: website_sale
 #. odoo-python
@@ -2652,7 +2633,7 @@ msgstr "Laskutus"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "Invoicing Policy"
-msgstr "Laskutus perustuu"
+msgstr "Laskutuskäytäntö"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_template__message_is_follower
@@ -2869,7 +2850,7 @@ msgstr "Pienet ikonit"
 #. odoo-javascript
 #: code:addons/website_sale/static/src/js/location_selector/location_selector_dialog/location_selector_dialog.js:0
 msgid "Loading..."
-msgstr "Lataa..."
+msgstr "Ladataan..."
 
 #. module: website_sale
 #: model:ir.model.fields.selection,name:website_sale.selection__website__ecommerce_access__logged_in
@@ -3294,7 +3275,7 @@ msgstr "Tai skannaa pankkisovelluksella."
 #: model_terms:ir.ui.view,arch_db:website_sale.view_sales_order_filter_ecommerce_abondand
 #: model_terms:ir.ui.view,arch_db:website_sale.view_sales_order_filter_ecommerce_unpaid
 msgid "Order Date"
-msgstr "Tilauksen pvm"
+msgstr "Tilauspäivä"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_sale_order__website_order_line
@@ -3680,33 +3661,33 @@ msgstr "Tuotetunnisteiden suodatin"
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_image__product_tmpl_id
 msgid "Product Template"
-msgstr "Tuotemalli"
+msgstr "Tuotepohja"
 
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_product_template_attribute_line
 msgid "Product Template Attribute Line"
-msgstr "Tuotemallin ominaisuusrivi"
+msgstr "Tuotepohjan ominaisuusrivi"
 
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_product_template_attribute_value
 msgid "Product Template Attribute Value"
-msgstr "Tuotemallin ominaisuuden arvo"
+msgstr "Tuotepohjan ominaisuuden arvo"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__product_tmpl_ids
 msgid "Product Tmpl"
-msgstr "Tuotemalli"
+msgstr "Tuotepohja"
 
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_product_product
 #: model:ir.model.fields,field_description:website_sale.field_product_image__product_variant_id
 msgid "Product Variant"
-msgstr "Tuotevariaatio"
+msgstr "Tuotevariantti"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "Product Variants"
-msgstr "Tuotevariaatiot"
+msgstr "Tuotevariantit"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_website_visitor__visitor_product_count
@@ -3834,7 +3815,7 @@ msgstr "Arvostelu"
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_template__rating_avg_text
 msgid "Rating Avg Text"
-msgstr "Kekismääräisen luokituksen teksti"
+msgstr "Arvostelun keskimääräinen teksti"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_template__rating_last_feedback
@@ -3859,7 +3840,7 @@ msgstr "Arvion tyytyväisyys"
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_template__rating_last_text
 msgid "Rating Text"
-msgstr "Luokitusteksti"
+msgstr "Arvioinnin teksti"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_template__rating_count
@@ -4048,7 +4029,7 @@ msgstr "Myyntianalyysi"
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_sale_report
 msgid "Sales Analysis Report"
-msgstr "Myyntianalyysi"
+msgstr "Myyntianalyysin raportti"
 
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_sale_order
@@ -4346,6 +4327,14 @@ msgstr "Ei saatavilla"
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/controllers/main.py:0
+msgid ""
+"Some products in your cart are not available for purchase in your country. "
+"Please remove them or contact us."
+msgstr ""
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
 msgid "Some required fields are empty."
 msgstr "Täytä kaikki vaaditut kentät."
 
@@ -4353,7 +4342,7 @@ msgstr "Täytä kaikki vaaditut kentät."
 #. odoo-python
 #: code:addons/website_sale/controllers/main.py:0
 msgid "Sorry, we are unable to ship your order."
-msgstr "Valitettavasti emme voi lähettää tilaustasi."
+msgstr "Emme valitettavasti pysty toimittamaan tilaustasi."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -4365,7 +4354,7 @@ msgstr "Järjestä"
 #: model_terms:ir.ui.view,arch_db:website_sale.product_product_view_form_easy_inherit_website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_only_website_form_view
 msgid "Specify unit"
-msgstr "Määritä yksikkö"
+msgstr "Tarkenna yksikkö"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_mega_menu_menus_logos
@@ -4475,6 +4464,14 @@ msgid "Taxes"
 msgstr "Verot"
 
 #. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+msgid ""
+"Taxes have been updated based on your address. Your payment method has not "
+"been charged."
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "Text"
 msgstr "Teksti"
@@ -4531,7 +4528,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/website_sale/models/sale_order.py:0
 msgid "The delivery method is not compatible with your delivery address."
-msgstr ""
+msgstr "Toimitustapa ei ole yhteensopiva toimitusosoitteesi kanssa."
 
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_delivery_carrier__website_url
@@ -4569,6 +4566,16 @@ msgid ""
 msgstr ""
 "Tässä valittua tilaa sovelletaan laskutuskäytäntönä kaikkiin uusiin "
 "tuotteisiin, mutta ei jo olemassa oleviin tuotteisiin."
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/combo_configurator.py:0
+msgid ""
+"The number of selected combo items must match the number of available combo "
+"choices."
+msgstr ""
+"Valittujen yhdistelmäkohteiden määrän on vastattava käytettävissä olevien "
+"yhdistelmävaihtoehtojen määrää."
 
 #. module: website_sale
 #. odoo-python
@@ -4672,10 +4679,22 @@ msgid "This product is no longer available."
 msgstr "Tuotetta ei ole enää saatavilla."
 
 #. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+msgid "This product is not available for purchase in your country."
+msgstr "Tämä tuote ei ole saatavilla maassasi."
+
+#. module: website_sale
 #. odoo-javascript
 #: code:addons/website_sale/static/src/js/website_sale_reorder.js:0
 msgid "This product is not available for purchase."
 msgstr "Tämä tuote ei ole ostettavissa."
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+msgid "This product is part of a combo and can't be updated individually."
+msgstr "Tämä tuote on osa yhdistelmää, eikä sitä voi päivittää erikseen."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products_item
@@ -4704,9 +4723,9 @@ msgid ""
 "list view and click on 'Portal Access Management' option in the dropdown "
 "menu *Action*."
 msgstr ""
-"Lähettääksesi kutsuja B2B-tilassa, avaa kontakti tai valitse useita "
-"listanäkymässä, ja klikkaa \"Portaalin käyttöoikeuksien hallinta\" "
-"\"Toiminto\"-pudotusvalikosta."
+"Lähetä kutsuja B2B-tilassa avaamalla yhteystieto tai valitsemalla useita "
+"listanäkymässä. Klikkaa pudotusvalikossa \"Portaalin käyttöoikeuksien "
+"hallinta\"."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -4827,9 +4846,14 @@ msgid "VAT"
 msgstr "ALV"
 
 #. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
+msgid "Values set here are website-specific."
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_add_to_cart_options
 msgid "Variant"
-msgstr "Muunnelma"
+msgstr "Variantti"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_product__variant_ribbon_id
@@ -5027,7 +5051,7 @@ msgstr "Verkkosivuston pätkäsuodatin"
 #: model:ir.model.fields,field_description:website_sale.field_product_product__website_url
 #: model:ir.model.fields,field_description:website_sale.field_product_template__website_url
 msgid "Website URL"
-msgstr "Verkkosivuston osoite"
+msgstr "Verkkosivun URL"
 
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_website_visitor
@@ -5037,7 +5061,7 @@ msgstr "Verkkosivun vierailija"
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_product_template__website_message_ids
 msgid "Website communication history"
-msgstr "Verkkosivun viestihistoria"
+msgstr "Verkkosivun viestintähistoria"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__website_meta_description
@@ -5122,6 +5146,11 @@ msgstr "Toivelistat"
 #: code:addons/website_sale/models/website_snippet_filter.py:0
 msgid "With three feet"
 msgstr "Kolmella jalalla"
+
+#. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.product_share_buttons
+msgid "X"
+msgstr "X"
 
 #. module: website_sale
 #. odoo-javascript
@@ -5222,7 +5251,7 @@ msgstr "Ostoskorisi ei ole valmis maksettavaksi, tarkista edelliset vaiheet."
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.payment_confirmation_status
 msgid "Your payment has been authorized."
-msgstr "Maksusuorituksesi on hyväksytty."
+msgstr "Maksusi on hyväksytty."
 
 #. module: website_sale
 #. odoo-javascript
@@ -5343,12 +5372,36 @@ msgstr "poista"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.accept_terms_and_conditions
 msgid "terms &amp; conditions"
-msgstr "tilaus- ja toimitusehdot"
+msgstr "käyttöehdot"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 msgid "to follow your order."
 msgstr "seurataksesi lähetystäsi."
+
+#. module: website_sale
+#. odoo-javascript
+#: code:addons/website_sale/static/src/xml/website_sale_reorder_modal.xml:0
+#: model_terms:ir.ui.view,arch_db:website_sale.cart_combo_item_line
+#: model_terms:ir.ui.view,arch_db:website_sale.checkout_layout
+msgid "x"
+msgstr "x"
+
+#~ msgid "100 %"
+#~ msgstr "100%"
+
+#~ msgid "50 %"
+#~ msgstr "50%"
+
+#~ msgid "66 %"
+#~ msgstr "66 %"
+
+#~ msgid ""
+#~ "<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
+#~ "specific.\" groups=\"website.group_multi_website\"/>"
+#~ msgstr ""
+#~ "<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
+#~ "specific.\" groups=\"website.group_multi_website\"/>"
 
 #~ msgid ""
 #~ "Your Dynamic Snippet will be displayed here...\n"

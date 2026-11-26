@@ -143,6 +143,29 @@ class TestAccountPayment(AccountPaymentCommon):
 
         self.assertEqual(author_id, self.user.partner_id.id)
 
+    def test_pending_tx_does_not_cancel_payment(self):
+        """When a token charge results in a 'pending' transaction (e.g SEPA),
+        the payment must stay in draft, and be posted once the tx becomes 'done'"""
+        payment_token = self._create_token()
+        payment = self.env['account.payment'].create({
+            'payment_type': 'inbound',
+            'partner_type': 'customer',
+            'amount': 100.0,
+            'currency_id': self.currency.id,
+            'partner_id': self.partner.id,
+            'journal_id': self.provider.journal_id.id,
+            'payment_method_line_id': self.inbound_payment_method_line.id,
+            'payment_token_id': payment_token.id,
+            'write_off_line_vals': [],
+        })
+
+        with patch.object(self.env.registry['payment.transaction'], '_send_payment_request',
+                          lambda self: self._set_pending()):
+            payment.action_post()
+
+        self.assertEqual(payment.payment_transaction_id.state, 'pending')
+        self.assertEqual(payment.state, 'in_process')
+
     def test_action_post_calls_send_payment_request_only_once(self):
         payment_token = self._create_token()
         payment_without_token = self.env['account.payment'].create({
@@ -393,6 +416,42 @@ class TestAccountPayment(AccountPaymentCommon):
         tx._post_process()
         self.assertEqual(tx.payment_id.state, 'in_process')
 
+    def test_post_process_only_posts_invoices_of_done_transactions(self):
+        """ When several transactions are post-processed together, only the draft invoices of the
+            confirmed transactions must be posted.
+        """
+        invoice_done, invoice_error = self.env['account.move'].create([{
+            'move_type': 'out_invoice',
+            'partner_id': self.partner.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'test line',
+                    'price_unit': 100.0,
+                }),
+            ],
+        } for _i in range(2)])
+        tx_done = self._create_transaction(
+            flow='direct',
+            state='pending',
+            reference='tx_done',
+            invoice_ids=[invoice_done.id],
+        )
+        tx_error = self._create_transaction(
+            flow='direct',
+            state='pending',
+            reference='tx_error',
+            invoice_ids=[invoice_error.id],
+        )
+        tx_done._set_done()
+        tx_error._set_error("Payment failed")
+        (tx_done | tx_error)._post_process()
+        self.assertEqual(invoice_done.state, 'posted')
+        self.assertEqual(
+            invoice_error.state,
+            'draft',
+            msg="The invoice of a failed transaction should not be posted.",
+        )
+
     def test_payment_token_for_invoice_partner_is_available(self):
         """Test that the payment token of the invoice partner is available"""
         Wizard = self.env['account.payment.register'].with_context(active_model='account.move')
@@ -442,3 +501,41 @@ class TestAccountPayment(AccountPaymentCommon):
             other_invoice.action_post()
             wizard = payment_register_wizard(invoice + other_invoice)
             self.assertEqual(wizard.suitable_payment_token_ids, parent_token)
+
+    def test_prepare_tx_vals_from_move_lines_no_domain_warning(self):
+        with self.mocked_get_payment_method_information():
+            bank_journal = self.company_data['default_journal_bank']
+            payment_method_line = bank_journal.inbound_payment_method_line_ids\
+                .filtered(lambda line: line.payment_provider_id == self.dummy_provider)
+            invoice = self.env['account.move'].create({
+                'move_type': 'out_invoice',
+                'partner_id': self.partner.id,
+                'invoice_line_ids': [Command.create({'name': 'test line', 'price_unit': 100.0})],
+            })
+            invoice.action_post()
+            token = self._create_token(partner_id=self.partner.id)
+            payment = self.env['account.payment'].create({
+                'payment_type': 'inbound',
+                'partner_type': 'customer',
+                'partner_id': self.partner.id,
+                'amount': 100.0,
+                'journal_id': bank_journal.id,
+                'payment_method_line_id': payment_method_line.id,
+                'payment_token_id': token.id,
+            })
+
+            with self.assertNoLogs('odoo.osv.expression', level='WARNING'):
+                vals = payment.with_context(
+                    active_model='account.move.line',
+                    active_ids=invoice.line_ids.ids,
+                )._prepare_payment_transaction_vals()
+            self.assertEqual(vals['invoice_ids'], [Command.set(invoice.ids)])
+
+            vals = payment.with_context(
+                active_model='account.move',
+                active_ids=invoice.ids,
+            )._prepare_payment_transaction_vals()
+            self.assertEqual(vals['invoice_ids'], [Command.set(invoice.ids)])
+
+            vals = payment._prepare_payment_transaction_vals()
+            self.assertEqual(vals['invoice_ids'], [Command.set([])])

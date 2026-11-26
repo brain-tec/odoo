@@ -1105,6 +1105,7 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
         // Wait for the popover to appear
         await nextTick();
         a.click();
+        setSelection(a, 0, a, 0); // Selection must be in the link otherwise the popover will close.
         await nextTick();
         // Click on the edit link icon
         document.querySelector("a.mx-1.o_we_edit_link.text-dark").click();
@@ -1180,6 +1181,46 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
         assert.strictEqual(htmlField.wysiwyg.getValue(), '<p>abc</p>', 'the value should be sanitized by the wysiwyg');
         assert.strictEqual(htmlField._isDirty(), false, 'should not be dirty as the content has not changed');
 
+    });
+
+    QUnit.test("content typed on a virtual keyboard is saved", async (assert) => {
+        serverData.models.partner.records.push({
+            id: 1,
+            txt: "<p><br></p>",
+        });
+        let htmlField;
+        const wysiwygPromise = makeDeferred();
+        patchWithCleanup(HtmlField.prototype, {
+            async startWysiwyg() {
+                await super.startWysiwyg(...arguments);
+                htmlField = this;
+                wysiwygPromise.resolve();
+            }
+        });
+        await makeView({
+            type: "form",
+            resId: 1,
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="txt" widget="html_legacy"/>
+                </form>`,
+        });
+        await wysiwygPromise;
+        const editor = htmlField.wysiwyg.odooEditor;
+        editor.testMode = true;
+
+        const paragraph = editor.editable.querySelector("p");
+        paragraph.replaceChildren(document.createTextNode("mobile note"));
+        setSelection(paragraph.firstChild, "mobile note".length);
+        editor.keyboardType = "VIRTUAL";
+        editor._onInput({ inputType: "insertText", data: "e", isTrusted: false });
+        editor.observerFlush();
+
+        await htmlField.commitChanges({ shouldInline: true });
+        assert.strictEqual(htmlField.props.record.data.txt.toString(), "<p>mobile note</p>",
+            "the note typed on a virtual keyboard is saved");
     });
 
     QUnit.module("Image transform");

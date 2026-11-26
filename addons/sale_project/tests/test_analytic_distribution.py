@@ -78,6 +78,65 @@ class TestAnalyticDistribution(HttpCase, TestSaleProjectCommon):
             "The analytic distribution of the SOL should be set to the account of the project set on the product.",
         )
 
+    def test_sol_analytic_distribution_multicompany_task(self):
+        """Test that the analytic distribution on SOL uses the correct company's
+        project when the product's project_id is company-dependent.
+
+        Scenario:
+        - Company A has project_a linked to the product
+        - Company B has project_b linked to the product
+        - Create a SO in Company B
+        - The SOL's analytic distribution should come from project_b, not project_a
+        """
+        company_a = self.env.company
+        company_b = self.env['res.company'].create({'name': 'Company B'})
+        analytic_account_a, analytic_account_b = self.env['account.analytic.account'].create([
+            {
+                'name': 'Analytic Account Company A',
+                'plan_id': self.analytic_plan.id,
+                'company_id': company_a.id,
+            },
+            {
+                'name': 'Analytic Account Company B',
+                'plan_id': self.analytic_plan.id,
+                'company_id': company_b.id,
+            }
+        ])
+        project_a, project_b = self.env['project.project'].create([
+            {
+                'name': 'Field Service (A)',
+                'company_id': company_a.id,
+                'account_id': analytic_account_a.id,
+                'allow_billable': True,
+            },
+            {
+                'name': 'Field Service (B)',
+                'company_id': company_b.id,
+                'account_id': analytic_account_b.id,
+                'allow_billable': True,
+            }
+        ])
+        product = self.env['product.product'].create({
+            'name': 'Service Task Global Project MC',
+            'type': 'service',
+            'service_tracking': 'task_global_project',
+            'company_id': False,
+            'taxes_id': False,
+        })
+
+        # Set the company-dependent project_id for each company
+        product.with_company(company_a).project_id = project_a
+        product.with_company(company_b).project_id = project_b
+        sale_order = self.env['sale.order'].create({
+            'partner_id': self.partner.id,
+            'company_id': company_b.id,
+            'order_line': [Command.create({'product_id': product.id})],
+        })
+        sale_order_line = sale_order.order_line
+
+        # The analytic distribution should come from project_b (Company B), not project_a
+        self.assertEqual(sale_order_line.analytic_distribution, {str(analytic_account_b.id): 100})
+
     def test_project_analytic_distribution_on_invoice_lines(self):
         """
         Test that Analytic Distribution applies from Project to Invoice Lines (excluding payable/receivable lines).
@@ -136,4 +195,85 @@ class TestAnalyticDistribution(HttpCase, TestSaleProjectCommon):
             domain,
             [(0, '=', 1)],
             "Domain should be (0, '=', 1) when analytic_distribution is missing."
+        )
+
+    def test_payment_line_does_not_receive_project_analytic_distribution(self):
+        """
+        Ensure that when a payment is registered for a bill created from a project,
+        the payment's own journal items do not receive the project's analytic distribution.
+        """
+        self.project_global.account_id = self.analytic_account_sale
+
+        bill = self.env['account.move'].with_context(project_id=self.project_global.id).create({
+            'move_type': 'in_invoice',
+            'partner_id': self.partner.id,
+            'invoice_date': '2024-01-01',
+            'invoice_line_ids': [Command.create({
+                'quantity': 1,
+                'price_unit': 100,
+                'account_id': self.company_data['default_account_expense'].id,
+            })],
+        })
+        bill.action_post()
+
+        self.assertEqual(
+            bill.invoice_line_ids.analytic_distribution,
+            {str(self.analytic_account_sale.id): 100},
+            "The bill's journal items should receive the project's analytic distribution.",
+        )
+
+        payment_register = self.env['account.payment.register'].with_context(
+            active_model='account.move', active_ids=bill.ids, project_id=self.project_global.id,
+        ).create({})
+        payment = payment_register._create_payments()
+
+        self.assertFalse(
+            any(str(self.analytic_account_sale.id) in (line.analytic_distribution or {})
+                for line in payment.move_id.line_ids),
+            "The payment's journal items should not receive the project's analytic distribution.",
+        )
+
+    def test_tax_line_does_not_receive_project_analytic_distribution(self):
+        """
+        Ensure that when an invoice opened from a project is edited by changing the customer and
+        replacing the taxed line, the tax line does not receive the project's analytic distribution
+        and the taxes are recomputed instead of keeping the amount of the removed line.
+        """
+        tax = self.tax_sale_a  # 15%
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'invoice_line_ids': [Command.create({
+                'name': 'Line 1',
+                'quantity': 1,
+                'price_unit': 1000,
+                'tax_ids': [Command.set(tax.ids)],
+                'analytic_distribution': {str(self.analytic_account_sale.id): 100},
+            })],
+        })
+        self.assertEqual(invoice.amount_tax, 150)
+
+        # Open the invoice from the project, change the customer and replace the taxed line
+        invoice.with_context(project_id=self.project_global.id).write({
+            'partner_id': self.partner_b.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'Line 2',
+                    'quantity': 1,
+                    'price_unit': 500,
+                    'tax_ids': [Command.set(tax.ids)],
+                }),
+                Command.delete(invoice.invoice_line_ids.id),
+            ],
+        })
+
+        self.assertRecordValues(invoice, [{'amount_untaxed': 500.0, 'amount_tax': 75.0, 'amount_total': 575.0}])
+        self.assertEqual(
+            invoice.invoice_line_ids.analytic_distribution,
+            {str(self.analytic_account_sale.id): 100},
+            "The invoice line should receive the project's analytic distribution.",
+        )
+        self.assertFalse(
+            invoice.line_ids.filtered('tax_repartition_line_id').analytic_distribution,
+            "The tax line should not receive the project's analytic distribution.",
         )

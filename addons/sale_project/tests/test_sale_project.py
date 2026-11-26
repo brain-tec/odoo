@@ -114,6 +114,14 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
         # Create additional analytic plans at setup to avoid adding fields in project.project between tests
         cls.analytic_plan_1 = cls.env['account.analytic.plan'].create({'name': 'Sale Project Plan 1'})
         cls.analytic_plan_2 = cls.env['account.analytic.plan'].create({'name': 'Sale Project Plan 2'})
+        cls.analytic_account_1 = cls.env['account.analytic.account'].create({
+            'name': 'Analytic Account - Plan 1',
+            'plan_id': cls.analytic_plan_1.id,
+        })
+        cls.analytic_account_2 = cls.env['account.analytic.account'].create({
+            'name': 'Analytic Account - Plan 2',
+            'plan_id': cls.analytic_plan_2.id,
+        })
 
     def test_task_create_sol_ui(self):
         self.start_tour('/odoo', 'task_create_sol_tour', login='admin')
@@ -540,7 +548,7 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
 
     def test_project_creation_on_so_with_manual_analytic(self):
         """ Tests that the manually added analytic account (of a plan other than projects) and the project account
-            created when SO is confirmed are both still in the line after confirmation.
+            created when the SO is confirmed are both still in the line after confirmation.
         """
         analytic_distribution_manual = {str(self.analytic_account_sale.id): 100}
         sale_order = self.env['sale.order'].create({
@@ -566,24 +574,15 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
         """
         # We create one distribution model with two accounts in one line, based on product
         # and a second model with a different plan, based on partner
-        analytic_account_1 = self.env['account.analytic.account'].create({
-            'name': 'Analytic Account - Plan 1',
-            'plan_id': self.analytic_plan_1.id,
-        })
-        analytic_account_2 = self.env['account.analytic.account'].create({
-            'name': 'Analytic Account - Plan 2',
-            'plan_id': self.analytic_plan_2.id,
-        })
-        distribution_model_product = self.env['account.analytic.distribution.model'].create({
+        self.env['account.analytic.distribution.model'].create([{
             'product_id': self.product_a.id,
-            'analytic_distribution': {','.join([str(analytic_account_1.id), str(analytic_account_2.id)]): 100},
+            'analytic_distribution': {','.join([str(self.analytic_account_1.id), str(self.analytic_account_2.id)]): 100},
             'company_id': self.company.id,
-        })
-        distribution_model_partner = self.env['account.analytic.distribution.model'].create({
+        }, {
             'partner_id': self.partner.id,
             'analytic_distribution': {self.analytic_account_sale.id: 100},
             'company_id': self.company.id,
-        })
+        }])
 
         project = self.env['project.project'].create({
             'name': 'Project Test',
@@ -599,24 +598,31 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
                 Command.create({'product_id': self.product_a.id}),
             ],
         })
-
         expected_analytic_distribution = {
-            f"{analytic_account_1.id},{analytic_account_2.id},{project.account_id.id}": 100,
-            f"{self.analytic_account_sale.id},{project.account_id.id}": 100,
+            f"{self.analytic_account_sale.id},{self.analytic_account_1.id},{self.analytic_account_2.id},{project.account_id.id}": 100,
         }
         self.assertEqual(sale_order.order_line.analytic_distribution, expected_analytic_distribution)
 
-        # If the project is removed from the SO, only the product's analytic distribution is still in the line
+        # If the project is removed from the SO, only the analytic distribution is still in the line
         sale_order.project_id = None
+        expected_analytic_distribution_no_project = {
+            f"{self.analytic_account_sale.id},{self.analytic_account_1.id},{self.analytic_account_2.id}": 100
+        }
         self.assertEqual(
             sale_order.order_line.analytic_distribution,
-            distribution_model_product.analytic_distribution | distribution_model_partner.analytic_distribution
+            expected_analytic_distribution_no_project
         )
 
         # If project is added and the SO is confirmed, both analytic distributions are in the line
         sale_order.project_id = project
         sale_order.action_confirm()
         self.assertEqual(sale_order.order_line.analytic_distribution, expected_analytic_distribution)
+
+        # The analytic distribution shouldn't change on items added after setting a project on the SO
+        with Form(sale_order) as so:
+            with so.order_line.new() as line:
+                line.product_id = self.product_a
+        self.assertEqual(sale_order.order_line[-1].analytic_distribution, expected_analytic_distribution)
 
     def test_exclude_archived_projects_in_stat_btn_related_view(self):
         """Checks if the project stat-button action includes both archived and active projects."""

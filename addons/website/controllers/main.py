@@ -433,7 +433,7 @@ class Website(Home):
                 domain,
                 ['|', ('filter_id.model_id', '=', model_name), ('action_server_id.model_id.model', '=', model_name)]
             ])
-        dynamic_filter = request.env['website.snippet.filter'].sudo().search_read(
+        dynamic_filter = request.env['website.snippet.filter'].with_context(lang=request.env.user.lang).sudo().search_read(
             domain, ['id', 'name', 'limit', 'model_name'], order='id asc'
         )
         return dynamic_filter
@@ -674,7 +674,10 @@ class Website(Home):
         # If that URL is also a menu, we update it accordingly.
         # NB: we don't want to slugify on menu creation as it could redirect
         # towards files (with spaces, apostrophes, etc.).
-        menu = request.env['website.menu'].search([('url', '=', '/' + path), ('page_id', '=', False)])
+        # When searching for a menu, we also match URLs with or without a
+        # leading slash to prevent mismatches when records were created without
+        # a leading slash.
+        menu = request.env['website.menu'].search([('url', 'in', ['/' + path, path]), ('page_id', '=', False)])
         if menu:
             menu.page_id = page['page_id']
 
@@ -750,7 +753,7 @@ class Website(Home):
 
     @http.route("/website/get_switchable_related_views", type="json", auth="user", website=True, readonly=True)
     def get_switchable_related_views(self, key):
-        views = request.env["ir.ui.view"].get_related_views(key, bundles=False).filtered(lambda v: v.customize_show)
+        views = request.env["ir.ui.view"].with_context(is_customization_code=False).get_related_views(key, bundles=False).filtered(lambda v: v.customize_show)
         views = views.sorted(key=lambda v: (v.inherit_id.id, v.name))
         return views.with_context(display_website=False).read(['name', 'id', 'key', 'xml_id', 'active', 'inherit_id'])
 

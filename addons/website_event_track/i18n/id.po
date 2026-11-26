@@ -1,24 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_event_track
+# * website_event_track
 #
 # Translators:
 # Wil Odoo, 2024
 # Abe Manyo, 2025
 #
+# "Nurul Aini Akrima Sabila (nuaas)" <nuaas@odoo.com>, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:38+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Abe Manyo, 2025\n"
-"Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
+"POT-Creation-Date: 2026-04-10 18:39+0000\n"
+"PO-Revision-Date: 2026-11-20 12:09+0000\n"
+"Last-Translator: \"Nurul Aini Akrima Sabila (nuaas)\" <nuaas@odoo.com>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-18/"
+"website_event_track/id/>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: website_event_track
 #: model:mail.template,body_html:website_event_track.mail_template_data_track_confirmation
@@ -49,18 +53,18 @@ msgid ""
 "    </t>\n"
 msgstr ""
 "\n"
-"    Kepada <t t-out=\"object.partner_id.name or object.partner_name or "
-"''\">Brandon Freeman</t><br/>\n"
+"    Kepada <t t-out=\"object.partner_id.name or object.partner_name or ''\">"
+"Brandon Freeman</t><br/>\n"
 "    Dengan bahagia kami menginformasikan Anda bahwa proposal Anda <t t-"
 "out=\"object.name or ''\">What This Event Is All About</t> telah diterima "
-"dan dikonfirmasi untuk acara <t t-out=\"object.event_id.name or "
-"''\">OpenWood Collection Online Reveal</t>.\n"
+"dan dikonfirmasi untuk acara <t t-out=\"object.event_id.name or ''\">"
+"OpenWood Collection Online Reveal</t>.\n"
 "    <br/>\n"
 "    Anda akan menemukan lebih banyak detail di sini:\n"
 "    <div style=\"margin: 16px 0px 16px 0px;\">\n"
-"        <a t-attf-href=\"/event/{{ object.event_id.id }}/track/"
-"{{ object.id }}\" style=\"padding: 8px 16px 8px 16px; font-size: 14px; "
-"color: #FFFFFF; text-decoration: none !important; background-color: #875A7B; "
+"        <a t-attf-href=\"/event/{{ object.event_id.id }}/track/{{ "
+"object.id }}\" style=\"padding: 8px 16px 8px 16px; font-size: 14px; color: "
+"#FFFFFF; text-decoration: none !important; background-color: #875A7B; "
 "border: 0px solid #875A7B; border-radius:3px\">\n"
 "            Lihat Talkshow\n"
 "        </a>\n"
@@ -113,7 +117,7 @@ msgstr "%s Lamaran Acara Online"
 #: model_terms:ir.ui.view,arch_db:website_event_track.agenda_main
 #: model_terms:ir.ui.view,arch_db:website_event_track.tracks_display_list
 msgid "(timezone:"
-msgstr "(timezone:"
+msgstr "(zona waktu:"
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_7_track_17
@@ -164,15 +168,6 @@ msgstr "<i class=\"fa fa-bell mx-2 text-muted\"/> Talkshow Favorit"
 #: model_terms:ir.ui.view,arch_db:website_event_track.tracks_display_list
 msgid "<span class=\"d-none d-md-block\">&amp;bull;</span>"
 msgstr "<span class=\"d-none d-md-block\">&amp;bull;</span>"
-
-#. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
-"specific.\" groups=\"website.group_multi_website\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
-"specific.\" groups=\"website.group_multi_website\"/>"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.agenda_online
@@ -302,7 +297,7 @@ msgstr "Status Aktivitas"
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__activity_type_icon
 msgid "Activity Type Icon"
-msgstr "Ikon Jenis Aktifitas"
+msgstr "Ikon Jenis Aktivitas"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_stage_view_form
@@ -376,9 +371,8 @@ msgid ""
 "Allow video and audio recording of their\n"
 "                            presentation, for publishing on our website."
 msgstr ""
-"Izinkan rekaman video dan audio untuk\n"
-"                            presentasi mereka, untuk dipasang pada website "
-"kami."
+"Izinkan perekaman video dan audio\n"
+"                            presentasi, untuk dipublikasikan di website kami."
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__wishlisted_by_default
@@ -454,7 +448,7 @@ msgstr "Tersedia pada semua halaman acara Agenda"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_main
 msgid "Back to All Talks"
-msgstr "Kembali ke Semua Talkshow"
+msgstr "Kembali ke Semua Talk"
 
 #. module: website_event_track
 #: model_terms:event.track,description:website_event_track.event_7_track_18
@@ -950,7 +944,7 @@ msgstr "Favorit"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.agenda_topbar
 msgid "Filter Tracks"
-msgstr "Filter Track"
+msgstr "Filter Trek"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.snippet_options
@@ -960,7 +954,7 @@ msgstr "Filter berdasarkan Tag"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.session_topbar
 msgid "Filters"
-msgstr "Penyaring"
+msgstr "Filter"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.tracks_display_list
@@ -1005,13 +999,13 @@ msgstr "Dapat diakses sepenuhnya"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_search
 msgid "Future Activities"
-msgstr "Kegiatan - Kegiatan Mendatang"
+msgstr "Aktivitas Mendatang"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_confirmation_end_page_hook
 #: model_terms:ir.ui.view,arch_db:website_event_track.registration_complete
 msgid "Get prepared and"
-msgstr "Siap-siap dan"
+msgstr "Bersiaplah dan"
 
 #. module: website_event_track
 #: model_terms:event.track,description:website_event_track.event_7_track_18
@@ -1363,7 +1357,7 @@ msgstr "Terakhir Diperbarui pada"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_search
 msgid "Late Activities"
-msgstr "Aktifitas terakhir"
+msgstr "Aktivitas Terlambat"
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track12
@@ -1383,7 +1377,7 @@ msgstr "Hidup di Rumah Mengelili Dunia: Cerita William"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid "Lightning Talks"
-msgstr "Talkshow Petir"
+msgstr "Presentasi Kilat"
 
 #. module: website_event_track
 #: model_terms:event.track,description:website_event_track.event_7_track_19
@@ -1515,7 +1509,7 @@ msgstr "Istirahat pagi hari"
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__my_activity_date_deadline
 msgid "My Activity Deadline"
-msgstr "Deadline Kegiatan Saya"
+msgstr "Tenggat Aktivitas Saya"
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track27
@@ -1558,7 +1552,7 @@ msgstr "Kalender Acara Aktivitas Berikutnya"
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Batas Waktu Aktivitas Berikutnya"
+msgstr "Tenggat Aktivitas Berikutnya"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__activity_summary
@@ -1754,7 +1748,7 @@ msgstr "Ditolak"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid "Regular Talks"
-msgstr "Talkshow Reguler"
+msgstr "Presentasi Reguler"
 
 #. module: website_event_track
 #: model:ir.model.fields,help:website_event_track.field_event_track__track_start_relative
@@ -1821,7 +1815,7 @@ msgstr "Mengamankan Kayu selama dijalan"
 #. odoo-javascript
 #: code:addons/website_event_track/static/src/js/website_event_track_proposal_form_tags.js:0
 msgid "Select Categories"
-msgstr "Pilih Kategori-Kategori"
+msgstr "Pilih Kategori"
 
 #. module: website_event_track
 #: model:mail.template,description:website_event_track.mail_template_data_track_confirmation
@@ -1974,7 +1968,7 @@ msgstr "Label"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid "Talk Intro"
-msgstr "Intro Talkshow"
+msgstr "Pengantar Presentasi"
 
 #. module: website_event_track
 #. odoo-python
@@ -2075,14 +2069,15 @@ msgid ""
 "These are 30 minutes talks on many different topics. Most topics are "
 "accepted in lightning talks."
 msgstr ""
-"Terdapat talkshow 30 menit untuk banyak topik yang berbeda. Kebanyakan topik "
-"diterima di talkshow petir."
+"Presentasi ini merupakan sesi 30 menit yang membahas berbagai topik. "
+"Sebagian besar topik diterima dalam presentasi singkat."
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid "These are standard talks with slides, alocated in slots of 60 minutes."
 msgstr ""
-"Berikut adalah talkshow standar dengan slide, dialokasikan di slow 60 menit."
+"Ini adalah presentasi standar dengan slide, yang dialokasikan dalam slot 60 "
+"menit."
 
 #. module: website_event_track
 #: model_terms:ir.actions.act_window,help:website_event_track.event_track_visitor_action
@@ -2139,8 +2134,8 @@ msgid ""
 "Timely release of presentation material (slides),\n"
 "                            for publishing on our website."
 msgstr ""
-"Perilisan tepat waktu materi presentasi (slide),\n"
-"                            untuk dipasang pada website kami."
+"Perilisan materi presentasi (slide) tepat waktu,\n"
+"                            untuk dipublikasikan di website kami."
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__name
@@ -2245,7 +2240,7 @@ msgstr "Lacak Stages"
 #: model:ir.actions.act_window,name:website_event_track.event_track_tag_category_action
 #: model:ir.ui.menu,name:website_event_track.event_track_tag_category_menu
 msgid "Track Tag Categories"
-msgstr "Lacak Kategori-Kategori Tag"
+msgstr "Lacak Kategori Tag"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_tag_category_view_form
@@ -2337,7 +2332,7 @@ msgstr "Jenis dari aktivitas pengecualian pada rekaman data."
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.agenda_main
 msgid "Unknown"
-msgstr "Tidak diketahui"
+msgstr "Tidak Diketahui"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.agenda_main_track
@@ -2389,6 +2384,11 @@ msgstr ""
 "    terpasang aman TANPA harus mengikat atau mengurai simpul yang rumit."
 
 #. module: website_event_track
+#: model_terms:ir.ui.view,arch_db:website_event_track.res_config_settings_view_form
+msgid "Values set here are website-specific."
+msgstr ""
+
+#. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_kanban
 msgid "View Track"
 msgstr "Lihat Track"
@@ -2433,14 +2433,15 @@ msgstr "Tunggu pengunjung menambahkan track ini ke daftar favorit mereka"
 #: model_terms:ir.ui.view,arch_db:website_event_track.agenda_online
 #: model_terms:ir.ui.view,arch_db:website_event_track.tracks_main
 msgid "We could not find any track at this moment."
-msgstr "Kita tidak dapat menemukan track apapun pada saat ini."
+msgstr "Kami tidak dapat menemukan sesi apa pun saat ini."
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.agenda_online
 #: model_terms:ir.ui.view,arch_db:website_event_track.tracks_main
 msgid "We could not find any track matching your search for:"
 msgstr ""
-"Kita tidak dapat menemukan track apapun yang cocok dengan apa yang Anda cari:"
+"Kami tidak dapat menemukan sesi apa pun yang sesuai dengan pencarian Anda "
+"untuk:"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
@@ -2460,10 +2461,13 @@ msgid ""
 "                                audience, it will be considered for\n"
 "                                inclusion in the programme."
 msgstr ""
-"Kami akan menerima berbagai macam presentasi, dari laporan pada project-"
-"project akademis dan komersial untuk tutorial dan studi kasus. Selama "
-"presentasi menarik dan berpotensi berguna untuk penonton, itu akan dianggap "
-"untuk dimasukkan dalam program."
+"Kami menerima beragam presentasi,\n"
+"                                mulai dari laporan proyek akademis dan\n"
+"                                komersial hingga tutorial dan studi\n"
+"                                kasus. Selama menarik dan berpotensi\n"
+"                                bermanfaat bagi audiens, presentasi\n"
+"                                tersebut akan dipertimbangkan untuk\n"
+"                                dimasukkan ke dalam program."
 
 #. module: website_event_track
 #. odoo-javascript
@@ -2474,7 +2478,7 @@ msgstr "Kami akan mengevaluasi proposisi dan kembali kepada Anda segera."
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid "We're sorry, this event does not accept proposals anymore"
-msgstr "Maaf, acara ini tidak menerima proposal lagi"
+msgstr "Mohon maaf, acara ini tidak lagi menerima proposal"
 
 #. module: website_event_track
 #: model:ir.model,name:website_event_track.model_website
@@ -2674,7 +2678,7 @@ msgstr "menit setelah Track dimulai"
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_confirmation_end_page_hook
 #: model_terms:ir.ui.view,arch_db:website_event_track.registration_complete
 msgid "register to your favorites talks now."
-msgstr "daftar ke talk favorit Anda sekarang."
+msgstr "daftar ke presentasi favorit Anda sekarang."
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_content
@@ -2685,3 +2689,16 @@ msgstr "dimulai di"
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_content
 msgid "starts on"
 msgstr "dimulai pada"
+
+#. module: website_event_track
+#. odoo-javascript
+#: code:addons/website_event_track/static/src/xml/website_event_pwa.xml:0
+msgid "x"
+msgstr "x"
+
+#~ msgid ""
+#~ "<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
+#~ "specific.\" groups=\"website.group_multi_website\"/>"
+#~ msgstr ""
+#~ "<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
+#~ "specific.\" groups=\"website.group_multi_website\"/>"

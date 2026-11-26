@@ -7,23 +7,24 @@
 # Wil Odoo, 2025
 # Vojtěch Olšan, 2025
 # Marta Wacławek, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# "Marta (wacm)" <wacm@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-11-21 02:38+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Czech <https://translate.odoo.com/projects/odoo-18/survey/cs/"
-">\n"
+"POT-Creation-Date: 2026-04-10 18:37+0000\n"
+"PO-Revision-Date: 2026-10-20 13:11+0000\n"
+"Last-Translator: \"Marta (wacm)\" <wacm@odoo.com>\n"
+"Language-Team: Czech <https://translate.odoo.com/projects/odoo-18/survey/cs/>"
+"\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n "
 "<= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__question_count
@@ -36,36 +37,6 @@ msgid "# Questions Randomly Picked"
 msgstr "# Náhodně vybrané otázky"
 
 #. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_4
-msgid "$100"
-msgstr "100€"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_1
-msgid "$20"
-msgstr "$20"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_5
-msgid "$200"
-msgstr "200€"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_6
-msgid "$300"
-msgstr "300€"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_2
-msgid "$50"
-msgstr "50€"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_3
-msgid "$80"
-msgstr "80€"
-
-#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_progression
 msgid "% completed"
 msgstr "% dokončeno"
@@ -74,7 +45,7 @@ msgstr "% dokončeno"
 #. odoo-python
 #: code:addons/survey/models/survey_user_input.py:0
 msgid "%(participant)s just participated in \"%(survey_title)s\"."
-msgstr ""
+msgstr "%(participant)s se právě zúčastnil(a) dotazníku „%(survey_title)s“."
 
 #. module: survey
 #. odoo-python
@@ -106,11 +77,6 @@ msgid "'Certification - %s' % (object.survey_id.display_name)"
 msgstr "'Osvědčení - %s' % (object.survey_id.display_name)"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
-msgid "0000000010"
-msgstr ""
-
-#. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p4_q2_sug2
 msgid "10 kg"
 msgstr "10 kg"
@@ -121,29 +87,14 @@ msgid "100 years"
 msgstr "100 let"
 
 #. module: survey
-#: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q1_sug3
-msgid "1055"
-msgstr "1055"
-
-#. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q3_sug3
 msgid "116 years"
 msgstr "116 let"
 
 #. module: survey
-#: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q1_sug1
-msgid "1227"
-msgstr "1227"
-
-#. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q3_sug4
 msgid "127 years"
 msgstr "127 let"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q1_sug2
-msgid "1324"
-msgstr "1324"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p2_q1_sug1
@@ -154,11 +105,6 @@ msgstr "1450 km"
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p4_q2_sug3
 msgid "16.2 kg"
 msgstr "16.2 kg"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
-msgid "2023-08-18"
-msgstr "2023-08-18"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p2_q1_sug2
@@ -224,7 +170,7 @@ msgstr ""
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
 msgid "<br/> <span>by</span>"
-msgstr ""
+msgstr "<br/> <span>autor:</span>"
 
 #. module: survey
 #: model:mail.template,body_html:survey.mail_template_certification
@@ -393,6 +339,9 @@ msgid ""
 "<i class=\"fa fa-exclamation-triangle\"/> It is currently not possible to "
 "pass this assessment because no question is configured to give any points."
 msgstr ""
+"<i class=\"fa fa-exclamation-triangle\"/> V současné době není možné toto "
+"hodnocení absolvovat, protože žádná otázka není nastavena tak, aby za ni "
+"byly uděleny body."
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_done
@@ -422,25 +371,29 @@ msgstr "<i class=\"fa fa-square-o fa-lg me-2\"/>odpověď"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_button_form_view
 msgid "<i class=\"oi oi-fw oi-arrow-right\"/>Go to Survey"
-msgstr ""
+msgstr "<i class=\"oi oi-fw oi-arrow-right\"/>Přejít k dotazníku"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
 msgid ""
 "<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Avg</span>"
 msgstr ""
+"<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Průměr</"
+"span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
 msgid ""
 "<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Max</span>"
 msgstr ""
+"<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Max</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
 msgid ""
 "<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Min</span>"
 msgstr ""
+"<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Min</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_in_progress
@@ -448,6 +401,8 @@ msgid ""
 "<span class=\"fw-bold text-muted ms-2 d-none d-md-inline\" id=\"enter-"
 "tooltip\"> or press CTRL+Enter</span>"
 msgstr ""
+"<span class=\"fw-bold text-muted ms-2 d-none d-md-inline\" id=\"enter-"
+"tooltip\"> nebo stiskněte CTRL+Enter</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_in_progress
@@ -469,6 +424,10 @@ msgid ""
 "                    <span id=\"enter-tooltip\">or press CTRL+Enter</span>\n"
 "                </span>"
 msgstr ""
+"<span class=\"fw-bold text-muted ms-2 d-none d-md-inline\">\n"
+"                    <span id=\"enter-tooltip\">nebo stiskněte CTRL+Enter</"
+"span>\n"
+"                </span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
@@ -483,6 +442,10 @@ msgid ""
 "                        <span class=\"o_stat_text\" "
 "invisible=\"certifications_company_count &gt; 1\">Certification</span>"
 msgstr ""
+"<span class=\"o_stat_text\" invisible=\"certifications_company_count &lt; "
+"2\">Certifikace</span>\n"
+"                        <span class=\"o_stat_text\" "
+"invisible=\"certifications_company_count &gt; 1\"> Certifikace</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.res_partner_view_form
@@ -492,6 +455,10 @@ msgid ""
 "                        <span class=\"o_stat_text\" "
 "invisible=\"certifications_count &gt; 1\">Certification</span>"
 msgstr ""
+"<span class=\"o_stat_text\" invisible=\"certifications_count &lt; 2\">"
+"Certifikace</span>\n"
+"                        <span class=\"o_stat_text\" "
+"invisible=\"certifications_count &gt; 1\">Certifikace</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_start
@@ -499,8 +466,8 @@ msgid ""
 "<span class=\"o_survey_enter fw-bold text-muted ms-2 d-none d-md-inline\">or "
 "press Enter</span>"
 msgstr ""
-"<span class=\"o_survey_enter fw-bold text-muted ms-2 d-none d-md-"
-"inline\">nebo stiskněte Enter</span>"
+"<span class=\"o_survey_enter fw-bold text-muted ms-2 d-none d-md-inline\">"
+"nebo stiskněte Enter</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_selection_key
@@ -521,6 +488,10 @@ msgid ""
 "filters\n"
 "                            </span>"
 msgstr ""
+"<span class=\"o_survey_results_topbar_clear_filters text-primary\">\n"
+"                                <i class=\"fa fa-trash me-1\"/>Odstranit "
+"všechny filtry\n"
+"                           </span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.user_input_session_manage_content
@@ -537,6 +508,8 @@ msgid ""
 "<span class=\"o_survey_session_navigation_next_label\">Start</span>\n"
 "                        <i class=\"oi oi-chevron-right\"/>"
 msgstr ""
+"<span class=\"o_survey_session_navigation_next_label\">Začít</span>\n"
+"                        <i class=\"oi oi-chevron-right\"/>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
@@ -556,7 +529,7 @@ msgstr ""
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
 msgid "<span class=\"text-muted\">Average Duration</span>"
-msgstr ""
+msgstr "<span class=\"text-muted\">Průměrná délka</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
@@ -566,22 +539,22 @@ msgstr "<span class=\"text-muted\">Otázky</span>"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
 msgid "<span class=\"text-muted\">Responded</span>"
-msgstr ""
+msgstr "<span class=\"text-muted\">Odpovězeno</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
 msgid "<span class=\"text-success\">Correct</span>"
-msgstr ""
+msgstr "<span class=\"text-success\">Správně</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
 msgid "<span class=\"text-warning\">Partial</span>"
-msgstr ""
+msgstr "<span class=\"text-warning\">Částečné</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "<span invisible=\"not is_scored_question\">Points</span>"
-msgstr ""
+msgstr "<span invisible=\"not is_scored_question\">Body</span>"
 
 #. module: survey
 #: model_terms:survey.question,description:survey.survey_demo_quiz_p3_q1
@@ -617,7 +590,7 @@ msgstr "<span>Datum</span>"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "<span>Do you like it?</span><br/>"
-msgstr ""
+msgstr "<span>Líbí se vám to?</span><br/>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
@@ -698,6 +671,8 @@ msgid ""
 "<span>This certificate is presented to</span>\n"
 "                                <br/>"
 msgstr ""
+"<span>Tento certifikát se uděluje</span>\n"
+"                                <br/>"
 
 #. module: survey
 #: model_terms:ir.actions.act_window,help:survey.action_survey_form
@@ -735,6 +710,8 @@ msgid ""
 "<span>for successfully completing</span>\n"
 "                                <br/>"
 msgstr ""
+"<span>za úspěšné dokončení</span>\n"
+"                                <br/>"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p3_q4
@@ -769,6 +746,8 @@ msgid ""
 "A positive default time limit is required when the session rewards quick "
 "answers."
 msgstr ""
+"Pokud relace odměňuje rychlé odpovědi, je nutné nastavit kladný výchozí "
+"časový limit."
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_question_answer__answer_score
@@ -797,6 +776,9 @@ msgid ""
 "A scored survey needs at least one question that gives points.\n"
 "Please check answers and their scores."
 msgstr ""
+"Hodnocený dotazník musí obsahovat alespoň jednu otázku, za kterou se udělují "
+"body.\n"
+"Zkontrolujte prosím odpovědi a jejich bodové hodnocení."
 
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p2
@@ -937,22 +919,22 @@ msgstr "Všechny průzkumy"
 #. module: survey
 #: model:ir.model.constraint,message:survey.constraint_survey_question_is_time_limited_have_time_limit
 msgid "All time-limited questions need a positive time limit"
-msgstr ""
+msgstr "Všechny otázky s časovým omezením musí mít kladný časový limit"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Allow Roaming"
-msgstr ""
+msgstr "Povolit roaming"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__allowed_triggering_question_ids
 msgid "Allowed Triggering Questions"
-msgstr ""
+msgstr "Povolené spouštěcí otázky"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__allowed_survey_types
 msgid "Allowed survey types"
-msgstr ""
+msgstr "Povolené typy dotazníků"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q2_sug2
@@ -1004,6 +986,8 @@ msgid ""
 "Answer label as either the value itself if not empty or a letter "
 "representing the index of the answer otherwise."
 msgstr ""
+"Štítek odpovědi by měl být buď samotná hodnota, pokud není prázdná, nebo v "
+"opačném případě písmeno představující index odpovědi."
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__user_input_line_ids
@@ -1048,7 +1032,7 @@ msgstr "Archivováno"
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_food_preferences_q1
 msgid "Are you vegetarian?"
-msgstr ""
+msgstr "Jste vegetarián?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p5
@@ -1153,7 +1137,7 @@ msgstr "Průměrná doba trvání"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_inner
 msgid "Average Score"
-msgstr ""
+msgstr "Průměrné skóre"
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__answer_duration_avg
@@ -1200,7 +1184,7 @@ msgstr "Včely"
 #. module: survey
 #: model:survey.question,question_placeholder:survey.vendor_certification_page_3_question_3
 msgid "Beware of leap years!"
-msgstr ""
+msgstr "Pozor na přestupné roky!"
 
 #. module: survey
 #. odoo-python
@@ -1257,7 +1241,7 @@ msgstr "Může upravovat tělo"
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p4_q3
 msgid "Can Humans ever directly see a photon?"
-msgstr ""
+msgstr "Mohou lidé někdy přímo vidět foton?"
 
 #. module: survey
 #. odoo-python
@@ -1351,7 +1335,7 @@ msgstr "Zaškrtněte tuto možnost, pokud chcete omezit počet pokusů na uživa
 #. odoo-javascript
 #: code:addons/survey/static/src/views/widgets/boolean_update_flag_field/boolean_update_flag_fields.js:0
 msgid "Checkbox updating comparison flag"
-msgstr ""
+msgstr "Zaškrtávací políčko pro aktualizaci příznaku porovnání"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p4_q2_sug2
@@ -1366,17 +1350,17 @@ msgstr "Volby"
 #. module: survey
 #: model_terms:survey.survey,description:survey.survey_demo_burger_quiz
 msgid "Choose your favourite subject and show how good you are. Ready?"
-msgstr ""
+msgstr "Vyberte si své oblíbené téma a ukažte, jak jste dobří. Jste připraveni?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_food_preferences_q3
 msgid "Choose your green meal"
-msgstr ""
+msgstr "Vyberte si své zelené jídlo"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_food_preferences_q4
 msgid "Choose your meal"
-msgstr ""
+msgstr "Vyberte si své jídlo"
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_survey__certification_report_layout__classic_blue
@@ -1434,6 +1418,9 @@ msgid ""
 "possible; please update the following surveys:\n"
 "- %(survey_names)s"
 msgstr ""
+"Kombinace roamingu a „Bodování s odpověďmi po každé stránce“ není možná; "
+"aktualizujte prosím následující dotazníky:\n"
+"- %(survey_names)s"
 
 #. module: survey
 #: model_terms:ir.actions.act_window,help:survey.action_survey_question_form
@@ -1487,7 +1474,7 @@ msgstr "Výpočet skóre vyžaduje otázku v argumentech."
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Conditional display"
-msgstr ""
+msgstr "Podmíněné zobrazení"
 
 #. module: survey
 #. odoo-javascript
@@ -1496,6 +1483,7 @@ msgstr ""
 msgid ""
 "Conditional display is not available when questions are randomly picked."
 msgstr ""
+"Podmíněné zobrazení není k dispozici, pokud jsou otázky vychystávány náhodně."
 
 #. module: survey
 #: model:survey.question.answer,value:survey.vendor_certification_page_1_question_2_choice_3
@@ -1734,12 +1722,12 @@ msgstr "Nastavitelná lampa"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__is_time_customized
 msgid "Customized speed rewards"
-msgstr ""
+msgstr "Odměny za rychlost přizpůsobené na míru"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
 msgid "DEMO_CERTIFIED_NAME"
-msgstr ""
+msgstr "DEMO_CERTIFIED_NAME"
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_question__question_type__date
@@ -1766,8 +1754,7 @@ msgstr "Odpověď datetime"
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_user_input__deadline
 msgid "Datetime until customer can open the survey and submit answers"
-msgstr ""
-"Datetime, dokud zákazník nebude moci otevřít průzkum a odeslat odpovědi"
+msgstr "Datetime, dokud zákazník nebude moci otevřít průzkum a odeslat odpovědi"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__deadline
@@ -1778,7 +1765,7 @@ msgstr "Termín"
 #: model:ir.model.fields,help:survey.field_survey_question__survey_session_speed_rating_time_limit
 #: model:ir.model.fields,help:survey.field_survey_survey__session_speed_rating_time_limit
 msgid "Default time given to receive additional points for right answers"
-msgstr ""
+msgstr "Výchozí časový limit pro získání bonusových bodů za správné odpovědi"
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_gamification_challenge__challenge_category
@@ -1822,7 +1809,7 @@ msgstr "Nesouhlasím"
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__display_name
 #: model:ir.model.fields,field_description:survey.field_survey_user_input_line__display_name
 msgid "Display Name"
-msgstr "Zobrazovací název"
+msgstr "Zobrazovaný název"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__progression_mode
@@ -1833,12 +1820,12 @@ msgstr "Zobrazit průběh jako"
 #. odoo-javascript
 #: code:addons/survey/static/src/views/widgets/survey_question_trigger/survey_question_trigger.js:0
 msgid "Displayed if \"%s\"."
-msgstr ""
+msgstr "Zobrazí se, pokud „%s “."
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Displayed when the answer entered is not valid."
-msgstr ""
+msgstr "Zobrazí se, pokud zadaná odpověď není platná."
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_1_question_1
@@ -1848,7 +1835,7 @@ msgstr "Prodáváme obrazovky akustického bloku?"
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p2_q3
 msgid "Do you have any other comments, questions, or concerns?"
-msgstr ""
+msgstr "Máte nějaké další připomínky, dotazy nebo obavy?"
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_1_question_5
@@ -1883,7 +1870,7 @@ msgstr "Šuplík"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Duplicate Question"
-msgstr ""
+msgstr "Duplicitní otázka"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
@@ -1921,7 +1908,7 @@ msgstr "Datum a čas ukončení"
 #. odoo-javascript
 #: code:addons/survey/static/src/js/survey_session_manage.js:0
 msgid "End of Survey"
-msgstr ""
+msgstr "Konec dotazníku"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_session_code
@@ -1961,7 +1948,7 @@ msgstr "Stávající e-maily"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Extremely likely"
-msgstr ""
+msgstr "Velmi pravděpodobné"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p2_q3_sug2
@@ -2013,7 +2000,7 @@ msgstr "Konečný žebříček"
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_food_preferences_q4_sug2
 msgid "Fish"
-msgstr ""
+msgstr "Ryba"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__message_follower_ids
@@ -2036,13 +2023,13 @@ msgstr "Ikona v rámci awesome font, např. fa-tasks"
 #. module: survey
 #: model:survey.survey,title:survey.survey_demo_food_preferences
 msgid "Food Preferences"
-msgstr ""
+msgstr "Potravinové preference"
 
 #. module: survey
 #. odoo-python
 #: code:addons/survey/models/survey_question.py:0
 msgid "For this question, you can only select one answer."
-msgstr ""
+msgstr "U této otázky můžete vybrat pouze jednu odpověď."
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_user_input_line__answer_type__text_box
@@ -2072,7 +2059,7 @@ msgstr "Ovoce a zelenina"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
 msgid "Functional Training"
-msgstr ""
+msgstr "Funkční školení"
 
 #. module: survey
 #: model:ir.model,name:survey.model_gamification_badge
@@ -2092,7 +2079,7 @@ msgstr "Získejte zpětnou vazbu od svých zaměstnanců a zákazníků"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__survey_session_speed_rating_time_limit
 msgid "General Time limit (seconds)"
-msgstr ""
+msgstr "Obecný časový limit (v sekundách)"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p2
@@ -2175,7 +2162,7 @@ msgstr "Má zprávu"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__has_image_only_suggested_answer
 msgid "Has image only suggested answer"
-msgstr ""
+msgstr "Jako navrhovaná odpověď je uveden pouze obrázek"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.vendor_certification_page_1_question_3_choice_2
@@ -2212,7 +2199,7 @@ msgstr "Historie"
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p1_q3
 msgid "How frequently do you buy products online?"
-msgstr ""
+msgstr "Jak často nakupujete produkty online?"
 
 #. module: survey
 #. odoo-python
@@ -2259,7 +2246,7 @@ msgstr "Kolik objednávek jste provedli za posledních 6 měsíců?"
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p1_q4
 msgid "How many times did you order products on our website?"
-msgstr ""
+msgstr "Kolikrát jste si objednali produkty na naší webové stránce?"
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_1_question_4
@@ -2269,7 +2256,7 @@ msgstr "Kolik verzí rohového stolu máme?"
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p3_q3
 msgid "How many years did the 100 years war last?"
-msgstr ""
+msgstr "Kolik let trvala stoletá válka?"
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_2_question_1
@@ -2317,7 +2304,7 @@ msgstr "Nemám tušení, jsem pes!"
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p5_q3_sug3
 msgid "I've been noticing gravity since I was very young!"
-msgstr ""
+msgstr "Gravitaci vnímám už od malička!"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__id
@@ -2518,7 +2505,7 @@ msgstr "Vložený text musí být e-mail"
 #. odoo-javascript
 #: code:addons/survey/static/src/views/widgets/integer_update_flag_field/integer_update_flag_fields.js:0
 msgid "Integer updating comparison flag"
-msgstr ""
+msgstr "Příznak porovnání aktualizace celých čísel"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__invite_token
@@ -2560,7 +2547,7 @@ msgstr "Je v relaci"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__is_placed_before_trigger
 msgid "Is misplaced?"
-msgstr ""
+msgstr "Je to na nesprávném místě?"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_search
@@ -2580,7 +2567,7 @@ msgstr ""
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_question__is_placed_before_trigger
 msgid "Is this question placed before any of its trigger questions?"
-msgstr ""
+msgstr "Je tato otázka umístěna před některou z jejích spouštěcích otázek?"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p2_q2_sug4
@@ -2590,7 +2577,7 @@ msgstr "Istanbul"
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_food_preferences_q1_sug3
 msgid "It depends"
-msgstr ""
+msgstr "Záleží na tom"
 
 #. module: survey
 #. odoo-python
@@ -2821,7 +2808,7 @@ msgstr "Živá relace"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__session_available
 msgid "Live Session available"
-msgstr ""
+msgstr "K dispozici je živá relace"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
@@ -2831,12 +2818,12 @@ msgstr "Živé relace"
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_survey__survey_type__live_session
 msgid "Live session"
-msgstr ""
+msgstr "Živá relace"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__session_available
 msgid "Live session available"
-msgstr ""
+msgstr "K dispozici je živá relace"
 
 #. module: survey
 #. odoo-javascript
@@ -2919,7 +2906,7 @@ msgstr "Maximální délka textu"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__scoring_max_obtainable
 msgid "Maximum obtainable score"
-msgstr ""
+msgstr "Maximální dosažitelné skóre"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__validation_max_float_value
@@ -2946,7 +2933,7 @@ msgstr "Zprávy"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Min/Max Limits"
-msgstr ""
+msgstr "Minimální a maximální limity"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
@@ -3092,7 +3079,7 @@ msgstr "Nové pozvání"
 #. module: survey
 #: model:mail.message.subtype,description:survey.mt_survey_survey_user_input_completed
 msgid "New participation completed."
-msgstr ""
+msgstr "Nová účast dokončena."
 
 #. module: survey
 #. odoo-javascript
@@ -3128,7 +3115,7 @@ msgstr "Typ další aktivity"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_in_progress
 msgid "Next Skipped"
-msgstr ""
+msgstr "Další přeskočit"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__nickname
@@ -3188,7 +3175,7 @@ msgstr "Nebyly nalezeny žádné vstupní řádky uživatele"
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p4_q3_sug2
 msgid "No, it's too small for the human eye."
-msgstr ""
+msgstr "Ne, je to pro lidské oko příliš malé."
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p4_q5_sug2
@@ -3203,7 +3190,7 @@ msgstr "Není to dobré, není to špatné"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Not likely at all"
-msgstr ""
+msgstr "To je vůbec nepravděpodobné"
 
 #. module: survey
 #. odoo-javascript
@@ -3395,6 +3382,9 @@ msgid ""
 "correct link and are allowed to\n"
 "                        participate or get in touch with its organizer."
 msgstr ""
+"Jejda! Nemohli jsme vám umožnit otevřít tento dotazník. Ujistěte se, že "
+"používáte správný odkaz a že máte oprávnění k\n"
+"                        účasti, nebo se obraťte na organizátora dotazníku."
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
@@ -3410,7 +3400,7 @@ msgstr "Otevřít sekci"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Optional previous answers required"
-msgstr ""
+msgstr "Volitelné předchozí odpovědi jsou povinné"
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_invite__lang
@@ -3422,8 +3412,8 @@ msgid ""
 msgstr ""
 "Volitelný překladový jazyk (kód ISO), který lze vybrat při odesílání e-"
 "mailu. Pokud není nastavena, bude použita anglická verze. To by měl být "
-"obvykle zástupný výraz, který poskytuje vhodný jazyk, např. "
-"{{object.partner_id.lang}}."
+"obvykle zástupný výraz, který poskytuje vhodný jazyk, např. {"
+"{object.partner_id.lang}}."
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
@@ -3506,7 +3496,7 @@ msgstr "Účastníci"
 #. odoo-python
 #: code:addons/survey/wizard/survey_invite.py:0
 msgid "Participate to %(survey_name)s"
-msgstr ""
+msgstr "Zúčastnit se %(survey_name)s"
 
 #. module: survey
 #: model:mail.template,subject:survey.mail_template_user_input_invite
@@ -3517,12 +3507,12 @@ msgstr "Zúčastněte se průzkumu {{ object.survey_id.display_name }}"
 #: model:mail.message.subtype,name:survey.mt_survey_survey_user_input_completed
 #: model:mail.message.subtype,name:survey.mt_survey_user_input_completed
 msgid "Participation completed"
-msgstr ""
+msgstr "Účast dokončena"
 
 #. module: survey
 #: model:mail.message.subtype,description:survey.mt_survey_user_input_completed
 msgid "Participation completed."
-msgstr ""
+msgstr "Účast dokončena."
 
 #. module: survey
 #: model:ir.actions.act_window,name:survey.action_survey_user_input
@@ -3604,6 +3594,8 @@ msgid ""
 "Picking any of these answers will trigger this question.\n"
 "Leave the field empty if the question should always be displayed."
 msgstr ""
+"Výběrem kterékoli z těchto odpovědí se spustí tato otázka.\n"
+"Nechte pole prázdné, pokud se má otázka zobrazovat vždy."
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p4_q1_sug1
@@ -3634,7 +3626,7 @@ msgstr "Zadejte prosím alespoň jednoho platného příjemce."
 #. module: survey
 #: model_terms:survey.survey,description:survey.survey_demo_food_preferences
 msgid "Please give us your preferences for this event's dinner!"
-msgstr ""
+msgstr "Sdělte nám prosím své preference ohledně večeře v rámci této události!"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_void_content
@@ -3690,12 +3682,12 @@ msgstr "Tisk"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_print
 msgid "Print Results"
-msgstr ""
+msgstr "Vytisknout výsledky"
 
 #. module: survey
 #: model:ir.actions.server,name:survey.action_survey_print
 msgid "Print Survey"
-msgstr ""
+msgstr "Vytisknout dotazník"
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_1
@@ -3778,7 +3770,7 @@ msgstr "Otázky a odpovědi"
 msgid ""
 "Questions containing the triggering answer(s) to display the current "
 "question."
-msgstr ""
+msgstr "Otázky obsahující spouštěcí odpovědi pro zobrazení aktuální otázky."
 
 #. module: survey
 #: model:survey.survey,title:survey.survey_demo_quiz
@@ -3799,7 +3791,7 @@ msgstr "Quizz prošel"
 #. odoo-javascript
 #: code:addons/survey/static/src/views/widgets/radio_selection_with_filter/radio_selection_field_with_filter.js:0
 msgid "Radio for Selection With Filter"
-msgstr ""
+msgstr "Rádio pro výběr s filtrem"
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_survey__questions_selection__random
@@ -3903,7 +3895,7 @@ msgstr "Zodpovědný uživatel"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__restrict_user_ids
 msgid "Restricted to"
-msgstr ""
+msgstr "Omezeno na"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_button_retake
@@ -3913,7 +3905,7 @@ msgstr "Opakovat"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_done
 msgid "Review your answers"
-msgstr ""
+msgstr "Zkontrolujte své odpovědi"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__survey_session_speed_rating
@@ -3981,42 +3973,42 @@ msgstr "Měřítko"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__scale_max_label
 msgid "Scale Maximum Label"
-msgstr ""
+msgstr "Maximální označení stupnice"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__scale_max
 msgid "Scale Maximum Value"
-msgstr ""
+msgstr "Maximální hodnota stupnice"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Scale Maximum Value (0 to 10)"
-msgstr ""
+msgstr "Maximální hodnota stupnice (0 až 10)"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__scale_mid_label
 msgid "Scale Middle Label"
-msgstr ""
+msgstr "Štítek uprostřed stupnice"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__scale_min_label
 msgid "Scale Minimum Label"
-msgstr ""
+msgstr "Škála Minimální stupnice"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__scale_min
 msgid "Scale Minimum Value"
-msgstr ""
+msgstr "Minimální hodnota stupnice"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Scale Minimum Value (0 to 10)"
-msgstr ""
+msgstr "Minimální hodnota stupnice (0 až 10)"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_user_input_line__value_scale
 msgid "Scale value"
-msgstr ""
+msgstr "Hodnota stupnice"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p4
@@ -4074,7 +4066,7 @@ msgstr "Bodování odpovědí až na konci"
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_survey__scoring_type__scoring_without_answers
 msgid "Scoring without answers"
-msgstr ""
+msgstr "Hodnocení bez odpovědí"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_answer_view_search
@@ -4116,7 +4108,7 @@ msgstr "Zobrazit výsledek"
 #. module: survey
 #: model_terms:survey.survey,description_done:survey.survey_demo_food_preferences
 msgid "See you soon!"
-msgstr ""
+msgstr "Na shledanou!"
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_1_question_3
@@ -4221,25 +4213,25 @@ msgstr "Zobrazit pole komentáře"
 #. odoo-javascript
 #: code:addons/survey/static/src/js/survey_session_manage.js:0
 msgid "Show Correct Answer(s)"
-msgstr ""
+msgstr "Zobrazit správnou odpověď / správné odpovědi"
 
 #. module: survey
 #. odoo-javascript
 #: code:addons/survey/static/src/js/survey_session_manage.js:0
 msgid "Show Final Leaderboard"
-msgstr ""
+msgstr "Zobrazit konečný žebříček"
 
 #. module: survey
 #. odoo-javascript
 #: code:addons/survey/static/src/js/survey_session_manage.js:0
 msgid "Show Leaderboard"
-msgstr ""
+msgstr "Zobrazit žebříček"
 
 #. module: survey
 #. odoo-javascript
 #: code:addons/survey/static/src/js/survey_session_manage.js:0
 msgid "Show Results"
-msgstr ""
+msgstr "Zobrazit výsledky"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__session_show_leaderboard
@@ -4249,8 +4241,7 @@ msgstr "Zobrazit žebříček relací"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_search
 msgid "Show all records which has next action date is before today"
-msgstr ""
-"Zobrazit všechny záznamy, které mají datum příští aktivity před dneškem"
+msgstr "Zobrazit všechny záznamy, které mají datum příští aktivity před dneškem"
 
 #. module: survey
 #. odoo-python
@@ -4301,7 +4292,7 @@ msgstr "Několik otázek o naší společnosti. Opravdu nás znáte?"
 #. odoo-python
 #: code:addons/survey/models/survey_user_input.py:0
 msgid "Someone just participated in \"%(survey_title)s\"."
-msgstr ""
+msgstr "Někdo se právě zúčastnil „%(survey_title)s."
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_header
@@ -4394,7 +4385,7 @@ msgstr ""
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_food_preferences_q4_sug1
 msgid "Steak with french fries"
-msgstr ""
+msgstr "Steak s hranolky"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p3_q6_row2
@@ -4429,7 +4420,7 @@ msgstr "Poměr úspěchu (%)"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_inner
 msgid "Success rate"
-msgstr ""
+msgstr "Poměr úspěšnosti"
 
 #. module: survey
 #: model:ir.actions.act_window,name:survey.survey_question_answer_action
@@ -4448,6 +4439,8 @@ msgid ""
 "Suggested answer value must not be empty (a text and/or an image must be "
 "provided)."
 msgstr ""
+"Hodnota navrhované odpovědi nesmí být prázdná (musí být zadán text a/nebo "
+"obrázek)."
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question_answer__value
@@ -4486,7 +4479,7 @@ msgstr "Dotazník"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_access_error
 msgid "Survey Access Error"
-msgstr ""
+msgstr "Chyba při přístupu k dotazníku"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_response_line_view_tree
@@ -4496,7 +4489,7 @@ msgstr "Řádek odpovědí na průzkum"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__survey_first_submitted
 msgid "Survey First Submitted"
-msgstr ""
+msgstr "První odeslání dotazníku"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_gamification_badge__survey_ids
@@ -4517,7 +4510,7 @@ msgstr "Odpověď dotazníku"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
 msgid "Survey Link"
-msgstr ""
+msgstr "Odkaz na dotazník"
 
 #. module: survey
 #. odoo-python
@@ -4550,7 +4543,7 @@ msgstr "Název průzkumu"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__survey_type
 msgid "Survey Type"
-msgstr ""
+msgstr "Typ dotazníku"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__survey_start_url
@@ -4657,7 +4650,7 @@ msgstr "Děkujeme za účast, doufáme, že jste si to užili!"
 #. odoo-python
 #: code:addons/survey/models/survey_survey_template.py:0
 msgid "Thank you very much for your feedback. We highly value your opinion!"
-msgstr ""
+msgstr "Moc děkujeme za vaši zpětnou vazbu. Velmi si vážíme vašeho názoru!"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_done
@@ -4679,6 +4672,9 @@ msgid ""
 "responsible still has access to it: \n"
 "%(survey_names)s\n"
 msgstr ""
+"Přístup k následujícím dotazníkům je omezen. Ujistěte se, že osoba "
+"zodpovědná za ně k nim stále má přístup: \n"
+"%(survey_names)s\n"
 
 #. module: survey
 #. odoo-python
@@ -4778,7 +4774,7 @@ msgstr "Otázka je časově omezená"
 #: model:ir.model.constraint,message:survey.constraint_survey_question_scale
 msgid ""
 "The scale must be a growing non-empty range between 0 and 10 (inclusive)"
-msgstr ""
+msgstr "Stupnice musí být vzestupný neprázdný rozsah mezi 0 a 10 (včetně)"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_session_code
@@ -4835,8 +4831,7 @@ msgstr "Během ověřování průzkumu došlo k chybě."
 #. odoo-python
 #: code:addons/survey/models/survey_survey_template.py:0
 msgid "They are a default answer, used if the participant skips the question"
-msgstr ""
-"Jsou výchozí odpovědí, která se používá, pokud účastník otázku přeskočí"
+msgstr "Jsou výchozí odpovědí, která se používá, pokud účastník otázku přeskočí"
 
 #. module: survey
 #. odoo-python
@@ -4849,7 +4844,7 @@ msgstr "Jsou to technické parametry, které zaručují odezvu stránky"
 #. odoo-python
 #: code:addons/survey/models/survey_user_input.py:0
 msgid "This answer cannot be overwritten."
-msgstr ""
+msgstr "Tuto odpověď nelze přepsat."
 
 #. module: survey
 #. odoo-python
@@ -4876,7 +4871,7 @@ msgstr ""
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_button_form_view
 msgid "This is a Test Survey Entry."
-msgstr ""
+msgstr "Toto je zkušební záznam v dotazníku."
 
 #. module: survey
 #. odoo-javascript
@@ -4956,7 +4951,7 @@ msgstr ""
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_closed_expired
 msgid "This survey is now closed. Thank you for your interest!"
-msgstr ""
+msgstr "Tento dotazník je nyní uzavřen. Děkujeme za váš zájem!"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_auth_required
@@ -4971,12 +4966,12 @@ msgstr "Čas a bodování"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Time Limit"
-msgstr ""
+msgstr "Časový limit"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Time Limit (seconds)"
-msgstr ""
+msgstr "Časový limit (sekundy)"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__time_limit
@@ -5002,7 +4997,7 @@ msgstr "Časový limit pro tuto průzkum:"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Time limits are only available for Live Sessions."
-msgstr ""
+msgstr "Časové limity jsou k dispozici pouze pro živé relace."
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__title
@@ -5036,7 +5031,7 @@ msgstr "Tokyo"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
 msgid "Top User Responses"
-msgstr ""
+msgstr "Nejlepší odpovědi uživatelů"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__scoring_total
@@ -5061,12 +5056,12 @@ msgstr "Stromy"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__triggering_answer_ids
 msgid "Triggering Answers"
-msgstr ""
+msgstr "Triggering answers"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__triggering_question_ids
 msgid "Triggering Questions"
-msgstr ""
+msgstr "Provokativní otázky"
 
 #. module: survey
 #. odoo-javascript
@@ -5076,6 +5071,9 @@ msgid ""
 "positioned after this question:\n"
 "\"%s\"."
 msgstr ""
+"Spouštěče založené na následujících otázkách nebudou fungovat, protože jsou "
+"umístěny za touto otázkou:\n"
+"„%s “."
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_search
@@ -5248,7 +5246,7 @@ msgstr "Chyba ověření"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question_answer__value_label
 msgid "Value Label"
-msgstr ""
+msgstr "Popisek hodnoty"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p3_q1_sug2
@@ -5258,12 +5256,12 @@ msgstr "Zelenina"
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_food_preferences_q3_sug2
 msgid "Vegetarian burger"
-msgstr ""
+msgstr "Vegetariánský burger"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_food_preferences_q3_sug1
 msgid "Vegetarian pizza"
-msgstr ""
+msgstr "Vegetariánská pizza"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.vendor_certification_page_2_question_3_choice_1
@@ -5278,7 +5276,7 @@ msgstr "Vietnam"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.user_input_session_open
 msgid "Waiting for attendees..."
-msgstr ""
+msgstr "Čekáme na účastníky..."
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_in_progress
@@ -5294,8 +5292,7 @@ msgstr ""
 msgid ""
 "We like to say that the apple doesn't fall far from the tree, so here are "
 "trees."
-msgstr ""
-"Rádi říkáme, že jablko nepadá daleko od stromu, takže tady jsou stromy."
+msgstr "Rádi říkáme, že jablko nepadá daleko od stromu, takže tady jsou stromy."
 
 #. module: survey
 #: model_terms:survey.question,description:survey.survey_demo_quiz_p5
@@ -5344,7 +5341,7 @@ msgstr ""
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p2_q2
 msgid "What do you think about our new eCommerce?"
-msgstr ""
+msgstr "Co si myslíte o našem novém E-shopu?"
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_2_question_3
@@ -5383,7 +5380,7 @@ msgstr "Jaký je nejlepší způsob, jak upoutat pozornost publika?"
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p2_q2
 msgid "What is the biggest city in the world?"
-msgstr ""
+msgstr "Jaké je největší město na světě?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p1_q1
@@ -5398,12 +5395,12 @@ msgstr ""
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p4_q2
 msgid "What is, approximately, the critical mass of plutonium-239?"
-msgstr ""
+msgstr "Jaká je přibližně kritická hmotnost plutonia-239?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p3_q1
 msgid "When did Genghis Khan die?"
-msgstr ""
+msgstr "Kdy zemřel Čingischán?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p2_q2
@@ -5423,7 +5420,7 @@ msgstr ""
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p1_q2
 msgid "When is your date of birth?"
-msgstr ""
+msgstr "Kdy máte narozeniny?"
 
 #. module: survey
 #. odoo-javascript
@@ -5439,7 +5436,7 @@ msgstr ""
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p1_q1
 msgid "Where do you live?"
-msgstr ""
+msgstr "Kde bydlíte?"
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__session_show_leaderboard
@@ -5450,7 +5447,7 @@ msgstr "Zda chceme účastníkům ukázat tento žebříček, nebo ne."
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p5_q1
 msgid "Which Musician is not in the 27th Club?"
-msgstr ""
+msgstr "Který hudebník nepatří do „Klubu 27“?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p3_q1
@@ -5460,12 +5457,12 @@ msgstr "Do které kategorie patří rajče"
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p2_q3
 msgid "Which is the highest volcano in Europe?"
-msgstr ""
+msgstr "Která sopka je nejvyšší v Evropě?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p2_q1
 msgid "Which of the following words would you use to describe our products?"
-msgstr ""
+msgstr "Která z následujících slov byste použili k popisu našich produktů?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p3_q2
@@ -5475,7 +5472,7 @@ msgstr "Kterou z následujících možností byste použili k opylování"
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p5_q2
 msgid "Which painting/drawing was not made by Pablo Picasso?"
-msgstr ""
+msgstr "Který obraz/kresba není dílem Pabla Picassa?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p5_q3
@@ -5490,7 +5487,7 @@ msgstr " Kdo jste?"
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p3_q2
 msgid "Who is the architect of the Great Pyramid of Giza?"
-msgstr ""
+msgstr "Kdo je architektem Velké pyramidy v Gíze?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p4_q1
@@ -5498,6 +5495,8 @@ msgid ""
 "Who received a Nobel prize in Physics for the discovery of neutrino "
 "oscillations, which shows that neutrinos have mass?"
 msgstr ""
+"Kdo obdržel Nobelovu cenu za fyziku za objev oscilací neutrin, který "
+"dokazuje, že neutrina mají hmotnost?"
 
 #. module: survey
 #. odoo-python
@@ -5526,7 +5525,7 @@ msgstr "Zima"
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_food_preferences_q2
 msgid "Would you prefer a veggie meal if possible?"
-msgstr ""
+msgstr "Dali byste si raději vegetariánské jídlo, pokud je to možné?"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
@@ -5604,8 +5603,8 @@ msgid ""
 "You cannot send an invitation for a \"One page per section\" survey if the "
 "survey has no sections."
 msgstr ""
-"Pokud průzkum neobsahuje žádné sekce, nemůžete odeslat pozvánku k průzkumu "
-"„Jedna stránka na sekci“."
+"Pokud průzkum neobsahuje žádné sekce, nemůžete odeslat pozvánku k průzkumu „"
+"Jedna stránka na sekci“."
 
 #. module: survey
 #. odoo-python
@@ -5676,7 +5675,7 @@ msgstr "Přiblížený obrázek"
 #. odoo-python
 #: code:addons/survey/models/survey_question.py:0
 msgid "[Question Title]"
-msgstr ""
+msgstr "[Název otázky]"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
@@ -5704,6 +5703,7 @@ msgstr "zavřít"
 msgid ""
 "e.g.  'Rick Sanchez' <rick_sanchez@example.com>, hictor_vugo@example.com"
 msgstr ""
+"např.  „Rick Sanchez“ <rick_sanchez@example.com>, hictor_vugo@example.com"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
@@ -5820,3 +5820,35 @@ msgid ""
 "⚠️ This question is positioned before some or all of its triggers and could "
 "be skipped."
 msgstr ""
+"⚠️ Tato otázka je umístěna před některými nebo všemi svými spouštěči a může "
+"být přeskočena."
+
+#~ msgid "$100"
+#~ msgstr "100€"
+
+#~ msgid "$20"
+#~ msgstr "$20"
+
+#~ msgid "$200"
+#~ msgstr "200€"
+
+#~ msgid "$300"
+#~ msgstr "300€"
+
+#~ msgid "$50"
+#~ msgstr "50€"
+
+#~ msgid "$80"
+#~ msgstr "80€"
+
+#~ msgid "1055"
+#~ msgstr "1055"
+
+#~ msgid "1227"
+#~ msgstr "1227"
+
+#~ msgid "1324"
+#~ msgstr "1324"
+
+#~ msgid "2023-08-18"
+#~ msgstr "2023-08-18"

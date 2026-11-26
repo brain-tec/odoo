@@ -7,15 +7,16 @@
 # Manon Rondou, 2025
 # Wil Odoo, 2025
 # Erwin van der Ploeg <erwin@odooexperts.nl>, 2025
-# "Manon Rondou (ronm)" <ronm@odoo.com>, 2025.
+# "Manon Rondou (ronm)" <ronm@odoo.com>, 2025, 2026.
 # Bren Driesen <brdri@odoo.com>, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2026.
+# Claes-Johan Dahlin <user-89@users.noreply.translate.odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-29 18:37+0000\n"
-"PO-Revision-Date: 2026-02-14 09:13+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-28 03:33+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Dutch <https://translate.odoo.com/projects/odoo-18/sale/nl/>\n"
 "Language: nl\n"
@@ -23,7 +24,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_payment_provider_onboarding_wizard___data_fetched
@@ -75,21 +76,6 @@ msgid ""
 msgstr ""
 "(object.state in ('draft', 'sent') and 'Offerte - %s' % (object.name)) or "
 "'Order - %s' % (object.name)"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
-msgid "2023-12-31"
-msgstr "2023-12-31"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
-msgid "27.00"
-msgstr "27.00"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
-msgid "31.05"
-msgstr "31.05"
 
 #. module: sale
 #. odoo-javascript
@@ -1151,15 +1137,6 @@ msgstr ""
 "is_product_archived\"/>"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-building-o p-2\" title=\"Values set here are "
-"company-specific.\" groups=\"base.group_multi_company\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-building-o p-2\" title=\"De hier bepaalde waarden "
-"zijn bedrijfsspecifiek.\" groups=\"base.group_multi_company\"/>"
-
-#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.crm_team_salesteams_view_form
 msgid "<span class=\"flex-grow-1\">/ Month</span>"
 msgstr "<span class=\"flex-grow-1\">/ Maand</span>"
@@ -1397,7 +1374,7 @@ msgstr "Offerte accepteren en betalen"
 #. odoo-python
 #: code:addons/sale/models/sale_order.py:0
 msgid "Accept & Sign Quotation"
-msgstr "Bekijk offerte"
+msgstr "Offerte aanvaarden & ondertekenen"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
@@ -1719,7 +1696,7 @@ msgstr ""
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__product_template__expense_policy__cost
 msgid "At cost"
-msgstr "Voor kostprijs"
+msgstr "Tegen kostprijs"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__message_attachment_count
@@ -2021,7 +1998,7 @@ msgstr "Bedrijf"
 #. module: sale
 #: model:ir.model,name:sale.model_base_document_layout
 msgid "Company Document Layout"
-msgstr "Bedrijf document lay-out"
+msgstr "Lay-out van bedrijfsdocumenten"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -4043,7 +4020,7 @@ msgstr "Kredietwaarschuwing partner"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
 msgid "Pay Now"
-msgstr "Betaal nu"
+msgstr "Nu betalen"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__res_company__sale_onboarding_payment_method__other
@@ -4371,7 +4348,7 @@ msgstr "Aantal te factureren vanuit verkooporders"
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 #: model_terms:ir.ui.view,arch_db:sale.sale_report_view_tree
 msgid "Quantity"
-msgstr "Aantal"
+msgstr "Hoeveelheid"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__qty_to_invoice
@@ -4492,7 +4469,7 @@ msgstr "Beoordelingen"
 #: model:ir.model.fields,field_description:sale.field_product_product__expense_policy
 #: model:ir.model.fields,field_description:sale.field_product_template__expense_policy
 msgid "Re-Invoice Costs"
-msgstr "Opnieuw factureren"
+msgstr "Kosten doorfactureren"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_product_product__visible_expense_policy
@@ -6018,11 +5995,16 @@ msgstr ""
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__validity_date
 msgid ""
-"Validity of the order, after that you will not able to sign & pay the "
-"quotation."
+"Validity of the quotation. After this date, you will no longer be able to "
+"sign and pay it."
 msgstr ""
-"Geldigheid van de order, hierna kun je de offerte niet meer ondertekenen & "
-"betalen."
+"Geldigheid van de offerte. Na deze datum kun je deze niet meer ondertekenen "
+"en betalen."
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
+msgid "Values set here are company-specific."
+msgstr "De hier ingestelde waarden zijn bedrijfsspecifiek."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -6152,17 +6134,6 @@ msgstr "Je kunt de prijslijst van een bevestigde order niet wijzigen!"
 
 #. module: sale
 #. odoo-python
-#: code:addons/sale/models/product_product.py:0
-#: code:addons/sale/models/product_template.py:0
-msgid ""
-"You cannot change the product's type because it is already used in sales "
-"orders."
-msgstr ""
-"Je kunt het type product niet meer wijzigen omdat het al in verkooporders "
-"wordt gebruikt."
-
-#. module: sale
-#. odoo-python
 #: code:addons/sale/models/sale_order_line.py:0
 msgid ""
 "You cannot change the type of a sale order line. Instead you should delete "
@@ -6195,6 +6166,19 @@ msgid ""
 msgstr ""
 "Je moet een product definiëren voor alles dat je verkoopt of inkoopt,\n"
 "of het nu een fysiek product, verbruiksartikel of een dienst is."
+
+#. module: sale
+#. odoo-python
+#: code:addons/sale/models/product_product.py:0
+#: code:addons/sale/models/product_template.py:0
+msgid ""
+"You should not change the product type because this product is already used "
+"in sales orders. Changing it may affect how the related order lines are "
+"delivered."
+msgstr ""
+"Je moet het producttype niet wijzigen omdat dit product al wordt gebruikt in "
+"verkooporders. Het wijzigen ervan kan van invloed zijn op hoe de "
+"bijbehorende orderregels worden geleverd."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.portal_my_home_sale
@@ -6322,6 +6306,12 @@ msgid "units"
 msgstr "eenheden"
 
 #. module: sale
+#. odoo-javascript
+#: code:addons/sale/static/src/xml/sale_product_field.xml:0
+msgid "x"
+msgstr "x"
+
+#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
 msgid "you confirm acceptance on the behalf of"
 msgstr "bevestig je de goedkeuring namens"
@@ -6357,3 +6347,33 @@ msgid ""
 msgstr ""
 "{{ object.company_id.name }} {{ object.type_name }} Geannuleerd (Ref "
 "{{ object.name or 'nvt' }})"
+
+#~ msgid ""
+#~ "Validity of the order, after that you will not able to sign & pay the "
+#~ "quotation."
+#~ msgstr ""
+#~ "Geldigheid van de order, hierna kun je de offerte niet meer ondertekenen "
+#~ "& betalen."
+
+#~ msgid ""
+#~ "You cannot change the product's type because it is already used in sales "
+#~ "orders."
+#~ msgstr ""
+#~ "Je kunt het type product niet meer wijzigen omdat het al in verkooporders "
+#~ "wordt gebruikt."
+
+#~ msgid "2023-12-31"
+#~ msgstr "2023-12-31"
+
+#~ msgid "27.00"
+#~ msgstr "27.00"
+
+#~ msgid "31.05"
+#~ msgstr "31.05"
+
+#~ msgid ""
+#~ "<span class=\"fa fa-lg fa-building-o p-2\" title=\"Values set here are "
+#~ "company-specific.\" groups=\"base.group_multi_company\"/>"
+#~ msgstr ""
+#~ "<span class=\"fa fa-lg fa-building-o p-2\" title=\"De hier bepaalde "
+#~ "waarden zijn bedrijfsspecifiek.\" groups=\"base.group_multi_company\"/>"

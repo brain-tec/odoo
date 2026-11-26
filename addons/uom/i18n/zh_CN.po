@@ -6,13 +6,14 @@
 # Wil Odoo, 2024
 # Odoo哥 <vnsoft.he@gmail.com>, 2024
 # Weblate <noreply-mt-weblate@weblate.org>, 2026.
+# "Chloe Wang (chwa)" <chwa@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-15 18:39+0000\n"
-"PO-Revision-Date: 2026-01-17 12:50+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-04-10 18:39+0000\n"
+"PO-Revision-Date: 2026-10-20 13:09+0000\n"
+"Last-Translator: \"Chloe Wang (chwa)\" <chwa@odoo.com>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
 "projects/odoo-18/uom/zh_Hans/>\n"
 "Language: zh_CN\n"
@@ -20,7 +21,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: uom
 #: model_terms:ir.ui.view,arch_db:uom.product_uom_form_view
@@ -169,7 +170,12 @@ msgstr "ID"
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_kwh
 msgid "KWH"
-msgstr ""
+msgstr "千瓦时"
+
+#. module: uom
+#: model:uom.uom,name:uom.product_uom_litre
+msgid "L"
+msgstr "升"
 
 #. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_category__write_uid
@@ -276,8 +282,7 @@ msgstr "表面"
 msgid ""
 "The computed quantity will be a multiple of this value. Use 1.0 for a Unit "
 "of Measure that cannot be further split, such as a piece."
-msgstr ""
-"计算的数量将是这个值的倍数。  不能进一步分割的单位，比如 1 片，使用1.0 。"
+msgstr "计算的数量将是这个值的倍数。  不能进一步分割的单位，比如 1 片，使用1.0 。"
 
 #. module: uom
 #: model:ir.model.constraint,message:uom.constraint_uom_uom_factor_gt_zero
@@ -464,6 +469,11 @@ msgid "ft³"
 msgstr "ft³"
 
 #. module: uom
+#: model:uom.uom,name:uom.product_uom_gram
+msgid "g"
+msgstr "克"
+
+#. module: uom
 #: model:uom.uom,name:uom.product_uom_gal
 msgid "gal (US)"
 msgstr "gal (US)"
@@ -494,6 +504,11 @@ msgid "lb"
 msgstr "lb"
 
 #. module: uom
+#: model:uom.uom,name:uom.product_uom_meter
+msgid "m"
+msgstr "米"
+
+#. module: uom
 #: model:uom.uom,name:uom.product_uom_mile
 msgid "mi"
 msgstr "英里"
@@ -522,6 +537,11 @@ msgstr "oz"
 #: model:uom.uom,name:uom.product_uom_qt
 msgid "qt (US)"
 msgstr "qt (US)"
+
+#. module: uom
+#: model:uom.uom,name:uom.product_uom_ton
+msgid "t"
+msgstr ""
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_yard

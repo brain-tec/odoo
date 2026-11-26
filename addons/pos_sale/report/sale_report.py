@@ -57,7 +57,7 @@ class SaleReport(models.Model):
             count(*) AS nbr,
             pos.name AS name,
             pos.date_order AS date,
-            (CASE WHEN pos.state = 'done' THEN 'sale' ELSE pos.state END) AS state,
+            pos.state AS state,
             NULL as invoice_status,
             pos.partner_id AS partner_id,
             pos.user_id AS user_id,
@@ -167,3 +167,11 @@ class SaleReport(models.Model):
             GROUP BY {self._group_by_pos()}
             )
         """
+
+    def _get_order_reference(self):
+        self.ensure_one()
+        if self.id < 0:
+            line = self.env['pos.order.line'].browse(-self.id)
+            line.fetch(['order_id'])
+            return line.order_id
+        return super()._get_order_reference()

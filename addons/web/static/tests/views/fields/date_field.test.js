@@ -1,6 +1,17 @@
-import { expect, test } from "@odoo/hoot";
-import { click, edit, press, queryAllTexts, queryOne, scroll } from "@odoo/hoot-dom";
-import { animationFrame, mockDate, mockTimeZone } from "@odoo/hoot-mock";
+import {
+    animationFrame,
+    click,
+    edit,
+    expect,
+    mockDate,
+    mockTimeZone,
+    press,
+    queryAllTexts,
+    queryOne,
+    scroll,
+    test,
+    waitFor,
+} from "@odoo/hoot";
 import {
     assertDateTimePicker,
     getPickerCell,
@@ -95,11 +106,11 @@ test("open datepicker on Control+Enter", async () => {
         date: [
             {
                 cells: [
-                    [0, 0, 0, 1, 2, 3, 4],
+                    [29, 30, 31, 1, 2, 3, 4],
                     [5, 6, 7, 8, [9], 10, 11],
                     [12, 13, 14, 15, 16, 17, 18],
                     [19, 20, 21, 22, 23, 24, 25],
-                    [26, 27, 28, 29, 30, 31, 0],
+                    [26, 27, 28, 29, 30, 31, 1],
                 ],
                 daysOfWeek: ["#", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
                 weekNumbers: [1, 2, 3, 4, 5],
@@ -336,7 +347,7 @@ test("multi edition of date field in list view: clear date in input", async () =
     expect(".o_field_date input").toHaveCount(1);
     await fieldInput("date").clear();
 
-    expect(".modal").toHaveCount(1);
+    expect(await waitFor(".modal")).toHaveCount(1);
     await contains(".modal .modal-footer .btn-primary").click();
 
     expect(".o_data_row:first-child .o_data_cell").toHaveText("");

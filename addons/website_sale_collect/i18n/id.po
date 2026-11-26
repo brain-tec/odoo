@@ -1,25 +1,29 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_sale_collect
+# * website_sale_collect
 #
 # Translators:
 # Tiffany Chang, 2024
 # Wil Odoo, 2024
 # Abe Manyo, 2025
 #
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
+# "Nurul Aini Akrima Sabila (nuaas)" <nuaas@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:38+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Abe Manyo, 2025\n"
-"Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
+"POT-Creation-Date: 2026-05-22 17:43+0000\n"
+"PO-Revision-Date: 2026-10-20 13:54+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-18/"
+"website_sale_collect/id/>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website_sale_collect
 #: model_terms:payment.provider,pending_msg:website_sale_collect.payment_provider_on_site
@@ -187,7 +191,7 @@ msgstr "Maaf, kami tidak dapat mengirimkan pesanan Anda."
 #: model:ir.model.fields,field_description:website_sale_collect.field_delivery_carrier__warehouse_ids
 #: model_terms:ir.ui.view,arch_db:website_sale_collect.delivery_carrier_form
 msgid "Stores"
-msgstr "Toko-Toko"
+msgstr "Toko"
 
 #. module: website_sale_collect
 #. odoo-python
@@ -201,6 +205,11 @@ msgstr "Metode pengiriman dan gudang harus memiliki perusahaan yang sama"
 msgid "The delivery method must have at least one warehouse to be published."
 msgstr ""
 "Metode pengiriman harus memiliki setidaknya satu gudang untuk dipublikasikan."
+
+#. module: website_sale_collect
+#: model:ir.model,name:website_sale_collect.model_stock_picking
+msgid "Transfer"
+msgstr "Transfer"
 
 #. module: website_sale_collect
 #: model:ir.model,name:website_sale_collect.model_stock_warehouse

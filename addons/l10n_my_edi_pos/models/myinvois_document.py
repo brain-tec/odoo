@@ -232,7 +232,12 @@ class MyInvoisDocument(models.Model):
         """ Make sure that the sequence date range follows the company's fiscal year """
         if reset == 'year_range':
             company = self.company_id
-            return date_utils.get_fiscal_year(self.myinvois_issuance_date, day=company.fiscalyear_last_day, month=int(company.fiscalyear_last_month))
+            date_start, date_end = date_utils.get_fiscal_year(
+                self.myinvois_issuance_date,
+                day=company.fiscalyear_last_day,
+                month=int(company.fiscalyear_last_month),
+            )
+            return (date_start, date_end) + (None, None)
         return super()._get_sequence_date_range(reset)
 
     @api.ondelete(at_uninstall=False)
@@ -889,6 +894,11 @@ class MyInvoisDocument(models.Model):
             'submission_too_large': self.env._('The submission is too large, try to send fewer invoices at once.'),
             'action_forbidden': self.env._('Permission to do this action has not been granted. Please ensure that Odoo has sufficient permissions on the MyInvois platform.'),
         }
+
+        if error['reference'] == 'document_too_large':
+            # Data contains the size of the document and the maximum size accepted by MyInvois, in KB.
+            return self.env._('This consolidated invoice is too large to be sent to MyInvois (%(size)s KB, the maximum is %(max_size)s KB). Please consolidate the orders over a shorter period.',
+                              size=error['data']['size'], max_size=error['data']['max_size'])
 
         if error.get('target'):
             # When validating a part of the invoice, they give random numerical codes with no explanation whatsoever.

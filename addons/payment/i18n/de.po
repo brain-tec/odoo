@@ -9,13 +9,14 @@
 # Larissa Manderfeld, 2025
 #
 # "Larissa Manderfeld (lman)" <lman@odoo.com>, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-15 18:39+0000\n"
-"PO-Revision-Date: 2026-01-24 09:11+0000\n"
-"Last-Translator: \"Larissa Manderfeld (lman)\" <lman@odoo.com>\n"
+"POT-Creation-Date: 2026-10-30 17:40+0000\n"
+"PO-Revision-Date: 2026-11-19 19:36+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: German <https://translate.odoo.com/projects/odoo-18/payment/"
 "de/>\n"
 "Language: de\n"
@@ -23,7 +24,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_provider_onboarding_wizard___data_fetched
@@ -2947,6 +2948,12 @@ msgstr ""
 
 #. module: payment
 #. odoo-python
+#: code:addons/payment/controllers/portal.py:0
+msgid "This payment provider is not available."
+msgstr "Dieser Zahlungsanbieter ist nicht verfügbar."
+
+#. module: payment
+#. odoo-python
 #: code:addons/payment/models/payment_transaction.py:0
 msgid ""
 "This transaction has been confirmed following the processing of its partial "
@@ -3127,6 +3134,11 @@ msgstr "Restbetrag stornieren"
 #: model_terms:ir.ui.view,arch_db:payment.payment_transaction_form
 msgid "Void Transaction"
 msgstr "Transaktion stornieren"
+
+#. module: payment
+#: model:payment.method,name:payment.payment_method_wero
+msgid "WERO"
+msgstr "WERO"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_wallets_india
@@ -3397,10 +3409,14 @@ msgid "Zalopay"
 msgstr "Zalopay"
 
 #. module: payment
-#: model:ir.model.fields,field_description:payment.field_payment_transaction__partner_zip
 #: model:payment.method,name:payment.payment_method_zip
 msgid "Zip"
 msgstr "PLZ"
+
+#. module: payment
+#: model:ir.model.fields,field_description:payment.field_payment_transaction__partner_zip
+msgid "Zip Code"
+msgstr "Postleitzahl"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_cofidis
@@ -3420,6 +3436,7 @@ msgstr "Express-Kassiervorgang nicht unterstützt"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_ideal
+#: model:payment.method,name:payment.payment_method_ideal_brand
 msgid "iDEAL"
 msgstr "iDEAL"
 

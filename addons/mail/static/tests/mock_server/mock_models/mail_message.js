@@ -14,10 +14,10 @@ import {
 export class MailMessage extends models.ServerModel {
     _name = "mail.message";
 
-    author_id = fields.Generic({ default: () => serverState.partnerId });
+    author_id = fields.Many2one({ default: () => serverState.partnerId });
     is_discussion = fields.Boolean({ string: "Discussion" });
     is_note = fields.Boolean({ string: "Note" });
-    pinned_at = fields.Generic({ default: false });
+    pinned_at = fields.Datetime({ default: false });
 
     /** @param {DomainListRepr} [domain] */
     mark_all_as_read(domain) {
@@ -67,14 +67,25 @@ export class MailMessage extends models.ServerModel {
     }
 
     /** @param {number[]} ids */
-    _to_store(ids, store, fields, for_current_user, add_followers) {
-        const kwargs = getKwArgs(arguments, "ids", "store", "for_current_user", "add_followers");
+    _to_store(ids, store, fields, format_reply, for_current_user, add_followers) {
+        const kwargs = getKwArgs(
+            arguments,
+            "ids",
+            "store",
+            "fields",
+            "format_reply",
+            "for_current_user",
+            "add_followers"
+        );
         ids = kwargs.ids;
         store = kwargs.store;
         fields = kwargs.fields;
+        format_reply = kwargs.format_reply ?? true;
         for_current_user = kwargs.for_current_user ?? false;
         add_followers = kwargs.add_followers ?? false;
 
+        /** @type {import("mock_models").DiscussChannel} */
+        const DiscussChannel = this.env["discuss.channel"];
         /** @type {import("mock_models").IrAttachment} */
         const IrAttachment = this.env["ir.attachment"];
         /** @type {import("mock_models").MailFollowers} */
@@ -181,6 +192,19 @@ export class MailMessage extends models.ServerModel {
                     makeKwArgs({ as_thread: true, only_id: true })
                 ),
             });
+            if (
+                format_reply &&
+                message.model === "discuss.channel" &&
+                thread?.channel_type === "channel" &&
+                !thread.parent_channel_id
+            ) {
+                data.linkedSubChannel = mailDataHelpers.Store.one(
+                    DiscussChannel.browse(
+                        DiscussChannel.search([["from_message_id", "=", message.id]])
+                    ),
+                    makeKwArgs({ as_thread: true, only_id: true })
+                );
+            }
             if (message.subtype_id) {
                 const [subtype] = MailMessageSubtype.browse(message.subtype_id);
                 data.subtype_description = subtype.description;

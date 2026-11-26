@@ -150,15 +150,20 @@ class PosOrder(models.Model):
                 coupon_per_report[report.id].append(coupon.id)
 
         # Adding loyalty history lines
-        loyalty_points = [
-            {
+        loyalty_points = []
+        for coupon_id, coupon_vals in coupon_data.items():
+            if 'points_earned' in coupon_vals and 'points_spent' in coupon_vals:
+                won = coupon_vals['points_earned']
+                spent = coupon_vals['points_spent']
+            else:
+                won = coupon_vals['points'] if coupon_vals['points'] > 0 else 0
+                spent = -coupon_vals['points'] if coupon_vals['points'] < 0 else 0
+            loyalty_points.append({
                 'order_id': self.id,
                 'card_id': coupon_id,
-                'spent': -coupon_vals['points'] if coupon_vals['points'] < 0 else 0,
-                'won': coupon_vals['points'] if coupon_vals['points'] > 0 else 0,
-            }
-            for coupon_id, coupon_vals in coupon_data.items()
-        ]
+                'spent': spent,
+                'won': won,
+            })
         coupon_updates = [
             {
                 'id': coupon.id,
@@ -193,6 +198,29 @@ class PosOrder(models.Model):
             )],
             'coupon_report': coupon_per_report,
         }
+
+    def get_ticket_screen_order_data(self):
+        data = super().get_ticket_screen_order_data()
+
+        histories = self.env['loyalty.history'].search([
+            ('order_model', '=', 'pos.order'),
+            ('card_id.source_pos_order_id', 'in', self.ids),
+            ('card_id.program_id.program_type', '=', 'next_order_coupons'),
+        ])
+        if not histories:
+            return data
+
+        coupon_data = defaultdict(list)
+        for history in histories:
+            coupon_data[history.card_id.source_pos_order_id.id].append({
+                'program_name': history.card_id.program_id.name,
+                'expiration_date': history.card_id.expiration_date,
+                'code': history.card_id.code,
+            })
+        for order in data["pos.order"]:
+            order["new_coupon_info"] = coupon_data.get(order["id"], [])
+
+        return data
 
     def _check_existing_loyalty_cards(self, coupon_data):
         coupon_key_to_modify = []

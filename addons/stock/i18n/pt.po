@@ -12,13 +12,13 @@
 # Peter Lawrence Romão <peterromao@yahoo.co.uk>, 2025
 # Daniel Reis, 2025
 # Wil Odoo, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2025-11-21 06:39+0000\n"
+"POT-Creation-Date: 2026-04-10 18:37+0000\n"
+"PO-Revision-Date: 2026-10-20 14:13+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Portuguese <https://translate.odoo.com/projects/odoo-18/stock/"
 "pt/>\n"
@@ -28,7 +28,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
 "1000000 == 0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: stock
 #. odoo-python
@@ -53,6 +53,14 @@ msgid ""
 msgstr ""
 "\n"
 "(%(serial_number)s) existe no local %(location)s"
+
+#. module: stock
+#. odoo-python
+#: code:addons/stock/models/stock_move.py:0
+msgid ""
+"\n"
+"Package: %s"
+msgstr ""
 
 #. module: stock
 #. odoo-python
@@ -431,46 +439,9 @@ msgid "1 Week"
 msgstr "1 Semana"
 
 #. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_package_barcode
-msgid "12.0"
-msgstr "12.0"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_generic_barcode
-msgid "1234567890"
-msgstr "1234567890"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_lot_label
-msgid "12345678901"
-msgstr "12345678901"
-
-#. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_picking_type__product_label_format__2x7xprice
 msgid "2 x 7 with price"
 msgstr "2 x 7 com preço"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_package_barcode
-msgid "2021-9-01"
-msgstr ""
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_package_barcode_small
-msgid "2023-01-01"
-msgstr "01-01-2023"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_picking
-msgid "2023-09-24"
-msgstr "24-09-2023"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_delivery_document
-#: model_terms:ir.ui.view,arch_db:stock.report_package_barcode
-#: model_terms:ir.ui.view,arch_db:stock.report_picking
-msgid "3.00"
-msgstr "3,00"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__lot_label_layout__print_format__4x12
@@ -497,11 +468,6 @@ msgstr "4 x 12 com preço"
 #: model:ir.model.fields.selection,name:stock.selection__stock_picking_type__product_label_format__4x7xprice
 msgid "4 x 7 with price"
 msgstr "4 x 7 com preço"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_package_barcode
-msgid "54326786758"
-msgstr "54326786758"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_warn_insufficient_qty_form_view
@@ -1660,8 +1626,7 @@ msgstr ""
 #: model:ir.model.fields,help:stock.field_stock_location__active
 msgid ""
 "By unchecking the active field, you may hide a location without deleting it."
-msgstr ""
-"Ao desmarcar o campo ativo, pode ocultar uma localização sem a excluir."
+msgstr "Ao desmarcar o campo ativo, pode ocultar uma localização sem a excluir."
 
 #. module: stock
 #. odoo-python
@@ -5867,8 +5832,8 @@ msgid ""
 "No rule has been found to replenish \"%(product)s\" in \"%(location)s\".\n"
 "Verify the routes configuration on the product."
 msgstr ""
-"Nenhuma regra foi encontrada para repor \"%(product)s\" em \"%"
-"(location)s\".\n"
+"Nenhuma regra foi encontrada para repor \"%(product)s\" em \"%(location)"
+"s\".\n"
 "Verifique a configuração das rotas no produto."
 
 #. module: stock
@@ -8470,8 +8435,8 @@ msgid ""
 "Serial number (%(serial_number)s) already exists in location(s): %"
 "(location_list)s. Please correct the serial number encoded."
 msgstr ""
-"O número de série (%(serial_number)s) já existe nos locais: %"
-"(location_list)s. Corrija o número de série codificado."
+"O número de série (%(serial_number)s) já existe nos locais: %(location_list)"
+"s. Corrija o número de série codificado."
 
 #. module: stock
 #. odoo-python
@@ -8483,8 +8448,8 @@ msgid ""
 "Please correct this to prevent inconsistent data."
 msgstr ""
 "O número de série (%(serial_number)s) não está localizado em %"
-"(source_location)s, mas está localizado no(s) local(is): %"
-"(other_locations)s.\n"
+"(source_location)s, mas está localizado no(s) local(is): %(other_locations)"
+"s.\n"
 "\n"
 "Corrija isso para evitar dados inconsistentes."
 
@@ -8498,8 +8463,8 @@ msgid ""
 "Source location for this move will be changed to %(recommended_location)s"
 msgstr ""
 "O número de série (%(serial_number)s) não está localizado em %"
-"(source_location)s, mas está localizado no(s) local(is): %"
-"(other_locations)s.\n"
+"(source_location)s, mas está localizado no(s) local(is): %(other_locations)"
+"s.\n"
 "\n"
 "O local de origem dessa movimentação será alterado para %"
 "(recommended_location)s"
@@ -9748,8 +9713,7 @@ msgstr ""
 #: code:addons/stock/models/stock_move_line.py:0
 msgid ""
 "This lot %(lot_name)s is incompatible with this product %(product_name)s"
-msgstr ""
-"Este lote %(lot_name)s é incompatível com este produto %(product_name)s"
+msgstr "Este lote %(lot_name)s é incompatível com este produto %(product_name)s"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_quant_tree_inventory_editable
@@ -10986,8 +10950,8 @@ msgid ""
 "When products arrive in <b>%(source_location)s</b>, <br> <b>%(operation)s</"
 "b> are created to send them to <b>%(destination)s</b>."
 msgstr ""
-"Quando os produtos chegam em <b>%(source_location)s</b>, <br> <b>%"
-"(operation)s</b> são criadas para enviá-los para <b>%(destination)s</b>."
+"Quando os produtos chegam em <b>%(source_location)s</b>, <br> <b>%(operation)"
+"s</b> são criadas para enviá-los para <b>%(destination)s</b>."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_rule__location_dest_from_rule
@@ -11929,3 +11893,24 @@ msgid ""
 msgstr ""
 "Pedido de entrega de {{ object.company_id.name }} (Ref. {{ object.name or 'n/"
 "d' }})"
+
+#~ msgid "12.0"
+#~ msgstr "12.0"
+
+#~ msgid "1234567890"
+#~ msgstr "1234567890"
+
+#~ msgid "12345678901"
+#~ msgstr "12345678901"
+
+#~ msgid "2023-01-01"
+#~ msgstr "01-01-2023"
+
+#~ msgid "2023-09-24"
+#~ msgstr "24-09-2023"
+
+#~ msgid "3.00"
+#~ msgstr "3,00"
+
+#~ msgid "54326786758"
+#~ msgstr "54326786758"

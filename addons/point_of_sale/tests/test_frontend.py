@@ -1977,6 +1977,55 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_limited_categories', login="pos_user")
 
+    def test_limited_categories_child_product_search(self):
+        """
+        Regression test: when only a parent category is set in iface_available_categ_ids,
+        searching for an unloaded product assigned to a child category (via "Search more")
+        must still find the product. Before the fix the JS domain only included the top-level
+        category IDs, so products in sub-categories were never returned by the server search.
+        """
+        parent_category = self.env['pos.category'].create({'name': 'Parent Search Cat'})
+        child_category = self.env['pos.category'].create({
+            'name': 'Child Search Cat',
+            'parent_id': parent_category.id,
+        })
+        # Service products sort before consumable/storable in the limited-loading SQL
+        # (ORDER BY CASE WHEN type='service' THEN 1 ELSE 0 END DESC), so this product
+        # is guaranteed to occupy the single pre-loaded slot.
+        self.env['product.product'].create({
+            'name': 'Anchor Product',
+            'available_in_pos': True,
+            'list_price': 1.0,
+            'taxes_id': False,
+            'pos_categ_ids': [(4, parent_category.id)],
+            'type': 'service',
+        })
+        # Consumable in the child category. Sorts after the service Anchor Product, so it
+        # will NOT be pre-loaded when the slot limit is 1.
+        self.env['product.product'].create({
+            'name': 'Child Cat Product',
+            'available_in_pos': True,
+            'list_price': 5.0,
+            'taxes_id': False,
+            'pos_categ_ids': [(4, child_category.id)],
+            'type': 'consu',
+        })
+        # Only the parent is configured; child categories must be resolved automatically.
+        self.main_pos_config.write({
+            'limit_categories': True,
+            'iface_available_categ_ids': [(6, 0, [parent_category.id])],
+        })
+        # Limit to 1 product so "Child Cat Product" (non-service) is not pre-loaded;
+        # the service "Anchor Product" takes the single slot.
+        self.env['ir.config_parameter'].sudo().set_param('point_of_sale.limited_product_count', '1')
+
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour(
+            "/pos/ui?config_id=%d" % self.main_pos_config.id,
+            'test_limited_categories_child_product_search',
+            login="pos_user",
+        )
+
     def test_one_attribute_value_scan_barcode(self):
         product = self.env['product.template'].create({
             'name': 'Product Test',
@@ -2300,6 +2349,14 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'test_combo_disallowLineQuantityChange', login="pos_user")
         self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'test_combo_disallowLineQuantityChange_2', login="pos_user")
 
+    def test_set_opening_note_without_cash_method(self):
+        cash_method = self.main_pos_config.payment_method_ids.filtered(lambda pm: pm.is_cash_count)
+        self.main_pos_config.payment_method_ids -= cash_method
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        current_session = self.main_pos_config.current_session_id
+        self.start_pos_tour('test_set_opening_note_without_cash_method')
+        self.assertEqual(current_session.opening_notes, 'Opening Notes')
+
     def test_orderline_merge_with_higher_price_precision(self):
         """ Test that orderline merging works correctly when product price has a higher precision than the currency. """
         self.env['decimal.precision'].search([('name', '=', 'Product Price')]).digits = 3
@@ -2367,6 +2424,334 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         created_order = self.env['pos.order'].search([('partner_id', '=', partner.id)], limit=1)
         self.assertNotEqual(created_order.pricelist_id, not_available_pricelist)
+
+    def test_combo_price_unchanged_with_lot_tracked_product(self):
+        """Test that assigning a lot to a combo item does not affect the combo price."""
+        lot_product = self.env['product.product'].create({
+            'name': 'Product A',
+            'is_storable': True,
+            'tracking': 'lot',
+            'available_in_pos': True,
+        })
+        combo = self.env["product.combo"].create({
+            "name": lot_product.name + " combo",
+            "combo_item_ids": [Command.create({"product_id": lot_product.id, "extra_price": 0})]
+        })
+        self.env["product.product"].create(
+            {
+                "available_in_pos": True,
+                "list_price": 7,
+                "name": "Test Combo",
+                "type": "combo",
+                "taxes_id": False,
+                "combo_ids": [
+                    (6, 0, [combo.id])
+                ],
+            }
+        )
+        self.main_pos_config.with_user(self.pos_admin).open_ui()
+        self.start_pos_tour('test_combo_price_unchanged_with_lot_tracked_product', login="pos_admin")
+
+    def test_amount_total_is_rounded(self):
+        tax = self.env['account.tax'].create({
+            'name': 'Tax 18% Included',
+            'amount': 18,
+            'price_include_override': 'tax_included',
+        })
+
+        self.env['product.product'].create({
+            'name': 'Test Product',
+            'available_in_pos': True,
+            'list_price': 2.8,
+            'taxes_id': [(6, 0, [tax.id])],
+        })
+
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_amount_total_is_rounded', login="pos_user")
+        order = self.env['pos.order'].search([], limit=1)
+        self.assertEqual(order.amount_total, 2.80, "The total amount should be rounded to 2 decimals")
+        self.assertEqual(order.amount_return, 0, "The return amount should be rounded to 2 decimals")
+
+    def test_stale_draft_read_keeps_order_paid(self):
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_stale_draft_read_keeps_order_paid', login="pos_user")
+
+    def test_offline_barcode_not_in_pos(self):
+        """
+        Tests that an unwanted error is not thrown when trying to scan a barcode while offline
+        for a product that is not in the PoS.
+        """
+        self.wall_shelf.available_in_pos = False
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_offline_barcode_not_in_pos', login="pos_user")
+
+    def test_barcode_scan_preselect_always_variant(self):
+        """
+        When scanning a barcode that matches a specific variant, the product configurator
+        should open with the 'always' variant attribute (Color) preselected and only the
+        'no_variant' attribute (Size) requiring user input.
+        """
+        color_attribute = self.env['product.attribute'].create({
+            'name': 'Color',
+            'create_variant': 'always',
+            'display_type': 'radio',
+            'value_ids': [(0, 0, {'name': 'Red', 'sequence': 1}), (0, 0, {'name': 'Blue', 'sequence': 2})],
+        })
+        size_attribute = self.env['product.attribute'].create({
+            'name': 'Size',
+            'create_variant': 'no_variant',
+            'display_type': 'radio',
+            'value_ids': [(0, 0, {'name': 'Small', 'sequence': 1}), (0, 0, {'name': 'Large', 'sequence': 2})],
+        })
+        product = self.env['product.template'].create({
+            'name': 'Variant Barcode Product',
+            'available_in_pos': True,
+            'list_price': 10,
+            'taxes_id': False,
+            'attribute_line_ids': [
+                (0, 0, {
+                    'attribute_id': color_attribute.id,
+                    'value_ids': [(6, 0, color_attribute.value_ids.ids)],
+                }),
+                (0, 0, {
+                    'attribute_id': size_attribute.id,
+                    'value_ids': [(6, 0, size_attribute.value_ids.ids)],
+                }),
+            ],
+        })
+        red_variant, blue_variant = product.product_variant_ids
+        red_variant.barcode = 'VAR_RED_001'
+        blue_variant.barcode = 'VAR_BLUE_001'
+
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_barcode_scan_preselect_always_variant', login="pos_user")
+
+    def test_barcode_scan_no_variant_extra_price(self):
+        """ Scanning a product with a no_variant attribute must add the picked
+        value's extra price, and scanning an "always" variant must add its extra
+        only once (dbc23b106c8b regression). """
+        toppings = self.env['product.attribute'].create({
+            'name': 'Toppings',
+            'create_variant': 'no_variant',
+            'display_type': 'multi',
+            'value_ids': [
+                (0, 0, {'name': 'Cheese', 'sequence': 1}),
+                (0, 0, {'name': 'Bacon', 'sequence': 2}),
+            ],
+        })
+        multi_product = self.env['product.template'].create({
+            'name': 'Multi Attr Product',
+            'available_in_pos': True,
+            'list_price': 10,
+            'taxes_id': False,
+            'attribute_line_ids': [
+                (0, 0, {
+                    'attribute_id': toppings.id,
+                    'value_ids': [(6, 0, toppings.value_ids.ids)],
+                }),
+            ],
+        })
+        multi_product.attribute_line_ids.product_template_value_ids.filtered(
+            lambda ptav: ptav.name == 'Bacon'
+        ).price_extra = 3
+        multi_product.product_variant_ids.barcode = 'MULTI_001'
+
+        color_attribute = self.env['product.attribute'].create({
+            'name': 'Color',
+            'create_variant': 'always',
+            'display_type': 'radio',
+            'value_ids': [
+                (0, 0, {'name': 'White', 'sequence': 1}),
+                (0, 0, {'name': 'Black', 'sequence': 2}),
+            ],
+        })
+        always_product = self.env['product.template'].create({
+            'name': 'Always Variant Product',
+            'available_in_pos': True,
+            'list_price': 20,
+            'taxes_id': False,
+            'attribute_line_ids': [
+                (0, 0, {
+                    'attribute_id': color_attribute.id,
+                    'value_ids': [(6, 0, color_attribute.value_ids.ids)],
+                }),
+            ],
+        })
+        always_product.attribute_line_ids.product_template_value_ids.filtered(
+            lambda ptav: ptav.name == 'Black'
+        ).price_extra = 10
+        black_variant = always_product.product_variant_ids.filtered(
+            lambda v: 'Black' in v.product_template_variant_value_ids.mapped('name')
+        )
+        black_variant.barcode = 'ALWAYS_BLACK_001'
+
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_barcode_scan_no_variant_extra_price', login="pos_user")
+
+    def test_refund_backend_duplicate(self):
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        current_session = self.main_pos_config.current_session_id
+        order = self.env['pos.order'].create({
+            'company_id': self.env.company.id,
+            'session_id': current_session.id,
+            'partner_id': self.partner_test_1.id,
+            'pos_reference': 'Order 0001-001-0001',
+            'lines': [Command.create({
+                'name': "OL/0001",
+                'product_id': self.whiteboard_pen.id,
+                'price_unit': 10.0,
+                'discount': 0.0,
+                'qty': 1.0,
+                'price_subtotal': 10.0,
+                'price_subtotal_incl': 10.0,
+            })],
+            'amount_total': 10.0,
+            'amount_tax': 0.0,
+            'amount_paid': 0.0,
+            'amount_return': 0.0,
+        })
+        payment_context = {"active_ids": order.ids, "active_id": order.id}
+        order_payment = self.env['pos.make.payment'].with_context(**payment_context).create({
+            'amount': order.amount_total,
+            'payment_method_id': self.bank_payment_method.id
+        })
+        order_payment.with_context(**payment_context).check()
+        order.refund()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_refund_backend_duplicate', login="pos_user")
+
+    def test_saver_screen_close_overlays(self):
+        """Test that active overlays (e.g., dropdown menus) are closed when the SaverScreen is triggered."""
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_pos_tour('SaverScreenCloseOverlaysTour')
+
+    def test_single_value_multi_attribute_configurator(self):
+        # A multi-select attribute with a single value must still open the
+        # configurator when the product is added to the order.
+        product = self.env['product.product'].create({
+            'name': 'Single Multi Product',
+            'available_in_pos': True,
+            'list_price': 10,
+            'taxes_id': False,
+        })
+        multi_attribute = self.env['product.attribute'].create({
+            'name': 'Extras',
+            'display_type': 'multi',
+            'create_variant': 'no_variant',
+        })
+        multi_value = self.env['product.attribute.value'].create({
+            'name': 'Extra Cheese',
+            'attribute_id': multi_attribute.id,
+        })
+        attribute_line = self.env['product.template.attribute.line'].create({
+            'product_tmpl_id': product.product_tmpl_id.id,
+            'attribute_id': multi_attribute.id,
+            'value_ids': [(6, 0, multi_value.ids)],
+        })
+        attribute_line.product_template_value_ids[0].price_extra = 5
+
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_pos_tour('test_single_value_multi_attribute_configurator')
+
+    def test_single_attribute_value_products(self):
+        self.main_pos_config.open_ui()
+        self.start_pos_tour('test_single_attribute_value_products')
+
+    def test_price_extra_pricelist_based_pricelist(self):
+        """
+        Tests that extra price is carried over when changing to a pricelist based pricelist
+        """
+        extra_attribute = self.env['product.attribute'].create({
+            'name': 'Extra attribute',
+            'create_variant': 'no_variant',
+        })
+        extra_value = self.env['product.attribute.value'].create({
+            'name': 'Extra value',
+            'attribute_id': extra_attribute.id,
+        })
+        attribute_line = self.env['product.template.attribute.line'].create({
+            'product_tmpl_id': self.whiteboard_pen.product_tmpl_id.id,
+            'attribute_id': extra_attribute.id,
+            'value_ids': [Command.set(extra_value.ids)]
+        })
+        attribute_line.product_template_value_ids[0].price_extra = 100
+
+        pricelist_1 = self.env['product.pricelist'].create({'name': 'Pricelist 1'})
+        pricelist_2 = self.env['product.pricelist'].create({
+            'name': 'Pricelist 2',
+            'item_ids': [Command.create({
+                'compute_price': 'percentage',
+                'base': 'pricelist',
+                'base_pricelist_id': pricelist_1.id,
+                'percent_price': 50,
+                'applied_on': '3_global',
+            })],
+        })
+
+        self.main_pos_config.write({
+            'pricelist_id': pricelist_1.id,
+            'available_pricelist_ids': [Command.set([pricelist_1.id, pricelist_2.id])],
+        })
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_price_extra_pricelist_based_pricelist', login="pos_user")
+
+    def _check_ticket_screen_keeps_variants_collapsed(self, sold_variant_index, tour='test_ticket_screen_keeps_variants_collapsed'):
+        attribute = self.env['product.attribute'].create({
+            'name': 'Side',
+            'create_variant': 'always',
+            'value_ids': [Command.create({'name': 'Bread'}), Command.create({'name': 'Rice'})],
+        })
+        template = self.env['product.template'].create({
+            'name': 'Variant Soup',
+            'available_in_pos': True,
+            'list_price': 10,
+            'taxes_id': False,
+            'attribute_line_ids': [Command.create({
+                'attribute_id': attribute.id,
+                'value_ids': [Command.set(attribute.value_ids.ids)],
+            })],
+        })
+        self.assertEqual(len(template.product_variant_ids), 2)
+
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        order = self.env['pos.order'].create({
+            'company_id': self.env.company.id,
+            'session_id': self.main_pos_config.current_session_id.id,
+            'config_id': self.main_pos_config.id,
+            'lines': [Command.create({
+                'name': 'OL/0001',
+                'product_id': template.product_variant_ids[sold_variant_index].id,
+                'price_unit': 10.00,
+                'discount': 0,
+                'qty': 1,
+                'tax_ids': False,
+                'price_subtotal': 10.00,
+                'price_subtotal_incl': 10.00,
+            })],
+            'amount_paid': 10.00,
+            'amount_total': 10.00,
+            'amount_tax': 0.0,
+            'amount_return': 0.0,
+            'to_invoice': False,
+            'pos_reference': 'Test/0001',
+        })
+        order.action_pos_order_paid()
+
+        self.start_pos_tour(tour)
+
+    def test_ticket_screen_keeps_variants_collapsed(self):
+        """ Fetching paid orders in the ticket screen must not undo the
+            client-side grouping of a template's variants into one card.
+        """
+        self._check_ticket_screen_keeps_variants_collapsed(0)
+
+    def test_ticket_screen_keeps_displayed_variant(self):
+        """ Same, when the paid order holds the variant displayed on the card. """
+        self._check_ticket_screen_keeps_variants_collapsed(-1)
+
+    def test_synced_products_keep_variants_collapsed(self):
+        """ Products synced from another device must not undo the client-side
+            grouping of a template's variants into one card.
+        """
+        self._check_ticket_screen_keeps_variants_collapsed(0, 'test_synced_products_keep_variants_collapsed')
 
 
 # This class just runs the same tests as above but with mobile emulation

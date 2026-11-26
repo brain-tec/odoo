@@ -9,24 +9,24 @@
 # Wil Odoo, 2025
 # Larissa Manderfeld, 2025
 #
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 # "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2026-02-14 09:10+0000\n"
-"Last-Translator: \"Noemi Pla Garcia (nopl)\" <nopl@odoo.com>\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 10:37+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Spanish <https://translate.odoo.com/projects/odoo-18/"
 "html_editor/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == 0)"
-" ? 1 : 2);\n"
-"X-Generator: Weblate 5.14.3\n"
+"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
+"0) ? 1 : 2);\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: html_editor
 #. odoo-javascript
@@ -272,12 +272,6 @@ msgstr "Reproducción automática"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/column_plugin.js:0
-msgid "Back to one column"
-msgstr "Volver a una columna"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/color_plugin.js:0
 #: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
 msgid "Background Color"
@@ -427,6 +421,12 @@ msgstr "Contenido"
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_dialog.js:0
 msgid "Content generated"
 msgstr "Contenido generado"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/column_plugin.js:0
+msgid "Convert columns to regular content"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -962,7 +962,7 @@ msgstr "Relleno de imagen"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/media_dialog.js:0
 msgid "Images"
-msgstr "Imagenes"
+msgstr "Imágenes"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1090,7 +1090,7 @@ msgstr "Instagram"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Label"
-msgstr "Descripción"
+msgstr "Etiqueta"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1191,7 +1191,7 @@ msgstr "Archivo faltante"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/powerbox/powerbox_plugin.js:0
+#: code:addons/html_editor/static/src/main/powerbox/search_powerbox_plugin.js:0
 msgid "More options"
 msgstr "Más opciones"
 
@@ -1272,6 +1272,12 @@ msgstr "Normal"
 #: code:addons/html_editor/static/src/main/list/list_plugin.js:0
 msgid "Numbered list"
 msgstr "Lista numerada"
+
+#. module: html_editor
+#. odoo-python
+#: code:addons/html_editor/controllers/main.py:0
+msgid "Only internal users can use AI text generation."
+msgstr ""
 
 #. module: html_editor
 #. odoo-python
@@ -1413,8 +1419,8 @@ msgstr "Eliminar enlace"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
-msgid "Remove columns"
-msgstr "Eliminar columnas"
+msgid "Remove column layout"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -2039,6 +2045,18 @@ msgstr "o"
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "videos"
 msgstr "vídeos"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/table/table_picker.xml:0
+msgid "x"
+msgstr "x"
+
+#~ msgid "Back to one column"
+#~ msgstr "Volver a una columna"
+
+#~ msgid "Remove columns"
+#~ msgstr "Eliminar columnas"
 
 #~ msgid "Hide Dailymotion logo"
 #~ msgstr "Ocultar logotipo de Dailymotion"

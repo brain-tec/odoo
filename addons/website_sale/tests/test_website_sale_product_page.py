@@ -1,6 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tests import HttpCase, tagged
+import json
+
+from odoo import http
+from odoo.tests import HttpCase, new_test_user, tagged
+from odoo.tools import file_open, mute_logger
 
 from odoo.addons.product.tests.common import ProductVariantsCommon
 from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
@@ -21,9 +25,7 @@ class TestWebsiteSaleProductPage(HttpCase, ProductVariantsCommon, WebsiteSaleCom
         manager = self.env.ref("base.user_admin")
         manager.write({"password": password})
 
-        self.env["ir.ui.view"].with_context(active_test=False).search([
-            ("key", "=", "website_sale.product_comment")
-        ]).write({"active": True})
+        self._enable_reviews()
 
         self.product_product_7 = self.env["product.product"].create({
             "name": "Storage Box Test",
@@ -42,6 +44,74 @@ class TestWebsiteSaleProductPage(HttpCase, ProductVariantsCommon, WebsiteSaleCom
         self._add_reaction(message, "😊")
 
         self.start_tour("/", "website_sale_product_reviews_reactions_public", login=None)
+
+    def test_portal_user_can_upload_attachment_on_product_review(self):
+        """
+        A portal user must be able to attach a file when posting a
+        product review once reviews are enabled for the current website.
+        """
+        portal_user = new_test_user(
+            self.env, login='product_review_portal', groups='base.group_portal',
+            password='product_review_portal',
+        )
+        self._enable_reviews()
+
+        self.product_template_sofa.website_published = True
+
+        self.authenticate(portal_user.login, 'product_review_portal')
+        with file_open("addons/web/__init__.py") as file:
+            response = self.url_open(
+                url="/mail/attachment/upload",
+                data={
+                    "csrf_token": http.Request.csrf_token(self),
+                    "thread_id": self.product_template_sofa.id,
+                    "thread_model": "product.template",
+                },
+                files={"ufile": file},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        result = response.json()
+        self.assertNotIn('error', result.get('data', {}), result.get('data'))
+        attachment_id = result['data']['ir.attachment'][0]['id']
+        self.assertTrue(self.env['ir.attachment'].sudo().browse(attachment_id).exists())
+
+    @mute_logger("odoo.http")
+    def test_public_user_cannot_post_product_review(self):
+        self._enable_reviews()
+        public_user = self.env.ref("base.public_user")
+        for product in (self.product_template_sofa, self.product_template_sofa.product_variant_id):
+            with self.subTest(model=product._name):
+                self.assertFalse(self._post_review(product, public_user))
+
+    def test_portal_user_can_post_product_review(self):
+        self._enable_reviews()
+        portal_user = new_test_user(
+            self.env, login="product_review_portal", groups="base.group_portal",
+            password="product_review_portal",
+        )
+        self.authenticate(portal_user.login, "product_review_portal")
+        for product in (self.product_template_sofa, self.product_template_sofa.product_variant_id):
+            with self.subTest(model=product._name):
+                self.assertTrue(self._post_review(product, portal_user))
+
+    def _enable_reviews(self):
+        self.env["ir.ui.view"].with_context(active_test=False).search([
+            ("key", "=", "website_sale.product_comment"),
+        ]).write({"active": True})
+
+    def _post_review(self, product, user):
+        self.url_open("/mail/message/post", data=json.dumps({"params": {
+            "thread_model": product._name,
+            "thread_id": product.id,
+            "post_data": {
+                "body": "Review",
+                "message_type": "comment",
+                "subtype_xmlid": "mail.mt_comment",
+                "rating_value": 1,
+            },
+        }}), headers={"Content-Type": "application/json"})
+        return product.message_ids.filtered(lambda message: message.author_id == user.partner_id)
 
     def _add_reaction(self, message, reaction):
         self.make_jsonrpc_request(

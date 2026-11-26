@@ -19,13 +19,14 @@
 # Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025
 # Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2025
 # Wil Odoo, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Saara Hakanen <sahak@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-11-21 02:29+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 10:38+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Finnish <https://translate.odoo.com/projects/odoo-18/"
 "html_editor/fi/>\n"
@@ -34,7 +35,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: html_editor
 #. odoo-javascript
@@ -51,7 +52,7 @@ msgstr ""
 #: code:addons/html_editor/static/src/main/media/image_description.xml:0
 msgid "'Title tag' is shown as a tooltip when you hover the picture."
 msgstr ""
-"'Otsikkotunniste' näytetään työkaluvihjeenä, kun viet kuvan yläpuolelle."
+"'Otsikkotunniste' näytetään työkaluvihjeenä viedessäsi valitsimen kuvan ylle."
 
 #. module: html_editor
 #. odoo-javascript
@@ -117,7 +118,7 @@ msgstr "Tekoälyhaamukirjoittaja"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
 msgid "AI Tools"
-msgstr "AI-työkalut"
+msgstr "Tekoälytyökalut"
 
 #. module: html_editor
 #. odoo-javascript
@@ -277,12 +278,6 @@ msgstr "Automaattinen toisto"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/column_plugin.js:0
-msgid "Back to one column"
-msgstr "Takaisin yhteen sarakkeeseen"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/color_plugin.js:0
 #: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
 msgid "Background Color"
@@ -388,7 +383,7 @@ msgstr "Tarkistuslista"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/others/x2many_image_field.xml:0
 msgid "Clear"
-msgstr "Pyyhi"
+msgstr "Tyhjennä"
 
 #. module: html_editor
 #. odoo-javascript
@@ -432,6 +427,12 @@ msgstr "Sisältö"
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_dialog.js:0
 msgid "Content generated"
 msgstr "Tuotettu sisältö"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/column_plugin.js:0
+msgid "Convert columns to regular content"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -566,7 +567,7 @@ msgstr ""
 #: code:addons/html_editor/static/src/main/media/file_plugin.js:0
 #: code:addons/html_editor/static/src/main/media/media_dialog/file_media_dialog.js:0
 msgid "Documents"
-msgstr "Dokumentit"
+msgstr "Asiakirjat"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1154,7 +1155,7 @@ msgstr "Lataa lisää..."
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_translate_dialog.xml:0
 #: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
 msgid "Loading..."
-msgstr "Lataa..."
+msgstr "Ladataan..."
 
 #. module: html_editor
 #. odoo-javascript
@@ -1194,7 +1195,7 @@ msgstr "Puuttuva tiedosto"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/powerbox/powerbox_plugin.js:0
+#: code:addons/html_editor/static/src/main/powerbox/search_powerbox_plugin.js:0
 msgid "More options"
 msgstr "Lisää vaihtoehtoja"
 
@@ -1275,6 +1276,12 @@ msgstr "Normaali"
 #: code:addons/html_editor/static/src/main/list/list_plugin.js:0
 msgid "Numbered list"
 msgstr "Numeroitu luettelo"
+
+#. module: html_editor
+#. odoo-python
+#: code:addons/html_editor/controllers/main.py:0
+msgid "Only internal users can use AI text generation."
+msgstr ""
 
 #. module: html_editor
 #. odoo-python
@@ -1416,8 +1423,8 @@ msgstr "Poista linkki"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
-msgid "Remove columns"
-msgstr "Poista sarakkeet"
+msgid "Remove column layout"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -1769,7 +1776,7 @@ msgstr "Vaihda alleviivaus"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_description.xml:0
 msgid "Tooltip"
-msgstr "Työkaluvinkki"
+msgstr "Työkaluvihje"
 
 #. module: html_editor
 #. odoo-javascript
@@ -2018,7 +2025,7 @@ msgstr "astetta"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/file_plugin.js:0
 msgid "document"
-msgstr "dokumentti"
+msgstr "asiakirja"
 
 #. module: html_editor
 #. odoo-javascript
@@ -2037,6 +2044,18 @@ msgstr "tai"
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "videos"
 msgstr "videot"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/table/table_picker.xml:0
+msgid "x"
+msgstr "x"
+
+#~ msgid "Back to one column"
+#~ msgstr "Takaisin yhteen sarakkeeseen"
+
+#~ msgid "Remove columns"
+#~ msgstr "Poista sarakkeet"
 
 #~ msgid "Hide Dailymotion logo"
 #~ msgstr "Piilota Dailymotion-logo"

@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
+from unittest import SkipTest
+from lxml import etree
 from odoo import Command
 from odoo.tests import freeze_time, tagged
 from odoo.addons.l10n_it_edi.tests.common import TestItEdi
@@ -175,6 +176,35 @@ class TestItEdiExport(TestItEdi):
         invoice.action_post()
         self._assert_export_invoice(invoice, 'invoice_non_latin_and_latin.xml')
 
+    def test_simplified_invoice_with_multiple_taxes_with_natura(self):
+        self.default_tax.write({'l10n_it_exempt_reason': 'N3.1'})
+        natura_tax = self.env['account.tax'].with_company(self.company).create({
+            'name': 'Exempt tax',
+            'amount_type': 'percent',
+            'amount': 4,
+        })
+
+        invoice = self.env['account.move'].with_company(self.company).create({
+            'move_type': 'out_invoice',
+            'partner_id': self.italian_partner_no_address_codice.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'line_with_multiple_taxes',
+                    'price_unit': 100.0,
+                    'tax_ids': [Command.set((self.default_tax + natura_tax).ids)],
+                }),
+            ],
+        })
+        invoice.action_post()
+
+        xml = invoice._l10n_it_edi_render_xml()
+        xml_root = etree.fromstring(xml)
+
+        natura_node = xml_root.xpath('.//DatiBeniServizi/Natura', namespaces={'p': 'http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0'})
+
+        self.assertTrue(natura_node, "The exported simplified invoice should contain a Natura node.")
+        self.assertEqual(natura_node[0].text, "N3.1")
+
     def test_invoice_below_400_codice_simplified(self):
         invoice = self.env['account.move'].with_company(self.company).create({
             'move_type': 'out_invoice',
@@ -216,7 +246,7 @@ class TestItEdiExport(TestItEdi):
         invoice.action_post()
         self._assert_export_invoice(invoice, 'invoice_total_400_VAT_simplified.xml')
 
-    def test_invoice_more_400_simplified(self):
+    def test_invoice_more_400_is_not_simplified(self):
         invoice = self.env['account.move'].with_company(self.company).create({
             'move_type': 'out_invoice',
             'invoice_date': '2022-03-24',
@@ -230,9 +260,10 @@ class TestItEdiExport(TestItEdi):
                 }),
             ],
         })
+        self.assertFalse(invoice._l10n_it_edi_is_simplified())
         self.assertEqual(['l10n_it_edi_partner_address_missing'], list(invoice._l10n_it_edi_export_data_check().keys()))
 
-    def test_invoice_non_domestic_simplified(self):
+    def test_invoice_non_domestic_is_not_simplified(self):
         invoice = self.env['account.move'].with_company(self.company).create({
             'move_type': 'out_invoice',
             'invoice_date': '2022-03-24',
@@ -246,6 +277,7 @@ class TestItEdiExport(TestItEdi):
                 }),
             ],
         })
+        self.assertFalse(invoice._l10n_it_edi_is_simplified())
         self.assertEqual(['l10n_it_edi_partner_address_missing'], list(invoice._l10n_it_edi_export_data_check().keys()))
 
     def test_bill_refund_no_reconcile(self):
@@ -499,6 +531,49 @@ class TestItEdiExport(TestItEdi):
         invoice.action_post()
         self._assert_export_invoice(invoice, 'test_export_invoice_with_two_downpayments.xml')
 
+    @freeze_time("2025-02-03")
+    def test_export_credit_note_on_downpayment_only_lists_origin_invoice(self):
+        """ A credit note crediting a down payment invoice directly must only reference
+            that invoice in DatiFattureCollegate, not every other move ever linked to the
+            same down payment sale order line (see 'downpayment_moves' in
+            _l10n_it_edi_export_data).
+        """
+        if self.env['ir.module.module']._get('sale').state != 'installed':
+            self.skipTest("sale module is not installed")
+
+        sale_order = self.env['sale.order'].with_company(self.company).create({
+            'partner_id': self.italian_partner_a.id,
+            'order_line': [
+                Command.create({'product_id': self.service_product.id, 'price_unit': 200.00}),
+            ],
+        })
+        sale_order.action_confirm()
+
+        downpayment_invoice = self.env['account.move'].with_company(self.company).browse(
+            self.env['sale.advance.payment.inv'].create([{
+                'advance_payment_method': 'fixed',
+                'fixed_amount': 50,
+                'sale_order_ids': [Command.link(sale_order.id)],
+            }]).create_invoices()['res_id']
+        )
+        downpayment_invoice.action_post()
+
+        # Credit the down payment invoice directly, without reconciling it against
+        # anything else, so DatiFattureCollegate must fall back to reversed_entry_id.
+        credit_note = downpayment_invoice._reverse_moves()
+        credit_note.action_post()
+
+        xml = credit_note._l10n_it_edi_render_xml()
+        xml_root = etree.fromstring(xml)
+        id_documento_nodes = xml_root.xpath('.//DatiFattureCollegate/IdDocumento')
+
+        self.assertEqual(
+            [node.text for node in id_documento_nodes],
+            [downpayment_invoice.name],
+            "DatiFattureCollegate must reference only the down payment invoice this credit "
+            "note credits, not itself nor any other move sharing the down payment line.",
+        )
+
     @freeze_time('2025-03-07')
     def test_send_prezzo_unitario_converted_to_company_currency(self):
         """
@@ -653,3 +728,84 @@ class TestItEdiExport(TestItEdi):
         invoice_b.action_post()
         (invoice_b.line_ids + credit_note.line_ids).filtered(lambda line: line.account_type in ('asset_receivable')).reconcile()
         self._assert_export_invoice(credit_note, 'invoice_exclude_postdated_moves.xml')
+
+    def test_export_XML_oss_tax(self):
+        be_partner = self.env['res.partner'].create({
+            'name': 'Alessi',
+            'vat': 'BE0477472701',
+            'country_id': self.env.ref('base.be').id,
+            'is_company': True,
+        })
+        oss_tag = self.env.ref('l10n_eu_oss.tag_oss', raise_if_not_found=False)
+        if not oss_tag:
+            raise SkipTest("l10n_eu_oss Module not installed")
+
+        oss_tax = self.env['account.tax'].create({
+            'name': 'OSS Tax',
+            'type_tax_use': 'sale',
+            'amount': 20,
+            'country_id': self.company.account_fiscal_country_id.id,
+            'company_id': self.company.id,
+            'invoice_repartition_line_ids': [
+                Command.create({'repartition_type': 'base'}),
+                Command.create({
+                    'repartition_type': 'tax',
+                    'tag_ids': [Command.set(oss_tag.ids)],
+                }),
+            ],
+        })
+
+        invoice = self.env['account.move'].with_company(self.company).create({
+            'move_type': 'out_invoice',
+            'invoice_date': '2022-03-24',
+            'invoice_date_due': '2022-03-24',
+            'partner_id': be_partner.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': "Product A",
+                    'price_unit': 100,
+                    'tax_ids': [Command.set(oss_tax.ids)],
+                })
+            ],
+        })
+        invoice.action_post()
+        self._assert_export_invoice(invoice, 'invoice_with_oss_tax.xml')
+
+    def test_export_invoice_uom_unicode_normalization(self):
+        """Test that non-standard Unicode characters (e.g. m², m³) are correctly normalized for XML invoices."""
+        uom_category = self.env['uom.category'].create({
+            'name': 'Test Surface',
+        })
+
+        self.product_a.uom_id = self.product_a.uom_id.copy({'name': 'm²', 'category_id': uom_category.id})
+        invoice = self._create_invoice(
+            partner_id=self.italian_partner_a,
+            post=True,
+            invoice_line_ids=[self._prepare_invoice_line(product_id=self.product_a, price_unit=800.40)],
+        )
+
+        xml = invoice._l10n_it_edi_render_xml()
+        invoice_tree = etree.fromstring(xml)
+
+        uom_nodes = invoice_tree.xpath("//*[local-name()='DettaglioLinee']/*[local-name()='UnitaMisura']")
+        self.assertEqual(uom_nodes[0].text, 'm2')
+
+    def test_reset_to_draft_l10n_it_edi_transaction(self):
+        """
+        In l10n_it_edi, it is possible to receive a bill where l10n_it_edi_transaction is already populated.
+        It should be possible to still reset this move to draft
+        """
+        bill = self.env['account.move'].create({
+            'partner_id': self.partner_a.id,
+            'move_type': 'in_invoice',
+            'invoice_date': '2026-03-24',
+            'l10n_it_edi_transaction': 'transaction',
+            'line_ids': [
+                Command.create({
+                    'name': 'line',
+                    'account_id': self.company_data['default_account_revenue'].id,
+                }),
+            ]
+        })
+        bill.action_post()
+        self.assertEqual(bill.show_reset_to_draft_button, True)

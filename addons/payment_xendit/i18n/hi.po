@@ -6,14 +6,14 @@
 # Martin Trigaux, 2024
 # Wil Odoo, 2024
 #
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:38+0000\n"
-"PO-Revision-Date: 2025-11-21 02:32+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-10-24 17:39+0000\n"
+"PO-Revision-Date: 2026-10-20 11:22+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Hindi <https://translate.odoo.com/projects/odoo-18/"
 "payment_xendit/hi/>\n"
 "Language: hi\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: payment_xendit
 #. odoo-python
@@ -32,26 +32,6 @@ msgid ""
 msgstr "आपके पेमेंट (%s) को प्रोसेस करते समय एक गड़बड़ी हुई . कृपया फिर से कोशिश करें।"
 
 #. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "Card Code"
-msgstr ""
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "Card Holder First Name"
-msgstr ""
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "Card Holder Last Name"
-msgstr ""
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "Card Number"
-msgstr ""
-
-#. module: payment_xendit
 #: model:ir.model.fields,field_description:payment_xendit.field_payment_provider__code
 msgid "Code"
 msgstr "कोड"
@@ -60,51 +40,13 @@ msgstr "कोड"
 #. odoo-python
 #: code:addons/payment_xendit/models/payment_provider.py:0
 msgid "Could not establish the connection to the API."
-msgstr ""
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "Email"
-msgstr "ईमेल"
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "Expiration"
-msgstr "समय सीमा समाप्ति"
-
-#. module: payment_xendit
-#. odoo-javascript
-#: code:addons/payment_xendit/static/src/js/payment_form.js:0
-msgid "Invalid CVN"
-msgstr ""
-
-#. module: payment_xendit
-#. odoo-javascript
-#: code:addons/payment_xendit/static/src/js/payment_form.js:0
-msgid "Invalid Card Number"
-msgstr ""
-
-#. module: payment_xendit
-#. odoo-javascript
-#: code:addons/payment_xendit/static/src/js/payment_form.js:0
-msgid "Invalid Date"
-msgstr ""
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "John"
-msgstr ""
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "MM"
-msgstr ""
+msgstr "एपीआई से कनेक्शन स्थापित नहीं हो सका।"
 
 #. module: payment_xendit
 #. odoo-python
 #: code:addons/payment_xendit/models/payment_transaction.py:0
 msgid "No transaction found matching reference %s."
-msgstr ""
+msgstr "रेफ़रेंस %s से मेल खाने वाला कोई ट्रांज़ैक्शन नहीं मिला।"
 
 #. module: payment_xendit
 #: model:ir.model,name:payment_xendit.model_payment_provider
@@ -117,36 +59,15 @@ msgid "Payment Transaction"
 msgstr "पेमेंट ट्रांज़ैक्शन"
 
 #. module: payment_xendit
-#. odoo-javascript
-#: code:addons/payment_xendit/static/src/js/payment_form.js:0
-msgid "Payment processing failed"
-msgstr ""
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "Phone Number"
-msgstr "फ़ोन नंबर"
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.payment_provider_form_xendit
-msgid "Public Key"
-msgstr "पब्लिक कुंजी"
-
-#. module: payment_xendit
 #. odoo-python
 #: code:addons/payment_xendit/models/payment_transaction.py:0
 msgid "Received data with missing reference."
-msgstr ""
+msgstr "डेटा प्राप्त हुआ जिसमें रेफ़रेंस गायब है।"
 
 #. module: payment_xendit
 #: model_terms:ir.ui.view,arch_db:payment_xendit.payment_provider_form_xendit
 msgid "Secret Key"
 msgstr "सीक्रेट की"
-
-#. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "Smith"
-msgstr ""
 
 #. module: payment_xendit
 #. odoo-python
@@ -157,14 +78,28 @@ msgid ""
 msgstr ""
 
 #. module: payment_xendit
+#. odoo-python
+#: code:addons/payment_xendit/models/payment_transaction.py:0
+msgid ""
+"The payment requires authentication from the customer, which isn't possible "
+"for this unattended transaction. Please ask the customer to pay manually."
+msgstr ""
+
+#. module: payment_xendit
 #: model:ir.model.fields,help:payment_xendit.field_payment_provider__code
 msgid "The technical code of this payment provider."
-msgstr ""
+msgstr "इस पेमेंट प्रोवाइडर का टेक्निकल कोड।"
 
 #. module: payment_xendit
 #. odoo-python
 #: code:addons/payment_xendit/models/payment_transaction.py:0
 msgid "The transaction is not linked to a token."
+msgstr "ट्रांज़ैक्शन किसी टोकन से जुड़ा नहीं है।"
+
+#. module: payment_xendit
+#. odoo-python
+#: code:addons/payment_xendit/models/payment_provider.py:0
+msgid "Update the Xendit webhook configuration"
 msgstr ""
 
 #. module: payment_xendit
@@ -176,6 +111,12 @@ msgstr ""
 #: model:ir.model.fields.selection,name:payment_xendit.selection__payment_provider__code__xendit
 msgid "Xendit"
 msgstr "Xendit"
+
+#. module: payment_xendit
+#. odoo-python
+#: code:addons/payment_xendit/models/payment_provider.py:0
+msgid "Xendit Dashboard"
+msgstr ""
 
 #. module: payment_xendit
 #: model:ir.model.fields,field_description:payment_xendit.field_payment_provider__xendit_public_key
@@ -193,11 +134,38 @@ msgid "Xendit Webhook Token"
 msgstr ""
 
 #. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "YYYY"
+#. odoo-python
+#: code:addons/payment_xendit/models/payment_provider.py:0
+msgid ""
+"Xendit replaced the single webhook field used by the %(provider)s payment "
+"provider with separate v3 event groups. Update the %(webhook_link)s on the %"
+"(dashboard_link)s before %(deadline)s to keep receiving payment and card "
+"token status updates."
 msgstr ""
 
 #. module: payment_xendit
-#: model_terms:ir.ui.view,arch_db:payment_xendit.inline_form
-msgid "john.smith@example.com"
+#. odoo-python
+#: code:addons/payment_xendit/models/payment_provider.py:0
+msgid "webhook configuration"
 msgstr ""
+
+#~ msgid "Email"
+#~ msgstr "ईमेल"
+
+#~ msgid "Expiration"
+#~ msgstr "समय सीमा समाप्ति"
+
+#~ msgid "Payment processing failed"
+#~ msgstr "पेमेंट प्रोसेस नहीं हो सका"
+
+#~ msgid "Phone Number"
+#~ msgstr "फ़ोन नंबर"
+
+#~ msgid "Public Key"
+#~ msgstr "पब्लिक कुंजी"
+
+#~ msgid "Smith"
+#~ msgstr "स्मिथ"
+
+#~ msgid "YYYY"
+#~ msgstr "साल"

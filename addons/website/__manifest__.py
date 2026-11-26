@@ -290,6 +290,7 @@
         'web.assets_unit_tests': [
             'website/static/tests/page_url_field.test.js',
             'website/static/tests/website_html_editor.test.js',
+            'website/static/tests/mobile/navbar.test.js',
         ],
         'web.tests_assets': [
             'website/static/tests/website_service_mock.js',
@@ -317,6 +318,7 @@
             'website/static/src/scss/website.wysiwyg.fonts.scss',
             'website/static/src/scss/website.wysiwyg.scss',
             'website/static/src/scss/website.edit_mode.scss',
+            'website/static/src/components/googleplaces_autocomplete/*',
             'website/static/src/js/editor/snippets.editor.js',
             'website/static/src/js/editor/snippets.options.js',
             'website/static/src/js/editor/shared_options/pricelist.js',

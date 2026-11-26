@@ -1,25 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_event_exhibitor
+# * website_event_exhibitor
 #
 # Translators:
 # Wil Odoo, 2024
 # Malaz Abuidris <msea@odoo.com>, 2025
-#
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-29 18:37+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2025\n"
-"Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
+"PO-Revision-Date: 2026-10-20 13:27+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-18/"
+"website_event_exhibitor/ar/>\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
-"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+"&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website_event_exhibitor
 #. odoo-javascript
@@ -75,7 +77,8 @@ msgstr ""
 msgid ""
 "<span>Oops! This room is full</span><br/>Come back later to have a chat with "
 "us!"
-msgstr "<span>عذراً! هذه الغرفة ممتلئة</span><br/>عد مجدداً لاحقاً لندردش سوياً! "
+msgstr ""
+"<span>عذراً! هذه الغرفة ممتلئة</span><br/>عد مجدداً لاحقاً لندردش سوياً! "
 
 #. module: website_event_exhibitor
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
@@ -109,6 +112,10 @@ msgid ""
 "productive,\n"
 "                responsive and profitable."
 msgstr ""
+"تقوم شركة Acme Corporation بتصميم وتطوير ودمج ودعم عمليات الموارد البشرية "
+"وإدارة سلاسل\n"
+"                التوريد لمساعدة عملائنا على تحقيق أكبر قدر ممكن من الإنتاجية\n"
+"                وسرعة الاستجابة والربحية."
 
 #. module: website_event_exhibitor
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
@@ -120,6 +127,10 @@ msgid ""
 "                with Open Sources software to manage their businesses. Our\n"
 "                consultants are experts in the following areas:"
 msgstr ""
+"تقوم شركة Acme Corporation بدمج نظام تخطيط موارد المؤسسات (ERP) للشركات "
+"العالمية وتدعم الشركات الصغيرة والمتوسطة\n"
+"                ببرامج مفتوحة المصدر لإدارة أعمالها. يتمتع مستشارونا\n"
+"                بخبرة واسعة في المجالات التالية:"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__message_needaction
@@ -552,8 +563,8 @@ msgid ""
 "                    research\"."
 msgstr ""
 "تمنحك فرصة التعليم العالي عن ديناميكية الموائع\n"
-"                    (ماجستير بحثي عن ديناميكية الموائع، \"دورة دبلوم\" "
-"سابقة،\n"
+"                    (ماجستير بحثي عن ديناميكية الموائع، \"دورة دبلوم\" سابقة"
+"،\n"
 "                    برنامج دكتوراه، برنامج المتدربين وسلسلة المحاضرات)\n"
 "                    وتشجع على \"التدريب على البحث من خلال\n"
 "                    البحث\". "
@@ -789,8 +800,7 @@ msgstr ""
 "                متطلبات عملك. يمكنهم بناء بيئة تقنية \n"
 "                جديدة لشركتك، ولكنهم يأخذون بعين الاعتبار\n"
 "                برنامج الحاسوب المثبت بالفعل دائماً. ولذلك،\n"
-"                Idealis Consulting هي الأمثل لإدارة الموارد البشرية وإدارة "
-"SC. "
+"                Idealis Consulting هي الأمثل لإدارة الموارد البشرية وإدارة SC. "
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__room_participant_count

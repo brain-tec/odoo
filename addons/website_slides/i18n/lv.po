@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_slides
+# * website_slides
 #
 # Translators:
 # Konstantins Zabogonskis <inculin4ik@gmail.com>, 2024
@@ -13,21 +13,22 @@
 # ievaputnina <ievai.putninai@gmail.com>, 2024
 # Will Sensors, 2025
 # Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2025
-#
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2025\n"
-"Language-Team: Latvian (https://app.transifex.com/odoo/teams/41243/lv/)\n"
+"POT-Creation-Date: 2026-05-15 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 17:46+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Latvian <https://translate.odoo.com/projects/odoo-18/"
+"website_slides/lv/>\n"
 "Language: lv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : "
-"2);\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__members_engaged_count
@@ -259,8 +260,8 @@ msgid ""
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <div style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
+"                    <div style=\"margin: 0px; padding: 0px; font-size: "
+"13px;\">\n"
 "                        <p style=\"margin: 0px;\">Sveicināti <t t-"
 "out=\"object.partner_id.name or ''\">Brandon Freeman</t>,</p><br/>\n"
 "                        <p><b>Apsveicam!</b></p>\n"
@@ -325,17 +326,17 @@ msgid ""
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">"
+"\n"
 "                        Sveicināti<br/><br/>\n"
 "                        <t t-out=\"user.name or ''\">Mitchell Admin</t> "
 "dalījās ar <strong t-out=\"object.name or ''\">dokumentu</strong> ar Jums!\n"
 "                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
 "align: center;\">\n"
 "                            <a t-att-href=\"object.website_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-"
-"src=\"{{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/"
-"image_256\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{"
+"{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/image_256\" "
+"style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
@@ -344,8 +345,8 @@ msgstr ""
 "style=\"background-color: #875a7b; padding: 8px 16px 8px "
 "16px;                                 text-decoration: none; color: #fff; "
 "border-radius: 5px;\">\n"
-"                                Skatīt <strong t-out=\"object.name or "
-"''\">Dokumentu</strong></a>\n"
+"                                Skatīt <strong t-out=\"object.name or ''\">"
+"Dokumentu</strong></a>\n"
 "                        </div>\n"
 "                        <t t-if=\"user.signature\" data-o-mail-quote-"
 "container=\"1\">\n"
@@ -395,25 +396,25 @@ msgid ""
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">"
+"\n"
 "                        Sveicināti<br/><br/>\n"
 "                        <t t-out=\"user.name or ''\">Mitchell Admin</t> "
 "dalījās ar <t t-out=\"object.slide_category or ''\">document</t> <strong t-"
 "out=\"object.name or ''\">Trees</strong> ar Jums!\n"
 "                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
 "align: center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?"
-"fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-"
-"src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/"
-"image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                            <a t-att-href=\"(object.website_share_url + "
+"'?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{"
+"{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" "
+"style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
 "center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?"
-"fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" "
+"                            <a t-att-href=\"(object.website_share_url + "
+"'?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" "
 "style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-"
 "decoration: none; color: #fff; border-radius: 5px;\">Skatīt <strong t-"
 "out=\"object.name or ''\">Trees</strong></a>\n"
@@ -468,21 +469,21 @@ msgid ""
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">"
+"\n"
 "                        Sveicināti<br/><br/>\n"
 "                        Ir kaut kas jauns kursā <strong t-"
 "out=\"object.channel_id.name or ''\">Trees, Wood and Gardens</strong>, kuram "
 "Jūs sekojat:<br/><br/>\n"
-"                        </p><center><strong t-out=\"object.name or "
-"''\">Trees</strong></center>\n"
+"                        </p><center><strong t-out=\"object.name or ''\">"
+"Trees</strong></center>\n"
 "                        <t t-if=\"object.image_1024\">\n"
 "                            <div style=\"padding: 16px 8px 16px 8px; text-"
 "align: center;\">\n"
 "                                <a t-att-href=\"object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-"
-"src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/"
-"image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{"
+"{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" "
+"style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        </t>\n"
@@ -680,8 +681,8 @@ msgid ""
 "<i class=\"fa fa-home\"/><span class=\"d-none d-md-inline-block ms-1\">Back "
 "to course</span>"
 msgstr ""
-"<i class=\"fa fa-home\"/><span class=\"d-none d-md-inline-block "
-"ms-1\">Atpakaļ pie kursa</span>"
+"<i class=\"fa fa-home\"/><span class=\"d-none d-md-inline-block ms-1\">"
+"Atpakaļ pie kursa</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
@@ -758,8 +759,8 @@ msgid ""
 "<i class=\"fa fa-sign-out\"/><span class=\"d-none d-md-inline-block "
 "ms-1\">Exit Fullscreen</span>"
 msgstr ""
-"<i class=\"fa fa-sign-out\"/><span class=\"d-none d-md-inline-block "
-"ms-1\">Aizvērt pilnekrāna režīmu</span>"
+"<i class=\"fa fa-sign-out\"/><span class=\"d-none d-md-inline-block ms-1\">"
+"Aizvērt pilnekrāna režīmu</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_all
@@ -870,10 +871,7 @@ msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
-msgid ""
-"<span class=\"o_form_label\">Slides</span>\n"
-"                    <span class=\"fa fa-lg fa-globe\" title=\"Values set "
-"here are website-specific.\" groups=\"website.group_multi_website\"/>"
+msgid "<span class=\"o_form_label\">Slides</span>"
 msgstr ""
 
 #. module: website_slides
@@ -4091,6 +4089,16 @@ msgid "Menu Entry"
 msgstr ""
 
 #. module: website_slides
+#: model:ir.model,name:website_slides.model_base_partner_merge_automatic_wizard
+msgid "Merge Partner Wizard"
+msgstr "Kontaktpersonu apvienošanas vednis"
+
+#. module: website_slides
+#: model:ir.model,name:website_slides.model_mail_message
+msgid "Message"
+msgstr "Ziņojums"
+
+#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__message_has_error
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__message_has_error
 msgid "Message Delivery error"
@@ -4550,8 +4558,8 @@ msgid ""
 msgstr ""
 "Izvēles tulkošanas valoda (ISO kods), ko izvēlēties, sūtot e-pastu. Ja tas "
 "nav iestatīts, tiks izmantota versija angļu valodā. Parasti tai ir jābūt "
-"viettura izteiksmei, kas nodrošina atbilstošo valodu, piem. "
-"{{ object.partner_id.lang }}."
+"viettura izteiksmei, kas nodrošina atbilstošo valodu, piem. {{ "
+"object.partner_id.lang }}."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
@@ -5233,8 +5241,7 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
 msgid "Sell access to your courses on your website and track revenues."
-msgstr ""
-"Pārdodiet piekļuvi Jūsu kursiem Jūsu mājas lapā un sekojiet ieņēmumiem."
+msgstr "Pārdodiet piekļuvi Jūsu kursiem Jūsu mājas lapā un sekojiet ieņēmumiem."
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_res_config_settings__module_website_sale_slides
@@ -6197,6 +6204,11 @@ msgid "Validation error"
 msgstr ""
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
+msgid "Values set here are website-specific."
+msgstr ""
+
+#. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.js:0
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_slide__slide_category__video
@@ -6581,6 +6593,14 @@ msgstr ""
 msgid ""
 "You cannot mark a slide quiz as not completed if you are not among its "
 "members or it is unpublished."
+msgstr ""
+
+#. module: website_slides
+#. odoo-python
+#: code:addons/website_slides/models/base_partner_merge.py:0
+msgid ""
+"You cannot merge these contacts because multiple contacts are enrolled in "
+"the same courses: %s"
 msgstr ""
 
 #. module: website_slides

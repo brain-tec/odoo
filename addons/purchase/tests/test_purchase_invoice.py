@@ -770,6 +770,132 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
         self.assertEqual(inv.invoice_line_ids[2].name, f"{pol_prod_product_in_name.name}", "When description contains the product name, the invoice line name should only be the description")
         self.assertEqual(inv.invoice_line_ids[3].name, f"{pol_prod_name_in_product.product_id.display_name}\n{pol_prod_name_in_product.name}", "When the product name contains the description, the invoice line name should be the product name and the description")
 
+    def test_keep_distribution_on_analytic_account_change(self):
+        """
+        Checks that when we create a vendor bill from a PO on which we set an analytic distribution manually,
+        that analytic distribution doesn't change when we change the analytic account of the product on the bill.
+        """
+        analytic_plan = self.env['account.analytic.plan'].create({
+            'name': 'default',
+            'applicability_ids': [Command.create({
+                'business_domain': 'bill',
+                'applicability': 'optional',
+            })]
+        })
+        analytic_account = self.env['account.analytic.account'].create({'name': 'default', 'plan_id': analytic_plan.id})
+        distribution_model_product = self.env['account.analytic.distribution.model'].create({
+            'product_id': self.product_order.id,
+            'analytic_distribution': {str(analytic_account.id): 100},
+            'company_id': self.company.id,
+        })
+        analytic_plan_2 = self.env['account.analytic.plan'].create({'name': 'Plan Test'})
+        analytic_account_2 = self.env['account.analytic.account'].create({'name': 'manual', 'plan_id': analytic_plan_2.id})
+        purchase_order = self.env['purchase.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [
+                Command.create({'product_id': self.product_order.id}),
+            ],
+        })
+        self.assertEqual(purchase_order.order_line.analytic_distribution, distribution_model_product.analytic_distribution)
+        analytic_distribution_manual = {str(analytic_account.id) + "," + str(analytic_account_2.id): 100}
+        purchase_order.order_line.write({'analytic_distribution': analytic_distribution_manual})
+        purchase_order.button_confirm()
+        purchase_order.order_line.qty_received = 12
+
+        move_form = Form(self.env['account.move'].with_context(default_move_type='in_invoice'))
+        move_form.purchase_vendor_bill_id = self.env['purchase.bill.union'].browse(-purchase_order.id)
+        invoice = move_form.save()
+
+        invoice.line_ids[0].account_id = self.cash_rounding_a.profit_account_id
+        # The analytic distribution of the line shouldn't change if its account changes.
+        self.assertEqual(invoice.line_ids[0].analytic_distribution, analytic_distribution_manual)
+
+    def test_compute_po_count_with_different_plan(self):
+        analytic_plan_1, analytic_plan_2 = self.env['account.analytic.plan'].create([
+            {'name': 'Plan 1'}, {'name': 'Plan 2'}
+        ])
+        analytic_account = self.env['account.analytic.account'].create({'name': 'Account', 'plan_id': analytic_plan_1.id})
+        purchase_order = self.init_purchase(partner=self.partner_a, products=[self.product_a])
+        purchase_order.order_line[0].analytic_distribution = {analytic_account.id: 100}
+        purchase_order.button_confirm()
+        purchase_order.order_line.qty_received = 1
+
+        bill = self.env['account.move'].browse(purchase_order.action_create_invoice()['res_id'])
+        bill.invoice_date = fields.Date.today()
+        bill.action_post()
+
+        self.assertEqual(analytic_account.purchase_order_count, 1)
+        analytic_account.plan_id = analytic_plan_2.id
+        analytic_account.invalidate_recordset(['purchase_order_count'])
+        self.assertEqual(analytic_account.purchase_order_count, 1)
+        self.assertEqual(analytic_account.action_view_purchase_orders()['domain'], [['id', 'in', purchase_order.ids]])
+
+    def test_invoice_line_name_partner_specific_code_not_duplicated(self):
+        """When a vendor has their own product code (product.supplierinfo),
+        the purchase order line description uses it (e.g. "[CUSTOM-CODE] Product").
+        Billing must not re-resolve the product's display_name without that
+        vendor in context, or it would find a different string ("[DEFAULT-CODE]
+        Product") and prepend it, duplicating the product name on the bill.
+        """
+        self.env['product.supplierinfo'].create({
+            'partner_id': self.partner_a.id,
+            'product_tmpl_id': self.product_order.product_tmpl_id.id,
+            'product_code': 'CUSTOM-CODE',
+        })
+        po = self.init_purchase(partner=self.partner_a, confirm=True, products=[self.product_order])
+        # The Form above goes through the same onchange as the web client, so
+        # the line description already carries the vendor-specific code.
+        self.assertIn('CUSTOM-CODE', po.order_line.name)
+        po.order_line.qty_received = 1
+
+        bill = self.env['account.move'].browse(po.action_create_invoice()['res_id'])
+        self.assertEqual(
+            bill.invoice_line_ids.name, po.order_line.name,
+            "Billing shouldn't duplicate the product name when the order line "
+            "already used a vendor-specific product code",
+        )
+
+    def test_invoice_line_name_standard_code_not_duplicated(self):
+        """A purchase order line created before the vendor has their own
+        product code keeps the standard product name. Billing must not
+        prepend the vendor-specific name added afterwards.
+        """
+        po = self.init_purchase(partner=self.partner_a, confirm=True, products=[self.product_order])
+        self.env['product.supplierinfo'].create({
+            'partner_id': self.partner_a.id,
+            'product_tmpl_id': self.product_order.product_tmpl_id.id,
+            'product_code': 'CUSTOM-CODE',
+        })
+        self.assertNotIn('CUSTOM-CODE', po.order_line.name)
+        po.order_line.qty_received = 1
+
+        bill = self.env['account.move'].browse(po.action_create_invoice()['res_id'])
+        self.assertEqual(bill.invoice_line_ids.name, po.order_line.name)
+
+    def test_invoice_line_name_expired_vendor_code_not_duplicated(self):
+        """When the vendor has several product codes, the purchase order line
+        description only uses the one of the selected seller. Billing must
+        resolve the same seller instead of joining every vendor code, or the
+        product name gets duplicated on the bill.
+        """
+        self.env['product.supplierinfo'].create([{
+            'partner_id': self.partner_a.id,
+            'product_tmpl_id': self.product_order.product_tmpl_id.id,
+            'product_code': 'OLD',
+            'date_end': fields.Date.today() - timedelta(days=10),
+        }, {
+            'partner_id': self.partner_a.id,
+            'product_tmpl_id': self.product_order.product_tmpl_id.id,
+            'product_code': 'NEW',
+        }])
+        po = self.init_purchase(partner=self.partner_a, confirm=True, products=[self.product_order])
+        self.assertIn('[NEW]', po.order_line.name)
+        self.assertNotIn('[OLD]', po.order_line.name)
+        po.order_line.qty_received = 1
+
+        bill = self.env['account.move'].browse(po.action_create_invoice()['res_id'])
+        self.assertEqual(bill.invoice_line_ids.name, po.order_line.name)
+
 
 @tagged('post_install', '-at_install')
 class TestInvoicePurchaseMatch(TestPurchaseToInvoiceCommon):
@@ -914,6 +1040,70 @@ class TestInvoicePurchaseMatch(TestPurchaseToInvoiceCommon):
             else:
                 self.assertFalse(line.purchase_line_id in po.order_line)
 
+    def test_subset_match_from_edi_diff_discount(self):
+        """When an EDI vendor bill line has the same unit price as a purchase order line
+        but a different discount, it should match and link to the purchase order line
+        without having its discount or price overridden.
+        """
+        po = self.init_purchase(confirm=True, products=[self.product_order])
+        po.order_line.discount = 10.0
+
+        invoice = self.init_invoice('in_invoice', partner=self.partner_a, products=[self.product_order])
+        invoice._find_and_set_purchase_orders(
+            ['my_match_reference'], invoice.partner_id.id, invoice.amount_total, from_ocr=False
+        )
+
+        self.assertRecordValues(invoice.invoice_line_ids, [
+            {
+                'name': f"From {po.name}",
+                'purchase_line_id': False,
+                'discount': 0.0,
+            },
+            {
+                'name': po.order_line.name,
+                'purchase_line_id': po.order_line.id,
+                'discount': 0.0,
+            },
+        ])
+
+    def test_subset_match_from_edi_diff_discount_partial(self):
+        """When an EDI vendor bill contains both a matching line with a different discount
+        and an unmatched line, the matched line links with preserved discount, and the
+        'From Electronic Document' section is properly added for the unmatched line.
+        """
+        po = self.init_purchase(confirm=True, products=[self.product_order])
+        po.order_line.discount = 10.0
+
+        invoice = self.init_invoice(
+            'in_invoice', partner=self.partner_a, products=[self.product_order, self.product_order_other_price]
+        )
+        invoice._find_and_set_purchase_orders(
+            ['my_match_reference'], invoice.partner_id.id, invoice.amount_total, from_ocr=False
+        )
+
+        self.assertRecordValues(invoice.invoice_line_ids.sorted('sequence'), [
+            {
+                'name': "From Electronic Document",
+                'purchase_line_id': False,
+                'discount': 0.0,
+            },
+            {
+                'name': self.product_order_other_price.display_name,
+                'purchase_line_id': False,
+                'discount': 0.0,
+            },
+            {
+                'name': f"From {po.name}",
+                'purchase_line_id': False,
+                'discount': 0.0,
+            },
+            {
+                'name': po.order_line.name,
+                'purchase_line_id': po.order_line.id,
+                'discount': 0.0,
+            },
+        ])
+
     def test_subset_not_match_non_invoice_lines(self):
         """Test that a purchase line with a line of 0 as unit price won't match
         with a non-invoice-lines (not an invoice_line_ids)
@@ -936,6 +1126,21 @@ class TestInvoicePurchaseMatch(TestPurchaseToInvoiceCommon):
             ['my_match_reference'], invoice.partner_id.id, invoice.amount_total, from_ocr=False)
 
         self.assertFalse(invoice.id in po.invoice_ids.ids)
+
+    def test_match_invoice_line_without_name(self):
+        """Test matching an invoice when an invoice line has no name"""
+        po = self.init_purchase(confirm=True, products=[self.product_order])
+        invoice = self.init_invoice(
+            'in_invoice',
+            partner=self.partner_a,
+            products=[self.product_order, self.service_order]
+        )
+
+        invoice.invoice_line_ids.filtered(lambda l: l.product_id == self.product_order).name = False
+        invoice._find_and_set_purchase_orders(
+            ['my_match_reference'], invoice.partner_id.id, invoice.amount_total, from_ocr=False)
+
+        self.assertEqual(invoice.invoice_line_ids.purchase_line_id, po.order_line)
 
     def test_po_match_from_ocr(self):
         po = self.init_purchase(confirm=True, products=[self.product_order, self.service_order])
@@ -965,18 +1170,42 @@ class TestInvoicePurchaseMatch(TestPurchaseToInvoiceCommon):
         self.assertTrue(invoice.id not in po.invoice_ids.ids)
 
     def test_manual_matching(self):
-        po = self.init_purchase(confirm=True, products=[self.product_order])
-        bill = self.init_invoice('in_invoice', partner=self.partner_a, products=[self.product_order])
+        """ Test bill matching with different configurations """
+        test_data = [(2, 2), (2, 3), (3, 2)]
+        expected_vals_dict = {
+            'purchase': [
+                [[1, 1], [1, 1]],
+                [[1, 2], [1, 1, 1]],
+                [[1, 1, 1], [1, 1, 1]],
+            ],
+            'receive': [
+                [[1, 1], [1, 1]],
+                [[1, 2], [1, 1, 1]],
+                [[1, 1, 0], [1, 1, 0]],
+            ],
+        }
 
-        self.env['account.move.line'].flush_model()  # necessary to get the bill lines
-        match_lines = self.env['purchase.bill.line.match'].search([('partner_id', '=', self.partner_a.id)])
+        for method, expected_vals in expected_vals_dict.items():
+            for i, test_vals in enumerate(test_data):
+                with self.subTest(test_data=test_data, expected_vals=expected_vals[i], method=method):
+                    nb_order_lines, nb_amls = test_vals
+                    expected_po_lines, expected_amls = expected_vals[i]
+                    if self.product_order.purchase_method != method:
+                        self.product_order.purchase_method = method
+                    po = self.init_purchase(confirm=True, products=[self.product_order] * nb_order_lines)
+                    bill = self.init_invoice('in_invoice', partner=self.partner_a, products=[self.product_order] * nb_amls)
+                    self.env['account.move.line'].flush_model()  # necessary to get the bill lines
 
-        expected_ids = po.order_line.ids + [-lid for lid in bill.invoice_line_ids.ids]
-        self.assertListEqual(match_lines.ids, expected_ids)
+                    match_lines_action = po.action_bill_matching()
+                    match_lines = self.env['purchase.bill.line.match'].search(match_lines_action['domain'])
 
-        match_lines.action_match_lines()
-        self.assertEqual(bill.invoice_line_ids.purchase_line_id, po.order_line)
-        self.assertEqual(po.order_line.qty_invoiced, bill.invoice_line_ids.quantity)
+                    expected_ids = po.order_line.ids + [-lid for lid in bill.invoice_line_ids.ids]
+                    self.assertListEqual(match_lines.ids, expected_ids)
+
+                    match_lines.action_match_lines()
+                    self.assertEqual(bill.invoice_line_ids.purchase_line_id, po.order_line)
+                    self.assertListEqual(po.order_line.mapped('qty_invoiced'), expected_po_lines)
+                    self.assertListEqual(bill.invoice_line_ids.mapped('quantity'), expected_amls)
 
     def test_manual_matching_restrict_no_pol(self):
         """ raises when there's no POL found """
@@ -1272,6 +1501,15 @@ class TestInvoicePurchaseMatch(TestPurchaseToInvoiceCommon):
         self.assertTrue(bill.id in po_2.invoice_ids.ids)
         self.assertEqual(bill.amount_total, po.amount_total + po_2.amount_total)
 
+    def test_link_bill_origin_to_purchase_orders_trailing_comma(self):
+        """Trailing comma in bill reference does not match a PO with an empty reference"""
+        po = self.init_purchase(confirm=True, products=[self.product_order])
+        po.partner_ref = False
+        bill = self.init_invoice('in_invoice', partner=self.partner_b, products=[self.product_order])
+        bill.invoice_origin = "OTHER PO, "
+        bill._link_bill_origin_to_purchase_orders()
+        self.assertNotIn(bill, po.invoice_ids)
+
     def test_po_matching_credit_note(self):
         po = self.init_purchase(partner=self.partner_a, products=[self.product_deliver])
         pol = po.order_line
@@ -1299,3 +1537,48 @@ class TestInvoicePurchaseMatch(TestPurchaseToInvoiceCommon):
             'quantity': 1,
             'product_id': pol.product_id.id,
         }])
+
+    def test_bill_description_only_line_purchase_matching(self):
+        """Test the purchase matching with description-only account line (without a set product)."""
+        bill = self.env['account.move'].create({
+            'move_type': 'in_invoice',
+            'partner_id': self.partner.id,
+            'invoice_date': '2020-06-15',
+            'invoice_line_ids': [Command.create({
+                'product_uom_id': self.uom_unit.id,
+                'quantity': 2,
+                'price_unit': 100,
+            })],
+        })
+        po = self.env['purchase.order'].create({
+            'partner_id': self.partner.id,
+            'order_line': [Command.create({
+                'product_id': self.product_a.id,
+                'product_qty': 2.0,
+                'product_uom': self.uom_unit.id,
+                'price_unit': 100,
+            })],
+        })
+        po.button_confirm()
+        self.env['purchase.order.line'].flush_model()
+
+        bill_matches = self.env['purchase.bill.line.match'].search(bill.action_purchase_matching()['domain'])
+        self.assertRecordValues(bill_matches, [
+            {
+                'product_uom_qty': 2.0,
+                'product_uom_price': 100,
+                'billed_amount_untaxed': 0.0,
+                'aml_id': False,
+            },
+            {
+                'product_uom_qty': 2.0,
+                'product_uom_price': 100,
+                'billed_amount_untaxed': 200.0,
+                'aml_id': bill.invoice_line_ids.id,
+            },
+        ])
+        po_matches = self.env['purchase.bill.line.match'].search(po.action_bill_matching()['domain'])
+        self.assertEqual(po_matches, bill_matches)
+        po_matches.action_match_lines()
+        self.assertEqual(po.invoice_ids, bill)
+        self.assertEqual(po.order_line.product_id, bill.invoice_line_ids.product_id)

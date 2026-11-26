@@ -6,17 +6,17 @@
 # Wil Odoo, 2024
 # Junko Augias, 2025
 #
-# Ryoko Tsuda <ryoko@quartile.co>, 2025.
+# Ryoko Tsuda <ryoko@quartile.co>, 2025, 2026.
 # "Junko Augias (juau)" <juau@odoo.com>, 2025, 2026.
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
-# Yoshi Tashiro <tashiro@quartile.co>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Yoshi Tashiro <tashiro@quartile.co>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2026-01-29 06:34+0000\n"
-"Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
+"POT-Creation-Date: 2026-11-13 17:37+0000\n"
+"PO-Revision-Date: 2026-11-14 10:33+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-18/"
 "purchase/ja/>\n"
 "Language: ja\n"
@@ -24,7 +24,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: purchase
 #: model:ir.actions.report,print_report_name:purchase.action_report_purchase_order
@@ -95,12 +95,12 @@ msgstr "-&gt;"
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
 msgid "3-way matching"
-msgstr "入荷請求差異照合"
+msgstr "3点照合(発注・入荷・請求)"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_res_config_settings__module_account_3way_match
 msgid "3-way matching: purchases, receptions and bills"
-msgstr "入荷請求差異照合: 購買注文、入荷、請求書"
+msgstr "3点照合: 購買オーダ、入荷、仕入先請求書"
 
 #. module: purchase
 #: model:mail.template,body_html:purchase.email_template_edi_purchase_reminder
@@ -546,7 +546,7 @@ msgstr "<strong>発注日:</strong>"
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.report_purchaseorder_document
 msgid "<strong>Order Deadline:</strong>"
-msgstr "<strong>オーダ期日</strong>"
+msgstr "<strong>期日</strong>"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.report_purchaseorder_document
@@ -761,7 +761,7 @@ msgstr "全て"
 #. odoo-javascript
 #: code:addons/purchase/static/src/views/purchase_dashboard.xml:0
 msgid "All Draft RFQs"
-msgstr "全てのドラフト見積依頼"
+msgstr "全ての下書き見積依頼"
 
 #. module: purchase
 #. odoo-javascript
@@ -1024,7 +1024,7 @@ msgstr "取消済"
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.report_purchaseorder_document
 msgid "Cancelled Purchase Order #"
-msgstr "取消済購買注文番号 #"
+msgstr "取消済み購買注文番号 #"
 
 #. module: purchase
 #. odoo-python
@@ -1092,7 +1092,7 @@ msgstr "Eメール作成"
 #. module: purchase
 #: model:ir.model,name:purchase.model_res_config_settings
 msgid "Config Settings"
-msgstr "コンフィグ設定"
+msgstr "構成設定"
 
 #. module: purchase
 #: model:ir.ui.menu,name:purchase.menu_purchase_config
@@ -1102,7 +1102,7 @@ msgstr "設定"
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
 msgid "Confirm Order"
-msgstr "オーダを確定"
+msgstr "オーダ確定"
 
 #. module: purchase
 #: model:ir.actions.server,name:purchase.action_confirm_rfqs
@@ -1285,7 +1285,7 @@ msgstr "入荷までの日数"
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_order
 msgid "Decline"
-msgstr "拒否"
+msgstr "辞退"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__company_price_include
@@ -1408,12 +1408,12 @@ msgstr "前受金"
 #. module: purchase
 #: model:ir.model.fields.selection,name:purchase.selection__purchase_report__state__draft
 msgid "Draft RFQ"
-msgstr "ドラフト見積依頼書"
+msgstr "下書き見積依頼書"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.view_purchase_order_filter
 msgid "Draft RFQs"
-msgstr "ドラフト見積依頼書"
+msgstr "下書き見積依頼書"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_order
@@ -1576,7 +1576,7 @@ msgstr "チェックした場合は、新しいメッセージに注意が必要
 #: model:ir.model.fields,help:purchase.field_purchase_order__message_has_error
 #: model:ir.model.fields,help:purchase.field_purchase_order__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "チェックした場合は、一部のメッセージに配信エラーが発生されました。"
+msgstr "チェックされている場合、一部のメッセージで送信エラーが発生しています。"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
@@ -1890,7 +1890,7 @@ msgstr "活動期限"
 #. odoo-javascript
 #: code:addons/purchase/static/src/views/purchase_dashboard.xml:0
 msgid "My Draft RFQs"
-msgstr "自分のドラフト見積依頼"
+msgstr "自分の下書き見積依頼"
 
 #. module: purchase
 #. odoo-javascript
@@ -1929,7 +1929,13 @@ msgstr "名称"
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
 msgid "Name, TIN, Email, or Reference"
-msgstr "名称/適格請求書発行事業者番号/Eメール/参照"
+msgstr "名称/適格請求書発行事業者番号/メール/参照番号"
+
+#. module: purchase
+#. odoo-python
+#: code:addons/purchase/models/purchase_order.py:0
+msgid "New"
+msgstr "新規"
 
 #. module: purchase
 #. odoo-python
@@ -2012,7 +2018,7 @@ msgstr "メモ"
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
 msgid "Notes"
-msgstr "ノート"
+msgstr "メモ"
 
 #. module: purchase
 #: model:ir.model.fields.selection,name:purchase.selection__purchase_order__invoice_status__no
@@ -2038,7 +2044,7 @@ msgstr "エラー数"
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr "アクションを必要とするメッセージの数"
+msgstr "対応が必要なメッセージ数"
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__message_has_error_counter
@@ -2087,6 +2093,12 @@ msgid ""
 msgstr ""
 "仕入先にプロダクトをオーダして見積依頼を確定すると、購買オーダに変換されま"
 "す。"
+
+#. module: purchase
+#. odoo-python
+#: code:addons/purchase/models/purchase_order.py:0
+msgid "Only a purchase manager can approve this purchase order."
+msgstr ""
 
 #. module: purchase
 #. odoo-python
@@ -2196,7 +2208,7 @@ msgstr "支払条件"
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_portal_content
 msgid "Payment terms"
-msgstr "支払期限"
+msgstr "支払条件"
 
 #. module: purchase
 #. odoo-python
@@ -2460,6 +2472,7 @@ msgstr "購買オーダ数"
 #: model:ir.actions.act_window,name:purchase.action_purchase_history
 #: model:ir.model,name:purchase.model_purchase_order_line
 #: model:ir.model.fields,field_description:purchase.field_account_move_line__purchase_line_id
+#: model:ir.model.fields,field_description:purchase.field_account_tax__purchase_order_line_ids
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_line_form2
 msgid "Purchase Order Line"
@@ -2599,7 +2612,7 @@ msgstr "購買"
 #. module: purchase
 #: model:ir.model,name:purchase.model_purchase_bill_union
 msgid "Purchases & Bills Union"
-msgstr "Purchases&Bills Union"
+msgstr "購買・仕入先請求書ユニオン"
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__dest_address_id
@@ -2798,7 +2811,7 @@ msgstr "参照"
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.view_purchase_bill_union_tree
 msgid "Reference Document"
-msgstr "参考資料"
+msgstr "元ドキュメント"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report__product_uom
@@ -2892,7 +2905,7 @@ msgstr "担当ユーザ"
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr "SMS送信エラー"
+msgstr "SMS配信エラー"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_portal_content
@@ -3023,7 +3036,7 @@ msgstr "シーケンス"
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
 msgid "Set to Draft"
-msgstr "ドラフトに設定"
+msgstr "下書きに設定"
 
 #. module: purchase
 #: model:ir.actions.act_window,name:purchase.action_purchase_configuration
@@ -3066,7 +3079,7 @@ msgstr "Odooで始めましょう"
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_bill_line_match__state
 msgid "State"
-msgstr "都道府県・州"
+msgstr "ステータス"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__state
@@ -3227,6 +3240,14 @@ msgid "The order receipt has been declined by %s."
 msgstr "オーダ入荷が %sによって却下されました。"
 
 #. module: purchase
+#. odoo-python
+#: code:addons/purchase/models/res_partner.py:0
+msgid "The partner cannot be deleted because it is used as a dropship address"
+msgstr ""
+"この取引先は、ドロップシップ(直送)先住所として使用されているため削除できませ"
+"ん"
+
+#. module: purchase
 #: model_terms:ir.actions.act_window,help:purchase.act_res_partner_2_purchase_order
 msgid ""
 "The request for quotation is the first step of the purchases flow. Once\n"
@@ -3371,7 +3392,7 @@ msgstr "未送信"
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_view_search
 #: model_terms:ir.ui.view,arch_db:purchase.view_purchase_order_filter
 msgid "Today Activities"
-msgstr "本日の活動"
+msgstr "今日の活動"
 
 #. module: purchase
 #. odoo-python
@@ -3452,7 +3473,7 @@ msgstr "メッセージを入力..."
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr "記録上の例外活動の種類。"
+msgstr "レコード上の例外の活動タイプ。"
 
 #. module: purchase
 #. odoo-python
@@ -3630,7 +3651,7 @@ msgid ""
 "                    document in Odoo."
 msgstr ""
 "仕入先請求書は、発注書または領収書に基づいて事前に生成できます。これにより、"
-"Odooのドラフト文書に従って、ベンダーから受け取る請求書を管理できます。"
+"Odooの下書き文書に従って、ベンダーから受け取る請求書を管理できます。"
 
 #. module: purchase
 #. odoo-python

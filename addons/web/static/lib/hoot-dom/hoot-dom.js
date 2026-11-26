@@ -61,7 +61,7 @@ export {
     freezeTime,
     unfreezeTime,
     microTick,
-    setFrameRate,
+    _setFrameRate as setFrameRate,
     tick,
     waitUntil,
 } from "./helpers/time";
@@ -71,7 +71,6 @@ export {
 //-----------------------------------------------------------------------------
 
 // DOM
-export const observe = interactor("query", dom.observe);
 export const waitFor = interactor("query", dom.waitFor);
 export const waitForNone = interactor("query", dom.waitForNone);
 

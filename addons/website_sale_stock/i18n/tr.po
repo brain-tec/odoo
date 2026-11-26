@@ -12,13 +12,13 @@
 # Murat Durmuş <muratd@projetgrup.com>, 2024
 # Deniz Guvener_Odoo <degu@odoo.com>, 2025
 # Tugay Hatıl <tugayh@projetgrup.com>, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:38+0000\n"
-"PO-Revision-Date: 2025-11-25 09:49+0000\n"
+"POT-Creation-Date: 2026-07-03 17:40+0000\n"
+"PO-Revision-Date: 2026-10-20 14:03+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Turkish <https://translate.odoo.com/projects/odoo-18/"
 "website_sale_stock/tr/>\n"
@@ -27,7 +27,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website_sale_stock
 #: model_terms:ir.ui.view,arch_db:website_sale_stock.res_config_settings_view_form
@@ -107,7 +107,7 @@ msgstr "Geçersiz e-posta"
 
 #. module: website_sale_stock
 #. odoo-javascript
-#: code:addons/website_sale_stock/static/src/xml/website_sale_stock_product_availability.xml:0
+#: code:addons/website_sale_stock/static/src/js/website_sale.js:0
 msgid "Invalid email"
 msgstr "Geçersiz e-posta"
 
@@ -150,6 +150,12 @@ msgstr "Stokta kalmadı"
 #: model:ir.model.fields,field_description:website_sale_stock.field_product_template__out_of_stock_message
 msgid "Out-of-Stock Message"
 msgstr "Stokta Kalmadı Mesajı"
+
+#. module: website_sale_stock
+#. odoo-python
+#: code:addons/website_sale_stock/controllers/main.py:0
+msgid "Please sign in to proceed."
+msgstr ""
 
 #. module: website_sale_stock
 #. odoo-python
@@ -242,6 +248,12 @@ msgid "The product '%(product_name)s' is now available"
 msgstr "'%(product_name)s' ürünü artık mevcut"
 
 #. module: website_sale_stock
+#. odoo-python
+#: code:addons/website_sale_stock/controllers/main.py:0
+msgid "This product is not eligible for stock notifications."
+msgstr ""
+
+#. module: website_sale_stock
 #. odoo-javascript
 #: code:addons/website_sale_stock/static/src/js/website_sale_reorder.js:0
 msgid "This product is out of stock."
@@ -313,8 +325,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/website_sale_stock/models/sale_order.py:0
 msgid "You ask for %(desired_qty)s products but only %(new_qty)s is available"
-msgstr ""
-"%(desired_qty)s ürünleri istiyorsunuz ancak yalnızca %(new_qty)s mevcut"
+msgstr "%(desired_qty)s ürünleri istiyorsunuz ancak yalnızca %(new_qty)s mevcut"
 
 #. module: website_sale_stock
 #. odoo-javascript

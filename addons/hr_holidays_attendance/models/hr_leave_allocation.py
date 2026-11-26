@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import datetime
+from pytz import timezone, UTC
 
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
@@ -34,27 +35,19 @@ class HolidaysAllocation(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         res = super().create(vals_list)
-        for allocation in res:
-            if allocation.overtime_deductible:
-                duration = allocation.number_of_hours_display
-                if duration > allocation.employee_id.total_overtime:
-                    raise ValidationError(_('The employee does not have enough overtime hours to request this leave.'))
-                if not allocation.overtime_id:
-                    allocation.sudo().overtime_id = self.env['hr.attendance.overtime'].sudo().create({
-                        'employee_id': allocation.employee_id.id,
-                        'date': allocation.date_from,
-                        'adjustment': True,
-                        'duration': -1 * duration,
-                    })
+        res._validate_overtime_and_create_adjustment()
         return res
 
     def write(self, vals):
         res = super().write(vals)
-        if 'number_of_days' not in vals:
+        if 'number_of_days' not in vals and 'holiday_status_id' not in vals:
             return res
         if not self.env.user.has_group("hr_holidays.group_hr_holidays_user") and any(allocation.state not in ('draft', 'confirm') for allocation in self):
             raise ValidationError(_('Only an Officer or Administrator is allowed to edit the allocation duration in this status.'))
+        self._validate_overtime_and_create_adjustment()
         for allocation in self.sudo().filtered('overtime_id'):
+            if 'number_of_days' not in vals:
+                continue
             employee = allocation.employee_id
             duration = allocation.number_of_hours_display
             overtime_duration = allocation.overtime_id.sudo().duration
@@ -64,18 +57,53 @@ class HolidaysAllocation(models.Model):
                 allocation.overtime_id.sudo().duration = -1 * duration
         return res
 
+    @api.ondelete(at_uninstall=False)
+    def _unlink_overtime_id(self):
+        self.overtime_id.sudo().unlink()
+
+    def action_set_to_confirm(self):
+        res = super().action_set_to_confirm()
+        self._validate_overtime_and_create_adjustment()
+        return res
+
     def action_refuse(self):
         res = super().action_refuse()
         self.overtime_id.sudo().unlink()
         return res
 
+    def _validate_overtime_and_create_adjustment(self):
+        overtime_vals_list = []
+        allocations_to_update = []
+
+        for allocation in self:
+            if not (allocation.overtime_deductible and not allocation.overtime_id):
+                continue
+            duration = allocation.number_of_hours_display
+            if duration > allocation.employee_id.total_overtime:
+                raise ValidationError(_('The employee does not have enough overtime hours to request this leave.'))
+            overtime_vals_list.append({
+                'employee_id': allocation.employee_id.id,
+                'date': allocation.date_from,
+                'adjustment': True,
+                'duration': -1 * duration,
+            })
+            allocations_to_update.append(allocation)
+
+        if overtime_vals_list:
+            overtimes = self.env['hr.attendance.overtime'].sudo().create(overtime_vals_list)
+            for allocation, overtime in zip(allocations_to_update, overtimes):
+                allocation.sudo().overtime_id = overtime.id
+
     def _get_accrual_plan_level_work_entry_prorata(self, level, start_period, start_date, end_period, end_date):
         self.ensure_one()
         if level.frequency != 'hourly' or level.frequency_hourly_source != 'attendance':
             return super()._get_accrual_plan_level_work_entry_prorata(level, start_period, start_date, end_period, end_date)
+
+        employee_tz = timezone(self.employee_id.tz or 'UTC')
         datetime_min_time = datetime.min.time()
-        start_dt = datetime.combine(start_date, datetime_min_time)
-        end_dt = datetime.combine(end_date, datetime_min_time)
+        # A pytz timezone must be localized: given as tzinfo, it is the local mean time (e.g. +00:17 in Brussels)
+        start_dt = employee_tz.localize(datetime.combine(start_date, datetime_min_time)).astimezone(UTC).replace(tzinfo=None)
+        end_dt = employee_tz.localize(datetime.combine(end_date, datetime_min_time)).astimezone(UTC).replace(tzinfo=None)
 
         # Search for any attendance overlapping the window
         attendances = self.env['hr.attendance'].sudo().search([
@@ -86,6 +114,16 @@ class HolidaysAllocation(models.Model):
 
         total_worked_hours = 0.0
         for attendance in attendances:
-            total_worked_hours += attendance._get_worked_hours_in_range(start_dt, end_dt)
+            worked_hours = attendance._get_worked_hours_in_range(start_dt, end_dt)
+            # Only the approved extra hours count: the ones still to approve or refused are left out
+            approved_overtime = attendance.validated_overtime_hours if attendance.overtime_status == 'approved' else 0.0
+            unapproved_overtime = max(0.0, attendance.overtime_hours - approved_overtime)
+            if worked_hours and unapproved_overtime:
+                # Prorated to the part of the attendance in the period (an attendance across midnight)
+                attendance_hours = attendance.worked_hours or attendance._get_worked_hours_in_range(attendance.check_in, attendance.check_out)
+                if attendance_hours:
+                    unapproved_overtime *= min(1.0, worked_hours / attendance_hours)
+                worked_hours = max(0.0, worked_hours - unapproved_overtime)
+            total_worked_hours += worked_hours
 
         return total_worked_hours

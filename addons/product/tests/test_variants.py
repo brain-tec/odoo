@@ -401,6 +401,17 @@ class TestVariants(ProductVariantsCommon):
         product = product_form.save()
         self.assertEqual(uom_unit, product.uom_id)
 
+    def test_open_product_form_with_default_uom_id_is_false_and_ir_default(self):
+        """ Test default UoM is used when a ir.default record defines a specific value,
+        and when default_uom_id is false. """
+        self.env['ir.default'].set("product.template", "uom_id", self.uom_dozen.id)
+        product_form = Form(self.env['product.product'].with_context(
+            default_uom_id=False,
+        ))
+        product_form.name = 'Test Product'
+        product = product_form.save()
+        self.assertEqual(self.uom_dozen.id, product.uom_id.id)
+
     def test_single_variant_template_computed_values_after_creation(self):
         """Check that only one packaging gets created along with a single-attribute product."""
         product_template = self.env['product.template'].create({
@@ -855,6 +866,27 @@ class TestVariantsImages(ProductVariantsCommon):
 
         # last update changed for the variant without image
         self.assertLess(old_last_update, new_last_update)
+
+    def test_batch_create_variants_with_image(self):
+        """Creating several variants with an image in one batch keeps the image."""
+        template = self.env['product.template'].create({'name': 'batch template'})
+        size = self.env['product.attribute'].create({
+            'name': 'Size', 'create_variant': 'dynamic',
+            'value_ids': [Command.create({'name': 'S'}), Command.create({'name': 'M'})],
+        })
+        ptal = self.env['product.template.attribute.line'].create({
+            'attribute_id': size.id,
+            'product_tmpl_id': template.id,
+            'value_ids': [Command.set(size.value_ids.ids)],
+        })
+        template.product_variant_ids.unlink()
+        variants = self.env['product.product'].create([{
+            'product_tmpl_id': template.id,
+            'product_template_attribute_value_ids': [Command.set(ptav.ids)],
+            'image_1920': self.images['red'],
+        } for ptav in ptal.product_template_value_ids])
+        self.assertEqual(template.image_1920, self.images['red'])
+        self.assertTrue(all(v.image_1920 for v in variants))
 
     def test_update_images_with_archived_variants(self):
         """Update images after variants have been archived"""
@@ -1449,6 +1481,37 @@ class TestVariantsArchive(ProductVariantsCommon):
         multiple_archived.action_archive()
         (multiple_archived + multiple_active).unlink()
         self.assertFalse(products.exists())
+
+    @mute_logger('odoo.models.unlink')
+    def test_add_attribute_to_archived_template(self):
+        template = self.env['product.template'].create({
+            'name': 'Test Product',
+            'attribute_line_ids': [Command.create({
+                'attribute_id': self.size_attribute.id,
+                'value_ids': [Command.link(self.size_attribute_s.id)],
+            })]
+        })
+        self.assertEqual(len(template.product_variant_ids), 1)
+        template_id = template.id
+        template.action_archive()
+        self.assertFalse(template.active)
+        template.write({
+            'attribute_line_ids': [Command.create({
+                'attribute_id': self.color_attribute.id,
+                'value_ids': [
+                    Command.link(self.color_attribute_red.id),
+                    Command.link(self.color_attribute_blue.id),
+                ],
+            })]
+        })
+        template = self.env['product.template'].browse(template_id).with_context(active_test=False)
+        self.assertTrue(template.exists(), "Template should not be deleted when adding attributes to archived template")
+        self.assertFalse(template.active, "Template should remain archived")
+        # Verify new variants are created but remain archived
+        all_variants = template.product_variant_ids
+        self.assertEqual(len(all_variants), 2, "Should create 2 variants: S+Red and S+Blue")
+        for variant in all_variants:
+            self.assertFalse(variant.active, "Variants should remain archived when template is archived")
 
 @tagged('post_install', '-at_install')
 class TestVariantWrite(TransactionCase):

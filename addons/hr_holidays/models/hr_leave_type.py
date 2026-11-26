@@ -32,7 +32,11 @@ class HolidaysType(models.Model):
     name = fields.Char('Time Off Type', required=True, translate=True)
     sequence = fields.Integer(default=100,
         help='The type with the smallest sequence is the default value in time off request')
-    create_calendar_meeting = fields.Boolean(string="Display Time Off in Calendar", default=True)
+    create_calendar_meeting = fields.Boolean(
+        string="Display Time Off in Calendar",
+        default=True,
+        help="If this field is checked, every leave request of this type will have a corresponding entry in the calendar application. There will be no entry if this stays unchecked."
+    )
     color = fields.Integer(string='Color', help="The color selected here will be used in every screen with the time off type.")
     icon_id = fields.Many2one('ir.attachment', string='Cover Image', domain="[('res_model', '=', 'hr.leave.type'), ('res_field', '=', 'icon_id')]")
     active = fields.Boolean('Active', default=True,
@@ -287,19 +291,18 @@ class HolidaysType(models.Model):
             target_date = self._context.get('leave_date_from', None)
         data_days = self.get_allocation_data(employee, target_date)[employee]
         for holiday_status in self:
-            result = [item for item in data_days if item[0] == holiday_status.name]
+            result = [item for item in data_days if item[3] == holiday_status.id]
             leave_type_tuple = result[0] if result else ('', {})
             holiday_status.max_leaves = leave_type_tuple[1].get('max_leaves', 0)
             holiday_status.leaves_taken = leave_type_tuple[1].get('leaves_taken', 0)
             holiday_status.virtual_remaining_leaves = leave_type_tuple[1].get('virtual_remaining_leaves', 0)
 
     def _compute_allocation_count(self):
-        min_datetime = fields.Datetime.to_string(datetime.now().replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0))
-        max_datetime = fields.Datetime.to_string(datetime.now().replace(month=12, day=31, hour=23, minute=59, second=59))
+        today = fields.Date.to_string(date.today())
         domain = [
             ('holiday_status_id', 'in', self.ids),
-            ('date_from', '>=', min_datetime),
-            ('date_from', '<=', max_datetime),
+            ('date_from', '<=', today),
+            '|', ('date_to', '=', False), ('date_to', '>=', today),
             ('state', 'in', ('confirm', 'validate')),
         ]
 
@@ -473,6 +476,7 @@ class HolidaysType(models.Model):
             ignored_leave_ids=self.env.context.get('ignored_leave_ids')
         )._get_consumed_leaves(self, target_date)
         leave_type_requires_allocation = self.filtered(lambda lt: lt.requires_allocation == 'yes')
+        is_holiday_user = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
 
         for employee in employees:
             for leave_type in leave_type_requires_allocation:
@@ -497,6 +501,7 @@ class HolidaysType(models.Model):
                         'icon': leave_type.sudo().icon_id.url,
                         'allows_negative': leave_type.allows_negative,
                         'max_allowed_negative': leave_type.max_allowed_negative,
+                        'can_request_allocation': leave_type.employee_requests == 'yes' or is_holiday_user,
                     },
                     leave_type.requires_allocation,
                     leave_type.id)

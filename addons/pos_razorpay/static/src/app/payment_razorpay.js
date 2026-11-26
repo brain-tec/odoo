@@ -1,3 +1,5 @@
+/* global Sha1 */
+
 import { _t } from "@web/core/l10n/translation";
 import { PaymentInterface } from "@point_of_sale/app/payment/payment_interface";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
@@ -88,25 +90,26 @@ export class PaymentRazorpay extends PaymentInterface {
     _process_razorpay(cid) {
         const order = this.pos.get_order();
         const line = order.get_selected_paymentline();
+        const sequenceNumber = order.payment_ids.filter(
+            (pi) => pi.payment_method_id.use_payment_terminal === "razorpay"
+        ).length;
 
         if (line.amount < 0) {
             this._showError(_t("Cannot process transactions with negative amount."));
             return Promise.resolve();
         }
 
-        const orderId = order.name.replace(" ", "").replaceAll("-", "").toUpperCase();
-        const referencePrefix = this.pos.config.name.replace(/\s/g, "").slice(0, 4);
-        localStorage.setItem(
-            "referenceId",
-            referencePrefix + "/" + orderId + "/" + crypto.randomUUID().replaceAll("-", "")
+        const referenceId = Sha1.hash(
+            `${this.pos.config.id}/${order.uuid}/${this.payment_method_id.id}/${this.pos.config.currency_id.name}/${line.amount}/${sequenceNumber}`
         );
+        localStorage.setItem("referenceId", referenceId);
         const data = {
             amount: line.amount,
-            referenceId: localStorage.getItem("referenceId"),
+            referenceId: referenceId,
         };
-        return this._call_razorpay(data, "razorpay_make_payment_request").then((data) => {
-            return this._razorpay_handle_response(data);
-        });
+        return this._call_razorpay(data, "razorpay_make_payment_request").then((data) =>
+            this._razorpay_handle_response(data)
+        );
     }
 
     /**

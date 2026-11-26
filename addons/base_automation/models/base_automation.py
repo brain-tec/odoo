@@ -702,7 +702,7 @@ class BaseAutomation(models.Model):
             return
 
         # mark the remaining records as done (to avoid recursive processing)
-        if self.env.context.get('__action_feedback'):
+        if records.env.context.get('__action_feedback'):
             # modify the context dict in place: this is useful when fields are
             # computed during the pre/post filtering, in order to know which
             # automations have already been run by the computation itself
@@ -719,7 +719,7 @@ class BaseAutomation(models.Model):
         automation_done[self] = records_done + records
 
         if records and 'date_automation_last' in records._fields:
-            records.date_automation_last = fields.Datetime.now()
+            records.sudo().date_automation_last = fields.Datetime.now()
 
         # prepare the contexts for server actions
         contexts = [
@@ -928,6 +928,7 @@ class BaseAutomation(models.Model):
                 automations = self.env['base.automation']._get_actions(self, [mail_trigger])
                 for automation in automations.with_context(old_values=None):
                     records = automation._filter_pre(self, feedback=True)
+                    records = automation._filter_post(records, feedback=True)
                     _logger.debug(
                         "Processing automation rule %s (#%s) on %s records (_message_post)",
                         automation.sudo().name, automation.sudo().id, len(records),

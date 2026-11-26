@@ -48,7 +48,7 @@
                         </td>
                         <td t-if="line.is_exchange" colspan="2">
                             <i class="o_field_widget text-start text-muted text-start">
-                                <span class="oe_form_field oe_form_field_float oe_form_field_monetary fw-bold">
+                                <span class="oe_form_field oe_form_field_float oe_form_field_monetary fw-bold" dir="ltr">
                                     <t t-out="line.amount_formatted"/>
                                 </span>
                                 <span> Exchange Difference</span>
@@ -56,7 +56,7 @@
                         </td>
                     </t>
                     <td t-if="!line.is_exchange" style="text-align:right;">
-                        <span class="oe_form_field oe_form_field_float oe_form_field_monetary" style="margin-left: -10px;">
+                        <span class="oe_form_field oe_form_field_float oe_form_field_monetary" style="margin-left: -10px;" dir="ltr">
                             <t t-out="line.amount_formatted"/>
                         </span>
                     </td>
@@ -109,7 +109,7 @@
                     </table>
                 </div>
                 <button class="btn btn-sm btn-primary js_unreconcile_payment float-start" t-if="!props.is_exchange" style="margin-top:5px; margin-bottom:5px;" groups="account.group_account_invoice" t-on-click="() => props._onRemoveMoveReconcile(props.move_id, props.partial_id)">Unreconcile</button>
-                <button class="btn btn-sm btn-secondary js_open_payment float-end" style="margin-top:5px; margin-bottom:5px;" t-on-click="() => props._onOpenMove(props.move_id)">View</button>
+                <button class="btn btn-sm btn-secondary js_open_payment float-end" t-if="props.can_open_move" style="margin-top:5px; margin-bottom:5px;" t-on-click="() => props._onOpenMove(props.move_id)">View</button>
             </div>
         </div>
     </t>

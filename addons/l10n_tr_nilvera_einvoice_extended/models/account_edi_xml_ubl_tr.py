@@ -286,6 +286,41 @@ class AccountEdiXmlUblTr(models.AbstractModel):
             vals['withholding_tax_total_vals_list'] = self._get_tr_tax_totals(line.move_id, taxes_vals, withholding=True)
         return vals
 
+    def _get_invoice_line_item_vals(self, line, taxes_vals):
+        """Fill <cbc:Name> and <cbc:Description> from the line label.
+
+        The first line of the label is the name (the product name stays when there is a product),
+        the next lines are the description, falling back to the product's sales description.
+        On bills, the description stays the product's purchase description.
+
+        :param line: The invoice line.
+        :param taxes_vals: The tax details for the current invoice line.
+        :return: A dictionary of invoice line item values.
+        """
+        line_item_vals = super()._get_invoice_line_item_vals(line, taxes_vals)
+        if line.move_id.is_purchase_document():
+            line_item_vals["description"] = self._l10n_tr_get_item_description(line)
+        else:
+            name, _separator, description = (line.name or "").partition("\n")
+            if not line.product_id:
+                line_item_vals["name"] = name.strip() or line_item_vals["name"]
+            line_item_vals["description"] = " ".join(description.split()) or self._l10n_tr_get_item_description(line)
+        return line_item_vals
+
+    def _l10n_tr_get_item_description(self, line):
+        """Build the <cbc:Description> value from the product's commercial description.
+
+        Uses the purchase description for purchase documents and the sale description
+        otherwise. The internal reference is not repeated here as it is already
+        reported in <cac:SellersItemIdentification>, so the node is dropped when the
+        description is not set.
+
+        :param line: The invoice line.
+        :return: The description string, or ``False`` when there is nothing to report.
+        """
+        product = line.product_id
+        return product.description_purchase if line.move_id.is_purchase_document() else product.description_sale
+
     def _get_invoice_monetary_total_vals(self, invoice, taxes_vals, line_extension_amount, allowance_total_amount, charge_total_amount):
         # EXTENDS account.edi.xml.ubl_20
         vals = super()._get_invoice_monetary_total_vals(invoice, taxes_vals, line_extension_amount, allowance_total_amount, charge_total_amount)
@@ -349,3 +384,19 @@ class AccountEdiXmlUblTr(models.AbstractModel):
             if element.text == "NO_ID":
                 element.text = ""
         return etree.tostring(xml_root, xml_declaration=True, encoding="UTF-8"), errors
+
+    def _import_fill_invoice(self, invoice, tree, qty_factor):
+        # EXTENDS account.edi.xml.ubl_20
+        # Kept for stable: the line label now comes from the XML (see _retrieve_line_vals).
+        return super()._import_fill_invoice(invoice, tree, qty_factor)
+
+    def _retrieve_line_vals(self, tree, document_type=False, qty_factor=1):
+        # EXTENDS account.edi.common
+        # Without a matching product, the label is the item name followed by the item description.
+        line_vals = super()._retrieve_line_vals(tree, document_type, qty_factor)
+        if not line_vals["product_id"]:
+            item_name = (tree.findtext("./{*}Item/{*}Name") or "").strip()
+            description = (tree.findtext("./{*}Item/{*}Description") or "").strip()
+            if item_name and description and item_name != description:
+                line_vals["name"] = f"{item_name}\n{description}"
+        return line_vals

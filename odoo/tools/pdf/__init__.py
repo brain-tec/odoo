@@ -173,13 +173,13 @@ def fill_form_fields_pdf(writer, form_fields):
     :return: a filled PDF datastring
     '''
 
+    pypdf_version = parse_version(pypdf.__version__)
+
     # This solves a known problem with PyPDF2, where with some pdf software, forms fields aren't
     # correctly filled until the user click on it, see: https://github.com/py-pdf/pypdf/issues/355
     if hasattr(writer, 'set_need_appearances_writer'):
         writer.set_need_appearances_writer()
-        is_upper_version_pypdf2 = True
     else:  # This method was renamed in PyPDF2 2.0
-        is_upper_version_pypdf2 = False
         catalog = writer._root_object
         # get the AcroForm tree
         if "/AcroForm" not in catalog:
@@ -188,12 +188,20 @@ def fill_form_fields_pdf(writer, form_fields):
             })
         writer._root_object["/AcroForm"][NameObject("/NeedAppearances")] = BooleanObject(True)
 
-    nbr_pages = len(writer.pages) if is_upper_version_pypdf2 else writer.getNumPages()
+    if pypdf_version >= parse_version('3.13.0'):
+        catalog = writer._root_object
+        acroform = catalog.get("/AcroForm").get_object()
+        if "/Fields" not in acroform:
+            acroform[NameObject("/Fields")] = ArrayObject()
+        if "/DR" not in acroform:
+            acroform[NameObject("/DR")] = DictionaryObject()
+
+    nbr_pages = len(writer.pages) if pypdf_version >= parse_version('1.28.0') else writer.getNumPages()
 
     for page_id in range(0, nbr_pages):
         page = writer.getPage(page_id)
 
-        if is_upper_version_pypdf2:
+        if pypdf_version >= parse_version('2.11.0'):
             writer.update_page_form_field_values(page, form_fields)
         else:
             # Known bug on previous versions of PyPDF2, fixed in 2.11
@@ -286,12 +294,13 @@ def add_banner(pdf_stream, text=None, logo=False, thickness=2 * cm):
     watermark_pdf = PdfFileReader(packet, overwriteWarnings=False)
     new_pdf = PdfFileWriter()
     for p in range(old_pdf.getNumPages()):
-        new_page = old_pdf.getPage(p)
+        new_pdf.addPage(old_pdf.getPage(p))
+        new_page = new_pdf.getPage(-1)
         # Remove annotations (if any), to prevent errors in PyPDF2
         if '/Annots' in new_page:
             del new_page['/Annots']
         new_page.mergePage(watermark_pdf.getPage(p))
-        new_pdf.addPage(new_page)
+        new_page.compressContentStreams()
 
     # Write the new pdf into a new output stream
     output = io.BytesIO()
@@ -328,6 +337,11 @@ def reshape_text(text):
     if first_letter_is_rtl and no_letter_is_ltr:
         text = reshape(text)
         text = text[::-1]
+        # Numbers are written left-to-right even inside right-to-left text,
+        # so restore the original order of their digits after the flip.
+        text = re.sub(r'\d+(?:[.,:/\u00A0\u060C\u066B\u066C\u202F]\d+)*', lambda match: match[0][::-1], text)
+        # Brackets are mirrored in right-to-left text.
+        text = text.translate(str.maketrans('()[]{}<>«»', ')(][}{><»«'))
 
     return text
 
@@ -343,14 +357,25 @@ class OdooPdfFileReader(PdfFileReader):
             # If the PDF is owner-encrypted, try to unwrap it by giving it an empty user password.
             self.decrypt('')
 
-        try:
-            file_path = self.trailer["/Root"].get("/Names", {}).get("/EmbeddedFiles", {}).get("/Names")
-
-            if not file_path:
-                return []
+        def _traverse_nodes(obj):
+            file_path = obj.get("/Names", [])
             for p in file_path[1::2]:
                 attachment = p.getObject()
-                yield (attachment["/F"], attachment["/EF"]["/F"].getObject().getData())
+                try:
+                    yield (attachment["/F"], attachment["/EF"]["/F"].getObject().getData())
+                except (KeyError, AttributeError):
+                    continue
+            for kid in obj.get("/Kids", []):
+                if id(kid) not in visited_nodes:
+                    visited_nodes.add(id(kid))
+                    yield from _traverse_nodes(kid.getObject())
+
+        try:
+            file_path = self.trailer["/Root"].get("/Names", {}).get("/EmbeddedFiles", {})
+            if not file_path:
+                return []
+            visited_nodes = set()
+            yield from _traverse_nodes(file_path)
         except Exception:  # noqa: BLE001
             # malformed pdf (i.e. invalid xref page)
             return []
@@ -389,19 +414,35 @@ class OdooPdfFileWriter(PdfFileWriter):
             adapted_subtype = ''
         return adapted_subtype
 
-    def add_attachment(self, name, data, subtype=None):
+    def add_attachment(self, name, data, subtype=None, afrelationship='/Data'):
         """
         Add an attachment to the pdf. Supports adding multiple attachment, while respecting PDF/A rules.
         :param name: The name of the attachement
         :param data: The data of the attachement
         :param subtype: The mime-type of the attachement. This is required by PDF/A, but not essential otherwise.
+        :param afrelationship: The relationship between the embedded file and the PDF content. This is required by PDF/A.
         """
+        # NOTE: Currently AFRelationship can only be '/Alternative' as it is coupled to the hardcoded
+        # <fx:ConformanceLevel>EXTENDED</fx:ConformanceLevel> in the XMP metadata template
+        # (account_invoice_pdfa_3_facturx_metadata). If support for MINIMUM/BASIC-WL is ever added,
+        # both afrelationship and ConformanceLevel must change together.
+
+        # Valid AFRelationship values per PDF 2.0 spec (ISO 32000-2, section 7.11.3)
+        valid_afrelationships = {'/Source', '/Data', '/Alternative', '/Supplement', '/Unspecified', '/EncryptedPayload', '/FormData', '/Schema'}
+        if afrelationship not in valid_afrelationships:
+            _logger.warning(
+                "Invalid AFRelationship value '%s', falling back to '/Data'. "
+                "Valid values are: %s",
+                afrelationship, ', '.join(sorted(valid_afrelationships))
+            )
+            afrelationship = '/Data'
         adapted_subtype = self.format_subtype(subtype)
 
         attachment = self._create_attachment_object({
             'filename': name,
             'content': data,
             'subtype': adapted_subtype,
+            'afrelationship': afrelationship,
         })
         if self._root_object.get('/Names') and self._root_object['/Names'].get('/EmbeddedFiles'):
             names_array = self._root_object["/Names"]["/EmbeddedFiles"]["/Names"]
@@ -434,9 +475,9 @@ class OdooPdfFileWriter(PdfFileWriter):
             })
     addAttachment = add_attachment
 
-    def embed_odoo_attachment(self, attachment, subtype=None):
+    def embed_odoo_attachment(self, attachment, subtype=None, afrelationship='/Data'):
         assert attachment, "embed_odoo_attachment cannot be called without attachment."
-        self.addAttachment(attachment.name, attachment.raw, subtype=subtype or attachment.mimetype)
+        self.addAttachment(attachment.name, attachment.raw, subtype=subtype or attachment.mimetype, afrelationship=afrelationship)
 
     def cloneReaderDocumentRoot(self, reader):
         super().cloneReaderDocumentRoot(reader)
@@ -563,8 +604,45 @@ class OdooPdfFileWriter(PdfFileWriter):
         else:
             _logger.warning('The fonttools package is not installed. Generated PDF may not be PDF/A compliant.')
 
-        outlines = self._root_object['/Outlines'].getObject()
-        outlines[NameObject('/Count')] = NumberObject(1)
+        # Every annotation dictionary, except those whose subtype is Popup,
+        # must contain the /F key (annotation flags), as required by PDF/A (clause 6.3.2).
+        # - Print flag must be 1.
+        # - Hidden, Invisible, ToggleNoView and NoView flags must be 0.
+        # - For text annotations, NoZoom and NoRotate are recommended to be 1.
+        PDFA_ANNOT_FLAG_INVISIBLE = 1 << 0
+        PDFA_ANNOT_FLAG_HIDDEN = 1 << 1
+        PDFA_ANNOT_FLAG_PRINT = 1 << 2
+        PDFA_ANNOT_FLAG_NOZOOM = 1 << 3
+        PDFA_ANNOT_FLAG_NOROTATE = 1 << 4
+        PDFA_ANNOT_FLAG_NOVIEW = 1 << 5
+        PDFA_ANNOT_FLAG_TOGGLENOVIEW = 1 << 8
+
+        for page in pages:
+            page_obj = page.getObject()
+            annots = page_obj.get('/Annots', [])
+            if isinstance(annots, IndirectObject):
+                annots = annots.getObject()
+            for annot_ref in annots:
+                annot = annot_ref.getObject()
+                if annot.get('/Subtype') == '/Popup':
+                    continue
+
+                flags = annot.get('/F', 0)
+                flags |= PDFA_ANNOT_FLAG_PRINT
+                flags &= ~(
+                    PDFA_ANNOT_FLAG_HIDDEN
+                    | PDFA_ANNOT_FLAG_INVISIBLE
+                    | PDFA_ANNOT_FLAG_TOGGLENOVIEW
+                    | PDFA_ANNOT_FLAG_NOVIEW
+                )
+                if annot.get('/Subtype') == '/Text':
+                    flags |= PDFA_ANNOT_FLAG_NOZOOM | PDFA_ANNOT_FLAG_NOROTATE
+
+                annot[NameObject('/F')] = NumberObject(flags)
+
+        if '/Outlines' in self._root_object:
+            outlines = self._root_object['/Outlines'].getObject()
+            outlines[NameObject('/Count')] = NumberObject(1)
 
         # [6.7.2.2-1] include a MarkInfo dictionary containing "Marked" with true value
         mark_info = DictionaryObject({NameObject("/Marked"): BooleanObject(True)})
@@ -631,7 +709,7 @@ class OdooPdfFileWriter(PdfFileWriter):
         file_entry_object = self._addObject(file_entry)
         filename_object = createStringObject(attachment['filename'])
         filespec_object = DictionaryObject({
-            NameObject("/AFRelationship"): NameObject("/Data"),
+            NameObject("/AFRelationship"): NameObject(attachment.get('afrelationship', '/Data')),
             NameObject("/Type"): NameObject("/Filespec"),
             NameObject("/F"): filename_object,
             NameObject("/EF"):

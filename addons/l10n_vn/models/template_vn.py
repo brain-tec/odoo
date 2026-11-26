@@ -9,7 +9,7 @@ class AccountChartTemplate(models.AbstractModel):
     @template('vn')
     def _get_vn_template_data(self):
         return {
-            'code_digits': '4',
+            'code_digits': '3',
             'property_account_receivable_id': 'chart1311',
             'property_account_payable_id': 'chart3311',
             'property_account_expense_categ_id': 'chart632',
@@ -24,8 +24,8 @@ class AccountChartTemplate(models.AbstractModel):
             self.env.company.id: {
                 'anglo_saxon_accounting': True,
                 'account_fiscal_country_id': 'base.vn',
-                'bank_account_code_prefix': '112',
-                'cash_account_code_prefix': '111',
+                'bank_account_code_prefix': '1121',
+                'cash_account_code_prefix': '1111',
                 'transfer_account_code_prefix': '113',
                 'account_default_pos_receivable_account_id': 'chart1311',
                 'income_currency_exchange_account_id': 'chart515',
@@ -37,7 +37,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'transfer_account_id': 'chart1131',
                 'deferred_expense_account_id': 'chart2421',
                 'deferred_revenue_account_id': 'chart33871',
-                'account_production_wip_account_id': 'chart154',
+                'account_production_wip_account_id': 'chart1541',
                 'default_cash_difference_income_account_id': 'chart711',
                 'default_cash_difference_expense_account_id': 'chart811',
                 'account_journal_suspense_account_id': 'chart1121',

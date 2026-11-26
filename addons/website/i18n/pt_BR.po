@@ -8,23 +8,24 @@
 # Rodrigo Sottomaior Macedo <sottomaiormacedotec@sottomaiormacedo.tech>, 2024
 # Wil Odoo, 2025
 # Maitê Dietze, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# "Maitê Dietze (madi)" <madi@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-12 18:38+0000\n"
-"PO-Revision-Date: 2025-11-11 17:26+0000\n"
+"POT-Creation-Date: 2026-07-31 17:39+0000\n"
+"PO-Revision-Date: 2026-11-11 18:33+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/"
-"odoo-18/website/pt_BR/>\n"
+"Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/odoo-"
+"18/website/pt_BR/>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
 "1000000 == 0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website
 #. odoo-javascript
@@ -177,92 +178,6 @@ msgid "$ 32M"
 msgstr "US$ 32M"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$1.50"
-msgstr "US$ 1,50"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$12.00"
-msgstr "$ 12,00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$13.00"
-msgstr "US$ 13,00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$13.50"
-msgstr "US$ 13,50"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$14.50"
-msgstr "US$ 14,50"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$15.00"
-msgstr "$15,00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$16.00"
-msgstr "US$ 16,00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$25.00"
-msgstr "US$ 25,00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$26.00"
-msgstr "US$ 26,00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$28.00"
-msgstr "US$ 28,00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$3.00"
-msgstr "US$ 3,00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$3.50"
-msgstr "US$ 3,50"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$4.00"
-msgstr "US$ 4,00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$4.10"
-msgstr "US$ 4,10"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$4.25"
-msgstr "US$ 4,25"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$4.50"
-msgstr "US$ 4,50"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$5.00"
-msgstr "US$ 5,00"
-
-#. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/components/views/page_list.js:0
 msgid "%s record(s) selected, are you sure you want to publish them all?"
@@ -326,35 +241,6 @@ msgid "+ New Website"
 msgstr "Adicionar novo site"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.footer_custom
-#: model_terms:ir.ui.view,arch_db:website.template_footer_centered
-#: model_terms:ir.ui.view,arch_db:website.template_footer_contact
-#: model_terms:ir.ui.view,arch_db:website.template_footer_descriptive
-#: model_terms:ir.ui.view,arch_db:website.template_footer_headline
-msgid "+1 555-555-5556"
-msgstr "+1 555-555-5556"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.template_footer_links
-msgid "+1 555-555-5556\""
-msgstr "+1 555-555-5556\""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_masonry_block_mosaic_template
-msgid "+12"
-msgstr "+12"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_contact_info
-msgid "+1555-555-5556"
-msgstr "+1555-555-5556"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
-msgid "+25.000"
-msgstr "+25.000"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.show_website_info
 msgid ", author:"
 msgstr ", autor:"
@@ -379,44 +265,9 @@ msgid "/contactus"
 msgstr "/contactus"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_key_images
-msgid "01"
-msgstr "01"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_key_images
-msgid "02"
-msgstr "02"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_key_images
-msgid "03"
-msgstr "03"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_key_images
-msgid "04"
-msgstr "04"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "1 km"
 msgstr "1 km"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_media_list_options
-msgid "1/2 - 1/2"
-msgstr "1/2 - 1/2"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_media_list_options
-msgid "1/3 - 2/3"
-msgstr "1/3 - 2/3"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_media_list_options
-msgid "1/4 - 3/4"
-msgstr "1/4 - 3/4"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
@@ -434,20 +285,9 @@ msgid "100 m"
 msgstr "100 m"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_hr_options
-#: model_terms:ir.ui.view,arch_db:website.snippet_options
-msgid "100%"
-msgstr "100%"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "1000 km"
 msgstr "1000 km"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_image_gallery_options
-msgid "12"
-msgstr "12"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_showcase
@@ -458,11 +298,6 @@ msgstr "12k"
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "15 km"
 msgstr "15 km"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_countdown
-msgid "16"
-msgstr "16"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -500,11 +335,6 @@ msgid "2000 km"
 msgstr "2000 km"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_masonry_block_mosaic_template
-msgid "22%"
-msgstr "22%"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features_wave
 msgid "24/7 Customer Support"
 msgstr "Suporte ao cliente 24/7"
@@ -513,13 +343,6 @@ msgstr "Suporte ao cliente 24/7"
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid "24/7 Support"
 msgstr "Suporte 24/7"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
-#: model_terms:ir.ui.view,arch_db:website.s_hr_options
-#: model_terms:ir.ui.view,arch_db:website.snippet_options
-msgid "25%"
-msgstr "25%"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_links
@@ -534,11 +357,6 @@ msgstr ""
 msgid ""
 "250 Executive Park Blvd, Suite 3400 • San Francisco CA 94134 • United States"
 msgstr "Av. Brasil, Nº 250, apto. 3400 • Rio de Janeiro RJ 94134-777 • Brasil"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_countdown
-msgid "30"
-msgstr "30"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
@@ -598,16 +416,6 @@ msgid "404 Not Found"
 msgstr "404 Não encontrada"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_countdown
-msgid "45"
-msgstr "45"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_numbers_showcase
-msgid "45%"
-msgstr "45%"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "5 m"
 msgstr "5 m"
@@ -621,12 +429,6 @@ msgstr "50 km"
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "50 m"
 msgstr "50 m"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_hr_options
-#: model_terms:ir.ui.view,arch_db:website.snippet_options
-msgid "50%"
-msgstr "50%"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cta_card
@@ -655,21 +457,14 @@ msgid "50,000+ companies trust Odoo."
 msgstr "+de 50.000 empresas confiam no Odoo."
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_hr_options
-#: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
-#: model_terms:ir.ui.view,arch_db:website.snippet_options
-msgid "75%"
-msgstr "75%"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
 msgid ""
 "75% of clients use the service for over a decade consistently.<br/>This "
 "showcases remarkable loyalty and satisfaction with the quality provided."
 msgstr ""
-"75% dos clientes usam o serviço por mais de uma década de forma consistente."
-"<br/>Isso demonstra uma notável fidelidade e satisfação com a qualidade "
-"fornecida."
+"75% dos clientes usam o serviço por mais de uma década de forma "
+"consistente.<br/>Isso demonstra uma notável fidelidade e satisfação com a "
+"qualidade fornecida."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
@@ -940,8 +735,8 @@ msgid ""
 "calling extra attention to featured content or information.<br/><br/>"
 msgstr ""
 "<br/>Esta é uma unidade herói simples, um componente simples no estilo "
-"jumbotron para chamar mais atenção para o conteúdo ou informação em destaque."
-"<br/><br/>"
+"jumbotron para chamar mais atenção para o conteúdo ou informação em "
+"destaque.<br/><br/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -965,8 +760,8 @@ msgid ""
 "                            87%\n"
 "                        </font>"
 msgstr ""
-"<font class=\"text-gradient\" style=\"background-image: linear-"
-"gradient(0deg, rgb(222, 222, 222) 25%, rgb(29, 32, 48) 80%);\">\n"
+"<font class=\"text-gradient\" style=\"background-image: linear-gradient"
+"(0deg, rgb(222, 222, 222) 25%, rgb(29, 32, 48) 80%);\">\n"
 "                            87%\n"
 "                        </font>"
 
@@ -977,8 +772,8 @@ msgid ""
 "<i class=\"fa fa-1x fa-fw fa-envelope me-2\"/"
 "><span>info@yourcompany.example.com</span>"
 msgstr ""
-"<i class=\"fa fa-1x fa-fw fa-envelope me-2\"/"
-"><span>info@suaempresa.exemplo.com</span>"
+"<i class=\"fa fa-1x fa-fw fa-envelope me-2\"/><span>"
+"info@suaempresa.exemplo.com</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_call_to_action
@@ -1242,14 +1037,13 @@ msgid ""
 "<i class=\"fa fa-phone fa-fw me-2\"/><span class=\"o_force_ltr\">+1 "
 "555-555-5556</span>"
 msgstr ""
-"<i class=\"fa fa-phone fa-fw me-2\"/><span class=\"o_force_ltr\">+1 "
-"555-555-5556</span>"
+"<i class=\"fa fa-phone fa-fw me-2\"/><span class=\"o_force_ltr\">+1 555-555-"
+"5556</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid "<i class=\"fa fa-times text-danger\" role=\"img\"/>  No customization"
-msgstr ""
-"<i class=\"fa fa-times text-danger\" role=\"img\"/>  Sem personalização"
+msgstr "<i class=\"fa fa-times text-danger\" role=\"img\"/>  Sem personalização"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
@@ -1427,8 +1221,8 @@ msgstr ""
 "                        Devoluções online por 30 dias\n"
 "                    </small>\n"
 "                    <small class=\"d-flex align-items-center\">\n"
-"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/"
-">\n"
+"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/>"
+"\n"
 "                        Envio padrão\n"
 "                    </small>"
 
@@ -1861,8 +1655,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
 "rounded-circle pe-none text-o-color-1\" contenteditable=\"false\"/>\n"
-"                        <small class=\"text-muted\">15 de junho 2024</"
-"small>\n"
+"                        <small class=\"text-muted\">15 de junho 2024</small>"
+"\n"
 "                        <strong>Suporte integrado a vários idiomas "
 "adicionado</strong>"
 
@@ -1876,8 +1670,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
 "rounded-circle pe-none text-o-color-1\" contenteditable=\"false\"/>\n"
-"                        <small class=\"text-muted\">9 outubro de 2024</"
-"small>\n"
+"                        <small class=\"text-muted\">9 outubro de 2024</small>"
+"\n"
 "                        <strong>Compatibilidade com aplicativos móveis "
 "ampliada</strong>"
 
@@ -2277,13 +2071,19 @@ msgstr "<u>Tuesday</u><br/>8.00am-6.00pm"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_opening_hours
-msgid "<u>Wednesday</u><br/>8.00am-12.00am"
-msgstr "<u>Wednesday</u><br/>8.00am-12.00am"
+msgid "<u>Wednesday</u><br/>8.00am-12.00pm"
+msgstr "<u>Quarta-feira</u><br/>8h00-12h00"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_opening_hours
 msgid "<u>info@yourcompany.example.com</u>"
 msgstr "<u>info@yourcompany.example.com</u>"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/website_loader/website_loader.xml:0
+msgid "A"
+msgstr "A"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -2469,7 +2269,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/website/models/website_controller_page.py:0
 msgid "A page must be set to display a concrete model."
-msgstr ""
+msgstr "Uma página deve ser configurada para exibir um modelo concreto."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -2775,7 +2575,7 @@ msgstr "Adicionar efeitos de destaque de texto"
 #. odoo-python
 #: code:addons/website/models/res_config_settings.py:0
 msgid "Add Website"
-msgstr ""
+msgstr "Adicionar site"
 
 #. module: website
 #. odoo-javascript
@@ -3487,6 +3287,12 @@ msgstr "Disponível no site"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/components/website_loader/website_loader.xml:0
+msgid "B"
+msgstr "B"
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "BSgzTvR5L1GB9jriT451iTN4huVPxHmltG6T6eo"
 msgstr "BSgzTvR5L1GB9jriT451iTN4huVPxHmltG6T6eo"
@@ -3915,6 +3721,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.view_edit_third_party_domains
 msgid "By default, the domains of the following services are already blocked:"
 msgstr "Por padrão, os domínios dos seguintes serviços já estão bloqueados:"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/dialog/seo.xml:0
+#: code:addons/website/static/src/components/website_loader/website_loader.xml:0
+msgid "C"
+msgstr "C"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__cdn_url
@@ -4858,8 +4671,7 @@ msgstr "Conteúdo para traduzir"
 #: model_terms:ir.ui.view,arch_db:website.s_media_list
 msgid ""
 "Continue reading <i class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
-msgstr ""
-"Continuar lendo <i class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
+msgstr "Continuar lendo <i class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_ir_ui_view__controller_page_ids
@@ -5265,6 +5077,13 @@ msgid "Customize Show"
 msgstr "Mostrar personalização"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/dialog/seo.xml:0
+#: model_terms:ir.ui.view,arch_db:website.s_countdown_options
+msgid "D"
+msgstr "D"
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
 msgid "D - H - M"
 msgstr "D - H - M"
@@ -5595,8 +5414,8 @@ msgid ""
 "Design is the intermediary between <strong>information</strong> and "
 "<strong>understanding</strong>"
 msgstr ""
-"O design é o intermediário entre <strong>informação</strong> e "
-"<strong>compreensão</strong>"
+"O design é o intermediário entre <strong>informação</strong> e <strong>"
+"compreensão</strong>"
 
 #. module: website
 #: model:website.configurator.feature,description:website.feature_page_pricing
@@ -7556,6 +7375,7 @@ msgstr "Chave do Google Analytics"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
+#: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Google Map"
 msgstr "Google Map"
 
@@ -7563,6 +7383,16 @@ msgstr "Google Map"
 #: model:ir.model.fields,field_description:website.field_website__google_maps_api_key
 msgid "Google Maps API Key"
 msgstr "Chave da API do Google Maps"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/js/editor/snippets.editor.js:0
+msgid ""
+"Google Maps configuration has changed. Please reload the page for changes to "
+"take effect."
+msgstr ""
+"A configuração do Google Maps foi alterada. Recarregue a página para que as "
+"alterações entrem em vigor."
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__has_google_search_console
@@ -8188,8 +8018,8 @@ msgstr "Se definido, um menu de site será criado para o recurso."
 msgid ""
 "If set, add the menu as a second level menu, as a child of \"Company\" menu."
 msgstr ""
-"Se definido, adiciona o menu como menu de segundo nível, abaixo do menu "
-"“Empresa”."
+"Se definido, adiciona o menu como menu de segundo nível, abaixo do menu “"
+"Empresa”."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_res_config_settings__social_default_image
@@ -10423,8 +10253,7 @@ msgstr "Precisa de ajuda?"
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
 msgid ""
 "Need to pick up your order at one of our stores? Discover the nearest to you."
-msgstr ""
-"Precisa retirar seu pedido na loja? Encontre a loja mais perto de você."
+msgstr "Precisa retirar seu pedido na loja? Encontre a loja mais perto de você."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
@@ -10519,9 +10348,9 @@ msgid ""
 "will help you configure essential settings such as language, time zone, and "
 "notifications."
 msgstr ""
-"Em seguida, você será apresentado ao nosso <b>assistente de configuração</"
-"b>, que foi projetado para orientá-lo na configuração básica da plataforma. "
-"O assistente o ajudará a definir as configurações essenciais, como idioma, "
+"Em seguida, você será apresentado ao nosso <b>assistente de configuração</b>"
+", que foi projetado para orientá-lo na configuração básica da plataforma. O "
+"assistente o ajudará a definir as configurações essenciais, como idioma, "
 "fuso horário e notificações."
 
 #. module: website
@@ -11553,8 +11382,8 @@ msgid ""
 "Paragraph with <strong>bold</strong>, <span class=\"text-muted\">muted</"
 "span> and <em>italic</em> texts"
 msgstr ""
-"Parágrafo com textos em <strong>negrito</strong>, <span class=\"text-"
-"muted\">silenciado</span> e <em>itálico</em>"
+"Parágrafo com textos em <strong>negrito</strong>, <span class=\"text-muted\">"
+"silenciado</span> e <em>itálico</em>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
@@ -11709,8 +11538,8 @@ msgstr "Marcador de posição"
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Places API"
-msgstr "API do Places"
+msgid "Places API (NEW)"
+msgstr "Places API (NOVO)"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
@@ -12754,8 +12583,8 @@ msgid ""
 "Savor our fresh, local cuisine with a modern twist.<br/>Deliciously crafted "
 "for every taste!"
 msgstr ""
-"Saboreie nossa culinária local fresca com um toque moderno. <br/"
-">Deliciosamente elaborada para todos os gostos!"
+"Saboreie nossa culinária local fresca com um toque moderno. <br/>"
+"Deliciosamente elaborada para todos os gostos!"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features
@@ -13531,6 +13360,12 @@ msgid "Sourdough Bread"
 msgstr "Pão de massa fermentada"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/dialog/edit_menu.xml:0
+msgid "Spaces are not allowed in URL."
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Spacing"
 msgstr "Espaçamento"
@@ -13873,6 +13708,12 @@ msgid "System Fonts"
 msgstr "Fontes do sistema"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/dialog/seo.xml:0
+msgid "T"
+msgstr "T"
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_menus_logos
 msgid "T-shirts"
 msgstr "Camisetas"
@@ -14164,6 +14005,10 @@ msgid ""
 "Model: %(model)s\n"
 "View: %(view)s"
 msgstr ""
+"O campo '%(field)s' não pode ser excluído porque é referenciado em uma "
+"visualização do site.\n"
+"Modelo: %(model)s\n"
+"Visualização: %(view)s"
 
 #. module: website
 #. odoo-javascript
@@ -14281,7 +14126,7 @@ msgstr "O nome da página utilizável em URL"
 #. odoo-python
 #: code:addons/website/models/website.py:0
 msgid "The provided website domain is not a valid URL."
-msgstr ""
+msgstr "O domínio do site fornecido não é um URL válido."
 
 #. module: website
 #. odoo-javascript
@@ -14501,8 +14346,8 @@ msgid ""
 "to (soft) reset a broken view."
 msgstr ""
 "Este campo salvará o ʻarch_db` atual antes de escrever nele.\n"
-"                                                                         Útil "
-"para fazer uma reinicialização (flexível) de uma visualização quebrada."
+"                                                                         "
+"Útil para fazer uma reinicialização (flexível) de uma visualização quebrada."
 
 #. module: website
 #. odoo-javascript
@@ -14831,8 +14676,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.cookies_warning.xml:0
 msgid "To see the interactive content, you need to accept optional cookies."
-msgstr ""
-"Para ver o conteúdo interativo, você precisa aceitar cookies opcionais."
+msgstr "Para ver o conteúdo interativo, você precisa aceitar cookies opcionais."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -15663,8 +15507,7 @@ msgstr "Data da visita"
 #. odoo-javascript
 #: code:addons/website/static/src/snippets/s_countdown/options.xml:0
 msgid "Visit our Facebook page to know if you are one of the lucky winners."
-msgstr ""
-"Visite nossa página no Facebook para saber se você é um dos ganhadores."
+msgstr "Visite nossa página no Facebook para saber se você é um dos ganhadores."
 
 #. module: website
 #: model:ir.model,name:website.model_website_track
@@ -16560,8 +16403,8 @@ msgid ""
 "customer – find out what they want and give it to them."
 msgstr ""
 "Escreva um ou dois parágrafos descrevendo seu produto ou serviços. Para ter "
-"sucesso, seu conteúdo precisa ser útil para os leitores. Comece pelo cliente "
-"- descubra o que ele quer e ofereça isso a ele."
+"sucesso, seu conteúdo precisa ser útil para os leitores. Comece pelo "
+"cliente - descubra o que ele quer e ofereça isso a ele."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_closer_look
@@ -16587,9 +16430,30 @@ msgstr ""
 "para seus leitores.<br/><br/>"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/snippets/s_social_media/options.js:0
+#: model_terms:ir.ui.view,arch_db:website.footer_custom
+#: model_terms:ir.ui.view,arch_db:website.header_social_links
+#: model_terms:ir.ui.view,arch_db:website.s_mega_menu_odoo_menu
+#: model_terms:ir.ui.view,arch_db:website.s_references_social
+#: model_terms:ir.ui.view,arch_db:website.s_share
+#: model_terms:ir.ui.view,arch_db:website.s_social_media
+#: model_terms:ir.ui.view,arch_db:website.snippet_options
+#: model_terms:ir.ui.view,arch_db:website.template_footer_centered
+#: model_terms:ir.ui.view,arch_db:website.template_footer_headline
+#: model_terms:ir.ui.view,arch_db:website.template_footer_links
+msgid "X"
+msgstr "X"
+
+#. module: website
 #: model:ir.model.fields,field_description:website.field_website__social_twitter
 msgid "X Account"
 msgstr "Conta do X (Twitter)"
+
+#. module: website
+#: model_terms:ir.ui.view,arch_db:website.snippet_options
+msgid "Y"
+msgstr "Y"
 
 #. module: website
 #. odoo-javascript
@@ -18035,3 +17899,126 @@ msgstr "✽  Pizzas"
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid "✽  What We Offer"
 msgstr "✽  O que oferecemos"
+
+#~ msgid "Places API"
+#~ msgstr "API do Places"
+
+#~ msgid "<u>Wednesday</u><br/>8.00am-12.00am"
+#~ msgstr "<u>Wednesday</u><br/>8.00am-12.00am"
+
+#~ msgid "$1.50"
+#~ msgstr "US$ 1,50"
+
+#~ msgid "$12.00"
+#~ msgstr "$ 12,00"
+
+#~ msgid "$13.00"
+#~ msgstr "US$ 13,00"
+
+#~ msgid "$13.50"
+#~ msgstr "US$ 13,50"
+
+#~ msgid "$14.50"
+#~ msgstr "US$ 14,50"
+
+#~ msgid "$15.00"
+#~ msgstr "$15,00"
+
+#~ msgid "$16.00"
+#~ msgstr "US$ 16,00"
+
+#~ msgid "$25.00"
+#~ msgstr "US$ 25,00"
+
+#~ msgid "$26.00"
+#~ msgstr "US$ 26,00"
+
+#~ msgid "$28.00"
+#~ msgstr "US$ 28,00"
+
+#~ msgid "$3.00"
+#~ msgstr "US$ 3,00"
+
+#~ msgid "$3.50"
+#~ msgstr "US$ 3,50"
+
+#~ msgid "$4.00"
+#~ msgstr "US$ 4,00"
+
+#~ msgid "$4.10"
+#~ msgstr "US$ 4,10"
+
+#~ msgid "$4.25"
+#~ msgstr "US$ 4,25"
+
+#~ msgid "$4.50"
+#~ msgstr "US$ 4,50"
+
+#~ msgid "$5.00"
+#~ msgstr "US$ 5,00"
+
+#~ msgid "+1 555-555-5556"
+#~ msgstr "+1 555-555-5556"
+
+#~ msgid "+1 555-555-5556\""
+#~ msgstr "+1 555-555-5556\""
+
+#~ msgid "+12"
+#~ msgstr "+12"
+
+#~ msgid "+1555-555-5556"
+#~ msgstr "+1555-555-5556"
+
+#~ msgid "+25.000"
+#~ msgstr "+25.000"
+
+#~ msgid "01"
+#~ msgstr "01"
+
+#~ msgid "02"
+#~ msgstr "02"
+
+#~ msgid "03"
+#~ msgstr "03"
+
+#~ msgid "04"
+#~ msgstr "04"
+
+#~ msgid "1/2 - 1/2"
+#~ msgstr "1/2 - 1/2"
+
+#~ msgid "1/3 - 2/3"
+#~ msgstr "1/3 - 2/3"
+
+#~ msgid "1/4 - 3/4"
+#~ msgstr "1/4 - 3/4"
+
+#~ msgid "100%"
+#~ msgstr "100%"
+
+#~ msgid "12"
+#~ msgstr "12"
+
+#~ msgid "16"
+#~ msgstr "16"
+
+#~ msgid "22%"
+#~ msgstr "22%"
+
+#~ msgid "25%"
+#~ msgstr "25%"
+
+#~ msgid "30"
+#~ msgstr "30"
+
+#~ msgid "45"
+#~ msgstr "45"
+
+#~ msgid "45%"
+#~ msgstr "45%"
+
+#~ msgid "50%"
+#~ msgstr "50%"
+
+#~ msgid "75%"
+#~ msgstr "75%"

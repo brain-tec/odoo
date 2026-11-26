@@ -6,23 +6,23 @@
 # Wil Odoo, 2025
 # Maitê Dietze, 2025
 #
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:38+0000\n"
-"PO-Revision-Date: 2025-11-21 02:37+0000\n"
+"POT-Creation-Date: 2026-11-06 17:40+0000\n"
+"PO-Revision-Date: 2026-11-07 10:29+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/"
-"odoo-18/sms/pt_BR/>\n"
+"Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/odoo-"
+"18/sms/pt_BR/>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
 "1000000 == 0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_composer__recipient_invalid_count
@@ -55,11 +55,6 @@ msgstr "%s (cópia)"
 #: code:addons/sms/wizard/sms_composer.py:0
 msgid "%s invalid recipients"
 msgstr "%s destinatários inválidos"
-
-#. module: sms
-#: model_terms:ir.ui.view,arch_db:sms.sms_account_phone_view_form
-msgid "+1 555-555-555"
-msgstr "+1 555-555-555"
 
 #. module: sms
 #. odoo-javascript
@@ -384,12 +379,6 @@ msgstr "País não suportado"
 #: model:ir.model.fields.selection,name:sms.selection__sms_sms__failure_type__sms_registration_needed
 msgid "Country-specific Registration Required"
 msgstr "É necessário registro específico do país"
-
-#. module: sms
-#. odoo-python
-#: code:addons/sms/tools/sms_api.py:0
-msgid "Country-specific registration required."
-msgstr "É necessário registro específico do país."
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_account_code__create_uid
@@ -1061,12 +1050,6 @@ msgstr "Cadastrar"
 #: code:addons/sms/wizard/sms_account_phone.py:0
 msgid "Register Account"
 msgstr "Cadastrar conta"
-
-#. module: sms
-#. odoo-python
-#: code:addons/sms/tools/sms_api.py:0
-msgid "Register now."
-msgstr "Cadastre-se agora."
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_account_code_view_form
@@ -1791,6 +1774,18 @@ msgstr "Sua conta de SMS foi cadastrada com sucesso."
 #. module: sms
 #. odoo-python
 #: code:addons/sms/tools/sms_api.py:0
+msgid "Your country is not supported due to sender registration legislation"
+msgstr "Seu país não é suportado devido à legislação de registro de remetente"
+
+#. module: sms
+#. odoo-python
+#: code:addons/sms/tools/sms_api.py:0
+msgid "Your database is not activated"
+msgstr "Sua base de dados foi ativada"
+
+#. module: sms
+#. odoo-python
+#: code:addons/sms/tools/sms_api.py:0
 msgid ""
 "Your sender name must be between 3 and 11 characters long and only contain "
 "alphanumeric characters."
@@ -1861,3 +1856,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_preview_form
 msgid "record:"
 msgstr "registro:"
+
+#~ msgid "Country-specific registration required."
+#~ msgstr "É necessário registro específico do país."
+
+#~ msgid "Register now."
+#~ msgstr "Cadastre-se agora."
+
+#~ msgid "+1 555-555-555"
+#~ msgstr "+1 555-555-555"

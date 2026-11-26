@@ -6,6 +6,7 @@ from ast import literal_eval
 
 from odoo import api, models, _
 from odoo.exceptions import AccessError, RedirectWarning, UserError
+from odoo.tools import str2bool
 
 _logger = logging.getLogger(__name__)
 
@@ -265,6 +266,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         if not fields:
             return res
 
+        self.check_access('read')
         IrDefault = self.env['ir.default']
         IrConfigParameter = self.env['ir.config_parameter'].sudo()
         classified = self._get_classified_fields(fields)
@@ -312,7 +314,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
                         _logger.warning(WARNING_MESSAGE, value, field, icp)
                         value = 0.0
                 elif field.type == 'boolean':
-                    value = bool(value)
+                    value = str2bool(value, bool(value))
             res[name] = value
 
         res.update(self.get_values())
@@ -363,7 +365,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
                 # bugs when users leave spaces around them
                 value = (value or "").strip() or False
             elif field.type in ('integer', 'float'):
-                value = repr(value) if value else False
+                value = repr(value)
             elif field.type == 'many2one':
                 # value is a (possibly empty) recordset
                 value = value.id
@@ -393,13 +395,16 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
 
         self = self.with_context(active_test=False)
         classified = self._get_classified_fields()
+        # set_values() may install modules as a side effect (e.g. loading a chart template),
+        # the unchecked boxes of such modules must not be read as a request to uninstall them
+        installed_modules = classified['module'].filtered(lambda m: m.state in ('installed', 'to upgrade'))
 
         self.set_values()
 
         # module fields: install/uninstall the selected modules
         to_install = classified['module'].filtered(
             lambda m: self[f'module_{m.name}'] and m.state != 'installed')
-        to_uninstall = classified['module'].filtered(
+        to_uninstall = installed_modules.filtered(
             lambda m: not self[f'module_{m.name}'] and m.state in ('installed', 'to upgrade'))
 
         if to_install or to_uninstall:

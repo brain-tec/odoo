@@ -8,8 +8,8 @@ import {
     toRaw,
     useState,
 } from "@odoo/owl";
-import { isNode, toSelector } from "@web/../lib/hoot-dom/helpers/dom";
-import { isInstanceOf, isIterable } from "@web/../lib/hoot-dom/hoot_dom_utils";
+import { _isNode, _toSelector } from "@web/../lib/hoot-dom/helpers/dom";
+import { isInstanceOf, isIterable, isPromise } from "@web/../lib/hoot-dom/hoot_dom_utils";
 import { logger } from "../core/logger";
 import {
     getTypeOf,
@@ -172,9 +172,9 @@ export class HootTechnicalValue extends Component {
 
     getTypeOf = getTypeOf;
     isIterable = isIterable;
-    isNode = isNode;
+    isNode = _isNode;
     stringify = stringify;
-    toSelector = toSelector;
+    toSelector = _toSelector;
 
     SPECIAL_SYMBOLS = [S_ANY, S_CIRCULAR, S_NONE];
 
@@ -249,7 +249,7 @@ export class HootTechnicalValue extends Component {
     }
 
     wrapPromiseValue(promise) {
-        if (!isInstanceOf(promise, Promise)) {
+        if (!isPromise(promise)) {
             return;
         }
         this.state.promiseState = ["pending", null];

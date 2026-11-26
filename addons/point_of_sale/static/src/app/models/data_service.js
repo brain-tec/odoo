@@ -16,16 +16,17 @@ const INDEXED_DB_VERSION = 1;
 
 export class PosData extends Reactive {
     static modelToLoad = []; // When empty all models are loaded
-    static serviceDependencies = ["orm", "bus_service"];
+    static serviceDependencies = ["orm", "bus_service", "dialog"];
 
     constructor() {
         super();
         this.ready = this.setup(...arguments).then(() => this);
     }
 
-    async setup(env, { orm, bus_service }) {
+    async setup(env, { orm, bus_service, dialog }) {
         this.orm = orm;
         this.bus = bus_service;
+        this.dialog = dialog;
         this.relations = [];
         this.custom = {};
         this.syncInProgress = false;
@@ -73,15 +74,6 @@ export class PosData extends Reactive {
 
     reconnectWebSocket() {
         this.intializeWebsocket();
-
-        const channels = [...this.channels];
-        this.channels = [];
-        while (channels.length) {
-            const channel = channels.pop();
-            this.connectWebSocket(channel.channel, channel.method);
-
-            console.warn("Reconnecting to channel", channel.channel);
-        }
     }
 
     connectWebSocket(channel, method) {
@@ -107,7 +99,7 @@ export class PosData extends Reactive {
             data.key,
             name,
         ]);
-        this.indexedDB = new IndexedDB(this.databaseName, INDEXED_DB_VERSION, models);
+        this.indexedDB = new IndexedDB(this.databaseName, INDEXED_DB_VERSION, models, this.dialog);
     }
 
     deleteDataIndexedDB(model, uuid) {
@@ -301,19 +293,7 @@ export class PosData extends Reactive {
             "pos.payment": payments,
         });
         this.loadedIndexedDBProducts = dbData ? dbData["product.product"] : [];
-        this.sanitizeData();
         this.network.loading = false;
-    }
-
-    sanitizeData() {
-        const order_to_delete = this.models["pos.order"].filter((order) =>
-            order.lines.some((line) => line.is_reward_line && !line.coupon_id)
-        );
-        for (const order of order_to_delete) {
-            for (let i = order.lines.length - 1; i >= 0; i--) {
-                order.lines[i].delete();
-            }
-        }
     }
 
     async execute({
@@ -650,9 +630,12 @@ export class PosData extends Reactive {
 
     async callRelated(model, method, args = [], kwargs = {}, queue = true) {
         const data = await this.execute({ type: "call", model, method, args, kwargs, queue });
-        this.deviceSync.dispatch(data);
-        const results = this.models.loadData(data, [], true);
-        return results;
+        if (data) {
+            this.deviceSync?.dispatch && this.deviceSync.dispatch(data);
+            const results = this.models.loadData(data, [], true);
+            return results;
+        }
+        return false;
     }
 
     async create(model, values, queue = true) {

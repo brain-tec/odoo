@@ -1,25 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_payment
+# * website_payment
 #
 # Translators:
 # Wil Odoo, 2024
 # Larissa Manderfeld, 2024
 #
+# "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-29 18:38+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Larissa Manderfeld, 2024\n"
-"Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
+"PO-Revision-Date: 2026-11-19 15:22+0000\n"
+"Last-Translator: \"Noemi Pla Garcia (nopl)\" <nopl@odoo.com>\n"
+"Language-Team: Spanish <https://translate.odoo.com/projects/odoo-18/"
+"website_payment/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? "
-"1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
+"0) ? 1 : 2);\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
@@ -33,7 +36,7 @@ msgid ""
 msgstr ""
 ".\n"
 "                        <br/>\n"
-"                        Agradecemos su apoyo a nuestra organización.\n"
+"                        Agradecemos tu apoyo a nuestra organización.\n"
 "                        <br/>\n"
 "                        Saludos."
 
@@ -95,7 +98,7 @@ msgstr "25 <span class=\"s_donation_currency pe-1\">€</span>"
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_button
 msgid "<span class=\"s_donation_currency pe-1\">$</span>50"
-msgstr "30 <span class=\"s_donation_currency pe-1\">€</span>"
+msgstr "50 <span class=\"s_donation_currency pe-1\">€</span>"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_pay
@@ -106,7 +109,7 @@ msgstr "<strong>Advertencia</strong> Falta la moneda o es incorrecta."
 #. odoo-python
 #: code:addons/website_payment/models/payment_transaction.py:0
 msgid "A donation has been made on your website"
-msgstr "Se ha hecho una donación en su sitio web"
+msgstr "Se ha hecho una donación en tu sitio web"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_button
@@ -155,13 +158,13 @@ msgstr "Importe("
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_button
 msgid "Caring for a baby for 1 month."
-msgstr "Cuidando de un bebé durante 1 mes."
+msgstr "Cuidado de un bebé durante 1 mes."
 
 #. module: website_payment
 #. odoo-javascript
 #: code:addons/website_payment/static/src/snippets/s_donation/options.xml:0
 msgid "Choose Your Amount"
-msgstr "Elija su importe"
+msgstr "Elige tu importe"
 
 #. module: website_payment
 #: model:ir.model,name:website_payment.model_res_config_settings
@@ -310,7 +313,7 @@ msgstr "Entrada"
 #. module: website_payment
 #: model:ir.model.fields,field_description:website_payment.field_account_payment__is_donation
 msgid "Is Donation"
-msgstr "Es la donación"
+msgstr "Es donación"
 
 #. module: website_payment
 #: model:ir.model.fields,field_description:website_payment.field_res_config_settings__is_stripe_supported_country
@@ -372,7 +375,7 @@ msgstr "Un año en primaria."
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_button
 msgid "One year in high school."
-msgstr "Un año en la secundaria."
+msgstr "Un año en secundaria."
 
 #. module: website_payment
 #: model:ir.model.fields.selection,name:website_payment.selection__res_config_settings__providers_state__other_than_paypal
@@ -420,7 +423,7 @@ msgstr "Solo Paypal"
 #. odoo-javascript
 #: code:addons/website_payment/static/src/snippets/s_donation/000.js:0
 msgid "Please select or enter an amount"
-msgstr "Seleccione o introduzca un importe"
+msgstr "Seleccione o introduce un importe"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
@@ -450,7 +453,7 @@ msgstr "Deslizador"
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation
 msgid "Small or large, your contribution is essential."
-msgstr "Cualquier contribución es importante sin importar su tamaño."
+msgstr "Pequeña o grande, tu contribución es esencial."
 
 #. module: website_payment
 #. odoo-javascript
@@ -469,7 +472,7 @@ msgid ""
 "Stripe Connect is not available in your country, please use another payment "
 "provider."
 msgstr ""
-"Stripe Connect no está disponible en su país, use otro proveedor de pago."
+"Stripe Connect no está disponible en tu país; utiliza otro proveedor de pago."
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
@@ -483,7 +486,7 @@ msgstr ""
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
 msgid "Thank you for your donation of"
-msgstr "Gracias por su donación de"
+msgstr "Gracias por tu donación de"
 
 #. module: website_payment
 #. odoo-javascript
@@ -519,14 +522,14 @@ msgstr "Sitio web: donación"
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid "Write us a comment"
-msgstr "Escríbanos un comentario"
+msgstr "Escríbenos un comentario"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid "Your comment"
-msgstr "Su comentario"
+msgstr "Tu comentario"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
 msgid "made on"
-msgstr "hecho el"
+msgstr "realizado el"

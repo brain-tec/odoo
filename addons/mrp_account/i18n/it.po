@@ -7,13 +7,13 @@
 # Marianna Ciofani, 2024
 # Wil Odoo, 2025
 # Sergio Zanchetta <primes2h@gmail.com>, 2025
-# "Marianna Ciofani (cima)" <cima@odoo.com>, 2025.
+# "Marianna Ciofani (cima)" <cima@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-09-01 21:17+0000\n"
+"POT-Creation-Date: 2026-06-05 19:33+0000\n"
+"PO-Revision-Date: 2026-10-23 15:03+0000\n"
 "Last-Translator: \"Marianna Ciofani (cima)\" <cima@odoo.com>\n"
 "Language-Team: Italian <https://translate.odoo.com/projects/odoo-18/"
 "mrp_account/it/>\n"
@@ -23,28 +23,13 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
 "0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.12.2\n"
-
-#. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "$1000"
-msgstr "$1000"
-
-#. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "$5000"
-msgstr "$5000"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: mrp_account
 #. odoo-python
 #: code:addons/mrp_account/models/mrp_production.py:0
 msgid "%s - Labour"
 msgstr "%s - Manodopera"
-
-#. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "2023-08-15"
-msgstr "15-08-2023"
 
 #. module: mrp_account
 #: model_terms:ir.ui.view,arch_db:mrp_account.view_move_form_inherit_mrp_account
@@ -112,11 +97,6 @@ msgid "Account move line to be created when posting WIP account move"
 msgstr ""
 "Riga movimento contabile da creare dopo la pubblicazione del movimento "
 "contabile WIP"
-
-#. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "Acme Corp."
-msgstr "Acme Corp."
 
 #. module: mrp_account
 #: model:ir.model,name:mrp_account.model_account_analytic_account
@@ -236,7 +216,7 @@ msgstr "Nome visualizzato"
 #. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_workcenter__distribution_analytic_account_ids
 msgid "Distribution Analytic Account"
-msgstr "Distribuzione conto analitico"
+msgstr "Conto analitico di distribuzione"
 
 #. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_account_analytic_applicability__business_domain
@@ -278,11 +258,6 @@ msgstr "Movimento contabile"
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting_line__label
 msgid "Label"
 msgstr "Etichetta"
-
-#. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "Laptop"
-msgstr "Laptop"
 
 #. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting__write_uid
@@ -393,11 +368,6 @@ msgid "Production Account"
 msgstr "Conto di produzione"
 
 #. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "REF123"
-msgstr "RIF123"
-
-#. module: mrp_account
 #: model:ir.model.fields,field_description:mrp_account.field_mrp_account_wip_accounting__reference
 msgid "Reference"
 msgstr "Riferimento"
@@ -478,11 +448,6 @@ msgstr "Totale avere"
 #: model_terms:ir.ui.view,arch_db:mrp_account.view_wip_accounting_form
 msgid "Total Debit"
 msgstr "Totale dare"
-
-#. module: mrp_account
-#: model_terms:ir.ui.view,arch_db:mrp_account.report_wip
-msgid "Units"
-msgstr "Unità"
 
 #. module: mrp_account
 #. odoo-python
@@ -574,6 +539,27 @@ msgstr "Registro produttività centro di lavoro"
 #: code:addons/mrp_account/models/mrp_workorder.py:0
 msgid "[WC] %s"
 msgstr "[CdL] %s"
+
+#~ msgid "Acme Corp."
+#~ msgstr "Acme Corp."
+
+#~ msgid "Laptop"
+#~ msgstr "Laptop"
+
+#~ msgid "REF123"
+#~ msgstr "RIF123"
+
+#~ msgid "Units"
+#~ msgstr "Unità"
+
+#~ msgid "$1000"
+#~ msgstr "$1000"
+
+#~ msgid "$5000"
+#~ msgstr "$5000"
+
+#~ msgid "2023-08-15"
+#~ msgstr "15-08-2023"
 
 #~ msgid "%s - Unbuild Cost Difference"
 #~ msgstr "%s - Differenza costo smontaggio"

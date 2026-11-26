@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:38+0000\n"
-"PO-Revision-Date: 2026-01-24 09:14+0000\n"
+"POT-Creation-Date: 2026-02-27 18:38+0000\n"
+"PO-Revision-Date: 2026-10-20 13:20+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Hindi <https://translate.odoo.com/projects/odoo-18/"
 "website_event_booth/hi/>\n"
@@ -20,7 +20,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
@@ -189,7 +189,7 @@ msgstr "वापस जाएं"
 #. module: website_event_booth
 #. odoo-javascript
 #: code:addons/website_event_booth/static/src/js/booth_register.js:0
-msgid "It looks like your email is linked to an existing account."
+msgid "It looks like your email is already in our system."
 msgstr ""
 
 #. module: website_event_booth
@@ -224,7 +224,7 @@ msgstr "फ़ोन"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
-msgid "Please Sign In."
+msgid "Please Sign In or Create an Account."
 msgstr ""
 
 #. module: website_event_booth

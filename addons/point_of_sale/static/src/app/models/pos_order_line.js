@@ -26,6 +26,9 @@ export class PosOrderline extends Base {
             hasChange: true,
         };
         this.saved_quantity = 0;
+        if (this.discount === undefined) {
+            this.discount = 0;
+        }
     }
 
     set_full_product_name() {
@@ -162,7 +165,7 @@ export class PosOrderline extends Base {
         }
 
         // Set the qty of the line based on number of pack lots.
-        if (!this.product_id.to_weight && setQuantity) {
+        if (!this.product_id.to_weight && setQuantity && this.product_id.tracking === "serial") {
             this.set_quantity_by_lot();
         }
         this.setDirty();
@@ -184,6 +187,9 @@ export class PosOrderline extends Base {
                 : parseFloat("" + discount);
 
         const disc = Math.min(Math.max(parsed_discount || 0, 0), 100);
+        if (this.discount === disc) {
+            return;
+        }
         this.discount = disc;
         this.order_id.recomputeOrderData();
         this.setDirty();
@@ -303,7 +309,7 @@ export class PosOrderline extends Base {
         if (this.qty < 0) {
             valid_lots_quantity = -valid_lots_quantity;
         }
-        this.set_quantity(valid_lots_quantity);
+        this.set_quantity(valid_lots_quantity, !!this.combo_parent_id);
     }
 
     has_valid_product_lot() {
@@ -392,7 +398,7 @@ export class PosOrderline extends Base {
             tax_ids: this.tax_ids,
             product_id: product,
             product_uom_id: product_uom,
-            is_refund: this.qty * priceUnit < 0,
+            is_refund: this.is_refund(),
             ...customValues,
         };
         if (order.fiscal_position_id) {
@@ -403,6 +409,10 @@ export class PosOrderline extends Base {
             );
         }
         return values;
+    }
+
+    is_refund() {
+        return this.qty * this.price_unit < 0;
     }
 
     set_unit_price(price) {
@@ -700,6 +710,10 @@ export class PosOrderline extends Base {
 
     get_discount() {
         return this.discount || 0;
+    }
+
+    isDiscountable() {
+        return !this.isTipLine();
     }
 
     // FIXME all below should be removed

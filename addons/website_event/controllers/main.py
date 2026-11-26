@@ -265,6 +265,8 @@ class WebsiteEventController(http.Controller):
     @http.route(['/event/<model("event.event"):event>/registration/new'], type='json', auth="public", methods=['POST'], website=True)
     def registration_new(self, event, **post):
         values = self._prepare_registration_new_values(event, **post)
+        if not values:
+            return values
         return request.env['ir.ui.view']._render_template("website_event.registration_attendee_details", values)
 
     def _process_attendees_form(self, event, form_details):
@@ -280,8 +282,12 @@ class WebsiteEventController(http.Controller):
         allowed_fields = request.env['event.registration']._get_website_registration_allowed_fields()
         registration_fields = {key: v for key, v in request.env['event.registration']._fields.items() if key in allowed_fields}
         for ticket_id in list(filter(lambda x: x is not None, [form_details[field] if 'event_ticket_id' in field else None for field in form_details.keys()])):
-            if int(ticket_id) not in event.event_ticket_ids.ids and len(event.event_ticket_ids.ids) > 0:
-                raise UserError(_("This ticket is not available for sale for this event"))
+            ticket_id = int(ticket_id)
+            # ticket_id=0 means "no ticket selected", only valid on events without tickets
+            if ticket_id or event.event_ticket_ids:
+                ticket = event.event_ticket_ids.filtered(lambda t: t.id == ticket_id)
+                if not ticket or not ticket.is_launched or ticket.is_expired:
+                    raise UserError(_("This ticket is not available for sale for this event"))
         registrations = {}
         general_answer_ids = []
         general_identification_answers = {}
@@ -299,7 +305,10 @@ class WebsiteEventController(http.Controller):
                 registration_index, field_name = key_values
                 if field_name not in registration_fields:
                     continue
-                registrations.setdefault(registration_index, dict())[field_name] = int(value) or False
+                # Only cast when needed, as it might crash here for custom inputs in overrides
+                if isinstance(registration_fields[field_name], (fields.Many2one, fields.Integer)):
+                    value = int(value) or False
+                registrations.setdefault(registration_index, dict())[field_name] = value
                 continue
 
             if len(key_values) != 3:
@@ -357,9 +366,9 @@ class WebsiteEventController(http.Controller):
         registrations_to_create = []
         for registration_values in registration_data:
             registration_values['event_id'] = event.id
-            if not registration_values.get('partner_id') and visitor_sudo.partner_id:
+            if visitor_sudo.partner_id:
                 registration_values['partner_id'] = visitor_sudo.partner_id.id
-            elif not registration_values.get('partner_id'):
+            else:
                 registration_values['partner_id'] = False if request.env.user._is_public() else request.env.user.partner_id.id
 
             # update registration based on visitor

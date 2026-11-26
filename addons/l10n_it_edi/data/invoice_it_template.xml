@@ -19,7 +19,7 @@
                     <Descrizione t-out="format_alphanumeric(it_values['descrizione'], 1000)"/>
                     <Quantita t-out="format_float(it_values['quantita'], it_values['quantita_pd'])"/>
                     <UnitaMisura t-if="line.product_uom_id and line.product_uom_id.category_id != env.ref('uom.product_uom_categ_unit')"
-                                 t-out="format_alphanumeric(line.product_uom_id.name, 10)"/>
+                                 t-out="format_uom(line.product_uom_id.name, 10)"/>
                     <PrezzoUnitario t-out="format_float(it_values['prezzo_unitario'], 8)"/>
                     <ScontoMaggiorazione t-foreach="it_values['sconto_maggiorazione_list']" t-as="sconto_maggiorazione">
                         <Tipo t-out="format_alphanumeric(sconto_maggiorazione['tipo'])"/>
@@ -45,7 +45,13 @@
 </template>
 
 <template id="account_invoice_it_FatturaPA_export">
-<p:FatturaElettronica t-att-versione="formato_trasmissione" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+<p:FatturaElettronica
+    t-att-versione="formato_trasmissione"
+    xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+    xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 https://www.fatturapa.gov.it/export/documenti/fatturapa/v1.4/Schema_VFPR12_v1.2.3.xsd"
+>
     <FatturaElettronicaHeader>
         <DatiTrasmissione>
             <IdTrasmittente>
@@ -141,7 +147,6 @@
                 <Numero t-out="format_alphanumeric(record.name, -20)"/>
                 <DatiBollo t-if="record.l10n_it_stamp_duty">
                     <BolloVirtuale t-translation="off">SI</BolloVirtuale>
-                    <ImportoBollo t-out="format_numbers(record.l10n_it_stamp_duty)"/>
                 </DatiBollo>
                 <ImportoTotaleDocumento t-out="format_monetary(importo_totale_documento, currency)"/>
             </DatiGeneraliDocumento>

@@ -20,6 +20,7 @@ TAX_EXEMPTION_MAPPING = {
     'VATEX-EU-132-1O': 'Exempt based on article 132, section 1 (o) of Council Directive 2006/112/EC',
     'VATEX-EU-132-1P': 'Exempt based on article 132, section 1 (p) of Council Directive 2006/112/EC',
     'VATEX-EU-132-1Q': 'Exempt based on article 132, section 1 (q) of Council Directive 2006/112/EC',
+    'VATEX-EU-135-1': 'Exempt based on article 135, section 1 of Council Directive 2006/112/EC',
     'VATEX-EU-143': 'Exempt based on article 143 of Council Directive 2006/112/EC',
     'VATEX-EU-143-1A': 'Exempt based on article 143, section 1 (a) of Council Directive 2006/112/EC',
     'VATEX-EU-143-1B': 'Exempt based on article 143, section 1 (b) of Council Directive 2006/112/EC',
@@ -88,6 +89,13 @@ TAX_EXEMPTION_MAPPING = {
     'VATEX-FR-298SEXDECIESA': 'Exempt based on article 298 sexdecies A of the Code Général des Impôts (CGI ; General tax code)',
     'VATEX-FR-CGI295': 'Exempt based on article 295 of the Code Général des Impôts (CGI ; General tax code)',
     'VATEX-FR-AE': 'Exempt based on 2 of article 283 of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-F': 'VATEX-FR-F - Second-hand sales',
+    'VATEX-FR-I': 'VATEX-FR-I - Sales of works of art',
+    'VATEX-FR-J': 'VATEX-FR-J - Sales of antiques',
+    'DL8.46.1': 'Certain financial services',
+    'DL8.46.2': 'Supply of residential units (lease or sale)',
+    'DL8.46.3': 'Bare land',
+    'DL8.46.4': 'Local passenger transport',
 }
 
 # Some codes were added with _ instead of -, this is a fix for stable version to add them correctly in XML files.
@@ -109,13 +117,22 @@ class AccountEdiCommon(models.AbstractModel):
     _inherit = "account.edi.common"
 
     def _get_tax_unece_codes(self, customer, supplier, tax):
-        if tax.ubl_cii_tax_category_code:
+        if tax and tax.ubl_cii_tax_category_code:
             reason_code = tax.ubl_cii_tax_exemption_reason_code
             reason_code = FIX_WRONG_CODES_MAPPING.get(reason_code, reason_code)
-            tax_exemption_reason = TAX_EXEMPTION_MAPPING.get(reason_code, _("Exempt from tax") if tax._requires_exemption_reason() else None)
+
+            if cocontractant_note := not tax.amount and tax.ubl_cii_tax_category_code == 'AE' and self._get_belgian_cocontractant_note(customer, supplier):
+                tax_exemption_reason = TAX_EXEMPTION_MAPPING.get(reason_code)
+                tax_exemption_reason = f"{tax_exemption_reason} - {cocontractant_note}" if tax_exemption_reason else cocontractant_note
+            else:
+                tax_exemption_reason = TAX_EXEMPTION_MAPPING.get(reason_code, _("Exempt from tax") if tax._requires_exemption_reason() else None)
             return {
                 'tax_category_code': tax.ubl_cii_tax_category_code,
                 'tax_exemption_reason_code': reason_code,
                 'tax_exemption_reason': tax_exemption_reason,
             }
         return super()._get_tax_unece_codes(customer, supplier, tax)
+
+    def _is_valid_cocontracant_tax_extension(self, tax):
+        # Deprecated
+        return not tax.amount and tax.ubl_cii_tax_category_code == "AE" and tax.ubl_cii_tax_exemption_reason_code == "VATEX_EU_AE"

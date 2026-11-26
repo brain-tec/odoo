@@ -54,12 +54,25 @@ class AttachmentController(http.Controller):
             raise NotFound()
         if thread_model == "discuss.channel" and not thread.allow_public_upload and not request.env.user._is_internal():
             raise AccessError(_("You are not allowed to upload attachments on this channel."))
+        partner, guest = request.env["res.partner"]._get_current_persona()
+        if thread_model == "discuss.channel" and not partner and not guest:
+            raise NotFound()
         vals = {
             "name": ufile.filename,
             "raw": ufile.read(),
             "res_id": int(thread_id),
             "res_model": thread_model,
         }
+        if company_id := thread._mail_get_companies()[thread.id]:
+            vals["company_id"] = company_id.id
+        elif cids := request.cookies.get("cids", False):
+            active_company_ids = [int(cid) for cid in cids.split("-")]
+            company_id = (
+                request.env.user.company_id.id
+                if request.env.user.company_id.id in active_company_ids
+                else active_company_ids[0]
+            )
+            vals["company_id"] = company_id
         if is_pending and is_pending != "false":
             # Add this point, the message related to the uploaded file does
             # not exist yet, so we use those placeholder values instead.
@@ -126,4 +139,5 @@ class AttachmentController(http.Controller):
         """
         ids_list = list(map(int, file_ids.split(',')))
         attachments = request.env['ir.attachment'].browse(ids_list)
+        attachments.check('read')
         return self._make_zip(zip_name, attachments)

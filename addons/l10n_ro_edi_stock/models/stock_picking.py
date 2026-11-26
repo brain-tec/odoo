@@ -375,7 +375,7 @@ class Picking(models.Model):
         for picking in self:
             picking.l10n_ro_edi_stock_enable_send = (
                     picking.l10n_ro_edi_stock_enable
-                    and picking.state == 'done'
+                    and picking.state in ('assigned', 'done')
                     and picking.l10n_ro_edi_stock_state in (False, 'stock_sending_failed')
                     and not picking._l10n_ro_edi_stock_get_last_document('stock_validated')
             )
@@ -409,7 +409,11 @@ class Picking(models.Model):
         # EXTENDS 'stock'
 
         # Validate the carrier first because it cannot be changed after the super call
-        self._l10n_ro_edi_stock_validate_carrier()
+        # validation should not be blocking demo data or unit tests of other modules
+        # an example is l10n_ro_saft_stock that creates pickings in demo data which cannot
+        # have a carrier_id because the module does not depends on stock_delivery
+        if not self.env.context.get('demo_mode', False):
+            self._l10n_ro_edi_stock_validate_carrier()
 
         return super().button_validate()
 
@@ -500,6 +504,7 @@ class Picking(models.Model):
             return errors  # return prematurely because all the end location fields depend on this field
 
         # Location fields
+        country_ro = self.env.ref('base.ro')
         for location in ('start', 'end'):
             loc_value = data[f'l10n_ro_edi_stock_{location}_loc_type']
             loc_group = _("'Start Location'") if location == 'start' else _("'End Location'")
@@ -514,9 +519,32 @@ class Picking(models.Model):
                         partner = data['picking_type_id'].warehouse_id.partner_id if location == 'start' else data['partner_id']
                     case 'incoming':
                         partner = data['picking_type_id'].warehouse_id.partner_id if location == 'end' else data['partner_id']
+                    case 'dropship':
+                        first_move = data["stock_move_ids"][:1]
+                        vendor = first_move.purchase_line_id.order_id.partner_id
+                        partner = vendor if location == "start" else first_move.partner_id
+
+                        if location != "start" and partner.is_company:
+                            if vendor.country_id.code != 'RO':
+                                # Vendor is foreign -> partner must self-declare, not the RO company
+                                errors.append(_(
+                                    "Declaration in the name of other registered Romanian B2B Customers is not "
+                                    "supported. %(partner)s must declare the eTransport itself.",
+                                    partner=partner.name,
+                                ))
+                            else:
+                                #  Vendor is domestic (B2B) -> vendor declares
+                                errors.append(_(
+                                    "Declaration on behalf of the supplier is not required for domestic dropshipping. "
+                                    "%(vendor)s, as the supplier, must handle the eTransport declaration.",
+                                    vendor=vendor.name,
+                                ))
                     case _other:
                         errors.append(_("Invalid picking type %(type_code)s", type_code=_other))
                         continue
+
+                if partner.country_id != country_ro:
+                    errors.append(_("Warehouse of %(location_group)s should be in Romania", location_group=loc_group))
 
                 missing_field_names = []
                 if not partner.state_id:
@@ -817,7 +845,11 @@ class Picking(models.Model):
         """
         Returns the data necessary to render the eTransport template
         """
-        commercial_partner = data['partner_id'].commercial_partner_id
+        commercial_partner = (
+            data["partner_id"]
+            if data["picking_type_id"].code != "dropship"
+            else data["stock_move_ids"][:1].purchase_line_id.order_id.partner_id
+        ).commercial_partner_id
         transport_partner = data['transport_partner_id']
         company_id = data['company_id']
         scheduled_date = data['scheduled_date'].date()
@@ -890,6 +922,12 @@ class Picking(models.Model):
                             partner = data['picking_type_id'].warehouse_id.partner_id if loc == 'start' else data['partner_id']
                         case 'incoming':
                             partner = data['picking_type_id'].warehouse_id.partner_id if loc == 'end' else data['partner_id']
+                        case 'dropship':
+                            partner = (
+                                data["stock_move_ids"][:1].purchase_line_id.order_id.partner_id
+                                if loc == "start"
+                                else data["stock_move_ids"][:1].partner_id
+                            )
 
                     template_data['notificare'][key]['locatie'] = {
                         'codJudet': STATE_CODES[partner.state_id.code],

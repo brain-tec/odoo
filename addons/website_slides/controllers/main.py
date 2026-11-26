@@ -133,7 +133,7 @@ class WebsiteSlides(WebsiteProfile):
             'next_slide': next_slide,
             'category_data': category_data,
             # rating and comments
-            'comments': slide.website_message_ids or [],
+            'comments': request.env["mail.message"].search(slide._get_comments_domain()),
         })
 
         # allow rating and comments
@@ -1446,7 +1446,8 @@ class WebsiteSlides(WebsiteProfile):
         # create slide itself
         try:
             values['user_id'] = request.env.uid
-            slide = request.env['slide.slide'].sudo().create(values)
+            with request.env.cr.savepoint():
+                slide = request.env['slide.slide'].sudo().create(values)
         except UserError as e:
             _logger.error(e)
             return {'error': e.args[0]}

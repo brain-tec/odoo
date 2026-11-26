@@ -7,12 +7,13 @@
 # Junko Augias, 2024
 #
 # "Junko Augias (juau)" <juau@odoo.com>, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2026-01-24 09:13+0000\n"
+"POT-Creation-Date: 2026-03-20 18:37+0000\n"
+"PO-Revision-Date: 2026-11-11 09:33+0000\n"
 "Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-18/"
 "sale_loyalty/ja/>\n"
@@ -21,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: sale_loyalty
 #. odoo-python
@@ -201,7 +202,7 @@ msgstr "無効な販売オーダ"
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_order_line__is_reward_line
 msgid "Is a program reward line"
-msgstr "プログラム特典明細ですか？"
+msgstr "プログラム特典明細"
 
 #. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_order_portal_loyalty_content
@@ -213,6 +214,11 @@ msgstr "発行済"
 #: code:addons/sale_loyalty/static/src/views/fields/loyalty_total/loyalty_data_field.xml:0
 msgid "Issued :"
 msgstr "発行済 :"
+
+#. module: sale_loyalty
+#: model:ir.model,name:sale_loyalty.model_account_move_line
+msgid "Journal Item"
+msgstr "仕訳明細"
 
 #. module: sale_loyalty
 #: model:ir.model.fields,field_description:sale_loyalty.field_sale_loyalty_coupon_wizard__write_uid
@@ -408,8 +414,8 @@ msgid ""
 "Technical field used to link multiple reward lines from the same reward "
 "together."
 msgstr ""
-"同じ特典の複数の特典明細を一緒にリンクするために使用される技術的なフィール"
-"ド。"
+"同じ特典の複数の特典明細を一緒にリンクするために使用される技術的なフィールド"
+"。"
 
 #. module: sale_loyalty
 #. odoo-python
@@ -517,8 +523,7 @@ msgstr "このプロモコードはすでに適用されています。"
 #. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_order_view_form_inherit_sale_loyalty
 msgid "Update current promotional lines and select new rewards if applicable."
-msgstr ""
-"現在のプロモーション明細を更新し、該当する場合は新しい特典を選択します。"
+msgstr "現在のプロモーション明細を更新し、該当する場合は新しい特典を選択します。"
 
 #. module: sale_loyalty
 #: model_terms:ir.ui.view,arch_db:sale_loyalty.sale_order_portal_loyalty_content

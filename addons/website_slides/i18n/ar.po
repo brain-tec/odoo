@@ -6,13 +6,14 @@
 # Malaz Abuidris <msea@odoo.com>, 2025
 # Wil Odoo, 2025
 # "Malaz Siddig Elsayed Abuidris (msea)" <msea@odoo.com>, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2026-01-27 23:15+0000\n"
-"Last-Translator: \"Malaz Siddig Elsayed Abuidris (msea)\" <msea@odoo.com>\n"
+"POT-Creation-Date: 2026-05-15 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 14:09+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Arabic <https://translate.odoo.com/projects/odoo-18/"
 "website_slides/ar/>\n"
 "Language: ar\n"
@@ -21,7 +22,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
 "&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__members_engaged_count
@@ -213,8 +214,8 @@ msgstr ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        مرحباً<br/><br/>\n"
-"        لقد تمت دعوتك لإلقاء نظرة على دورة: <t t-"
-"out=\"object.channel_id.name or ''\">مبادئ العناية بالحدائق</t>.\n"
+"        لقد تمت دعوتك لإلقاء نظرة على دورة: <t t-out=\"object.channel_id.name "
+"or ''\">مبادئ العناية بالحدائق</t>.\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -253,8 +254,8 @@ msgid ""
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <div style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
+"                    <div style=\"margin: 0px; padding: 0px; font-size: "
+"13px;\">\n"
 "                        <p style=\"margin: 0px;\">مرحباً <t t-"
 "out=\"object.partner_id.name or ''\">Brandon Freeman</t>،</p><br/>\n"
 "                        <p><b>تهانينا!</b></p>\n"
@@ -319,17 +320,17 @@ msgid ""
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">"
+"\n"
 "                        مرحباً<br/><br/>\n"
 "                        <t t-out=\"user.name or ''\">قام ميتشل آدمن</t> "
 "بمشاركة مستند <strong t-out=\"object.name or ''\"></strong> معك!\n"
 "                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
 "align: center;\">\n"
 "                            <a t-att-href=\"object.website_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-"
-"src=\"{{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/"
-"image_256\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{"
+"{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/image_256\" "
+"style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
@@ -389,25 +390,25 @@ msgid ""
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">"
+"\n"
 "                        مرحباً<br/><br/>\n"
 "                        لقد قام <t t-out=\"user.name or ''\">ميتشل آدمن</t> "
 "بمشاركة <t t-out=\"object.slide_category or ''\">المستند</t> <strong t-"
 "out=\"object.name or ''\">الأشجار</strong> معك!\n"
 "                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
 "align: center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?"
-"fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-"
-"src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/"
-"image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                            <a t-att-href=\"(object.website_share_url + "
+"'?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{"
+"{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" "
+"style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
 "center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?"
-"fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" "
+"                            <a t-att-href=\"(object.website_share_url + "
+"'?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" "
 "style=\"background-color: #875a7b; padding: 8px 16px 8px 16px; text-"
 "decoration: none; color: #fff; border-radius: 5px;\">عرض <strong t-"
 "out=\"object.name or ''\">الأشجار</strong></a>\n"
@@ -462,21 +463,21 @@ msgid ""
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">"
+"\n"
 "                        مرحباً<br/><br/>\n"
 "                        لقد تم إضافة محتوى جديد في دورة <strong t-"
 "out=\"object.channel_id.name or ''\">الأشجار، الخشب، والحدائق</strong> التي "
 "تتبعها:<br/><br/>\n"
-"                        </p><center><strong t-out=\"object.name or "
-"''\">الأشجار</strong></center>\n"
+"                        </p><center><strong t-out=\"object.name or ''\">"
+"الأشجار</strong></center>\n"
 "                        <t t-if=\"object.image_1024\">\n"
 "                            <div style=\"padding: 16px 8px 16px 8px; text-"
 "align: center;\">\n"
 "                                <a t-att-href=\"object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-"
-"src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/"
-"image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{"
+"{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" "
+"style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        </t>\n"
@@ -513,8 +514,8 @@ msgid ""
 "<i class=\"fa fa-bars\"/><span class=\"d-none d-md-inline-block "
 "ms-1\">Lessons</span>"
 msgstr ""
-"<i class=\"fa fa-bars\"/><span class=\"d-none d-md-inline-block "
-"ms-1\">الدروس</span> "
+"<i class=\"fa fa-bars\"/><span class=\"d-none d-md-inline-block ms-1\">"
+"الدروس</span> "
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.lesson_card
@@ -694,8 +695,8 @@ msgid ""
 "<i class=\"fa fa-home\"/><span class=\"d-none d-md-inline-block ms-1\">Back "
 "to course</span>"
 msgstr ""
-"<i class=\"fa fa-home\"/><span class=\"d-none d-md-inline-block "
-"ms-1\">العودة إلى الدورة</span> "
+"<i class=\"fa fa-home\"/><span class=\"d-none d-md-inline-block ms-1\">"
+"العودة إلى الدورة</span> "
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
@@ -712,8 +713,8 @@ msgid ""
 "<i class=\"fa fa-plus me-1\"/> <span class=\"d-none d-md-inline-block\">Add "
 "Content</span>"
 msgstr ""
-"<i class=\"fa fa-plus me-1\"/> <span class=\"d-none d-md-inline-"
-"block\">إضافة محتوى</span> "
+"<i class=\"fa fa-plus me-1\"/> <span class=\"d-none d-md-inline-block\">"
+"إضافة محتوى</span> "
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list
@@ -773,8 +774,8 @@ msgid ""
 "span>"
 msgstr ""
 "<i class=\"fa fa-share-alt\"/>\n"
-"                        <span class=\"d-none d-md-inline-block "
-"ms-2\">مشاركة</span> "
+"                        <span class=\"d-none d-md-inline-block ms-2\">"
+"مشاركة</span> "
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_sidebar
@@ -787,8 +788,8 @@ msgid ""
 "<i class=\"fa fa-sign-out\"/><span class=\"d-none d-md-inline-block "
 "ms-1\">Exit Fullscreen</span>"
 msgstr ""
-"<i class=\"fa fa-sign-out\"/><span class=\"d-none d-md-inline-block "
-"ms-1\">الخروج من وضع ملء الشاشة</span> "
+"<i class=\"fa fa-sign-out\"/><span class=\"d-none d-md-inline-block ms-1\">"
+"الخروج من وضع ملء الشاشة</span> "
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_all
@@ -919,14 +920,8 @@ msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
-msgid ""
-"<span class=\"o_form_label\">Slides</span>\n"
-"                    <span class=\"fa fa-lg fa-globe\" title=\"Values set "
-"here are website-specific.\" groups=\"website.group_multi_website\"/>"
+msgid "<span class=\"o_form_label\">Slides</span>"
 msgstr ""
-"<span class=\"o_form_label\">الشرائح</span>\n"
-"                    <span class=\"fa fa-lg fa-globe\" title=\"القيم المحددة "
-"هنا خاصة بالموقع الإلكتروني فقط. \" groups=\"website.group_multi_website\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
@@ -1014,8 +1009,8 @@ msgstr ""
 msgid ""
 "<span class=\"text-muted text-truncate mw-100\" title=\"Total\">Total</span>"
 msgstr ""
-"<span class=\"text-muted text-truncate mw-100\" title=\"الإجمالي "
-"\">الإجمالي</span>"
+"<span class=\"text-muted text-truncate mw-100\" title=\"الإجمالي \">الإجمالي</"
+"span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_sample
@@ -1049,12 +1044,12 @@ msgstr ""
 "                                        <span id=\"previous\" class=\"mx-1 "
 "mx-sm-2\" title=\"الشريحة السابقة \" aria-label=\"Previous slide\" "
 "role=\"button\"><i class=\"fa fa-arrow-circle-left\"/></span>\n"
-"                                        <span id=\"next\" class=\"mx-1 mx-"
-"sm-2\" title=\"الشريحة التالية \" aria-label=\"Next slide\" "
-"role=\"button\"><i class=\"fa fa-arrow-circle-right\"/></span>\n"
-"                                        <span id=\"last\" class=\"mx-1 mx-"
-"sm-2\" title=\"الشريحة الأخيرة \" aria-label=\"Last slide\" "
-"role=\"button\"><i class=\"fa fa-step-forward\"/></span>"
+"                                        <span id=\"next\" class=\"mx-1 mx-sm-"
+"2\" title=\"الشريحة التالية \" aria-label=\"Next slide\" role=\"button\"><i "
+"class=\"fa fa-arrow-circle-right\"/></span>\n"
+"                                        <span id=\"last\" class=\"mx-1 mx-sm-"
+"2\" title=\"الشريحة الأخيرة \" aria-label=\"Last slide\" role=\"button\"><i "
+"class=\"fa fa-step-forward\"/></span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
@@ -1085,13 +1080,13 @@ msgid ""
 msgstr ""
 "<span id=\"zoomout\" class=\"d-inline ms-2 me-2\" title=\"تصغير \" aria-"
 "label=\"Zoom out\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-minus\"/"
-">\n"
+"                                            <i class=\"fa fa-search-minus\"/>"
+"\n"
 "                                        </span>\n"
 "                                        <span id=\"zoomin\" class=\"d-"
 "inline\" title=\"تكبير \" aria-label=\"Zoom in\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-plus\"/"
-">\n"
+"                                            <i class=\"fa fa-search-plus\"/>"
+"\n"
 "                                        </span>"
 
 #. module: website_slides
@@ -1100,8 +1095,8 @@ msgid ""
 "<span name=\"done_members_count_label\" class=\"text-muted text-truncate "
 "mw-100\" title=\"Finished\">Finished</span>"
 msgstr ""
-"<span name=\"done_members_count_label\" class=\"text-muted text-truncate "
-"mw-100\" title=\"منتهية \">منتهية</span>"
+"<span name=\"done_members_count_label\" class=\"text-muted text-truncate mw-"
+"100\" title=\"منتهية \">منتهية</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
@@ -1194,6 +1189,8 @@ msgstr "<strong>لا يوجد حاضرون بعد!</strong> "
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_social_email
 msgid "<strong>Sharing is caring!</strong> Your email(s) will arrive shortly."
 msgstr ""
+"<strong>المشاركة هي تعبير عن الاهتمام!</strong> ستصلك رسائل البريد الإلكتروني "
+"قريبًا."
 
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_slide_demo_2_1
@@ -1274,8 +1271,7 @@ msgstr "ملخص المعرفة: كيف وماذا. "
 msgid ""
 "A summary of know-how: how and what. All the basics for this course about "
 "gardening."
-msgstr ""
-"ملخص المعرفة: كيف وماذا. كافة المبادئ لهذه الدورة عن العناية بالحدائق. "
+msgstr "ملخص المعرفة: كيف وماذا. كافة المبادئ لهذه الدورة عن العناية بالحدائق. "
 
 #. module: website_slides
 #: model_terms:slide.slide,description:website_slides.slide_slide_demo_2_0
@@ -1524,8 +1520,8 @@ msgid ""
 "answer: \n"
 "%s\n"
 msgstr ""
-"يجب أن يكون لكافة الأسئلة إجابة واحدة صحيحة على الأقل وإجابة واحدة غير "
-"صحيحة: \n"
+"يجب أن يكون لكافة الأسئلة إجابة واحدة صحيحة على الأقل وإجابة واحدة غير صحيحة: "
+"\n"
 "%s\n"
 
 #. module: website_slides
@@ -2111,9 +2107,9 @@ msgid ""
 "answering questions. In this course, you'll study those topics with "
 "activities about mathematics, science and logic."
 msgstr ""
-"من المهام المعتادة لعالِم الحاسوب هي سؤال الأسئلة المناسبة والإجابة على "
-"الأسئلة. سوف تتعلم في هذه الدورة عن تلك المواضيع عن طريق الأنشطة المتعلقة "
-"بالرياضيات والعلوم والمنطق. "
+"من المهام المعتادة لعالِم الحاسوب هي سؤال الأسئلة المناسبة والإجابة على الأسئلة. "
+"سوف تتعلم في هذه الدورة عن تلك المواضيع عن طريق الأنشطة المتعلقة بالرياضيات "
+"والعلوم والمنطق. "
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_form_add
@@ -2248,8 +2244,8 @@ msgid ""
 "Congratulations, your course has been created, but there isn't any content "
 "yet. First, let's add a <b>Section</b> to give your course a structure."
 msgstr ""
-"تهانينا، لقد تم إنشاء دورتك، ولكن لا يوجد أي محتوى بعد. أولاً، فلنقم بإضافة "
-"<b>جزء</b> لإضفاء هيكل لدورتك. "
+"تهانينا، لقد تم إنشاء دورتك، ولكن لا يوجد أي محتوى بعد. أولاً، فلنقم بإضافة <b>"
+"جزء</b> لإضفاء هيكل لدورتك. "
 
 #. module: website_slides
 #: model:ir.model,name:website_slides.model_res_partner
@@ -2403,8 +2399,8 @@ msgid ""
 "Could not find your video. Please check if your link is correct and if the "
 "video can be accessed."
 msgstr ""
-"لم نتمكن من العثور على مقطع الفيديو الخاص بك. يرجى التحقق من سلامة الرابط "
-"ومن أن مقطع الفيديو يمكن الوصول إليه. "
+"لم نتمكن من العثور على مقطع الفيديو الخاص بك. يرجى التحقق من سلامة الرابط ومن "
+"أن مقطع الفيديو يمكن الوصول إليه. "
 
 #. module: website_slides
 #: model:ir.model,name:website_slides.model_slide_channel
@@ -3221,8 +3217,8 @@ msgid ""
 "First, create your lesson, then edit it with the website builder. You'll be "
 "able to drop building blocks on your page and edit them."
 msgstr ""
-"أنشئ درسك أولاً ثم قم بتحريره باستخدام أداة بناء المواقع الإلكترونية. سوف "
-"يكون بمقدورك سحب وإفلات الكتل البرمجية الإنشائية في صفحتك وتحريرها. "
+"أنشئ درسك أولاً ثم قم بتحريره باستخدام أداة بناء المواقع الإلكترونية. سوف يكون "
+"بمقدورك سحب وإفلات الكتل البرمجية الإنشائية في صفحتك وتحريرها. "
 
 #. module: website_slides
 #. odoo-javascript
@@ -3678,8 +3674,8 @@ msgid ""
 "Impossible to send emails. Select a \"Share Template\" for courses %"
 "(course_names)s first"
 msgstr ""
-"لا يمكن إرسال رسائل البريد الإلكتروني. قم أولاً بتحديد \"قالب المشاركة\" "
-"للدورات %(course_names)s "
+"لا يمكن إرسال رسائل البريد الإلكتروني. قم أولاً بتحديد \"قالب المشاركة\" للدورات "
+"%(course_names)s "
 
 #. module: website_slides
 #: model:slide.answer,comment:website_slides.slide_slide_demo_1_4_question_0_1
@@ -4238,6 +4234,16 @@ msgid "Menu Entry"
 msgstr "قيد القائمة "
 
 #. module: website_slides
+#: model:ir.model,name:website_slides.model_base_partner_merge_automatic_wizard
+msgid "Merge Partner Wizard"
+msgstr "معالج دمج الوكيل"
+
+#. module: website_slides
+#: model:ir.model,name:website_slides.model_mail_message
+msgid "Message"
+msgstr "الرسالة"
+
+#. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__message_has_error
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide__message_has_error
 msgid "Message Delivery error"
@@ -4270,8 +4276,8 @@ msgid ""
 "Mighty forest just don't appear in a few weeks. Learn how time made our "
 "forests mighty and mysterious."
 msgstr ""
-"لا تظهر الغابات الرائعة خلال أسابيع قليلة. تعلّم كيف تمكنا من جعل غاباتنا "
-"رائعة وساحرة مع الوقت. "
+"لا تظهر الغابات الرائعة خلال أسابيع قليلة. تعلّم كيف تمكنا من جعل غاباتنا رائعة "
+"وساحرة مع الوقت. "
 
 #. module: website_slides
 #. odoo-javascript
@@ -4699,10 +4705,10 @@ msgid ""
 "a placeholder expression that provides the appropriate language, e.g. "
 "{{ object.partner_id.lang }}."
 msgstr ""
-"لغة الترجمة الاختيارية (كود ISO) لاختيارها عند إرسال بريد إلكتروني. إذا لم "
-"يتم تعيينها، سوف تُستخدم النسخة باللغة الإنجليزية. عادة ما يكون ذلك تمثيلاً "
-"للعنصر النائب المسؤول عن التزويد باللغة المناسبة، مثال: "
-"{{ object.partner_id.lang }}. "
+"لغة الترجمة الاختيارية (كود ISO) لاختيارها عند إرسال بريد إلكتروني. إذا لم يتم "
+"تعيينها، سوف تُستخدم النسخة باللغة الإنجليزية. عادة ما يكون ذلك تمثيلاً للعنصر "
+"النائب المسؤول عن التزويد باللغة المناسبة، مثال: {{ object.partner_id.lang }}"
+". "
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
@@ -5393,8 +5399,7 @@ msgstr "اختر الإجابة الصحيحة أدناه: "
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
 msgid "Sell access to your courses on your website and track revenues."
 msgstr ""
-"قم ببيع صلاحيات الوصول إلى دوراتك على موقعك الإلكتروني وتمكن من تتبع "
-"إيراداتك. "
+"قم ببيع صلاحيات الوصول إلى دوراتك على موقعك الإلكتروني وتمكن من تتبع إيراداتك. "
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_res_config_settings__module_website_sale_slides
@@ -5612,8 +5617,8 @@ msgid ""
 "Skill up and have an impact! Your business career starts here.<br/>Time to "
 "start a course."
 msgstr ""
-"ارتق بمهاراتك وأحدِث فرقاً! رحلة الأعمال الخاصة بك تبدأ هنا.<br/>حان الوقت "
-"لبدء الدورة. "
+"ارتق بمهاراتك وأحدِث فرقاً! رحلة الأعمال الخاصة بك تبدأ هنا.<br/>حان الوقت لبدء "
+"الدورة. "
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_resource__slide_id
@@ -5995,8 +6000,8 @@ msgid ""
 "The video link to input here can be obtained by using the 'share' button in "
 "the Vimeo interface."
 msgstr ""
-"يمكن الحصول على رابط الفيديو لادخاله هنا عن طريق استخدام زر 'مشاركة' في "
-"واجهة Vimeo. "
+"يمكن الحصول على رابط الفيديو لادخاله هنا عن طريق استخدام زر 'مشاركة' في واجهة "
+"Vimeo. "
 
 #. module: website_slides
 #: model:ir.model.constraint,message:website_slides.constraint_slide_slide_partner_check_vote
@@ -6386,6 +6391,11 @@ msgid "Validation error"
 msgstr "خطأ في التصديق "
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
+msgid "Values set here are website-specific."
+msgstr ""
+
+#. module: website_slides
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_dialog.js:0
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_slide__slide_category__video
@@ -6733,8 +6743,7 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
 msgid "You can add questions to this quiz in the 'Quiz' tab."
-msgstr ""
-"بإمكانك إضافة أسئلة إلى هذا الاختبار القصير في شريط 'الاختبار القصير'. "
+msgstr "بإمكانك إضافة أسئلة إلى هذا الاختبار القصير في شريط 'الاختبار القصير'. "
 
 #. module: website_slides
 #. odoo-javascript
@@ -6782,8 +6791,8 @@ msgid ""
 "You cannot mark a slide quiz as completed if you are not among its members "
 "or it is unpublished."
 msgstr ""
-"لا يمكنك تحديد الاختبار القصير لشريحة كمكتمل إذا لم تكن أحد الأعضاء أو إذا "
-"كان غير منشور. "
+"لا يمكنك تحديد الاختبار القصير لشريحة كمكتمل إذا لم تكن أحد الأعضاء أو إذا كان "
+"غير منشور. "
 
 #. module: website_slides
 #. odoo-python
@@ -6792,8 +6801,16 @@ msgid ""
 "You cannot mark a slide quiz as not completed if you are not among its "
 "members or it is unpublished."
 msgstr ""
-"لا يمكنك تحديد الاختبار القصير لشريحة كغير مكتمل إذا لم تكن أحد الأعضاء أو "
-"إذا كان غير منشور. "
+"لا يمكنك تحديد الاختبار القصير لشريحة كغير مكتمل إذا لم تكن أحد الأعضاء أو إذا "
+"كان غير منشور. "
+
+#. module: website_slides
+#. odoo-python
+#: code:addons/website_slides/models/base_partner_merge.py:0
+msgid ""
+"You cannot merge these contacts because multiple contacts are enrolled in "
+"the same courses: %s"
+msgstr ""
 
 #. module: website_slides
 #. odoo-python
@@ -7325,3 +7342,13 @@ msgstr "قام {{ user.name }} بمشاركة {{ object.slide_category }} معك
 #: model_terms:ir.ui.view,arch_db:website_slides.course_nav
 msgid "└<span class=\"ms-1\">Uncategorized</span>"
 msgstr "└<span class=\"ms-1\">غير مصنف</span> "
+
+#~ msgid ""
+#~ "<span class=\"o_form_label\">Slides</span>\n"
+#~ "                    <span class=\"fa fa-lg fa-globe\" title=\"Values set "
+#~ "here are website-specific.\" groups=\"website.group_multi_website\"/>"
+#~ msgstr ""
+#~ "<span class=\"o_form_label\">الشرائح</span>\n"
+#~ "                    <span class=\"fa fa-lg fa-globe\" title=\"القيم "
+#~ "المحددة هنا خاصة بالموقع الإلكتروني فقط. \" "
+#~ "groups=\"website.group_multi_website\"/>"

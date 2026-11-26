@@ -6,14 +6,15 @@
 # Wil Odoo, 2024
 # Larissa Manderfeld, 2025
 #
-# "Larissa Manderfeld (lman)" <lman@odoo.com>, 2025.
-# "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2025.
+# "Larissa Manderfeld (lman)" <lman@odoo.com>, 2025, 2026.
+# "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-12-04 18:03+0000\n"
+"POT-Creation-Date: 2026-10-30 17:40+0000\n"
+"PO-Revision-Date: 2026-11-18 09:33+0000\n"
 "Last-Translator: \"Noemi Pla Garcia (nopl)\" <nopl@odoo.com>\n"
 "Language-Team: Spanish <https://translate.odoo.com/projects/odoo-18/loyalty/"
 "es/>\n"
@@ -23,7 +24,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
 "0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: loyalty
 #: model:ir.model.fields,help:loyalty.field_loyalty_program__trigger
@@ -72,11 +73,6 @@ msgstr ""
 #: code:addons/loyalty/models/loyalty_reward.py:0
 msgid " (Max %s)"
 msgstr "(Máximo %s)"
-
-#. module: loyalty
-#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_report
-msgid "$100"
-msgstr "100 €"
 
 #. module: loyalty
 #. odoo-python
@@ -135,25 +131,10 @@ msgid "10% on your order"
 msgstr "10 % en su pedido"
 
 #. module: loyalty
-#: model_terms:ir.ui.view,arch_db:loyalty.gift_card_report
-msgid "1000"
-msgstr "1000"
-
-#. module: loyalty
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
 msgid "2+1 Free"
 msgstr "Gratis 2+1"
-
-#. module: loyalty
-#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_report
-msgid "2023-08-20"
-msgstr "20-08-2023"
-
-#. module: loyalty
-#: model_terms:ir.ui.view,arch_db:loyalty.gift_card_report
-msgid "2023-12-31"
-msgstr "31-12-2023 "
 
 #. module: loyalty
 #: model:mail.template,body_html:loyalty.mail_template_gift_card
@@ -321,14 +302,14 @@ msgstr ""
 "<span class=\"o_stat_text\" invisible=\"program_type not in ('coupons', "
 "'next_order_coupons')\">Cupones</span>\n"
 "                                <span class=\"o_stat_text\" "
-"invisible=\"program_type != 'loyalty'\">Tarjetas de fidalidad</span>\n"
+"invisible=\"program_type != 'loyalty'\">Tarjetas de fidelidad</span>\n"
 "                                <span class=\"o_stat_text\" "
 "invisible=\"program_type not in ('promotion', 'buy_x_get_y')\">Promociones</"
 "span>\n"
 "                                <span class=\"o_stat_text\" "
 "invisible=\"program_type != 'promo_code'\">Descuentos</span>\n"
 "                                <span class=\"o_stat_text\" "
-"invisible=\"program_type != 'gift_card'\">Tarjetas de regalo</span>\n"
+"invisible=\"program_type != 'gift_card'\">Tarjetas regalo</span>\n"
 "                                <span class=\"o_stat_text\" "
 "invisible=\"program_type != 'ewallet'\">Monederos electrónicos</span>"
 
@@ -972,7 +953,7 @@ msgstr "Modo de descuento"
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__payment_program_discount_product_id
 msgid "Discount Product"
-msgstr "Product de descuento"
+msgstr "Producto de descuento"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_reward__discount_product_domain
@@ -1147,6 +1128,12 @@ msgstr "Producto gratuito - Gabinete grande"
 #. module: loyalty
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_reward.py:0
+msgid "Free Product - [%(products)s, and %(count)s more]"
+msgstr ""
+
+#. module: loyalty
+#. odoo-python
+#: code:addons/loyalty/models/loyalty_reward.py:0
 msgid "Free Product - [%s]"
 msgstr "Producto gratuito - [%s]"
 
@@ -1188,7 +1175,7 @@ msgstr "Generar cupones"
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
 msgid "Generate Gift Cards"
-msgstr "Generar tarjetas de regalo"
+msgstr "Genera tarjetas regalo"
 
 #. module: loyalty
 #. odoo-python
@@ -1231,7 +1218,7 @@ msgstr "Productos de tarjeta de regalo"
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_generate_wizard_view_form
 msgid "Gift Card value"
-msgstr "Valor de la tarjeta de regalo"
+msgstr "Valor de la tarjeta regalo"
 
 #. module: loyalty
 #: model:mail.template,name:loyalty.mail_template_gift_card
@@ -1243,7 +1230,7 @@ msgstr "Tarjeta de regalo: información de tarjeta de regalo"
 #: code:addons/loyalty/models/loyalty_program.py:0
 #: model:loyalty.program,name:loyalty.gift_card_program
 msgid "Gift Cards"
-msgstr "Tarjetas de regalo"
+msgstr "Tarjetas regalo"
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
@@ -1254,10 +1241,10 @@ msgid ""
 "                                    Then, Gift Cards can be used to pay "
 "orders."
 msgstr ""
-"Las tarjetas de regalo se crean manualmente o se envían automáticamente por "
-"correo cuando el cliente pide un producto de tarjeta de regalo.\n"
+"Las tarjetas regalo se crean manualmente o se envían automáticamente por "
+"correo cuando el cliente la pide.\n"
 "                                    <br/>\n"
-"                                    Después, las tarjetas de regalo se "
+"                                    De esta forma, las tarjetas regalo se "
 "pueden usar para pagar pedidos."
 
 #. module: loyalty
@@ -1269,7 +1256,7 @@ msgstr "Regalo para el cliente"
 #. module: loyalty
 #: model:ir.actions.act_window,name:loyalty.loyalty_program_gift_ewallet_action
 msgid "Gift cards & eWallet"
-msgstr "Tarjetas de regalo y monedero electrónico"
+msgstr "Tarjetas regalo y monedero electrónico"
 
 #. module: loyalty
 #. odoo-python
@@ -1868,7 +1855,7 @@ msgstr "Clientes seleccionados"
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
 msgid "Sell Gift Cards, that allows to purchase products"
-msgstr "Vender tarjetas de regalo que se pueden usar para comprar productos"
+msgstr "Vende tarjetas regalo que se pueden utilizar para comprar productos"
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_card_view_tree
@@ -2386,10 +2373,27 @@ msgid "used)"
 msgstr "utilizados)"
 
 #. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_reward_view_kanban
+msgid "x"
+msgstr "x"
+
+#. module: loyalty
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_reward.py:0
 msgid "your order"
 msgstr "su pedido"
+
+#~ msgid "$100"
+#~ msgstr "100 €"
+
+#~ msgid "1000"
+#~ msgstr "1000"
+
+#~ msgid "2023-08-20"
+#~ msgstr "20-08-2023"
+
+#~ msgid "2023-12-31"
+#~ msgstr "31-12-2023 "
 
 #~ msgid ""
 #~ "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "

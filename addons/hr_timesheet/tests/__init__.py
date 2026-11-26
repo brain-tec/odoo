@@ -5,3 +5,6 @@ from . import test_timesheet
 from . import test_project_task_quick_create
 from . import test_portal_timesheet
 from . import test_project_project
+from . import test_project_sharing
+from . import test_task_analysis
+from . import test_task_progress

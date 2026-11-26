@@ -1,26 +1,29 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_event_track
+# * website_event_track
 #
 # Translators:
 # Wil Odoo, 2024
 # Shark McGnark <peculiarcheese@gmail.com>, 2024
 # Manon Rondou, 2025
-#
+# "Manon Rondou (ronm)" <ronm@odoo.com>, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:38+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Manon Rondou, 2025\n"
-"Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
+"POT-Creation-Date: 2026-04-10 18:39+0000\n"
+"PO-Revision-Date: 2026-10-20 13:43+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: French <https://translate.odoo.com/projects/odoo-18/"
+"website_event_track/fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % "
-"1000000 == 0 ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
+"1000000 == 0) ? 1 : 2);\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website_event_track
 #: model:mail.template,body_html:website_event_track.mail_template_data_track_confirmation
@@ -51,18 +54,18 @@ msgid ""
 "    </t>\n"
 msgstr ""
 "\n"
-"    Bonjour <t t-out=\"object.partner_id.name or object.partner_name or "
-"''\">Brandon Freeman</t><br/>\n"
+"    Bonjour <t t-out=\"object.partner_id.name or object.partner_name or ''\">"
+"Brandon Freeman</t><br/>\n"
 "    Nous sommes ravis de vous informer que votre proposition <t t-"
 "out=\"object.name or ''\">Concernant cet événement</t> a été acceptée et "
-"confirmée pour l'événement <t t-out=\"object.event_id.name or "
-"''\">Révélation en ligne de la collection OpenWood</t>.\n"
+"confirmée pour l'événement <t t-out=\"object.event_id.name or ''\">"
+"Révélation en ligne de la collection OpenWood</t>.\n"
 "    <br/>\n"
 "    Vous trouverez plus de détails ci-dessous :\n"
 "    <div style=\"margin: 16px 0px 16px 0px;\">\n"
-"        <a t-attf-href=\"/event/{{ object.event_id.id }}/track/"
-"{{ object.id }}\" style=\"padding: 8px 16px 8px 16px; font-size: 14px; "
-"color: #FFFFFF; text-decoration: none !important; background-color: #875A7B; "
+"        <a t-attf-href=\"/event/{{ object.event_id.id }}/track/{{ "
+"object.id }}\" style=\"padding: 8px 16px 8px 16px; font-size: 14px; color: "
+"#FFFFFF; text-decoration: none !important; background-color: #875A7B; "
 "border: 0px solid #875A7B; border-radius:3px\">\n"
 "            Voir la présentation \n"
 "        </a>\n"
@@ -168,15 +171,6 @@ msgid "<span class=\"d-none d-md-block\">&amp;bull;</span>"
 msgstr "<span class=\"d-none d-md-block\">&amp;bull;</span>"
 
 #. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
-"specific.\" groups=\"website.group_multi_website\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-globe\" title=\"Les valeurs définies ici sont "
-"spécifiques au site Web.\" groups=\"website.group_multi_website\"/>"
-
-#. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.agenda_online
 #: model_terms:ir.ui.view,arch_db:website_event_track.tracks_main
 msgid "<span class=\"fa fa-plus me-1\"/> Schedule Tracks"
@@ -273,8 +267,8 @@ msgid ""
 " * Red indicates something is preventing the progress of this track\n"
 " * Green indicates the track is ready to be pulled to the next stage"
 msgstr ""
-"L'état kanban de la session indique les situations spéciales qui "
-"l'affecte :\n"
+"L'état kanban de la session indique les situations spéciales qui l'affecte "
+":\n"
 " * Gris est la situation par défaut\n"
 "* Rouge indique que quelque chose bloque la progression de cette session\n"
 " * Vert indique que la session est prête pour passer à l'étape suivante"
@@ -297,7 +291,7 @@ msgstr "Activités"
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "Activité exception décoration"
+msgstr "Indicateur d’exception d’activité"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__activity_state
@@ -727,8 +721,8 @@ msgstr "Définir les étiquettes qui expliquent la gestion des étapes kanban"
 #: model:ir.model.fields,help:website_event_track.field_event_track_location__sequence
 msgid "Define the order in which the location will appear on \"Agenda\" page"
 msgstr ""
-"Déterminer l'ordre dans lequel l'emplacement apparaître sur la page "
-"\"Programme\"."
+"Déterminez l'ordre dans lequel l'emplacement apparaîtra sur la page "
+"\"Agenda\""
 
 #. module: website_event_track
 #: model_terms:ir.actions.act_window,help:website_event_track.event_track_stage_action
@@ -1399,8 +1393,8 @@ msgid ""
 "simple and transformation type projects like this! :)-"
 msgstr ""
 "Lien vers les questions-réponses ici ! Le moment est venu de transformer ces "
-"vieux murs. Aimez les projets simples et de transformation comme celui-"
-"ci ! :)-"
+"vieux murs. Aimez les projets simples et de transformation comme celui-ci ! "
+":)-"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.agenda_main_track
@@ -1566,7 +1560,7 @@ msgstr "Activité suivante de l'événement du calendrier"
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Date limite de l'activité à venir"
+msgstr "Échéance de la prochaine activité"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__activity_summary
@@ -2126,8 +2120,8 @@ msgid ""
 "This page hasn't been saved for offline reading yet.<br/>Please check your "
 "network connection."
 msgstr ""
-"Cette page n'a pas encore été enregistrée pour être lue hors ligne.<br/"
-">Veuillez vérifier votre connexion réseau."
+"Cette page n'a pas encore été enregistrée pour être lue hors ligne.<br/>"
+"Veuillez vérifier votre connexion réseau."
 
 #. module: website_event_track
 #: model:ir.model.fields,help:website_event_track.field_event_track_stage__fold
@@ -2155,8 +2149,8 @@ msgid ""
 "Timely release of presentation material (slides),\n"
 "                            for publishing on our website."
 msgstr ""
-"Mise à disposition en temps voulu des supports de présentation "
-"(diapositives),\n"
+"Mise à disposition en temps voulu des supports de présentation (diapositives)"
+",\n"
 "                            qui seront publiés sur notre site web."
 
 #. module: website_event_track
@@ -2197,7 +2191,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_visitor_view_search
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_form
 msgid "Track"
-msgstr "Session"
+msgstr "Suivi"
 
 #. module: website_event_track
 #: model:ir.model,name:website_event_track.model_event_track_visitor
@@ -2409,6 +2403,11 @@ msgstr ""
 "délicats ou compliqués."
 
 #. module: website_event_track
+#: model_terms:ir.ui.view,arch_db:website_event_track.res_config_settings_view_form
+msgid "Values set here are website-specific."
+msgstr "Les valeurs définies ici sont spécifiques au site web."
+
+#. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_kanban
 msgid "View Track"
 msgstr "Voir la session"
@@ -2460,8 +2459,7 @@ msgstr "Nous n'avons trouvé aucune session pour l'instant."
 #: model_terms:ir.ui.view,arch_db:website_event_track.agenda_online
 #: model_terms:ir.ui.view,arch_db:website_event_track.tracks_main
 msgid "We could not find any track matching your search for:"
-msgstr ""
-"Nous n'avons trouvé aucune session correspondant à votre recherche de :"
+msgstr "Nous n'avons trouvé aucune session correspondant à votre recherche de :"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
@@ -2708,3 +2706,16 @@ msgstr "commence dans "
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_content
 msgid "starts on"
 msgstr "commence le"
+
+#. module: website_event_track
+#. odoo-javascript
+#: code:addons/website_event_track/static/src/xml/website_event_pwa.xml:0
+msgid "x"
+msgstr "x"
+
+#~ msgid ""
+#~ "<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
+#~ "specific.\" groups=\"website.group_multi_website\"/>"
+#~ msgstr ""
+#~ "<span class=\"fa fa-lg fa-globe\" title=\"Les valeurs définies ici sont "
+#~ "spécifiques au site Web.\" groups=\"website.group_multi_website\"/>"

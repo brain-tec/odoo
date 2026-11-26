@@ -103,6 +103,8 @@ class PosOrder(models.Model):
 
         if self.l10n_es_tbai_is_required:
             vals['l10n_es_tbai_refund_reason'] = self.l10n_es_tbai_refund_reason
+            if self.l10n_es_tbai_refund_reason == 'R5':
+                vals['l10n_es_is_simplified'] = True
 
         return vals
 
@@ -170,7 +172,7 @@ class PosOrder(models.Model):
         self.env['l10n_es_edi_tbai.document']._add_base_lines_tax_amounts(base_lines, self.company_id)
 
         for base_line in base_lines:
-            sign = base_line['is_refund'] and -1 or 1
+            sign = -1 * base_line['sign']
             base_line['gross_price_unit'] = sign * base_line['gross_price_unit']
             base_line['discount_amount'] = sign * base_line['discount_amount']
             base_line['price_total'] = sign * base_line['price_total']

@@ -3,6 +3,7 @@ from datetime import datetime
 
 from freezegun import freeze_time
 
+from odoo import Command
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tools import file_open
 from odoo.tests import tagged
@@ -76,10 +77,13 @@ class TestMyUBLPint(AccountTestInvoicingCommon):
         )
 
     def test_invoice_with_sst(self):
+        self.env['ir.config_parameter'].set_param('account_edi_ubl_cii.use_new_dict_to_xml_helpers', 'True')
         invoice = self.init_invoice('out_invoice', currency=self.other_currency, products=self.product_a)
+        service_tax = self.env['account.chart.template'].ref('l10n_my_tax_sale_8')
 
         invoice.write({
             'invoice_incoterm_id': self.env.ref('account.incoterm_CFR').id,
+            'invoice_line_ids': [Command.create({'product_id': self.product_b.id, 'tax_ids': [Command.set(service_tax.ids)]})],
         })
 
         self.company_data['company'].write({
@@ -100,7 +104,3 @@ class TestMyUBLPint(AccountTestInvoicingCommon):
             self.get_xml_tree_from_string(actual_xml),
             self.get_xml_tree_from_string(expected_xml),
         )
-
-    def test_invoice_with_sst_new(self):
-        self.env['ir.config_parameter'].set_param('account_edi_ubl_cii.use_new_dict_to_xml_helpers', 'True')
-        self.test_invoice_with_sst()

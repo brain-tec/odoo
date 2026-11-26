@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* purchase
+# * purchase
 #
 # Translators:
 # Martin Trigaux, 2024
@@ -8,21 +8,23 @@
 # Chill Liao <chill421@qq.com>, 2024
 # 何彬 <vnsoft.he@gmail.com>, 2025
 # Chloe Wang, 2025
-#
+# "Chloe Wang (chwa)" <chwa@odoo.com>, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Chloe Wang, 2025\n"
-"Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/"
-"zh_CN/)\n"
+"POT-Creation-Date: 2026-11-13 17:37+0000\n"
+"PO-Revision-Date: 2026-10-20 12:42+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
+"projects/odoo-18/purchase/zh_Hans/>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: purchase
 #: model:ir.actions.report,print_report_name:purchase.action_report_purchase_order
@@ -1908,6 +1910,12 @@ msgstr "名称, 税号, 邮箱, 或 参考"
 
 #. module: purchase
 #. odoo-python
+#: code:addons/purchase/models/purchase_order.py:0
+msgid "New"
+msgstr "新建"
+
+#. module: purchase
+#. odoo-python
 #: code:addons/purchase/controllers/portal.py:0
 msgid "Newest"
 msgstr "最新"
@@ -2062,6 +2070,12 @@ msgstr "一旦您向供应商订购了产品，请确认您的报价请求，它
 
 #. module: purchase
 #. odoo-python
+#: code:addons/purchase/models/purchase_order.py:0
+msgid "Only a purchase manager can approve this purchase order."
+msgstr ""
+
+#. module: purchase
+#. odoo-python
 #: code:addons/purchase/models/product.py:0
 msgid "Operation not supported"
 msgstr "操作不支持"
@@ -2182,7 +2196,7 @@ msgstr "请至少选择两个带有状态询价和发送要合并的询价的采
 #. odoo-python
 #: code:addons/purchase/models/purchase_bill_line_match.py:0
 msgid "Please select bill lines with the same vendor."
-msgstr ""
+msgstr "请选择供应商相同的账单行。"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_bill_line_match__pol_id
@@ -2430,6 +2444,7 @@ msgstr "采购订单数"
 #: model:ir.actions.act_window,name:purchase.action_purchase_history
 #: model:ir.model,name:purchase.model_purchase_order_line
 #: model:ir.model.fields,field_description:purchase.field_account_move_line__purchase_line_id
+#: model:ir.model.fields,field_description:purchase.field_account_tax__purchase_order_line_ids
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_line_form2
 msgid "Purchase Order Line"
@@ -3190,6 +3205,12 @@ msgstr "订单收据已由%s确认。"
 #: code:addons/purchase/models/purchase_order.py:0
 msgid "The order receipt has been declined by %s."
 msgstr "订单收据已被%s拒绝。"
+
+#. module: purchase
+#. odoo-python
+#: code:addons/purchase/models/res_partner.py:0
+msgid "The partner cannot be deleted because it is used as a dropship address"
+msgstr ""
 
 #. module: purchase
 #: model_terms:ir.actions.act_window,help:purchase.act_res_partner_2_purchase_order

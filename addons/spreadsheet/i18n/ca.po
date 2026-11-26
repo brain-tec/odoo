@@ -24,7 +24,7 @@
 # Cristian Cruz, 2025
 # Adrià Navarro PYMING, 2025
 # EstudiTIC - estuditic.com <odoo@estuditic.com>, 2025
-# Santiago Payà <santiagopim@gmail.com>, 2025
+# Santiago Payà <santiagopim@gmail.com>, 2025, 2026.
 # marcescu, 2025
 # Noemi Pla, 2025
 # Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
@@ -32,8 +32,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-05 18:38+0000\n"
-"PO-Revision-Date: 2026-02-07 18:00+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 12:59+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Catalan <https://translate.odoo.com/projects/odoo-18/"
 "spreadsheet/ca/>\n"
@@ -42,7 +42,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -278,38 +278,21 @@ msgstr "%s coincidències en tots els fulls"
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
-"(0) Exact match. \n"
-"        (-1) Return next smaller item if no match. \n"
-"        (1) Return next greater item if no match. \n"
-"        (2) Wildcard match."
+"(0) Exact match.         (-1) Return next smaller item if no match.         "
+"(1) Return next greater item if no match.         (2) Wildcard match."
 msgstr ""
-"(0) coincidència exacta. \n"
-"        (-1) Mostrar el següent element més petit si no hi ha "
-"coincidència. \n"
-"        (1) Mostrar el següent element més gran si no hi ha coincidència. \n"
-"        (2) Coincidència amb comodí."
 
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
-"(1) Search starting at first item. \n"
-"      (-1) Search starting at last item. \n"
-"      (2) Perform a binary search that relies on lookup_array being sorted "
-"in ascending order. If not sorted, invalid results will be returned. \n"
-"      (-2) Perform a binary search that relies on lookup_array being sorted "
-"in descending order. If not sorted, invalid results will be returned.\n"
-"      "
+"(1) Search starting at first item.       (-1) Search starting at last "
+"item.       (2) Perform a binary search that relies on lookup_array being "
+"sorted in ascending order. If not sorted, invalid results will be "
+"returned.       (-2) Perform a binary search that relies on lookup_array "
+"being sorted in descending order. If not sorted, invalid results will be "
+"returned.      "
 msgstr ""
-"(1) Cerca a partir del primer element. \n"
-"      (-1) Cerca a partir de l'últim element. \n"
-"      (2) Realitza una cerca binària que depèn que lookup_array estigui "
-"ordenat en ordre ascendent. Si no està ordenat, es retornaran resultats no "
-"vàlids. \n"
-"      (-2) Realitza una cerca binària que depèn que lookup_array estigui "
-"ordenat en ordre descendent. Si no està ordenat, es retornaran resultats no "
-"vàlids.\n"
-"      "
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -370,6 +353,12 @@ msgstr "2 columnes"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "2 rows"
 msgstr "2 fileres"
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
+msgid "A"
+msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -1044,14 +1033,6 @@ msgstr ""
 #. module: spreadsheet
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid ""
-"An unexpected error occurred while pasting content.\n"
-"          This is probably due to a spreadsheet version mismatch."
-msgstr ""
-
-#. module: spreadsheet
-#. odoo-javascript
-#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "An unexpected error occurred. Submit a support ticket at odoo.com/help."
 msgstr ""
 
@@ -1654,6 +1635,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Cannot open the link because the linked sheet is hidden."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid ""
+"Cannot perform this action on merged cells. Unmerge the cells and try again."
 msgstr ""
 
 #. module: spreadsheet
@@ -3620,25 +3608,6 @@ msgstr "La funció [[FUNCTIONNAME]] no ha trobat cap resultat."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
-"Function [[FUNCTION_NAME]] expects criteria_range and criterion to be in "
-"pairs."
-msgstr ""
-"La funció [[FUNCTION_NAME]] espera que criteria_range i criteri estiguin en "
-"parells"
-
-#. module: spreadsheet
-#. odoo-javascript
-#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid ""
-"Function [[FUNCTION_NAME]] expects criteria_range to have the same dimension"
-msgstr ""
-"La funció [[FUNCTION_NAME]] espera que criteria_range tingui la mateixa "
-"dimensió"
-
-#. module: spreadsheet
-#. odoo-javascript
-#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
-msgid ""
 "Function [[FUNCTION_NAME]] expects number values for %s, but got a boolean."
 msgstr ""
 
@@ -4061,8 +4030,7 @@ msgstr "En [[FUNCTION_NAME]] avaluació, no es pot trobar '%s' dins '%s'."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
 "In [[FUNCTION_NAME]], the number of columns of the first matrix (%s) must be "
-"equal to the \n"
-"        number of rows of the second matrix (%s)."
+"equal to the         number of rows of the second matrix (%s)."
 msgstr ""
 
 #. module: spreadsheet
@@ -5217,6 +5185,12 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "Next coupon date after the settlement date."
 msgstr "Data del cupó següent després de la data de liquidació."
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/hooks.js:0
+msgid "No"
+msgstr "No"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -10471,11 +10445,9 @@ msgstr "Aquesta operació no es permet amb seleccions múltiples."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
-"This operation is not possible due to a merge. Please remove the merges "
-"first than try again."
+"This operation would cause tables to overlap. Move or remove the conflicting "
+"table and try again."
 msgstr ""
-"Aquesta operació no és possible a causa d'una fusió. Si us plau, elimineu "
-"les combinacions primer i torneu-ho a provar."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -11179,9 +11151,8 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
 "Whether or not to remove empty text messages from the split results. The "
-"default behavior is to treat \n"
-"        consecutive delimiters as one (if TRUE). If FALSE, empty cells "
-"values are added between consecutive delimiters."
+"default behavior is to treat         consecutive delimiters as one (if "
+"TRUE). If FALSE, empty cells values are added between consecutive delimiters."
 msgstr ""
 
 #. module: spreadsheet
@@ -11196,8 +11167,7 @@ msgstr ""
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid ""
 "Whether the array should be scanned by column. True scans the array by "
-"column and false (default) \n"
-"      scans the array by row."
+"column and false (default)       scans the array by row."
 msgstr ""
 
 #. module: spreadsheet
@@ -11350,6 +11320,12 @@ msgstr ""
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/hooks.js:0
+msgid "Yes"
+msgstr "Sí"
+
+#. module: spreadsheet
+#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "You can't merge cells inside of an existing filter."
 msgstr "No podeu combinar cel·les dins d'un filtre existent."
@@ -11358,6 +11334,14 @@ msgstr "No podeu combinar cel·les dins d'un filtre existent."
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "You cannot create overlapping tables."
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
+#: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
+msgid ""
+"You copied content from a different version of the application. Only text "
+"content will be pasted."
 msgstr ""
 
 #. module: spreadsheet
@@ -11638,6 +11622,12 @@ msgstr "demà"
 
 #. module: spreadsheet
 #. odoo-javascript
+#: code:addons/spreadsheet/static/src/public_readonly_app/public_readonly.xml:0
+msgid "x"
+msgstr ""
+
+#. module: spreadsheet
+#. odoo-javascript
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "yesterday"
 msgstr "ahir"
@@ -11647,3 +11637,58 @@ msgstr "ahir"
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 msgid "zero"
 msgstr "zero"
+
+#~ msgid ""
+#~ "This operation is not possible due to a merge. Please remove the merges "
+#~ "first than try again."
+#~ msgstr ""
+#~ "Aquesta operació no és possible a causa d'una fusió. Si us plau, elimineu "
+#~ "les combinacions primer i torneu-ho a provar."
+
+#~ msgid ""
+#~ "(0) Exact match. \n"
+#~ "        (-1) Return next smaller item if no match. \n"
+#~ "        (1) Return next greater item if no match. \n"
+#~ "        (2) Wildcard match."
+#~ msgstr ""
+#~ "(0) coincidència exacta. \n"
+#~ "        (-1) Mostrar el següent element més petit si no hi ha "
+#~ "coincidència. \n"
+#~ "        (1) Mostrar el següent element més gran si no hi ha "
+#~ "coincidència. \n"
+#~ "        (2) Coincidència amb comodí."
+
+#~ msgid ""
+#~ "(1) Search starting at first item. \n"
+#~ "      (-1) Search starting at last item. \n"
+#~ "      (2) Perform a binary search that relies on lookup_array being "
+#~ "sorted in ascending order. If not sorted, invalid results will be "
+#~ "returned. \n"
+#~ "      (-2) Perform a binary search that relies on lookup_array being "
+#~ "sorted in descending order. If not sorted, invalid results will be "
+#~ "returned.\n"
+#~ "      "
+#~ msgstr ""
+#~ "(1) Cerca a partir del primer element. \n"
+#~ "      (-1) Cerca a partir de l'últim element. \n"
+#~ "      (2) Realitza una cerca binària que depèn que lookup_array estigui "
+#~ "ordenat en ordre ascendent. Si no està ordenat, es retornaran resultats "
+#~ "no vàlids. \n"
+#~ "      (-2) Realitza una cerca binària que depèn que lookup_array estigui "
+#~ "ordenat en ordre descendent. Si no està ordenat, es retornaran resultats "
+#~ "no vàlids.\n"
+#~ "      "
+
+#~ msgid ""
+#~ "Function [[FUNCTION_NAME]] expects criteria_range and criterion to be in "
+#~ "pairs."
+#~ msgstr ""
+#~ "La funció [[FUNCTION_NAME]] espera que criteria_range i criteri estiguin "
+#~ "en parells"
+
+#~ msgid ""
+#~ "Function [[FUNCTION_NAME]] expects criteria_range to have the same "
+#~ "dimension"
+#~ msgstr ""
+#~ "La funció [[FUNCTION_NAME]] espera que criteria_range tingui la mateixa "
+#~ "dimensió"

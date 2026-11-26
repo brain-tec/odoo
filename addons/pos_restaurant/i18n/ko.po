@@ -1,25 +1,42 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* pos_restaurant
+# * pos_restaurant
 #
 # Translators:
 # Wil Odoo, 2024
 # Daye Jeong, 2024
 # Sarah Park, 2025
 #
+# "Kwanghee Park (kwpa)" <kwpa@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Sarah Park, 2025\n"
-"Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
+"POT-Creation-Date: 2026-07-03 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 11:47+0000\n"
+"Last-Translator: \"Kwanghee Park (kwpa)\" <kwpa@odoo.com>\n"
+"Language-Team: Korean <https://translate.odoo.com/projects/odoo-18/"
+"pos_restaurant/ko/>\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.8.1\n"
+
+#. module: pos_restaurant
+#. odoo-javascript
+#: code:addons/pos_restaurant/static/src/app/tip_screen/tip_screen.js:0
+msgid ""
+"%(amount)s is more than 25% of the order's total amount. Are you sure of "
+"this tip amount?"
+msgstr ""
+
+#. module: pos_restaurant
+#. odoo-javascript
+#: code:addons/pos_restaurant/static/src/app/tip_screen/tip_screen.js:0
+msgid "%(original)s + %(tip)s tip = %(overall)s"
+msgstr ""
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -39,8 +56,8 @@ msgid ""
 "200G Irish Black Angus beef, 9-month matured cheddar cheese, shredded "
 "iceberg lettuce, caramelised onions, crushed tomatoes and Chef’s sauce."
 msgstr ""
-"아이리시 블랙 앵거스 소고기 200g, 9개월 숙성 체다 치즈, 잘게 썬 양상추, 캐러"
-"멜라이즈 양파, 으깬 토마토, 셰프 소스."
+"아이리시 블랙 앵거스 소고기 200g, 9개월 숙성 체다 치즈, 잘게 썬 양상추, "
+"캐러멜라이즈 양파, 으깬 토마토, 셰프 소스."
 
 #. module: pos_restaurant
 #: model:product.template,description_sale:pos_restaurant.pos_food_bacon_product_template
@@ -49,8 +66,8 @@ msgid ""
 "iceberg salad, red onions, grilled bacon, tomato sauce, pickles, barbecue "
 "sauce"
 msgstr ""
-"아이리시 블랙 앵거스 소고기 200g, 캐러멜라이즈 양파 파프리카, 다진 양상추 샐"
-"러드, 적양파, 구운 베이컨, 토마토 소스, 피클, 바비큐 소스"
+"아이리시 블랙 앵거스 소고기 200g, 캐러멜라이즈 양파 파프리카, 다진 양상추 "
+"샐러드, 적양파, 구운 베이컨, 토마토 소스, 피클, 바비큐 소스"
 
 #. module: pos_restaurant
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.view_restaurant_floor_kanban
@@ -69,8 +86,8 @@ msgid ""
 "where you can\n"
 "                define and position the tables."
 msgstr ""
-"식당 층은 고객에게 서비스를 제공하는 장소를 나타냅니다. 테이블을 정의하고 배"
-"치하십시오."
+"식당 층은 고객에게 서비스를 제공하는 장소를 나타냅니다. 테이블을 정의하고 "
+"배치하십시오."
 
 #. module: pos_restaurant
 #: model:ir.model.fields,field_description:pos_restaurant.field_restaurant_floor__active
@@ -130,16 +147,15 @@ msgid ""
 "Adjust the amount authorized by payment terminals to add a tip after the "
 "customers left or at the end of the day."
 msgstr ""
-"고객 퇴점 후 혹은 업무 종료 시 팁을 추가하려면 승인된 금액을 결제용 단말기에"
-"서 조정하십시오."
+"고객 퇴점 후 혹은 업무 종료 시 팁을 추가하려면 승인된 금액을 결제용 "
+"단말기에서 조정하십시오."
 
 #. module: pos_restaurant
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.res_config_settings_view_form
 msgid ""
 "Adjust the tax rate based on whether customers are dining in or opting for "
 "takeout."
-msgstr ""
-"고객이 매장에서 식사를 하는지, 테이크아웃 하는지에 따라 세율을 조정합니다."
+msgstr "고객이 매장에서 식사를 하는지, 테이크아웃 하는지에 따라 세율을 조정합니다."
 
 #. module: pos_restaurant
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.res_config_settings_view_form
@@ -167,7 +183,7 @@ msgstr "지불하기 전에 청구서를 인쇄할 수 있습니다."
 #: model:ir.model.fields,field_description:pos_restaurant.field_res_config_settings__pos_takeaway_fp_id
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.res_config_settings_view_form
 msgid "Alternative Fiscal Position"
-msgstr "대체 재정 상태"
+msgstr "대체 재정 포지션"
 
 #. module: pos_restaurant
 #: model:product.attribute.value,name:pos_restaurant.product_attribute_value_anchovy
@@ -193,6 +209,7 @@ msgstr "보관됨"
 #. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.js:0
+#: code:addons/pos_restaurant/static/src/app/tip_screen/tip_screen.js:0
 msgid "Are you sure?"
 msgstr "진행할까요?"
 
@@ -467,12 +484,12 @@ msgstr "파일"
 #. module: pos_restaurant
 #: model:ir.model,name:pos_restaurant.model_account_fiscal_position
 msgid "Fiscal Position"
-msgstr "재정 상태"
+msgstr "재정 포지션"
 
 #. module: pos_restaurant
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.res_config_settings_view_form
 msgid "Fiscal Positions"
-msgstr "재정 위치"
+msgstr "재정 포지션"
 
 #. module: pos_restaurant
 #: model:ir.model.fields,field_description:pos_restaurant.field_restaurant_table__floor_id
@@ -624,6 +641,18 @@ msgstr "최근 갱신한 사람"
 #: model:ir.model.fields,field_description:pos_restaurant.field_restaurant_table__write_date
 msgid "Last Updated on"
 msgstr "최근 갱신 일자"
+
+#. module: pos_restaurant
+#. odoo-javascript
+#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.js:0
+msgid "Link Table"
+msgstr ""
+
+#. module: pos_restaurant
+#. odoo-javascript
+#: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.js:0
+msgid "Link Table %(sourceTable)s with %(destinationTable)s"
+msgstr ""
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -852,6 +881,15 @@ msgstr "베지테리언 피자"
 #: code:addons/pos_restaurant/static/src/overrides/components/navbar/navbar.xml:0
 msgid "Plan"
 msgstr "계획"
+
+#. module: pos_restaurant
+#. odoo-python
+#: code:addons/pos_restaurant/models/pos_restaurant.py:0
+msgid ""
+"Please close and validate the following open PoS Session before modifying "
+"this floor.\n"
+"Open session: %(config_name)s"
+msgstr ""
 
 #. module: pos_restaurant
 #: model:ir.model,name:pos_restaurant.model_pos_config
@@ -1282,8 +1320,8 @@ msgid ""
 "This is useful for restaurants with onsite and take-away services that imply "
 "specific tax rates."
 msgstr ""
-"이는 특정 세율을 암시하는 현장 및 테이크 아웃 서비스가 있는 레스토랑에 유용합"
-"니다."
+"이는 특정 세율을 암시하는 현장 및 테이크 아웃 서비스가 있는 레스토랑에 "
+"유용합니다."
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -1292,8 +1330,8 @@ msgid ""
 "This order is not yet synced to server. Make sure it is synced then try "
 "again."
 msgstr ""
-"이 주문은 아직 서버와 동기화되지 않았습니다. 동기화 여부를 확인 한 후 다시 시"
-"도하십시오."
+"이 주문은 아직 서버와 동기화되지 않았습니다. 동기화 여부를 확인 한 후 다시 "
+"시도하십시오."
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -1399,30 +1437,26 @@ msgstr "폭"
 #: code:addons/pos_restaurant/models/pos_restaurant.py:0
 msgid ""
 "You cannot delete a floor when orders are still in draft for this floor."
-msgstr ""
-"이 플로어에서 미결 상태인 주문서가 있는 경우 플로어를 삭제할 수 없습니다."
+msgstr "이 플로어에서 미결 상태인 주문서가 있는 경우 플로어를 삭제할 수 없습니다."
 
 #. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.js:0
 msgid "You cannot delete a floor with orders still in draft for this floor."
-msgstr ""
-"이 플로어에서 미결 상태인 주문서가 있는 경우 플로어를 삭제할 수 없습니다."
+msgstr "이 플로어에서 미결 상태인 주문서가 있는 경우 플로어를 삭제할 수 없습니다."
 
 #. module: pos_restaurant
 #. odoo-python
 #: code:addons/pos_restaurant/models/pos_restaurant.py:0
 msgid ""
 "You cannot delete a table when orders are still in draft for this table."
-msgstr ""
-"이 테이블에서 미결 상태인 주문서가 있는 경우 테이블을 삭제할 수 없습니다."
+msgstr "이 테이블에서 미결 상태인 주문서가 있는 경우 테이블을 삭제할 수 없습니다."
 
 #. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/floor_screen/floor_screen.js:0
 msgid "You cannot delete a table with orders still in draft for this table."
-msgstr ""
-"이 테이블에서 미결 상태인 주문서가 있는 경우 테이블을 삭제할 수 없습니다."
+msgstr "이 테이블에서 미결 상태인 주문서가 있는 경우 테이블을 삭제할 수 없습니다."
 
 #. module: pos_restaurant
 #. odoo-python
@@ -1430,8 +1464,7 @@ msgstr ""
 msgid ""
 "You cannot remove a floor that is used in a PoS session, close the "
 "session(s) first: \n"
-msgstr ""
-"PoS 세션에서 사용된 층을 제거할 수 없습니다. 먼저 세션을 닫으십시오. : \n"
+msgstr "PoS 세션에서 사용된 층을 제거할 수 없습니다. 먼저 세션을 닫으십시오. : \n"
 
 #. module: pos_restaurant
 #. odoo-python
@@ -1440,20 +1473,8 @@ msgid ""
 "You cannot remove a table that is used in a PoS session, close the "
 "session(s) first."
 msgstr ""
-"POS 세션에서 사용 중인 테이블은 삭제할 수 없습니다. 먼저 세션을 닫으시기 바랍"
-"니다."
-
-#. module: pos_restaurant
-#. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/tip_receipt/tip_receipt.xml:0
-msgid "________________________"
-msgstr "________________________"
-
-#. module: pos_restaurant
-#. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/tip_receipt/tip_receipt.xml:0
-msgid "______________________________________________"
-msgstr "______________________________________________"
+"POS 세션에서 사용 중인 테이블은 삭제할 수 없습니다. 먼저 세션을 닫으시기 "
+"바랍니다."
 
 #. module: pos_restaurant
 #. odoo-javascript
@@ -1472,3 +1493,9 @@ msgstr "항목"
 #: code:addons/pos_restaurant/static/src/overrides/components/order_widget/order_widget.js:0
 msgid "or book the table for later"
 msgstr "또는 나중에 테이블을 예약할 수 있습니다."
+
+#~ msgid "________________________"
+#~ msgstr "________________________"
+
+#~ msgid "______________________________________________"
+#~ msgstr "______________________________________________"

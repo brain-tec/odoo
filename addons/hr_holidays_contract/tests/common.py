@@ -30,6 +30,7 @@ class TestHolidayContract(TransactionCase):
             'birthday': '1984-05-01',
             'country_id': cls.env.ref('base.be').id,
             'department_id': cls.dep_rd.id,
+            'tz': 'Europe/Brussels',
         })
 
         cls.calendar_35h = cls.env['resource.calendar'].create({
@@ -50,9 +51,13 @@ class TestHolidayContract(TransactionCase):
                 (0, 0, {'name': 'Friday Morning', 'dayofweek': '4', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
                 (0, 0, {'name': 'Friday Lunch', 'dayofweek': '4', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
                 (0, 0, {'name': 'Friday Evening', 'dayofweek': '4', 'hour_from': 13, 'hour_to': 16, 'day_period': 'afternoon'})
-            ]
+            ],
+            'tz': 'Europe/Brussels',
         })
-        cls.calendar_40h = cls.env['resource.calendar'].create({'name': 'Default calendar'})
+        cls.calendar_40h = cls.env['resource.calendar'].create({
+            'name': 'Default calendar',
+            'tz': 'Europe/Brussels',
+        })
 
         # This contract ends at the 15th of the month
         cls.contract_cdd = cls.env['hr.contract'].create({  # Fixed term contract

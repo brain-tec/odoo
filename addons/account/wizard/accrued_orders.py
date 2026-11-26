@@ -64,7 +64,7 @@ class AccruedExpenseRevenue(models.TransientModel):
     @api.depends('date')
     def _compute_reversal_date(self):
         for record in self:
-            if not record.reversal_date or record.reversal_date <= record.date:
+            if record.date and (not record.reversal_date or record.reversal_date <= record.date):
                 record.reversal_date = record.date + relativedelta(days=1)
             else:
                 record.reversal_date = record.reversal_date
@@ -223,7 +223,7 @@ class AccruedExpenseRevenue(models.TransientModel):
             analytic_distribution = {}
             total = sum(order.amount_total for order in orders)
             for line in orders.order_line:
-                ratio = line.price_total / total
+                ratio = line.price_total / total if total else 0.0
                 if not line.analytic_distribution:
                     continue
                 for account_id, distribution in line.analytic_distribution.items():

@@ -242,10 +242,19 @@ class ProductProduct(models.Model):
 
     def _compute_mrp_product_qty(self):
         date_from = fields.Datetime.to_string(fields.datetime.now() - timedelta(days=365))
-        #TODO: state = done?
-        domain = [('state', '=', 'done'), ('product_id', 'in', self.ids), ('date_start', '>', date_from)]
-        read_group_res = self.env['mrp.production']._read_group(domain, ['product_id'], ['product_uom_qty:sum'])
-        mapped_data = {product.id: qty for product, qty in read_group_res}
+        domain = [
+            ('production_id.state', '=', 'done'),
+            ('product_id', 'in', self.ids),
+            ('production_id.date_start', '>', date_from),
+            ('state', '!=', 'cancel'),
+            ('picked', '=', True),
+        ]
+        read_group_res = self.env['stock.move']._read_group(domain, ['product_id', 'product_uom'], ['quantity:sum'])
+        mapped_data = collections.defaultdict(float)
+        for product, uom, qty in read_group_res:
+            if uom != product.uom_id:
+                qty = uom._compute_quantity(qty, product.uom_id)
+            mapped_data[product.id] += qty
         for product in self:
             if not product.id:
                 product.mrp_product_qty = 0.0
@@ -273,16 +282,35 @@ class ProductProduct(models.Model):
         )
         qties = self.env.context.get("mrp_compute_quantities", {})
         qties.update(res)
+
+        # preload product phantom boms to avoid individual calls to _bom_find in explode method
+        phantom_boms_cache = {}
+        grouped_bom_ids = collections.defaultdict(set)
+        for bom in bom_kits.values():
+            grouped_bom_ids[bom.picking_type_id, bom.company_id.id].add(bom.id)
+        for (picking_type, company_id), bom_ids in grouped_bom_ids.items():
+            boms = self.env['mrp.bom'].browse(bom_ids)
+            phantom_boms_cache.update(self.env['mrp.bom'].preload_phantom_boms(
+                products=boms.bom_line_ids.product_id,
+                picking_type=picking_type,
+                company_id=company_id,
+            ))
+        self.env.cr.cache['phantom_boms_cache'] = phantom_boms_cache
+        explode_env = self.with_context(bom_cost_share_cache={}).env
+
         # pre-compute bom lines and identify missing kit components to prefetch
         bom_sub_lines_per_kit = {}
         prefetch_component_ids = set()
         for product in bom_kits:
-            __, bom_sub_lines = bom_kits[product].explode(product, 1)
+            __, bom_sub_lines = bom_kits[product].with_env(explode_env).explode(product, 1)
             bom_sub_lines_per_kit[product] = bom_sub_lines
             for bom_line, __ in bom_sub_lines:
                 if bom_line.product_id.id not in qties:
                     prefetch_component_ids.add(bom_line.product_id.id)
+        # invalidate the cache to keep it localized to this compute method
+        self.env.cr.cache.pop('phantom_boms_cache', None)
         # compute kit quantities
+        compute_env = self.with_context(mrp_compute_quantities=qties).with_prefetch(prefetch_component_ids).env
         for product in bom_kits:
             bom_sub_lines = bom_sub_lines_per_kit[product]
             # group lines by component
@@ -296,7 +324,7 @@ class ProductProduct(models.Model):
             ratios_free_qty = []
 
             for component, bom_sub_lines in bom_sub_lines_grouped.items():
-                component = component.with_context(mrp_compute_quantities=qties).with_prefetch(prefetch_component_ids)
+                component = component.with_env(compute_env)
                 qty_per_kit = 0
                 for bom_line, bom_line_data in bom_sub_lines:
                     if not component.is_storable or float_is_zero(bom_line_data['qty'], precision_rounding=bom_line.product_uom_id.rounding):
@@ -398,18 +426,14 @@ class ProductProduct(models.Model):
         '''extending the method in stock.product to take into account kits'''
         product_ids = super(ProductProduct, self)._search_qty_available_new(operator, value, lot_id, owner_id, package_id)
         kit_boms = self.env['mrp.bom'].search([('type', "=", 'phantom')])
-        kit_products = self.env['product.product']
-        for kit in kit_boms:
-            if kit.product_id:
-                kit_products |= kit.product_id
-            else:
-                kit_products |= kit.product_tmpl_id.product_variant_ids
+        kit_products = kit_boms.mapped(lambda kit: kit.product_id or kit.product_tmpl_id.product_variant_ids)
+        product_ids = set(product_ids)
         for product in kit_products:
             if OPERATORS[operator](product.qty_available, value):
-                product_ids.append(product.id)
-            elif product.id in product_ids:
-                product_ids.pop(product_ids.index(product.id))
-        return list(set(product_ids))
+                product_ids.add(product.id)
+            else:
+                product_ids.discard(product.id)
+        return list(product_ids)
 
     def action_archive(self):
         filtered_products = self.env['mrp.bom.line'].search([('product_id', 'in', self.ids), ('bom_id.active', '=', True)]).product_id.mapped('display_name')

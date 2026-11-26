@@ -237,10 +237,16 @@ class HrEmployeeBase(models.AbstractModel):
             if not employee.work_contact_id:
                 employees_without_work_contact += employee
             else:
-                employee.work_contact_id.sudo().write({
-                    'email': employee.work_email,
-                    'mobile': employee.mobile_phone,
-                })
+                partner = employee.work_contact_id
+                vals = {
+                    fname: value for fname, value in [('email', employee.work_email), ('mobile', employee.mobile_phone)]
+                    if partner[fname] != value
+                }
+                if not vals:
+                    continue
+                if not employee.user_id and not partner.user_ids:
+                    partner = partner.sudo()
+                partner.write(vals)
         if employees_without_work_contact:
             employees_without_work_contact.sudo()._create_work_contacts()
 
@@ -303,7 +309,7 @@ class HrEmployeeBase(models.AbstractModel):
         """
         calendar_periods_by_employee = {}
         for employee in self:
-            calendar = employee.resource_calendar_id or employee.company_id.resource_calendar_id
+            calendar = employee.resource_calendar_id
             calendar_periods_by_employee[employee] = [(start, stop, calendar)]
         return calendar_periods_by_employee
 

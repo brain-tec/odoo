@@ -11,25 +11,25 @@
 # Wil Odoo, 2024
 # Lucia Pacheco, 2024
 # Larissa Manderfeld, 2025
-# "Larissa Manderfeld (lman)" <lman@odoo.com>, 2025.
-# "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2025.
+# "Larissa Manderfeld (lman)" <lman@odoo.com>, 2025, 2026.
+# "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2025, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-15 18:39+0000\n"
-"PO-Revision-Date: 2026-01-24 09:11+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-10-30 17:40+0000\n"
+"PO-Revision-Date: 2026-11-19 13:34+0000\n"
+"Last-Translator: \"Noemi Pla Garcia (nopl)\" <nopl@odoo.com>\n"
 "Language-Team: Spanish <https://translate.odoo.com/projects/odoo-18/payment/"
 "es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == 0)"
-" ? 1 : 2);\n"
-"X-Generator: Weblate 5.14.3\n"
+"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
+"0) ? 1 : 2);\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_provider_onboarding_wizard___data_fetched
@@ -662,7 +662,7 @@ msgstr "Belfius"
 #. module: payment
 #: model:payment.method,name:payment.payment_method_benefit
 msgid "Benefit"
-msgstr "Beneficio"
+msgstr "Benefit"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_bharatqr
@@ -1203,7 +1203,7 @@ msgstr "Completo y parcial"
 #: model:ir.model.fields.selection,name:payment.selection__payment_provider__support_manual_capture__full_only
 #: model:ir.model.fields.selection,name:payment.selection__payment_provider__support_refund__full_only
 msgid "Full Only"
-msgstr "Completos solamente"
+msgstr "Solo íntegro"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_gcash
@@ -1280,7 +1280,7 @@ msgstr "Contiene un importe restante "
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_transaction__is_post_processed
 msgid "Has the payment been post-processed"
-msgstr "¿Se ha posprocesado el pago?"
+msgstr "Se ha procesado el pago posteriormente"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_provider__pre_msg
@@ -1336,9 +1336,9 @@ msgid ""
 "In test mode, a fake payment is processed through a test payment interface.\n"
 "This mode is advised when setting up the provider."
 msgstr ""
-"En el modo de prueba, se procesa un pago falso a través de una interfaz de "
-"pago de prueba.\n"
-"Este modo se recomienda al configurar el método de pago."
+"En el modo de prueba, se procesa un pago simulado a través de una interfaz "
+"de pago de prueba.\n"
+"Se recomienda este modo al configurar el proveedor."
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_provider__inline_form_view_id
@@ -1721,7 +1721,7 @@ msgstr ""
 #. module: payment
 #: model_terms:ir.actions.act_window,help:payment.action_payment_method
 msgid "No payment methods found for your payment providers."
-msgstr "No se encontraron métodos de pago para sus proveedores de pago"
+msgstr "No se han encontrado métodos de pago para sus proveedores de pago."
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.no_pms_available_warning
@@ -2002,7 +2002,7 @@ msgstr "Formulario de pago"
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_link_wizard_view_form
 msgid "Payment Info"
-msgstr "Información de Pago"
+msgstr "Información de pago"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_provider_onboarding_wizard__manual_post_msg
@@ -2203,7 +2203,7 @@ msgstr "Por favor espere... "
 #. module: payment
 #: model:payment.method,name:payment.payment_method_post_finance
 msgid "PostFinance Pay"
-msgstr "Pago con PostFinance"
+msgstr "PostFinance Pay"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_poste_pay
@@ -2894,12 +2894,12 @@ msgid ""
 "the\n"
 "provider's database, allowing the customer to reuse it for a next purchase."
 msgstr ""
-"Controla si los clientes pueden guardar sus métodos de pago como tokens de "
+"Determina si los clientes pueden guardar sus métodos de pago como tokens de "
 "pago.\n"
-"Un token de pago es un enlace anónimo a los detalles de pago guardados en "
-"la\n"
-"base de datos del proveedor de pago, lo que permite al cliente volver a "
-"usarlo en una futura compra."
+"Un token de pago es un enlace anónimo a los datos del método de pago "
+"almacenados en la\n"
+"base de datos del proveedor, que permite al cliente volver a usarlo en la "
+"próxima compra."
 
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_provider__allow_express_checkout
@@ -2933,6 +2933,12 @@ msgid ""
 msgstr ""
 "Este método de pago necesita apoyo. Primero, debe activar un proveedor de "
 "pago que sea compatible con este método."
+
+#. module: payment
+#. odoo-python
+#: code:addons/payment/controllers/portal.py:0
+msgid "This payment provider is not available."
+msgstr ""
 
 #. module: payment
 #. odoo-python
@@ -3116,6 +3122,11 @@ msgstr "Anular el importe restante"
 #: model_terms:ir.ui.view,arch_db:payment.payment_transaction_form
 msgid "Void Transaction"
 msgstr "Anular transacción"
+
+#. module: payment
+#: model:payment.method,name:payment.payment_method_wero
+msgid "WERO"
+msgstr "WERO"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_wallets_india
@@ -3375,7 +3386,7 @@ msgstr "Sus métodos de pago"
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_transaction_form
 msgid "ZIP"
-msgstr "C.P."
+msgstr "ZIP"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_zalopay
@@ -3383,10 +3394,14 @@ msgid "Zalopay"
 msgstr "Zalopay"
 
 #. module: payment
-#: model:ir.model.fields,field_description:payment.field_payment_transaction__partner_zip
 #: model:payment.method,name:payment.payment_method_zip
 msgid "Zip"
-msgstr "C.P."
+msgstr "Zip"
+
+#. module: payment
+#: model:ir.model.fields,field_description:payment.field_payment_transaction__partner_zip
+msgid "Zip Code"
+msgstr "Código postal"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_cofidis
@@ -3402,10 +3417,11 @@ msgstr "eNETS"
 #. odoo-python
 #: code:addons/payment/const.py:0
 msgid "express checkout not supported"
-msgstr "no se admite el pago exprés"
+msgstr "no se admite el pago rápido"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_ideal
+#: model:payment.method,name:payment.payment_method_ideal_brand
 msgid "iDEAL"
 msgstr "iDEAL"
 

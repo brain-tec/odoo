@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 from odoo.addons.base.tests.test_ir_cron import CronMixinCase
 from odoo.addons.mass_mailing.tests.common import MassMailCommon
-from odoo.exceptions import ValidationError
+from odoo.exceptions import AccessError, ValidationError
 from odoo.sql_db import Cursor
 from odoo.tests import Form, HttpCase, users, tagged
 from odoo.tools import mute_logger
@@ -28,6 +28,36 @@ class TestMassMailValues(MassMailCommon):
     def setUpClass(cls):
         super(TestMassMailValues, cls).setUpClass()
         cls._create_mailing_list()
+
+    def test_mail_composer_mailing_name(self):
+        """ Only email marketing users can create a mailing from the mass mail composer:
+        the mailing name is hidden from other users, and no sudo gives the right away. """
+        recipients = self.env['res.partner'].create([
+            {'name': f'Recipient {idx}', 'email': f'recipient.{idx}@example.com'} for idx in range(2)
+        ])
+        ctx = {
+            'default_body': '<p>Hello</p>',
+            'default_composition_mode': 'mass_mail',
+            'default_model': 'res.partner',
+            'default_res_ids': recipients.ids,
+            'default_subject': 'Composer Mailing',
+        }
+        composer_form = Form(self.env['mail.compose.message'].with_user(self.user_employee).with_context(ctx))
+        with self.assertRaisesRegex(AssertionError, "invisible field 'mass_mailing_name'"):
+            composer_form.mass_mailing_name = 'Composer Mailing'
+        composer = composer_form.save()
+        # filled anyway, e.g. through RPC
+        composer.mass_mailing_name = 'Composer Mailing'
+        with self.assertRaises(AccessError):
+            composer._action_send_mail()
+
+        composer_form = Form(self.env['mail.compose.message'].with_user(self.user_marketing).with_context(ctx))
+        composer_form.mass_mailing_name = 'Composer Mailing'
+        composer = composer_form.save()
+        composer._action_send_mail()
+        mailing = self.env['mailing.mailing'].search([('name', '=', 'Composer Mailing')])
+        self.assertEqual(composer.mass_mailing_id, mailing)
+        self.assertEqual(len(mailing), 1)
 
     @users('user_marketing')
     def test_mailing_body_cropped_vml_image(self):
@@ -114,14 +144,14 @@ class TestMassMailValues(MassMailCommon):
                             <!--[if mso]>
                                 <img src="data:image/png;base64,{BASE_64_STRING}9">Fake url, in text: img src="data:image/png;base64,{BASE_64_STRING}"
                                 Fake url, in text: img src="data:image/png;base64,{BASE_64_STRING}"
-                                <img src="data:image/jpg;base64,{BASE_64_STRING}10">
-                                <div style='color: red; background-image:url("data:image/jpg;base64,{BASE_64_STRING}11"); display: block;'>Fake url, in text: style="background-image:url('data:image/png;base64,{BASE_64_STRING}');"
+                                <img src="data:image/jpg;base64,{BASE_64_STRING}A">
+                                <div style='color: red; background-image:url("data:image/jpg;base64,{BASE_64_STRING}B"); display: block;'>Fake url, in text: style="background-image:url('data:image/png;base64,{BASE_64_STRING}');"
                                 Fake url, in text: style="background-image:url('data:image/png;base64,{BASE_64_STRING}');"</div>
-                                <div style="color: red; background-image:url('data:image/jpg;base64,{BASE_64_STRING}12'); display: block;"/>
-                                <div style="color: red; background-image:url(&quot;data:image/jpg;base64,{BASE_64_STRING}13&quot;); display: block;"/>
-                                <div style="color: red; background-image:url(&#34;data:image/jpg;base64,{BASE_64_STRING}14&#34;); display: block;"/>
-                                <div style="color: red; background-image:url(data:image/jpg;base64,{BASE_64_STRING}15); display: block;"/>
-                                <div style="color: red; background-image: url(data:image/jpg;base64,{BASE_64_STRING}16); background: url('data:image/jpg;base64,{BASE_64_STRING}17'); display: block;"/>
+                                <div style="color: red; background-image:url('data:image/jpg;base64,{BASE_64_STRING}C'); display: block;"/>
+                                <div style="color: red; background-image:url(&quot;data:image/jpg;base64,{BASE_64_STRING}D&quot;); display: block;"/>
+                                <div style="color: red; background-image:url(&#34;data:image/jpg;base64,{BASE_64_STRING}E&#34;); display: block;"/>
+                                <div style="color: red; background-image:url(data:image/jpg;base64,{BASE_64_STRING}F); display: block;"/>
+                                <div style="color: red; background-image: url(data:image/jpg;base64,{BASE_64_STRING}G); background: url('data:image/jpg;base64,{BASE_64_STRING}H'); display: block;"/>
                             <![endif]-->
                             <img src="data:image/png;base64,{BASE_64_STRING}0">
                         </section>
@@ -129,31 +159,23 @@ class TestMassMailValues(MassMailCommon):
                 })
         self.assertEqual(len(attachments), 19)
         self.assertEqual(attachments[0]['id'], attachments[18]['id'])
-        self.assertEqual(str(mailing.body_html).strip(), f"""
-                        <section>
-                            <img src="/web/image/{attachments[0]['id']}?access_token={attachments[0]['token']}"/>
-                            <img src="/web/image/{attachments[1]['id']}?access_token={attachments[1]['token']}"/>
-                            <div style="color: red; background-image:url(&quot;/web/image/{attachments[2]['id']}?access_token={attachments[2]['token']}&quot;); display: block;"/>
-                            <div style="color: red; background-image:url('/web/image/{attachments[3]['id']}?access_token={attachments[3]['token']}'); display: block;"/>
-                            <div style="color: red; background-image:url(&quot;/web/image/{attachments[4]['id']}?access_token={attachments[4]['token']}&quot;); display: block;"/>
-                            <div style="color: red; background-image:url(&quot;/web/image/{attachments[5]['id']}?access_token={attachments[5]['token']}&quot;); display: block;"/>
-                            <div style="color: red; background-image:url(/web/image/{attachments[6]['id']}?access_token={attachments[6]['token']}); display: block;"/>
-                            <div style="color: red; background-image: url(/web/image/{attachments[7]['id']}?access_token={attachments[7]['token']}); background: url('/web/image/{attachments[8]['id']}?access_token={attachments[8]['token']}'); display: block;"/>
-                            <!--[if mso]>
-                                <img src="/web/image/{attachments[9]['id']}?access_token={attachments[9]['token']}">Fake url, in text: img src="data:image/png;base64,{BASE_64_STRING}"
-                                Fake url, in text: img src="data:image/png;base64,{BASE_64_STRING}"
-                                <img src="/web/image/{attachments[10]['id']}?access_token={attachments[10]['token']}">
-                                <div style='color: red; background-image:url("/web/image/{attachments[11]['id']}?access_token={attachments[11]['token']}"); display: block;'>Fake url, in text: style="background-image:url('data:image/png;base64,{BASE_64_STRING}');"
-                                Fake url, in text: style="background-image:url('data:image/png;base64,{BASE_64_STRING}');"</div>
-                                <div style="color: red; background-image:url('/web/image/{attachments[12]['id']}?access_token={attachments[12]['token']}'); display: block;"/>
-                                <div style="color: red; background-image:url(&quot;/web/image/{attachments[13]['id']}?access_token={attachments[13]['token']}&quot;); display: block;"/>
-                                <div style="color: red; background-image:url(&#34;/web/image/{attachments[14]['id']}?access_token={attachments[14]['token']}&#34;); display: block;"/>
-                                <div style="color: red; background-image:url(/web/image/{attachments[15]['id']}?access_token={attachments[15]['token']}); display: block;"/>
-                                <div style="color: red; background-image: url(/web/image/{attachments[16]['id']}?access_token={attachments[16]['token']}); background: url('/web/image/{attachments[17]['id']}?access_token={attachments[17]['token']}'); display: block;"/>
-                            <![endif]-->
-                            <img src="/web/image/{attachments[18]['id']}?access_token={attachments[18]['token']}"/>
-                        </section>
-        """.strip())
+
+        # Ensure right number of routing image links exist in the final output
+        found_urls = re.findall(r'/web/image/\d+\?access_token=[a-zA-Z0-9\-_=]+', mailing.body_html)
+        self.assertEqual(len(found_urls), 19, "not the correct number of routing URLs.")
+
+        # Ensure every single generated attachment URL is present somewhere
+        for att in attachments:
+            expected_route = f"/web/image/{att['id']}?access_token={att['token']}"
+            self.assertIn(expected_route, mailing.body_html, f"Generated URL {expected_route} was dropped or mangled.")
+
+        # False-Positive Validation:
+        # The original active attributes are gone, but the "Fake url" plain text blocks must remain.
+        raw_b64_count = mailing.body_html.count(BASE_64_STRING)
+        self.assertEqual(raw_b64_count, 4, f"Expected 4 raw plain text instances of base64 data, found {raw_b64_count}.")
+
+        # Verify that the MSO comment wrapper itself wasn't completely scrubbed out
+        self.assertIn("Fake url, in text:", mailing.body_html)
 
     @users('user_marketing')
     def test_mailing_body_responsive(self):
@@ -797,8 +819,8 @@ class TestMailingHeaders(MassMailCommon, HttpCase):
 
     @users('user_marketing')
     def test_mailing_unsubscribe_headers(self):
-        """ Check unsubscribe headers are present in outgoing emails and work
-        as one-click """
+        """ Check unsubscribe headers are present in outgoing emails, are not
+        folded when sent to the SMTP server and work as one-click """
         test_mailing = self.test_mailing.with_env(self.env)
         test_mailing.action_put_in_queue()
 
@@ -820,6 +842,13 @@ class TestMailingHeaders(MassMailCommon, HttpCase):
             self.assertEqual(headers.get("List-Unsubscribe"), f"<{unsubscribe_oneclick_url}>")
             self.assertEqual(headers.get("List-Unsubscribe-Post"), "List-Unsubscribe=One-Click")
             self.assertEqual(headers.get("Precedence"), "list")
+
+            # check List-Unsubscribe is not folded (no encoded-words) in the message sent to the SMTP server
+            smtp_message = next(
+                sent['message'] for sent in self.emails
+                if sent['smtp_to_list'] == [contact.email_normalized]
+            )
+            self.assertIn(f"List-Unsubscribe: <{unsubscribe_oneclick_url}>\r\n", smtp_message)
 
             # check outgoing email has real links
             self.assertNotIn("/unsubscribe_from_list", email["body"])

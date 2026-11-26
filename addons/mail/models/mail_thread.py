@@ -49,6 +49,7 @@ from odoo.tools.mail import (
 )
 
 MAX_DIRECT_PUSH = 5
+BAD_CONTENT_TYPES = ('binary/octet-stream', '*/*', 'bin/plain')  # replaced by application/octet-stream
 
 _logger = logging.getLogger(__name__)
 
@@ -1200,20 +1201,20 @@ class MailThread(models.AbstractModel):
             user_id = self._mail_find_user_for_gateway(email_from, alias=dest_aliases).id or self._uid
             route = self._routing_check_route(
                 message, message_dict,
-                (reply_model, reply_thread_id, custom_values, user_id, dest_aliases),
+                (reply_model, reply_thread_id, None, user_id, dest_aliases),
                 raise_exception=False)
             if route:
                 _logger.info(
                     'Routing mail from %s to %s with Message-Id %s: direct reply to msg: model: %s, thread_id: %s, custom_values: %s, uid: %s',
-                    email_from, message_dict['to'], message_id, reply_model, reply_thread_id, custom_values, self._uid)
+                    email_from, message_dict['to'], message_id, reply_model, reply_thread_id, None, self._uid)
                 return [route]
             if route is False:
                 return []
 
         # 2. Handle new incoming email by checking aliases and applying their settings
         # prefetch catchall aliases as they are used several times
-        catchall_aliases = self.env['mail.alias.domain'].search([]).mapped('catchall_email')
-        self = self.with_context(mail_catchall_aliases=catchall_aliases)
+        all_aliases = self.env['mail.alias.domain'].search([])
+        self = self.with_context(mail_catchall_aliases=all_aliases.mapped('catchall_email'))
         if rcpt_tos_list:
             # no route found for a matching reference (or reply), so parent is invalid
             message_dict.pop('parent_id', None)
@@ -1222,14 +1223,23 @@ class MailThread(models.AbstractModel):
             if self._detect_write_to_catchall(message_dict):
                 _logger.info('Routing mail from %s to %s with Message-Id %s: direct write to catchall, bounce',
                              email_from, message_dict['to'], message_id)
+
+                # TODO master: merge the logic with _detect_write_to_catchall.
+                recipient_company = self.env.company
+                email_to_list = [email_normalize(e) or e for e in email_split(message_dict['to'])]
+                for alias in all_aliases:
+                    if alias.catchall_email in email_to_list and alias.company_ids and recipient_company not in alias.company_ids:
+                        recipient_company = alias.company_ids[:1]
+
                 body = self.env['ir.qweb']._render('mail.mail_bounce_catchall', {
                     'message': message,
+                    'res_company': recipient_company,
                 })
-                self._routing_create_bounce_email(
+                self.with_company(recipient_company)._routing_create_bounce_email(
                     email_from, body, message,
                     # add a reference with a tag, to be able to ignore response to this email
                     references=f'{message_id} {generate_tracking_message_id("loop-detection-bounce-email")}',
-                    reply_to=self.env.company.email)
+                    reply_to=recipient_company.email)
                 return []
 
             dest_aliases = self.env['mail.alias'].search([
@@ -1307,7 +1317,11 @@ class MailThread(models.AbstractModel):
 
             # disabled subscriptions during message_new/update to avoid having the system user running the
             # email gateway become a follower of all inbound messages
-            ModelCtx = Model.with_user(related_user).sudo()
+            ModelCtx = Model
+            if alias:
+                if self.env.is_system():
+                    ModelCtx = Model.with_user(related_user)
+                ModelCtx = ModelCtx.sudo()
             if thread_id and hasattr(ModelCtx, 'message_update'):
                 thread = ModelCtx.browse(thread_id)
                 thread.message_update(message_dict)
@@ -1410,10 +1424,18 @@ class MailThread(models.AbstractModel):
         if strip_attachments:
             msg_dict.pop('attachments', None)
 
-        existing_msg_ids = self.env['mail.message'].search([('message_id', '=', msg_dict['message_id'])], limit=1)
-        if existing_msg_ids:
+        msg_id = msg_dict.get('message_id')
+        is_duplicate = bool(self.env['mail.message'].search_count([('message_id', '=', msg_id)], limit=1))
+        if not is_duplicate and msg_id:
+            # Synchronize concurrent transactions for the same message_id to make the duplicate check reliable.
+            # Use pg_try_advisory_xact_lock: if another transaction is already processing the same message_id,
+            # treat it as a duplicate.
+            self.env.cr.execute(SQL('SELECT pg_try_advisory_xact_lock(hashtext(%s))', msg_id))
+            is_duplicate = not self.env.cr.fetchone()[0]
+
+        if is_duplicate:
             _logger.info('Ignored mail from %s to %s with Message-Id %s: found duplicated Message-Id during processing',
-                         msg_dict.get('email_from'), msg_dict.get('to'), msg_dict.get('message_id'))
+                         msg_dict.get('email_from'), msg_dict.get('to'), msg_id)
             return False
 
         if self._detect_loop_headers(msg_dict):
@@ -1575,11 +1597,8 @@ class MailThread(models.AbstractModel):
                     # the parent email that might be added at the end
                     # (e.g. for outlook / yahoo bounce email)
                     break
-                if part.get_content_type() == 'binary/octet-stream':
-                    _logger.warning("Message containing an unexpected Content-Type 'binary/octet-stream', assuming 'application/octet-stream'")
-                    part.replace_header('Content-Type', 'application/octet-stream')
-                if part.get_content_type() == '*/*':
-                    _logger.warning("Message containing an unexpected Content-Type '*/*', assuming 'application/octet-stream'")
+                if (bad_content_type := part.get_content_type()) in BAD_CONTENT_TYPES:
+                    _logger.warning("Message containing an unexpected Content-Type %r, assuming 'application/octet-stream'", bad_content_type)
                     part.replace_header('Content-Type', 'application/octet-stream')
                 if part.get_content_type() == 'multipart/alternative':
                     alternative = True
@@ -1599,7 +1618,13 @@ class MailThread(models.AbstractModel):
                 if part.get('Content-Type', '').startswith('pdf;'):
                     part.replace_header('Content-Type', 'application/pdf' + part.get('Content-Type', '')[3:])
 
-                content = part.get_content()
+                is_attachment = bool(filename) or part.get('content-disposition', '').strip().startswith('attachment')
+                content = None
+                if is_attachment:
+                    content = part.get_payload(decode=True)
+                if content is None:
+                    # Parts holding a message, such as a forwarded eml, decode to no payload
+                    content = part.get_content()
                 info = {'encoding': encoding}
                 # 0) Inline Attachments -> attachments, with a third part in the tuple to match cid / attachment
                 if filename and part.get('content-id'):
@@ -1607,7 +1632,7 @@ class MailThread(models.AbstractModel):
                     attachments.append(self._Attachment(filename, content, info))
                     continue
                 # 1) Explicit Attachments -> attachments
-                if filename or part.get('content-disposition', '').strip().startswith('attachment'):
+                if is_attachment:
                     attachments.append(self._Attachment(filename or 'attachment', content, info))
                     continue
                 # 2) text/plain -> <pre/>
@@ -2066,16 +2091,24 @@ class MailThread(models.AbstractModel):
         done_partners += [partner for partner in partners]
 
         # prioritize current user if exists in list, and partners with matching company ids
+        emails_set = set(emails)
         if company_fname := records and records._mail_get_company_field():
             def sort_key(p):
                 return (
                     self.env.user.partner_id == p,           # prioritize user
                     p.company_id in records[company_fname],  # then partner associated w/ records
+                    p.email_formatted in emails_set,         # prioritize exact mail match
                     not p.company_id,                        # else pick partner w/out company_id
+                    -p.id,                                   # finally use a deterministic id ASC tie-breaker
                 )
         else:
             def sort_key(p):
-                return (self.env.user.partner_id == p, not p.company_id)
+                return (
+                    self.env.user.partner_id == p,          # prioritize user
+                    p.email_formatted in emails_set,        # prioritize exact mail match
+                    not p.company_id,                       # else pick partner w/out company_id
+                    -p.id,                                  # finally use a deterministic id ASC tie-breaker
+                )
 
         done_partners.sort(key=sort_key, reverse=True)  # reverse because False < True
 
@@ -3686,14 +3719,16 @@ class MailThread(models.AbstractModel):
         # have a fallback in case replies mess with Messsage-Id in the In-Reply-To (e.g. amazon
         # SES SMTP may replace Message-Id and In-Reply-To refers an internal ID not stored in Odoo)
         message_sudo = message.sudo()
-        ancestors = self.env['mail.message'].sudo().search(
-            [
-                ('model', '=', message_sudo.model), ('res_id', '=', message_sudo.res_id),
-                ('id', '!=', message_sudo.id),
-                ('subtype_id', '!=', False),  # filters out logs
-                ('message_id', '!=', False),  # ignore records that somehow don't have a message_id (non ORM created)
-            ], limit=32, order='id DESC',  # take 32 last, hoping to find public discussions in it
-        )
+        ancestors = self.env['mail.message'].sudo()
+        if message_sudo.model and message_sudo.res_id:
+            ancestors = ancestors.search(
+                [
+                    ('model', '=', message_sudo.model), ('res_id', '=', message_sudo.res_id),
+                    ('id', '!=', message_sudo.id),
+                    ('subtype_id', '!=', False),  # filters out logs
+                    ('message_id', '!=', False),  # ignore records that somehow don't have a message_id (non ORM created)
+                ], limit=32, order='id DESC',  # take 32 last, hoping to find public discussions in it
+            )
 
         # filter out internal messages, to fetch 'public discussion' first
         outgoing_types = ('comment', 'auto_comment', 'email', 'email_outgoing')
@@ -3854,6 +3889,7 @@ class MailThread(models.AbstractModel):
             'options': {
                 'icon': icon,
                 'data': {
+                    "message_id": message.id,
                     'model': model if model else '',
                     'res_id': res_id if res_id else '',
                 }
@@ -4679,6 +4715,8 @@ class MailThread(models.AbstractModel):
             msg_values.update({
                 'partner_ids': list(partner_ids or [])
             })
+        if "subject" in kwargs:
+            msg_values["subject"] = kwargs["subject"]
         if msg_values:
             message.write(msg_values)
 
@@ -4704,6 +4742,8 @@ class MailThread(models.AbstractModel):
             "recipients": Store.many(message.partner_ids, fields=["avatar_128", "name"]),
             "write_date": message.write_date,
         }
+        if "subject" in kwargs:
+            res["subject"] = message.subject
         if body is not None:
             # sudo: mail.message.translation - discarding translations of message after editing it
             self.env["mail.message.translation"].sudo().search([("message_id", "=", message.id)]).unlink()
@@ -4794,11 +4834,13 @@ class MailThread(models.AbstractModel):
 
     @api.model
     def _get_allowed_message_update_params(self):
-        return {"attachment_ids", "body", "partner_ids"}
+        return {"attachment_ids", "body", "partner_ids", "subject"}
 
     @api.model
     def _get_thread_with_access(self, thread_id, mode="read", **kwargs):
         thread = self.browse(thread_id)
-        if thread.exists() and thread.sudo(False).has_access(mode):
+        if thread.exists() and thread.sudo(False).with_context(
+            allowed_company_ids=[]
+        ).has_access(mode):
             return thread
         return self.browse()

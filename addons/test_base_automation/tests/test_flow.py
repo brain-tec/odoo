@@ -402,6 +402,40 @@ else:
         self.assertNotEqual(lead.deadline, False)
         self.assertEqual(send_mail_count, 1)
 
+    def test_014_recompute_on_create(self):
+        stage_field = self.env.ref("test_base_automation.field_base_automation_lead_test__stage_id")
+        create_automation(
+            self,
+            model_id=self.env['ir.model']._get_id('base.automation.lead.thread.test'),
+            trigger='on_create_or_write',
+            trigger_field_ids=[Command.link(stage_field.id)],
+            filter_domain="[('stage_id', '!=', False)]",
+            _actions={
+                'state': 'mail_post',
+                'mail_post_method': 'email',
+                'template_id': self.test_mail_template_automation.id,
+            },
+        )
+
+        send_mail_count = 0
+
+        def _patched_send_mail(*args, **kwargs):
+            nonlocal send_mail_count
+            send_mail_count += 1
+
+        patcher = patch('odoo.addons.mail.models.mail_template.MailTemplate.send_mail', _patched_send_mail)
+        self.startPatcher(patcher)
+
+        lead = self.env['base.automation.lead.thread.test'].with_context(
+            test_base_automation_read_stage_on_create=True,
+        ).create({
+            'name': "Lead Test",
+            'user_id': self.user_root.id,
+        })
+        self.addCleanup(lead.unlink)
+        self.assertTrue(lead.stage_id)
+        self.assertEqual(send_mail_count, 1)
+
     def test_020_recursive(self):
         """ Check that a rule is executed recursively by a secondary change. """
         create_automation(
@@ -927,6 +961,30 @@ if env.context.get('old_values', None):  # on write
         self.assertEqual(len(copy_action_ids), len(action_ids))
         self.assertNotEqual(copy_action_ids, action_ids)
 
+    def test_150_on_write_recompute_without_write_access(self):
+        """ A user may trigger an automation on records they can only read,
+        through the recomputation of a stored field without compute_sudo. """
+        tag = self.env['test_base_automation.tag'].create({'name': 'Tag'})
+        record = self.env['base.automation.readonly.test'].create({'tag_id': tag.id})
+        create_automation(
+            self,
+            model_id=self.env['ir.model']._get_id('base.automation.readonly.test'),
+            trigger='on_create_or_write',
+            _actions={'state': 'code', 'code': "records.write({'name': 'Processed'})"},
+        )
+        self.assertFalse(record.date_automation_last)
+
+        # sanity check: user demo can read the record, but not write on it
+        self.assertTrue(record.with_user(self.user_demo).has_access('read'))
+        self.assertFalse(record.with_user(self.user_demo).has_access('write'))
+
+        tag.with_user(self.user_demo).name = 'New Tag'
+        # recompute 'tag_name' as user demo, like when flushing their request
+        record.with_user(self.user_demo).flush_model()
+        self.assertEqual(record.tag_name, 'New Tag')
+        self.assertEqual(record.name, 'Processed')
+        self.assertTrue(record.date_automation_last)
+
 
 @common.tagged('post_install', '-at_install')
 class TestCompute(common.TransactionCase):
@@ -1380,6 +1438,25 @@ class TestCompute(common.TransactionCase):
         obj.message_post(author_id=internal_partner.id, message_type="comment", subtype_xmlid="mail.mt_comment")
         self.assertFalse(obj.active)
         self.assertEqual(obj.name, "test!")
+
+    def test_mail_trigger_filter_domain(self):
+        """ The "Apply on" domain of a mail-triggered automation must be respected """
+        lead_thread_model = self.env["ir.model"]._get("base.automation.lead.thread.test")
+        create_automation(self, trigger="on_message_received", model_id=lead_thread_model.id,
+            filter_domain=repr([("name", "=", "match")]),
+            _actions={
+                "state": "object_write",
+                "update_path": "active",
+                "update_boolean_value": "false",
+            },
+        )
+        ext_partner = self.env["res.partner"].create({"name": "ext", "email": "email@server.com"})
+        matching, other = self.env["base.automation.lead.thread.test"].create([{"name": "match"}, {"name": "other"}])
+
+        other.message_post(author_id=ext_partner.id, subtype_xmlid="mail.mt_comment", message_type="comment")
+        self.assertTrue(other.active, "the automation should not run on a record outside its domain")
+        matching.message_post(author_id=ext_partner.id, subtype_xmlid="mail.mt_comment", message_type="comment")
+        self.assertFalse(matching.active)
 
     def test_compute_on_create(self):
         lead_model = self.env['ir.model']._get('base.automation.lead.test')

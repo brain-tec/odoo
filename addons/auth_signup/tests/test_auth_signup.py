@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from unittest.mock import patch
+from urllib.parse import parse_qs, urlsplit
 
 import odoo
 from odoo import http
@@ -66,6 +67,12 @@ class TestAuthSignupFlow(HttpCaseWithUserPortal, HttpCaseWithUserDemo):
         with self.assertRaises(AccessError):
             partner.with_user(user.id)._get_signup_url()
 
+        # Assert no token generated if no signup type
+        partner.signup_cancel()
+        signup_url = partner._get_signup_url()
+        signup_url_params = parse_qs(urlsplit(signup_url).query)
+        self.assertFalse(signup_url_params.get('token'))
+
     def test_copy_multiple_users(self):
         users = self.env['res.users'].create([
             {'login': 'testuser1', 'name': 'Test User 1', 'email': 'test1@odoo.com'},
@@ -88,3 +95,25 @@ class TestAuthSignupFlow(HttpCaseWithUserPortal, HttpCaseWithUserDemo):
         self.env.flush_all()
         with self.registry.cursor() as cr:
             users.with_env(users.env(cr=cr)).send_unregistered_user_reminder(after_days=5, batch_size=100)
+
+    def test_alert_new_device_lang(self):
+        self.env['res.lang']._activate_lang('fr_BE')
+        user = self.user_demo
+        user.lang = 'fr_BE'
+
+        view = self.env.ref('auth_signup.alert_login_new_device')
+        view.with_context(lang='en_US').arch = '<div>EN</div>'
+        view.update_field_translations('arch_db', {
+           'fr_BE': {
+                'EN': 'FR',
+            }
+        })
+
+        self.env['mail.mail'].search([]).sudo().unlink()
+        with (
+            patch.object(self.env.registry['mail.mail'], 'unlink', lambda m: None),
+            patch.object(self.env.registry['res.users'], '_should_alert_new_device', lambda u: True),
+        ):
+            self.authenticate('demo', 'demo')
+            mail = self.env['mail.mail'].search([], limit=1)
+            self.assertEqual(mail.body_html, '<div>FR</div>')

@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-22 18:36+0000\n"
-"PO-Revision-Date: 2026-01-10 09:30+0000\n"
+"POT-Creation-Date: 2026-11-13 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 09:29+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Portuguese <https://translate.odoo.com/projects/odoo-18/"
 "account_edi_ubl_cii_tax_extension/pt/>\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
 "1000000 == 0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: account_edi_ubl_cii_tax_extension
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_category_code__ae
@@ -113,6 +113,16 @@ msgid ""
 msgstr ""
 "O motivo pelo qual o valor está isento de IVA ou pelo qual não está sendo "
 "cobrado IVA, usado para fins de faturamento eletrônico."
+
+#. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields,field_description:account_edi_ubl_cii_tax_extension.field_account_tax__ubl_cii_available_tax_category_codes
+msgid "Ubl Cii Available Tax Category Codes"
+msgstr ""
+
+#. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields,field_description:account_edi_ubl_cii_tax_extension.field_account_tax__ubl_cii_available_tax_exemption_reason_codes
+msgid "Ubl Cii Available Tax Exemption Reason Codes"
+msgstr ""
 
 #. module: account_edi_ubl_cii_tax_extension
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132
@@ -274,6 +284,13 @@ msgid ""
 msgstr ""
 "VATEX-EU-132-1Q - Isento com base no artigo 132, seção 1 (q) da Diretiva "
 "2006/112/CE do Conselho"
+
+#. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-135-1
+msgid ""
+"VATEX-EU-135-1 - Exempt based on article 135, section 1 of Council Directive "
+"2006/112/EC"
+msgstr ""
 
 #. module: account_edi_ubl_cii_tax_extension
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-143
@@ -743,7 +760,8 @@ msgstr ""
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-fr-cgi261d-3
 msgid ""
 "VATEX-FR-CGI261D-3 - Exempt based on 3° of article 261 D of the Code Général "
-"des Impôts (CGI ; General tax code)"
+"des Impôts (CGI ; General tax code) Exonération de TVA - Article 261 D-3° du "
+"Code Général des Impôts"
 msgstr ""
 
 #. module: account_edi_ubl_cii_tax_extension
@@ -798,9 +816,24 @@ msgstr ""
 "perda do IVA pelo fornecedor para desconto"
 
 #. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-fr-f
+msgid "VATEX-FR-F - Second-hand sales"
+msgstr ""
+
+#. module: account_edi_ubl_cii_tax_extension
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex_fr-franchise
 msgid "VATEX-FR-FRANCHISE - France domestic VAT franchise in base"
 msgstr "VATEX-FR-FRANCHISE - Franquia doméstica de IVA na base da França"
+
+#. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-fr-i
+msgid "VATEX-FR-I - Sales of works of art"
+msgstr ""
+
+#. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-fr-j
+msgid "VATEX-FR-J - Sales of antiques"
+msgstr ""
 
 #. module: account_edi_ubl_cii_tax_extension
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_category_code__z

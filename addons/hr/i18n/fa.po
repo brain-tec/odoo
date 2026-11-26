@@ -7,13 +7,13 @@
 # Tiffany Chang, 2025
 # Naser mars, 2025
 # Mostafa Barmshory <mostafa.barmshory@gmail.com>, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2025-11-10 09:44+0000\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
+"PO-Revision-Date: 2026-10-20 15:22+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Persian <https://translate.odoo.com/projects/odoo-18/hr/fa/>\n"
 "Language: fa\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_company__hr_presence_control_email_amount
@@ -1397,6 +1397,11 @@ msgid "Employee's Country"
 msgstr "کشور کارمند"
 
 #. module: hr
+#: model:ir.model.fields,field_description:hr.field_res_users__employee_country_code
+msgid "Employee's Country Code"
+msgstr ""
+
+#. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_kanban
 #: model_terms:ir.ui.view,arch_db:hr.hr_kanban_view_employees
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
@@ -1449,7 +1454,7 @@ msgstr "برچسب‌های کارمندان"
 #. odoo-python
 #: code:addons/hr/models/hr_employee.py:0
 msgid "Employees profile"
-msgstr ""
+msgstr "پروفایل کارمندان"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_job__contract_type_id
@@ -3219,14 +3224,6 @@ msgid "Temporary"
 msgstr "موقت"
 
 #. module: hr
-#. odoo-python
-#: code:addons/hr/models/hr_employee.py:0
-msgid ""
-"The Badge ID must be alphanumeric without any accents and no longer than 18 "
-"characters."
-msgstr ""
-
-#. module: hr
 #: model:ir.model.constraint,message:hr.constraint_hr_employee_barcode_uniq
 msgid ""
 "The Badge ID must be unique, this one is already assigned to another "
@@ -3236,7 +3233,16 @@ msgstr ""
 "شده است."
 
 #. module: hr
+#. odoo-python
+#: code:addons/hr/models/hr_employee.py:0
+msgid ""
+"The Badge ID must contain only printable ASCII characters, without spaces, "
+"and be no longer than 18 characters."
+msgstr ""
+
+#. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__company_country_code
+#: model:ir.model.fields,help:hr.field_res_users__employee_country_code
 msgid ""
 "The ISO country code in two chars. \n"
 "You can use this field for quick search."
@@ -3271,7 +3277,7 @@ msgstr "پین‌کد باید دنباله‌ای از ارقام باشد."
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "The default working hours are set in configuration."
-msgstr ""
+msgstr "ساعات کاری پیش‌فرض در تنظیمات ست شده‌اند."
 
 #. module: hr
 #. odoo-python
@@ -3291,6 +3297,8 @@ msgid ""
 "The fields “%s”, which you are trying to read, are not available for "
 "employee public profiles."
 msgstr ""
+"فیلدهای «%s» که سعی در خواندن آنها دارید برای پروفایل عمومی کارمند در دسترس "
+"نیستند."
 
 #. module: hr
 #. odoo-python
@@ -3337,7 +3345,7 @@ msgstr "مجوز کار %(employee)s در تاریخ %(date)s منقضی می‌
 #. module: hr
 #: model:hr.contract.type,name:hr.contract_type_thesis
 msgid "Thesis"
-msgstr ""
+msgstr "پایان‌نامه"
 
 #. module: hr
 #. odoo-python
@@ -3716,6 +3724,8 @@ msgid ""
 "You are not allowed to access \"Employee\" (hr.employee) records.\n"
 "We can redirect you to the public employee list."
 msgstr ""
+"شما مجاز به دسترسی به رکوردهای \"کارمند\" (hr.employee) نیستید.\n"
+"می‌توانیم شما را به لیست عمومی کارمندان هدایت کنیم."
 
 #. module: hr
 #. odoo-python
@@ -3864,12 +3874,12 @@ msgstr "به عنوان مثال موقعیت را در یک یا دو خط خل
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "e.g. johndoe@example.com"
-msgstr ""
+msgstr "مثال: johndoe@example.com"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "e.g. myprivateemail@example.com"
-msgstr ""
+msgstr "مثال: myprivateemail@example.com"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__distance_home_work_unit__kilometers
@@ -3891,3 +3901,10 @@ msgstr "محدود به کارکنان"
 #: model:ir.model.fields,field_description:hr.field_hr_employee__work_permit_name
 msgid "work_permit_name"
 msgstr "نام_اجازه_کار"
+
+#~ msgid ""
+#~ "The Badge ID must be alphanumeric without any accents and no longer than "
+#~ "18 characters."
+#~ msgstr ""
+#~ "شناسه نشان باید متشکل از حروف الفبا و عدد، بدون اعراب و حداکثر ۱۸ کاراکتر "
+#~ "باشد."

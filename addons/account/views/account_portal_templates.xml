@@ -113,7 +113,7 @@
         <xpath expr="//div[hasclass('o_portal_sidebar')]" position="inside">
             <t t-set="o_portal_fullwidth_alert" groups="sales_team.group_sale_salesman,account.group_account_invoice,account.group_account_readonly">
                 <t t-call="portal.portal_back_in_edit_mode">
-                    <t t-set="backend_url" t-value="'/odoo/action-account.action_move_out_invoice_type/%s' % invoice.id"/>
+                    <t t-set="backend_url" t-value="'/odoo/action-account.action_move_out_invoice/%s' % invoice.id"/>
                 </t>
             </t>
 
@@ -183,7 +183,6 @@
                                     <t t-set="_contactAvatar" t-value="image_data_uri(invoice.invoice_user_id.avatar_128)"/>
                                     <t t-set="_contactName" t-value="invoice.invoice_user_id.name"/>
                                     <t t-set="_contactLink" t-value="True"/>
-                                    <div t-field="invoice.invoice_user_id" t-options='{"widget": "contact", "fields": ["city", "phone"]}'/>
                                 </t>
                             </div>
                         </div>

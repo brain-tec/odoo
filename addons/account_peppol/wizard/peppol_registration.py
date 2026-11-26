@@ -6,9 +6,11 @@ except ImportError:
     phonenumbers = None
 
 from odoo import _, api, fields, models, modules
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import UserError, ValidationError, RedirectWarning
+from odoo.tools import single_email_re
 
 from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
+from odoo.addons.account_edi_ubl_cii.models.account_edi_common import DEPRECATED_PEPPOL_EAS
 from odoo.addons.account_peppol.tools.demo_utils import handle_demo
 
 
@@ -73,7 +75,12 @@ class PeppolRegistration(models.TransientModel):
     phone_number = fields.Char(related='selected_company_id.account_peppol_phone_number', readonly=False)
     account_peppol_proxy_state = fields.Selection(related='company_id.account_peppol_proxy_state', readonly=False)
     verification_code = fields.Char(related='edi_user_id.peppol_verification_code', readonly=False)  # TODO remove in master
-    peppol_eas = fields.Selection(related='company_id.peppol_eas', readonly=False, required=True)
+    peppol_eas = fields.Selection(
+        selection='_get_peppol_eas_selection',
+        compute="_compute_peppol_eas",
+        inverse="_inverse_peppol_eas",
+        readonly=False, required=True, store=False,
+    )
     peppol_endpoint = fields.Char(related='company_id.peppol_endpoint', readonly=False, required=True)
     peppol_warnings = fields.Json(
         string="Peppol warnings",
@@ -90,7 +97,6 @@ class PeppolRegistration(models.TransientModel):
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS
     # -------------------------------------------------------------------------
-
     @api.onchange('peppol_endpoint')
     def _onchange_peppol_endpoint(self):
         for wizard in self:
@@ -156,6 +162,15 @@ class PeppolRegistration(models.TransientModel):
     def _compute_peppol_warnings(self):
         for wizard in self:
             peppol_warnings = {}
+            if wizard.company_id._peppol_is_french_company():
+                pdp_info = self.env['res.config.settings']._get_pdp_module_info()
+                if not pdp_info['is_installed']:
+                    peppol_warnings['company_french_warning'] = {
+                        'level': 'warning',
+                        'message': pdp_info['warning_message'],
+                        'action_text': pdp_info['action_name'],
+                        'action': pdp_info['action'],
+                    }
             if (
                 wizard.peppol_eas
                 and wizard.peppol_endpoint
@@ -214,15 +229,35 @@ class PeppolRegistration(models.TransientModel):
                 self.env['ir.config_parameter'].sudo().set_param('account_peppol.edi.mode', wizard.edi_mode)
                 return
 
+    @api.depends("company_id.peppol_eas")
+    def _compute_peppol_eas(self):
+        for wizard in self:
+            if wizard.company_id._peppol_is_french_company():
+                wizard.peppol_eas = "0225"
+            else:
+                wizard.peppol_eas = wizard.company_id.peppol_eas
+
+    def _inverse_peppol_eas(self):
+        for wizard in self:
+            wizard.company_id.peppol_eas = wizard.peppol_eas
+
     # -------------------------------------------------------------------------
     # BUSINESS ACTIONS
     # -------------------------------------------------------------------------
+    def _get_peppol_eas_selection(self):
+        return [
+            (eas, label)
+            for eas, label in self.env['res.company']._fields['peppol_eas']._description_selection(self.env)
+            if eas not in DEPRECATED_PEPPOL_EAS or eas == self.env.company.peppol_eas
+        ]
 
     def _ensure_mandatory_fields(self):
         if self.use_parent_connection:
             return
         if not self.contact_email or not self.phone_number:
             raise ValidationError(_("Contact email and phone number are required."))
+        if not single_email_re.match(self.contact_email):
+            raise ValidationError(_("Please make sure the Contact email is a valid email address."))
         if not self.peppol_eas or not self.peppol_endpoint:
             raise ValidationError(_("Peppol Address should be provided."))
         if (
@@ -232,6 +267,17 @@ class PeppolRegistration(models.TransientModel):
             and self.peppol_endpoint == self.parent_company_id.peppol_endpoint
         ):
             raise ValidationError(_("Peppol ID should be different from main company."))
+
+    def _ensure_pdp_not_sent_through_peppol(self):
+        self.ensure_one()
+        if self.peppol_eas != '0225':
+            return
+        pdp_info = self.env['res.config.settings']._get_pdp_module_info()
+        raise RedirectWarning(
+            message=pdp_info['warning_message'],
+            action=pdp_info['action'],
+            button_text=pdp_info['action_name'],
+        )
 
     def _action_open_peppol_form(self, reopen=True):
         view = self.env.ref('account_peppol.peppol_registration_form').sudo()
@@ -276,6 +322,60 @@ class PeppolRegistration(models.TransientModel):
             }
         }
 
+    def button_register_with_kyc(self):
+        self.ensure_one()
+        if self.peppol_eas != self.company_id.peppol_eas:
+            self.peppol_eas = self.company_id.peppol_eas
+        self._ensure_mandatory_fields()
+        self._ensure_pdp_not_sent_through_peppol()
+        company = self.company_id
+
+        if self.use_parent_connection:
+            company.write({
+                'peppol_eas': self.peppol_eas,
+                'peppol_endpoint': self.peppol_endpoint,
+                'account_peppol_contact_email': self.contact_email,
+                'account_peppol_phone_number': self.phone_number,
+            })
+        elif self.account_peppol_proxy_state not in ('not_registered', 'in_verification'):
+            raise UserError(_('Cannot register a user with a %s application', self.account_peppol_proxy_state))
+
+        edi_proxy_client = self.env['account_edi_proxy_client.user']
+        blocking_proxy_types = set(edi_proxy_client._get_peppol_proxy_types()) - {'peppol'}
+        blocking_user = company.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type in blocking_proxy_types)
+        if blocking_user:
+            blocking_proxy_type = dict(blocking_user._fields['proxy_type']._description_selection(self.env))[blocking_user[:1].proxy_type]
+            raise UserError(_("A connection to '%s' already exists.", blocking_proxy_type))
+
+        edi_identification = edi_proxy_client._get_proxy_identification(company, 'peppol')
+
+        # archive before can_connect because _get_peppol_edi_mode() reads the active user
+        edi_proxy_client.sudo().search([
+            ('company_id', '=', company.id),
+            ('proxy_type', '=', 'peppol'),
+        ]).active = False
+        edi_proxy_client.flush_model(['active'])
+
+        authorization_url = self.env['res.company']._peppol_select_kyc_url(
+            company._peppol_can_connect(edi_identification.lower())
+        )
+
+        if authorization_url:
+            # redirect to IAP KYC link (that will redirect back to here thru callback)
+            return {'type': 'ir.actions.act_url', 'url': authorization_url, 'target': 'self'}
+
+        company._peppol_create_connection(edi_identification.lower())  # no auth, IAP will authorize connection directly
+        notifications = {
+            'sender': _('You can now send electronic invoices via Peppol.'),
+            'smp_registration': _('Your Peppol registration will be activated soon. You can already send invoices.'),
+            'receiver': _('You can now send and receive electronic invoices via Peppol'),
+            'rejected': _('Your registration has been rejected. Please contact the support for further assistance.'),
+        }
+        return self._action_send_notification(
+            title=None,
+            message=notifications[company.account_peppol_proxy_state],
+        )
+
     @handle_demo
     def button_peppol_sender_registration(self):
         """ TODO remove in master
@@ -305,6 +405,9 @@ class PeppolRegistration(models.TransientModel):
         Calls /update_user on the iap server
         """
         self.ensure_one()
+        # self.peppol_eas resets due to the compute function, so we need to assign it to the company's EAS value.
+        if self.peppol_eas != self.company_id.peppol_eas:
+            self.peppol_eas = self.company_id.peppol_eas
         self._ensure_mandatory_fields()
 
         edi_identification = f'{self.peppol_eas}:{self.peppol_endpoint}'
@@ -343,7 +446,11 @@ class PeppolRegistration(models.TransientModel):
     @handle_demo
     def button_register_peppol_participant(self):
         self.ensure_one()
+        # self.peppol_eas resets due to the compute function, so we need to assign it to the company's EAS value.
+        if self.peppol_eas != self.company_id.peppol_eas:
+            self.peppol_eas = self.company_id.peppol_eas
         self._ensure_mandatory_fields()
+        self._ensure_pdp_not_sent_through_peppol()
 
         if self.use_parent_connection:
             self.company_id.write({
@@ -355,6 +462,12 @@ class PeppolRegistration(models.TransientModel):
         elif self.account_peppol_proxy_state in ('smp_registration', 'receiver', 'rejected'):
             raise UserError(
                 _('Cannot register a user with a %s application', self.account_peppol_proxy_state))
+
+        blocking_proxy_types = set(self.env['account_edi_proxy_client.user']._get_peppol_proxy_types()) - {'peppol'}
+        blocking_user = self.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type in blocking_proxy_types)
+        if blocking_user:
+            blocking_proxy_type = dict(blocking_user._fields['proxy_type']._description_selection(self.env))[blocking_user[:1].proxy_type]
+            raise UserError(self.env._("A connection to '%s' already exists.", blocking_proxy_type))
 
         edi_user = self.edi_user_id or self.env['account_edi_proxy_client.user']._register_proxy_user(self.company_id, 'peppol', self.edi_mode)
 
@@ -398,6 +511,9 @@ class PeppolRegistration(models.TransientModel):
         Deregister the edi user from Peppol network
         """
         self.ensure_one()
+        # self.peppol_eas resets due to the compute function, so we need to assign it to the company's EAS value.
+        if self.peppol_eas != self.company_id.peppol_eas:
+            self.peppol_eas = self.company_id.peppol_eas
 
         if self.edi_user_id:
             self.edi_user_id._peppol_deregister_participant()

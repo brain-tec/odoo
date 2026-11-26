@@ -2,6 +2,7 @@ from base64 import b64encode
 
 from odoo import Command
 from odoo.exceptions import ValidationError
+from odoo.tests.form import Form
 from odoo.tests.common import tagged, TransactionCase, freeze_time
 from odoo.tools import mute_logger
 from odoo.tools.misc import file_open
@@ -60,18 +61,18 @@ class TestPeppolParticipant(PeppolConnectorCommon):
             'peppol_endpoint': False,
         })
         with self.assertRaises(ValidationError), self.cr.savepoint():
-            wizard.button_peppol_sender_registration()
+            wizard.button_register_with_kyc()
 
     def test_register_participant_for_the_first_time_as_sender_then_receiver_then_unregister(self):
         # not_register -> sender
         with self._mock_requests([
-            self._mock_create_user(),
+            self._mock_can_connect(),
             self._mock_lookup_participant(already_exist=True),
-            self._mock_register_sender(),
+            self._mock_connect(peppol_state='sender'),
         ]):
             wizard = self.env['peppol.registration'].create({})
             self.assertRecordValues(wizard, [{'smp_registration': False}])
-            wizard.button_register_peppol_participant()
+            wizard.button_register_with_kyc()
         self.assertRecordValues(self.env.company, [{'account_peppol_proxy_state': 'sender'}])
 
         # sender -> smp_registration.
@@ -101,13 +102,13 @@ class TestPeppolParticipant(PeppolConnectorCommon):
     def test_register_participant_already_exists_on_peppol_as_receiver(self):
         # not_register -> smp_registration
         with self._mock_requests([
-            self._mock_create_user(),
+            self._mock_can_connect(),
             self._mock_lookup_participant(),
-            self._mock_register_sender(),
+            self._mock_connect(),
         ]):
             wizard = self.env['peppol.registration'].create({})
             self.assertRecordValues(wizard, [{'smp_registration': True}])
-            wizard.button_register_peppol_participant()
+            wizard.button_register_with_kyc()
         self.assertRecordValues(self.env.company, [{'account_peppol_proxy_state': 'smp_registration'}])
 
         # smp_registration -> receiver
@@ -118,13 +119,13 @@ class TestPeppolParticipant(PeppolConnectorCommon):
     def test_register_participant_rejected(self):
         # not_register -> smp_registration
         with self._mock_requests([
-            self._mock_create_user(),
+            self._mock_can_connect(),
             self._mock_lookup_participant(),
-            self._mock_register_sender(),
+            self._mock_connect(),
         ]):
             wizard = self.env['peppol.registration'].create({})
             self.assertRecordValues(wizard, [{'smp_registration': True}])
-            wizard.button_register_peppol_participant()
+            wizard.button_register_with_kyc()
         self.assertRecordValues(self.env.company, [{'account_peppol_proxy_state': 'smp_registration'}])
 
         # smp_registration -> rejected
@@ -135,13 +136,13 @@ class TestPeppolParticipant(PeppolConnectorCommon):
     def test_save_migration_key(self):
         """ Ensure the migration_key is remove from the company after we've used it. """
         with self._mock_requests([
-            self._mock_create_user(),
-            self._mock_register_sender(),
+            self._mock_can_connect(),
+            self._mock_connect(),
         ]):
             wizard = self.env['peppol.registration'].create({
                 'account_peppol_migration_key': 'helloo',
             })
-            wizard.button_register_peppol_participant()
+            wizard.button_register_with_kyc()
             self.assertRecordValues(self.env.company, [{
                 'account_peppol_proxy_state': 'smp_registration',
                 'account_peppol_migration_key': False,
@@ -167,23 +168,24 @@ class TestPeppolParticipant(PeppolConnectorCommon):
 
         # You must not use the same EAS/ENDPOINT than the parent company!
         wizard.write({
-            'contact_email': "turlututu@tsointsoin",
+            'contact_email': "turlututu@tsointsoin.com",
             'phone_number': "+3236656565",
             'peppol_eas': '0208',
             'peppol_endpoint': '0477472701',
         })
         with self._mock_requests([
-            self._mock_create_user(),
+            self._mock_can_connect(),
             self._mock_lookup_participant(already_exist=True),
-            self._mock_register_sender(),
+            self._mock_connect(peppol_state='sender'),
         ]):
-            wizard.button_register_peppol_participant()
+            self.assertRecordValues(wizard, [{'smp_registration': False}])
+            wizard.button_register_with_kyc()
 
         self.assertRecordValues(branch, [{
             'peppol_parent_company_id': False,
             'peppol_eas': '0208',
             'peppol_endpoint': '0477472701',
-            'account_peppol_contact_email': "turlututu@tsointsoin",
+            'account_peppol_contact_email': "turlututu@tsointsoin.com",
             'account_peppol_phone_number': "+3236656565",
         }])
 
@@ -245,11 +247,10 @@ class TestPeppolParticipant(PeppolConnectorCommon):
             'use_parent_connection_selection': 'use_self',
         }])
         with self._mock_requests([
-            self._mock_create_user(),
-            self._mock_lookup_participant(already_exist=True),
-            self._mock_register_sender(),
+            self._mock_can_connect(),
+            self._mock_connect(peppol_state='sender'),
         ]):
-            wizard.button_register_peppol_participant()
+            wizard.button_register_with_kyc()
 
         settings = self.env['res.config.settings'].with_context(allowed_company_ids=self.env.company.ids).create({})
         self.assertRecordValues(settings, [{
@@ -278,11 +279,12 @@ class TestPeppolParticipant(PeppolConnectorCommon):
             'use_parent_connection_selection': 'use_parent',
         }])
         with self._mock_requests([
-            self._mock_create_user(),
+            self._mock_can_connect(),
             self._mock_lookup_participant(already_exist=True),
-            self._mock_register_sender(),
+            self._mock_connect(peppol_state='sender', id_client='test_id_client_branch'),
         ]):
-            wizard.button_register_peppol_participant()
+            self.assertRecordValues(wizard, [{'smp_registration': False}])
+            wizard.button_register_with_kyc()
         self.assertRecordValues(branch, [{
             'peppol_parent_company_id': self.env.company.id,
             'peppol_eas': '0208',
@@ -322,13 +324,13 @@ class TestPeppolParticipant(PeppolConnectorCommon):
     def test_deregister_with_client_gone_error(self):
         """Test deregistration succeeds even when proxy returns client_gone error"""
         with self._mock_requests([
-            self._mock_create_user(),
+            self._mock_can_connect(),
             self._mock_lookup_participant(),
-            self._mock_register_sender(),
+            self._mock_connect(),
         ]):
             wizard = self.env['peppol.registration'].create({})
             self.assertRecordValues(wizard, [{'smp_registration': True}])
-            wizard.button_register_peppol_participant()
+            wizard.button_register_with_kyc()
         with self._mock_requests([self._mock_participant_status('sender')]):
             self.env.company.account_edi_proxy_client_ids._peppol_get_participant_status()
         self.assertEqual(self.env.company.account_peppol_proxy_state, 'sender')
@@ -341,3 +343,97 @@ class TestPeppolParticipant(PeppolConnectorCommon):
 
         # Should successfully deregister despite Exception
         self.assertEqual(self.env.company.account_peppol_proxy_state, 'not_registered')
+
+    def test_peppol_commercial_entity(self):
+        receivable = self.env["account.account"].create({
+            "account_type": "income",
+            "name": "test_receiv",
+            "code": "TESTR"
+        })
+        payable = self.env["account.account"].create({
+            "account_type": "expense",
+            "name": "test_pay",
+            "code": "TESTP"
+        })
+        company_peppol = self.env["res.company"].create({
+            "name": "test_be",
+            "country_id": self.env.ref("base.be").id,
+        })
+        partner_view = self.env.ref("base.view_partner_form")
+        self.env["ir.ui.view"].create({
+            "name": "test_inherit",
+            "inherit_id": partner_view.id,
+            "model": "res.partner",
+            "type": "form",
+            "arch": """<xpath expr="//field" position="after">
+                    <field name="commercial_partner_id" />
+                </xpath>"""
+        })
+        env_partner = (self.env["res.partner"]
+            .with_company(company_peppol)
+            .with_context(
+                default_property_account_receivable_id=receivable.id,
+                default_property_account_payable_id=payable.id
+            ))
+        with Form(env_partner, view=partner_view) as partner_form:
+            self.assertEqual(partner_form.peppol_verification_state, "not_verified")
+            partner_form.name = "test"
+            partner_form.vat = "BE0477472701"
+            partner_form.peppol_eas = "odemo"
+            self.assertFalse(partner_form.commercial_partner_id)
+            p_rec = partner_form.save()
+            self.assertEqual(partner_form.peppol_verification_state, "not_valid")
+            self.assertEqual(p_rec.commercial_partner_id, p_rec)
+            self.assertEqual(p_rec.commercial_partner_id.name, "test")
+
+    def test_do_not_reset_peppol_endpoint(self):
+        be_country = self.env.ref('base.be')
+        self.env.company.write({
+            'country_id': be_country.id,
+            'vat': 'BE0477472701',
+        })
+        with self._mock_requests([
+            self._mock_can_connect(),
+            self._mock_lookup_participant(),
+            self._mock_connect(),
+        ]):
+            wizard = self.env['peppol.registration'].create({
+                'peppol_eas': '0088',
+                'peppol_endpoint': '88888888888',
+                'phone_number': '+32483123456',
+                'contact_email': 'yourcompany@test.example.com',
+            })
+            wizard.button_register_with_kyc()
+        with self._mock_requests([self._mock_participant_status('sender')]):
+            self.env.company.account_edi_proxy_client_ids._peppol_get_participant_status()
+        self.env.company.vat = 'BE0475646428'
+        self.assertRecordValues(self.env.company.partner_id, [{
+            'peppol_eas': '0088',
+            'peppol_endpoint': '88888888888',
+        }])
+
+        with Form(self.env.company.partner_id) as partner:
+            # Test with NewID record
+            partner.vat = 'BE0477472701'
+        self.assertRecordValues(self.env.company.partner_id, [{
+            'peppol_eas': '0088',
+            'peppol_endpoint': '88888888888',
+        }])
+
+        company_partner = self.env.company.partner_id
+
+        other_company = self.env['res.company'].create({'name': 'new company 3', 'country_id': be_country.id})
+        self.env = self.env(context=dict(allowed_company_ids=other_company.ids))
+        # Do not raise even if no access to a registered company
+
+        company_partner.vat = 'BE0477472701'
+        self.assertRecordValues(company_partner, [{
+            'peppol_eas': '0088',
+            'peppol_endpoint': '88888888888',
+        }])
+
+        self.env.company.vat = 'BE0475646428'
+        self.assertRecordValues(self.env.company.partner_id, [{
+            'peppol_eas': '0208',
+            'peppol_endpoint': '0475646428',
+        }])

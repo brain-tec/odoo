@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-22 18:36+0000\n"
-"PO-Revision-Date: 2026-01-28 23:46+0000\n"
+"POT-Creation-Date: 2026-11-13 17:38+0000\n"
+"PO-Revision-Date: 2026-11-19 05:57+0000\n"
 "Last-Translator: \"Fernanda Alvarez (mfar)\" <mfar@odoo.com>\n"
 "Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
 "odoo-18/account_edi_ubl_cii_tax_extension/es_419/>\n"
@@ -20,9 +20,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == 0)"
-" ? 1 : 2);\n"
-"X-Generator: Weblate 5.14.3\n"
+"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
+"0) ? 1 : 2);\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: account_edi_ubl_cii_tax_extension
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_category_code__ae
@@ -115,6 +115,16 @@ msgid ""
 msgstr ""
 "El motivo por el que la cantidad está exenta de IVA o por qué no se está "
 "cobrando el IVA, se usa para fines de facturación electrónica."
+
+#. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields,field_description:account_edi_ubl_cii_tax_extension.field_account_tax__ubl_cii_available_tax_category_codes
+msgid "Ubl Cii Available Tax Category Codes"
+msgstr "Códigos de categoría fiscal disponibles (UBL/CII)"
+
+#. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields,field_description:account_edi_ubl_cii_tax_extension.field_account_tax__ubl_cii_available_tax_exemption_reason_codes
+msgid "Ubl Cii Available Tax Exemption Reason Codes"
+msgstr ""
 
 #. module: account_edi_ubl_cii_tax_extension
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132
@@ -276,6 +286,15 @@ msgid ""
 msgstr ""
 "VATEX-EU-132-1Q - Exención según el artículo 132, sección 1 (q) de la "
 "directiva del Consejo 2006/112/EC"
+
+#. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-135-1
+msgid ""
+"VATEX-EU-135-1 - Exempt based on article 135, section 1 of Council Directive "
+"2006/112/EC"
+msgstr ""
+"VATEX-EU-135-1 - Exención según el artículo 135, sección 1 de la directiva "
+"del Consejo 2006/112/EC"
 
 #. module: account_edi_ubl_cii_tax_extension
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-143
@@ -788,10 +807,12 @@ msgstr ""
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-fr-cgi261d-3
 msgid ""
 "VATEX-FR-CGI261D-3 - Exempt based on 3° of article 261 D of the Code Général "
-"des Impôts (CGI ; General tax code)"
+"des Impôts (CGI ; General tax code) Exonération de TVA - Article 261 D-3° du "
+"Code Général des Impôts"
 msgstr ""
-"VATEX-FR-CGI261D-3 - Exento según el apartado 3° del artículo 261 D del Code "
-"Général des Impôts (CGI; Código General de Impuestos)"
+"VATEX-FR-CGI261D-3 - Exento según el apartado 3 del artículo 261 D del "
+"Código General de Impuestos (CGI; código fiscal general) Exoneración de IVA "
+"- Artículo 261 D-3 del Código General de Impuestos"
 
 #. module: account_edi_ubl_cii_tax_extension
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-fr-cgi261d-4
@@ -857,11 +878,43 @@ msgstr ""
 "proveedor perdió el IVA por descuento"
 
 #. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-fr-f
+msgid "VATEX-FR-F - Second-hand sales"
+msgstr "VATEX-FR-F - Ventas de segunda mano"
+
+#. module: account_edi_ubl_cii_tax_extension
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex_fr-franchise
 msgid "VATEX-FR-FRANCHISE - France domestic VAT franchise in base"
 msgstr "VATEX-FR-FRANCHISE - IVA doméstico de franquicia de Francia en base"
 
 #. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-fr-i
+msgid "VATEX-FR-I - Sales of works of art"
+msgstr "VATEX-FR-I - Ventas de obras de arte"
+
+#. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-fr-j
+msgid "VATEX-FR-J - Sales of antiques"
+msgstr "VATEX-FR-J - Ventas de antigüedades"
+
+#. module: account_edi_ubl_cii_tax_extension
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_category_code__z
 msgid "Z - Zero rated goods"
 msgstr "Z - Bienes exentos"
+
+#~ msgid ""
+#~ "Invalid Tax Setup for Co-Contractor fiscal position. Please apply the "
+#~ "standard co-contractor tax, or ensure your custom tax uses Reason Code "
+#~ "'AE' and Exemption Reason Code 'VATEX-EU-AE' "
+#~ msgstr ""
+#~ "La configuración fiscal para la posición fiscal de cocontratista no es "
+#~ "válida. Aplica el impuesto estándar de cocontratista o asegúrate de que "
+#~ "tu impuesto personalizado use el código de motivo \"AE\" y el código de "
+#~ "motivo de exención \"VATEX-EU-AE\" "
+
+#~ msgid ""
+#~ "VATEX-FR-CGI261D-3 - Exempt based on 3° of article 261 D of the Code "
+#~ "Général des Impôts (CGI ; General tax code)"
+#~ msgstr ""
+#~ "VATEX-FR-CGI261D-3 - Exento según el apartado 3° del artículo 261 D del "
+#~ "Code Général des Impôts (CGI; Código General de Impuestos)"

@@ -6,14 +6,15 @@
 # Wahyu Setiawan <wahyusetiaaa@gmail.com>, 2024
 # Wil Odoo, 2025
 # Abe Manyo, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# "Nurul Aini Akrima Sabila (nuaas)" <nuaas@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-12 18:38+0000\n"
-"PO-Revision-Date: 2025-12-04 23:33+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-07-31 17:39+0000\n"
+"PO-Revision-Date: 2026-11-18 09:33+0000\n"
+"Last-Translator: \"Nurul Aini Akrima Sabila (nuaas)\" <nuaas@odoo.com>\n"
 "Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-18/"
 "website/id/>\n"
 "Language: id\n"
@@ -21,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: website
 #. odoo-javascript
@@ -176,92 +177,6 @@ msgid "$ 32M"
 msgstr "$ 32M"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$1.50"
-msgstr "$1.50"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$12.00"
-msgstr "$12.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$13.00"
-msgstr "$13.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$13.50"
-msgstr "$13.50"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$14.50"
-msgstr "$14.50"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$15.00"
-msgstr "$15.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
-msgid "$16.00"
-msgstr "$16.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$25.00"
-msgstr "$25.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$26.00"
-msgstr "$26.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$28.00"
-msgstr "$28.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$3.00"
-msgstr "$3.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$3.50"
-msgstr "$3.50"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$4.00"
-msgstr "$4.00"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$4.10"
-msgstr "$4.10"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$4.25"
-msgstr "$4.25"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
-msgid "$4.50"
-msgstr "$4.50"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_product_catalog
-msgid "$5.00"
-msgstr "$5.00"
-
-#. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/components/views/page_list.js:0
 msgid "%s record(s) selected, are you sure you want to publish them all?"
@@ -327,35 +242,6 @@ msgid "+ New Website"
 msgstr "+ New Website"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.footer_custom
-#: model_terms:ir.ui.view,arch_db:website.template_footer_centered
-#: model_terms:ir.ui.view,arch_db:website.template_footer_contact
-#: model_terms:ir.ui.view,arch_db:website.template_footer_descriptive
-#: model_terms:ir.ui.view,arch_db:website.template_footer_headline
-msgid "+1 555-555-5556"
-msgstr "+1 555-555-5556"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.template_footer_links
-msgid "+1 555-555-5556\""
-msgstr "+1 555-555-5556\""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_masonry_block_mosaic_template
-msgid "+12"
-msgstr "+12"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_contact_info
-msgid "+1555-555-5556"
-msgstr "+1555-555-5556"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
-msgid "+25.000"
-msgstr "+25.000"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.show_website_info
 msgid ", author:"
 msgstr ", author:"
@@ -380,44 +266,9 @@ msgid "/contactus"
 msgstr "/contactus"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_key_images
-msgid "01"
-msgstr "01"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_key_images
-msgid "02"
-msgstr "02"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_key_images
-msgid "03"
-msgstr "03"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_key_images
-msgid "04"
-msgstr "04"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "1 km"
 msgstr "1 km"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_media_list_options
-msgid "1/2 - 1/2"
-msgstr "1/2 - 1/2"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_media_list_options
-msgid "1/3 - 2/3"
-msgstr "1/3 - 2/3"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_media_list_options
-msgid "1/4 - 3/4"
-msgstr "1/4 - 3/4"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
@@ -435,20 +286,9 @@ msgid "100 m"
 msgstr "100 m"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_hr_options
-#: model_terms:ir.ui.view,arch_db:website.snippet_options
-msgid "100%"
-msgstr "100%"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "1000 km"
 msgstr "1000 km"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_image_gallery_options
-msgid "12"
-msgstr "12"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_showcase
@@ -459,11 +299,6 @@ msgstr "12k"
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "15 km"
 msgstr "15 km"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_countdown
-msgid "16"
-msgstr "16"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -501,11 +336,6 @@ msgid "2000 km"
 msgstr "2000 km"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_masonry_block_mosaic_template
-msgid "22%"
-msgstr "22%"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features_wave
 msgid "24/7 Customer Support"
 msgstr "Bantuan Pelanggan 24/7"
@@ -516,20 +346,13 @@ msgid "24/7 Support"
 msgstr "Bantuan 24/7"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
-#: model_terms:ir.ui.view,arch_db:website.s_hr_options
-#: model_terms:ir.ui.view,arch_db:website.snippet_options
-msgid "25%"
-msgstr "25%"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_links
 msgid ""
 "250 Executive Park Blvd, Suite 3400 <br/> San Francisco CA 94134 <br/>United "
 "States"
 msgstr ""
-"250 Executive Park Blvd, Suite 3400 <br/> San Francisco CA 94134 <br/"
-">Amerika Serikat"
+"250 Executive Park Blvd, Suite 3400 <br/> San Francisco CA 94134 <br/>"
+"Amerika Serikat"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_centered
@@ -538,11 +361,6 @@ msgid ""
 msgstr ""
 "250 Executive Park Blvd, Suite 3400 • San Francisco CA 94134 • Amerika "
 "Serikat"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_countdown
-msgid "30"
-msgstr "30"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
@@ -602,16 +420,6 @@ msgid "404 Not Found"
 msgstr "404 Tidak Ditemukan"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_countdown
-msgid "45"
-msgstr "45"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_numbers_showcase
-msgid "45%"
-msgstr "45%"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "5 m"
 msgstr "5 m"
@@ -625,12 +433,6 @@ msgstr "50 km"
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "50 m"
 msgstr "50 m"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_hr_options
-#: model_terms:ir.ui.view,arch_db:website.snippet_options
-msgid "50%"
-msgstr "50%"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cta_card
@@ -657,13 +459,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_cta_mockups
 msgid "50,000+ companies trust Odoo."
 msgstr "50,000+ perusahaan mempercayai Odoo."
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_hr_options
-#: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
-#: model_terms:ir.ui.view,arch_db:website.snippet_options
-msgid "75%"
-msgstr "75%"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
@@ -837,8 +632,8 @@ msgid ""
 "><br/>"
 msgstr ""
 "<br/>Delivering tailored, innovative tools to help you overcome challenges "
-"and<br/> achieve your goals, ensuring your journey is fully supported.<br/"
-"><br/>"
+"and<br/> achieve your goals, ensuring your journey is fully supported.<br/>"
+"<br/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
@@ -853,8 +648,8 @@ msgid ""
 "<br/><br/>"
 msgstr ""
 "<br/>Every groundbreaking innovation, whether meticulously engineered or "
-"born from spontaneous creativity, contains stories waiting to be discovered."
-"<br/><br/>"
+"born from spontaneous creativity, contains stories waiting to be "
+"discovered.<br/><br/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_references_social
@@ -909,8 +704,8 @@ msgid ""
 ">"
 msgstr ""
 "<br/>Sell online easily with a user-friendly platform that streamlines all "
-"the steps, including setup, inventory management, and payment processing.<br/"
-">"
+"the steps, including setup, inventory management, and payment "
+"processing.<br/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
@@ -953,9 +748,9 @@ msgid ""
 "staying current with updates, you can take advantage of the latest tools and "
 "features, ensuring your business remains competitive and efficient."
 msgstr ""
-"<br/>User-user dapat berpartisipasi di program beta testing, menyediakan "
-"feedback pada rilis-rilis mendatang dan memengaruhi arah platform di masa "
-"depan. Dengan mengikuti update, Anda dapat memanfaatkan alat dan fitur-fitur "
+"<br/>User dapat berpartisipasi di program beta testing, menyediakan feedback "
+"pada rilis-rilis mendatang dan memengaruhi arah platform di masa depan. "
+"Dengan mengikuti update, Anda dapat memanfaatkan alat dan fitur-fitur "
 "terkini, sehingga memastikan bisnis Anda akan terus kompetitif dan efisien."
 
 #. module: website
@@ -966,8 +761,8 @@ msgid ""
 "                            87%\n"
 "                        </font>"
 msgstr ""
-"<font class=\"text-gradient\" style=\"background-image: linear-"
-"gradient(0deg, rgb(222, 222, 222) 25%, rgb(29, 32, 48) 80%);\">\n"
+"<font class=\"text-gradient\" style=\"background-image: linear-gradient"
+"(0deg, rgb(222, 222, 222) 25%, rgb(29, 32, 48) 80%);\">\n"
 "                            87%\n"
 "                        </font>"
 
@@ -978,8 +773,8 @@ msgid ""
 "<i class=\"fa fa-1x fa-fw fa-envelope me-2\"/"
 "><span>info@yourcompany.example.com</span>"
 msgstr ""
-"<i class=\"fa fa-1x fa-fw fa-envelope me-2\"/"
-"><span>info@yourcompany.example.com</span>"
+"<i class=\"fa fa-1x fa-fw fa-envelope me-2\"/><span>"
+"info@yourcompany.example.com</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_call_to_action
@@ -1039,8 +834,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid ""
 "<i class=\"fa fa-check text-success\" role=\"img\"/>  Access all modules"
-msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  Akses semua modul"
+msgstr "<i class=\"fa fa-check text-success\" role=\"img\"/>  Akses semua modul"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
@@ -1235,8 +1029,8 @@ msgid ""
 "<i class=\"fa fa-phone fa-fw me-2\"/><span class=\"o_force_ltr\">+1 "
 "555-555-5556</span>"
 msgstr ""
-"<i class=\"fa fa-phone fa-fw me-2\"/><span class=\"o_force_ltr\">+1 "
-"555-555-5556</span>"
+"<i class=\"fa fa-phone fa-fw me-2\"/><span class=\"o_force_ltr\">+1 555-555-"
+"5556</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
@@ -1419,8 +1213,8 @@ msgstr ""
 "                        Pengembalian Online 30 Hari\n"
 "                    </small>\n"
 "                    <small class=\"d-flex align-items-center\">\n"
-"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/"
-">\n"
+"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/>"
+"\n"
 "                        Pengiriman Standar\n"
 "                    </small>"
 
@@ -1429,8 +1223,8 @@ msgstr ""
 msgid ""
 "<small class=\"text-center\">Instant setup, satisfied or reimbursed.</small>"
 msgstr ""
-"<small class=\"text-center\">Setup instan, Anda puas atau uang dikembalikan."
-"</small>"
+"<small class=\"text-center\">Setup instan, Anda puas atau uang "
+"dikembalikan.</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -2025,12 +1819,12 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
 msgid "<span class=\"s_progress_bar_text small d-none\">25%</span>"
-msgstr ""
+msgstr "<span class=\"s_progress_bar_text small d-none\">25%</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
 msgid "<span class=\"s_progress_bar_text small d-none\">80%</span>"
-msgstr ""
+msgstr "<span class=\"s_progress_bar_text small d-none\">80%</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_progress_bar
@@ -2267,13 +2061,19 @@ msgstr "<u>Selasa</u><br/>8.00am-6.00pm"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_opening_hours
-msgid "<u>Wednesday</u><br/>8.00am-12.00am"
-msgstr "<u>Rabu</u><br/>8.00am-12.00am"
+msgid "<u>Wednesday</u><br/>8.00am-12.00pm"
+msgstr "<u>Rabu</u><br/>8.00-12.00"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_opening_hours
 msgid "<u>info@yourcompany.example.com</u>"
 msgstr "<u>info@yourcompany.example.com</u>"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/website_loader/website_loader.xml:0
+msgid "A"
+msgstr "A"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -2459,7 +2259,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/website/models/website_controller_page.py:0
 msgid "A page must be set to display a concrete model."
-msgstr ""
+msgstr "Halaman harus diatur untuk menampilkan model konkret."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -2988,7 +2788,7 @@ msgstr "Meratakan Bawah"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_list_options
 msgid "Align Center"
-msgstr "Selaraskan ke Tengah"
+msgstr "Rata Tengah"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_list_options
@@ -3479,6 +3279,12 @@ msgstr "Tersedia di Website"
 
 #. module: website
 #. odoo-javascript
+#: code:addons/website/static/src/components/website_loader/website_loader.xml:0
+msgid "B"
+msgstr "B"
+
+#. module: website
+#. odoo-javascript
 #: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "BSgzTvR5L1GB9jriT451iTN4huVPxHmltG6T6eo"
 msgstr "BSgzTvR5L1GB9jriT451iTN4huVPxHmltG6T6eo"
@@ -3909,6 +3715,13 @@ msgid "By default, the domains of the following services are already blocked:"
 msgstr "Secara default, domain dari layanan berikut sudah diblokir:"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/dialog/seo.xml:0
+#: code:addons/website/static/src/components/website_loader/website_loader.xml:0
+msgid "C"
+msgstr "C"
+
+#. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__cdn_url
 #: model:ir.model.fields,field_description:website.field_website__cdn_url
 msgid "CDN Base URL"
@@ -4095,7 +3908,7 @@ msgstr "Judul kartu"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Cards"
-msgstr "Kartu-Kartu"
+msgstr "Kartu"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -4110,7 +3923,7 @@ msgstr "Cards Soft"
 #. module: website
 #: model:website.configurator.feature,name:website.feature_module_career
 msgid "Career"
-msgstr "Karir"
+msgstr "Karier"
 
 #. module: website
 #. odoo-javascript
@@ -4336,7 +4149,7 @@ msgstr "Pilih dari daftar"
 #. odoo-javascript
 #: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
 msgid "Choose your favorite"
-msgstr "Pilih favorite Anda"
+msgstr "Pilih"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_catalog
@@ -5260,6 +5073,13 @@ msgid "Customize Show"
 msgstr "Kustomisasi Show"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/dialog/seo.xml:0
+#: model_terms:ir.ui.view,arch_db:website.s_countdown_options
+msgid "D"
+msgstr "D"
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
 msgid "D - H - M"
 msgstr "D - H - M"
@@ -5593,8 +5413,8 @@ msgid ""
 "Design is the intermediary between <strong>information</strong> and "
 "<strong>understanding</strong>"
 msgstr ""
-"Desain adalah perantara antara <strong>informasi</strong> dan "
-"<strong>pemahaman</strong>"
+"Desain adalah perantara antara <strong>informasi</strong> dan <strong>"
+"pemahaman</strong>"
 
 #. module: website
 #: model:website.configurator.feature,description:website.feature_page_pricing
@@ -5974,8 +5794,7 @@ msgstr "Domain untuk membatasi record yang dapat dilihat secara publik"
 #. odoo-javascript
 #: code:addons/website/static/src/components/dialog/page_properties.xml:0
 msgid "Don't forget to update all links referring to it."
-msgstr ""
-"Jangan lupa untuk mengupdate semua link yang merujuk pada hal tersebut."
+msgstr "Jangan lupa untuk mengupdate semua link yang merujuk pada hal tersebut."
 
 #. module: website
 #. odoo-javascript
@@ -7553,6 +7372,7 @@ msgstr "Kunci Google Analitik"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
+#: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Google Map"
 msgstr "Google Map"
 
@@ -7560,6 +7380,16 @@ msgstr "Google Map"
 #: model:ir.model.fields,field_description:website.field_website__google_maps_api_key
 msgid "Google Maps API Key"
 msgstr "Kunci API Google Maps"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/js/editor/snippets.editor.js:0
+msgid ""
+"Google Maps configuration has changed. Please reload the page for changes to "
+"take effect."
+msgstr ""
+"Konfigurasi Google Maps telah berubah. Muat ulang halaman agar perubahan "
+"diterapkan."
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__has_google_search_console
@@ -8424,7 +8254,7 @@ msgstr "Subtitle Gambar"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Images Wall"
-msgstr "Dinding Gamba"
+msgstr "Dinding Gambar"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -8801,8 +8631,7 @@ msgstr "Sistem Intuitive"
 #. odoo-javascript
 #: code:addons/website/static/src/js/editor/snippets.editor.js:0
 msgid "Invalid API Key. The following error was returned by Google: %(error)s"
-msgstr ""
-"API Key Tidak valid. Error berikut dikembalikkan oleh Google: %(error)s"
+msgstr "API Key Tidak valid. Error berikut dikembalikkan oleh Google: %(error)s"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_grid
@@ -9102,17 +8931,17 @@ msgstr "Gambar-Gambar Kunci"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_list
 msgid "Key Metrics of Company's Achievements"
-msgstr "Metrik-Metrik Kunci Pencapaian Perusahaan"
+msgstr "Metrik Kunci Pencapaian Perusahaan"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
 msgid "Key Metrics of Company's<br/>Achievements"
-msgstr "Metrik-Metrik Kunci Pencapaian<br/>Perusahaan"
+msgstr "Metrik Kunci Pencapaian<br/>Perusahaan"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers
 msgid "Key Metrics of<br/>Company's Achievements"
-msgstr "Metrik-Metrik Kunci<br/>Pencapaian Perusahaan"
+msgstr "Metrik Kunci<br/>Pencapaian Perusahaan"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_masonry_block_alternation_image_text_template
@@ -10888,7 +10717,7 @@ msgstr "Daring"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_grid
 msgid "Online Members"
-msgstr "Anggota-Anggota Online"
+msgstr "Anggota Online"
 
 #. module: website
 #. odoo-javascript
@@ -11558,8 +11387,8 @@ msgid ""
 "Paragraph with <strong>bold</strong>, <span class=\"text-muted\">muted</"
 "span> and <em>italic</em> texts"
 msgstr ""
-"Paragraf dengan teks <strong>bold</strong>, <span class=\"text-"
-"muted\">muted</span> dan <em>italic</em>. "
+"Paragraf dengan teks <strong>bold</strong>, <span class=\"text-muted\">"
+"muted</span> dan <em>italic</em>. "
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
@@ -11714,8 +11543,8 @@ msgstr "Placeholder"
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Places API"
-msgstr "Lokasi API"
+msgid "Places API (NEW)"
+msgstr "Places API (NEW)"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
@@ -13533,6 +13362,12 @@ msgid "Sourdough Bread"
 msgstr "Sourdough Bread"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/dialog/edit_menu.xml:0
+msgid "Spaces are not allowed in URL."
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Spacing"
 msgstr "Spacing"
@@ -13705,7 +13540,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.snippets
 #: model_terms:ir.ui.view,arch_db:website.step_wizard
 msgid "Steps"
-msgstr "Langkah-langkah"
+msgstr "Langkah"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_table_of_content_options
@@ -13874,6 +13709,12 @@ msgstr "Ganti Tema"
 #: code:addons/website/static/src/js/editor/snippets.options.js:0
 msgid "System Fonts"
 msgstr "Font Sistem"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/components/dialog/seo.xml:0
+msgid "T"
+msgstr "T"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_menus_logos
@@ -14276,8 +14117,7 @@ msgstr "Pesan akan muncul setelah countdown berakhir"
 #: model:ir.model.fields,field_description:website.field_website_controller_page__name
 msgid ""
 "The name is used to generate the URL and is shown in the browser title bar"
-msgstr ""
-"Nama digunakan untuk membuat URL dan ditunjukkan di kolom judul browser"
+msgstr "Nama digunakan untuk membuat URL dan ditunjukkan di kolom judul browser"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_controller_page__name_slugified
@@ -14674,8 +14514,8 @@ msgid ""
 "Those services will be blocked on your website for users until they accept "
 "optional cookies."
 msgstr ""
-"Layanan-layanan tersebut akan diblokir pada website Anda untuk user-user "
-"sampai mereka menyetujui cookies opsional."
+"Layanan-layanan tersebut akan diblokir pada website Anda untuk user sampai "
+"mereka menyetujui cookies opsional."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_references_social
@@ -16383,7 +16223,7 @@ msgstr "Website"
 #. module: website
 #: model:ir.model.fields,field_description:website.field_base_language_install__website_ids
 msgid "Websites to translate"
-msgstr "Website untuk menerjemahkan"
+msgstr "Website yang akan diterjemahkan"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_services_0_s_three_columns
@@ -16598,9 +16438,30 @@ msgstr ""
 "pembaca Anda.<br/><br/>"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/snippets/s_social_media/options.js:0
+#: model_terms:ir.ui.view,arch_db:website.footer_custom
+#: model_terms:ir.ui.view,arch_db:website.header_social_links
+#: model_terms:ir.ui.view,arch_db:website.s_mega_menu_odoo_menu
+#: model_terms:ir.ui.view,arch_db:website.s_references_social
+#: model_terms:ir.ui.view,arch_db:website.s_share
+#: model_terms:ir.ui.view,arch_db:website.s_social_media
+#: model_terms:ir.ui.view,arch_db:website.snippet_options
+#: model_terms:ir.ui.view,arch_db:website.template_footer_centered
+#: model_terms:ir.ui.view,arch_db:website.template_footer_headline
+#: model_terms:ir.ui.view,arch_db:website.template_footer_links
+msgid "X"
+msgstr "X"
+
+#. module: website
 #: model:ir.model.fields,field_description:website.field_website__social_twitter
 msgid "X Account"
 msgstr "Akun X"
+
+#. module: website
+#: model_terms:ir.ui.view,arch_db:website.snippet_options
+msgid "Y"
+msgstr "Y"
 
 #. module: website
 #. odoo-javascript
@@ -16610,8 +16471,8 @@ msgid ""
 "( %s ). This is necessary to edit or view your website from the Website app. "
 "You might need to log back in."
 msgstr ""
-"Anda akan dialihkan ulang ke domain yang dikonfigurasi untuk website Anda "
-"( %s ). Ini dibutuhkan untuk mengedit atau melihat website Anda dari app "
+"Anda akan dialihkan ulang ke domain yang dikonfigurasi untuk website Anda ( "
+"%s ). Ini dibutuhkan untuk mengedit atau melihat website Anda dari app "
 "Website. Anda mungkin harus login kembali."
 
 #. module: website
@@ -17252,7 +17113,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/client_actions/configurator/configurator.js:0
 msgid "develop the brand"
-msgstr "develop brand"
+msgstr "mengembangkan brand"
 
 #. module: website
 #. odoo-javascript
@@ -18048,3 +17909,126 @@ msgstr "✽  Pizzas"
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid "✽  What We Offer"
 msgstr "✽  What We Offer"
+
+#~ msgid "Places API"
+#~ msgstr "Lokasi API"
+
+#~ msgid "<u>Wednesday</u><br/>8.00am-12.00am"
+#~ msgstr "<u>Rabu</u><br/>8.00am-12.00am"
+
+#~ msgid "$1.50"
+#~ msgstr "$1.50"
+
+#~ msgid "$12.00"
+#~ msgstr "$12.00"
+
+#~ msgid "$13.00"
+#~ msgstr "$13.00"
+
+#~ msgid "$13.50"
+#~ msgstr "$13.50"
+
+#~ msgid "$14.50"
+#~ msgstr "$14.50"
+
+#~ msgid "$15.00"
+#~ msgstr "$15.00"
+
+#~ msgid "$16.00"
+#~ msgstr "$16.00"
+
+#~ msgid "$25.00"
+#~ msgstr "$25.00"
+
+#~ msgid "$26.00"
+#~ msgstr "$26.00"
+
+#~ msgid "$28.00"
+#~ msgstr "$28.00"
+
+#~ msgid "$3.00"
+#~ msgstr "$3.00"
+
+#~ msgid "$3.50"
+#~ msgstr "$3.50"
+
+#~ msgid "$4.00"
+#~ msgstr "$4.00"
+
+#~ msgid "$4.10"
+#~ msgstr "$4.10"
+
+#~ msgid "$4.25"
+#~ msgstr "$4.25"
+
+#~ msgid "$4.50"
+#~ msgstr "$4.50"
+
+#~ msgid "$5.00"
+#~ msgstr "$5.00"
+
+#~ msgid "+1 555-555-5556"
+#~ msgstr "+1 555-555-5556"
+
+#~ msgid "+1 555-555-5556\""
+#~ msgstr "+1 555-555-5556\""
+
+#~ msgid "+12"
+#~ msgstr "+12"
+
+#~ msgid "+1555-555-5556"
+#~ msgstr "+1555-555-5556"
+
+#~ msgid "+25.000"
+#~ msgstr "+25.000"
+
+#~ msgid "01"
+#~ msgstr "01"
+
+#~ msgid "02"
+#~ msgstr "02"
+
+#~ msgid "03"
+#~ msgstr "03"
+
+#~ msgid "04"
+#~ msgstr "04"
+
+#~ msgid "1/2 - 1/2"
+#~ msgstr "1/2 - 1/2"
+
+#~ msgid "1/3 - 2/3"
+#~ msgstr "1/3 - 2/3"
+
+#~ msgid "1/4 - 3/4"
+#~ msgstr "1/4 - 3/4"
+
+#~ msgid "100%"
+#~ msgstr "100%"
+
+#~ msgid "12"
+#~ msgstr "12"
+
+#~ msgid "16"
+#~ msgstr "16"
+
+#~ msgid "22%"
+#~ msgstr "22%"
+
+#~ msgid "25%"
+#~ msgstr "25%"
+
+#~ msgid "30"
+#~ msgstr "30"
+
+#~ msgid "45"
+#~ msgstr "45"
+
+#~ msgid "45%"
+#~ msgstr "45%"
+
+#~ msgid "50%"
+#~ msgstr "50%"
+
+#~ msgid "75%"
+#~ msgstr "75%"

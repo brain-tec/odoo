@@ -6,13 +6,14 @@
 # Wil Odoo, 2024
 # Abe Manyo, 2024
 #
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# "Nurul Aini Akrima Sabila (nuaas)" <nuaas@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0+e\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-11-21 02:25+0000\n"
+"PO-Revision-Date: 2026-10-20 09:48+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-18/"
 "base_automation/id/>\n"
@@ -21,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: base_automation
 #. odoo-javascript
@@ -90,8 +91,8 @@ msgid ""
 "<code>time</code>, <code>datetime</code>, <code>dateutil</code>, "
 "<code>timezone</code>: useful Python libraries"
 msgstr ""
-"<code>waktu</code>, <code>tanggalwaktu</code>, <code>dateutil</code>, "
-"<code>zonawaktu</code>: Python libraries yang berguna"
+"<code>waktu</code>, <code>tanggalwaktu</code>, <code>dateutil</code>, <code>"
+"zonawaktu</code>: Python libraries yang berguna"
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_kanban
@@ -146,8 +147,8 @@ msgstr ""
 "<span invisible=\"trigger != 'on_time_created'\">setelah pembuatan</span>\n"
 "                                    <span invisible=\"trigger != "
 "'on_time_updated'\">setelah update terakhir</span>\n"
-"                                    <span invisible=\"trigger != "
-"'on_time'\">setelah</span>"
+"                                    <span invisible=\"trigger != 'on_time'\">"
+"setelah</span>"
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
@@ -189,7 +190,7 @@ msgstr "Action"
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 msgid "Actions To Do"
-msgstr "Action Untuk Dilakukan"
+msgstr "Tindakan untuk Dilakukan"
 
 #. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_base_automation__active
@@ -199,7 +200,7 @@ msgstr "Aktif"
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 msgid "Add an action"
-msgstr "Tambahkan actio"
+msgstr "Tambahkan tindakan"
 
 #. module: base_automation
 #. odoo-javascript
@@ -259,18 +260,18 @@ msgstr "Nama Peraturan Otomatisasi"
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_kanban
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_tree
 msgid "Automation Rules"
-msgstr "Peraturan-Peraturan Otomatisasi"
+msgstr "Peraturan Otomatisasi"
 
 #. module: base_automation
 #: model:ir.actions.server,name:base_automation.ir_cron_data_base_automation_check_ir_actions_server
 msgid "Automation Rules: check and execute"
-msgstr "Peraturan-Peraturan Otomatisasi: periksa dan jalankan"
+msgstr "Peraturan Otomatisasi: periksa dan jalankan"
 
 #. module: base_automation
 #. odoo-javascript
 #: code:addons/base_automation/static/src/kanban_header_patch.js:0
 msgid "Automations"
-msgstr "Otomatisasi-Otomatisasi"
+msgstr "Otomatisasi"
 
 #. module: base_automation
 #: model:ir.model.fields.selection,name:base_automation.selection__base_automation__trigger__on_time
@@ -313,7 +314,7 @@ msgstr "Buat Record baru"
 #. odoo-python
 #: code:addons/base_automation/models/ir_actions_server.py:0
 msgid "Create activity: %(activity_name)s"
-msgstr "Buat kegiatan: %(activity_name)s"
+msgstr "Buat aktivitas: %(activity_name)s"
 
 #. module: base_automation
 #. odoo-javascript
@@ -1020,7 +1021,7 @@ msgid ""
 "calendar to compute the date based on working days."
 msgstr ""
 "Saat menghitung kondisi waktu berdasarkan hari, kalender dapat digunakan "
-"untuk menghitung tanggal berdasarkan hari-hari kerja."
+"untuk menghitung tanggal berdasarkan hari kerja."
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__trg_date_id

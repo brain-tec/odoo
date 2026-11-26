@@ -194,10 +194,25 @@ class TestPartnerLeadPortal(TestCrmCommon, HttpCase):
 
     def test_partner_lead_decline(self):
         """ Test an integrating partner decline the lead """
+        # Add a child for the commercial partner of portal user
+        # because it will affect the message unsubscribe process.
+        self.env['res.partner'].create({
+            'name': 'Child Contact Name',
+            'parent_id': self.user_portal.partner_id.id,
+        })
         self.lead_portal.with_user(self.user_portal).partner_desinterested(comment="No thanks, I have enough leads !", contacted=True, spam=False)
 
         self.assertFalse(self.lead_portal.partner_assigned_id.id, 'The partner_assigned_id of the declined lead should be False.')
         self.assertTrue(self.user_portal.partner_id in self.lead_portal.sudo().partner_declined_ids, 'Partner who has declined the lead should be in the declined_partner_ids.')
+
+    def test_partner_lead_decline_spam(self):
+        """ Test an integrating partner decline the lead by mentioning that it is spam """
+        self.lead_portal.invalidate_recordset()
+        self.lead_portal.with_user(self.user_portal).partner_desinterested(comment="It is a spam !", contacted=True, spam=True)
+
+        self.assertFalse(self.lead_portal.partner_assigned_id.id, 'The partner_assigned_id of the declined lead should be False.')
+        self.assertTrue(self.user_portal.partner_id in self.lead_portal.sudo().partner_declined_ids, 'Partner who has declined the lead should be in the declined_partner_ids.')
+        self.assertIn(self.env.ref('website_crm_partner_assign.tag_portal_lead_is_spam'), self.lead_portal.tag_ids, 'The lead must be tagged as spam.')
 
     def test_lead_access_right(self):
         """ Test another portal user can not write on every leads """
@@ -233,14 +248,13 @@ class TestPartnerLeadPortal(TestCrmCommon, HttpCase):
         })
         opportunity = self.env['crm.lead'].browse(data['id'])
 
-        email_1 = 'test_partner@test.com'
+        origin_email = 'test_partner@test.com'
         test_user = self.env['res.users'].create({
             'name': 'test user',
             'login': 'user',
-            'email': email_1,
+            'email': origin_email,
         })
         test_partner = test_user.partner_id
-        test_partner.user_id = test_user
 
         with self.assertRaises(AccessError):
             opportunity.with_user(self.user_portal).write({
@@ -262,18 +276,24 @@ class TestPartnerLeadPortal(TestCrmCommon, HttpCase):
         opportunity.with_user(self.user_portal).update_lead_portal(update_values)
         self.assertEqual(opportunity.expected_revenue, 9999.0, "Portal user should be able to update revenue or other details via portal method")
 
-        email_2 = 'test_partner_updated@test.com'
-        opportunity.with_user(self.user_portal).update_contact_details_from_portal({
-            'email_from': email_2,
-        })
-        self.assertEqual(opportunity.email_from, email_2, 'Address email on the opportunity must be updated')
-        self.assertEqual(test_partner.email, email_1, 'Adress email on the partner should not be updated')
+        # `update_contact_details_from_portal` should not update partner's email address
 
+        # Lead linked to a user via a partner
+        new_email = 'test_partner_update1@test.com'
+        opportunity.with_user(self.user_portal).update_contact_details_from_portal({
+            'email_from': new_email,
+        })
+        self.assertEqual(opportunity.email_from, new_email, 'Address email on the opportunity must be updated')
+        self.assertEqual(test_partner.email, origin_email, 'Adress email on the partner should not be updated')
+
+        # Lead not linked to a user via a parter
+        new_email = 'test_partner_update2@test.com'
         test_user.unlink()
         opportunity.with_user(self.user_portal).update_contact_details_from_portal({
-            'email_from': email_2,
+            'email_from': new_email,
         })
-        self.assertEqual(test_partner.email, email_2, 'Adress email on the partner must be updated')
+        self.assertEqual(opportunity.email_from, new_email, 'Address email on the opportunity must be updated')
+        self.assertEqual(test_partner.email, origin_email, 'Adress email on the partner should not be updated')
 
     def test_portal_mixin_url(self):
         record_action = self.lead_portal._get_access_action(access_uid=self.user_portal.id)

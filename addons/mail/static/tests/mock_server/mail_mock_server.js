@@ -566,6 +566,22 @@ async function mail_link_preview(request) {
             "mail.record/insert",
             new mailDataHelpers.Store(MailLinkPreview.browse(linkPreviewId)).get_result()
         );
+    } else {
+        const linkPreviewIds = MailLinkPreview.search([["message_id", "=", message_id]]);
+        for (const linkPreviewId of linkPreviewIds) {
+            BusBus._sendone(
+                MailMessage._bus_notification_target(message_id),
+                "mail.record/insert",
+                new mailDataHelpers.Store(MailMessage.browse(message_id), {
+                    linkPreviews: mailDataHelpers.Store.many(
+                        MailLinkPreview.browse(linkPreviewId),
+                        "DELETE",
+                        makeKwArgs({ only_id: true })
+                    ),
+                }).get_result()
+            );
+        }
+        MailLinkPreview.unlink(linkPreviewIds);
     }
 }
 
@@ -698,7 +714,7 @@ async function mail_message_update_content(request) {
     /** @type {import("mock_models").MailMessage} */
     const MailMessage = this.env["mail.message"];
 
-    const { attachment_ids, body, message_id } = await parseRequestParams(request);
+    const { attachment_ids, body, message_id, ...kwargs } = await parseRequestParams(request);
     const [message] = MailMessage.browse(message_id);
     const msg_values = {};
     if (body !== null) {
@@ -722,23 +738,30 @@ async function mail_message_update_content(request) {
         );
         msg_values.attachment_ids = attachment_ids;
     }
+    if ("subject" in kwargs) {
+        msg_values.subject = kwargs.subject;
+    }
     MailMessage.write([message_id], msg_values);
     if (body === "" && attachment_ids.length === 0) {
         MailMessage.write([message_id], { pinned_at: false });
         MailMessage._cleanup_side_records([message_id]);
     }
+    const res = {
+        attachment_ids: mailDataHelpers.Store.many(IrAttachment.browse(message.attachment_ids)),
+        body: message.body,
+        pinned_at: message.pinned_at,
+        recipients: mailDataHelpers.Store.many(
+            this.env["res.partner"].browse(message.partner_ids),
+            makeKwArgs({ fields: ["avatar_128", "name"] })
+        ),
+    };
+    if ("subject" in kwargs) {
+        res.subject = message.subject;
+    }
     BusBus._sendone(
         MailMessage._bus_notification_target(message.id),
         "mail.record/insert",
-        new mailDataHelpers.Store(MailMessage.browse(message.id), {
-            attachment_ids: mailDataHelpers.Store.many(IrAttachment.browse(message.attachment_ids)),
-            body: message.body,
-            pinned_at: message.pinned_at,
-            recipients: mailDataHelpers.Store.many(
-                this.env["res.partner"].browse(message.partner_ids),
-                makeKwArgs({ fields: ["avatar_128", "name"] })
-            ),
-        }).get_result()
+        new mailDataHelpers.Store(MailMessage.browse(message.id), res).get_result()
     );
     return new mailDataHelpers.Store(
         MailMessage.browse(message_id),
@@ -820,10 +843,13 @@ async function session_update_and_broadcast(request) {
 
     const { session_id, values } = await parseRequestParams(request);
     const [session] = DiscussChannelRtcSession.search_read([["id", "=", session_id]]);
+    if (!session) {
+        return;
+    }
     const [currentChannelMember] = DiscussChannelMember.search_read([
         ["id", "=", session.channel_member_id[0]],
     ]);
-    if (session && currentChannelMember.partner_id[0] === serverState.partnerId) {
+    if (currentChannelMember.partner_id[0] === serverState.partnerId) {
         DiscussChannelRtcSession._update_and_broadcast(session.id, values);
     }
 }

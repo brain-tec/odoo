@@ -7,13 +7,14 @@
 # Wil Odoo, 2025
 # Thi Huong Nguyen, 2025
 # "Thi Huong Nguyen (thng)" <thng@odoo.com>, 2025, 2026.
+# Deleted User <noreply+31@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2026-01-17 18:01+0000\n"
-"Last-Translator: \"Thi Huong Nguyen (thng)\" <thng@odoo.com>\n"
+"POT-Creation-Date: 2026-04-10 18:37+0000\n"
+"PO-Revision-Date: 2026-10-20 14:27+0000\n"
+"Last-Translator: Deleted User <noreply+31@weblate.org>\n"
 "Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-18/stock/"
 "vi/>\n"
 "Language: vi\n"
@@ -21,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: stock
 #. odoo-python
@@ -46,6 +47,14 @@ msgid ""
 msgstr ""
 "\n"
 "(%(serial_number)s) tồn tại trong vị trí %(location)s"
+
+#. module: stock
+#. odoo-python
+#: code:addons/stock/models/stock_move.py:0
+msgid ""
+"\n"
+"Package: %s"
+msgstr ""
 
 #. module: stock
 #. odoo-python
@@ -181,8 +190,8 @@ msgid ""
 "%(operations)s have default source or destination locations within warehouse "
 "%(warehouse)s, therefore you cannot archive it."
 msgstr ""
-"%(operations)s có vị trí nguồn hoặc đích mặc định trong nhà kho %"
-"(warehouse)s, do đó bạn không thể lưu trữ nó."
+"%(operations)s có vị trí nguồn hoặc đích mặc định trong nhà kho %(warehouse)"
+"s, do đó bạn không thể lưu trữ nó."
 
 #. module: stock
 #. odoo-python
@@ -434,46 +443,9 @@ msgid "1 Week"
 msgstr "1 Tuần"
 
 #. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_package_barcode
-msgid "12.0"
-msgstr "12.0"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_generic_barcode
-msgid "1234567890"
-msgstr "1234567890"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_lot_label
-msgid "12345678901"
-msgstr "12345678901"
-
-#. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_picking_type__product_label_format__2x7xprice
 msgid "2 x 7 with price"
 msgstr "2 x 7 kèm giá"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_package_barcode
-msgid "2021-9-01"
-msgstr "2021-9-01"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_package_barcode_small
-msgid "2023-01-01"
-msgstr "2023-01-01"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_picking
-msgid "2023-09-24"
-msgstr "2023-09-24"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_delivery_document
-#: model_terms:ir.ui.view,arch_db:stock.report_package_barcode
-#: model_terms:ir.ui.view,arch_db:stock.report_picking
-msgid "3.00"
-msgstr "3.00"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__lot_label_layout__print_format__4x12
@@ -500,11 +472,6 @@ msgstr "4 x 12 kèm giá"
 #: model:ir.model.fields.selection,name:stock.selection__stock_picking_type__product_label_format__4x7xprice
 msgid "4 x 7 with price"
 msgstr "4 x 7 kèm giá"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.report_package_barcode
-msgid "54326786758"
-msgstr "54326786758"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_warn_insufficient_qty_form_view
@@ -613,8 +580,8 @@ msgstr ""
 "                <t t-set=\"multiple_carrier_tracking\" t-"
 "value=\"object.get_multiple_carrier_tracking()\"/>\n"
 "                <t t-if=\"multiple_carrier_tracking\">\n"
-"                    <t t-foreach=\"multiple_carrier_tracking\" t-"
-"as=\"line\">\n"
+"                    <t t-foreach=\"multiple_carrier_tracking\" t-as=\"line\">"
+"\n"
 "                        <br/><a t-att-href=\"line[1]\" target=\"_blank\" t-"
 "out=\"line[0] or ''\"/>\n"
 "                    </t>\n"
@@ -3495,7 +3462,7 @@ msgstr "Ngày hết hạn"
 #. odoo-python
 #: code:addons/stock/models/stock_picking.py:0
 msgid "Exp %s"
-msgstr "Ngày hết hạn %s"
+msgstr "Ngày dự kiến %s"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_picking__products_availability_state__expected
@@ -5901,8 +5868,8 @@ msgid ""
 "No rule has been found to replenish \"%(product)s\" in \"%(location)s\".\n"
 "Verify the routes configuration on the product."
 msgstr ""
-"Không tìm thấy quy tắc nào để bổ sung \"%(product)s\" trong \"%"
-"(location)s\".\n"
+"Không tìm thấy quy tắc nào để bổ sung \"%(product)s\" trong \"%(location)"
+"s\".\n"
 "Hãy xác định cấu hình tuyến cung ứng của sản phẩm."
 
 #. module: stock
@@ -8496,8 +8463,8 @@ msgid ""
 "Serial number (%(serial_number)s) already exists in location(s): %"
 "(location_list)s. Please correct the serial number encoded."
 msgstr ""
-"Số sê-ri (%(serial_number)s) đã tồn tại trong (các) vị trí: %"
-"(location_list)s. Vui lòng sửa số sê-ri được nhập."
+"Số sê-ri (%(serial_number)s) đã tồn tại trong (các) vị trí: %(location_list)"
+"s. Vui lòng sửa số sê-ri được nhập."
 
 #. module: stock
 #. odoo-python
@@ -9333,8 +9300,8 @@ msgid ""
 "Otherwise, the serial number should be corrected to prevent inconsistent "
 "data."
 msgstr ""
-"Số sê-ri (%(serial_number)s) đã được sử dụng ở (các) vị trí: %"
-"(location_list)s.\n"
+"Số sê-ri (%(serial_number)s) đã được sử dụng ở (các) vị trí: %(location_list)"
+"s.\n"
 "\n"
 "Đây có phải điều bạn muốn thực hiện không? Ví dụ, điều này có thể xảy ra nếu "
 "xác nhận một hoạt động xuất kho trước khi hoạt động nhập kho tương ứng của "
@@ -9609,8 +9576,7 @@ msgstr "Tên viết tắt của kho hàng trong mỗi công ty phải là duy nh
 #: model:ir.model.fields,help:stock.field_res_users__property_stock_customer
 msgid ""
 "The stock location used as destination when sending goods to this contact."
-msgstr ""
-"Vị trí tồn kho được dùng làm vị trí đích khi giao hàng tới liên hệ này."
+msgstr "Vị trí tồn kho được dùng làm vị trí đích khi giao hàng tới liên hệ này."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_res_partner__property_stock_supplier
@@ -9768,8 +9734,7 @@ msgstr ""
 #: code:addons/stock/models/stock_move_line.py:0
 msgid ""
 "This lot %(lot_name)s is incompatible with this product %(product_name)s"
-msgstr ""
-"Lô %(lot_name)s này không tương thích với sản phẩm %(product_name)s này"
+msgstr "Lô %(lot_name)s này không tương thích với sản phẩm %(product_name)s này"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_quant_tree_inventory_editable
@@ -11969,6 +11934,30 @@ msgid ""
 msgstr ""
 "{{ object.company_id.name }} Lệnh giao hàng (Mã {{ object.name or 'không "
 "có' }})"
+
+#~ msgid "12.0"
+#~ msgstr "12.0"
+
+#~ msgid "1234567890"
+#~ msgstr "1234567890"
+
+#~ msgid "12345678901"
+#~ msgstr "12345678901"
+
+#~ msgid "2021-9-01"
+#~ msgstr "2021-9-01"
+
+#~ msgid "2023-01-01"
+#~ msgstr "2023-01-01"
+
+#~ msgid "2023-09-24"
+#~ msgstr "2023-09-24"
+
+#~ msgid "3.00"
+#~ msgstr "3.00"
+
+#~ msgid "54326786758"
+#~ msgstr "54326786758"
 
 #~ msgid ""
 #~ "You cannot validate a transfer if no quantities are reserved. To force "

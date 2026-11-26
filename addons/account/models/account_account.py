@@ -20,7 +20,7 @@ class AccountAccount(models.Model):
     _name = "account.account"
     _inherit = ['mail.thread']
     _description = "Account"
-    _order = "code, placeholder_code"
+    _order = "code, placeholder_code, id"
     _check_company_auto = True
     _check_company_domain = models.check_companies_domain_parent_of
 
@@ -519,7 +519,7 @@ class AccountAccount(models.Model):
             """
             return (
                 new_code not in cache
-                and not self.sudo().search_count([
+                and not self.with_context(active_test=False).sudo().search_count([
                     ('code', '=', new_code),
                     '|',
                     ('company_ids', 'parent_of', self.env.company.id),
@@ -753,9 +753,9 @@ class AccountAccount(models.Model):
         ]
         if journal_id:
             domain += ['|', ('account_id.allowed_journal_ids', '=', journal_id), ('account_id.allowed_journal_ids', '=', False)]
-        if move_type in self.env['account.move'].get_inbound_types(include_receipts=True):
+        if move_type in self.env['account.move'].get_sale_types(include_receipts=True):
             domain.append(('account_id.internal_group', '=', 'income'))
-        elif move_type in self.env['account.move'].get_outbound_types(include_receipts=True):
+        elif move_type in self.env['account.move'].get_purchase_types(include_receipts=True):
             domain.append(('account_id.internal_group', '=', 'expense'))
 
         query = self.env['account.move.line']._where_calc(domain)
@@ -783,8 +783,18 @@ class AccountAccount(models.Model):
 
     @api.model
     def _get_most_frequent_account_for_partner(self, company_id, partner_id, move_type=None, journal_id=None):
-        most_frequent_account = self._get_most_frequent_accounts_for_partner(company_id, partner_id, move_type, filter_never_user_accounts=True, limit=1, journal_id=journal_id)
-        return most_frequent_account[0] if most_frequent_account else False
+
+        cache = self.env.cr.cache.setdefault('most_frequent_accounts_for_partner', {})
+        key = (company_id, partner_id, move_type, journal_id)
+
+        if key not in cache:
+            most_frequent_account = self._get_most_frequent_accounts_for_partner(
+                company_id, partner_id, move_type,
+                filter_never_user_accounts=True, limit=1, journal_id=journal_id
+            )
+            cache[key] = most_frequent_account[0] if most_frequent_account else False
+
+        return cache[key]
 
     @api.model
     def _order_accounts_by_frequency_for_partner(self, company_id, partner_id, move_type=None):
@@ -1219,7 +1229,9 @@ class AccountAccount(models.Model):
         (self | new_accounts).invalidate_recordset()
 
         # 3.1: Update fields on other models that reference account.account
-        many2x_fields = self.env['ir.model.fields'].search([
+        # The field lookups of steps 3.1 to 3.3 run as sudo: reading field definitions
+        # requires the Access Rights group, and the user's access was checked in step 1.
+        many2x_fields = self.env['ir.model.fields'].sudo().search([
             ('ttype', 'in', ('many2one', 'many2many')),
             ('relation', '=', 'account.account'),
             ('store', '=', True),
@@ -1282,7 +1294,7 @@ class AccountAccount(models.Model):
             ))
 
         # 3.2: Update Reference fields that reference account.account
-        reference_fields = self.env['ir.model.fields'].search([('ttype', '=', 'reference'), ('store', '=', True)])
+        reference_fields = self.env['ir.model.fields'].sudo().search([('ttype', '=', 'reference'), ('store', '=', True)])
         for field_to_update in reference_fields:
             model = field_to_update.model
             if not self.env[model]._auto:
@@ -1307,7 +1319,7 @@ class AccountAccount(models.Model):
             ))
 
         # 3.3: Update Many2OneReference fields that reference account.account
-        many2one_reference_fields = self.env['ir.model.fields'].search([
+        many2one_reference_fields = self.env['ir.model.fields'].sudo().search([
             ('ttype', '=', 'many2one_reference'),
             ('store', '=', True),
             '!', '&', ('model', '=', 'studio.approval.request'),  # A weird Many2oneReference which doesn't have its model field on the model.

@@ -7,25 +7,25 @@
 # Carlos Gómez, 2024
 # Larissa Manderfeld, 2025
 #
-# "Larissa Manderfeld (lman)" <lman@odoo.com>, 2025.
+# "Larissa Manderfeld (lman)" <lman@odoo.com>, 2025, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 # "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2026-02-14 09:11+0000\n"
-"Last-Translator: \"Noemi Pla Garcia (nopl)\" <nopl@odoo.com>\n"
+"POT-Creation-Date: 2026-04-10 18:37+0000\n"
+"PO-Revision-Date: 2026-10-20 11:30+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Spanish <https://translate.odoo.com/projects/odoo-18/mrp/es/>"
 "\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == 0)"
-" ? 1 : 2);\n"
-"X-Generator: Weblate 5.14.3\n"
+"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
+"0) ? 1 : 2);\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__state
@@ -62,8 +62,8 @@ msgid ""
 " <br/><br/> The manufactured products will be moved towards <b>%"
 "(destination)s</b>, <br/> as specified from <b>%(operation)s</b> destination."
 msgstr ""
-" <br/><br/>Los productos facturados se moverán a <b>%(destination)s</b>, <br/"
-"> como se especificó en el destino <b>%(operation)s</b>."
+" <br/><br/>Los productos facturados se moverán a <b>%(destination)s</b>, "
+"<br/> como se especificó en el destino <b>%(operation)s</b>."
 
 #. module: mrp
 #: model:ir.model.fields.selection,name:mrp.selection__mrp_bom__ready_to_produce__all_available
@@ -229,55 +229,14 @@ msgstr ""
 "mover el producto final de la zona de producción al stock."
 
 #. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "100"
-msgstr "100"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrp_production_components
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrp_workorder
-msgid "12345678901"
-msgstr "12345678901"
-
-#. module: mrp
 #: model_terms:product.template,description:mrp.product_product_computer_desk_leg_product_template
 msgid "18″ x 2½″ Square Leg"
 msgstr "Pata cuadrada de 18\" x 2½\""
 
 #. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "2023-09-15"
-msgstr "15-09-2023"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrp_production_components
-msgid "25"
-msgstr "25"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "50"
-msgstr "50"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "58"
-msgstr "58"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "60"
-msgstr "60"
-
-#. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.report_mrp_production_components
 msgid "8 GB RAM"
 msgstr "8 GB RAM"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "987654321098"
-msgstr "987654321098"
 
 #. module: mrp
 #. odoo-javascript
@@ -672,7 +631,7 @@ msgstr "Actividades"
 #: model:ir.model.fields,field_description:mrp.field_mrp_routing_workcenter__activity_exception_decoration
 #: model:ir.model.fields,field_description:mrp.field_mrp_unbuild__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "Decoración de Actividad de Excepción"
+msgstr "Indicador de excepción de actividad"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__activity_state
@@ -686,7 +645,7 @@ msgstr "Estado de la actividad"
 #: model:ir.model.fields,field_description:mrp.field_mrp_routing_workcenter__activity_type_icon
 #: model:ir.model.fields,field_description:mrp.field_mrp_unbuild__activity_type_icon
 msgid "Activity Type Icon"
-msgstr "Icono de tipo de actvidad"
+msgstr "Icono de tipo de actividad"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_workcenter_block_wizard_form
@@ -926,8 +885,7 @@ msgstr "Imprimir automáticamente la orden de producción terminada"
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_stock_picking_type__auto_print_generated_mrp_lot
 msgid "Auto Print Generated Lot/SN Label"
-msgstr ""
-"Imprimir automáticamente la etiqueta de número de lote o serie generada"
+msgstr "Imprimir automáticamente la etiqueta de número de lote o serie generada"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_stock_picking_type__auto_print_done_mrp_lot
@@ -1770,7 +1728,7 @@ msgstr "Número de entregas parciales vinculadas"
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__use_create_components_lots
 #: model:ir.model.fields,field_description:mrp.field_stock_picking_type__use_create_components_lots
 msgid "Create New Lots/Serial Numbers for Components"
-msgstr "Crear nuevos números de lotes/serie para componentes"
+msgstr "Crear nuevos lotes/números de serie para los componentes"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_backorder_form
@@ -2034,7 +1992,8 @@ msgstr ""
 #: model:ir.model.fields,help:mrp.field_mrp_workcenter_capacity__product_uom_id
 msgid "Default unit of measure used for all stock operations."
 msgstr ""
-"Unidad de medida por defecto utilizada para todas las operaciones de stock"
+"Unidad de medida predeterminada utilizada para todas las operaciones de "
+"stock."
 
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.product_template_action
@@ -2962,7 +2921,7 @@ msgstr "John Doe"
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter__kanban_dashboard_graph
 msgid "Kanban Dashboard Graph"
-msgstr "Gráfica de tablero de kanban"
+msgstr "Gráfico del tablero kanban"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_stock_move__description_bom_line
@@ -4919,7 +4878,7 @@ msgstr "Referencia"
 #. module: mrp
 #: model:ir.model.constraint,message:mrp.constraint_mrp_production_name_uniq
 msgid "Reference must be unique per Company!"
-msgstr "¡La referencia debe ser única por compañía!"
+msgstr "¡La referencia debe ser única por empresa!"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__origin
@@ -5059,8 +5018,8 @@ msgstr "Finalización programada"
 msgid ""
 "Scheduled before the previous work order, planned from %(start)s to %(end)s"
 msgstr ""
-"Programada antes de la orden de trabajo anterior, planidicada desde %"
-"(start)s a %(end)s"
+"Programada antes de la orden de trabajo anterior, planidicada desde %(start)"
+"s a %(end)s"
 
 #. module: mrp
 #. odoo-javascript
@@ -6513,10 +6472,11 @@ msgid ""
 "If not activated, and any of the components consumption is edited manually "
 "on the manufacturing order, Odoo assumes manual consumption also."
 msgstr ""
-"Cuando se activa, el registro de consumo para ese componente se registra "
+"Cuando está activado, el registro del consumo de ese componente se realiza "
 "exclusivamente de forma manual.\n"
-"Si no se activa y el consumo de cualquier componente se edita manualmente en "
-"la orden de fabricación, Odoo asume también el consumo manual."
+"Si no está activado, y se edita manualmente el consumo de cualquiera de los "
+"componentes en la orden de fabricación, Odoo asume que el consumo también es "
+"manual."
 
 #. module: mrp
 #: model:ir.model.fields.selection,name:mrp.selection__mrp_bom__ready_to_produce__asap
@@ -7018,10 +6978,10 @@ msgstr ""
 "                        <b invisible=\"consumption != 'strict'\">\n"
 "                            Revise su consumo de componentes o pida a un "
 "gerente que valide\n"
-"                            <span invisible=\"mrp_production_count != "
-"1\">esta orden de fabricación</span>\n"
-"                            <span invisible=\"mrp_production_count == "
-"1\">estas órdenes de fabricación</span>.\n"
+"                            <span invisible=\"mrp_production_count != 1\">"
+"esta orden de fabricación</span>\n"
+"                            <span invisible=\"mrp_production_count == 1\">"
+"estas órdenes de fabricación</span>.\n"
 "                        </b>"
 
 #. module: mrp
@@ -7079,8 +7039,8 @@ msgid ""
 "You need to supply Lot/Serial Number for products and 'consume' them: %"
 "(missing_products)s"
 msgstr ""
-"Debe proporcionar el número de lote o serie para los productos y "
-"“consumirlos”: %(missing_products)s"
+"Debe proporcionar el número de lote o serie para los productos y “consumirlos"
+"”: %(missing_products)s"
 
 #. module: mrp
 #: model:ir.actions.act_window,name:mrp.action_mrp_production_backorder
@@ -7210,3 +7170,27 @@ msgstr "divididas"
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_routing_workcenter_form_view
 msgid "work orders"
 msgstr "órdenes de trabajo"
+
+#~ msgid "100"
+#~ msgstr "100"
+
+#~ msgid "12345678901"
+#~ msgstr "12345678901"
+
+#~ msgid "2023-09-15"
+#~ msgstr "15-09-2023"
+
+#~ msgid "25"
+#~ msgstr "25"
+
+#~ msgid "50"
+#~ msgstr "50"
+
+#~ msgid "58"
+#~ msgstr "58"
+
+#~ msgid "60"
+#~ msgstr "60"
+
+#~ msgid "987654321098"
+#~ msgstr "987654321098"

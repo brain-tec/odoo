@@ -144,7 +144,7 @@ class AccountPayment(models.Model):
         )
         super(AccountPayment, payments_tx_done).action_post()
         payments_tx_not_done = payments_need_tx.filtered(
-            lambda p: p.payment_transaction_id.state != 'done'
+            lambda p: p.payment_transaction_id.state not in ('done', 'pending', 'authorized')
         )
         payments_tx_not_done.action_cancel()
 
@@ -203,7 +203,7 @@ class AccountPayment(models.Model):
         if self._context.get('active_model', '') == 'account.move':
             invoice_ids = self._context.get('active_ids', [])
         elif self._context.get('active_model', '') == 'account.move.line':
-            invoice_ids = self.env['account.move'].search([('line_ids', '=', self._context.get('active_ids'))]).ids
+            invoice_ids = self.env['account.move'].search([('line_ids', 'in', self._context.get('active_ids', []))]).ids
         else:
             invoice_ids = []
         return {

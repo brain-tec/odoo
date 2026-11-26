@@ -9,14 +9,14 @@
 # Manav Shah, 2025
 # Ujjawal Pathak, 2025
 #
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-12-12 21:59+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
+"PO-Revision-Date: 2026-10-20 10:44+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Hindi <https://translate.odoo.com/projects/odoo-18/"
 "im_livechat/hi/>\n"
 "Language: hi\n"
@@ -24,7 +24,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: im_livechat
 #. odoo-python
@@ -83,13 +83,10 @@ msgid ""
 "* 'Show with notification' is 'Show' in addition to a floating text just "
 "next to the button.\n"
 "* 'Open automatically' displays the button and automatically opens the "
-"conversation pane.\n"
+"conversation pane on larger screens. On small screens, this behaves like "
+"'Show'.\n"
 "* 'Hide' hides the chat button on the pages.\n"
 msgstr ""
-"* ''दिखाएं' चैट बटन को पेज पर दिखाता है.\n"
-"* ''नोटिफ़िकेशन के साथ दिखाएं' बटन के साथ एक फ़्लोटिंग टेक्स्ट दिखाता है.\n"
-"* 'अपने आप खोलें' बटन दिखाता है और चैट विंडो खुद ही खोल देता है.\n"
-"* 'छिपाएं' चैट बटन को पेज से छिपा देता है.\n"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.livechat_email_template
@@ -497,12 +494,6 @@ msgstr "संपर्क"
 #: model:ir.model.fields,field_description:im_livechat.field_im_livechat_report_operator__channel_id
 msgid "Conversation"
 msgstr "बातचीत"
-
-#. module: im_livechat
-#. odoo-javascript
-#: code:addons/im_livechat/static/src/embed/common/chatbot/chatbot_service.js:0
-msgid "Conversation ended..."
-msgstr ""
 
 #. module: im_livechat
 #. odoo-python
@@ -1423,6 +1414,11 @@ msgid "Question"
 msgstr "सवाल"
 
 #. module: im_livechat
+#: model:ir.model,name:im_livechat.model_ir_qweb
+msgid "Qweb"
+msgstr ""
+
+#. module: im_livechat
 #. odoo-python
 #: code:addons/im_livechat/controllers/main.py:0
 #: model:ir.model,name:im_livechat.model_rating_rating
@@ -1630,7 +1626,7 @@ msgstr "सेशन फ़ॉर्म"
 #: model:ir.actions.act_window,name:im_livechat.im_livechat_report_channel_time_to_answer_action
 #: model:ir.ui.menu,name:im_livechat.menu_reporting_livechat_channel
 msgid "Session Statistics"
-msgstr ""
+msgstr "सेशन स्टैटिस्टिक्स"
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_im_livechat_report_channel__is_unrated
@@ -1800,6 +1796,12 @@ msgid "This Week"
 msgstr "इस सप्ताह"
 
 #. module: im_livechat
+#. odoo-javascript
+#: code:addons/im_livechat/static/src/embed/common/chatbot/chatbot_service.js:0
+msgid "This conversation has ended."
+msgstr ""
+
+#. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel__default_message
 msgid ""
 "This is an automated 'welcome' message that your visitor will see when they "
@@ -1865,7 +1867,7 @@ msgstr "उस स्टैटिक पेज का यूआरएल जह�
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_im_livechat_report_channel__uuid
 msgid "UUID"
-msgstr ""
+msgstr "UUID"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.discuss_channel_view_search
@@ -2084,3 +2086,16 @@ msgstr "सेकंड"
 #: model_terms:ir.ui.view,arch_db:im_livechat.livechat_email_template
 msgid "{{author_name}}"
 msgstr ""
+
+#~ msgid ""
+#~ "* 'Show' displays the chat button on the pages.\n"
+#~ "* 'Show with notification' is 'Show' in addition to a floating text just "
+#~ "next to the button.\n"
+#~ "* 'Open automatically' displays the button and automatically opens the "
+#~ "conversation pane.\n"
+#~ "* 'Hide' hides the chat button on the pages.\n"
+#~ msgstr ""
+#~ "* ''दिखाएं' चैट बटन को पेज पर दिखाता है.\n"
+#~ "* ''नोटिफ़िकेशन के साथ दिखाएं' बटन के साथ एक फ़्लोटिंग टेक्स्ट दिखाता है.\n"
+#~ "* 'अपने आप खोलें' बटन दिखाता है और चैट विंडो खुद ही खोल देता है.\n"
+#~ "* 'छिपाएं' चैट बटन को पेज से छिपा देता है.\n"

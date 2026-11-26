@@ -6,15 +6,15 @@
 # Wil Odoo, 2025
 # Tony Ng, 2025
 #
-# "Tony Ng (ngto)" <ngto@odoo.com>, 2025.
+# "Tony Ng (ngto)" <ngto@odoo.com>, 2025, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-29 18:38+0000\n"
-"PO-Revision-Date: 2025-11-08 17:34+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"PO-Revision-Date: 2026-11-09 07:43+0000\n"
+"Last-Translator: \"Tony Ng (ngto)\" <ngto@odoo.com>\n"
 "Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
 "projects/odoo-18/portal/zh_Hant/>\n"
 "Language: zh_TW\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -108,8 +108,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid ""
 "<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
-msgstr ""
-"<i title=\"系統使用說明\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
+msgstr "<i title=\"系統使用說明\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
@@ -329,15 +328,14 @@ msgstr ""
 "out=\"user_name\">Marc Demo</span>\n"
 "                </td><td valign=\"middle\" align=\"right\" t-if=\"not "
 "object.user_id.company_id.uses_default_logo\">\n"
-"                    <img t-attf-src=\"/logo.png?"
-"company={{ object.user_id.company_id.id }}\" style=\"padding: 0px; margin: "
-"0px; height: auto; width: 80px;\" t-att-"
-"alt=\"object.user_id.company_id.name\"/>\n"
+"                    <img t-attf-src=\"/logo.png?company={{ "
+"object.user_id.company_id.id }}\" style=\"padding: 0px; margin: 0px; height: "
+"auto; width: 80px;\" t-att-alt=\"object.user_id.company_id.name\"/>\n"
 "                </td></tr>\n"
 "                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
-"                  <hr width=\"100%\" style=\"background-"
-"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
-"size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
+"                  <hr width=\"100%\" style=\"background-color:rgb"
+"(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-"
+"height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
 "                </td></tr>\n"
 "            </table>\n"
 "        </td>\n"
@@ -350,8 +348,8 @@ msgstr ""
 "0px 8px 0px 8px; border-collapse:separate;\">\n"
 "                <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
 "                    <div>\n"
-"                        <t t-out=\"user_name\">Marc Demo</t> 你好！<br/> <br/"
-">\n"
+"                        <t t-out=\"user_name\">Marc Demo</t> 你好！<br/> "
+"<br/>\n"
 "                        歡迎使用 <t t-out=\"company_name\">YourCompany</t> 的"
 "門戶網站！<br/><br/>\n"
 "                        系統已為你建立帳戶，登入名稱為：  <t t-"
@@ -370,9 +368,9 @@ msgstr ""
 "                    </div>\n"
 "                </td></tr>\n"
 "                <tr><td style=\"text-align:center;\">\n"
-"                  <hr width=\"100%\" style=\"background-"
-"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
-"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                  <hr width=\"100%\" style=\"background-color:rgb"
+"(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-"
+"height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
 "                </td></tr>\n"
 "            </table>\n"
 "        </td>\n"
@@ -391,15 +389,15 @@ msgstr ""
 "                    <t t-out=\"object.user_id.company_id.phone or ''\">+1 "
 "650-123-4567</t>\n"
 "                    <t t-if=\"object.user_id.company_id.email\">\n"
-"                        | <a t-attf-href=\"'mailto:%s' % "
-"{{ object.user_id.company_id.email }}\" style=\"text-decoration:none; color: "
-"#454748;\" t-out=\"object.user_id.company_id.email or "
-"''\">info@yourcompany.com</a>\n"
+"                        | <a t-attf-href=\"'mailto:%s' % {{ "
+"object.user_id.company_id.email }}\" style=\"text-decoration:none; color: "
+"#454748;\" t-out=\"object.user_id.company_id.email or ''\">"
+"info@yourcompany.com</a>\n"
 "                    </t>\n"
 "                    <t t-if=\"object.user_id.company_id.website\">\n"
-"                        | <a t-attf-href=\"'%s' % "
-"{{ object.user_id.company_id.website }}\" style=\"text-decoration:none; "
-"color: #454748;\" t-out=\"object.user_id.company_id.website or ''\">http://"
+"                        | <a t-attf-href=\"'%s' % {{ "
+"object.user_id.company_id.website }}\" style=\"text-decoration:none; color: "
+"#454748;\" t-out=\"object.user_id.company_id.website or ''\">http://"
 "www.example.com</a>\n"
 "                    </t>\n"
 "                </td></tr>\n"
@@ -415,9 +413,9 @@ msgstr ""
 "style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; "
 "padding: 8px; border-collapse:separate;\">\n"
 "      <tr><td style=\"text-align: center; font-size: 13px;\">\n"
-"        由 <a target=\"_blank\" href=\"https://www.odoo.com?"
-"utm_source=db&amp;utm_medium=portalinvite\" style=\"color: #875A7B;\">Odoo</"
-"a> 驅動\n"
+"        由 <a target=\"_blank\" href=\"https://"
+"www.odoo.com?utm_source=db&amp;utm_medium=portalinvite\" style=\"color: "
+"#875A7B;\">Odoo</a> 驅動\n"
 "      </td></tr>\n"
 "    </table>\n"
 "</td></tr>\n"
@@ -529,8 +527,7 @@ msgstr "一旦為您的帳戶簽發了文檔，就不允許更改公司名稱。
 msgid ""
 "Changing the country is not allowed once document(s) have been issued for "
 "your account. Please contact us directly for this operation."
-msgstr ""
-"為你的帳戶簽發文件後，就不允許更改國家/地區。 請直接聯絡我們進行此操作。"
+msgstr "為你的帳戶簽發文件後，就不允許更改國家/地區。 請直接聯絡我們進行此操作。"
 
 #. module: portal
 #. odoo-javascript
@@ -571,7 +568,7 @@ msgstr "配置設定"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_home
 msgid "Configure your connection parameters"
-msgstr "配置您的連線參數"
+msgstr "配置連線參數"
 
 #. module: portal
 #. odoo-javascript
@@ -614,7 +611,7 @@ msgstr "聯絡人"
 #. odoo-javascript
 #: code:addons/portal/static/src/js/portal_composer.js:0
 msgid "Could not save file <strong>%s</strong>"
-msgstr "無法儲存文件<strong>%s</strong>"
+msgstr "未能儲存檔案 <strong>%s</strong>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
@@ -701,7 +698,7 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details
 msgid "Discard"
-msgstr "捨棄"
+msgstr "取消"
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_share__display_name
@@ -794,8 +791,8 @@ msgid ""
 "Here is your new API key, use it instead of a password for RPC access.\n"
 "                Your login is still necessary for interactive usage."
 msgstr ""
-"這是您的新API密鑰，使用它代替密碼進行 RPC 訪問.\n"
-"                            您的登錄仍然是交互式使用所必需的."
+"這是你的新 API 密鑰，請使用它代替密碼，進行遠端程序呼叫（RPC）存取。\n"
+"                互動式操作仍需要用戶名稱及密碼登入。"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_breadcrumbs
@@ -875,8 +872,8 @@ msgid ""
 "It is very important that this description be clear\n"
 "                and complete,"
 msgstr ""
-"此描述清晰完整是\n"
-"                非常重要，"
+"將這段描述寫得清晰、完整，\n"
+"                是非常重要的。"
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_share__write_uid
@@ -1476,13 +1473,13 @@ msgstr "密碼錯誤。"
 #. odoo-python
 #: code:addons/portal/controllers/portal.py:0
 msgid "You cannot leave any password empty."
-msgstr "您不能讓任何密碼為空。"
+msgstr "任何密碼欄位都不可留空。"
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 msgid "You must be"
-msgstr "您必須"
+msgstr "你必須為"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -1501,8 +1498,8 @@ msgid ""
 "Your account at {{ object.user_id.company_id.name or "
 "object.partner_id.company_id.name }}"
 msgstr ""
-"你在 {{ object.user_id.company_id.name or "
-"object.partner_id.company_id.name }} 的帳戶"
+"你的 {{ object.user_id.company_id.name or "
+"object.partner_id.company_id.name }} 帳戶"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_contact

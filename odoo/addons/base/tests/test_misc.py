@@ -271,7 +271,7 @@ class TestFormatLangDate(TransactionCase):
         self.assertEqual(misc.format_time(lang.with_context(lang='zh_CN').env, time_part, time_format='ah:mm'), '\u4e0b\u53484:30')
 
         # Check timezoned time part
-        self.assertEqual(misc.format_time(lang.with_context(lang='fr_FR').env, time_part_tz, time_format='HH:mm:ss Z'), '16:30:22 -0504')
+        self.assertEqual(misc.format_time(lang.with_context(lang='fr_FR').env, time_part_tz, time_format='HH:mm:ss Z'), '16:30:22 -0456')
         self.assertEqual(misc.format_time(lang.with_context(lang='zh_CN').env, time_part_tz, time_format='zzzz ah:mm:ss'), '\u5317\u7f8e\u4e1c\u90e8\u6807\u51c6\u65f6\u95f4\u0020\u4e0b\u53484:30:22')
 
         #Check timezone conversion in format_time
@@ -630,3 +630,23 @@ class TestMiscToken(TransactionCase):
         new_timestamp = new_timestamp.to_bytes(8, byteorder='little')
         token = base64.urlsafe_b64encode(token[:1] + new_timestamp + token[9:]).decode()
         self.assertIsNone(misc.verify_hash_signed(self.env, 'test', token))
+
+    def test_custom_secret(self):
+        payload = {'value': 123456, 'name': 'bob'}
+        token = misc.hash_sign(self.env, 'test', payload, expiration_hours=24, secret='very_secret')
+
+        self.assertEqual(misc.verify_hash_signed(self.env, 'test', token, secret='very_secret'), payload)
+        self.assertEqual(misc.verify_hash_signed(self.env, 'test', token, secret=b'very_secret'), payload)
+        self.assertIsNone(misc.verify_hash_signed(self.env, 'test', token, secret='other'))
+        self.assertIsNone(misc.verify_hash_signed(self.env, 'test', token))
+
+    def test_default_secret(self):
+        payload = ["str1", "str2", "str3", 4, 5]
+        db_secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
+
+        token_default = misc.hash_sign(self.env, 'test', payload, expiration_hours=24)
+        token_explicit = misc.hash_sign(self.env, 'test', payload, expiration_hours=24, secret=db_secret)
+
+        self.assertEqual(misc.verify_hash_signed(self.env, 'test', token_default), payload)
+        self.assertEqual(misc.verify_hash_signed(self.env, 'test', token_explicit), payload)
+        self.assertEqual(misc.verify_hash_signed(self.env, 'test', token_default, secret=db_secret), payload)

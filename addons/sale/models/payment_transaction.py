@@ -203,7 +203,7 @@ class PaymentTransaction(models.Model):
                 # Create a down payment invoice for partially paid orders
                 downpayment_invoices = (
                     confirmed_orders - fully_paid_orders
-                )._generate_downpayment_invoices()
+                ).with_context(downpayment_fixed_amount=tx.amount)._generate_downpayment_invoices()
 
                 # For fully paid orders create a final invoice.
                 fully_paid_orders._force_lines_to_invoice_policy_order()
@@ -216,7 +216,10 @@ class PaymentTransaction(models.Model):
                 # edi postprocessing of invoice and displaying the sale order on the portal
                 for invoice in invoices:
                     invoice._portal_ensure_token()
-                tx.invoice_ids = [Command.set(invoices.ids)]
+                if invoices:
+                    tx.invoice_ids = [Command.set(invoices.ids)]
+
+        self.env.flush_all()
 
     @api.model
     def _compute_reference_prefix(self, provider_code, separator, **values):

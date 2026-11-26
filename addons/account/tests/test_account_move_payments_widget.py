@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.tests import tagged
+from odoo.tests import new_test_user, tagged
 from odoo import Command
 
 
@@ -204,3 +204,108 @@ class TestAccountMovePaymentsWidget(AccountTestInvoicingCommon):
                 expected_amounts[ln.matched_credit_ids.exchange_move_id.id] = 50.0
 
         self.assert_invoice_outstanding_reconciled_widget(out_invoice, expected_amounts)
+
+    def test_outstanding_payments_branch_and_companies(self):
+        """ Test the outstanding payments widget on invoices of a branch
+        of the company having oustanding payments.
+        """
+
+        branch_a, branch_b = self.env['res.company'].create([{
+            'name': name,
+            'parent_id': self.env.company.id,
+        } for name in ['Branch A', 'Branch B']])
+        self.cr.precommit.run()  # load the CoA
+
+        other_company_data = self.setup_other_company()
+        other_company = other_company_data['company']
+
+        self.env['account.journal'].with_company(company=other_company).create([
+            {'name': 'sale', 'type': 'sale', 'code': 'SALE'},
+            {'name': 'purchase', 'type': 'purchase', 'code': 'BUY'},
+        ])
+
+        # Customer invoice of 2500.0 in curr_1.
+        out_invoices = self.env['account.move'].create([{
+            'move_type': 'out_invoice',
+            'date': '2017-01-01',
+            'invoice_date': '2017-01-01',
+            'partner_id': self.partner_a.id,
+            'currency_id': self.curr_1.id,
+            'company_id': company.id,
+            'invoice_line_ids': [(0, 0, {'name': '/', 'price_unit': 2500.0})],
+        } for company in [branch_a, branch_b, other_company, self.company]])
+        out_invoices.action_post()
+
+        # Vendor bill of 2500.0 in curr_1.
+        in_invoices = self.env['account.move'].create([{
+            'move_type': 'in_invoice',
+            'date': '2017-01-01',
+            'invoice_date': '2017-01-01',
+            'partner_id': self.partner_a.id,
+            'currency_id': self.curr_1.id,
+            'company_id': company.id,
+            'invoice_line_ids': [(0, 0, {'name': '/', 'price_unit': 2500.0})],
+        } for company in [branch_a, branch_b, other_company, self.company]])
+        in_invoices.action_post()
+
+        out_refund = self.env['account.move'].create([{
+            'move_type': 'out_refund',
+            'partner_id': self.partner_a.id,
+            'company_id': branch.id,
+            'invoice_line_ids': [(0, 0, {'name': '/', 'price_unit': price})],
+        } for branch, price in zip((branch_a, branch_b), (2500.0, 1000.0))])
+        out_refund.action_post()
+        in_refund = self.env['account.move'].create([{
+            'move_type': 'in_refund',
+            'invoice_date': '2017-01-01',
+            'partner_id': self.partner_a.id,
+            'company_id': branch.id,
+            'invoice_line_ids': [(0, 0, {'name': '/', 'price_unit': price})],
+        } for branch, price in zip((branch_a, branch_b), (2500.0, 1000.0))])
+        in_refund.action_post()
+
+        expected_amounts = {
+            self.payment_2016_curr_1.id: 500.0,
+            self.payment_2016_curr_2.id: 500.0,
+            self.payment_2017_curr_2.id: 500.0,
+            self.payment_2016_curr_3.id: 500.0,
+            self.payment_2017_curr_3.id: 500.0,
+        }
+
+        self.assert_invoice_outstanding_to_reconcile_widget(out_invoices[0], {out_refund[0].id: 2500.0})
+        self.assert_invoice_outstanding_to_reconcile_widget(in_invoices[0], {in_refund[0].id: 2500.0})
+        self.assert_invoice_outstanding_to_reconcile_widget(out_invoices[1], {out_refund[1].id: 1000.0})
+        self.assert_invoice_outstanding_to_reconcile_widget(in_invoices[1], {in_refund[1].id: 1000.0})
+        self.assert_invoice_outstanding_to_reconcile_widget(out_invoices[2], {})
+        self.assert_invoice_outstanding_to_reconcile_widget(in_invoices[2], {})
+        self.assert_invoice_outstanding_to_reconcile_widget(out_invoices[3], {**expected_amounts, out_refund[0].id: 2500.0, out_refund[1].id: 1000.0})
+        self.assert_invoice_outstanding_to_reconcile_widget(in_invoices[3], {**expected_amounts, in_refund[0].id: 2500.0, in_refund[1].id: 1000.0})
+
+    def test_payments_widget_open_entries(self):
+        """ The invoicing users can't open the entries that aren't invoices or payments. """
+        invoice = self.init_invoice('out_invoice', amounts=[3000.0], post=True)
+        receivable_line = invoice.line_ids.filtered(lambda line: line.account_id == self.receivable_account)
+        payment = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=invoice.ids).create({
+            'amount': 1000.0,
+        })._create_payments()
+        bank_journal = self.company_data['default_journal_bank']
+        bank_entry = self.env['account.move'].create({
+            'journal_id': bank_journal.id,
+            'line_ids': [
+                Command.create({'credit': 1000.0, 'account_id': self.receivable_account.id, 'partner_id': self.partner_a.id}),
+                Command.create({'debit': 1000.0, 'account_id': bank_journal.default_account_id.id}),
+            ],
+        })
+        misc_entry = self.payment_2016_curr_1.copy({'date': '2017-01-01'})
+        (bank_entry + misc_entry).action_post()
+        (receivable_line + (bank_entry + misc_entry).line_ids.filtered(lambda line: line.account_id == self.receivable_account)).reconcile()
+
+        invoicing_user = new_test_user(self.env, login='invoicing_user', groups='base.group_user,account.group_account_invoice')
+        readonly_user = new_test_user(self.env, login='readonly_user', groups='base.group_user,account.group_account_readonly')
+        for user, expected in (
+            (invoicing_user, {payment.move_id.id: True, bank_entry.id: False, misc_entry.id: False}),
+            (readonly_user, {payment.move_id.id: True, bank_entry.id: True, misc_entry.id: True}),
+        ):
+            with self.subTest(user=user.login):
+                widget_vals = invoice.with_user(user).invoice_payments_widget
+                self.assertEqual({vals['move_id']: vals['can_open_move'] for vals in widget_vals['content']}, expected)

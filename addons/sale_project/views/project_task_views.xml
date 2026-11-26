@@ -49,6 +49,9 @@
         <field name="model">project.project</field>
         <field name="inherit_id" ref="project.edit_project"/>
         <field name="arch" type="xml">
+            <form position="attributes">
+                <attribute name="js_class">sale_project_project_form</attribute>
+            </form>
             <div name="button_box" position="inside">
                 <field name="display_sales_stat_buttons" invisible="1"/>
                 <field name="allow_billable" invisible="1" />
@@ -177,6 +180,7 @@
                 <attribute name="invisible">not allow_billable</attribute>
             </xpath>
             <xpath expr="//field[@name='partner_id']" position="after">
+                <!-- TODO: remove project_sale_order_id in master -->
                 <field name="project_sale_order_id" invisible="1"/>
                 <field name="sale_order_id" invisible="True" groups="sales_team.group_sale_salesman"/>
                 <label for="sale_line_id" invisible="not allow_billable or not project_id or not partner_id"/>
@@ -200,7 +204,7 @@
                             'form_view_ref': 'sale_project.sale_order_line_view_form_editable',
                             'default_partner_id': partner_id,
                             'default_company_id': company_id,
-                            'default_order_id': project_sale_order_id,
+                            'default_order_id': sale_order_id,
                         }"
                         placeholder="Non-billable"/>
                     <span 

@@ -3,27 +3,27 @@
 # * sale
 #
 # Translators:
-# Ryoko Tsuda <ryoko@quartile.co>, 2024, 2025.
+# Ryoko Tsuda <ryoko@quartile.co>, 2024, 2025, 2026.
 # Junko Augias, 2025
 # Wil Odoo, 2025
 # "Junko Augias (juau)" <juau@odoo.com>, 2025, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
-# Yoshi Tashiro <tashiro@quartile.co>, 2025.
+# Yoshi Tashiro <tashiro@quartile.co>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-29 18:37+0000\n"
-"PO-Revision-Date: 2026-02-14 09:13+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-18/sale/ja/"
-">\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-11-12 06:39+0000\n"
+"Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-18/sale/"
+"ja/>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_payment_provider_onboarding_wizard___data_fetched
@@ -75,21 +75,6 @@ msgid ""
 msgstr ""
 "(object.state in ('draft', 'sent') and '見積 - %s' % (object.name)) or 'オー"
 "ダ - %s' % (object.name)"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
-msgid "2023-12-31"
-msgstr "2023-12-31"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
-msgid "27.00"
-msgstr "27.00"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
-msgid "31.05"
-msgstr "31.05"
 
 #. module: sale
 #. odoo-javascript
@@ -1140,15 +1125,6 @@ msgstr ""
 "is_product_archived\"/>"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-building-o p-2\" title=\"Values set here are "
-"company-specific.\" groups=\"base.group_multi_company\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-building-o p-2\" title=\"Values set here are "
-"company-specific.\" groups=\"base.group_multi_company\"/>"
-
-#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.crm_team_salesteams_view_form
 msgid "<span class=\"flex-grow-1\">/ Month</span>"
 msgstr "<span class=\"flex-grow-1\">/ 月</span>"
@@ -1227,7 +1203,7 @@ msgstr ""
 "<span>このオーダを本当にキャンセルしますか？<br/></span>\n"
 "                        <span id=\"display_invoice_alert\" invisible=\"not "
 "display_invoice_alert\">\n"
-"                            このオーダの請求書ドラフトはキャンセルされます。 "
+"                            このオーダの請求書下書きはキャンセルされます。 "
 "<br/>\n"
 "                        </span>"
 
@@ -1718,7 +1694,7 @@ msgstr "作成者"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__authorized_transaction_ids
 msgid "Authorized Transactions"
-msgstr "承認されたトランザクション"
+msgstr "承認された取引"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__automatic_invoice
@@ -2069,7 +2045,7 @@ msgstr "オーダで配送費用を計算"
 #. module: sale
 #: model:ir.model,name:sale.model_res_config_settings
 msgid "Config Settings"
-msgstr "コンフィグ設定"
+msgstr "構成設定"
 
 #. module: sale
 #: model:ir.ui.menu,name:sale.menu_sale_config
@@ -2142,7 +2118,7 @@ msgstr "作成日"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_sale_advance_payment_inv
 msgid "Create Draft"
-msgstr "ドラフトを作成"
+msgstr "下書きを作成"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__advance_payment_method
@@ -2237,7 +2213,7 @@ msgstr "作成日"
 msgid ""
 "Creation date of draft/sent orders,\n"
 "Confirmation date of confirmed orders."
-msgstr "ドラフト/送信済み注文の作成日、確認済オーダの確認日。"
+msgstr "下書き/送信済み注文の作成日、確認済オーダの確認日。"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_payment_provider_onboarding_wizard__payment_method__stripe
@@ -2567,7 +2543,7 @@ msgstr "割引"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__display_draft_invoice_warning
 msgid "Display Draft Invoice Warning"
-msgstr "請求書ドラフトの警告を表示する"
+msgstr "請求書(下書き)の警告を表示"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__display_invoice_amount_warning
@@ -2640,7 +2616,7 @@ msgstr "前受金額 (固定)"
 #. odoo-python
 #: code:addons/sale/models/sale_order_line.py:0
 msgid "Down Payment: %(date)s (Draft)"
-msgstr "前受金: %(date)s (ドラフト)"
+msgstr "前受金: %(date)s (下書き)"
 
 #. module: sale
 #. odoo-python
@@ -2695,7 +2671,7 @@ msgstr "前受金勘定"
 #: code:addons/sale/wizard/sale_make_invoice_advance.py:0
 #: model_terms:ir.ui.view,arch_db:sale.view_sale_advance_payment_inv
 msgid "Draft Invoices"
-msgstr "ドラフト請求書"
+msgstr "請求書(下書き)"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -2922,7 +2898,7 @@ msgstr ""
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Grant discounts on sales order lines"
-msgstr "販売オーダラインに値引適用"
+msgstr "販売オーダ明細に値引を適用"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__weight
@@ -3007,7 +2983,7 @@ msgstr "チェックした場合は、新しいメッセージに注意が必要
 #: model:ir.model.fields,help:sale.field_sale_order__message_has_error
 #: model:ir.model.fields,help:sale.field_sale_order__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "チェックした場合は、一部のメッセージに配信エラーが発生されました。"
+msgstr "チェックされている場合、一部のメッセージで送信エラーが発生しています。"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__journal_id
@@ -3023,7 +2999,8 @@ msgstr ""
 msgid ""
 "If the sale is locked, you can not modify it anymore. However, you will "
 "still be able to invoice or deliver."
-msgstr "販売がロックされている場合は、これ以上編集できません。ただし、請求や出荷は引"
+msgstr ""
+"販売がロックされている場合は、これ以上編集できません。ただし、請求や出荷は引"
 "き続き可能です。"
 
 #. module: sale
@@ -3044,7 +3021,7 @@ msgstr "即時"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "Import Amazon orders and sync deliveries"
-msgstr "Amazonオーダインポートおよび運送同期"
+msgstr "Amazonの注文を取り込み、配送状況を同期"
 
 #. module: sale
 #. odoo-python
@@ -3353,7 +3330,7 @@ msgstr "最終更新日"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_sales_order_filter
 msgid "Late Activities"
-msgstr "遅れた活動"
+msgstr "期限超過の活動"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__customer_lead
@@ -3662,7 +3639,7 @@ msgstr "エラー数"
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr "アクションを必要とするメッセージの数"
+msgstr "対応が必要なメッセージ数"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__message_has_error_counter
@@ -3767,7 +3744,7 @@ msgstr "確認済の前払のみが考慮されます"
 #. odoo-python
 #: code:addons/sale/models/sale_order.py:0
 msgid "Only draft orders can be marked as sent directly."
-msgstr "送信済として直接マークできるのはドラフトオーダのみです。"
+msgstr "送信済として直接マークできるのは下書きオーダのみです。"
 
 #. module: sale
 #: model:ir.model.constraint,message:sale.constraint_product_attribute_custom_value_sol_custom_value_unique
@@ -3852,7 +3829,7 @@ msgstr "オーダ数"
 #: model_terms:ir.ui.view,arch_db:sale.view_order_product_search
 #: model_terms:ir.ui.view,arch_db:sale.view_sales_order_filter
 msgid "Order Date"
-msgstr "オーダ日"
+msgstr "注文日"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
@@ -4064,7 +4041,7 @@ msgstr "支払取引金額"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "Payment terms"
-msgstr "支払期限"
+msgstr "支払条件"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_discount__discount_percentage
@@ -4477,7 +4454,7 @@ msgstr "通常請求書"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
 msgid "Reject This Quotation"
-msgstr "この見積を拒否する"
+msgstr "この見積を却下"
 
 #. module: sale
 #. odoo-javascript
@@ -4559,7 +4536,7 @@ msgstr "キャンペーンによって生み出された収益"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr "SMS送信エラー"
+msgstr "SMS配信エラー"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -4799,7 +4776,7 @@ msgstr "販売チーム"
 #: model:ir.model.fields,field_description:sale.field_res_partner__sale_warn
 #: model:ir.model.fields,field_description:sale.field_res_users__sale_warn
 msgid "Sales Warnings"
-msgstr "販売警告"
+msgstr "販売アラート"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_account_analytic_line__so_line
@@ -5022,7 +4999,7 @@ msgstr "配送"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "Shipping Address"
-msgstr "配送住所"
+msgstr "配送先"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_shiprocket
@@ -5423,8 +5400,7 @@ msgstr ""
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_sale_advance_payment_inv
 msgid "The new invoice will deduct draft invoices linked to this sale order."
-msgstr ""
-"この販売オーダにリンクした請求書ドラフトから新しい請求書が控除されます。"
+msgstr "この販売オーダにリンクした請求書下書きから新しい請求書が控除されます。"
 
 #. module: sale
 #. odoo-python
@@ -5451,7 +5427,7 @@ msgstr "このオーダは顧客署名が必要なステータスではありま
 #. odoo-python
 #: code:addons/sale/models/sale_order_line.py:0
 msgid "The ordered quantity has been updated."
-msgstr "注文数量が更新されました。"
+msgstr "オーダ数量が更新されました。"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__reference
@@ -5564,7 +5540,8 @@ msgstr ""
 msgid ""
 "This is the delivery date promised to the customer. If set, the delivery "
 "order will be scheduled based on this date rather than product lead times."
-msgstr "これは、お客様に約束された納期です。設定されている場合、出荷オーダは、製品の"
+msgstr ""
+"これは、お客様に約束された納期です。設定されている場合、出荷オーダは、製品の"
 "リードタイムではなく、この日付に基づいてスケジュールされます。"
 
 #. module: sale
@@ -5699,7 +5676,7 @@ msgstr ""
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_sales_order_filter
 msgid "Today Activities"
-msgstr "本日の活動"
+msgstr "今日の活動"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__amount_total
@@ -5747,7 +5724,7 @@ msgstr "追跡"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__transaction_ids
 msgid "Transactions"
-msgstr "取引明細書"
+msgstr "取引"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__translated_product_name
@@ -5768,17 +5745,17 @@ msgstr "メッセージを入力..."
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr "記録上の例外活動の種類。"
+msgstr "レコード上の例外の活動タイプ。"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Type to find a customer..."
-msgstr "顧客を見つけるためにタイプ..."
+msgstr "顧客名を入力して検索..."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "Type to find a product..."
-msgstr "プロダクトを見つけるためにタイプ..."
+msgstr "タイプしてプロダクトを検索..."
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_ups
@@ -5923,10 +5900,14 @@ msgstr ""
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__validity_date
 msgid ""
-"Validity of the order, after that you will not able to sign & pay the "
-"quotation."
-msgstr ""
-"オーダの有効期限：有効期限を過ぎると、見積に署名することができなくなります。"
+"Validity of the quotation. After this date, you will no longer be able to "
+"sign and pay it."
+msgstr "見積もりの有効期限です。この日付を過ぎると、署名や支払いができなくなります。"
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
+msgid "Values set here are company-specific."
+msgstr "ここで設定される値は、会社ごとに異なります。"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -6054,17 +6035,6 @@ msgstr "確認済オーダの価格表を変えることはできません！"
 
 #. module: sale
 #. odoo-python
-#: code:addons/sale/models/product_product.py:0
-#: code:addons/sale/models/product_template.py:0
-msgid ""
-"You cannot change the product's type because it is already used in sales "
-"orders."
-msgstr ""
-"プロダクトの種類は、すでに販売オーダで使用されているため、変更することができ"
-"ません。"
-
-#. module: sale
-#. odoo-python
 #: code:addons/sale/models/sale_order_line.py:0
 msgid ""
 "You cannot change the type of a sale order line. Instead you should delete "
@@ -6096,6 +6066,19 @@ msgid ""
 msgstr ""
 "販売または購買するもの(在庫品、消耗品、サービス品等)は、プロダクトとして登録"
 "する必要があります。"
+
+#. module: sale
+#. odoo-python
+#: code:addons/sale/models/product_product.py:0
+#: code:addons/sale/models/product_template.py:0
+msgid ""
+"You should not change the product type because this product is already used "
+"in sales orders. Changing it may affect how the related order lines are "
+"delivered."
+msgstr ""
+"このプロダクトはすでに販売オーダで使用されているため、プロダクトタイプを変更"
+"することは推奨されません。変更すると、関連するオーダ明細の出荷処理に影響を与"
+"える可能性があります。"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.portal_my_home_sale
@@ -6222,6 +6205,12 @@ msgid "units"
 msgstr "単位"
 
 #. module: sale
+#. odoo-javascript
+#: code:addons/sale/static/src/xml/sale_product_field.xml:0
+msgid "x"
+msgstr "x"
+
+#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
 msgid "you confirm acceptance on the behalf of"
 msgstr "の代理人として受諾を確認します。"
@@ -6257,3 +6246,33 @@ msgid ""
 msgstr ""
 "{{ object.company_id.name }} {{ object.type_name }} キャンセル済 (Ref "
 "{{ object.name or 'n/a' }})"
+
+#~ msgid ""
+#~ "Validity of the order, after that you will not able to sign & pay the "
+#~ "quotation."
+#~ msgstr ""
+#~ "オーダの有効期限：有効期限を過ぎると、見積に署名することができなくなりま"
+#~ "す。"
+
+#~ msgid ""
+#~ "You cannot change the product's type because it is already used in sales "
+#~ "orders."
+#~ msgstr ""
+#~ "プロダクトの種類は、すでに販売オーダで使用されているため、変更することがで"
+#~ "きません。"
+
+#~ msgid "2023-12-31"
+#~ msgstr "2023-12-31"
+
+#~ msgid "27.00"
+#~ msgstr "27.00"
+
+#~ msgid "31.05"
+#~ msgstr "31.05"
+
+#~ msgid ""
+#~ "<span class=\"fa fa-lg fa-building-o p-2\" title=\"Values set here are "
+#~ "company-specific.\" groups=\"base.group_multi_company\"/>"
+#~ msgstr ""
+#~ "<span class=\"fa fa-lg fa-building-o p-2\" title=\"Values set here are "
+#~ "company-specific.\" groups=\"base.group_multi_company\"/>"

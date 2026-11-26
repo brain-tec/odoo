@@ -17,16 +17,18 @@
 # Tuomas Lyyra <tuomas.lyyra@legenda.fi>, 2024
 # Martin Trigaux, 2024
 # Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2024
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025
+# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025, 2026.
 # Jessica Jakara, 2025
 # "Jessica Tuulia Sade Jäkärä (jtsj)" <jtsj@odoo.com>, 2025.
+# Saara Hakanen <sahak@odoo.com>, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-11-21 07:48+0000\n"
-"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>\n"
+"POT-Creation-Date: 2026-04-10 18:38+0000\n"
+"PO-Revision-Date: 2026-11-10 14:34+0000\n"
+"Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
 "Language-Team: Finnish <https://translate.odoo.com/projects/odoo-18/"
 "stock_account/fi/>\n"
 "Language: fi\n"
@@ -34,7 +36,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: stock_account
 #. odoo-python
@@ -98,11 +100,6 @@ msgstr ""
 "negatiivista lisäarvoa kirjataksesi tuotteen arvon alenemisen</small>"
 
 #. module: stock_account
-#: model_terms:ir.ui.view,arch_db:stock_account.stock_account_report_invoice_document
-msgid "6.00"
-msgstr "6.00"
-
-#. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.view_category_property_form
 msgid "<b>Set other input/output accounts on specific </b>"
 msgstr "<b>Aseta muut tulo-/lähtötilit tietyille </b>"
@@ -121,17 +118,17 @@ msgstr "<span>Tuote</span>"
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_account_report_invoice_document
 msgid "<span>Quantity</span>"
-msgstr "<span>Määrä</span>"
+msgstr "<span>Lukumäärä</span>"
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_account_report_invoice_document
 msgid "<span>SN/LN</span>"
-msgstr "<span>Sarja- tai eränumero</span>"
+msgstr "<span>Sarja-/eränumero</span>"
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_account_chart_template
 msgid "Account Chart Template"
-msgstr "Tilikarttamalli"
+msgstr "Tilikartan mallipohja"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_move__account_move_ids
@@ -199,17 +196,17 @@ msgstr ""
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_account_analytic_account
 msgid "Analytic Account"
-msgstr "Analyyttinen tili"
+msgstr "Laskentakohde"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_move__analytic_account_line_ids
 msgid "Analytic Account Line"
-msgstr "Analyyttinen tilirivi"
+msgstr "Laskentakohderivi"
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_account_analytic_plan
 msgid "Analytic Plans"
-msgstr "Analyyttiset suunnitelmat"
+msgstr "Laskentakohderyhmät"
 
 #. module: stock_account
 #: model:ir.model.fields.selection,name:stock_account.selection__product_category__property_valuation__real_time
@@ -286,7 +283,7 @@ msgstr "Valitse päivämäärä saadaksesi arvonmäärityksen kyseisenä päivä
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_account_move_line__cogs_origin_id
 msgid "Cogs Origin"
-msgstr "Cogs Alkuperä"
+msgstr "Myytyjen tavaroiden hankintamenojen alkuperä"
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_res_company
@@ -332,7 +329,7 @@ msgstr "Kustannushinta"
 #: model:ir.model.fields,field_description:stock_account.field_product_template__cost_method
 #: model:ir.model.fields,field_description:stock_account.field_stock_quant__cost_method
 msgid "Costing Method"
-msgstr "Arvotuskäytäntö"
+msgstr "Kustannusmenetelmä"
 
 #. module: stock_account
 #. odoo-python
@@ -341,8 +338,8 @@ msgid ""
 "Costing method change for product category %(category)s: from %(old_method)s "
 "to %(new_method)s."
 msgstr ""
-"Kustannuslaskentamenetelmän muutos tuoteryhmässä %(category)s: %"
-"(old_method)s-stä %(new_method)s-een."
+"Kustannuslaskentamenetelmän muutos tuoteryhmässä %(category)s: %(old_method)"
+"s-stä %(new_method)s-een."
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer_revaluation__account_id
@@ -489,7 +486,7 @@ msgstr "Saapuva"
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_stock_location
 msgid "Inventory Locations"
-msgstr "Inventaariopaikat"
+msgstr "Varastoinnin sijainnit"
 
 #. module: stock_account
 #. odoo-python
@@ -528,12 +525,12 @@ msgstr "Päiväkirjan kirjaus"
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_account_move_line
 msgid "Journal Item"
-msgstr "Päiväkirjamerkintä"
+msgstr "Kirjausrivi"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_res_config_settings__module_stock_landed_costs
 msgid "Landed Costs"
-msgstr "Läh. kokonaiskulu"
+msgstr "Kokonaiskustannukset"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer__write_uid
@@ -577,7 +574,7 @@ msgstr "Erä/sarja"
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer__lot_id
 #: model_terms:ir.ui.view,arch_db:stock_account.view_inventory_valuation_search
 msgid "Lot/Serial Number"
-msgstr "Erä/sarjanumero"
+msgstr "Erä-/sarjanumero"
 
 #. module: stock_account
 #. odoo-python
@@ -672,6 +669,16 @@ msgstr ""
 "Määritä erät kaikille määrillesi ennen eräarvon määrittämisen sallimista."
 
 #. module: stock_account
+#. odoo-python
+#: code:addons/stock_account/models/stock_move_line.py:0
+msgid ""
+"Product %(product)s is valuated by lot: an explicit Lot/Serial number is "
+"required."
+msgstr ""
+"Tuotteen %(product)s arvo määritetään eräkohtaisesti: erillinen erä-/"
+"sarjanumero vaaditaan."
+
+#. module: stock_account
 #: model:ir.model,name:stock_account.model_product_category
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer__categ_id
 #: model_terms:ir.ui.view,arch_db:stock_account.view_inventory_valuation_search
@@ -693,12 +700,12 @@ msgstr "Tuotteen uudelleenarvostus"
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer__product_tmpl_id
 msgid "Product Template"
-msgstr "Tuotemalli"
+msgstr "Tuotepohja"
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_product_product
 msgid "Product Variant"
-msgstr "Tuotevariaatio"
+msgstr "Tuotevariantti"
 
 #. module: stock_account
 #. odoo-python
@@ -712,12 +719,12 @@ msgstr ""
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_res_company__account_production_wip_account_id
 msgid "Production WIP Account"
-msgstr "Tuotannon WIP-tili"
+msgstr "Keskeneräisen tuotannon tili"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_res_company__account_production_wip_overhead_account_id
 msgid "Production WIP Overhead Account"
-msgstr "Tuotannon WIP-yleiskustannustili"
+msgstr "Keskeneräisen tuotannon yleiskustannustili"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer__quantity
@@ -779,7 +786,7 @@ msgstr "Jäljellä oleva arvo"
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_stock_return_picking_line
 msgid "Return Picking Line"
-msgstr "Palauta poimintalinja"
+msgstr "Palautuskeräilyrivi"
 
 #. module: stock_account
 #. odoo-python
@@ -927,8 +934,8 @@ msgid ""
 "The ISO country code in two chars. \n"
 "You can use this field for quick search."
 msgstr ""
-"Kaksikirjaiminen ISO-maatunnus. \n"
-"Voit käyttää tätä kenttää pikahakuun."
+"Kaksikirjaiminen ISO-maaatunnus. \n"
+"Voit käyttää tätä kenttää nopeaa hakua varten."
 
 #. module: stock_account
 #. odoo-python
@@ -1170,13 +1177,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_form
 #: model_terms:ir.ui.view,arch_db:stock_account.view_stock_quant_tree_editable_inherit
 msgid "Valuation"
-msgstr "Arvostus"
+msgstr "Arvonmääritys"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_product_product__company_currency_id
 #: model:ir.model.fields,field_description:stock_account.field_stock_lot__company_currency_id
 msgid "Valuation Currency"
-msgstr "Arvostusvaluutta"
+msgstr "Arvonmäärityksen valuutta"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer_revaluation__adjusted_layer_ids
@@ -1282,9 +1289,9 @@ msgid ""
 "When doing automated inventory valuation, this is the Accounting Journal in "
 "which entries will be automatically posted when stock moves are processed."
 msgstr ""
-"Kun tehdään automaattista varaston arvonmääritystä, tämä on "
-"kirjanpitopäiväkirja, johon kirjaukset kirjataan automaattisesti, kun "
-"varastosiirtoja käsitellään."
+"Automaattista varaston arvonmääritystä suoritettaessa tämä on kirjanpidon "
+"päiväkirja, johon kirjaukset tehdään automaattisesti varastosiirtojen "
+"käsittelyn yhteydessä."
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_stock_valuation_layer_revaluation
@@ -1437,3 +1444,6 @@ msgstr "yksiköt"
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_graph
 msgid "valuation graph"
 msgstr "arviointikaavio"
+
+#~ msgid "6.00"
+#~ msgstr "6.00"

@@ -1,5 +1,6 @@
 /* global waitForWebfonts */
 
+import { Domain } from "@web/core/domain";
 import { Mutex } from "@web/core/utils/concurrency";
 import { markRaw } from "@odoo/owl";
 import { floatIsZero } from "@web/core/utils/numbers";
@@ -163,6 +164,7 @@ export class PosStore extends Reactive {
         });
 
         initLNA(this.notification);
+        this.canUserCreateProduct = await user.checkAccessRight("product.product", "create");
     }
 
     get firstScreen() {
@@ -399,16 +401,41 @@ export class PosStore extends Reactive {
         }
 
         if (productIds.size > 0) {
-            const missingVariants = await this.data.searchRead("product.product", [
-                "&",
-                ["id", "not in", [...productIds]],
-                ["product_tmpl_id", "in", [...productTmplIds]],
-            ]);
-            for (const product of missingVariants.filter(
-                (p) =>
-                    !productIds.has(p.id) && p.raw?.product_template_variant_value_ids?.length > 0
-            )) {
-                productByTmplId[product.raw.product_tmpl_id].push(product);
+            for (const product of this.models["product.product"].getAll()) {
+                const tmplId = product.raw?.product_tmpl_id;
+                if (
+                    !productIds.has(product.id) &&
+                    productTmplIds.has(tmplId) &&
+                    product.raw?.product_template_variant_value_ids?.length > 0
+                ) {
+                    productIds.add(product.id);
+                    // The last product of a template stays displayed: keep the reloaded ones last.
+                    productByTmplId[tmplId].unshift(product);
+                }
+            }
+            this.siblingVariantsLoadedTmplIds ??= new Set();
+            const tmplIdsToFetch = [...productTmplIds].filter(
+                (id) => !this.siblingVariantsLoadedTmplIds.has(id)
+            );
+            if (tmplIdsToFetch.length > 0) {
+                const loadedIds = tmplIdsToFetch.flatMap((id) =>
+                    productByTmplId[id].map((p) => p.id)
+                );
+                // Only the sibling ids are needed; bin_size keeps the images out.
+                const missingVariants = await this.data.searchRead(
+                    "product.product",
+                    ["&", ["id", "not in", loadedIds], ["product_tmpl_id", "in", tmplIdsToFetch]],
+                    [],
+                    { context: { bin_size: true } }
+                );
+                for (const product of missingVariants.filter(
+                    (p) =>
+                        !productIds.has(p.id) &&
+                        p.raw?.product_template_variant_value_ids?.length > 0
+                )) {
+                    productByTmplId[product.raw.product_tmpl_id].push(product);
+                }
+                tmplIdsToFetch.forEach((id) => this.siblingVariantsLoadedTmplIds.add(id));
             }
         }
 
@@ -627,10 +654,21 @@ export class PosStore extends Reactive {
             );
         }
         const attributeLinesValues = attributeLines.map((attr) => attr.product_template_value_ids);
-        if (attributeLinesValues.some((values) => values.length > 1 || values[0].is_custom)) {
+        if (
+            attributeLinesValues.some(
+                (values) =>
+                    values.length > 1 ||
+                    values[0].is_custom ||
+                    values[0].attribute_id.display_type === "multi"
+            )
+        ) {
             let defaultValues = {};
-            const match = product.barcode && product.barcode.includes(this.searchProductWord);
-            if (this.searchProductWord && match) {
+            const searchMatch =
+                this.searchProductWord &&
+                product.barcode &&
+                product.barcode.includes(this.searchProductWord);
+            const scanMatche = opts.code && product.barcode === opts.code.base_code;
+            if (searchMatch || scanMatche) {
                 defaultValues = Object.fromEntries(
                     product.product_template_variant_value_ids.map((value) => [
                         value.attribute_line_id.id,
@@ -714,7 +752,7 @@ export class PosStore extends Reactive {
             ...opts,
         };
 
-        if ("price_unit" in vals) {
+        if ("price_unit" in vals || opts.merge === false) {
             merge = false;
         }
 
@@ -912,8 +950,7 @@ export class PosStore extends Reactive {
         if (!values.product_id.isCombo() && vals.price_unit === undefined) {
             values.price_unit = values.product_id.get_price(order.pricelist_id, values.qty);
         }
-        const isScannedProduct = opts.code && opts.code.type === "product";
-        if (values.price_extra && !isScannedProduct) {
+        if (values.price_extra) {
             const price = values.product_id.get_price(
                 order.pricelist_id,
                 values.qty,
@@ -936,7 +973,9 @@ export class PosStore extends Reactive {
                 line,
                 related_lines
             );
-            related_lines.forEach((line) => line.set_unit_price(price));
+            related_lines
+                .filter((line) => line.price_type !== "manual")
+                .forEach((line) => line.set_unit_price(price));
         }
         line.setOptions(options);
         this.selectOrderLine(order, line);
@@ -1372,14 +1411,24 @@ export class PosStore extends Reactive {
         }
     }
     async getServerOrders() {
-        return await this.loadServerOrders([
+        return await this.loadServerOrders(this.getServerOrdersDomain().toList());
+    }
+    getServerOrdersDomain() {
+        return new Domain([
             ["config_id", "in", [...this.config.raw.trusted_config_ids, this.config.id]],
             ["state", "=", "draft"],
         ]);
     }
     async loadServerOrders(domain) {
+        const finalizedStates = new Map(
+            this.models["pos.order"].filter((o) => o.finalized).map((o) => [o.uuid, o.state])
+        );
         const orders = await this.data.searchRead("pos.order", domain);
         for (const order of orders) {
+            // A read started before the payment was committed must not reopen the order
+            if (finalizedStates.has(order.uuid) && !order.finalized) {
+                order.state = finalizedStates.get(order.uuid);
+            }
             order.update({
                 config_id: this.config,
                 session_id: this.session,
@@ -1755,7 +1804,7 @@ export class PosStore extends Reactive {
                 );
                 changes.new = [];
                 if (!printed) {
-                    unsuccedPrints.push("Detailed Receipt");
+                    unsuccedPrints.push(_t("Detailed Receipt"));
                 } else {
                     isPrinted = true;
                 }
@@ -1775,7 +1824,7 @@ export class PosStore extends Reactive {
             if (orderChange.generalNote && anyChangesToPrint) {
                 const printed = await this.printReceipts(order, printer, "Message", []);
                 if (!printed) {
-                    unsuccedPrints.push("General Message");
+                    unsuccedPrints.push(_t("General Message"));
                 } else {
                     isPrinted = true;
                 }
@@ -1969,8 +2018,13 @@ export class PosStore extends Reactive {
             }
         );
     }
+    get hasProductCreationAccess() {
+        return this.canUserCreateProduct;
+    }
+
+    // TODO: Remove in master. Use `hasProductCreationAccess` instead.
     async allowProductCreation() {
-        return await user.checkAccessRight("product.product", "create");
+        return this.hasProductCreationAccess;
     }
     orderDetailsProps(order) {
         const oldPaymentIds = order.payment_ids.map((p) => p.id);

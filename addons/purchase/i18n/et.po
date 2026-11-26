@@ -15,13 +15,14 @@
 # Katrin Kampura, 2024
 # Tairi Tiimann, 2024
 # Siim Raasuke, 2024
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Odoo Translation Bot <c3p@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2025-11-20 19:03+0000\n"
+"POT-Creation-Date: 2026-11-13 17:37+0000\n"
+"PO-Revision-Date: 2026-10-20 17:00+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Estonian <https://translate.odoo.com/projects/odoo-18/"
 "purchase/et/>\n"
@@ -30,7 +31,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: purchase
 #: model:ir.actions.report,print_report_name:purchase.action_report_purchase_order
@@ -1846,6 +1847,12 @@ msgstr "Nimi, TIN, e-post või viide"
 
 #. module: purchase
 #. odoo-python
+#: code:addons/purchase/models/purchase_order.py:0
+msgid "New"
+msgstr "Uus"
+
+#. module: purchase
+#. odoo-python
 #: code:addons/purchase/controllers/portal.py:0
 msgid "Newest"
 msgstr "Uusim"
@@ -2000,6 +2007,12 @@ msgid ""
 msgstr ""
 "Kui olete tarnijalt tooted ära tellinud, kinnitage hinnapäring ning see "
 "muutub ostutellimuseks."
+
+#. module: purchase
+#. odoo-python
+#: code:addons/purchase/models/purchase_order.py:0
+msgid "Only a purchase manager can approve this purchase order."
+msgstr ""
 
 #. module: purchase
 #. odoo-python
@@ -2373,6 +2386,7 @@ msgstr "Ostutellimuste arv"
 #: model:ir.actions.act_window,name:purchase.action_purchase_history
 #: model:ir.model,name:purchase.model_purchase_order_line
 #: model:ir.model.fields,field_description:purchase.field_account_move_line__purchase_line_id
+#: model:ir.model.fields,field_description:purchase.field_account_tax__purchase_order_line_ids
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_line_form2
 msgid "Purchase Order Line"
@@ -3145,6 +3159,12 @@ msgstr "Tellimuse kättesaamist on kinnitanud %s."
 #: code:addons/purchase/models/purchase_order.py:0
 msgid "The order receipt has been declined by %s."
 msgstr "%s keeldus tellimuse vastuvõtmisest."
+
+#. module: purchase
+#. odoo-python
+#: code:addons/purchase/models/res_partner.py:0
+msgid "The partner cannot be deleted because it is used as a dropship address"
+msgstr ""
 
 #. module: purchase
 #: model_terms:ir.actions.act_window,help:purchase.act_res_partner_2_purchase_order

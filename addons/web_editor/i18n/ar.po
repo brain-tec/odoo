@@ -6,13 +6,13 @@
 # Martin Trigaux, 2024
 # Wil Odoo, 2024
 # Malaz Abuidris <msea@odoo.com>, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:38+0000\n"
-"PO-Revision-Date: 2025-11-21 02:38+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-28 03:33+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Arabic <https://translate.odoo.com/projects/odoo-18/"
 "web_editor/ar/>\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
 "&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: web_editor
 #. odoo-javascript
@@ -80,16 +80,6 @@ msgid "(URL or Embed)"
 msgstr "(الرابط أو الكود المضمن)"
 
 #. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
-msgid "100%"
-msgstr "100%"
-
-#. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
-msgid "1977"
-msgstr "1977"
-
-#. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
@@ -101,16 +91,6 @@ msgstr "1x"
 #: code:addons/web_editor/static/src/js/wysiwyg/wysiwyg.js:0
 msgid "2 columns"
 msgstr "عمودان 2 "
-
-#. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
-msgid "25"
-msgstr "25"
-
-#. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
-msgid "25%"
-msgstr "25%"
 
 #. module: web_editor
 #. odoo-javascript
@@ -158,21 +138,11 @@ msgid "5 Stars"
 msgstr "5 نجوم "
 
 #. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
-msgid "50%"
-msgstr "50%"
-
-#. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 msgid "5x"
 msgstr "5x"
-
-#. module: web_editor
-#: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
-msgid "90"
-msgstr "90"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
@@ -796,6 +766,12 @@ msgstr "قم بنسخ ولصق رابطك أو الكود المضمن هنا"
 
 #. module: web_editor
 #. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Correct"
+msgstr "صحيحة"
+
+#. module: web_editor
+#. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/snippets.editor.js:0
 msgid "Could not install module %s"
 msgstr "تعذر تثبيت التطبيق %s "
@@ -1232,6 +1208,12 @@ msgstr "لا يمكن إفلات الكتلة البنائية هنا لأسبا
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "Format"
 msgstr "التنسيق "
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Friendly"
+msgstr "ودود"
 
 #. module: web_editor
 #. odoo-javascript
@@ -1752,6 +1734,12 @@ msgstr "يسار"
 
 #. module: web_editor
 #. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Lengthen"
+msgstr "تطويل "
+
+#. module: web_editor
+#. odoo-javascript
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 msgid "Light"
 msgstr "فاتح "
@@ -2076,6 +2064,12 @@ msgid "Patterns"
 msgstr "الأنماط "
 
 #. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Persuasive"
+msgstr "مقنع"
+
+#. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
 msgid "Position"
@@ -2087,6 +2081,12 @@ msgstr "المنصب الوظيفي "
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 msgid "Preview"
 msgstr "معاينة"
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Professional"
+msgstr "احترافي"
 
 #. module: web_editor
 #. odoo-javascript
@@ -2544,6 +2544,12 @@ msgstr "الشكل: الصورة المصغرة "
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 msgid "Shapes"
 msgstr "أشكال "
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/wysiwyg/widgets/chatgpt_alternatives_dialog.js:0
+msgid "Shorten"
+msgstr "تقصير "
 
 #. module: web_editor
 #. odoo-javascript
@@ -3145,13 +3151,13 @@ msgstr "اختبار محول محرر الويب"
 #. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/snippets.options.js:0
 msgid "WebGL is not enabled on your browser."
-msgstr ""
+msgstr "WebGL غير مفعّل في متصفحك."
 
 #. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/snippets.options.js:0
 msgid "WebP compression not supported on this browser"
-msgstr ""
+msgstr "المتصفح الحالي لا يدعم تقنية ضغط الصور بترميز WebP"
 
 #. module: web_editor
 #. odoo-javascript
@@ -3355,6 +3361,24 @@ msgstr "التعامل مع رسائل websocket "
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 msgid "www.example.com"
 msgstr "www.example.com"
+
+#~ msgid "100%"
+#~ msgstr "100%"
+
+#~ msgid "1977"
+#~ msgstr "1977"
+
+#~ msgid "25"
+#~ msgstr "25"
+
+#~ msgid "25%"
+#~ msgstr "25%"
+
+#~ msgid "50%"
+#~ msgstr "50%"
+
+#~ msgid "90"
+#~ msgstr "90"
 
 #~ msgid "Hide Dailymotion logo"
 #~ msgstr "إخفاء شعار Dailymotion"

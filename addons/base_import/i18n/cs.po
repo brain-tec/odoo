@@ -7,22 +7,24 @@
 # Wil Odoo, 2025
 # Marta Wacławek, 2025
 # Weblate <noreply-mt-weblate@weblate.org>, 2026.
+# "Marta (wacm)" <wacm@odoo.com>, 2026.
+# Tomáš Píšek <Tomas.Pisek@seznam.cz>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2026-01-28 16:39+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 09:44+0000\n"
+"Last-Translator: Tomáš Píšek <Tomas.Pisek@seznam.cz>\n"
 "Language-Team: Czech <https://translate.odoo.com/projects/odoo-18/"
 "base_import/cs/>\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : "
-"(n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
-"X-Generator: Weblate 5.14.3\n"
+"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n "
+"<= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: base_import
 #. odoo-javascript
@@ -116,7 +118,7 @@ msgstr "Mapování importního jádra"
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_progress/import_data_progress.xml:0
 msgid "Batch"
-msgstr "Šarže"
+msgstr "Dávka"
 
 #. module: base_import
 #. odoo-javascript
@@ -254,7 +256,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__display_name
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__display_name
 msgid "Display Name"
-msgstr "Zobrazovací název"
+msgstr "Zobrazovaný název"
 
 #. module: base_import
 #. odoo-javascript
@@ -455,15 +457,6 @@ msgid ""
 msgstr ""
 "Pokud model používá openchatter, sledování historie nastaví předplatné a "
 "odešle oznámení během importu, ale povede k pomalejšímu importu."
-
-#. module: base_import
-#. odoo-python
-#: code:addons/base_import/models/base_import.py:0
-msgid ""
-"Image size excessive, imported images must be smaller than 42 million pixel"
-msgstr ""
-"Nadměrná velikost obrázku, nahrané obrázky musí být menší než 42 milionů "
-"pixelu"
 
 #. module: base_import
 #. odoo-javascript
@@ -991,3 +984,10 @@ msgstr "vteřin"
 #: code:addons/base_import/models/base_import.py:0
 msgid "unknown error code %s"
 msgstr "neznámý kód chyby%s"
+
+#~ msgid ""
+#~ "Image size excessive, imported images must be smaller than 42 million "
+#~ "pixel"
+#~ msgstr ""
+#~ "Nadměrná velikost obrázku, nahrané obrázky musí být menší než 42 milionů "
+#~ "pixelu"

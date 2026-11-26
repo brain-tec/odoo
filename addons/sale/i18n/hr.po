@@ -22,17 +22,17 @@
 # Bole <bole@dajmi5.com>, 2025
 # Ivica Dimjašević, 2025
 # Luka Carević <luka@uvid.hr>, 2025
-# Alen Komljen <alen@uvid.hr>, 2025.
-# Karlo Mikešić <karlo@uvid.hr>, 2025.
-# Ana Matulin <ana@uvid.hr>, 2025.
+# Alen Komljen <alen@uvid.hr>, 2025, 2026.
+# Karlo Mikešić <karlo@uvid.hr>, 2025, 2026.
+# Ana Matulin <ana@uvid.hr>, 2025, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-29 18:37+0000\n"
-"PO-Revision-Date: 2026-01-31 18:01+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 15:56+0000\n"
+"Last-Translator: Ana Matulin <ana@uvid.hr>\n"
 "Language-Team: Croatian <https://translate.odoo.com/projects/odoo-18/sale/hr/"
 ">\n"
 "Language: hr\n"
@@ -41,7 +41,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_payment_provider_onboarding_wizard___data_fetched
@@ -93,21 +93,6 @@ msgid ""
 msgstr ""
 "(object.state in ('draft', 'sent') and 'Ponuda - %s' % (object.name)) or "
 "'Prodajni nalog - %s' % (object.name)"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
-msgid "2023-12-31"
-msgstr "2023-12-31"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
-msgid "27.00"
-msgstr "27.00"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
-msgid "31.05"
-msgstr "31.05"
 
 #. module: sale
 #. odoo-javascript
@@ -656,7 +641,7 @@ msgstr ""
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
 msgid "<i class=\"fa fa-print me-1\"/>View Details"
-msgstr "<i class=\"fa fa-print me-1\"/> Vidi detalje"
+msgstr "<i class=\"fa fa-print me-1\"/> Ispiši"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
@@ -701,15 +686,6 @@ msgstr ""
 "<span class=\"fa fa-exclamation-triangle text-warning me-1\" title=\"Ovaj "
 "proizvod je arhiviran\" invisible=\"state not in ['draft', 'sent'] or not "
 "is_product_archived\"/>"
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-building-o p-2\" title=\"Values set here are "
-"company-specific.\" groups=\"base.group_multi_company\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-building-o p-2\" title=\"Ove vrijednosti su "
-"specifične za svaku tvrtku.\" groups=\"base.group_multi_company\"/>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.crm_team_salesteams_view_form
@@ -1768,6 +1744,8 @@ msgid ""
 "Create one invoice for all orders related to same customer and same "
 "invoicing address"
 msgstr ""
+"Kreiraj jedan račun za sve narudžbe povezane s istim kupcem i istom adresom "
+"za izdavanje računa"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_advance_payment_inv__create_uid
@@ -4434,7 +4412,7 @@ msgstr "Prodavači"
 #. module: sale
 #: model:ir.model,name:sale.model_mail_scheduled_message
 msgid "Scheduled Message"
-msgstr ""
+msgstr "Planirana poruka"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_sales_order_filter
@@ -5509,9 +5487,15 @@ msgstr ""
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__validity_date
 msgid ""
-"Validity of the order, after that you will not able to sign & pay the "
-"quotation."
-msgstr "Valjanost narudžbe, nakon toga nećete moći potpisati i platiti ponudu."
+"Validity of the quotation. After this date, you will no longer be able to "
+"sign and pay it."
+msgstr ""
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
+msgid "Values set here are company-specific."
+msgstr ""
+"Vrijednosti koje su ovdje postavljene specifične su za pojedine tvrtke."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -5639,17 +5623,6 @@ msgstr "Ne možete mijenjati cjenik potvrđene narudžbe!"
 
 #. module: sale
 #. odoo-python
-#: code:addons/sale/models/product_product.py:0
-#: code:addons/sale/models/product_template.py:0
-msgid ""
-"You cannot change the product's type because it is already used in sales "
-"orders."
-msgstr ""
-"Nije moguće mijenjanje tipa proizvoda jer je već korišten na prodajnim "
-"nalozima."
-
-#. module: sale
-#. odoo-python
 #: code:addons/sale/models/sale_order_line.py:0
 msgid ""
 "You cannot change the type of a sale order line. Instead you should delete "
@@ -5682,6 +5655,16 @@ msgstr ""
 "Sve što prodajete ili kupujete potrebno je definirati kao proizvod,\n"
 "                bez obzira na to radi li se o uskladištivom proizvodu, "
 "potrošnom materijalu ili usluzi."
+
+#. module: sale
+#. odoo-python
+#: code:addons/sale/models/product_product.py:0
+#: code:addons/sale/models/product_template.py:0
+msgid ""
+"You should not change the product type because this product is already used "
+"in sales orders. Changing it may affect how the related order lines are "
+"delivered."
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.portal_my_home_sale
@@ -5807,6 +5790,12 @@ msgid "units"
 msgstr "jedinice"
 
 #. module: sale
+#. odoo-javascript
+#: code:addons/sale/static/src/xml/sale_product_field.xml:0
+msgid "x"
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
 msgid "you confirm acceptance on the behalf of"
 msgstr ""
@@ -5840,3 +5829,32 @@ msgid ""
 "{{ object.company_id.name }} {{ object.type_name }} Cancelled (Ref "
 "{{ object.name or 'n/a' }})"
 msgstr "{{ object.company_id.name }} Otkazani (Ref {{ object.name or '/' }})"
+
+#~ msgid ""
+#~ "Validity of the order, after that you will not able to sign & pay the "
+#~ "quotation."
+#~ msgstr ""
+#~ "Valjanost narudžbe, nakon toga nećete moći potpisati i platiti ponudu."
+
+#~ msgid ""
+#~ "You cannot change the product's type because it is already used in sales "
+#~ "orders."
+#~ msgstr ""
+#~ "Nije moguće mijenjanje tipa proizvoda jer je već korišten na prodajnim "
+#~ "nalozima."
+
+#~ msgid "2023-12-31"
+#~ msgstr "2023-12-31"
+
+#~ msgid "27.00"
+#~ msgstr "27.00"
+
+#~ msgid "31.05"
+#~ msgstr "31.05"
+
+#~ msgid ""
+#~ "<span class=\"fa fa-lg fa-building-o p-2\" title=\"Values set here are "
+#~ "company-specific.\" groups=\"base.group_multi_company\"/>"
+#~ msgstr ""
+#~ "<span class=\"fa fa-lg fa-building-o p-2\" title=\"Ove vrijednosti su "
+#~ "specifične za svaku tvrtku.\" groups=\"base.group_multi_company\"/>"

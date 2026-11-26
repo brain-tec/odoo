@@ -10,13 +10,13 @@
 # Junko Augias, 2025
 #
 # "Junko Augias (juau)" <juau@odoo.com>, 2025, 2026.
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2026-01-30 03:48+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-11-06 04:33+0000\n"
 "Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-18/"
 "html_editor/ja/>\n"
@@ -25,7 +25,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: html_editor
 #. odoo-javascript
@@ -268,12 +268,6 @@ msgstr "自動再生"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/column_plugin.js:0
-msgid "Back to one column"
-msgstr "1カラム戻る"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/color_plugin.js:0
 #: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
 msgid "Background Color"
@@ -329,7 +323,7 @@ msgstr "大セクション見出し"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/list/list_plugin.js:0
 msgid "Bulleted list"
-msgstr "箇条書きリスト"
+msgstr "箇条書き"
 
 #. module: html_editor
 #. odoo-javascript
@@ -341,13 +335,13 @@ msgstr "ボタン"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.js:0
 msgid "Button Primary"
-msgstr "プライマリボタン"
+msgstr "メインボタン"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.js:0
 msgid "Button Secondary"
-msgstr "セカンダリボタン"
+msgstr "サブボタン"
 
 #. module: html_editor
 #. odoo-javascript
@@ -427,6 +421,12 @@ msgstr "コンテンツが生成されました"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
+msgid "Convert columns to regular content"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/column_plugin.js:0
 msgid "Convert into 2 columns"
 msgstr "2カラムに変換"
 
@@ -464,7 +464,7 @@ msgstr "ここにURL又は埋め込みコードをコピーペーストしてく
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.js:0
 msgid "Correct"
-msgstr "正しい"
+msgstr "修正"
 
 #. module: html_editor
 #. odoo-javascript
@@ -482,7 +482,7 @@ msgstr "番号でリストを作成"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/list/list_plugin.js:0
 msgid "Create a simple bulleted list"
-msgstr "簡単な箇条書きリストを作成"
+msgstr "簡単な箇条書きを作成"
 
 #. module: html_editor
 #. odoo-javascript
@@ -494,7 +494,7 @@ msgstr "URLを作成。"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_crop_plugin.js:0
 msgid "Crop image"
-msgstr "画像をクロップ"
+msgstr "画像を切り抜き"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1185,7 +1185,7 @@ msgstr "ファイルが見つかりません"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/powerbox/powerbox_plugin.js:0
+#: code:addons/html_editor/static/src/main/powerbox/search_powerbox_plugin.js:0
 msgid "More options"
 msgstr "他のオプション"
 
@@ -1266,6 +1266,12 @@ msgstr "通常"
 #: code:addons/html_editor/static/src/main/list/list_plugin.js:0
 msgid "Numbered list"
 msgstr "段落番号リスト"
+
+#. module: html_editor
+#. odoo-python
+#: code:addons/html_editor/controllers/main.py:0
+msgid "Only internal users can use AI text generation."
+msgstr ""
 
 #. module: html_editor
 #. odoo-python
@@ -1407,8 +1413,8 @@ msgstr "リンクを削除"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
-msgid "Remove columns"
-msgstr "カラムを削除"
+msgid "Remove column layout"
+msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -1528,7 +1534,7 @@ msgstr "メッセージを送信"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/core/dom_plugin.js:0
 msgid "Separator"
-msgstr "セパレータ"
+msgstr "区切り線"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1630,7 +1636,7 @@ msgstr "提案"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/text_direction_plugin.js:0
 msgid "Switch direction"
-msgstr "方向を変更"
+msgstr "方向を切り替え"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1730,31 +1736,31 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/core/format_plugin.js:0
 msgid "Toggle bold"
-msgstr "太字を切り替える"
+msgstr "太字切り替え"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
 msgid "Toggle icon spin"
-msgstr "アイコン回転を切り替える"
+msgstr "アイコンの回転を切り替え"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/core/format_plugin.js:0
 msgid "Toggle italic"
-msgstr "斜体を切り替える"
+msgstr "斜体切り替え"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/core/format_plugin.js:0
 msgid "Toggle strikethrough"
-msgstr "取消線を切り替える"
+msgstr "取り消し線を切り替え"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/core/format_plugin.js:0
 msgid "Toggle underline"
-msgstr "下線を切り替える"
+msgstr "下線切り替え"
 
 #. module: html_editor
 #. odoo-javascript
@@ -2028,6 +2034,18 @@ msgstr "又は"
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "videos"
 msgstr "動画"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/table/table_picker.xml:0
+msgid "x"
+msgstr "x"
+
+#~ msgid "Back to one column"
+#~ msgstr "1カラム戻る"
+
+#~ msgid "Remove columns"
+#~ msgstr "カラムを削除"
 
 #~ msgid "Hide Dailymotion logo"
 #~ msgstr "Dailymotionロゴを非表示"

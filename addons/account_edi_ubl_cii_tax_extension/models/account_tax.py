@@ -43,6 +43,7 @@ class AccountTax(models.Model):
             ('VATEX-EU-132-1O', 'VATEX-EU-132-1O - Exempt based on article 132, section 1 (o) of Council Directive 2006/112/EC'),
             ('VATEX-EU-132-1P', 'VATEX-EU-132-1P - Exempt based on article 132, section 1 (p) of Council Directive 2006/112/EC'),
             ('VATEX-EU-132-1Q', 'VATEX-EU-132-1Q - Exempt based on article 132, section 1 (q) of Council Directive 2006/112/EC'),
+            ('VATEX-EU-135-1', 'VATEX-EU-135-1 - Exempt based on article 135, section 1 of Council Directive 2006/112/EC'),
             ('VATEX-EU-143', 'VATEX-EU-143 - Exempt based on article 143 of Council Directive 2006/112/EC'),
             ('VATEX-EU-143-1A', 'VATEX-EU-143-1A - Exempt based on article 143, section 1 (a) of Council Directive 2006/112/EC'),
             ('VATEX-EU-143-1B', 'VATEX-EU-143-1B - Exempt based on article 143, section 1 (b) of Council Directive 2006/112/EC'),
@@ -102,7 +103,7 @@ class AccountTax(models.Model):
             ('VATEX-FR-CGI261D-1', 'VATEX-FR-CGI261D-1 - Exempt based on 1° of article 261 D of the Code Général des Impôts (CGI ; General tax code)'),
             ('VATEX-FR-CGI261D-1BIS', 'VATEX-FR-CGI261D-1BIS - Exempt based on 1°bis of article 261 D of the Code Général des Impôts (CGI ; General tax code)'),
             ('VATEX-FR-CGI261D-2', 'VATEX-FR-CGI261D-2 - Exempt based on 2° of article 261 D of the Code Général des Impôts (CGI ; General tax code)'),
-            ('VATEX-FR-CGI261D-3', 'VATEX-FR-CGI261D-3 - Exempt based on 3° of article 261 D of the Code Général des Impôts (CGI ; General tax code)'),
+            ('VATEX-FR-CGI261D-3', 'VATEX-FR-CGI261D-3 - Exempt based on 3° of article 261 D of the Code Général des Impôts (CGI ; General tax code) Exonération de TVA - Article 261 D-3° du Code Général des Impôts'),
             ('VATEX-FR-CGI261D-4', 'VATEX-FR-CGI261D-4 - Exempt based on 4° of article 261 D of the Code Général des Impôts (CGI ; General tax code)'),
             ('VATEX-FR-CGI261E-1', 'VATEX-FR-CGI261E-1 - Exempt based on 1° of article 261 E of the Code Général des Impôts (CGI ; General tax code)'),
             ('VATEX-FR-CGI261E-2', 'VATEX-FR-CGI261E-2 - Exempt based on 2° of article 261 E of the Code Général des Impôts (CGI ; General tax code)'),
@@ -111,8 +112,21 @@ class AccountTax(models.Model):
             ('VATEX-FR-298SEXDECIESA', 'VATEX-FR-298SEXDECIESA - Exempt based on article 298 sexdecies A of the Code Général des Impôts (CGI ; General tax code)'),
             ('VATEX-FR-CGI295', 'VATEX-FR-CGI295 - Exempt based on article 295 of the Code Général des Impôts (CGI ; General tax code)'),
             ('VATEX-FR-AE', 'VATEX-FR-AE - Exempt based on 2 of article 283 of the Code Général des Impôts (CGI ; General tax code)'),
+            ('VATEX-FR-F', 'VATEX-FR-F - Second-hand sales'),
+            ('VATEX-FR-I', 'VATEX-FR-I - Sales of works of art'),
+            ('VATEX-FR-J', 'VATEX-FR-J - Sales of antiques'),
         ]
     )
+    ubl_cii_available_tax_category_codes = fields.Json(compute='_compute_ubl_cii_available_tax_category_codes')
+    ubl_cii_available_tax_exemption_reason_codes = fields.Json(compute='_compute_ubl_cii_available_tax_exemption_reason_codes')
+
+    def _compute_ubl_cii_available_tax_category_codes(self):
+        # TO OVERRIDE
+        self.ubl_cii_available_tax_category_codes = self._fields['ubl_cii_tax_category_code'].get_values(self.env)
+
+    def _compute_ubl_cii_available_tax_exemption_reason_codes(self):
+        # TO OVERRIDE
+        self.ubl_cii_available_tax_exemption_reason_codes = self._fields['ubl_cii_tax_exemption_reason_code'].get_values(self.env)
 
     def _requires_exemption_reason(self):
         self.ensure_one()

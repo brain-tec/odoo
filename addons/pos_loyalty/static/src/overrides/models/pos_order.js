@@ -157,7 +157,7 @@ patch(PosOrder.prototype, {
             result.loyaltyStats = this.getLoyaltyPoints();
             result.partner = this.get_partner();
         }
-        result.new_coupon_info = this.new_coupon_info;
+        result.new_coupon_info = this.new_coupon_info ?? this.raw.new_coupon_info;
         return result;
     },
     //@override
@@ -356,7 +356,7 @@ patch(PosOrder.prototype, {
             won += points - this._getPointsCorrection(program);
             if (coupon_id !== 0) {
                 for (const line of this._get_reward_lines()) {
-                    if (line.coupon_id.id === coupon_id) {
+                    if (line.coupon_id?.id === coupon_id) {
                         spent += line.points_cost;
                     }
                 }
@@ -963,12 +963,17 @@ patch(PosOrder.prototype, {
     _getDiscountableOnOrder(reward) {
         let discountable = 0;
         const discountablePerTax = {};
+        const isPaymentReward = ["ewallet", "gift_card"].includes(reward.program_id.program_type);
         for (const line of this.get_orderlines()) {
             if (!line.get_quantity()) {
                 continue;
             }
 
-            const taxKey = ["ewallet", "gift_card"].includes(reward.program_id.program_type)
+            if (!isPaymentReward && !line.isDiscountable()) {
+                continue;
+            }
+
+            const taxKey = isPaymentReward
                 ? line.tax_ids.map((t) => t.id)
                 : line.tax_ids.filter((t) => t.amount_type !== "fixed").map((t) => t.id);
             discountable += line.get_price_with_tax();
@@ -984,7 +989,8 @@ patch(PosOrder.prototype, {
      */
     _getCheapestLine() {
         const filtered_lines = this.get_orderlines().filter(
-            (line) => !line.comboParent && !line.reward_id && line.get_quantity
+            (line) =>
+                line.isDiscountable() && !line.comboParent && !line.reward_id && line.get_quantity
         );
         return filtered_lines.toSorted(
             (lineA, lineB) => lineA.getComboTotalPrice() - lineB.getComboTotalPrice()
@@ -1014,7 +1020,7 @@ patch(PosOrder.prototype, {
         const discountableLines = [];
         const applicableProductIds = new Set(reward.all_discount_product_ids.map((p) => p.id));
         for (const line of this.get_orderlines()) {
-            if (!line.get_quantity()) {
+            if (!line.get_quantity() || !line.isDiscountable()) {
                 continue;
             }
             if (
@@ -1040,7 +1046,7 @@ patch(PosOrder.prototype, {
         const orderProducts = orderLines.map((line) => line.product_id.id);
         const remainingAmountPerLine = {};
         for (const line of orderLines) {
-            if (!line.get_quantity() || !line.price_unit) {
+            if (!line.get_quantity() || !line.price_unit || !line.isDiscountable()) {
                 continue;
             }
             remainingAmountPerLine[line.uuid] = line.get_price_with_tax();
@@ -1154,6 +1160,9 @@ patch(PosOrder.prototype, {
             return _t("Unknown discount type");
         }
         let { discountable, discountablePerTax } = getDiscountable(reward);
+        // Other discounts may already cover part of the discountable lines
+        const totalFactor =
+            discountable > 0 ? Math.min(1, this.get_total_with_tax() / discountable) : 1;
         discountable = Math.min(this.get_total_with_tax(), discountable);
         if (floatIsZero(discountable)) {
             return [];
@@ -1206,6 +1215,11 @@ patch(PosOrder.prototype, {
             ];
         }
         const discountFactor = discountable ? Math.min(1, maxDiscount / discountable) : 1;
+        // Round like `get_unit_price()`: the UI taxes the rounded price unit,
+        // but the raw value is what gets stored and re-taxed by the server.
+        const priceDigits = this.models["decimal.precision"].find(
+            (dp) => dp.name === "Product Price"
+        ).digits;
         const result = Object.entries(discountablePerTax).reduce((lst, entry) => {
             // Ignore 0 price lines
             if (!entry[1]) {
@@ -1216,7 +1230,7 @@ patch(PosOrder.prototype, {
 
             lst.push({
                 product_id: discountProduct,
-                price_unit: -(Math.min(this.get_total_with_tax(), entry[1]) * discountFactor),
+                price_unit: -roundDecimals(entry[1] * totalFactor * discountFactor, priceDigits),
                 qty: 1,
                 reward_id: reward,
                 is_reward_line: true,

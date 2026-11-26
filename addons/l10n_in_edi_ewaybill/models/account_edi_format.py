@@ -94,6 +94,9 @@ class AccountEdiFormat(models.Model):
         elif move.l10n_in_mode in ("2", "3", "4"):
             if not move.l10n_in_transportation_doc_no and move.l10n_in_transportation_doc_date:
                 error_message.append(_("- Transport document number and date is required when Transportation Mode is Rail,Air or Ship"))
+        buyer_seller_partners = self._get_l10n_in_edi_saler_buyer_party(move)
+        if buyer_seller_partners['ship_to_details'].zip == buyer_seller_partners['dispatch_details'].zip and not move.l10n_in_distance:
+            error_message.append(_("- Set a valid distance when the dispatch and delivery pincodes are the same."))
         if error_message:
             error_message.insert(0, _("The following information are missing on the invoice (see eWayBill tab):"))
         goods_lines = move.invoice_line_ids.filtered(lambda line: not (line.display_type in ('line_section', 'line_note', 'rounding') or line.product_id.type == "service"))
@@ -138,7 +141,9 @@ class AccountEdiFormat(models.Model):
         if response.get("error"):
             error = response["error"]
             error_codes = [e.get("code") for e in error]
-            if "238" in error_codes:
+            if "238" in error_codes or any(
+                "the token is missing or has expired" in str(e.get("message", "")).lower() for e in error
+            ):
                 # Invalid token eror then create new token and send generate request again.
                 # This happen when authenticate called from another odoo instance with same credentials (like. Demo/Test)
                 authenticate_response = self._l10n_in_edi_ewaybill_authenticate(invoices.company_id)
@@ -312,7 +317,9 @@ class AccountEdiFormat(models.Model):
         if response.get("error"):
             error = response["error"]
             error_codes = [e.get("code") for e in error]
-            if "238" in error_codes:
+            if "238" in error_codes or any(
+                "the token is missing or has expired" in str(e.get("message", "")).lower() for e in error
+            ):
                 # Invalid token eror then create new token and send generate request again.
                 # This happen when authenticate called from another odoo instance with same credentials (like. Demo/Test)
                 authenticate_response = self._l10n_in_edi_ewaybill_authenticate(invoices.company_id)

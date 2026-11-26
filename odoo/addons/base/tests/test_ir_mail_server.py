@@ -3,16 +3,18 @@
 
 import email.message
 import email.policy
+import smtplib
 
 from unittest.mock import patch
 
 import psycopg2.errors
 
 from odoo import tools
+from odoo.addons.base.models.ir_mail_server import MailDeliveryException
 from odoo.addons.base.tests import test_mail_examples
 from odoo.addons.base.tests.common import MockSmtplibCase
 from odoo.tests import tagged, users
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import Like, TransactionCase
 from odoo.tools import mute_logger
 from odoo.tools import config
 
@@ -298,6 +300,25 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
                 from_filter=False,
             )
 
+    def test_mail_server_send_email_error_shows_server_name(self):
+        message = self._build_email(mail_from='specific_user@test.mycompany.com')
+
+        with (
+            self.mock_smtplib_connection(),
+            patch.object(self.testing_smtp_session, 'send_message', side_effect=smtplib.SMTPDataError(550, b'failure')),
+            self.assertRaisesRegex(MailDeliveryException, r"User specific server"),
+            self.assertLogs('odoo.addons.base.models.ir_mail_server', 'INFO') as capture,
+        ):
+            self.env['ir.mail_server'].send_email(message, mail_server_id=self.mail_server_user.id)
+
+        self.assertEqual(capture.output, [
+            Like(
+                "INFO:odoo.addons.base.models.ir_mail_server:"
+                "Mail delivery failed via SMTP server 'User specific server'.\n"
+                "SMTPDataError: ..."
+            ),
+        ])
+
     @mute_logger('odoo.models.unlink', 'odoo.addons.base.models.ir_mail_server')
     def test_mail_server_send_email_context_force(self):
         """ Allow to force notifications_email / bounce_address from context
@@ -341,6 +362,25 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
             message_from='"specific_user" <test@custom_domain.com>',
             from_filter='random.domain',
         )
+
+    @patch.dict(config.options, {'smtp_user': 'config-user', 'smtp_password': 'config-password', 'smtp_server': 'config-host.com'})
+    def test_mail_server_send_email_explicit_host(self):
+        # use the CLI server
+        with self.subTest("Use CLI server"), self.mock_smtplib_connection(), patch.object(self.testing_smtp_session, 'login') as login:
+            message = self._build_email(mail_from='specific_user@test.com')
+            self.env['ir.mail_server'].send_email(message, smtp_server='config-host.com')
+            login.assert_called_once_with('config-user', 'config-password')
+
+        # don't use the CLI server
+        for user in (None, 'explicit-user'):
+            with self.subTest(user=user), self.mock_smtplib_connection(), patch.object(self.testing_smtp_session, 'login') as login:
+                message = self._build_email(mail_from='specific_user@test.com')
+                self.env['ir.mail_server'].send_email(message, smtp_server='example.com', smtp_user=user)
+                if user:
+                    login.assert_called_once_with(user, '')
+                else:
+                    login.assert_not_called()
+                self.assertEqual(len(self.emails), 1)
 
     @mute_logger('odoo.models.unlink')
     def test_mail_server_send_email_IDNA(self):

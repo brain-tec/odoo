@@ -7,16 +7,16 @@
 # Wil Odoo, 2024
 # Manon Rondou, 2025
 # Erwin van der Ploeg <erwin@odooexperts.nl>, 2025
-# "Manon Rondou (ronm)" <ronm@odoo.com>, 2025.
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# "Manon Rondou (ronm)" <ronm@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 # Bren Driesen <brdri@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2026-01-17 09:07+0000\n"
-"Last-Translator: Bren Driesen <brdri@odoo.com>\n"
+"POT-Creation-Date: 2026-11-13 17:37+0000\n"
+"PO-Revision-Date: 2026-10-27 19:33+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Dutch <https://translate.odoo.com/projects/odoo-18/purchase/"
 "nl/>\n"
 "Language: nl\n"
@@ -24,7 +24,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: purchase
 #: model:ir.actions.report,print_report_name:purchase.action_report_purchase_order
@@ -1402,7 +1402,7 @@ msgstr "Domein"
 #. module: purchase
 #: model:ir.model.fields.selection,name:purchase.selection__purchase_report__state__done
 msgid "Done"
-msgstr "Gereed"
+msgstr "Voltooid"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_res_company__po_double_validation_amount
@@ -1649,7 +1649,7 @@ msgstr "In de order"
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__incoterm_id
 msgid "Incoterm"
-msgstr "Leveringscondities"
+msgstr "Incoterm"
 
 #. module: purchase
 #. odoo-javascript
@@ -1663,9 +1663,9 @@ msgid ""
 "International Commercial Terms are a series of predefined commercial terms "
 "used in international transactions."
 msgstr ""
-"International Commercial Terms (INCOTERMS) zijn een set van "
-"voorgedefinieerde commerciële voorwaarden, welke worden gebruikt bij "
-"internationaal transport."
+"International Commercial Terms (Incoterms) zijn een groep van "
+"voorgedefinieerde handelsvoorwaarden die worden gebruikt bij internationaal "
+"transport."
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
@@ -1892,7 +1892,7 @@ msgstr "Berichten"
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_res_config_settings__po_double_validation_amount
 msgid "Minimum Amount"
-msgstr "Minimum bedrag"
+msgstr "Minimumbedrag"
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_res_company__po_double_validation_amount
@@ -1957,6 +1957,12 @@ msgstr "Naam, btw-nr, e-mail, of referentie"
 
 #. module: purchase
 #. odoo-python
+#: code:addons/purchase/models/purchase_order.py:0
+msgid "New"
+msgstr "Nieuw"
+
+#. module: purchase
+#. odoo-python
 #: code:addons/purchase/controllers/portal.py:0
 msgid "Newest"
 msgstr "Nieuwste"
@@ -1964,7 +1970,7 @@ msgstr "Nieuwste"
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
-msgstr "Volgende activiteitenafspraak"
+msgstr "Volgende activiteit Agenda-afspraak"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__activity_date_deadline
@@ -2115,6 +2121,12 @@ msgid ""
 msgstr ""
 "Nadat je je producten bij je leverancier heeft besteld, bevestig je je "
 "inkoopofferte en wordt het een inkooporder."
+
+#. module: purchase
+#. odoo-python
+#: code:addons/purchase/models/purchase_order.py:0
+msgid "Only a purchase manager can approve this purchase order."
+msgstr ""
 
 #. module: purchase
 #. odoo-python
@@ -2489,6 +2501,7 @@ msgstr "Inkooporder aantal"
 #: model:ir.actions.act_window,name:purchase.action_purchase_history
 #: model:ir.model,name:purchase.model_purchase_order_line
 #: model:ir.model.fields,field_description:purchase.field_account_move_line__purchase_line_id
+#: model:ir.model.fields,field_description:purchase.field_account_tax__purchase_order_line_ids
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_line_form2
 msgid "Purchase Order Line"
@@ -2682,7 +2695,7 @@ msgstr "Hoeveelheden gefactureerd door leveranciers"
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_history_tree
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_portal_content
 msgid "Quantity"
-msgstr "Aantal"
+msgstr "Hoeveelheid"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
@@ -2707,7 +2720,7 @@ msgstr "Inkoopofferte bevestigd"
 #. module: purchase
 #: model:mail.message.subtype,name:purchase.mt_rfq_done
 msgid "RFQ Done"
-msgstr "Inkoopofferte gereed"
+msgstr "Inkoopofferte voltooid"
 
 #. module: purchase
 #: model:ir.model.fields.selection,name:purchase.selection__purchase_order__state__sent
@@ -3266,6 +3279,14 @@ msgstr "De orderontvangst is bevestigd door %s."
 #: code:addons/purchase/models/purchase_order.py:0
 msgid "The order receipt has been declined by %s."
 msgstr "De orderontvangst is geweigerd door %s."
+
+#. module: purchase
+#. odoo-python
+#: code:addons/purchase/models/res_partner.py:0
+msgid "The partner cannot be deleted because it is used as a dropship address"
+msgstr ""
+"De partner kan niet worden verwijderd omdat hij wordt gebruikt als adres "
+"voor dropshipping"
 
 #. module: purchase
 #: model_terms:ir.actions.act_window,help:purchase.act_res_partner_2_purchase_order

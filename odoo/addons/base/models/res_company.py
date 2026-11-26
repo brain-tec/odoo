@@ -287,7 +287,10 @@ class Company(models.Model):
             if vals.get('name') and not vals.get('partner_id')
         ]
         if no_partner_vals_list:
-            partners = self.env['res.partner'].with_context(default_parent_id=False).create([
+            partners = self.env['res.partner'].with_context(
+                default_parent_id=False,
+                default_company_id=False,
+            ).create([
                 {
                     'name': vals['name'],
                     'is_company': True,
@@ -385,8 +388,12 @@ class Company(models.Model):
                     ('id', 'child_of', company.id),
                     ('id', '!=', company.id),
                 ])
-                for fname in sorted(changed):
-                    branches[fname] = company[fname]
+
+                changed_vals = {
+                    fname: self._fields[fname].convert_to_write(company[fname], branches)
+                    for fname in sorted(changed)
+                }
+                branches.write(changed_vals)
 
         if companies_needs_l10n:
             companies_needs_l10n.install_l10n_modules()
@@ -494,3 +501,7 @@ class Company(models.Model):
                 'company_id': self.id,
                 'company_ids': [(6, 0, [self.id])],
             })
+
+    @ormcache()
+    def _get_company_partner_ids(self):
+        return tuple(self.env['res.company'].sudo().with_context(active_test=False).search([]).partner_id.ids)

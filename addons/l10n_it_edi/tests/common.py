@@ -103,6 +103,15 @@ class TestItEdi(AccountTestInvoicingCommon):
             'is_company': True,
         })
 
+        cls.italian_partner_no_VAT_no_codice = cls.env['res.partner'].create({
+            'name': 'Alessi',
+            'country_id': cls.env.ref('base.it').id,
+            'street': 'Via Privata Alessi 6',
+            'zip': '28887',
+            'city': 'Milan',
+            'is_company': True,
+        })
+
         cls.american_partner = cls.env['res.partner'].create({
             'name': 'Alessi',
             'vat': '00465840031',
@@ -129,21 +138,64 @@ class TestItEdi(AccountTestInvoicingCommon):
             'amount_type': 'percent',
         })
 
+        cls.vat_0_N1_purchase = cls.env['account.tax'].with_company(cls.company).create({
+            'name': "VAT 0% Natura N1",
+            'amount': 0.0,
+            'amount_type': 'percent',
+            'type_tax_use': 'purchase',
+            'l10n_it_exempt_reason': 'N1',
+            'l10n_it_law_reference': 'test',
+        })
+
+        cls.vat_0_N2_1_purchase = cls.env['account.tax'].with_company(cls.company).create({
+            'name': "VAT 0% Natura N2.1",
+            'amount': 0.0,
+            'amount_type': 'percent',
+            'type_tax_use': 'purchase',
+            'l10n_it_exempt_reason': 'N2.1',
+            'l10n_it_law_reference': 'test',
+        })
+
         cls.module = 'l10n_it_edi'
+
+    def _remove_all_namespaces(self, root):
+        """Strip XML namespaces and schemaLocation for deterministic test comparisons.
+
+        While namespaces are fixed, schemaLocation can change across XSD versions.
+        Since tests don't care about schema URLs or tag prefixes, stripping
+        them keeps assertions focused purely on business data correctness.
+        """
+        for elem in root.iter(etree.Element):
+            if isinstance(elem.tag, str) and elem.tag.startswith('{'):
+                elem.tag = etree.QName(elem).localname
+            for key in list(elem.attrib.keys()):
+                if key.startswith('{'):
+                    if "xmlns" in key or "schemaLocation" in key:
+                        elem.attrib.pop(key)
+                    else:
+                        local_key = etree.QName(key).localname
+                        elem.attrib[local_key] = elem.attrib.pop(key)
+                elif key.startswith('xmlns'):
+                    elem.attrib.pop(key)
+        return root
 
     def _assert_export_invoice(self, invoice, filename):
         path = f'{self.module}/tests/export_xmls/{filename}'
         with tools.file_open(path, mode='rb') as fd:
             expected_tree = etree.fromstring(fd.read())
+            expected_tree = self._remove_all_namespaces(expected_tree)
+
         xml = invoice._l10n_it_edi_render_xml()
         invoice_etree = etree.fromstring(xml)
+        invoice_etree = self._remove_all_namespaces(invoice_etree)
+
         try:
             self.assertXmlTreeEqual(invoice_etree, expected_tree)
         except AssertionError as ae:
             ae.args = (ae.args[0] + f"\nFile used for comparison: {filename}", )
             raise
 
-    def _assert_import_invoice(self, filename, expected_values_list, xml_to_apply=None):
+    def _assert_import_invoice(self, filename, expected_values_list, xml_to_apply=None, move_type="in_invoice"):
         """ Tests an invoice imported from an XML vendor bill file on the filesystem
             against expected values. XPATHs can be applied with the `xml_to_apply`
             argument to the XML content before it's imported.
@@ -163,7 +215,12 @@ class TestItEdi(AccountTestInvoicingCommon):
             'name': filename,
             'raw': import_content,
         })
-        purchase_journal = self.company_data_2['default_journal_purchase'].with_context(default_move_type='in_invoice')
+
+        journal_type = {
+            'in_invoice': 'default_journal_purchase',
+            'out_invoice': 'default_journal_sale',
+        }[move_type]
+        purchase_journal = self.company_data_2[journal_type].with_context(default_move_type=move_type)
         invoices = purchase_journal._create_document_from_attachment(attachment.ids)
 
         expected_invoice_values_list = []

@@ -24,8 +24,9 @@
                         <ram:SellerAssignedID
                             t-if="line.product_id and line.product_id.default_code"
                             t-out="line.product_id.default_code"/>
-                        <ram:Name t-out="line.product_id.name"/>
-                        <ram:Description t-out="line.name" t-if="line.name != line.product_id.name"/>
+                        <t t-set="item_name" t-value="line.product_id.name or line.name"/>
+                        <ram:Name t-out="item_name"/>
+                        <ram:Description t-out="line.name" t-if="item_name != line.name"/>
                     </ram:SpecifiedTradeProduct>
 
                     <!-- Amounts. -->
@@ -107,7 +108,7 @@
                 xmlns:qdt="urn:un:unece:uncefact:data:standard:QualifiedDataType:100"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <!-- Contact. -->
-                <ram:Name t-out="partner.display_name if partner.name else partner.commercial_partner_id.display_name"/>
+                <ram:Name t-out="partner_name or (partner.display_name if partner.name else partner.commercial_partner_id.display_name)"/>
                 <ram:SpecifiedLegalOrganization t-if="specified_legal_organization_val">
                     <ram:ID t-att-schemeID="str('0002')"
                             t-out="specified_legal_organization_val"/>
@@ -174,6 +175,10 @@
                     <ram:IncludedNote>
                         <ram:Content t-out="ExchangedDocument_vals.get('included_note')"/>
                     </ram:IncludedNote>
+                    <ram:IncludedNote t-foreach="ExchangedDocument_vals.get('included_note_list')" t-as="included_note">
+                        <ram:Content t-out="included_note.get('content')"/>
+                        <ram:SubjectCode t-out="included_note.get('subject_code')"/>
+                    </ram:IncludedNote>
                 </rsm:ExchangedDocument>
 
                 <rsm:SupplyChainTradeTransaction>
@@ -194,14 +199,24 @@
                                 <t t-set="specified_legal_organization_val" t-value="seller_specified_legal_organization"/>
                             </t>
 
-                            <!-- VAT. -->
-                            <ram:SpecifiedTaxRegistration t-if="record.fiscal_position_id.foreign_vat">
+                            <ram:URIUniversalCommunication t-if="record.company_id.partner_id.peppol_eas and record.company_id.partner_id.peppol_endpoint">
+                                <ram:URIID t-att-schemeID="record.company_id.partner_id.peppol_eas" t-out="record.company_id.partner_id.peppol_endpoint"/>
+                            </ram:URIUniversalCommunication>
+
+                            <!-- VAT (BR-CO-09: '/' is not a valid VAT id). -->
+                            <ram:SpecifiedTaxRegistration t-if="record.fiscal_position_id.foreign_vat and record.fiscal_position_id.foreign_vat not in ['/', 'na', 'NA']">
                                 <ram:ID schemeID="VA" t-out="record.fiscal_position_id.foreign_vat"/>
                             </ram:SpecifiedTaxRegistration>
 
-                            <ram:SpecifiedTaxRegistration t-elif="record.company_id.vat">
+                            <ram:SpecifiedTaxRegistration t-elif="record.company_id.vat and record.company_id.vat not in ['/', 'na', 'NA']">
                                 <ram:ID schemeID="VA" t-out="record.company_id.vat"/>
                             </ram:SpecifiedTaxRegistration>
+
+                            <t t-foreach="seller_extra_tax_registrations" t-as="tax_registration">
+                                <ram:SpecifiedTaxRegistration>
+                                    <ram:ID t-att-schemeID="tax_registration['scheme']" t-out="tax_registration['value']"/>
+                                </ram:SpecifiedTaxRegistration>
+                            </t>
                         </ram:SellerTradeParty>
 
                         <!-- Customer. -->
@@ -209,11 +224,16 @@
                             <!-- Address. -->
                             <t t-call="account_edi_ubl_cii.account_invoice_partner_facturx_export_22">
                                 <t t-set="partner" t-value="record.partner_id"/>
+                                <t t-set="partner_name" t-value="record.commercial_partner_id.name"/>
                                 <t t-set="specified_legal_organization_val" t-value="buyer_specified_legal_organization"/>
                             </t>
 
-                            <!-- VAT. -->
-                            <ram:SpecifiedTaxRegistration t-if="record.commercial_partner_id.vat">
+                            <ram:URIUniversalCommunication t-if="record.partner_id.peppol_eas and record.partner_id.peppol_endpoint">
+                                <ram:URIID t-att-schemeID="record.partner_id.peppol_eas" t-out="record.partner_id.peppol_endpoint"/>
+                            </ram:URIUniversalCommunication>
+
+                            <!-- VAT (BR-CO-09: '/' is not a valid VAT id). -->
+                            <ram:SpecifiedTaxRegistration t-if="record.commercial_partner_id.vat and record.commercial_partner_id.vat not in ['/', 'na', 'NA']">
                                 <ram:ID schemeID="VA" t-out="record.commercial_partner_id.vat"/>
                             </ram:SpecifiedTaxRegistration>
                         </ram:BuyerTradeParty>
@@ -301,6 +321,10 @@
                             <ram:DueDateDateTime t-if="record.invoice_date_due">
                                 <udt:DateTimeString format="102" t-out="format_date(record.invoice_date_due)"/>
                             </ram:DueDateDateTime>
+                            <ram:ApplicableTradePaymentDiscountTerms t-if="record.invoice_payment_term_id.early_discount and record.invoice_payment_term_id.early_pay_discount_computation == 'mixed'">
+                                <ram:BasisPeriodMeasure unitCode="DAY" t-out="record.invoice_payment_term_id.discount_days"/>
+                                <ram:CalculationPercent t-out="record.invoice_payment_term_id.discount_percentage"/>
+                            </ram:ApplicableTradePaymentDiscountTerms>
                         </ram:SpecifiedTradePaymentTerms>
 
                         <!-- Summary. -->
@@ -398,7 +422,7 @@
                         </pdfaExtension:schemas>
                     </rdf:Description>
                     <rdf:Description xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#" rdf:about="">
-                        <fx:ConformanceLevel>EN 16931</fx:ConformanceLevel>
+                        <fx:ConformanceLevel t-translation="off">EXTENDED</fx:ConformanceLevel>
                         <fx:DocumentFileName>factur-x.xml</fx:DocumentFileName>
                         <fx:DocumentType t-translation="off">INVOICE</fx:DocumentType>
                         <fx:Version>1.0</fx:Version>

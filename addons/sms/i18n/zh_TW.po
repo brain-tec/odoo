@@ -6,15 +6,15 @@
 # Wil Odoo, 2025
 # Tony Ng, 2025
 #
-# "Tony Ng (ngto)" <ngto@odoo.com>, 2025.
+# "Tony Ng (ngto)" <ngto@odoo.com>, 2025, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:38+0000\n"
-"PO-Revision-Date: 2025-11-21 02:37+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-11-06 17:40+0000\n"
+"PO-Revision-Date: 2026-11-19 05:58+0000\n"
+"Last-Translator: \"Tony Ng (ngto)\" <ngto@odoo.com>\n"
 "Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
 "projects/odoo-18/sms/zh_Hant/>\n"
 "Language: zh_TW\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_composer__recipient_invalid_count
@@ -54,11 +54,6 @@ msgstr "%s (副本)"
 #: code:addons/sms/wizard/sms_composer.py:0
 msgid "%s invalid recipients"
 msgstr "%s無效的收件人"
-
-#. module: sms
-#: model_terms:ir.ui.view,arch_db:sms.sms_account_phone_view_form
-msgid "+1 555-555-555"
-msgstr "+1 555-555-555"
 
 #. module: sms
 #. odoo-javascript
@@ -374,12 +369,6 @@ msgid "Country-specific Registration Required"
 msgstr "需要有該國特定註冊"
 
 #. module: sms
-#. odoo-python
-#: code:addons/sms/tools/sms_api.py:0
-msgid "Country-specific registration required."
-msgstr "需要有在特定國家的註冊。"
-
-#. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_account_code__create_uid
 #: model:ir.model.fields,field_description:sms.field_sms_account_phone__create_uid
 #: model:ir.model.fields,field_description:sms.field_sms_account_sender__create_uid
@@ -437,7 +426,7 @@ msgstr "已送貨"
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_preview_form
 msgid "Discard"
-msgstr "捨棄"
+msgstr "取消"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_account_code__display_name
@@ -912,8 +901,8 @@ msgid ""
 "a placeholder expression that provides the appropriate language, e.g. "
 "{{ object.partner_id.lang }}."
 msgstr ""
-"發送電子郵件時要選擇的可選翻譯語言（ISO 代碼）。如果未設置，將使用英文版本。"
-"這通常應該是提供適當語言的佔位符表達式，例如{{ object.partner_id.lang }}。"
+"發送電子郵件所使用的翻譯語言之 ISO 代碼，可選填。若未有設定，會使用英文版本。"
+"通常會是佔位表達式，指示適當的語言，例如：{{ object.partner_id.lang }}。"
 
 #. module: sms
 #: model:ir.model,name:sms.model_sms_sms
@@ -1032,12 +1021,6 @@ msgid "Register Account"
 msgstr "註冊帳戶"
 
 #. module: sms
-#. odoo-python
-#: code:addons/sms/tools/sms_api.py:0
-msgid "Register now."
-msgstr "立即註冊"
-
-#. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_account_code_view_form
 #: model_terms:ir.ui.view,arch_db:sms.sms_account_phone_view_form
 msgid "Register your SMS account"
@@ -1061,7 +1044,7 @@ msgstr "刪除相關模型的上下文操作"
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_template__render_model
 msgid "Rendering Model"
-msgstr "呈現模型"
+msgstr "繪製模型"
 
 #. module: sms
 #: model:ir.actions.server,name:sms.ir_actions_server_sms_sms_resend
@@ -1306,7 +1289,7 @@ msgstr "立即發送"
 #: model:ir.model.fields.selection,name:sms.selection__ir_actions_server__state__sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_composer_view_form
 msgid "Send SMS"
-msgstr "發送簡訊"
+msgstr "傳送短訊"
 
 #. module: sms
 #. odoo-python
@@ -1444,7 +1427,7 @@ msgstr "成功"
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_template_reset__template_ids
 msgid "Template"
-msgstr "範本文字"
+msgstr "範本"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_template__template_fs
@@ -1713,7 +1696,7 @@ msgstr "您沒有符合條件的 IAP 帳戶。"
 #. odoo-python
 #: code:addons/sms/tools/sms_api.py:0
 msgid "You don't have enough credits on your IAP account."
-msgstr "您的 IAP 帳戶上沒有足夠的積分。"
+msgstr "你的 IAP 帳戶沒有足夠點數。"
 
 #. module: sms
 #. odoo-python
@@ -1733,6 +1716,18 @@ msgstr "您的 SMS 文本消息必須包含至少一個非空白字符"
 #: code:addons/sms/wizard/sms_account_code.py:0
 msgid "Your SMS account has been successfully registered."
 msgstr "你的短訊帳戶已成功註冊。"
+
+#. module: sms
+#. odoo-python
+#: code:addons/sms/tools/sms_api.py:0
+msgid "Your country is not supported due to sender registration legislation"
+msgstr ""
+
+#. module: sms
+#. odoo-python
+#: code:addons/sms/tools/sms_api.py:0
+msgid "Your database is not activated"
+msgstr ""
 
 #. module: sms
 #. odoo-python
@@ -1802,3 +1797,12 @@ msgstr "收訊人電話號碼無效，將不會收到此訊息。"
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_preview_form
 msgid "record:"
 msgstr "記錄："
+
+#~ msgid "Country-specific registration required."
+#~ msgstr "需要有在特定國家的註冊。"
+
+#~ msgid "Register now."
+#~ msgstr "立即註冊"
+
+#~ msgid "+1 555-555-555"
+#~ msgstr "+1 555-555-555"

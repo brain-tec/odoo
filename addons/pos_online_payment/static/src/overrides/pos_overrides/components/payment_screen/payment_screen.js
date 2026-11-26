@@ -9,7 +9,7 @@ import { serializeDateTime } from "@web/core/l10n/dates";
 
 patch(PaymentScreen.prototype, {
     async addNewPaymentLine(paymentMethod) {
-        if (paymentMethod.is_online_payment && typeof this.currentOrder.id === "string") {
+        if (paymentMethod.is_online_payment) {
             this.currentOrder.date_order = serializeDateTime(luxon.DateTime.now());
             this.pos.addPendingOrder([this.currentOrder.id]);
             await this.pos.syncAllOrders();
@@ -123,7 +123,7 @@ patch(PaymentScreen.prototype, {
                         qrCode: qrCodeSrc(
                             `${this.pos.session._base_url}/pos/pay/${this.currentOrder.id}?access_token=${this.currentOrder.access_token}`
                         ),
-                        orderName: this.currentOrder.name,
+                        orderName: this.currentOrder.pos_reference,
                     };
                     this.currentOrder.onlinePaymentData = onlinePaymentData;
                     const qrCodePopupCloser = this.dialog.add(
@@ -132,6 +132,7 @@ patch(PaymentScreen.prototype, {
                         {
                             onClose: () => {
                                 onlinePaymentLine.onlinePaymentResolver(false);
+                                this.currentOrder.onlinePaymentData = {};
                             },
                         }
                     );

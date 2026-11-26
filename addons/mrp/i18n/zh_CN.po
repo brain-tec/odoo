@@ -10,14 +10,15 @@
 # Wil Odoo, 2024
 # Chloe Wang, 2025
 # Jeffery CHEN <jeffery9@gmail.com>, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# "Chloe Wang (chwa)" <chwa@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2025-11-21 06:37+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-04-10 18:37+0000\n"
+"PO-Revision-Date: 2026-10-20 12:30+0000\n"
+"Last-Translator: \"Chloe Wang (chwa)\" <chwa@odoo.com>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
 "projects/odoo-18/mrp/zh_Hans/>\n"
 "Language: zh_CN\n"
@@ -25,7 +26,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__state
@@ -225,55 +226,14 @@ msgstr ""
 "3 步：从库存中提取组件，进行生产，然后将最终成品从生产区域移入库存。"
 
 #. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "100"
-msgstr "100"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrp_production_components
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrp_workorder
-msgid "12345678901"
-msgstr "12345678901"
-
-#. module: mrp
 #: model_terms:product.template,description:mrp.product_product_computer_desk_leg_product_template
 msgid "18″ x 2½″ Square Leg"
 msgstr "18″ x 2½″方腿"
 
 #. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "2023-09-15"
-msgstr "2023-09-15"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrp_production_components
-msgid "25"
-msgstr "25"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "50"
-msgstr "50"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "58"
-msgstr "58"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "60"
-msgstr "60"
-
-#. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.report_mrp_production_components
 msgid "8 GB RAM"
 msgstr "8G 内存"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "987654321098"
-msgstr "987654321098"
 
 #. module: mrp
 #. odoo-javascript
@@ -613,8 +573,8 @@ msgid ""
 "its components when:"
 msgstr ""
 "类型为\"套件\"的物料清单（BoM）并非在制造订单下制造。<br/>\n"
-"                                相反，在以下情况下，用于将物料清单分解为组"
-"件："
+"                                相反，在以下情况下，用于将物料清单分解为组件"
+"："
 
 #. module: mrp
 #. odoo-python
@@ -1734,8 +1694,7 @@ msgstr "创建欠单"
 msgid ""
 "Create a backorder if you expect to process the remaining products later. Do "
 "not create a backorder if you will not process the remaining products."
-msgstr ""
-"如果希望之后处理剩余产品，请创建欠单。如果不处理剩余产品，则无需创建欠单。"
+msgstr "如果希望之后处理剩余产品，请创建欠单。如果不处理剩余产品，则无需创建欠单。"
 
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.mrp_routing_action
@@ -1761,8 +1720,8 @@ msgid ""
 "enough time to replenish components or manufacture semi-finished products.\n"
 "Note that security lead times will also be considered when appropriate."
 msgstr ""
-"提前创建并确认制造订单这么多天，以确保有足够的时间来补充零部件或制造半成"
-"品。\n"
+"提前创建并确认制造订单这么多天，以确保有足够的时间来补充零部件或制造半成品"
+"。\n"
 "请注意，在适当的情况下，还将考虑安全提前时间。"
 
 #. module: mrp
@@ -3601,7 +3560,7 @@ msgstr "无欠单"
 #. odoo-python
 #: code:addons/mrp/models/stock_rule.py:0
 msgid "No BoM Found"
-msgstr ""
+msgstr "未找到物料清单"
 
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.mrp_bom_form_action
@@ -5241,7 +5200,7 @@ msgstr "不锈钢螺丝"
 #. module: mrp
 #: model_terms:product.template,description:mrp.product_product_computer_desk_bolt_product_template
 msgid "Stainless steel screw full (dia - 5mm, Length - 10mm)"
-msgstr "不锈钢螺丝满（直径5毫米，长度10毫米）"
+msgstr "不锈钢全螺纹螺丝（直径5毫米，长度10毫米）"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_filter
@@ -5465,8 +5424,8 @@ msgid ""
 "The attribute value %(attribute)s set on product %(product)s does not match "
 "the BoM product %(bom_product)s."
 msgstr ""
-"产品%(product)s中设置的属性值%(attribute)s与物料清单（BOM）产品%"
-"(bom_product)s不匹配。"
+"产品%(product)s中设置的属性值%(attribute)s与物料清单（BOM）产品%(bom_product)"
+"s不匹配。"
 
 #. module: mrp
 #. odoo-python
@@ -5527,8 +5486,7 @@ msgstr ""
 msgid ""
 "The percentage of the final production cost for this by-product. The total "
 "of all by-products' cost share must be smaller or equal to 100."
-msgstr ""
-"该副产品线的最终生产成本百分比。所有副产品的成本份额总和须小于或等于100。"
+msgstr "该副产品线的最终生产成本百分比。所有副产品的成本份额总和须小于或等于100。"
 
 #. module: mrp
 #. odoo-python
@@ -6118,8 +6076,7 @@ msgstr "紧急"
 msgid ""
 "Use Manufacturing Orders (MO) to build finished products while consuming "
 "components: i.e. 1 Table = 4 Table Legs + 1 Table Top"
-msgstr ""
-"使用制造订单（MO）构建成品，同时消耗组件：例如，1张桌子 = 4个桌腿 + 1个桌面"
+msgstr "使用制造订单（MO）构建成品，同时消耗组件：例如，1张桌子 = 4个桌腿 + 1个桌面"
 
 #. module: mrp
 #: model:res.groups,name:mrp.group_mrp_workorder_dependencies
@@ -6349,8 +6306,7 @@ msgstr ""
 msgid ""
 "Wizard in case of consumption in warning/strict and more component has been "
 "used for a MO (related to the bom)"
-msgstr ""
-"消耗处于警告/严格状态、且工单（与物料清单（BOM）相关）使用更多组件时的向导"
+msgstr "消耗处于警告/严格状态、且工单（与物料清单（BOM）相关）使用更多组件时的向导"
 
 #. module: mrp
 #: model:ir.model,name:mrp.model_mrp_production_split_multi
@@ -6684,7 +6640,7 @@ msgstr "只能合并状态相同的制造。"
 #. odoo-python
 #: code:addons/mrp/models/mrp_production.py:0
 msgid "You cannot cancel a manufacturing order that is already done."
-msgstr ""
+msgstr "无法取消已完成状态的生产订单。"
 
 #. module: mrp
 #. odoo-python
@@ -6710,7 +6666,7 @@ msgstr "不能创建周期性依赖性。"
 #. odoo-python
 #: code:addons/mrp/models/mrp_production.py:0
 msgid "You cannot delete a manufacturing order that is already done."
-msgstr ""
+msgstr "无法删除已完成的生产订单。"
 
 #. module: mrp
 #. odoo-python
@@ -6967,3 +6923,27 @@ msgstr "拆分"
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_routing_workcenter_form_view
 msgid "work orders"
 msgstr "工单"
+
+#~ msgid "100"
+#~ msgstr "100"
+
+#~ msgid "12345678901"
+#~ msgstr "12345678901"
+
+#~ msgid "2023-09-15"
+#~ msgstr "2023-09-15"
+
+#~ msgid "25"
+#~ msgstr "25"
+
+#~ msgid "50"
+#~ msgstr "50"
+
+#~ msgid "58"
+#~ msgstr "58"
+
+#~ msgid "60"
+#~ msgstr "60"
+
+#~ msgid "987654321098"
+#~ msgstr "987654321098"

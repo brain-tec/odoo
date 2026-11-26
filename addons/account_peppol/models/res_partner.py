@@ -9,8 +9,10 @@ from hashlib import md5
 from urllib import parse
 
 from odoo import api, fields, models
-from odoo.addons.account_peppol.tools.demo_utils import handle_demo
 from odoo.addons.account.models.company import PEPPOL_LIST
+from odoo.addons.account_edi_ubl_cii.models.account_edi_common import EAS_MAPPING
+from odoo.addons.account_peppol.tools.demo_utils import handle_demo
+
 
 TIMEOUT = 10
 _logger = logging.getLogger(__name__)
@@ -39,6 +41,9 @@ class ResPartner(models.Model):
 
     @api.onchange('invoice_edi_format', 'peppol_endpoint', 'peppol_eas')
     def _onchange_verify_peppol_status(self):
+        if not self.commercial_partner_id:
+            # avoid issue when commercial_partner_id is on the view
+            self._compute_commercial_partner()
         self.button_account_peppol_check_partner_endpoint()
 
     # -------------------------------------------------------------------------
@@ -62,13 +67,14 @@ class ResPartner(models.Model):
             else:
                 partner.available_peppol_edi_formats = list(dict(self._fields['invoice_edi_format'].selection))
 
+    @api.depends('peppol_eas')
     def _compute_available_peppol_eas(self):
         # EXTENDS 'account_edi_ubl_cii'
         super()._compute_available_peppol_eas()
-        eas_codes = set(self[:1].available_peppol_eas)
-        if self.env.company._get_peppol_edi_mode() != 'demo' and 'odemo' in eas_codes:
-            eas_codes.remove('odemo')
-            self.available_peppol_eas = list(eas_codes)
+        is_demo = self.env.company._get_peppol_edi_mode() == 'demo'
+        for partner in self:
+            if not is_demo and partner.available_peppol_eas and 'odemo' in partner.available_peppol_eas:
+                partner.available_peppol_eas = [eas for eas in partner.available_peppol_eas if eas != 'odemo']
 
     # -------------------------------------------------------------------------
     # HELPERS
@@ -159,13 +165,21 @@ class ResPartner(models.Model):
 
     @api.model
     def _peppol_lookup_participant(self, edi_identification):
+        # TODO: Remove in master
+        return self._peppol_lookup_participant_formats_accepted(edi_identification, None)
+
+    @api.model
+    def _peppol_lookup_participant_formats_accepted(self, edi_identification, formats):
         """NAPTR DNS peppol participant lookup through Odoo's Peppol proxy"""
-        if (edi_mode := self.env.company._get_peppol_edi_mode()) == 'demo':
+        company = self.env.company
+        if (edi_mode := company._get_peppol_edi_mode()) == 'demo':
             return
 
-        origin = self.env['account_edi_proxy_client.user']._get_proxy_urls()['peppol'][edi_mode]
-        query = parse.urlencode({'peppol_identifier': edi_identification.lower()})
-        endpoint = f'{origin}/api/peppol/1/lookup?{query}'
+        proxy_type = company._get_peppol_proxy_type()
+        origin = self.env['account_edi_proxy_client.user']._get_proxy_urls()[proxy_type][edi_mode]
+        query = parse.urlencode({'peppol_identifier': edi_identification.lower(), 'formats': formats})
+        api_endpoint = self.env['account_edi_proxy_client.user']._get_peppol_proxy_endpoint('1/lookup', proxy_type=proxy_type)
+        endpoint = f'{origin}{api_endpoint}?{query}'
 
         try:
             response = requests.get(endpoint, timeout=TIMEOUT)
@@ -191,6 +205,8 @@ class ResPartner(models.Model):
         return decoded_response.get('result')
 
     def _check_document_type_support(self, participant_info, ubl_cii_format):
+        # DEPRECATED: TODO Remove in master
+
         if self.env.context.get('check_self_billing_support'):
             # This context key can be `True` only if the `account_peppol_selfbilling` module is installed.
             expected_customization_id = self.env['account.edi.xml.ubl_bis3']._get_selfbilling_customization_ids()[ubl_cii_format]
@@ -243,6 +259,18 @@ class ResPartner(models.Model):
             res._update_peppol_state_per_company()
         return res
 
+    def _compute_peppol_endpoint(self):
+        # Don't recompute on partners corresponding to registered companies
+        partners_not_to_recompute = self._get_partners_to_skip_peppol_computation()
+        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in partners_not_to_recompute])
+        super(ResPartner, partners_to_recompute)._compute_peppol_endpoint()
+
+    def _compute_peppol_eas(self):
+        # Don't recompute on partners corresponding to registered companies
+        partners_not_to_recompute = self._get_partners_to_skip_peppol_computation()
+        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in partners_not_to_recompute])
+        super(ResPartner, partners_to_recompute)._compute_peppol_eas()
+
     # -------------------------------------------------------------------------
     # BUSINESS ACTIONS
     # -------------------------------------------------------------------------
@@ -266,27 +294,14 @@ class ResPartner(models.Model):
         if not self_partner.peppol_eas or not self_partner.peppol_endpoint:
             return False
         old_value = self_partner.peppol_verification_state
-        new_value = self._get_peppol_verification_state(
+        new_value = self_partner._get_peppol_verification_state(
             self_partner.peppol_endpoint,
             self_partner.peppol_eas,
             self_partner._get_peppol_edi_format(),
         )
-        if (
-                new_value != 'valid'
-                and self_partner.peppol_eas in ('0208', '9925')
-        ):
-            # checks the inverse `eas:endpoint` if the belgian user was not found on Peppol in the first try
-            inverse_eas = '9925' if self_partner.peppol_eas == '0208' else '0208'
-            inverse_endpoint = f'BE{self_partner.peppol_endpoint}' if self_partner.peppol_eas == '0208' else self_partner.peppol_endpoint[2:]
-            if (peppol_state := self._get_peppol_verification_state(inverse_endpoint, inverse_eas, self_partner._get_peppol_edi_format())) == 'valid':
-                self_partner.write({
-                    'peppol_eas': inverse_eas,
-                    'peppol_endpoint': inverse_endpoint,
-                })
-                new_value = peppol_state
 
         if new_value != old_value:
-            self_partner.peppol_verification_state = new_value
+            self_partner.sudo().peppol_verification_state = new_value
             self._log_verification_state_update(company, old_value, self_partner.peppol_verification_state)
         return False
 
@@ -297,16 +312,45 @@ class ResPartner(models.Model):
             return 'not_verified'
 
         edi_identification = f"{peppol_eas}:{peppol_endpoint}".lower()
-        participant_info = self._peppol_lookup_participant(edi_identification)
+
+        if self.env.context.get('check_self_billing_support'):
+            # This context key can be `True` only if the `account_peppol_selfbilling` module is installed.
+            formats = self.env['account.edi.xml.ubl_bis3']._get_selfbilling_customization_ids()
+        else:
+            formats = self.env['account.edi.xml.ubl_21']._get_customization_ids()
+
+        format_str = ",".join(formats.values())
+        participant_info = self._peppol_lookup_participant_formats_accepted(edi_identification, format_str)
+
         if participant_info is None:
             return 'not_valid'
-        else:
-            is_participant_on_network = self._check_peppol_participant_exists(participant_info, edi_identification)
-            if is_participant_on_network:
-                is_valid_format = self._check_document_type_support(participant_info, invoice_edi_format)
-                if is_valid_format:
-                    return 'valid'
-                else:
-                    return 'not_valid_format'
-            else:
-                return 'not_valid'
+
+        accepted_formats = {
+            ubl_format
+            for service in participant_info.get('services', [])
+            for ubl_format in service['formats']
+        }
+
+        if formats[invoice_edi_format] not in accepted_formats:
+            return 'not_valid_format'
+
+        return 'valid'
+
+    def _get_partners_to_skip_peppol_computation(self):
+        return self.env['res.company'].search([
+            ('account_peppol_proxy_state', 'in', self.env['account_edi_proxy_client.user']._get_can_send_domain()),
+        ]).mapped('partner_id')
+
+    @api.model
+    def _get_peppol_proxy_identification_info(self, peppol_eas, peppol_endpoint):
+        # Return tuple `(proxy_type, peppol_identifier)` where `peppol_identifier` is in form "{scheme}:{identifier}"
+        if not peppol_eas or not peppol_endpoint:
+            return None, ""
+        return 'peppol', f"{peppol_eas}:{peppol_endpoint}"
+
+    def _peppol_is_french_partner(self):
+        self.ensure_one()
+        return (
+                self.country_code in {'FR', 'GP', 'MQ', 'RE'}
+                or self.peppol_eas in EAS_MAPPING.get('FR', [])
+        )

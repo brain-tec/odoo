@@ -1,24 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_debit_note
+# * account_debit_note
 #
 # Translators:
 # Wil Odoo, 2024
 # Junko Augias, 2024
 #
+# "Junko Augias (juau)" <juau@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Junko Augias, 2024\n"
-"Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
+"PO-Revision-Date: 2026-10-20 09:24+0000\n"
+"Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-18/"
+"account_debit_note/ja/>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: account_debit_note
 #: model_terms:ir.ui.view,arch_db:account_debit_note.view_move_form_debit
@@ -81,7 +84,7 @@ msgstr "デビットノート"
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__date
 #: model_terms:ir.ui.view,arch_db:account_debit_note.view_account_debit_note
 msgid "Debit Note Date"
-msgstr "デビットノート日付"
+msgstr "デビットノート発行日"
 
 #. module: account_debit_note
 #. odoo-python
@@ -119,8 +122,8 @@ msgid ""
 "In case you need to do corrections for every line, it can be in handy to "
 "copy them.  We won't copy them for debit notes from credit notes. "
 msgstr ""
-"全項目を修正する必要がある場合は、コピーすれば簡単に使用できます。クレジット"
-"ノートからデビットノートへのコピーはできません。"
+"全項目を修正する必要がある場合は、コピーすれば簡単に使用できます。"
+"クレジットノートからデビットノートへのコピーはできません。"
 
 #. module: account_debit_note
 #: model:ir.model,name:account_debit_note.model_account_journal
@@ -214,7 +217,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_debit_note/wizard/account_debit_note.py:0
 msgid "You can only debit posted moves."
-msgstr "記帳済仕訳のみ借方記入できます。"
+msgstr "記帳済の仕訳にしか、借方計上できません。"
 
 #. module: account_debit_note
 #. odoo-python

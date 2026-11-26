@@ -287,7 +287,7 @@ class StockMove(models.Model):
                 for line in lines:
                     quantities[line.lot_id] += line.quantity_product_uom
             else:
-                quantities[self.env['stock.lot']] += move.product_qty
+                quantities[self.env['stock.lot']] += move.product_uom._compute_quantity(move.quantity, move.product_id.uom_id)
 
             unit_cost = move._get_price_unit()
             if move.product_id.cost_method == 'standard':
@@ -375,10 +375,9 @@ class StockMove(models.Model):
 
         stock_valuation_layers._check_company()
 
-        # For every in move, run the vacuum for the linked product.
-        products_to_vacuum = valued_moves['in'].mapped('product_id')
-        company = valued_moves['in'].mapped('company_id') and valued_moves['in'].mapped('company_id')[0] or self.env.company
-        products_to_vacuum._run_fifo_vacuum(company)
+        # For every in move in each company, run the vacuum for the linked product.
+        for company, moves in valued_moves['in'].grouped('company_id').items():
+            moves.product_id._run_fifo_vacuum(company)
 
         return res
 
@@ -526,6 +525,11 @@ class StockMove(models.Model):
                 if forced_quantity:
                     val['description'] = _('Correction of %s (modification of past move)', move.picking_id.name or move.name)
             svl_vals_list += vals
+        self._round_in_svl_value(svl_vals_list)
+        return svl_vals_list
+
+    @api.model
+    def _round_in_svl_value(self, svl_vals_list):
         return svl_vals_list
 
     def _get_src_account(self, accounts_data):
@@ -776,9 +780,23 @@ class StockMove(models.Model):
     def _is_returned(self, valued_type):
         self.ensure_one()
         if valued_type == 'in':
-            return self.location_id and self.location_id.usage == 'customer'   # goods returned from customer
+            return self.location_id and (
+                self.location_id.usage == 'customer'
+                or (
+                    self.location_id.usage == 'transit'
+                    and self.origin_returned_move_id
+                    and not self.origin_returned_move_id._is_returned('out')
+                )
+            )  # goods returned from customer or inter-company return
         if valued_type == 'out':
-            return self.location_dest_id and self.location_dest_id.usage == 'supplier'   # goods returned to supplier
+            return self.location_dest_id and (
+                self.location_dest_id.usage == 'supplier'
+                or (
+                    self.location_dest_id.usage == 'transit'
+                    and self.origin_returned_move_id
+                    and not self.origin_returned_move_id._is_returned('in')
+                )
+            )  # goods returned to supplier or inter-company return
 
     def _get_all_related_aml(self):
         return self.account_move_ids.line_ids
@@ -789,3 +807,15 @@ class StockMove(models.Model):
     def _get_layer_candidates(self):
         self.ensure_one()
         return self.stock_valuation_layer_ids
+
+    def _get_layers_price_diff(self):
+        total_layers_ids = OrderedSet()
+        for move in self:
+            if move._is_dropshipped():
+                layers = move.stock_valuation_layer_ids.filtered(lambda svl: svl.quantity > 0)
+            elif move._is_dropshipped_returned():
+                layers = move.stock_valuation_layer_ids.filtered(lambda svl: svl.quantity < 0)
+            else:
+                layers = move.stock_valuation_layer_ids
+            total_layers_ids.update(layers.ids)
+        return self.env['stock.valuation.layer'].browse(total_layers_ids)

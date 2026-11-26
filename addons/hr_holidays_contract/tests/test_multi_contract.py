@@ -384,3 +384,118 @@ class TestHolidaysMultiContract(TestHolidayContract):
         })
 
         self.assertEqual(leave2.number_of_hours, calendar_partial.full_time_required_hours)
+
+    @freeze_time('2024-06-12 10:00:00')
+    def test_compute_leave_status_fully_flexible_contract(self):
+        """Test that reading the leave status of an employee on a fully flexible
+        contract (no working schedule) does not crash when the employee is
+        currently on a validated leave."""
+        employee = self.env['hr.employee'].create({'name': 'Flex Employee'})
+        self.env['hr.contract'].create({
+            'name': 'Fully flexible contract',
+            'employee_id': employee.id,
+            'date_start': date(2024, 1, 1),
+            'resource_calendar_id': False,
+            'wage': 1000.0,
+            'state': 'open',
+        })
+        leave = self.env['hr.leave'].create({
+            'employee_id': employee.id,
+            'holiday_status_id': self.leave_type.id,
+            'request_date_from': '2024-06-10',
+            'request_date_to': '2024-06-14',
+        })
+        leave.action_approve()
+        self.assertRecordValues(employee, [{
+            'is_absent': True,
+            'current_leave_state': 'validate',
+        }])
+
+    @freeze_time('2026-09-24')
+    def test_recompute_leave_on_contract_change_date_rollover(self):
+        employee = self.env['hr.employee'].create({
+            'name': 'mythra juice box',
+            'tz': 'America/New_York'
+        })
+        first_schedule, second_schedule = self.env['resource.calendar'].create([
+            {
+                'name': "40 Hour Schedule",
+                'tz': "America/New_York"
+            },
+            {
+                'name': '50 Hour Schedule',
+                'tz': 'America/New_York',
+                'attendance_ids': [
+                    (0, 0, {'name': 'Monday', 'dayofweek': '0', 'hour_from': 12, 'hour_to': 22, 'day_period': 'morning'}),
+                    (0, 0, {'name': 'Tuesday', 'dayofweek': '1', 'hour_from': 12, 'hour_to': 22, 'day_period': 'morning'}),
+                    (0, 0, {'name': 'Wednesday', 'dayofweek': '2', 'hour_from': 12, 'hour_to': 22, 'day_period': 'morning'}),
+                    (0, 0, {'name': 'Thursday', 'dayofweek': '3', 'hour_from': 12, 'hour_to': 22, 'day_period': 'morning'}),
+                    (0, 0, {'name': 'Friday', 'dayofweek': '4', 'hour_from': 12, 'hour_to': 22, 'day_period': 'morning'})
+                ]
+            }
+
+        ])
+        contract = self.env['hr.contract'].create({
+            'name': "mythra's contract",
+            'date_start': datetime.strptime('2026-09-01', '%Y-%m-%d').date(),
+            'employee_id': employee.id,
+            'resource_calendar_id': first_schedule.id,
+            'state': 'open',
+            'wage': 6700.0
+        })
+
+        allocation = self.env['hr.leave.allocation'].create({
+            'display_name': 'pto for mythra',
+            'date_from': datetime.strptime('2026-09-01', '%Y-%m-%d').date(),
+            'number_of_days': 3,
+            'holiday_status_id': self.env.ref('hr_holidays.holiday_status_cl').id,
+            'employee_id': employee.id
+        })
+        allocation.action_approve()
+
+        leave = self.env['hr.leave'].create({
+            'request_date_from': datetime(2026, 9, 15, 12, 0, 0),
+            'request_date_to': datetime(2026, 9, 17, 21, 0, 0),
+            'display_name': "mythra goes to elysium",
+            'employee_id': employee.id,
+            'holiday_status_id': self.env.ref('hr_holidays.holiday_status_cl').id,
+        })
+        leave.action_approve()
+
+        self.assertRaises(contract.write({'resource_calendar_id': second_schedule.id}))
+
+    def test_cancelled_leave_next_contract_running(self):
+        # A cancelled time off shouldn't be impacted when the next contract, with another working schedule, is set
+        # as running
+        employee = self.env['hr.employee'].create({
+            'name': 'Employee with two contracts',
+            'tz': 'Europe/Brussels',
+        })
+        self.env['hr.contract'].create({
+            'name': 'September contract',
+            'employee_id': employee.id,
+            'date_start': date(2026, 9, 1),
+            'date_end': date(2026, 9, 30),
+            'resource_calendar_id': self.calendar_40h.id,
+            'wage': 1000.0,
+            'state': 'open',
+        })
+        october_contract = self.env['hr.contract'].create({
+            'name': 'October contract',
+            'employee_id': employee.id,
+            'date_start': date(2026, 10, 1),
+            'resource_calendar_id': self.calendar_35h.id,
+            'wage': 1000.0,
+            'state': 'draft',
+            'kanban_state': 'normal',
+        })
+        leave = self.create_leave(date(2026, 9, 30), date(2026, 10, 2), employee_id=employee.id)
+        leave.action_approve()
+        leave._force_cancel("Not needed anymore")
+        self.assertEqual(leave.state, 'cancel')
+
+        october_contract.state = 'open'
+
+        self.assertEqual(leave.state, 'cancel')
+        self.assertEqual(leave.resource_calendar_id, self.calendar_40h)
+        self.assertEqual(self.env['hr.leave'].search([('employee_id', '=', employee.id)]), leave)

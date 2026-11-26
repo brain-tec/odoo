@@ -15,7 +15,7 @@ class StockPickingBatch(models.Model):
     _order = "name desc"
 
     name = fields.Char(
-        string='Batch Transfer', default='New',
+        string='Batch Transfer', default=lambda self: _('New'),
         copy=False, required=True, readonly=True)
     description = fields.Char('Description')
     user_id = fields.Many2one(
@@ -85,14 +85,14 @@ class StockPickingBatch(models.Model):
             estimated_shipping_weight = 0
             estimated_shipping_volume = 0
             # packs
-            for pack in self.move_line_ids.result_package_id:
+            for pack in batch.move_line_ids.result_package_id:
                 p_type = pack.package_type_id
                 estimated_shipping_weight += pack.shipping_weight
                 if p_type:
                     estimated_shipping_weight += p_type.base_weight or 0
                     estimated_shipping_volume += (p_type.packaging_length * p_type.width * p_type.height) / 1000.0**3
             # move without packs
-            for move in self.picking_ids.move_ids_without_package:
+            for move in batch.picking_ids.move_ids_without_package:
                 estimated_shipping_weight += move.product_id.weight * move.product_qty
                 estimated_shipping_volume += move.product_id.volume * move.product_qty
             batch.estimated_shipping_weight = estimated_shipping_weight
@@ -335,6 +335,9 @@ class StockPickingBatch(models.Model):
     def _is_picking_auto_mergeable(self, picking):
         """ Verifies if a picking can be safely inserted into the batch without violating auto_batch_constrains.
         """
+        # A picking done through `_action_done` (e.g. PoS closing) stays in its batch, `_sanity_check` rejects it
+        if any(p.state == 'done' for p in self.picking_ids) and picking.state != 'done':
+            return False
         res = True
         if self.picking_type_id.batch_max_lines:
             res = res and (len(self.move_ids) + len(picking.move_ids) <= self.picking_type_id.batch_max_lines)

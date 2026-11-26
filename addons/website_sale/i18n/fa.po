@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_sale
+# * website_sale
 #
 # Translators:
 # zakariya moradi, 2025
@@ -8,20 +8,22 @@
 # Mostafa Barmshory <mostafa.barmshory@gmail.com>, 2025
 # Naser mars, 2025
 # Tiffany Chang, 2025
-#
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-22 18:36+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Tiffany Chang, 2025\n"
-"Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
+"PO-Revision-Date: 2026-10-28 06:33+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Persian <https://translate.odoo.com/projects/odoo-18/"
+"website_sale/fa/>\n"
 "Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products
@@ -73,29 +75,14 @@ msgid "'. Showing results for '"
 msgstr "'. نمایش نتایج برای'"
 
 #. module: website_sale
-#: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_image_width__100_pc
-msgid "100 %"
-msgstr "100%"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "100 percent"
 msgstr "100درصد"
 
 #. module: website_sale
-#: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_image_width__50_pc
-msgid "50 %"
-msgstr "50%"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "50 percent"
 msgstr "۵۰ درصد"
-
-#. module: website_sale
-#: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_image_width__66_pc
-msgid "66 %"
-msgstr "66 ٪"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -256,6 +243,8 @@ msgid ""
 "<i class=\"oi oi-chevron-left oe_unmovable border bg-white text-900\" "
 "role=\"img\" aria-label=\"Previous\" title=\"Previous\"/>"
 msgstr ""
+"<i class=\"oi oi-chevron-left oe_unmovable border bg-white text-900\" "
+"role=\"img\" aria-label=\"قبلی\" title=\"قبلی\"/>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.shop_product_carousel
@@ -263,6 +252,8 @@ msgid ""
 "<i class=\"oi oi-chevron-right oe_unmovable border bg-white text-900\" "
 "role=\"img\" aria-label=\"Next\" title=\"Next\"/>"
 msgstr ""
+"<i class=\"oi oi-chevron-right oe_unmovable border bg-white text-900\" "
+"role=\"img\" aria-label=\"بعدی\" title=\"بعدی\"/>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.address
@@ -332,15 +323,6 @@ msgstr ""
 "inline\">افزودن به سبد خرید</span>"
 
 #. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
-"specific.\" groups=\"website.group_multi_website\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
-"specific.\" groups=\"website.group_multi_website\"/>"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_dynamic_snippet_products_preview_data
 msgid ""
 "<span class=\"fw-bold\" name=\"product_price\" data-oe-type=\"monetary\" "
@@ -349,6 +331,11 @@ msgid ""
 "class=\"oe_currency_value\">1,500.00</span>\n"
 "                                            </span>"
 msgstr ""
+"<span class=\"fw-bold\" name=\"product_price\" data-oe-type=\"monetary\" "
+"data-oe-expression=\"data['price']\">\n"
+"                                                <span "
+"class=\"oe_currency_value\">1,5000000</span>\n"
+"                                            </span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_dynamic_snippet_products_preview_data
@@ -359,6 +346,11 @@ msgid ""
 "class=\"oe_currency_value\">140.00</span>\n"
 "                                            </span>"
 msgstr ""
+"<span class=\"fw-bold\" name=\"product_price\" data-oe-type=\"monetary\" "
+"data-oe-expression=\"data['price']\">\n"
+"                                                <span "
+"class=\"oe_currency_value\">1400000</span>\n"
+"                                            </span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_dynamic_snippet_products_preview_data
@@ -369,6 +361,11 @@ msgid ""
 "class=\"oe_currency_value\">33.00</span>\n"
 "                                            </span>"
 msgstr ""
+"<span class=\"fw-bold\" name=\"product_price\" data-oe-type=\"monetary\" "
+"data-oe-expression=\"data['price']\">\n"
+"                                                <span "
+"class=\"oe_currency_value\">330000</span>\n"
+"                                            </span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_dynamic_snippet_products_preview_data
@@ -379,6 +376,11 @@ msgid ""
 "class=\"oe_currency_value\">750.00</span>\n"
 "                                            </span>"
 msgstr ""
+"<span class=\"fw-bold\" name=\"product_price\" data-oe-type=\"monetary\" "
+"data-oe-expression=\"data['price']\">\n"
+"                                                <span "
+"class=\"oe_currency_value\">7500000</span>\n"
+"                                            </span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -738,6 +740,8 @@ msgid ""
 "Add a strikethrough price to your /shop and product pages for comparison "
 "purposes.It will not be displayed if pricelists apply."
 msgstr ""
+"برای مقایسه، یک قیمت خط‌خورده به صفحات /shop و محصولات خود اضافه کنید. اگر "
+"لیست‌های قیمت اعمال شوند، نمایش داده نخواهد شد."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
@@ -1294,7 +1298,7 @@ msgstr "پاک کردن فیلترها"
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_res_config_settings__module_website_sale_collect
 msgid "Click & Collect"
-msgstr ""
+msgstr "خرید آنلاین و تحویل حضوری"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products
@@ -1460,12 +1464,12 @@ msgstr "هزینه‌های ارسال در سفارش‌ها محاسبه کن"
 #. odoo-javascript
 #: code:addons/website_sale/static/src/js/checkout.js:0
 msgid "Computed after delivery"
-msgstr ""
+msgstr "محاسبه پس از تحویل"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_dynamic_snippet_products_preview_data
 msgid "Conference Chair"
-msgstr ""
+msgstr "صندلی کنفرانس"
 
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_res_config_settings
@@ -2299,7 +2303,7 @@ msgstr "شبکه"
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_website__shop_gap
 msgid "Grid-gap on the shop"
-msgstr ""
+msgstr "فاصله بین خانه‌های شبکه در فروشگاه"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.sale_report_view_search_website
@@ -4202,6 +4206,14 @@ msgstr "ناموجود"
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/controllers/main.py:0
+msgid ""
+"Some products in your cart are not available for purchase in your country. "
+"Please remove them or contact us."
+msgstr ""
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
 msgid "Some required fields are empty."
 msgstr "بعضی فیلدهای اجباری خالی هستند."
 
@@ -4331,6 +4343,14 @@ msgid "Taxes"
 msgstr "مالیات ها"
 
 #. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+msgid ""
+"Taxes have been updated based on your address. Your payment method has not "
+"been charged."
+msgstr ""
+
+#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "Text"
 msgstr "متن"
@@ -4387,7 +4407,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/website_sale/models/sale_order.py:0
 msgid "The delivery method is not compatible with your delivery address."
-msgstr ""
+msgstr "این روش ارسال با آدرس تحویل شما سازگاری ندارد."
 
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_delivery_carrier__website_url
@@ -4428,6 +4448,16 @@ msgid ""
 msgstr ""
 "انتخاب حالت در اینجا به عنوان سیاست صدور فاکتور برای هر محصول جدید ایجاد‌شده "
 "اعمال می‌شود، اما برای محصولات موجود در حال حاضر اعمال نمی‌شود."
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/combo_configurator.py:0
+msgid ""
+"The number of selected combo items must match the number of available combo "
+"choices."
+msgstr ""
+"تعداد موارد ترکیبی انتخابی باید با تعداد گزینه های ترکیبی موجود مطابقت داشته "
+"باشد."
 
 #. module: website_sale
 #. odoo-python
@@ -4530,10 +4560,22 @@ msgid "This product is no longer available."
 msgstr "این محصول دیگر موجود نیست."
 
 #. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+msgid "This product is not available for purchase in your country."
+msgstr ""
+
+#. module: website_sale
 #. odoo-javascript
 #: code:addons/website_sale/static/src/js/website_sale_reorder.js:0
 msgid "This product is not available for purchase."
 msgstr "این محصول برای خرید در دسترس نیست."
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+msgid "This product is part of a combo and can't be updated individually."
+msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products_item
@@ -4548,7 +4590,7 @@ msgstr "کد تبلیغاتی موجود نیست."
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_dynamic_snippet_products_preview_data
 msgid "Three-Seat Sofa"
-msgstr ""
+msgstr "مبل سه نفره"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -4684,6 +4726,11 @@ msgstr ""
 #: code:addons/website_sale/controllers/main.py:0
 msgid "VAT"
 msgstr "ارزش افزوده"
+
+#. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
+msgid "Values set here are website-specific."
+msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_add_to_cart_options
@@ -4964,12 +5011,12 @@ msgstr "وایت برد"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "Wide (16/9)"
-msgstr ""
+msgstr "عریض (16/9)"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "Wider (21/9)"
-msgstr ""
+msgstr "عریض‌تر (21/9)"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_res_config_settings__module_website_sale_wishlist
@@ -4981,6 +5028,11 @@ msgstr "لیست آرزوها"
 #: code:addons/website_sale/models/website_snippet_filter.py:0
 msgid "With three feet"
 msgstr "با سه پا(قدم)"
+
+#. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.product_share_buttons
+msgid "X"
+msgstr ""
 
 #. module: website_sale
 #. odoo-javascript
@@ -5209,6 +5261,30 @@ msgstr "شرایط و ضوابط"
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 msgid "to follow your order."
 msgstr "تا سفارش شما را دنبال کند"
+
+#. module: website_sale
+#. odoo-javascript
+#: code:addons/website_sale/static/src/xml/website_sale_reorder_modal.xml:0
+#: model_terms:ir.ui.view,arch_db:website_sale.cart_combo_item_line
+#: model_terms:ir.ui.view,arch_db:website_sale.checkout_layout
+msgid "x"
+msgstr ""
+
+#~ msgid "100 %"
+#~ msgstr "100%"
+
+#~ msgid "50 %"
+#~ msgstr "50%"
+
+#~ msgid "66 %"
+#~ msgstr "66 ٪"
+
+#~ msgid ""
+#~ "<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
+#~ "specific.\" groups=\"website.group_multi_website\"/>"
+#~ msgstr ""
+#~ "<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
+#~ "specific.\" groups=\"website.group_multi_website\"/>"
 
 #~ msgid ""
 #~ "Your Dynamic Snippet will be displayed here...\n"

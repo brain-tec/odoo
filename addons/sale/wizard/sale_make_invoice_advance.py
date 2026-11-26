@@ -239,14 +239,9 @@ class SaleAdvancePaymentInv(models.TransientModel):
         """
         self.ensure_one()
         AccountTax = self.env['account.tax']
-
-        if self.advance_payment_method == 'percentage':
-            ratio = self.amount / 100
-        else:
-            ratio = self.fixed_amount / order.amount_total if order.amount_total else 1
-
         order_lines = order.order_line.filtered(lambda l: not l.display_type and not l.is_downpayment)
         down_payment_values = []
+        fixed_taxes_amount = 0.0
         for line in order_lines:
             base_line_values = line._prepare_base_line_for_taxes_computation(special_mode='total_excluded')
             product_account = line['product_id'].product_tmpl_id.get_product_accounts(fiscal_pos=order.fiscal_position_id)
@@ -256,32 +251,17 @@ class SaleAdvancePaymentInv(models.TransientModel):
 
             taxes = line.tax_id.flatten_taxes_hierarchy()
             fixed_taxes = taxes.filtered(lambda tax: tax.amount_type == 'fixed')
+            fixed_taxes_amount += sum(
+                fixed_tax.amount * line.product_uom_qty
+                for fixed_tax in fixed_taxes
+                if fixed_tax.price_include_override != 'tax_included'
+            )
             down_payment_values.append([
                 taxes - fixed_taxes,
                 base_line_values['analytic_distribution'],
                 tax_details['raw_total_excluded_currency'],
                 account,
             ])
-            for fixed_tax in fixed_taxes:
-                # Fixed taxes cannot be set as taxes on down payments as they always amounts to 100%
-                # of the tax amount. Therefore fixed taxes are removed and are replace by a new line
-                # with appropriate amount, and non fixed taxes if the fixed tax affected the base of
-                # any other non fixed tax.
-                if fixed_tax.price_include:
-                    continue
-
-                if fixed_tax.include_base_amount:
-                    pct_tax = taxes[list(taxes).index(fixed_tax) + 1:]\
-                        .filtered(lambda t: t.is_base_affected and t.amount_type != 'fixed')
-                else:
-                    pct_tax = self.env['account.tax']
-                down_payment_values.append([
-                    pct_tax,
-                    base_line_values['analytic_distribution'],
-                    base_line_values['quantity'] * fixed_tax.amount,
-                    account
-                ])
-
         downpayment_line_map = {}
         analytic_map = {}
         base_downpayment_lines_values = self._prepare_base_downpayment_line_values(order)
@@ -300,6 +280,12 @@ class SaleAdvancePaymentInv(models.TransientModel):
             if analytic_distribution:
                 analytic_map.setdefault(grouping_key, [])
                 analytic_map[grouping_key].append((price_subtotal, analytic_distribution))
+
+        if self.advance_payment_method == 'percentage':
+            ratio = self.amount / 100
+        else:
+            amount_total_without_fixed_taxes = order.amount_total - fixed_taxes_amount
+            ratio = self.fixed_amount / amount_total_without_fixed_taxes if amount_total_without_fixed_taxes else 1
 
         lines_values = []
         accounts = []

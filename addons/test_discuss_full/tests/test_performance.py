@@ -43,14 +43,14 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - _bus_last_id
     #       - _get_needaction_count (inbox counter)
     #       - starred counter
-    #   29: _process_request_for_all (discuss):
+    #   33: _process_request_for_all (discuss):
     #       - search discuss_channel (channels_domain)
-    #       28: channel _to_store:
+    #       32: channel _to_store:
     #           - _bus_last_id
     #           - manual query to search discuss_channel_member
-    #           10: channel member _to_store:
+    #           13: channel member _to_store:
     #               - fetch discuss_channel_member
-    #               9: partner _to_store:
+    #               12: partner _to_store:
     #                   - fetch res_partner (partner _to_store)
     #                   - fetch res_users (_compute_im_status)
     #                   - search bus_presence (_compute_im_status)
@@ -58,8 +58,11 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #                   - _get_on_leave_ids (_compute_im_status override)
     #                   - search hr_employee (_compute_im_status override)
     #                   - fetch hr_employee (_compute_im_status override)
-    #                   - search hr_leave (out_of_office_date_end)
     #                   - fetch res_users (internal user)
+    #                   - fetch company_ids of res_users (out_of_office_date_end)
+    #                   - fetch res_company (out_of_office_date_end)
+    #                   - search hr_employee (out_of_office_date_end)
+    #                   - search hr_leave (out_of_office_date_end)
     #           - fetch res_groups (authorizedGroupFullName)
     #           - fetch ir_module_category (authorizedGroupFullName)
     #           - search discuss_channel_member (is_member, channel ACL)
@@ -68,18 +71,19 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #           - count discuss_channel_member (member_count)
     #           - _compute_message_needaction
     #           - search discuss_channel_rtc_session
-    #           8: rtc session _to_store:
+    #           9: rtc session _to_store:
     #               - fetch discuss_channel_rtc_session
-    #               7. channel member _to_store:
+    #               8. channel member _to_store:
     #                   - fetch discuss_channel_member
-    #                   6: partner _to_store:
+    #                   7: partner _to_store:
     #                       - fetch res_parter
     #                       - fetch res_users (_compute_im_status)
     #                       - search bus_presence (_compute_im_status)
     #                       - _get_on_leave_ids (_compute_im_status override)
     #                       - search hr_employee (_compute_im_status override)
     #                       - fetch hr_employee (_compute_im_status override)
-    _query_count_init_messaging = 41
+    #                       - fetch res_users (_compute_im_status override)
+    _query_count_init_messaging = 45
     # Queries for _query_count_discuss_channels (in order):
     #   1: insert res_device_log
     #   1: fetch res_users (for current user: first occurence current persona, _search_is_member)
@@ -88,12 +92,12 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - fetch channel_ids of current partner (active test filtering, _search_is_member)
     #       - search discuss_channel (member_domain)
     #       - search discuss_channel (pinned_member_domain)
-    #   31: channel _to_store:
+    #   34: channel _to_store:
     #       - _bus_last_id
     #       - manual query to search discuss_channel_member
-    #       16: channel member _to_store:
+    #       19: channel member _to_store:
     #           - fetch discuss_channel_member
-    #           12: partner _to_store:
+    #           15: partner _to_store:
     #               - fetch res_partner (partner _to_store)
     #               - fetch res_users (_compute_im_status)
     #               - search bus_presence (_compute_im_status)
@@ -101,8 +105,11 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #               - _get_on_leave_ids (_compute_im_status override)
     #               - search hr_employee (_compute_im_status override)
     #               - fetch hr_employee (_compute_im_status override)
-    #               - search hr_leave (out_of_office_date_end)
     #               - fetch res_users (internal user)
+    #               - fetch company_ids of res_users (out_of_office_date_end)
+    #               - fetch res_company (out_of_office_date_end)
+    #               - search hr_employee (out_of_office_date_end)
+    #               - search hr_leave (out_of_office_date_end)
     #               - search res_users_settings (livechat username)
     #               - fetch res_users_settings (livechat username)
     #               - fetch res_country (livechat override)
@@ -125,7 +132,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - fetch im_livechat_channel
     #       - fetch country (anonymous_country)
     #   - _get_last_messages
-    #   14: message _to_store:
+    #   15: message _to_store:
     #       - search mail_message_schedule
     #       - fetch mail_message
     #       - search mail_message_reaction
@@ -140,7 +147,8 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - search mail_message_res_partner_starred_rel
     #       - search rating_rating
     #       - _compute_rating_stats
-    _query_count_discuss_channels = 52
+    #       - search discuss_channel (linkedSubChannel)
+    _query_count_discuss_channels = 56
 
     def setUp(self):
         super().setUp()
@@ -1265,6 +1273,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_discussion": False,
                 "is_note": True,
                 "linkPreviews": [],
+                "linkedSubChannel": False,
                 "message_type": "comment",
                 "model": "discuss.channel",
                 "needaction": False,
@@ -1301,6 +1310,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_discussion": False,
                 "is_note": True,
                 "linkPreviews": [],
+                "linkedSubChannel": False,
                 "message_type": "comment",
                 "model": "discuss.channel",
                 "needaction": True,
@@ -1337,6 +1347,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_discussion": True,
                 "is_note": False,
                 "linkPreviews": [],
+                "linkedSubChannel": False,
                 "message_type": "notification",
                 "model": "discuss.channel",
                 "needaction": False,
@@ -1369,6 +1380,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_discussion": True,
                 "is_note": False,
                 "linkPreviews": [],
+                "linkedSubChannel": False,
                 "message_type": "notification",
                 "model": "discuss.channel",
                 "needaction": False,
@@ -1401,6 +1413,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_discussion": True,
                 "is_note": False,
                 "linkPreviews": [],
+                "linkedSubChannel": False,
                 "message_type": "notification",
                 "model": "discuss.channel",
                 "needaction": False,
@@ -1461,8 +1474,8 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "default_subject": "anon 2 Ernest Employee",
                 "email_from": False,
                 "id": last_message.id,
-                "is_discussion": False,
-                "is_note": True,
+                "is_discussion": True,
+                "is_note": False,
                 "linkPreviews": [],
                 "message_type": "comment",
                 "model": "discuss.channel",

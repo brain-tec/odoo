@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* hr_timesheet
+# * hr_timesheet
 #
 # Translators:
 # Atte Isopuro <atte.isopuro@web-veistamo.fi>, 2024
@@ -17,20 +17,23 @@
 # Wil Odoo, 2025
 # Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025
 # Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2025
-#
+# Saara Hakanen <sahak@odoo.com>, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2025\n"
-"Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
+"POT-Creation-Date: 2026-06-12 17:37+0000\n"
+"PO-Revision-Date: 2026-11-19 10:50+0000\n"
+"Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-18/"
+"hr_timesheet/fi/>\n"
 "Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.portal_timesheet_table
@@ -86,9 +89,8 @@ msgid ""
 "'%(missing_plan_names)s' analytic plan(s) required on the project '%"
 "(project_name)s' linked to the timesheet."
 msgstr ""
-"'%(missing_plan_names)s' analyyttinen suunnitelma (analyyttiset "
-"suunnitelmat), joka (jotka) vaaditaan työaikakirjauksiin liitetyssä "
-"projektissa '%(project_name)s'."
+"Työaikakirjauksiin linkitetyt projektit '%(project_name)s' vaativat "
+"laskentakohderyhmät '%(missing_plan_names)s'."
 
 #. module: hr_timesheet
 #. odoo-python
@@ -117,11 +119,6 @@ msgstr "1 päivä"
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.timesheet_table
 msgid "2 hours"
 msgstr "2 tuntia"
-
-#. module: hr_timesheet
-#: model_terms:ir.ui.view,arch_db:hr_timesheet.timesheet_table
-msgid "2021-09-01"
-msgstr "2021-09-01"
 
 #. module: hr_timesheet
 #: model_terms:digest.tip,tip_description:hr_timesheet.digest_tip_hr_timesheet_0
@@ -157,36 +154,13 @@ msgstr "<span class=\"text-nowrap\">Alitehtäviin käytetty aika:</span>"
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.hr_employee_delete_wizard_form
 msgid ""
-"<span invisible=\"not has_timesheet\">\n"
-"                        You cannot delete employees who have timesheets.\n"
-"                        <span invisible=\"not has_active_employee\">\n"
-"                            You can either archive these employees or first "
-"delete all of their timesheets.\n"
-"                        </span>\n"
-"                        <span invisible=\"has_active_employee\" "
-"groups=\"hr_timesheet.group_hr_timesheet_approver\">\n"
-"                            Please first delete all of their timesheets.\n"
-"                        </span>\n"
-"                    </span>\n"
-"                    <span invisible=\"has_timesheet\">\n"
+"<span invisible=\"has_timesheet\">\n"
 "                        Are you sure you want to delete these employees?\n"
 "                    </span>"
 msgstr ""
-"<span invisible=\"not has_timesheet\">\n"
-"                        Et voi poistaa työntekijöitä, joilla on "
-"työaikakirjauksia.\n"
-"                       <span invisible=\"not has_active_employee\">\n"
-"                            Voit joko arkistoida nämä työntekijät tai "
-"poistaa ensin kaikki heidän työaikakirjauksensa.\n"
-"                       </span>\n"
-"                       <span invisible=\"has_active_employee\" "
-"groups=\"hr_timesheet.group_hr_timesheet_approver\">\n"
-"                            Poista ensin kaikki heidän työaikakirjauksensa.\n"
-"                       </span>\n"
-"                    </span>\n"
-"                    <span invisible=\"has_timesheet\">\n"
+"<span invisible=\"has_timesheet\">\n"
 "                        Haluatko varmasti poistaa nämä työntekijät?\n"
-"                    </span>"
+"                   </span>"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.timesheet_table
@@ -275,7 +249,7 @@ msgstr "Varattu aika"
 #. module: hr_timesheet
 #: model:ir.model.fields,field_description:hr_timesheet.field_timesheets_analysis_report__amount
 msgid "Amount"
-msgstr "Arvo"
+msgstr "Määrä"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -286,17 +260,17 @@ msgstr "Analyysi"
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.hr_timesheet_line_form
 msgid "Analytic Entry"
-msgstr "Analyyttinen kirjaus"
+msgstr "Laskentakohdekirjaus"
 
 #. module: hr_timesheet
 #: model:ir.model,name:hr_timesheet.model_account_analytic_line
 msgid "Analytic Line"
-msgstr "Analyyttinen rivi"
+msgstr "Laskentakohderivi"
 
 #. module: hr_timesheet
 #: model:ir.model,name:hr_timesheet.model_account_analytic_applicability
 msgid "Analytic Plan's Applicabilities"
-msgstr "Analyysisuunnitelman sovellettavuus"
+msgstr "Laskentakohderyhmän sovellettavuus"
 
 #. module: hr_timesheet
 #: model_terms:ir.actions.act_window,help:hr_timesheet.act_hr_timesheet_report
@@ -531,6 +505,11 @@ msgid "Employee Termination"
 msgstr "Työntekijän irtisanominen"
 
 #. module: hr_timesheet
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.view_kanban_account_analytic_line
+msgid "Employee's image"
+msgstr "Työntekijän kuva"
+
+#. module: hr_timesheet
 #. odoo-python
 #: code:addons/hr_timesheet/wizard/hr_employee_delete_wizard.py:0
 msgid "Employees' Timesheets"
@@ -551,8 +530,7 @@ msgstr "Lisäaika"
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.res_config_settings_view_form
 msgid "Generate timesheets for validated time off requests and public holidays"
 msgstr ""
-"Luo työaikakirjaukset, joiden perusteena on hyväksytyt vapaa-ajan pyynnöt ja "
-"yleiset vapaapäivät"
+"Luo työaikakirjaukset hyväksytyille lomapyynnöille ja yleisille vapaapäiville"
 
 #. module: hr_timesheet
 #: model:ir.model,name:hr_timesheet.model_ir_http
@@ -673,7 +651,7 @@ msgstr "Viesti partnerille"
 #: model:ir.model.fields,field_description:hr_timesheet.field_account_analytic_line__milestone_id
 #: model:ir.model.fields,field_description:hr_timesheet.field_timesheets_analysis_report__milestone_id
 msgid "Milestone"
-msgstr "Virstanpylväs"
+msgstr "Välitavoite"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_update_view_search_inherit
@@ -697,7 +675,7 @@ msgstr "Omat työaikakirjaukset"
 #. odoo-python
 #: code:addons/hr_timesheet/controllers/portal.py:0
 msgid "Newest"
-msgstr "Uusimmat"
+msgstr "Uusin"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.portal_my_timesheets
@@ -760,9 +738,14 @@ msgid "Partner"
 msgstr "Kumppani"
 
 #. module: hr_timesheet
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.hr_employee_delete_wizard_form
+msgid "Please first delete all of their timesheets."
+msgstr "Poista ensin kaikki heidän työaikakirjaukset."
+
+#. module: hr_timesheet
 #: model:ir.model,name:hr_timesheet.model_uom_uom
 msgid "Product Unit of Measure"
-msgstr "Tuotteen yksikkö"
+msgstr "Tuotteen mittayksikkö"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -784,7 +767,7 @@ msgstr "Edistyminen"
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.report_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.timesheet_table
 msgid "Project"
-msgstr "Projektit"
+msgstr "Projekti"
 
 #. module: hr_timesheet
 #: model:ir.model.fields,field_description:hr_timesheet.field_project_project__account_id
@@ -953,8 +936,8 @@ msgid ""
 "The project, the task and the analytic accounts of the timesheet must belong "
 "to the same company."
 msgstr ""
-"Työaikataulun projektin, tehtävän ja analyyttisten tilien on kuuluttava "
-"samaan yritykseen."
+"Työaikataulun projektin, tehtävän ja laskentakohteiden on kuuluttava samaan "
+"yritykseen."
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.portal_my_timesheets
@@ -1102,7 +1085,7 @@ msgstr "Jäljellä oleva aika myyntitilauksella"
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.view_my_timesheet_line_pivot
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.view_task_form2_inherited
 msgid "Time Spent"
-msgstr "Kulutettu aika"
+msgstr "Käytetty aika"
 
 #. module: hr_timesheet
 #: model:ir.model.fields,field_description:hr_timesheet.field_report_project_task_user__subtask_effective_hours
@@ -1294,8 +1277,8 @@ msgid ""
 "Timesheets must be created with at least an active analytic account defined "
 "in the plan '%(plan_name)s'."
 msgstr ""
-"Työaikakirjaukset on luotava vähintään aktiivisella analyyttisellä tilillä, "
-"joka on määritelty suunnitelmassa \"%(plan_name)s\"."
+"Työaikakirjaukset on luotava vähintään yhden laskentakohteessa '%(plan_name)"
+"s' määritetyn laskentakohteen kanssa."
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1316,9 +1299,9 @@ msgid ""
 "project. Please set one up in the plan '%(plan_name)s' or turn off the "
 "timesheets feature."
 msgstr ""
-"Jotta voit käyttää työaikakirjaustoimintoa, tarvitset analyyttisen tilin "
-"projektillesi. Ota sellainen käyttöön suunnitelmassa '%(plan_name)s' tai ota "
-"työaikakirjausket pois käytöstä."
+"Jotta voit käyttää työaikakirjaustoimintoa, tarvitset laskentakohteen "
+"projektillesi. Ota sellainen käyttöön suunnitelmassa '%(plan_name)s' tai "
+"poista työaikakirjaukset käytöstä."
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1445,6 +1428,16 @@ msgid "You cannot delete employees who have timesheets."
 msgstr "Et voi poistaa työntekijöitä, joilla on työaikakirjauksia."
 
 #. module: hr_timesheet
+#: model_terms:ir.ui.view,arch_db:hr_timesheet.hr_employee_delete_wizard_form
+msgid ""
+"You cannot delete employees who have timesheets.\n"
+"                        <span invisible=\"not has_active_employee\">\n"
+"                            You can either archive these employees or first "
+"delete all of their timesheets.\n"
+"                        </span>"
+msgstr ""
+
+#. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_invoice_form
 msgid ""
 "You cannot log timesheets on this project since it is linked to an inactive "
@@ -1452,10 +1445,10 @@ msgid ""
 "                            Please switch to another account, or reactivate "
 "the current one to timesheet on the project."
 msgstr ""
-"Et voi syöttää työaikakirjauksia tähän projektiin, koska se on liitetty "
-"inaktiiviseen analytiikkatiliin.<br/>\n"
-"                            Vaihda toiseen tiliin tai aktivoi nykyinen "
-"tilisi uudelleen, jotta voit tehdä työaikakirjanpitoa projektissa."
+"Et voi syöttää työaikakirjauksia tähän projektiin. Se on linkitetty "
+"laskentakohteeseen, joka ei ole aktiivinen.<br/>\n"
+"                            Vaihda toiseen laskentakohteeseen tai aktivoi "
+"nykyinen, jotta voit tehdä työaikakirjanpitoa projektissa."
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.view_task_form2_inherited
@@ -1464,9 +1457,9 @@ msgid ""
 "analytic account.<br/> Please change this account, or reactivate the current "
 "one to timesheet on the project."
 msgstr ""
-"Et voi kirjata työaikakirjauksia tähän projektiin, koska se on liitetty "
-"inaktiiviseen analytiikkatiliin.<br/> Vaihda tämä tili tai aktivoi nykyinen "
-"tili uudelleen, jotta voit tehdä työaikakirjanpitoa projektissa."
+"Et voi kirjata työaikakirjauksia tähän projektiin. Se on linkitetty "
+"laskentakohteeseen, joka ei ole aktiivinen.<br/> Vaihda laskentakohde tai "
+"aktivoi nykyinen, jotta voit tehdä työaikakirjanpitoa projektissa."
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1505,3 +1498,39 @@ msgstr ""
 "osoitteessa\n"
 "                        <span class=\"fw-bold text-dark\"> Alatehtävät</"
 "span>)"
+
+#~ msgid "2021-09-01"
+#~ msgstr "2021-09-01"
+
+#~ msgid ""
+#~ "<span invisible=\"not has_timesheet\">\n"
+#~ "                        You cannot delete employees who have timesheets.\n"
+#~ "                        <span invisible=\"not has_active_employee\">\n"
+#~ "                            You can either archive these employees or "
+#~ "first delete all of their timesheets.\n"
+#~ "                        </span>\n"
+#~ "                        <span invisible=\"has_active_employee\" "
+#~ "groups=\"hr_timesheet.group_hr_timesheet_approver\">\n"
+#~ "                            Please first delete all of their timesheets.\n"
+#~ "                        </span>\n"
+#~ "                    </span>\n"
+#~ "                    <span invisible=\"has_timesheet\">\n"
+#~ "                        Are you sure you want to delete these employees?\n"
+#~ "                    </span>"
+#~ msgstr ""
+#~ "<span invisible=\"not has_timesheet\">\n"
+#~ "                        Et voi poistaa työntekijöitä, joilla on "
+#~ "työaikakirjauksia.\n"
+#~ "                       <span invisible=\"not has_active_employee\">\n"
+#~ "                            Voit joko arkistoida nämä työntekijät tai "
+#~ "poistaa ensin kaikki heidän työaikakirjauksensa.\n"
+#~ "                       </span>\n"
+#~ "                       <span invisible=\"has_active_employee\" "
+#~ "groups=\"hr_timesheet.group_hr_timesheet_approver\">\n"
+#~ "                            Poista ensin kaikki heidän "
+#~ "työaikakirjauksensa.\n"
+#~ "                       </span>\n"
+#~ "                    </span>\n"
+#~ "                    <span invisible=\"has_timesheet\">\n"
+#~ "                        Haluatko varmasti poistaa nämä työntekijät?\n"
+#~ "                    </span>"

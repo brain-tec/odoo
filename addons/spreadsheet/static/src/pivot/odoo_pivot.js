@@ -9,7 +9,8 @@ import { LOADING_ERROR } from "@spreadsheet/data_sources/data_source";
 import { omit } from "@web/core/utils/objects";
 import { OdooPivotLoader } from "./odoo_pivot_loader";
 
-const { pivotRegistry, supportedPivotPositionalFormulaRegistry } = registries;
+const { pivotRegistry, supportedPivotPositionalFormulaRegistry, pivotNormalizationValueRegistry } =
+    registries;
 const { pivotTimeAdapter, toString, areDomainArgsFieldsValid, toNormalizedPivotValue, deepEquals } =
     helpers;
 
@@ -68,13 +69,7 @@ export class OdooPivot {
         this.odooDataProvider = services.odooDataProvider;
 
         /** @protected @type {Object} */
-        this.context = omit(
-            definition.context,
-            ...Object.keys(user.context),
-            "pivot_measures",
-            "pivot_row_groupby",
-            "pivot_column_groupby"
-        );
+        this.context = this._purgeContext(definition.context);
 
         /** @protected */
         this.domainWithGlobalFilters = this.coreDefinition.domain;
@@ -84,7 +79,7 @@ export class OdooPivot {
      * @param {OdooPivotCoreDefinition} nextDefinition
      */
     onDefinitionChange(nextDefinition) {
-        this.context = omit(nextDefinition.context, ...Object.keys(user.context));
+        this.context = this._purgeContext(nextDefinition.context);
         const actualDefinition = this.coreDefinition;
         this.coreDefinition = nextDefinition;
         if (
@@ -116,6 +111,24 @@ export class OdooPivot {
             }
         }
         this.load({ reload: true });
+    }
+
+    /**
+     * Remove the user context keys and the PivotView related keys, which would
+     * otherwise override the measures and groupbys of the definition.
+     *
+     * @protected
+     * @param {Object} context
+     * @returns {Object}
+     */
+    _purgeContext(context) {
+        return omit(
+            context,
+            ...Object.keys(user.context),
+            "pivot_measures",
+            "pivot_row_groupby",
+            "pivot_column_groupby"
+        );
     }
 
     /**
@@ -565,6 +578,15 @@ export class OdooPivotRuntimeDefinition extends PivotRuntimeDefinition {
         return this._sortedColumn;
     }
 
+    createPivotDimension(fields, dimension) {
+        const dim = super.createPivotDimension(fields, dimension);
+        const field = fields[dimension.fieldName];
+        if (field?.relation) {
+            dim.relation = field.relation;
+        }
+        return dim;
+    }
+
     get domain() {
         return this._domain;
     }
@@ -631,7 +653,7 @@ pivotRegistry.add("ODOO", {
         ((MEASURES_TYPES.includes(field.type) && field.aggregator) || field.type === "many2one") &&
         field.name !== "id" &&
         field.store,
-    isGroupable: (field) => field.groupable,
+    isGroupable: (field) => field.groupable && pivotNormalizationValueRegistry.contains(field.type),
 });
 
 supportedPivotPositionalFormulaRegistry.add("ODOO", true);

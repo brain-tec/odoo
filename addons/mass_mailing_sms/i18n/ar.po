@@ -5,13 +5,13 @@
 # Translators:
 # Wil Odoo, 2024
 # Malaz Abuidris <msea@odoo.com>, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-11-21 02:30+0000\n"
+"POT-Creation-Date: 2026-04-10 18:37+0000\n"
+"PO-Revision-Date: 2026-10-20 11:01+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Arabic <https://translate.odoo.com/projects/odoo-18/"
 "mass_mailing_sms/ar/>\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
 "&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: mass_mailing_sms
 #. odoo-javascript
@@ -40,15 +40,6 @@ msgstr "(شاملة متتبعات الورابط) "
 #: code:addons/mass_mailing_sms/static/src/components/sms_widget/fields_sms_widget.js:0
 msgid " (including opt-out link)"
 msgstr "(شاملة رابط الانسحاب) "
-
-#. module: mass_mailing_sms
-#: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_sms_test_view_form
-msgid ""
-"+32 495 85 85 77\n"
-"+33 545 55 55 55"
-msgstr ""
-"+32 495 85 85 77\n"
-"+33 545 55 55 55"
 
 #. module: mass_mailing_sms
 #. odoo-python
@@ -111,8 +102,8 @@ msgid ""
 "<span name=\"scheduled_text_sms\" invisible=\"mailing_type != 'sms'\">SMS "
 "Text Messages are in queue and will be sent soon.</span>"
 msgstr ""
-"<span name=\"scheduled_text_sms\" invisible=\"mailing_type != "
-"'sms'\">الرسائل النصية القصيرة قيد الانتظار وسوف يتم إرسالها قريباً.</span>"
+"<span name=\"scheduled_text_sms\" invisible=\"mailing_type != 'sms'\">"
+"الرسائل النصية القصيرة قيد الانتظار وسوف يتم إرسالها قريباً.</span>"
 
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_form_sms
@@ -211,7 +202,7 @@ msgstr "عدد المرفقات"
 #. module: mass_mailing_sms
 #: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__twilio_authentication
 msgid "Authentication Error\""
-msgstr ""
+msgstr "خطأ في المصادقة\""
 
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_tree_sms
@@ -238,8 +229,8 @@ msgid ""
 "Blacklist through SMS Marketing unsubscribe (mailing ID: %(mailing_id)s - "
 "model: %(model)s)"
 msgstr ""
-"إدراج في القائمة السوداء عن طريق إلغاء الاشتراك من التسويق عبر الرسائل "
-"النصية القصيرة (معرف المراسلة: %(mailing_id)s - النموذج: %(model)s) "
+"إدراج في القائمة السوداء عن طريق إلغاء الاشتراك من التسويق عبر الرسائل النصية "
+"القصيرة (معرف المراسلة: %(mailing_id)s - النموذج: %(model)s) "
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__sms_blacklist
@@ -434,7 +425,7 @@ msgstr ""
 #. module: mass_mailing_sms
 #: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__twilio_from_to
 msgid "From / To identic"
-msgstr ""
+msgstr "المصدر والوجهة متطابقان"
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_contact__has_message
@@ -488,7 +479,7 @@ msgstr "يشمل رابط الانسحاب "
 #. module: mass_mailing_sms
 #: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__twilio_callback
 msgid "Incorrect callback URL"
-msgstr ""
+msgstr "عنوان URL غير صحيح لصفحة إعادة التوجيه"
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields,help:mass_mailing_sms.field_mailing_contact__mobile_blacklisted
@@ -497,9 +488,9 @@ msgid ""
 "distinguish which number is blacklisted             when there is both a "
 "mobile and phone field in a model."
 msgstr ""
-"يشير إلى ما إذا كان رقم الهاتف السليم المدرج في القائمة السوداء أم لا.  "
-"يساعد في تمييز أي الأرقام تم إدراجها في القائمة السوداء عندما يمون هناك "
-"حقلان لرقم الهاتف والهاتف المحمول في إحدى النماذج. "
+"يشير إلى ما إذا كان رقم الهاتف السليم المدرج في القائمة السوداء أم لا.  يساعد "
+"في تمييز أي الأرقام تم إدراجها في القائمة السوداء عندما يمون هناك حقلان لرقم "
+"الهاتف والهاتف المحمول في إحدى النماذج. "
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields,help:mass_mailing_sms.field_mailing_contact__phone_blacklisted
@@ -649,7 +640,7 @@ msgstr "الرسائل"
 #. module: mass_mailing_sms
 #: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__twilio_from_missing
 msgid "Missing From Number"
-msgstr ""
+msgstr "رقم المرسل غير موجود"
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__sms_number_missing
@@ -790,7 +781,7 @@ msgstr "التقييمات "
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_form_sms
 msgid "Ready to unleash your text messages?"
-msgstr ""
+msgstr "هل أنت مستعد لإطلاق العنان لرسائلك النصية؟"
 
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_tree_sms
@@ -1133,6 +1124,13 @@ msgstr "تم الإدراج في القائمة السوداء بنجاح "
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.blacklist_number
 msgid "has been successfully removed from"
 msgstr "تمت الإزالة بنجاح من "
+
+#~ msgid ""
+#~ "+32 495 85 85 77\n"
+#~ "+33 545 55 55 55"
+#~ msgstr ""
+#~ "+32 495 85 85 77\n"
+#~ "+33 545 55 55 55"
 
 #~ msgid "Test SMS could not be sent to %(destination)s: %(state)s"
 #~ msgstr ""

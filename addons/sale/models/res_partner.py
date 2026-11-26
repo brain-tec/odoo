@@ -60,7 +60,7 @@ class ResPartner(models.Model):
         """ Can't edit `name` if there is (non draft) issued SO. """
         return super()._can_edit_name() and not self._has_order(
             [
-                ('partner_invoice_id', '=', self.id),
+                '|', ('partner_invoice_id', '=', self.id),
                 ('partner_id', '=', self.id),
             ]
         )
@@ -91,7 +91,10 @@ class ResPartner(models.Model):
             ('partner_invoice_id', 'any', [
                 ('commercial_partner_id', 'in', commercial_partners.ids),
             ]),
-            ('order_line', 'any', [('untaxed_amount_to_invoice', '>', 0)]),
+            ('order_line', 'any', [
+                '|', ('untaxed_amount_to_invoice', '>', 0),
+                     ('invoice_status', '=', 'no'),
+            ]),
             ('state', '=', 'sale'),
         ])
         for (partner, currency), orders in sale_orders.grouped(

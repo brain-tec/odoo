@@ -491,6 +491,67 @@ describe(parseUrl(import.meta.url), () => {
         expect.verifySteps(["pointerdown:0(1)@button", "pointerup:0@button", "click:0@button"]);
     });
 
+    test("click on touch: slow listener does not suppress the click", async () => {
+        mockTouch(true);
+
+        await mountForTest(/* xml */ `<button type="button">Click me</button>`);
+
+        on("button", "pointerdown", () => advanceTime(600));
+
+        await hover("button");
+        monitorEvents("button");
+
+        await click("button");
+
+        expect.verifySteps([
+            "pointerdown:0(1)@button",
+            "focus@button",
+            "focusin@button",
+            "pointerup:0@button",
+            "click:0@button",
+        ]);
+    });
+
+    test("click on touch: a held pointer suppresses the click", async () => {
+        mockTouch(true);
+
+        await mountForTest(/* xml */ `<button type="button">Click me</button>`);
+
+        await hover("button");
+        monitorEvents("button");
+
+        await pointerDown("button");
+        await advanceTime(600);
+        await pointerUp("button");
+
+        expect.verifySteps([
+            "pointerdown:0(1)@button",
+            "focus@button",
+            "focusin@button",
+            "pointerup:0@button",
+        ]);
+    });
+
+    test("click on touch: a held drag suppresses the click on drop", async () => {
+        mockTouch(true);
+
+        await mountForTest(/* xml */ `<button type="button">Click me</button>`);
+
+        await hover("button");
+        monitorEvents("button");
+
+        const { drop } = await drag("button");
+        await advanceTime(600);
+        await drop();
+
+        expect.verifySteps([
+            "pointerdown:0(1)@button",
+            "focus@button",
+            "focusin@button",
+            "pointerup:0@button",
+        ]);
+    });
+
     test("click: iframe", async () => {
         await mountForTest(/* xml */ `
             <button>Click me</button>
@@ -1236,8 +1297,8 @@ describe(parseUrl(import.meta.url), () => {
             "pointerleave:0@input",
             "mouseleave:0@input",
             // Change
-            "blur@input",
             "change@input",
+            "blur@input",
             "focusout@input",
         ]);
     });
@@ -1534,6 +1595,40 @@ describe(parseUrl(import.meta.url), () => {
         ]);
     });
 
+    test("hover and leave: shadow root", async () => {
+        await mountForTest(/* xml */ `<div class="container" />`);
+        const shadow = queryOne(".container").attachShadow({ mode: "open" });
+        const button = document.createElement("button");
+        shadow.appendChild(button);
+        for (const type of ["mouseenter", "mouseleave"]) {
+            button.addEventListener(type, () => expect.step(type));
+        }
+        await hover(".container:shadow button");
+        expect.verifySteps(["mouseenter"]);
+        await leave();
+        expect.verifySteps(["mouseleave"]);
+    });
+
+    test("hover: previous target in a removed iframe", async () => {
+        await mountForTest(/* xml */ `
+            <button>Click me</button>
+            <iframe srcdoc="&lt;button&gt;iframe button&lt;/button&gt;" />
+        `);
+
+        await hover(":iframe button");
+
+        queryOne("button").addEventListener("pointerover", (ev) =>
+            expect.step(`pointerover:${ev.relatedTarget}`)
+        );
+        queryOne("iframe").remove();
+
+        // The removed iframe button must not be used as related target
+        // (Chrome >= 156 would crash the renderer).
+        await hover("button");
+
+        expect.verifySteps(["pointerover:null"]);
+    });
+
     test("keyDown", async () => {
         await mountForTest(/* xml */ `<input type="text" />`);
 
@@ -1759,6 +1854,8 @@ describe(parseUrl(import.meta.url), () => {
             "focus@input",
             "focusin@input",
             "focusin@form",
+            "keyup:Tab@input",
+            "keyup:Tab@form",
             // Enter
             "keydown:Enter@input",
             "keydown:Enter@form",
@@ -1790,6 +1887,8 @@ describe(parseUrl(import.meta.url), () => {
             "focus@button",
             "focusin@button",
             "focusin@form",
+            "keyup:Tab@button",
+            "keyup:Tab@form",
             // Enter
             "keydown:Enter@button",
             "keydown:Enter@form",
@@ -1822,6 +1921,8 @@ describe(parseUrl(import.meta.url), () => {
             "focus@button",
             "focusin@button",
             "focusin@form",
+            "keyup:Tab@button",
+            "keyup:Tab@form",
             // Enter
             "keydown:Enter@button",
             "keydown:Enter@form",

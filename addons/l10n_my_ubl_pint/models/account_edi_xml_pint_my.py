@@ -75,7 +75,7 @@ class AccountEdiXmlUBLPINTMY(models.AbstractModel):
 
     def _get_tax_unece_codes(self, customer, supplier, tax):
         """
-        In malaysia, only the following codes can be used: T, E, O
+        In malaysia, only the following codes can be used: SA, SE, HVG, LVG, TTX, E, O
         https://docs.peppol.eu/poac/my/pint-my/bis/#_tax_category_code
         """
         # OVERRIDE account_edi_ubl_cii
@@ -91,7 +91,7 @@ class AccountEdiXmlUBLPINTMY(models.AbstractModel):
         if not supplier.sst_registration_number:
             codes['tax_category_code'] = 'O'
         elif tax.amount != 0:
-            codes['tax_category_code'] = 'T'
+            codes['tax_category_code'] = 'SE' if tax.tax_scope == 'service' else 'SA'
         else:
             codes['tax_category_code'] = 'E'
         return codes
@@ -142,10 +142,12 @@ class AccountEdiXmlUBLPINTMY(models.AbstractModel):
         if not supplier.sst_registration_number:
             grouping_key['tax_category_code'] = 'O'
         elif tax_data['tax'].amount != 0:
-            grouping_key['tax_category_code'] = 'T'
+            grouping_key['tax_category_code'] = 'SE' if tax_data['tax'].tax_scope == 'service' else 'SA'
         else:
             grouping_key['tax_category_code'] = 'E'
 
+        # [aligned-ibrp-047] Malaysian tax categories belong to the VAT scheme.
+        grouping_key['scheme_id'] = 'VAT'
         return grouping_key
 
     def _add_invoice_tax_total_nodes(self, document_node, vals):
@@ -167,25 +169,34 @@ class AccountEdiXmlUBLPINTMY(models.AbstractModel):
         document_node['cbc:CustomizationID'] = {'_text': self._get_customization_ids()['pint_my']}
         document_node['cbc:ProfileID'] = {'_text': 'urn:peppol:bis:billing'}
 
-    def _get_party_node(self, vals):
-        party_node = super()._get_party_node(vals)
-        commercial_partner = vals['partner'].commercial_partner_id
+    def _ubl_add_party_tax_scheme_nodes(self, vals):
+        # EXTENDS account.edi.ubl_bis3
+        super()._ubl_add_party_tax_scheme_nodes(vals)
+        partner = vals['party_vals']['partner']
+        commercial_partner = partner.commercial_partner_id
 
-        # See https://docs.peppol.eu/poac/my/pint-my/bis/#_seller_tax_identifier
-        party_node['cac:PartyTaxScheme'][0]['cbc:CompanyID']['_text'] = commercial_partner.sst_registration_number or 'NA'
+        if commercial_partner.country_code == 'MY':
+            vals['party_node']['cac:PartyTaxScheme'] = [{
+                'cbc:CompanyID': {'_text': commercial_partner.sst_registration_number or 'NA'},
+                'cac:TaxScheme': {
+                    'cbc:ID': {'_text': 'NOT_EU_VAT'},
+                },
+            }]
 
-        if vals['role'] == 'supplier':
-            party_node['cac:PartyTaxScheme'].append(
-                {
-                    **party_node['cac:PartyTaxScheme'][0],
-                    'cbc:CompanyID': {'_text': commercial_partner.vat or 'NA'},
-                    'cac:TaxScheme': {
-                        'cbc:ID': {'_text': 'GST'}
-                    }
-                }
-            )
+    def _ubl_add_accounting_supplier_party_tax_scheme_nodes(self, vals):
+        # EXTENDS account.edi.ubl_bis3
+        super()._ubl_add_accounting_supplier_party_tax_scheme_nodes(vals)
+        nodes = vals['party_node']['cac:PartyTaxScheme']
+        partner = vals['party_vals']['partner']
+        commercial_partner = partner.commercial_partner_id
 
-        return party_node
+        if commercial_partner.country_code == 'MY':
+            nodes.append({
+                'cbc:CompanyID': {'_text': commercial_partner.vat or 'NA'},
+                'cac:TaxScheme': {
+                    'cbc:ID': {'_text': 'GST'},
+                },
+            })
 
     def _export_invoice_constraints_new(self, invoice, vals):
         # EXTENDS account_edi_ubl_cii

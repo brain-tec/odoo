@@ -6,13 +6,13 @@
 # Martin Trigaux, 2018
 # Boško Stojaković <bluesoft83@gmail.com>, 2018
 # Bole <bole@dajmi5.com>, 2018
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-12-31 16:37+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 17:16+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Bosnian <https://translate.odoo.com/projects/odoo-18/"
 "google_calendar/bs/>\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: google_calendar
 #. odoo-python
@@ -87,7 +87,7 @@ msgstr ""
 #. module: google_calendar
 #: model:ir.model,name:google_calendar.model_calendar_event
 msgid "Calendar Event"
-msgstr ""
+msgstr "Događaj na kalendaru"
 
 #. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_res_users__google_calendar_cal_id
@@ -123,7 +123,7 @@ msgstr ""
 #. module: google_calendar
 #: model:ir.model,name:google_calendar.model_res_config_settings
 msgid "Config Settings"
-msgstr ""
+msgstr "Postavke"
 
 #. module: google_calendar
 #. odoo-javascript
@@ -383,6 +383,14 @@ msgid "The following event could not be synced with Google Calendar."
 msgstr ""
 
 #. module: google_calendar
+#. odoo-python
+#: code:addons/google_calendar/models/calendar.py:0
+msgid ""
+"This event has more than 5 reminders, only the first 5 will be synced to "
+"Google Calendar."
+msgstr ""
+
+#. module: google_calendar
 #: model:ir.model.fields,help:google_calendar.field_google_calendar_account_reset__delete_policy
 msgid "This will only affect events for which the user is the owner"
 msgstr ""
@@ -402,7 +410,7 @@ msgstr "Korisnik"
 #. module: google_calendar
 #: model:ir.model,name:google_calendar.model_res_users_settings
 msgid "User Settings"
-msgstr ""
+msgstr "Korisničke postavke"
 
 #. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_res_users__google_calendar_token

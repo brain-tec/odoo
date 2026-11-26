@@ -206,14 +206,10 @@ class Project(models.Model):
 
     @api.depends('milestone_ids', 'milestone_ids.is_reached', 'milestone_ids.deadline')
     def _compute_next_milestone_id(self):
-        milestone_ids_per_project_id = {
-            project.id: milestone_ids
-            for project, milestone_ids in self.env['project.milestone']._read_group(
-                [('project_id', 'in', self.ids), ('is_reached', '=', False)],
-                ['project_id'],
-                ['id:recordset'],
-            )
-        }
+        milestone_ids_per_project_id = self.env['project.milestone'].search([
+            ('project_id', 'in', self.ids),
+            ('is_reached', '=', False),
+        ]).grouped(lambda milestone: milestone.project_id.id)
         for project in self:
             milestone = milestone_ids_per_project_id.get(project.id, self.env['project.milestone'])[:1]
             project.next_milestone_id = milestone
@@ -480,7 +476,7 @@ class Project(models.Model):
             for follower in old_project.message_follower_ids:
                 new_project.message_subscribe(partner_ids=follower.partner_id.ids, subtype_ids=follower.subtype_ids.ids)
             if old_project.allow_milestones:
-                new_project.milestone_ids = self.milestone_ids.copy().ids
+                new_project.milestone_ids = old_project.milestone_ids.copy().ids
             if 'tasks' not in default:
                 old_project.map_tasks(new_project.id)
             if not old_project.active:
@@ -606,15 +602,16 @@ class Project(models.Model):
             analytic_account_to_update = self.env['account.analytic.account'].browse([
                 analytic_account.id for [analytic_account] in projects_read_group
             ])
-            analytic_account_to_update.write({'name': self.name})
+            analytic_account_to_update.write({'name': vals['name']})
         return res
 
     def unlink(self):
         # Delete the empty related analytic account
         analytic_accounts_to_delete = self.env['account.analytic.account']
         for project in self:
-            if project.account_id and not project.account_id.line_ids:
-                analytic_accounts_to_delete |= project.account_id
+            account = project.account_id
+            if account and not account.line_ids and not (account.with_context(active_test=False).project_ids - self):
+                analytic_accounts_to_delete |= account
         self.with_context(active_test=False).tasks.unlink()
         result = super(Project, self).unlink()
         analytic_accounts_to_delete.unlink()
@@ -1053,9 +1050,9 @@ class Project(models.Model):
             elif project.privacy_visibility == 'portal':
                 portal_users = project.message_partner_ids.user_ids.filtered('share')
                 project.message_unsubscribe(partner_ids=portal_users.partner_id.ids)
-                project.tasks._unsubscribe_portal_users()
+                project.with_context(active_test=False).tasks._unsubscribe_portal_users()
                 # revoke access_token since the project and its tasks are no longer accessible for portal/public users
-                project.tasks.access_token = ''
+                project.with_context(active_test=False).tasks.access_token = ''
                 project.access_token = ''
 
     # ---------------------------------------------------
@@ -1115,7 +1112,7 @@ class Project(models.Model):
         if request_list and "followers" in request_list:
             store.add(
                 self,
-                {"collaborator_ids": Store.many(self.collaborator_ids.partner_id, only_id=True)},
+                {"collaborator_ids": Store.many(self.sudo().collaborator_ids.partner_id, only_id=True)},
                 as_thread=True,
             )
 

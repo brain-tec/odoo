@@ -77,7 +77,7 @@ class AccountMoveSend(models.AbstractModel):
             })
         # Add mail attachments if sending methods support them
         if self._display_attachments_widget(vals['invoice_edi_format'], vals['sending_methods']):
-            mail_attachments_widget = self._get_default_mail_attachments_widget(
+            mail_attachments_widget = self.with_context(sending_method=vals['sending_methods'])._get_default_mail_attachments_widget(
                 move,
                 mail_template,
                 invoice_edi_format=vals['invoice_edi_format'],
@@ -229,16 +229,18 @@ class AccountMoveSend(models.AbstractModel):
         # _get_placeholder_mail_attachments_data method.
         invoice_template = (pdf_report or self._get_default_pdf_report_id(move)) + self.env.ref('account.account_invoices')
         extra_mail_templates = mail_template.report_template_ids - invoice_template
-        filename = move._get_invoice_report_filename()
-        return [
-            {
+
+        attachments = []
+        for extra_mail_template in extra_mail_templates:
+            filename = move._get_invoice_mail_template_dynamic_report_filename(extra_mail_template) or f'{extra_mail_template.name.lower()}_{move.name}.pdf'
+            attachments.append({
                 'id': f'placeholder_{extra_mail_template.name.lower()}_{filename}',
-                'name': f'{extra_mail_template.name.lower()}_{filename}',
+                'name': filename,
                 'mimetype': 'application/pdf',
                 'placeholder': True,
                 'dynamic_report': extra_mail_template.report_name,
-            } for extra_mail_template in extra_mail_templates
-        ]
+            })
+        return attachments
 
     @api.model
     def _get_invoice_extra_attachments(self, move):
@@ -371,15 +373,14 @@ class AccountMoveSend(models.AbstractModel):
         :param invoice_data:    The collected data for the invoice so far.
         """
 
-        company_id = next(iter(invoices_data)).company_id
         grouped_invoices_by_report = defaultdict(dict)
         for invoice, invoice_data in invoices_data.items():
-            grouped_invoices_by_report[invoice_data['pdf_report']][invoice] = invoice_data
+            grouped_invoices_by_report[invoice_data['pdf_report'], invoice.company_id][invoice] = invoice_data
 
-        for pdf_report, group_invoices_data in grouped_invoices_by_report.items():
+        for (pdf_report, _company), group_invoices_data in grouped_invoices_by_report.items():
             ids = [inv.id for inv in group_invoices_data]
 
-            content, report_type = self.env['ir.actions.report'].with_company(company_id)._pre_render_qweb_pdf(pdf_report.report_name, res_ids=ids)
+            content, report_type = self.env['ir.actions.report']._pre_render_qweb_pdf(pdf_report.report_name, res_ids=ids)
             content_by_id = self.env['ir.actions.report']._get_splitted_report(pdf_report.report_name, content, report_type)
             if len(content_by_id) == 1 and False in content_by_id:
                 raise ValidationError(_("Cannot identify the invoices in the generated PDF: %s", ids))
@@ -401,7 +402,7 @@ class AccountMoveSend(models.AbstractModel):
         :param invoice_data:    The collected data for the invoice so far.
         """
         pdf_report = invoice_data['pdf_report']
-        content, report_type = self.env['ir.actions.report'].with_company(invoice.company_id)._pre_render_qweb_pdf(pdf_report.report_name, invoice.ids, data={'proforma': True})
+        content, report_type = self.env['ir.actions.report']._pre_render_qweb_pdf(pdf_report.report_name, invoice.ids, data={'proforma': True})
         content_by_id = self.env['ir.actions.report']._get_splitted_report(pdf_report.report_name, content, report_type)
 
         invoice_data['proforma_pdf_attachment_values'] = {

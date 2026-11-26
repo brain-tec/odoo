@@ -96,16 +96,22 @@ def _make_request(company, endpoint_type, params=False):
             if response_json['error']['code'] == 404:
                 message = company.env._('The url that this service tried to contact does not exist. The url was “%s”', url)
             raise MojEracunServiceError('connection_error', message)
+        elif 'Username' in response_json:  # No valid response contains this, it is a credentials error format
+            message = company.env._("MER service returned an error: Username '%(name)s': %(desc)s", name=response_json['Username'].get('Value'), desc=response_json['Username'].get('Messages'))
+            raise MojEracunServiceError('credentials_error', message)
         return response_json
     else:
         return response.content
 
 
 def _call_mer_service(company, endpoint, params=None):
+    # The credentials are restricted to accounting managers, but any user allowed to
+    # process the documents must be able to call the service.
+    company_sudo = company.sudo()
     params_base = {
-        'Username': company.l10n_hr_mer_username,
-        'Password': company.l10n_hr_mer_password,
-        'CompanyId': company.l10n_hr_mer_company_ident,
+        'Username': company_sudo.l10n_hr_mer_username,
+        'Password': company_sudo.l10n_hr_mer_password,
+        'CompanyId': company_sudo.l10n_hr_mer_company_ident,
         'CompanyBu': company.partner_id.l10n_hr_business_unit_code,
         'SoftwareId': company.l10n_hr_mer_software_ident,
     }

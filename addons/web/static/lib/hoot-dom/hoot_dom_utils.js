@@ -62,9 +62,9 @@ function makeInteractorFn(type, fn, name, alias) {
     return {
         [alias || name](...args) {
             const result = fn(...args);
-            if (isInstanceOf(result, Promise)) {
+            if (isPromise(result)) {
                 for (let i = 0; i < args.length; i++) {
-                    if (isInstanceOf(args[i], Promise)) {
+                    if (isPromise(args[i])) {
                         // Get promise result for async arguments if possible
                         args[i].then((result) => (args[i] = result));
                     }
@@ -316,6 +316,16 @@ export function isFirefox() {
     return /firefox/i.test($userAgent);
 }
 
+Array.isArray;
+
+/**
+ * @param {any} instance
+ * @returns {instance is Promise<any>}
+ */
+export function isPromise(instance) {
+    return instance && typeof instance.then === "function";
+}
+
 /**
  * Cross-realm equivalent to 'instanceof'.
  * Can be called with multiple constructors, and will return true if the given object
@@ -393,23 +403,6 @@ export function parseRegExp(value, options) {
         }
     }
     return value;
-}
-
-/**
- * @param {Node} node
- * @param {{ raw?: boolean }} [options]
- */
-export function toSelector(node, options) {
-    const tagName = getTag(node);
-    const id = node.id ? `#${node.id}` : "";
-    const classNames = node.classList
-        ? [...node.classList].map((className) => `.${className}`)
-        : [];
-    if (options?.raw) {
-        return { tagName, id, classNames };
-    } else {
-        return [tagName, id, ...classNames].join("");
-    }
 }
 
 export class HootDebugHelpers {

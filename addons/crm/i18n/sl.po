@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* crm
+# * crm
 #
 # Translators:
 # JernejEditor, 2024
@@ -8,20 +8,25 @@
 # Neun Pro, 2025
 # Aleš Pipan, 2025
 #
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
+# Žiga Trček <ziga.trcek@implex.si>, 2026.
+# Jan Zorko <jan.zorko@implex.si>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-29 18:36+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Aleš Pipan, 2025\n"
-"Language-Team: Slovenian (https://app.transifex.com/odoo/teams/41243/sl/)\n"
+"POT-Creation-Date: 2026-02-20 18:37+0000\n"
+"PO-Revision-Date: 2026-10-20 16:26+0000\n"
+"Last-Translator: Jan Zorko <jan.zorko@implex.si>\n"
+"Language-Team: Slovenian <https://translate.odoo.com/projects/odoo-18/crm/"
+"sl/>\n"
 "Language: sl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
-"n%100==4 ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
+"n%100==4 ? 2 : 3;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__lead_all_assigned_month_count
@@ -180,8 +185,8 @@ msgid ""
 "                                    <span class=\"o_stat_text\" "
 "invisible=\"duplicate_lead_count &gt; 1\">Similar Lead</span>"
 msgstr ""
-"<span class=\"o_stat_text\" invisible=\"duplicate_lead_count &lt; "
-"2\">Podobne potencialne stranke</span>\n"
+"<span class=\"o_stat_text\" invisible=\"duplicate_lead_count &lt; 2\">"
+"Podobne potencialne stranke</span>\n"
 "                                    <span class=\"o_stat_text\" "
 "invisible=\"duplicate_lead_count &gt; 1\">Podobna potencialna stranka</span>"
 
@@ -194,8 +199,8 @@ msgid ""
 msgstr ""
 "<span class=\"o_stat_text\" invisible=\"not use_leads\">Potencialne stranke</"
 "span>\n"
-"                        <span class=\"o_stat_text\" "
-"invisible=\"use_leads\">Priložnosti</span>"
+"                        <span class=\"o_stat_text\" invisible=\"use_leads\">"
+"Priložnosti</span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lost_reason_view_form
@@ -206,19 +211,6 @@ msgstr "<span class=\"o_stat_text\"> Leads</span>"
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid "<span class=\"oe_grey p-2 text-nowrap d-none d-sm-block\"> at </span>"
 msgstr ""
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
-msgid ""
-"<span class=\"oe_grey p-2\" groups=\"crm.group_use_recurring_revenues\"> + </"
-"span>\n"
-"                                        <span class=\"oe_grey p-2\" "
-"groups=\"!crm.group_use_recurring_revenues\"> at </span>"
-msgstr ""
-"<span class=\"oe_grey p-2\" groups=\"crm.group_use_recurring_revenues\"> + </"
-"span>\n"
-"                                        <span class=\"oe_grey p-2\" "
-"groups=\"!crm.group_use_recurring_revenues\"> at </span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -602,7 +594,7 @@ msgstr "Naziv vzdevka"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__alias_status
 msgid "Alias Status"
-msgstr "Vzdevek status"
+msgstr "Status vzdevka"
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_team__alias_status
@@ -649,8 +641,8 @@ msgid ""
 "                                        To work with the CRM, you should <a "
 "name=\"%d\" type=\"action\" tabindex=\"-1\">join a team.</a>"
 msgstr ""
-"As you are a member of no Sales Team, you are showed the Pipeline of the "
-"<b>first team by default.</b>\n"
+"As you are a member of no Sales Team, you are showed the Pipeline of the <b>"
+"first team by default.</b>\n"
 "                                        To work with the CRM, you should <a "
 "name=\"%d\" type=\"action\" tabindex=\"-1\">join a team.</a>"
 
@@ -663,8 +655,8 @@ msgid ""
 "                                        To work with the CRM, you should "
 "join a team."
 msgstr ""
-"As you are a member of no Sales Team, you are showed the Pipeline of the "
-"<b>first team by default.</b>\n"
+"As you are a member of no Sales Team, you are showed the Pipeline of the <b>"
+"first team by default.</b>\n"
 "                                        To work with the CRM, you should "
 "join a team."
 
@@ -1508,7 +1500,7 @@ msgstr "Expected Closing:"
 #: model:ir.model.fields,field_description:crm.field_crm_lead__recurring_revenue_monthly
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_tree_view_oppor
 msgid "Expected MRR"
-msgstr "Expected MRR"
+msgstr "Pričakovan mesečni prihodek"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__expected_revenue
@@ -1597,6 +1589,10 @@ msgid ""
 "targeted to your needs: company size, industry, etc. To help you test the "
 "feature, we offer you 20 credits for free."
 msgstr ""
+"Za prodajno ekipo ni nič hujšega kot pomanjkanje potencialnih strank. Na "
+"srečo lahko v nekaj klikih ustvarite potencialne stranke, posebej "
+"prilagojene vašim potrebam: velikost podjetja, panoga itd. Da bi vam "
+"pomagali preizkusiti funkcijo, vam brezplačno ponujamo 20 kreditov."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead2opportunity_partner__force_assignment
@@ -2135,8 +2131,7 @@ msgstr "Ustvarjanje indicev"
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_lead_all_leads
 msgid "Leads are the qualification step before the creation of an opportunity."
-msgstr ""
-"Leads are the qualification step before the creation of an opportunity."
+msgstr "Leads are the qualification step before the creation of an opportunity."
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_activity
@@ -2639,8 +2634,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/crm/models/crm_team.py:0
 msgid "No new lead allocated to the teams because no lead match their domains."
-msgstr ""
-"No new lead allocated to the teams because no lead match their domains."
+msgstr "No new lead allocated to the teams because no lead match their domains."
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_lead_action_forecast
@@ -4162,6 +4156,11 @@ msgid "alias"
 msgstr "vzdevek"
 
 #. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
+msgid "at"
+msgstr "pri"
+
+#. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
 msgid "e.g. \"0123456789\""
 msgstr "npr. \"0123456789\""
@@ -4238,6 +4237,17 @@ msgstr "to your CRM. This email address is configurable by sales team members."
 #: code:addons/crm/models/crm_lead.py:0
 msgid "unknown"
 msgstr "neznano"
+
+#~ msgid ""
+#~ "<span class=\"oe_grey p-2\" groups=\"crm.group_use_recurring_revenues\"> "
+#~ "+ </span>\n"
+#~ "                                        <span class=\"oe_grey p-2\" "
+#~ "groups=\"!crm.group_use_recurring_revenues\"> at </span>"
+#~ msgstr ""
+#~ "<span class=\"oe_grey p-2\" groups=\"crm.group_use_recurring_revenues\"> "
+#~ "+ </span>\n"
+#~ "                                        <span class=\"oe_grey p-2\" "
+#~ "groups=\"!crm.group_use_recurring_revenues\"> at </span>"
 
 #~ msgid ""
 #~ "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-"

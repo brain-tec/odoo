@@ -7,14 +7,15 @@
 # Wil Odoo, 2025
 # Larisa_nexterp, 2025
 #
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Dorin Hongu <dhongu@gmail.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2025-11-21 02:36+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"PO-Revision-Date: 2026-11-19 19:36+0000\n"
+"Last-Translator: Dorin Hongu <dhongu@gmail.com>\n"
 "Language-Team: Romanian <https://translate.odoo.com/projects/odoo-18/project/"
 "ro/>\n"
 "Language: ro\n"
@@ -23,7 +24,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: project
 #. odoo-python
@@ -129,8 +130,8 @@ msgid ""
 "#{record.milestone_count_reached.value} Milestones reached out of "
 "#{record.milestone_count.value}"
 msgstr ""
-"#{record.milestone_count_reached.value} etape atinse din "
-"#{record.milestone_count.value}"
+"#{record.milestone_count_reached.value} etape atinse din #"
+"{record.milestone_count.value}"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_tasks_list
@@ -375,16 +376,16 @@ msgid ""
 "            "
 msgstr ""
 "<div>\n"
-"    <t t-set=\"access_token\" t-value=\"object._rating_get_access_token()\"/"
-">\n"
+"    <t t-set=\"access_token\" t-value=\"object._rating_get_access_token()\"/>"
+"\n"
 "    <t t-set=\"partner\" t-value=\"object._rating_get_partner()\"/>\n"
 "    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
 "style=\"width:100%; margin:0px auto;\">\n"
 "    <tbody>\n"
 "        <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
 "            <t t-if=\"partner.name\">\n"
-"                Bună <t t-out=\"partner.name or ''\">Brandon Freeman</t>,<br/"
-"><br/>\n"
+"                Bună <t t-out=\"partner.name or ''\">Brandon Freeman</t>"
+",<br/><br/>\n"
 "            </t>\n"
 "            <t t-else=\"\">\n"
 "                Bună,<br/><br/>\n"
@@ -393,9 +394,8 @@ msgstr ""
 "noastre legate de sarcina <strong t-out=\"object.name or ''\">Planificare și "
 "buget</strong>\n"
 "            <t t-if=\"object._rating_get_operator().name\">\n"
-"                atribuită lui <strong t-"
-"out=\"object._rating_get_operator().name or ''\">Mitchell Admin</strong>.<br/"
-">\n"
+"                atribuită lui <strong t-out=\"object._rating_get_operator()"
+".name or ''\">Mitchell Admin</strong>.<br/>\n"
 "            </t>\n"
 "            <t t-else=\"\">\n"
 "                .<br/>\n"
@@ -454,8 +454,8 @@ msgstr ""
 "                <br/><span style=\"margin: 0; font-size: 12px; opacity: 0.5; "
 "color: #454748;\">Acest chestionar de satisfacție este trimis <b t-"
 "out=\"object.project_id.rating_status_period or ''\">săptămânal</b> atât "
-"timp cât sarcina se află în stadiul <b t-out=\"object.stage_id.name or "
-"''\">În desfășurare</b>.</span>\n"
+"timp cât sarcina se află în stadiul <b t-out=\"object.stage_id.name or ''\">"
+"În desfășurare</b>.</span>\n"
 "            </t>\n"
 "        </td></tr>\n"
 "        <tr><td><br/>Cu stimă,</td></tr>\n"
@@ -464,19 +464,19 @@ msgstr ""
 "t>\n"
 "        </td></tr>\n"
 "        <tr><td style=\"opacity: 0.5;\">\n"
-"            <t t-out=\"object.project_id.company_id.phone or ''\">1 "
-"650-123-4567</t>\n"
+"            <t t-out=\"object.project_id.company_id.phone or ''\">1 650-123-"
+"4567</t>\n"
 "            <t t-if=\"object.project_id.company_id.email\">\n"
-"                | <a t-attf-href=\"mailto:"
-"{{ object.project_id.company_id.email }}\" style=\"text-decoration:none; "
-"color: #454748;\" t-out=\"object.project_id.company_id.email or "
-"''\">info@companiadvs.com</a>\n"
+"                | <a t-attf-href=\"mailto:{{ "
+"object.project_id.company_id.email }}\" style=\"text-decoration:none; color: "
+"#454748;\" t-out=\"object.project_id.company_id.email or ''\">"
+"info@companiadvs.com</a>\n"
 "            </t>\n"
 "            <t t-if=\"object.project_id.company_id.website\">\n"
 "                | <a t-attf-href=\"{{ object.project_id.company_id.website }}"
 "\" style=\"text-decoration:none; color: #454748;\" t-"
-"out=\"object.project_id.company_id.website or ''\">http://www.exemplu.com</"
-"a>\n"
+"out=\"object.project_id.company_id.website or ''\">http://www.exemplu.com</a>"
+"\n"
 "            </t>\n"
 "        </td></tr>\n"
 "    </tbody>\n"
@@ -692,8 +692,8 @@ msgstr "<span class=\"o_stat_text\">Sarcini</span>"
 msgid ""
 "<span class=\"text-muted o_row ps-1 pb-3\">Send a rating request:</span>"
 msgstr ""
-"<span class=\"text-muted o_row ps-1 pb-3\">Trimite o solicitare de evaluare:"
-"</span>"
+"<span class=\"text-muted o_row ps-1 pb-3\">Trimite o solicitare de "
+"evaluare:</span>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
@@ -1898,9 +1898,9 @@ msgid ""
 "Date on which this task was last assigned (or unassigned). Based on this, "
 "you can get statistics on the time it usually takes to assign tasks."
 msgstr ""
-"Data la care această sarcină a fost ultima dată atribuită (sau "
-"dezatribuită). Pe baza acesteia, puteți obține statistici despre timpul "
-"necesar pentru a atribui sarcini."
+"Data la care această sarcină a fost ultima dată atribuită (sau dezatribuită)"
+". Pe baza acesteia, puteți obține statistici despre timpul necesar pentru a "
+"atribui sarcini."
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_task__repeat_unit__day
@@ -2257,8 +2257,7 @@ msgstr "Eroare! Nu puteți crea o ierarhie recursivă de sarcini."
 #. odoo-javascript
 #: code:addons/project/static/src/xml/project_task_kanban_examples.xml:0
 msgid "Everyone can propose ideas, and the Editor marks the best ones as"
-msgstr ""
-"Toată lumea poate propune idei, iar Editorul marchează cele mai bune ca"
+msgstr "Toată lumea poate propune idei, iar Editorul marchează cele mai bune ca"
 
 #. module: project
 #. odoo-javascript
@@ -2324,7 +2323,7 @@ msgstr "Urmărește"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_my_home
 msgid "Follow and comments tasks of your projects"
-msgstr "Urmărește și comentează sarcinile proiectelor tale"
+msgstr "Urmăriți și comentați sarcinile proiectelor dumneavoastră"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_my_home
@@ -2493,7 +2492,7 @@ msgstr "Ascunde sub-sarcina din fluxul tău"
 #: model:ir.model.fields.selection,name:project.selection__project_task__priority__1
 #: model:ir.model.fields.selection,name:project.selection__report_project_task_user__priority__1
 msgid "High"
-msgstr "Ridicată"
+msgstr "Ridicat"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_my_task
@@ -2774,8 +2773,7 @@ msgstr "Versiune problemă"
 #: model:ir.model.fields,help:project.field_project_project__duration_tracking
 #: model:ir.model.fields,help:project.field_project_task__duration_tracking
 msgid "JSON that maps ids from a many2one field to seconds spent"
-msgstr ""
-"JSON care map-ează id-urile dintr-un câmp many2one la secunde petrecute"
+msgstr "JSON care map-ează id-urile dintr-un câmp many2one la secunde petrecute"
 
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.act_project_project_2_project_task_all
@@ -2975,7 +2973,7 @@ msgstr "Caută"
 #: model:ir.model.fields.selection,name:project.selection__project_task__priority__0
 #: model:ir.model.fields.selection,name:project.selection__report_project_task_user__priority__0
 msgid "Low"
-msgstr "Scăzută"
+msgstr "Scăzut"
 
 #. module: project
 #. odoo-javascript
@@ -4577,10 +4575,10 @@ msgid ""
 "move them all at once to the next sprint by editing the milestone, tag, or "
 "property."
 msgstr ""
-"Sortează-ți sarcinile pe sprint folosind etape, etichete sau o proprietate "
-"dedicată. La finalul fiecărui sprint, selectează sarcinile rămase din listă "
-"și mută-le pe toate odată în sprintul următor editând etapa, eticheta sau "
-"proprietatea."
+"Sortează-ți sarcinile pe sprinturi folosind repere, etichete sau o "
+"proprietate dedicată. La sfârșitul fiecărui sprint, pur și simplu alege "
+"sarcinile rămase în lista ta și mută-le pe toate odată în următorul sprint "
+"editând reperul, eticheta sau proprietatea."
 
 #. module: project
 #. odoo-javascript
@@ -5244,9 +5242,9 @@ msgid ""
 "project's visibility will be changed to \"invited portal users and all "
 "internal users (public)\" in order to make it accessible to the recipients."
 msgstr ""
-"Acest proiect este restricționat în prezent la „Utilizatori interni "
-"invitați”. Vizibilitatea proiectului va fi schimbată la „utilizatori portal "
-"invitați și toți utilizatorii interni (public)” pentru a-l face accesibil "
+"Acest proiect este restricționat în prezent la „Utilizatori interni invitați"
+"”. Vizibilitatea proiectului va fi schimbată la „utilizatori portal invitați "
+"și toți utilizatorii interni (public)” pentru a-l face accesibil "
 "destinatarilor."
 
 #. module: project
@@ -5367,8 +5365,8 @@ msgid ""
 "To get things done, use activities and status on tasks.<br>\n"
 "                Chat in real time or by email to collaborate efficiently."
 msgstr ""
-"Pentru a finaliza lucrurile, folosește activitățile și starea pe sarcini."
-"<br>\n"
+"Pentru a finaliza lucrurile, folosește activitățile și starea pe sarcini.<br>"
+"\n"
 "                Discută în timp real sau prin e-mail pentru a colabora "
 "eficient."
 
@@ -5511,7 +5509,7 @@ msgstr "Nealocat"
 #: code:addons/project/static/src/project_sharing/chatter/portal_chatter_patch.xml:0
 #: code:addons/project/static/src/project_sharing/components/chatter/chatter_container.xml:0
 msgid "Unfollow"
-msgstr "Nu mai urmări"
+msgstr "Nu urmați"
 
 #. module: project
 #. odoo-python

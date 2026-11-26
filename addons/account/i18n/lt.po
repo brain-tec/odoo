@@ -43,15 +43,16 @@
 # Paulius Sladkevičius <paulius@versada.eu>, 2025
 # Wil Odoo, 2025
 # Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2025
-# Gustas Putvinskas <gustas@vialaurea.com>, 2025.
+# Gustas Putvinskas <gustas@vialaurea.com>, 2025, 2026.
 # Gailius Kazlauskas <gailius@vialaurea.com>, 2025, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Vialaurea <ramune@vialaurea.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-12 18:38+0000\n"
-"PO-Revision-Date: 2026-02-14 18:01+0000\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
+"PO-Revision-Date: 2026-11-14 10:33+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Lithuanian <https://translate.odoo.com/projects/odoo-18/"
 "account/lt/>\n"
@@ -59,11 +60,10 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural="
-"(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : "
-"(n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != "
-"0 ? 2: 3);\n"
-"X-Generator: Weblate 5.14.3\n"
+"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < "
+"11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 "
+": n % 1 != 0 ? 2: 3);\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__type
@@ -76,6 +76,11 @@ msgid ""
 "        Select 'General' for miscellaneous operations journals.\n"
 "        "
 msgstr ""
+"Klientų sąskaitų faktūrų žurnalams pasirinkite „Pardavimas“.\n"
+"Tiekėjų sąskaitų žurnalams pasirinkite „Pirkimas“.\n"
+"Klientų arba tiekėjų mokėjimų žurnalams pasirinkite „Grynieji pinigai“, "
+"„Bankas“ arba „Kredito kortelė“.\n"
+"Įvairių operacijų žurnalams pasirinkite „Bendrasis“."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_tax__amount_type
@@ -102,6 +107,16 @@ msgstr ""
 "        e.g 180 / (1 - 10%) = 200 (mokestis neįtrauktas į kainą)\n"
 "        e.g 200 * (1 - 10%) = 180 (mokestis įtrauktas į kainą)\n"
 "        "
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_send.py:0
+msgid ""
+"\n"
+"Please contact your administrator."
+msgstr ""
+"\n"
+"Kreipkitės į sistemos administratorių."
 
 #. module: account
 #. odoo-python
@@ -173,12 +188,13 @@ msgid ""
 "%(attachment_name)s (detached by %(user)s on %(date)s)%"
 "(attachment_extension)s"
 msgstr ""
+"%(attachment_name)s (atskyrė %(user)s, %(date)s)%(attachment_extension)s"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_lock_exception.py:0
 msgid "%(exception)s for %(user)s%(end_datetime_string)s%(reason)s."
-msgstr ""
+msgstr "%(exceptions)s naudotojui %(user)s%(end_datetime_string)s%(reason)s."
 
 #. module: account
 #. odoo-python
@@ -285,7 +301,7 @@ msgstr ""
 #. module: account
 #: model:ir.actions.server,name:account.action_move_block_payment
 msgid "(Un)Block Payment"
-msgstr ""
+msgstr "Blokuoti / atblokuoti mokėjimą"
 
 #. module: account
 #. odoo-python
@@ -360,6 +376,10 @@ msgid ""
 "    --\n"
 "    <br/>"
 msgstr ""
+".\n"
+"    <br/>\n"
+"    --\n"
+"    <br/>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -385,7 +405,7 @@ msgstr "... (%(nb_of_values)s kita)"
 #. odoo-javascript
 #: code:addons/account/static/src/components/x2many_buttons/x2many_buttons.xml:0
 msgid "... (View all)"
-msgstr ""
+msgstr "... (Rodyti viską)"
 
 #. module: account
 #. odoo-python
@@ -395,19 +415,9 @@ msgid "/ if not applicable"
 msgstr ""
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.document_tax_totals_template
-msgid "1.05"
-msgstr "1.05"
-
-#. module: account
 #: model:account.payment.term,name:account.account_payment_term_30_days_end_month_the_10
 msgid "10 Days after End of Next Month"
 msgstr "10 dienų po kito mėnesio pabaigos"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_statement
-msgid "100.0"
-msgstr "100.0"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
@@ -415,95 +425,14 @@ msgid "100.00 USD"
 msgstr "100.00 USD"
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_statement
-msgid "1000.0"
-msgstr "1000.0"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "11.05"
-msgstr "11.05"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_statement
-msgid "12345"
-msgstr "12345"
-
-#. module: account
 #: model:account.payment.term,name:account.account_payment_term_15days
 msgid "15 Days"
 msgstr "15 dienų"
 
 #. module: account
-#: model:account.tax,name:account.1_purchase_tax_template
-#: model:account.tax,name:account.1_sale_tax_template
-msgid "15%"
-msgstr "15%"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_statement
-msgid "1500.0"
-msgstr "1500.0"
-
-#. module: account
 #: model:account.payment.term,name:account.account_payment_term_30days_early_discount
 msgid "2/7 Net 30"
 msgstr "2/7 Grynasis 30"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "20.00"
-msgstr "20.00"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "2021-09-19"
-msgstr "2021-09-19"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
-msgid "2023-01-01"
-msgstr "2023-01-01"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
-msgid "2023-01-05"
-msgstr "2023-01-05"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_statement
-msgid "2023-08-11"
-msgstr "2023-08-11"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_statement
-msgid "2023-08-15"
-msgstr "2023-08-15"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_statement
-msgid "2023-08-31"
-msgstr "2023-08-31"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "2023-09-12"
-msgstr "2023-09-12"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "2023-09-25"
-msgstr "2023-09-25"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "2023-10-31"
-msgstr "2023-10-31"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "2024-01-01"
-msgstr "2024-01-01"
 
 #. module: account
 #: model:account.payment.term,name:account.account_payment_term_21days
@@ -521,18 +450,6 @@ msgid "25.00 USD"
 msgstr "25.00 USD"
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.document_tax_totals_company_currency_template
-#: model_terms:ir.ui.view,arch_db:account.document_tax_totals_template
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "27.00"
-msgstr "27.00"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "3.00"
-msgstr "3.00"
-
-#. module: account
 #: model:account.payment.term,name:account.account_payment_term_30days
 msgid "30 Days"
 msgstr "30 dienų"
@@ -546,24 +463,6 @@ msgstr "30% avansas iki mėnesio pabaigos"
 #: model:account.payment.term,name:account.account_payment_term_advance_60days
 msgid "30% Now, Balance 60 Days"
 msgstr "30% Dabar, Balansas 60 Dienų"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "30.00"
-msgstr "30.00"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.document_tax_totals_company_currency_template
-#: model_terms:ir.ui.view,arch_db:account.document_tax_totals_template
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "31.05"
-msgstr "31.05"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.document_tax_totals_company_currency_template
-#: model_terms:ir.ui.view,arch_db:account.document_tax_totals_template
-msgid "4.05"
-msgstr "4.05"
 
 #. module: account
 #: model:account.payment.term,name:account.account_payment_term_45days
@@ -581,19 +480,9 @@ msgid "50.00 EUR"
 msgstr "50.00 EUR"
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_statement
-msgid "534677881234"
-msgstr "534677881234"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "9.00"
-msgstr "9.00"
-
-#. module: account
 #: model:account.payment.term,name:account.account_payment_term_90days_on_the_10th
 msgid "90 days, on the 10th"
-msgstr ""
+msgstr "Po 90 dienų, 10-ąją mėnesio dieną"
 
 #. module: account
 #. odoo-python
@@ -822,6 +711,10 @@ msgid ""
 "                                    <span class=\"d-none d-md-inline\"> "
 "Processing Payment</span>"
 msgstr ""
+"<i class=\"fa fa-fw fa-check\" aria-label=\"processing_payment\" "
+"title=\"Mokėjimas apdorojamas\" role=\"img\"/>\n"
+"                                    <span class=\"d-none d-md-inline\"> "
+"Mokėjimas apdorojamas</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.portal_my_invoices
@@ -845,6 +738,11 @@ msgid ""
 "                        You also have the option to disable the feature for "
 "all vendors in the accounting settings."
 msgstr ""
+"<i class=\"fa fa-lightbulb-o\" role=\"img\"/>\n"
+"                        Nesijaudinkite – vėliau šį nustatymą bet kada "
+"galėsite pakeisti tiekėjo kortelėje.\n"
+"                        Apskaitos nustatymuose šią funkciją taip pat galite "
+"išjungti visiems tiekėjams."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_terms_conditions_setting_banner
@@ -865,6 +763,8 @@ msgstr ""
 msgid ""
 "<i class=\"oi oi-fw o_button_icon oi-arrow-right\"/> Configure Alias Domain"
 msgstr ""
+"<i class=\"oi oi-fw o_button_icon oi-arrow-right\"/> Konfigūruoti "
+"alternatyvaus adreso domeną"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.portal_my_details_fields
@@ -874,6 +774,10 @@ msgid ""
 "invoices, and with which electronic format.\n"
 "                    </small>"
 msgstr ""
+"<small class=\"form-text text-muted\">\n"
+"                        Galite pasirinkti, kaip ir kokiu elektroniniu "
+"formatu norite gauti sąskaitas faktūras.\n"
+"                    </small>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.portal_my_invoices
@@ -915,6 +819,8 @@ msgid ""
 "<span class=\"figure-caption\">Never miss a deadline, with automated "
 "statements and alerts.</span>"
 msgstr ""
+"<span class=\"figure-caption\">Nepraleiskite mokėjimo termino – naudokite "
+"automatines ataskaitas ir įspėjimus.</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -922,6 +828,8 @@ msgid ""
 "<span class=\"o_form_label mx-3 oe_edit_only text-center\" style=\"width: "
 "6ch;\" invisible=\"state != 'draft' or invoice_payment_term_id\">or</span>"
 msgstr ""
+"<span class=\"o_form_label mx-3 oe_edit_only text-center\" style=\"width: "
+"6ch;\" invisible=\"state != 'draft' or invoice_payment_term_id\">arba</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_line_form
@@ -953,7 +861,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_lock_exception_form
 msgid "<span class=\"o_form_label\">Changed Lock Date:</span>"
-msgstr ""
+msgstr "<span class=\"o_form_label\">Pakeista užrakinimo data:</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_lock_exception_form
@@ -962,6 +870,9 @@ msgid ""
 "                                        Audit\n"
 "                                    </span>"
 msgstr ""
+"<span class=\"o_stat_text\">\n"
+"                                        Auditas\n"
+"                                    </span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_form
@@ -1001,14 +912,14 @@ msgid "<span class=\"o_stat_text\">Invoiced</span>"
 msgstr "<span class=\"o_stat_text\">SF suma</span>"
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
-msgid "<span class=\"o_stat_text\">Journal Entries</span>"
-msgstr "<span class=\"o_stat_text\">Žurnalo įrašai</span>"
-
-#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
 msgid "<span class=\"o_stat_text\">Journal Entry</span>"
 msgstr "<span class=\"o_stat_text\">Žurnalo įrašas</span>"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
+msgid "<span class=\"o_stat_text\">Journal Items</span>"
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -1032,6 +943,9 @@ msgid ""
 "                                <i>inclusive, to make them immutable</i>\n"
 "                            </span>"
 msgstr ""
+"<span class=\"text-muted ms-2\">\n"
+"                                <i>imtinai, kad jų nebūtų galima keisti</i>\n"
+"                            </span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_secure_entries_wizard
@@ -1040,6 +954,9 @@ msgid ""
 "                                <i>Secure entries up to</i>\n"
 "                            </span>"
 msgstr ""
+"<span class=\"text-muted\">\n"
+"                                <i>Apsaugoti įrašus iki</i>\n"
+"                            </span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.bill_preview
@@ -1088,11 +1005,13 @@ msgstr "<span class=\"text-warning\">Vidutinė rizika</span>: Ibanas"
 msgid ""
 "<span invisible=\"name or name_placeholder or quick_edit_mode\">Draft</span>"
 msgstr ""
+"<span invisible=\"name or name_placeholder or quick_edit_mode\">Juodraštis</"
+"span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.autopost_bills_wizard
 msgid "<span invisible=\"nb_unmodified_bills &lt; 10\">10+</span>"
-msgstr ""
+msgstr "<span invisible=\"nb_unmodified_bills &lt; 10\">10+</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_payment_term_form
@@ -1129,7 +1048,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_lock_exception_form
 msgid "<span invisible=\"user_id\">everyone</span>"
-msgstr ""
+msgstr "<span invisible=\"user_id\">visi</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
@@ -1190,7 +1109,7 @@ msgstr "<span>$ <span class=\"oe_currency_value\">19,250.00</span></span>"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "<span>1</span>"
-msgstr ""
+msgstr "<span>1</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.bill_preview
@@ -1200,12 +1119,12 @@ msgstr "<span>5.00</span>"
 #. module: account
 #: model_terms:web_tour.tour,rainbow_man_message:account.account_tour
 msgid "<span><b>Good job!</b> You went through all steps of this tour.</span>"
-msgstr ""
+msgstr "<span><b>Puikiai!</b> Atlikote visus šio vadovo veiksmus.</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "<span>=</span>"
-msgstr ""
+msgstr "<span>=</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
@@ -1261,6 +1180,8 @@ msgid ""
 "<span>One or more Bank Accounts set on this partner are also used by others:"
 "</span>"
 msgstr ""
+"<span>Viena ar kelios šiam kontaktui nurodytos banko sąskaitos taip pat "
+"naudojamos kitų kontaktų:</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
@@ -1297,7 +1218,7 @@ msgstr "<span>Mokesčiai</span>"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_partner_bank_form_inherit_account
 msgid "<span>The Bank Account could be a duplicate of</span>"
-msgstr ""
+msgstr "<span>Ši banko sąskaita gali būti dublikatas:</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -1318,7 +1239,7 @@ msgstr "<span>Tai yra jūsų sąlygų ir nuostatų peržiūra.</span>"
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_register_form
 msgid "<span>This payment has the same partner, amount and date as </span>"
-msgstr ""
+msgstr "<span>Šio mokėjimo kontaktas, suma ir data sutampa su </span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.bill_preview
@@ -1477,7 +1398,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.constraint,message:account.constraint_account_journal_group_uniq_name
 msgid "A Ledger group name must be unique per company."
-msgstr ""
+msgstr "Žurnalų grupės pavadinimas turi būti unikalus kiekvienai įmonei."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__alias_defaults
@@ -1501,6 +1422,8 @@ msgid ""
 "A bank account with Account Number %(number)s already exists for Partner %"
 "(partner)s, but is archived. Please unarchive it instead."
 msgstr ""
+"Banko sąskaita su numeriu %(number)s jau yra priskirta partneriui %"
+"(partner)s, bet ji yra suarchyvuota. Prašome ją išarchyvuoti."
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_bank_statement_tree
@@ -1523,6 +1446,10 @@ msgid ""
 "You\n"
 "                should receive this periodically from your bank."
 msgstr ""
+"Kredito sąskaitos išrašas – tai visų finansinių operacijų,\n"
+"                atliktų kredito sąskaitoje per tam tikrą laikotarpį, "
+"suvestinė. Tokį\n"
+"                išrašą turėtumėte reguliariai gauti iš savo banko."
 
 #. module: account
 #. odoo-python
@@ -1565,6 +1492,8 @@ msgstr "Šios operacijos eilutėje naudojama pasenusi sąskaita, jos neįrašysi
 #: code:addons/account/models/company.py:0
 msgid "A new Hard Lock Date must be posterior (or equal) to the previous one."
 msgstr ""
+"Nauja griežto užrakinimo data turi būti vėlesnė už ankstesnę datą arba jai "
+"lygi."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -1598,6 +1527,8 @@ msgid ""
 "A payment with an outstanding account cannot be confirmed without having a "
 "journal entry."
 msgstr ""
+"Mokėjimo, kuriame naudojama neapmokėtų sumų sąskaita, negalima patvirtinti "
+"nesukūrus žurnalo įrašo."
 
 #. module: account
 #: model:ir.model.constraint,message:account.constraint_account_reconcile_model_name_unique
@@ -1628,7 +1559,7 @@ msgstr "Skyriaus pavadinimas"
 #. odoo-python
 #: code:addons/account/models/account_lock_exception.py:0
 msgid "A single exception must change exactly one lock date field."
-msgstr ""
+msgstr "Viena išimtis turi pakeisti tik vieną užrakinimo datos lauką."
 
 #. module: account
 #. odoo-python
@@ -1668,24 +1599,24 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_validate_account_move__abnormal_amount_partner_ids
 msgid "Abnormal Amount Partner"
-msgstr ""
+msgstr "Įspėjimas apie neįprastą sumą Partneriui"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__abnormal_amount_warning
 #: model:ir.model.fields,field_description:account.field_account_move__abnormal_amount_warning
 msgid "Abnormal Amount Warning"
-msgstr ""
+msgstr "Įspėjimas apie neįprastą sumą"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_validate_account_move__abnormal_date_partner_ids
 msgid "Abnormal Date Partner"
-msgstr ""
+msgstr "Įspėjimas apie neįprastą datą Kontaktui"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__abnormal_date_warning
 #: model:ir.model.fields,field_description:account.field_account_move__abnormal_date_warning
 msgid "Abnormal Date Warning"
-msgstr ""
+msgstr "Įspėjimas apie neįprastą datą"
 
 #. module: account
 #: model:ir.model,name:account.model_res_groups
@@ -1728,6 +1659,8 @@ msgid ""
 "Account %(account)s will be split in %(num_accounts)s, one for each "
 "company:\n"
 msgstr ""
+"Sąskaita %(account)s bus padalyta į %(num_accounts)s sąskaitų – po vieną "
+"kiekvienai įmonei:\n"
 
 #. module: account
 #. odoo-python
@@ -1736,6 +1669,8 @@ msgid ""
 "Account %s cannot be unmerged as it already belongs to a single company. The "
 "unmerge operation only splits an account based on its companies."
 msgstr ""
+"Sąskaitos %s negalima išskaidyti, nes ji jau priklauso vienai įmonei. "
+"Išskaidant sąskaita padalijama tik pagal jai priskirtas įmones."
 
 #. module: account
 #. odoo-python
@@ -1778,6 +1713,8 @@ msgid ""
 "Account Code Mapping cannot be accessed directly. It is designed to be used "
 "only through the Chart of Accounts."
 msgstr ""
+"Sąskaitų kodų susiejimo negalima atlikti tiesiogiai. Jis naudojamas tik "
+"perparametrą Sąskaitų planas."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_line__account_codes_formula
@@ -1821,7 +1758,7 @@ msgstr "Sąskaitų grupės su tuo pačiu detalumo lygiu negali persidengti"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_merge_wizard_line__account_has_hashed_entries
 msgid "Account Has Hashed Entries"
-msgstr ""
+msgstr "Sąskaitoje yra maišos reikšme apsaugotų įrašų"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__company_partner_id
@@ -1853,18 +1790,23 @@ msgstr "Apskaitos Žurnalo Grupė"
 #: model:ir.model,name:account.model_account_lock_exception
 #: model_terms:ir.ui.view,arch_db:account.view_account_lock_exception_form
 msgid "Account Lock Exception"
-msgstr ""
+msgstr "Sąskaitos blokavimo išimtis"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__account_map
 msgid "Account Map"
-msgstr ""
+msgstr "Sąskaitų susiejimas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__account_ids
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_form
 msgid "Account Mapping"
 msgstr "Sąskaitų susiejimai"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_tax__account_move_line_ids
+msgid "Account Move Line"
+msgstr "Paskyros perkėlimo eilutė"
 
 #. module: account
 #: model:ir.model,name:account.model_account_move_reversal
@@ -1879,12 +1821,12 @@ msgstr "Sąskaitų įrašų siuntimas"
 #. module: account
 #: model:ir.model,name:account.model_account_move_send_batch_wizard
 msgid "Account Move Send Batch Wizard"
-msgstr ""
+msgstr "Masinio apskaitos įrašų siuntimo vedlys"
 
 #. module: account
 #: model:ir.model,name:account.model_account_move_send_wizard
 msgid "Account Move Send Wizard"
-msgstr ""
+msgstr "Apskaitos įrašo siuntimo vedlys"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__name
@@ -1913,7 +1855,7 @@ msgstr "Kreditorių sąskaita"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_analytic_applicability__account_prefix_placeholder
 msgid "Account Prefix Placeholder"
-msgstr ""
+msgstr "Sąskaitos prefikso vietaženklis"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_category_property_form
@@ -1936,6 +1878,11 @@ msgstr "Gautinos sumos (PoS)"
 #: model:ir.model.fields,field_description:account.field_account_move_line__is_account_reconcile
 msgid "Account Reconcile"
 msgstr "Sąskaitų suderinimas"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_tax__account_reconcile_model_line_ids
+msgid "Account Reconcile Model Line"
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__account_root_id
@@ -2013,6 +1960,7 @@ msgid ""
 "Account codes must be unique. You can't create accounts with these duplicate "
 "codes: %s"
 msgstr ""
+"Sąskaitos kodas turi būti unikalus. Negalite kurti sąskaitos su šiuo kodu: %s"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_config_settings__account_journal_early_pay_discount_loss_account_id
@@ -2049,12 +1997,12 @@ msgstr ""
 #. module: account
 #: model:ir.model,name:account.model_account_merge_wizard
 msgid "Account merge wizard"
-msgstr ""
+msgstr "Sąskaitų sujungimo vedlys"
 
 #. module: account
 #: model:ir.model,name:account.model_account_merge_wizard_line
 msgid "Account merge wizard line"
-msgstr ""
+msgstr "Sąskaitų sujungimo vedlio eilutė"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position_account__account_src_id
@@ -2239,13 +2187,13 @@ msgstr "Sąskaitų prefiksas"
 #: model_terms:ir.ui.view,arch_db:account.account_analytic_distribution_model_form_inherit
 #: model_terms:ir.ui.view,arch_db:account.account_analytic_distribution_model_tree_inherit
 msgid "Accounts Prefixes"
-msgstr ""
+msgstr "Sąskaitų prefiksai"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/wizard/account_merge_wizard.py:0
 msgid "Accounts successfully merged!"
-msgstr ""
+msgstr "Sąskaitos sėkmingai sujungtos!"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_accrued_orders_wizard__account_id
@@ -2265,6 +2213,8 @@ msgid ""
 "Accrual entry created on %(date)s: %(accrual_entry)s.                And its "
 "reverse entry: %(reverse_entry)s."
 msgstr ""
+"Kaupimo įrašas sukurtas %(date)s: %(accrual_entry)s.                "
+"Atvirkštinis įrašas: %(reverse_entry)s."
 
 #. module: account
 #. odoo-python
@@ -2311,7 +2261,7 @@ msgstr "Reikalingas veiksmas"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_register__actionable_errors
 msgid "Actionable Errors"
-msgstr ""
+msgstr "Taisytinos klaidos"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -2321,7 +2271,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.autopost_bills_wizard
 msgid "Activate auto-validation"
-msgstr ""
+msgstr "Įjungti automatinį patvirtinimą"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -2426,7 +2376,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account/static/src/js/tours/account.js:0
 msgid "Add a description to your item."
-msgstr ""
+msgstr "Pridėkite elemento aprašymą."
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_account_journal_form
@@ -2605,7 +2555,7 @@ msgstr "Visi"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_group_tree
 msgid "All Companies"
-msgstr ""
+msgstr "Visos įmonės"
 
 #. module: account
 #. odoo-python
@@ -2616,7 +2566,7 @@ msgstr "Visos sąskaitos eilutėse turi būti to paties tipo."
 #. module: account
 #: model:ir.model.fields,help:account.field_account_secure_entries_wizard__move_to_hash_ids
 msgid "All moves that will be hashed"
-msgstr ""
+msgstr "Visi apskaitos įrašai, kurie bus apsaugoti maišos reikšme"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_default_terms_and_conditions
@@ -2635,11 +2585,13 @@ msgid ""
 "All unhashable moves before the selected date that are not protected by the "
 "Hard Lock Date"
 msgstr ""
+"Visi iki pasirinktos datos esantys apskaitos įrašai, kurių negalima "
+"apsaugoti maišos reikšme ir kurių neapima griežto užrakinimo data"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_secure_entries_wizard__unreconciled_bank_statement_line_ids
 msgid "All unreconciled bank statement lines before the selected date."
-msgstr ""
+msgstr "Visos nesudengtos banko išrašo eilutės iki pasirinktos datos."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__module_product_margin
@@ -2694,7 +2646,7 @@ msgstr "Leidžia jums naudotis analitine apskaita."
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.portal_invoice_page
 msgid "Already Paid:"
-msgstr ""
+msgstr "Jau apmokėta:"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_report__availability_condition__always
@@ -2890,7 +2842,7 @@ msgstr ""
 msgid ""
 "An error occurred when computing the inalterability. A gap has been detected "
 "in the sequence."
-msgstr ""
+msgstr "Tikrinant nuoseklumą įvyko klaida. Sekoje aptikta spraga."
 
 #. module: account
 #. odoo-python
@@ -2899,6 +2851,7 @@ msgid ""
 "An error occurred when computing the inalterability. All entries have to be "
 "reconciled."
 msgstr ""
+"Apskaičiuojant nekintamumą įvyko klaida. Visi įrašai turi būti sudengti."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -2977,7 +2930,7 @@ msgstr "Analitinis tikslumas"
 #. module: account
 #: model:ir.ui.menu,name:account.menu_action_analytic_reporting
 msgid "Analytic Report"
-msgstr ""
+msgstr "Analitinė ataskaita"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.action_analytic_reporting
@@ -3006,6 +2959,9 @@ msgid ""
 "in accordance with its journal sequence. This lock date is irreversible and "
 "does not allow any exception."
 msgstr ""
+"Visi įrašai iki šios datos imtinai bus perkelti į vėlesnę datą pagal jų "
+"žurnalo seką. Šios užrakinimo datos atšaukti negalima ir jai netaikomos "
+"jokios išimtys."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_company__fiscalyear_lock_date
@@ -3013,6 +2969,8 @@ msgid ""
 "Any entry up to and including that date will be postponed to a later time, "
 "in accordance with its journal's sequence."
 msgstr ""
+"Visi įrašai iki šios datos imtinai bus perkelti į vėlesnę datą pagal jų "
+"žurnalo seką."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_company__tax_lock_date
@@ -3021,6 +2979,9 @@ msgid ""
 "later time, in accordance with its journal's sequence. The tax lock date is "
 "automatically set when the tax closing entry is posted."
 msgstr ""
+"Visi įrašai su mokesčiais iki šios datos imtinai bus perkelti į vėlesnę datą "
+"pagal jų žurnalo seką. Mokesčių užrakinimo data nustatoma automatiškai, kai "
+"užregistruojamas mokesčių laikotarpio uždarymo įrašas."
 
 #. module: account
 #. odoo-python
@@ -3046,6 +3007,8 @@ msgid ""
 "Any purchase entry prior to and including this date will be postponed to a "
 "later date, in accordance with its journal's sequence."
 msgstr ""
+"Visi pirkimo įrašai iki šios datos imtinai bus perkelti į vėlesnę datą pagal "
+"jų žurnalo seką."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_company__sale_lock_date
@@ -3053,6 +3016,8 @@ msgid ""
 "Any sales entry prior to and including this date will be postponed to a "
 "later date, in accordance with its journal's sequence."
 msgstr ""
+"Visi pardavimo įrašai iki šios datos imtinai bus perkelti į vėlesnę datą "
+"pagal jų žurnalo seką."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account_tag__applicability
@@ -3123,12 +3088,12 @@ msgstr "Ar tikrai? Šis veiksmas įvykdys šias operacijas:\n"
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__res_partner__autopost_bills__ask
 msgid "Ask after 3 validations without edits"
-msgstr ""
+msgstr "Klausti po 3 patvirtinimų be pakeitimų"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.autopost_bills_wizard
 msgid "Ask me later"
-msgstr ""
+msgstr "Paklausti vėliau"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_account__internal_group__asset
@@ -3200,7 +3165,7 @@ msgstr "Prisegtukai"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_send_wizard__attachments_not_supported
 msgid "Attachments Not Supported"
-msgstr ""
+msgstr "Priedai nepalaikomi"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_mail_mail__account_audit_log_activated
@@ -3215,13 +3180,13 @@ msgstr ""
 #: model:ir.ui.menu,name:account.account_audit_trail_menu
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Audit Trail"
-msgstr ""
+msgstr "Audito seka"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__audit_trail_message_ids
 #: model:ir.model.fields,field_description:account.field_account_move__audit_trail_message_ids
 msgid "Audit Trail Messages"
-msgstr ""
+msgstr "Audito sekos pranešimai"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_expression__auditable
@@ -3269,7 +3234,7 @@ msgstr "Automatinis paskelbimas"
 #: model:ir.model.fields,field_description:account.field_res_partner__autopost_bills
 #: model:ir.model.fields,field_description:account.field_res_users__autopost_bills
 msgid "Auto-post bills"
-msgstr ""
+msgstr "Automatiškai registruoti sąskaitas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__auto_post_until
@@ -3284,6 +3249,8 @@ msgid ""
 "Auto-post was disabled on this invoice because a potential duplicate was "
 "detected."
 msgstr ""
+"Šios sąskaitos automatinis registravimas išjungtas, nes aptiktas galimas "
+"dublikatas."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__auto_reconcile
@@ -3295,7 +3262,7 @@ msgstr "Automatiškai patvirtinti"
 #: model:ir.model.fields,field_description:account.field_res_company__autopost_bills
 #: model:ir.model.fields,field_description:account.field_res_config_settings__autopost_bills
 msgid "Auto-validate bills"
-msgstr ""
+msgstr "Automatiškai patvirtinti sąskaitas"
 
 #. module: account
 #. odoo-python
@@ -3323,7 +3290,7 @@ msgstr "Automatinė seka"
 #: model:ir.model.fields,help:account.field_res_partner__autopost_bills
 #: model:ir.model.fields,help:account.field_res_users__autopost_bills
 msgid "Automatically post bills for this trusted partner"
-msgstr ""
+msgstr "Automatiškai registruoti šio patikimo tiekėjo sąskaitas"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_partner_property_form
@@ -3335,12 +3302,12 @@ msgstr "Automatizacija"
 #: code:addons/account/models/account_move.py:0
 #: model_terms:ir.ui.view,arch_db:account.autopost_bills_wizard
 msgid "Autopost Bills"
-msgstr ""
+msgstr "Automatinis sąskaitų registravimas"
 
 #. module: account
 #: model:ir.model,name:account.model_account_autopost_bills_wizard
 msgid "Autopost Bills Wizard"
-msgstr ""
+msgstr "Automatinio sąskaitų registravimo vedlys"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report__availability_condition
@@ -3380,7 +3347,7 @@ msgstr "Vidutinė kaina"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_base_document_layout
 msgid "BE71096123456769"
-msgstr ""
+msgstr "BE71096123456769"
 
 #. module: account
 #. odoo-python
@@ -3392,13 +3359,13 @@ msgstr "SĄSKAITA"
 #. odoo-javascript
 #: code:addons/account/static/src/components/product_catalog/kanban_controller.js:0
 msgid "Back to Bill"
-msgstr ""
+msgstr "Grįžti į sąskaitą"
 
 #. module: account
 #. odoo-javascript
 #: code:addons/account/static/src/components/product_catalog/kanban_controller.js:0
 msgid "Back to Invoice"
-msgstr ""
+msgstr "Grįžti į sąskaitą faktūrą"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -3454,6 +3421,8 @@ msgstr "Bankas ir grynieji pinigai"
 #: code:addons/account/models/account_account.py:0
 msgid "Bank & Cash accounts cannot be shared between companies."
 msgstr ""
+"Banko ir grynųjų pinigų sąskaitos negali būti bendrai naudojamos skirtingų "
+"įmonių."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__bank_account_id
@@ -3465,7 +3434,7 @@ msgstr "Banko sąskaita"
 #. odoo-python
 #: code:addons/account/models/res_partner_bank.py:0
 msgid "Bank Account %(link)s with number %(number)s archived"
-msgstr ""
+msgstr "Banko sąskaitos „ %(link)s “ su numeriu „ %(number)s “ archyvas"
 
 #. module: account
 #. odoo-python
@@ -3549,7 +3518,7 @@ msgstr "Banko sudengimo veiksmų išankstinis nustatymas"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "Bank Setup"
-msgstr ""
+msgstr "Banko nustatymas"
 
 #. module: account
 #: model:ir.model,name:account.model_account_bank_statement
@@ -3560,7 +3529,7 @@ msgstr "Banko išrašas"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__module_account_bank_statement_extract
 msgid "Bank Statement Digitization"
-msgstr ""
+msgstr "Banko sąskaitos išrašų skaitmeninimas"
 
 #. module: account
 #: model:ir.model,name:account.model_account_bank_statement_line
@@ -3626,6 +3595,12 @@ msgid "Bank of odoo"
 msgstr "Odoo bankas"
 
 #. module: account
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+msgid "Bank settings"
+msgstr "Banko nustatymai"
+
+#. module: account
 #: model:ir.model,name:account.model_account_setup_bank_manual_config
 msgid "Bank setup manual config"
 msgstr "Banko nustatymų rankinis konfigūravimas"
@@ -3642,7 +3617,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Bank transactions and payments:"
-msgstr ""
+msgstr "Banko operacijos ir mokėjimai:"
 
 #. module: account
 #. odoo-python
@@ -3728,7 +3703,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__batch_payment_sequence_id
 msgid "Batch Payment Sequence"
-msgstr ""
+msgstr "Grupinio mokėjimo numeravimo seka"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -3742,6 +3717,8 @@ msgid ""
 "Batch invoice sending is unavailable. Please, activate the cron to enable "
 "batch sending of invoices."
 msgstr ""
+"Grupinis sąskaitų faktūrų siuntimas negalimas. Suaktyvinkite „cron“ užduotį, "
+"kad galėtumėte sąskaitas faktūras siųsti grupėmis."
 
 #. module: account
 #. odoo-python
@@ -3750,6 +3727,9 @@ msgid ""
 "Batch invoice sending is unavailable. Please, contact your system "
 "administrator to activate the cron to enable batch sending of invoices."
 msgstr ""
+"Grupinis sąskaitų faktūrų siuntimas negalimas. Kreipkitės į sistemos "
+"administratorių, kad jis suaktyvintų grupiniam sąskaitų faktūrų siuntimui "
+"reikalingą „cron“ užduotį."
 
 #. module: account
 #. odoo-javascript
@@ -3760,13 +3740,13 @@ msgstr "Prieš"
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment_register__installments_mode__before_date
 msgid "Before Next Payment Date"
-msgstr ""
+msgstr "Prieš sekančio mokėjimo dieną"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/wizard/account_merge_wizard.py:0
 msgid "Belongs to the same company as %s."
-msgstr ""
+msgstr "Priklauso tai pačiai įmonei kaip %s."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_default_terms_and_conditions
@@ -3826,7 +3806,7 @@ msgstr "Sąskaitų analizė"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "Bills Late"
-msgstr ""
+msgstr "Vėluojančios sąskaitos"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
@@ -3930,6 +3910,12 @@ msgid ""
 "By unchecking the active field, you may hide an INCOTERM you will not use."
 msgstr ""
 "Atžymėjus aktyvų lauką, galite paslėpti INCOTERM sąlygas, kurių nenaudosite."
+
+#. module: account
+#. odoo-python
+#: code:addons/account/wizard/account_automatic_entry_wizard.py:0
+msgid "C"
+msgstr "C"
 
 #. module: account
 #. odoo-python
@@ -4105,6 +4091,8 @@ msgid ""
 "Capture invoices, register payments and keep track of the discussions with "
 "your vendors."
 msgstr ""
+"Registruokite tiekėjų sąskaitas ir mokėjimus bei stebėkite susirašinėjimą su "
+"tiekėjais."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_expression__carryover_target
@@ -4266,7 +4254,7 @@ msgstr "Grynieji: balansas"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "Catalog"
-msgstr ""
+msgstr "Katalogas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_analytic_line__category
@@ -4289,7 +4277,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_secure_entries_wizard__chains_to_hash_with_gaps
 msgid "Chains To Hash With Gaps"
-msgstr ""
+msgstr "Grandinės, kurias reikia suskaidyti su tarpais"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_automatic_entry_wizard__action__change_account
@@ -4313,7 +4301,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_lock_exception__lock_date
 msgid "Changed Lock Date"
-msgstr ""
+msgstr "Pakeista užrakinimo data"
 
 #. module: account
 #. odoo-python
@@ -4381,6 +4369,8 @@ msgid "Chart of accounts set!"
 msgstr "Sąskaitų planas nustatytas!"
 
 #. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_send.py:0
 #: model_terms:ir.ui.view,arch_db:account.report_hash_integrity
 msgid "Check"
 msgstr "Pažymėti"
@@ -4389,7 +4379,7 @@ msgstr "Pažymėti"
 #. odoo-python
 #: code:addons/account/models/account_move_send.py:0
 msgid "Check Partner(s) Email(s)"
-msgstr ""
+msgstr "Patikrinti kontaktų el. pašto adresus"
 
 #. module: account
 #. odoo-python
@@ -4518,7 +4508,7 @@ msgstr "Kodas"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__code_mapping_ids
 msgid "Code Mapping"
-msgstr ""
+msgstr "Kodų susiejimas"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_group_form
@@ -4538,7 +4528,7 @@ msgstr "Kodo priešdėlio pradžia"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__code_store
 msgid "Code Store"
-msgstr ""
+msgstr "Kodų saugykla"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -4703,7 +4693,7 @@ msgstr "Įmonės fiskalinės šalies kodas"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__company_registry_placeholder
 msgid "Company Registry Placeholder"
-msgstr ""
+msgstr "Įmonės registracijos numerio vietaženklis"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__is_storno
@@ -4713,7 +4703,7 @@ msgstr "Įmonės stornavimo apskaita"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__company_vat_placeholder
 msgid "Company Vat Placeholder"
-msgstr ""
+msgstr "Įmonės PVM kodo vietaženklis"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__has_chart_of_accounts
@@ -4790,24 +4780,25 @@ msgstr "Patvirtinti įrašus"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.validate_account_move_view
 msgid "Confirm them now"
-msgstr ""
+msgstr "Patvirtinti dabar"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "Connect your bank. Match invoices automatically."
-msgstr ""
+msgstr "Prijunkite banką. Automatiškai susiekite sąskaitas faktūras."
 
 #. module: account
 #. odoo-python
 #: code:addons/account/wizard/account_payment_register.py:0
 msgid "Consider paying in %(btn_start)sinstallments%(btn_end)s instead."
 msgstr ""
+"Apsvarstykite galimybę vietoj to mokėti %(btn_start)sdalimis%(btn_end)s."
 
 #. module: account
 #. odoo-python
 #: code:addons/account/wizard/account_payment_register.py:0
 msgid "Consider paying the %(btn_start)sfull amount%(btn_end)s."
-msgstr ""
+msgstr "Apsvarstykite galimybę sumokėti %(btn_start)svisą sumą%(btn_end)s."
 
 #. module: account
 #: model:ir.model,name:account.model_res_partner
@@ -4827,12 +4818,15 @@ msgid ""
 "Contains either the section name or error message, depending on the line "
 "type."
 msgstr ""
+"Atsižvelgiant į eilutės tipą, pateikiamas skilties pavadinimas arba klaidos "
+"pranešimas."
 
 #. module: account
 #. odoo-python
 #: code:addons/account/wizard/account_merge_wizard.py:0
 msgid "Contains hashed entries, but %s also has hashed entries."
 msgstr ""
+"Yra maišos reikšme apsaugotų įrašų, tačiau %s taip pat yra tokių įrašų."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_send_wizard__mail_body
@@ -4856,24 +4850,25 @@ msgstr ""
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_amounts_to_settle
 msgid "Cool, it looks like you don't have any amount to settle."
-msgstr ""
+msgstr "Puiku, panašu, kad nebeturite mokėtinos sumos."
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/company.py:0
 msgid "Corrupted data on journal entry with id %(id)s (%(name)s)."
 msgstr ""
+"Apskaitos įraše, kurio ID %(id)s (%(name)s), aptikti sugadinti duomenys."
 
 #. module: account
 #: model:account.account,name:account.1_cost_of_goods_sold
 #: model:ir.model.fields.selection,name:account.selection__account_move_line__display_type__cogs
 msgid "Cost of Goods Sold"
-msgstr ""
+msgstr "Parduotų prekių savikaina"
 
 #. module: account
 #: model:account.account,name:account.1_cost_of_production
 msgid "Cost of Production"
-msgstr ""
+msgstr "Gamybos savikaina"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_account__account_type__expense_direct_cost
@@ -4887,23 +4882,24 @@ msgid ""
 "Could not compute any code for the copy automatically. Please create it "
 "manually."
 msgstr ""
+"Nepavyko automatiškai parinkti kopijos kodo. Sukurkite jį rankiniu būdu."
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_report.py:0
 msgid "Could not determine carryover target automatically for expression %s."
-msgstr ""
+msgstr "Nepavyko automatiškai nustatyti išraiškos %s perkėlimo paskirties."
 
 #. module: account
 #. odoo-javascript
 #: code:addons/account/static/src/components/upload_drop_zone/upload_drop_zone.js:0
 msgid "Could not upload files"
-msgstr ""
+msgstr "Failų įkelti nepavyko"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_form
 msgid "Counterpart Items"
-msgstr ""
+msgstr "Koresponduojantys įrašai"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__counterpart_type
@@ -4923,7 +4919,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,help:account.field_res_company__multi_vat_foreign_country_ids
 msgid "Countries for which the company has a VAT number"
-msgstr ""
+msgstr "Šalys, kuriose įmonė turi PVM mokėtojo kodą"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account_tag__country_id
@@ -4961,7 +4957,7 @@ msgstr "Šalių grupė"
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_report__availability_condition__country
 msgid "Country Matches"
-msgstr ""
+msgstr "Šalis atitinka"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_setup_bank_manual_config__partner_country_name
@@ -4972,7 +4968,7 @@ msgstr "Valstybės pavadinimas"
 #. module: account
 #: model:ir.model.fields,help:account.field_account_account_tag__country_id
 msgid "Country for which this tag is available, when applied on taxes."
-msgstr ""
+msgstr "Šalis, kurioje ši žyma gali būti naudojama mokesčiams."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.setup_bank_account_wizard
@@ -5030,7 +5026,7 @@ msgstr "Sukurti mokėjimus"
 #. odoo-javascript
 #: code:addons/account/static/src/components/bill_guide/bill_guide.xml:0
 msgid "Create a bill manually"
-msgstr ""
+msgstr "Sukurti tiekėjo sąskaitą rankiniu būdu"
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_move_out_refund_type
@@ -5114,6 +5110,8 @@ msgid ""
 "Create a structured report with multiple sections for convenient navigation "
 "and simultaneous printing."
 msgstr ""
+"Sukurkite struktūrizuotą kelių skilčių ataskaitą, kurią būtų patogu naršyti "
+"ir išspausdinti visą iš karto."
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_move_in_invoice
@@ -5134,12 +5132,16 @@ msgid ""
 "                    adjustments, ensuring compliance with diverse "
 "regulations."
 msgstr ""
+"Sukurkite tiek didžiosios knygos grupių, kiek reikia atskiroms didžiosioms "
+"knygoms pagal vietinius GAAP, TFAS ar mokestines\n"
+"                    korekcijas tvarkyti ir įvairių teisės aktų reikalavimams "
+"užtikrinti."
 
 #. module: account
 #. odoo-javascript
 #: code:addons/account/static/src/components/bill_guide/bill_guide.xml:0
 msgid "Create bill manually"
-msgstr ""
+msgstr "Sukurti tiekėjo sąskaitą rankiniu būdu"
 
 #. module: account
 #. odoo-python
@@ -5167,7 +5169,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account/static/src/components/bill_guide/bill_guide.xml:0
 msgid "Create manually"
-msgstr ""
+msgstr "Sukurti rankiniu būdu"
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.rounding_list_action
@@ -5178,7 +5180,7 @@ msgstr "Sukurti pirmąjį grynųjų pinigų apvalinimo įrašą"
 #. odoo-javascript
 #: code:addons/account/static/src/js/tours/account.js:0
 msgid "Create the product."
-msgstr ""
+msgstr "Sukurkite prekę."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_partner_bank_search_inherit
@@ -5306,7 +5308,7 @@ msgstr "Kreditas"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_partial_reconcile__credit_amount_currency
 msgid "Credit Amount Currency"
-msgstr ""
+msgstr "Kredito suma operacijos valiuta"
 
 #. module: account
 #: model:account.account,name:account.1_credit_card
@@ -5324,7 +5326,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_journal_dashboard.py:0
 msgid "Credit Card: Balance"
-msgstr ""
+msgstr "Kredito kortelė: likutis"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__credit_limit
@@ -5366,7 +5368,7 @@ msgstr "Kreditinės sąskaitos valiuta"
 #. module: account
 #: model:mail.template,name:account.email_template_edi_credit_note
 msgid "Credit Note: Sending"
-msgstr ""
+msgstr "Kreditinė sąskaita faktūra: siuntimas"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.action_move_out_refund_type
@@ -5381,13 +5383,13 @@ msgstr "Kreditinės sąskaitos"
 #. module: account
 #: model:ir.actions.act_window,name:account.action_credit_statement_tree
 msgid "Credit Statements"
-msgstr ""
+msgstr "Kredito sąskaitų išrašai"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__credit_to_invoice
 #: model:ir.model.fields,field_description:account.field_res_users__credit_to_invoice
 msgid "Credit To Invoice"
-msgstr ""
+msgstr "Dar neišrašytų sąskaitų suma"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
@@ -5408,13 +5410,14 @@ msgstr "Šio partneriui kredito limitas."
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__cumulated_balance
 msgid "Cumulated Balance"
-msgstr ""
+msgstr "Sukauptas likutis"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_move_line__cumulated_balance
 msgid ""
 "Cumulated balance depending on the domain and the order chosen in the view."
 msgstr ""
+"Sukauptas likutis, priklausantis nuo rodinyje pasirinkto domeno ir eiliškumo."
 
 #. module: account
 #: model:ir.ui.menu,name:account.menu_action_currency_form
@@ -5450,12 +5453,12 @@ msgstr "Valiuta"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__display_currency_helper
 msgid "Currency Conversion Helper"
-msgstr ""
+msgstr "Valiutos konvertavimo pagalbinis įrankis"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__currency_exchange_journal_id
 msgid "Currency Exchange Journal"
-msgstr ""
+msgstr "Valiutų keitimo žurnalas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__invoice_currency_rate
@@ -5467,7 +5470,7 @@ msgstr "Valiutos kursas"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report__currency_translation
 msgid "Currency Translation"
-msgstr ""
+msgstr "Valiutos perskaičiavimas"
 
 #. module: account
 #. odoo-python
@@ -5479,7 +5482,7 @@ msgstr "Valiutos kursų skirtumas"
 #. odoo-python
 #: code:addons/account/models/res_partner_bank.py:0
 msgid "Currency must always be provided in order to generate a QR-code"
-msgstr ""
+msgstr "Norint sugeneruoti QR kodą, visada turi būti nurodyta valiuta"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_partial_reconcile__credit_currency_id
@@ -5489,14 +5492,14 @@ msgstr " Kredito žurnalo įrašo valiuta"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_partial_reconcile__debit_currency_id
 msgid "Currency of the debit journal item."
-msgstr ""
+msgstr "Debetinio žurnalo įrašo valiuta."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_bank_statement_line__invoice_currency_rate
 #: model:ir.model.fields,help:account.field_account_move__invoice_currency_rate
 #: model:ir.model.fields,help:account.field_account_move_line__currency_rate
 msgid "Currency rate from company currency to document currency."
-msgstr ""
+msgstr "Įmonės valiutos perskaičiavimo į dokumento valiutą kursas."
 
 #. module: account
 #: model:account.account,name:account.1_current_assets
@@ -5507,7 +5510,7 @@ msgstr "Trumpalaikis turtas"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__current_balance
 msgid "Current Balance"
-msgstr ""
+msgstr "Dabartinis likutis"
 
 #. module: account
 #: model:account.account,name:account.1_current_liabilities
@@ -5518,7 +5521,7 @@ msgstr "Dabartiniai įsipareigojimai"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__current_statement_balance
 msgid "Current Statement Balance"
-msgstr ""
+msgstr "Dabartinis išrašo likutis"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_account__account_type__equity_unaffected
@@ -5528,22 +5531,22 @@ msgstr "Šių metų pajamos"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_column__custom_audit_action_id
 msgid "Custom Audit Action"
-msgstr ""
+msgstr "Pasirinktinis audito veiksmas"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_report_expression__engine__custom
 msgid "Custom Python Function"
-msgstr ""
+msgstr "Pasirinktinė „Python“ funkcija"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_register__custom_user_amount
 msgid "Custom User Amount"
-msgstr ""
+msgstr "Naudotojo nurodyta suma"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_register__custom_user_currency_id
 msgid "Custom User Currency"
-msgstr ""
+msgstr "Naudotojo nurodyta valiuta"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment__partner_type__customer
@@ -5595,7 +5598,7 @@ msgstr "Kliento sąskaitos"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__account_discount_expense_allocation_id
 msgid "Customer Invoices Discounts Account"
-msgstr ""
+msgstr "Klientų sąskaitų faktūrų nuolaidų sąskaita"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__res_company__quick_edit_mode__out_and_in_invoices
@@ -5633,7 +5636,7 @@ msgstr "Klientų portalo adresas"
 #: model:ir.model.fields,field_description:account.field_res_partner_bank__partner_customer_rank
 #: model:ir.model.fields,field_description:account.field_res_users__customer_rank
 msgid "Customer Rank"
-msgstr ""
+msgstr "Kliento reitingas"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -5669,24 +5672,30 @@ msgstr "Pritaikyti"
 #. module: account
 #: model:onboarding.onboarding.step,description:account.onboarding_onboarding_step_base_document_layout
 msgid "Customize the look of your documents."
-msgstr ""
+msgstr "Tinkinkite savo dokumentų išvaizdą."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "Cut-Off"
-msgstr ""
+msgstr "Laikotarpių atskyrimas"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 msgid "Cut-off {label}"
-msgstr ""
+msgstr "Laikotarpių atskyrimas: {label}"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 msgid "Cut-off {label} {percent}%"
-msgstr ""
+msgstr "Laikotarpių atskyrimas: {label} {percent}%"
+
+#. module: account
+#. odoo-python
+#: code:addons/account/wizard/account_automatic_entry_wizard.py:0
+msgid "D"
+msgstr "D"
 
 #. module: account
 #: model:account.incoterms,name:account.incoterm_DAP
@@ -5696,7 +5705,7 @@ msgstr "PRISTATYTA Į VIETĄ"
 #. module: account
 #: model:account.incoterms,name:account.incoterm_DPU
 msgid "DELIVERED AT PLACE UNLOADED"
-msgstr ""
+msgstr "PRISTATYTA Į VIETĄ, IŠKRAUTA"
 
 #. module: account
 #: model:account.incoterms,name:account.incoterm_DDP
@@ -5712,17 +5721,17 @@ msgstr "Valdymo skydelis"
 #. module: account
 #: model:ir.actions.server,name:account.action_check_hash_integrity
 msgid "Data Inalterability Check"
-msgstr ""
+msgstr "Duomenų nepakeičiamumo patikrinimas"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_hash_integrity
 msgid "Data Inalterability Check Report -"
-msgstr ""
+msgstr "Duomenų nepakeičiamumo patikrinimo ataskaita –"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_hash_integrity
 msgid "Data consistency check"
-msgstr ""
+msgstr "Duomenų nuoseklumo patikrinimas"
 
 #. module: account
 #. odoo-javascript
@@ -5751,7 +5760,7 @@ msgstr "Data"
 #. module: account
 #: model:ir.model.fields,help:account.field_account_resequence_wizard__first_date
 msgid "Date (inclusive) from which the numbers are resequenced."
-msgstr ""
+msgstr "Data (imtinai), nuo kurios skaičiai perrikiuojami."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_resequence_wizard__end_date
@@ -5759,21 +5768,23 @@ msgid ""
 "Date (inclusive) to which the numbers are resequenced. If not set, all "
 "Journal Entries up to the end of the period are resequenced."
 msgstr ""
+"Data (imtinai), iki kurios skaičiai perrūšiuojami. Jei nenustatyta, "
+"perrūšiuojami visi žurnalo įrašai iki laikotarpio pabaigos."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report__filter_date_range
 msgid "Date Range"
-msgstr ""
+msgstr "Laikotarpis"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_expression__date_scope
 msgid "Date Scope"
-msgstr ""
+msgstr "Datos apimtis"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_term__example_date
 msgid "Date example"
-msgstr ""
+msgstr "Pavyzdys su data"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_financial_year_op__opening_date
@@ -5810,32 +5821,32 @@ msgstr "Dienos"
 #: model:ir.model.fields,field_description:account.field_res_partner__days_sales_outstanding
 #: model:ir.model.fields,field_description:account.field_res_users__days_sales_outstanding
 msgid "Days Sales Outstanding (DSO)"
-msgstr ""
+msgstr "Vidutinė atsiskaitymo trukmė (DSO)"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment_term_line__delay_type__days_after_end_of_month
 msgid "Days after end of month"
-msgstr ""
+msgstr "Dienos po mėnesio pabaigos"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment_term_line__delay_type__days_after_end_of_next_month
 msgid "Days after end of next month"
-msgstr ""
+msgstr "Dienos po kito mėnesio pabaigos"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment_term_line__delay_type__days_after
 msgid "Days after invoice date"
-msgstr ""
+msgstr "Dienos po sąskaitos faktūros išrašymo datos"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment_term_line__delay_type__days_end_of_month_on_the
 msgid "Days end of month on the"
-msgstr ""
+msgstr "Mėnesio pabaigos dienos"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_term_line__days_next_month
 msgid "Days on the next month"
-msgstr ""
+msgstr "Kito mėnesio dienos"
 
 #. module: account
 #. odoo-python
@@ -5849,7 +5860,7 @@ msgstr "Debetas"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_partial_reconcile__debit_amount_currency
 msgid "Debit Amount Currency"
-msgstr ""
+msgstr "Debeto suma Valiuta"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_partial_reconcile__debit_move_id
@@ -5884,7 +5895,7 @@ msgstr "Dedikuota kreditinių sąskaitų seka"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__payment_sequence
 msgid "Dedicated Payment Sequence"
-msgstr ""
+msgstr "Speciali mokėjimo seka"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_tax_form
@@ -5906,22 +5917,22 @@ msgstr "Sąskaitos tipas pagal nutylėjimą"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Default Accounts"
-msgstr ""
+msgstr "Numatytieji paskyros"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__account_default_credit_limit
 msgid "Default Credit Limit"
-msgstr ""
+msgstr "Numatytasis kredito limitas"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
 msgid "Default Expense Account"
-msgstr ""
+msgstr "Numatytasis išlaidų sąskaitos tipas"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
 msgid "Default Income Account"
-msgstr ""
+msgstr "Numatytasis pajamų sąskaita"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -5931,7 +5942,7 @@ msgstr "Numatytasis Incoterm"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Default Incoterm of your company"
-msgstr ""
+msgstr "Jūsų įmonės numatytasis „Incoterm“"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report__default_opening_date_filter
@@ -5941,7 +5952,7 @@ msgstr "Numatytasis atidarymas"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__account_default_pos_receivable_account_id
 msgid "Default PoS Receivable Account"
-msgstr ""
+msgstr "Numatytasis POS gautinų sumų sąskaita"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__account_purchase_tax_id
@@ -5962,7 +5973,7 @@ msgstr "Numatytas pardavimo mokestis"
 #: model:ir.model.fields,field_description:account.field_res_company__account_price_include
 #: model:ir.model.fields,field_description:account.field_res_config_settings__account_price_include
 msgid "Default Sales Price Include"
-msgstr ""
+msgstr "Į numatytąją pardavimo kainą įskaičiuota"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__tax_ids
@@ -5983,7 +5994,7 @@ msgstr "Numatytos naudojimosi sąlygos"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__invoice_terms_html
 msgid "Default Terms and Conditions as a Web page"
-msgstr ""
+msgstr "Numatytieji naudojimo sąlygų puslapio nustatymai"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__alias_defaults
@@ -6006,29 +6017,32 @@ msgid ""
 "Default on whether the sales price used on the product and invoices with "
 "this Company includes its taxes."
 msgstr ""
+"Nustatykite, ar produkto ir sąskaitų faktūrų, išrašytų šios įmonės vardu, "
+"pardavimo kaina apima mokesčius."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Default taxes applied when creating new products."
-msgstr ""
+msgstr "Kuriant naujus produktus taikomi numatyti mokesčiai."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_product_product__supplier_taxes_id
 #: model:ir.model.fields,help:account.field_product_template__supplier_taxes_id
 msgid "Default taxes used when buying the product"
-msgstr ""
+msgstr "Pirkimo metu taikomi numatyti mokesčiai"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_product_product__taxes_id
 #: model:ir.model.fields,help:account.field_product_template__taxes_id
 msgid "Default taxes used when selling the product"
-msgstr ""
+msgstr "Parduodant produktą taikomi numatyti mokesčiai"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "Default value for 'company_id' for %(record)s is not an integer"
 msgstr ""
+"„ %(record)s “ lauko „company_id“ numatytoji reikšmė nėra sveikasis skaičius"
 
 #. module: account
 #: model:account.account,name:account.1_deferred_revenue
@@ -6045,7 +6059,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Define the smallest coinage of the currency used to pay by cash"
-msgstr ""
+msgstr "Nurodykite mažiausią monetą, kuria galima atsiskaityti grynaisiais"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal_group__company_id
@@ -6053,11 +6067,15 @@ msgid ""
 "Define which company can select the multi-ledger in report filters. If none "
 "is provided, available for all companies"
 msgstr ""
+"Nustatykite, kuri įmonė gali pasirinkti kelių apskaitos knygų parinktį "
+"ataskaitų filtruose. Jei nenurodyta, ši parinktis prieinama visoms įmonėms"
 
 #. module: account
 #: model:onboarding.onboarding.step,description:account.onboarding_onboarding_step_fiscal_year
 msgid "Define your fiscal years & tax returns periodicity."
 msgstr ""
+"Nustatykite savo finansinius metus ir mokesčių deklaracijų teikimo "
+"periodiškumą."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__bank_statements_source
@@ -6067,7 +6085,7 @@ msgstr "Nustato, kaip bus registruojami banko išrašai"
 #. module: account
 #: model:ir.model.fields,help:account.field_account_analytic_applicability__display_account_prefix
 msgid "Defines if the field account prefix should be displayed"
-msgstr ""
+msgstr "Nustato, ar turi būti rodomas lauko „account“ priešdėlis"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_bank_statement_line__invoice_cash_rounding_id
@@ -6110,22 +6128,22 @@ msgstr "Pakrovimo data"
 #. module: account
 #: model:account.account.tag,name:account.demo_ceo_wages_account
 msgid "Demo CEO Wages Account"
-msgstr ""
+msgstr "„Demo“ generalinio direktoriaus atlyginimo sąskaita"
 
 #. module: account
 #: model:account.account.tag,name:account.demo_capital_account
 msgid "Demo Capital Account"
-msgstr ""
+msgstr "Demo kapitalo sąskaita"
 
 #. module: account
 #: model:account.account.tag,name:account.demo_sale_of_land_account
 msgid "Demo Sale of Land Account"
-msgstr ""
+msgstr "Pavyzdinė žemės sklypo pardavimo sąskaita"
 
 #. module: account
 #: model:account.account.tag,name:account.demo_stock_account
 msgid "Demo Stock Account"
-msgstr ""
+msgstr "Demo sąskaita"
 
 #. module: account
 #. odoo-python
@@ -6157,6 +6175,8 @@ msgstr "Aprašymas"
 #: model_terms:ir.ui.view,arch_db:account.view_payment_term_form
 msgid "Description on invoice (e.g. Payment terms: 30 days after invoice date)"
 msgstr ""
+"Aprašymas sąskaitoje (pvz., Mokėjimo sąlygos: per 30 dienų nuo sąskaitos "
+"išrašymo datos)"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_term__note
@@ -6182,6 +6202,9 @@ msgid ""
 "used by itself, however it can still be used in a group. 'adjustment' is "
 "used to perform tax adjustment."
 msgstr ""
+"Nustato, kur galima pasirinkti mokestį. Pastaba: „Nėra“ reiškia, kad "
+"mokestis negali būti naudojamas atskirai, tačiau jį vis tiek galima naudoti "
+"grupėje. „Koregavimas“ naudojamas mokesčio koregavimui atlikti."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_tax__price_include
@@ -6189,6 +6212,8 @@ msgid ""
 "Determines whether the price you use on the product and invoices includes "
 "this tax."
 msgstr ""
+"Nustato, ar kaina, kurią nurodote ant produkto ir sąskaitose, apima šį "
+"mokestį."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_register__writeoff_account_id
@@ -6209,24 +6234,26 @@ msgstr "Santrauka"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Digitization"
-msgstr ""
+msgstr "Skaitmeninimas"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid ""
 "Digitize your PDF or scanned documents with OCR and Artificial Intelligence"
 msgstr ""
+"Skaitmenizuokite savo PDF arba nuskaitytus dokumentus naudodami OCR ir "
+"dirbtinį intelektą"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__direction_sign
 #: model:ir.model.fields,field_description:account.field_account_move__direction_sign
 msgid "Direction Sign"
-msgstr ""
+msgstr "Krypties ženklas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_merge_wizard__disable_merge_button
 msgid "Disable Merge Button"
-msgstr ""
+msgstr "Išjungti sujungimo mygtuką"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_report__filter_account_type__disabled
@@ -6269,17 +6296,17 @@ msgstr "Nuolaida (%)"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__discount_allocation_dirty
 msgid "Discount Allocation Dirty"
-msgstr ""
+msgstr "Nuolaidų paskirstymas Netvarkingas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__discount_allocation_key
 msgid "Discount Allocation Key"
-msgstr ""
+msgstr "Nuolaidų paskirstymo raktas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__discount_allocation_needed
 msgid "Discount Allocation Needed"
-msgstr ""
+msgstr "Reikia paskirstyti nuolaidas"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -6291,7 +6318,7 @@ msgstr "Nuolaidos suma"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__discount_balance
 msgid "Discount Balance"
-msgstr ""
+msgstr "Nuolaidos likutis"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__discount_date
@@ -6305,77 +6332,77 @@ msgstr "Nuolaidos data"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_term__discount_days
 msgid "Discount Days"
-msgstr ""
+msgstr "Nuolaidų dienos"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__discount_amount_currency
 msgid "Discount amount in Currency"
-msgstr ""
+msgstr "Nuolaidos suma valiuta"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "Discount of %(amount)s if paid today"
-msgstr ""
+msgstr "%(amount)s o nuolaida, jei sumokėsite šiandien"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "Discount of %(amount)s if paid within %(days)s days"
-msgstr ""
+msgstr "„ %(amount)s “ nuolaida, jei sumokama per „ %(days)s “ dienas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_analytic_applicability__display_account_prefix
 msgid "Display Account Prefix"
-msgstr ""
+msgstr "Rodyti paskyros priešdėlį"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__display_alias_fields
 msgid "Display Alias Fields"
-msgstr ""
+msgstr "Rodyti aliaso laukus"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_accrued_orders_wizard__display_amount
 msgid "Display Amount"
-msgstr ""
+msgstr "Rodyti sumą"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_send_wizard__display_attachments_widget
 msgid "Display Attachments Widget"
-msgstr ""
+msgstr "Prisegtukų rodymo valdiklis"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_term_line__display_days_next_month
 msgid "Display Days Next Month"
-msgstr ""
+msgstr "Rodyti ateinančio mėnesio dienas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_validate_account_move__display_force_post
 msgid "Display Force Post"
-msgstr ""
+msgstr "Priverstinis įrašo rodymas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__display_inactive_currency_warning
 #: model:ir.model.fields,field_description:account.field_account_move__display_inactive_currency_warning
 msgid "Display Inactive Currency Warning"
-msgstr ""
+msgstr "Rodyti įspėjimą apie nebevartojamą valiutą"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__display_invoice_edi_format
 #: model:ir.model.fields,field_description:account.field_res_users__display_invoice_edi_format
 msgid "Display Invoice Edi Format"
-msgstr ""
+msgstr "Rodyti sąskaitos faktūros redagavimo formatą"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__display_invoice_template_pdf_report_id
 #: model:ir.model.fields,field_description:account.field_res_users__display_invoice_template_pdf_report_id
 msgid "Display Invoice Template Pdf Report"
-msgstr ""
+msgstr "Rodyti sąskaitos faktūros šabloną PDF formatu"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__display_mapping_tab
 msgid "Display Mapping Tab"
-msgstr ""
+msgstr "Skirtukas „Atvaizdavimo priskyrimas“"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__display_name
@@ -6434,29 +6461,29 @@ msgstr "Rodomas pavadinimas"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_send_wizard__display_pdf_report_id
 msgid "Display Pdf Report"
-msgstr ""
+msgstr "Rodyti PDF ataskaitą"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__display_qr_code
 #: model:ir.model.fields,field_description:account.field_account_move__display_qr_code
 msgid "Display QR-code"
-msgstr ""
+msgstr "Rodyti QR kodą"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_base_document_layout__qr_code
 #: model:ir.model.fields,field_description:account.field_res_company__qr_code
 msgid "Display QR-code on invoices"
-msgstr ""
+msgstr "Rodyti QR kodą sąskaitose"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_currency__display_rounding_warning
 msgid "Display Rounding Warning"
-msgstr ""
+msgstr "Rodyti apvalinimo įspėjimą"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__qr_code
 msgid "Display SEPA QR-code"
-msgstr ""
+msgstr "Rodyti SEPA QR kodą"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_merge_wizard_line__display_type
@@ -6467,59 +6494,59 @@ msgstr "Ekrano tipas"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__placeholder_code
 msgid "Display code"
-msgstr ""
+msgstr "Rodyti kodą"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__preview_ready
 msgid "Display preview button"
-msgstr ""
+msgstr "Peržiūros mygtukas"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Display the total amount of an invoice in letters"
-msgstr ""
+msgstr "Rodyti sąskaitos faktūros bendrą sumą raidėmis"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax__repartition_line_ids
 msgid "Distribution"
-msgstr ""
+msgstr "Paskirstymas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__distribution_analytic_account_ids
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model_line__distribution_analytic_account_ids
 msgid "Distribution Analytic Account"
-msgstr ""
+msgstr "Paskirstymo analitinė sąskaita"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax__invoice_repartition_line_ids
 #: model_terms:ir.ui.view,arch_db:account.view_tax_form
 msgid "Distribution for Invoices"
-msgstr ""
+msgstr "Sąskaitų faktūrų platinimas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax__refund_repartition_line_ids
 msgid "Distribution for Refund Invoices"
-msgstr ""
+msgstr "Grąžinamųjų sąskaitų faktūrų paskirstymas"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_tax_form
 msgid "Distribution for Refunds"
-msgstr ""
+msgstr "Grąžinamų lėšų paskirstymas"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_tax__refund_repartition_line_ids
 msgid "Distribution when the tax is used on a refund"
-msgstr ""
+msgstr "Paskirstymas, kai mokestis taikomas grąžinamai sumai"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_tax__invoice_repartition_line_ids
 msgid "Distribution when the tax is used on an invoice"
-msgstr ""
+msgstr "Paskirstymas, kai mokestis nurodytas sąskaitoje faktūroje"
 
 #. module: account
 #: model:account.account,name:account.1_dividends
 msgid "Dividends"
-msgstr ""
+msgstr "Dividendai"
 
 #. module: account
 #. odoo-python
@@ -6531,12 +6558,12 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__module_account_extract
 msgid "Document Digitization"
-msgstr ""
+msgstr "Dokumentų skaitmeninimas"
 
 #. module: account
 #: model:onboarding.onboarding.step,title:account.onboarding_onboarding_step_base_document_layout
 msgid "Documents Layout"
-msgstr ""
+msgstr "Dokumentų išdėstymas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_analytic_applicability__business_domain
@@ -6546,12 +6573,12 @@ msgstr "Domenas"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_line__domain_formula
 msgid "Domain Formula Shortcut"
-msgstr ""
+msgstr "Domeno formulės trumpinys"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Domestic country of your accounting"
-msgstr ""
+msgstr "Jūsų apskaitos šalis"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_cash_rounding__rounding_method__down
@@ -6574,6 +6601,8 @@ msgid ""
 "Downpayments posted on this account will be considered by the Tax Closing "
 "Entry."
 msgstr ""
+"Į šią sąskaitą įskaityti avansiniai mokėjimai bus įtraukti į mokesčių "
+"uždarymo įrašą."
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_invoice_report__state__draft
@@ -6589,7 +6618,7 @@ msgstr "Juodraštis"
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "Draft (%(currency_amount)s)"
-msgstr ""
+msgstr "Juodraštis (%(currency_amount)s)"
 
 #. module: account
 #. odoo-python
@@ -6642,49 +6671,49 @@ msgstr "Mokėjimo juodraštis"
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "Draft Purchase Receipt"
-msgstr ""
+msgstr "Pirkimo kvito projektas"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "Draft Sales Receipt"
-msgstr ""
+msgstr "Pardavimo kvito projektas"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "Draft Vendor Credit Note"
-msgstr ""
+msgstr "Tiekėjo kredito avizo projektas"
 
 #. module: account
 #. odoo-javascript
 #: code:addons/account/static/src/components/bill_guide/bill_guide.xml:0
 msgid "Drag & drop"
-msgstr ""
+msgstr "Pervilkite ir numeskite"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_journal_dashboard.py:0
 msgid "Drop and let the AI process your bills automatically."
-msgstr ""
+msgstr "Paleiskite ir leiskite AI automatiškai apdoroti jūsų sąskaitas."
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_journal_dashboard.py:0
 msgid "Drop to create journal entries with attachments."
-msgstr ""
+msgstr "Paspauskite, kad sukurtumėte žurnalo įrašus su prisegtukais."
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_journal_dashboard.py:0
 msgid "Drop to import transactions"
-msgstr ""
+msgstr "Atšaukti sandorių importavimą"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_journal_dashboard.py:0
 msgid "Drop to import your invoices."
-msgstr ""
+msgstr "Paspauskite, kad importuotumėte savo sąskaitas faktūras."
 
 #. module: account
 #. odoo-python
@@ -6696,7 +6725,7 @@ msgstr "Laukia"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
 msgid "Due Amount for"
-msgstr ""
+msgstr "Mokėtina suma už"
 
 #. module: account
 #. odoo-python
@@ -6716,7 +6745,7 @@ msgstr "Mokėjimo terminas"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_payment_term_form
 msgid "Due Terms"
-msgstr ""
+msgstr "Terminų apibrėžimai"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_setup_bank_manual_config__duplicate_bank_partner_ids
@@ -6724,13 +6753,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:account.field_res_partner_bank__duplicate_bank_partner_ids
 #: model:ir.model.fields,field_description:account.field_res_users__duplicate_bank_partner_ids
 msgid "Duplicate Bank Partner"
-msgstr ""
+msgstr "Duplikuotas banko partneris"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment__duplicate_payment_ids
 #: model:ir.model.fields,field_description:account.field_account_payment_register__duplicate_payment_ids
 msgid "Duplicate Payment"
-msgstr ""
+msgstr "Dvigubas mokėjimas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__duplicated_bank_account_partners_count
@@ -6741,19 +6770,19 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "Duplicated Documents"
-msgstr ""
+msgstr "Pakartotiniai dokumentai"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_register_form
 msgid "Duplicated Payments"
-msgstr ""
+msgstr "Pakartotiniai mokėjimai"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__duplicated_ref_ids
 #: model:ir.model.fields,field_description:account.field_account_move__duplicated_ref_ids
 msgid "Duplicated Ref"
-msgstr ""
+msgstr "Pakartotinis šaltinis"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__module_account_reports
@@ -6764,16 +6793,18 @@ msgstr "Dinaminės ataskaitos"
 #: model:ir.model.fields,help:account.field_account_tax_repartition_line__tag_ids_domain
 msgid "Dynamic domain used for the tag that can be set on tax"
 msgstr ""
+"Dinaminis domenas, naudojamas žymėms, kurias galima nustatyti mokesčių "
+"srityje"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_partner_view_tree
 msgid "EDI Format"
-msgstr ""
+msgstr "EDI formatas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__module_l10n_eu_oss
 msgid "EU Intra-community Distance Selling"
-msgstr ""
+msgstr "ES Bendrijos vidaus nuotolinė prekyba"
 
 #. module: account
 #: model:account.incoterms,name:account.incoterm_EXW
@@ -6790,52 +6821,52 @@ msgstr "EXCH"
 #: model:ir.model.fields,field_description:account.field_account_payment_term__early_discount
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_payment_filter
 msgid "Early Discount"
-msgstr ""
+msgstr "Ankstyva nuolaida"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__account_journal_early_pay_discount_gain_account_id
 msgid "Early Discount Gain"
-msgstr ""
+msgstr "Ankstyvos nuolaidos nauda"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__account_journal_early_pay_discount_loss_account_id
 msgid "Early Discount Loss"
-msgstr ""
+msgstr "Ankstyvos nuolaidos nuostolis"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 #: model:ir.model.fields.selection,name:account.selection__account_move_line__display_type__epd
 msgid "Early Payment Discount"
-msgstr ""
+msgstr "Nuolaida už išankstinį mokėjimą"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 #: code:addons/account/models/account_move_line.py:0
 msgid "Early Payment Discount (%s)"
-msgstr ""
+msgstr "Nuolaida už išankstinį mokėjimą (%s)"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "Early Payment Discount (Exchange Difference)"
-msgstr ""
+msgstr "Nuolaida už išankstinį mokėjimą (valiutų kurso skirtumas)"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_register__early_payment_discount_mode
 msgid "Early Payment Discount Mode"
-msgstr ""
+msgstr "Ankstyvo mokėjimo nuolaidos režimas"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_payment_term__discount_percentage
 msgid "Early Payment Discount granted for this payment term"
-msgstr ""
+msgstr "Už šį mokėjimo terminą suteikiama nuolaida už išankstinį mokėjimą"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_register_form
 msgid "Early Payment Discount of"
-msgstr ""
+msgstr "Nuolaida už išankstinį mokėjimą"
 
 #. module: account
 #. odoo-python
@@ -6843,11 +6874,13 @@ msgstr ""
 msgid ""
 "Early Payment Discount: <b>%(amount)s</b> if paid before <b>%(date)s</b>"
 msgstr ""
+"Nuolaida už išankstinį mokėjimą: <b>%(amount)s</b> , jei sumokėta iki <b>%"
+"(date)s</b>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Early payment discounts:"
-msgstr ""
+msgstr "Nuolaidos už išankstinį mokėjimą:"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_line_payment_tree
@@ -6859,17 +6892,17 @@ msgstr "Redaguoti"
 #: model:ir.model.fields,help:account.field_account_bank_statement_line__tax_totals
 #: model:ir.model.fields,help:account.field_account_move__tax_totals
 msgid "Edit Tax amounts if you encounter rounding issues."
-msgstr ""
+msgstr "Jei kyla suapvalinimo problemų, pakoreguokite mokesčių sumas."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
 msgid "Electronic Data Interchange"
-msgstr ""
+msgstr "Elektroninis duomenų mainas"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.portal_my_details_fields
 msgid "Electronic format"
-msgstr ""
+msgstr "Elektroninis formatas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__alias_email
@@ -6886,12 +6919,12 @@ msgstr "El. laiškų šablonai"
 #. odoo-javascript
 #: code:addons/account/static/src/components/bill_guide/bill_guide.xml:0
 msgid "Email bills"
-msgstr ""
+msgstr "Sąskaitos el. paštu"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__alias_domain
 msgid "Email domain e.g. 'example.com' in 'odoo@example.com'"
-msgstr ""
+msgstr "El. pašto domenas, pvz., „example.com“ adresu „odoo@example.com“"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_send_wizard__mail_template_id
@@ -6901,34 +6934,34 @@ msgstr ""
 #. module: account
 #: model:account.account,name:account.1_employee_payroll_taxes
 msgid "Employee Payroll Taxes"
-msgstr ""
+msgstr "Darbuotojų atlyginimų mokesčiai"
 
 #. module: account
 #: model:account.account,name:account.1_employer_payroll_taxes
 msgid "Employer Payroll Taxes"
-msgstr ""
+msgstr "Darbdavio atlyginimų mokesčiai"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_bank_statement_search
 msgid "Empty"
-msgstr ""
+msgstr "Tuščia"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Enable PEPPOL"
-msgstr ""
+msgstr "Įjunkite PEPPOL"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_company__account_use_credit_limit
 #: model:ir.model.fields,help:account.field_res_config_settings__account_use_credit_limit
 msgid "Enable the use of credit limit on partners."
-msgstr ""
+msgstr "Leisti naudoti kredito limitą partneriams."
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_report__filter_hide_0_lines__by_default
 #: model:ir.model.fields.selection,name:account.selection__account_report__filter_hierarchy__by_default
 msgid "Enabled by Default"
-msgstr ""
+msgstr "Įjungta pagal numatytuosius nustatymus"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_lock_exception__end_datetime
@@ -6951,7 +6984,7 @@ msgstr "Pabaigos balansas"
 #. odoo-javascript
 #: code:addons/account/static/src/components/product_label_section_and_note_field/product_label_section_and_note_field.xml:0
 msgid "Enter a description"
-msgstr ""
+msgstr "Įveskite aprašymą"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.action_move_line_form
@@ -6962,13 +6995,13 @@ msgstr "Įrašai"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__entries_count
 msgid "Entries Count"
-msgstr ""
+msgstr "Įrašų skaičius"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/company.py:0
 msgid "Entries are correctly hashed"
-msgstr ""
+msgstr "Įrašai yra teisingai sugeneruoti"
 
 #. module: account
 #. odoo-python
@@ -7011,22 +7044,22 @@ msgstr "Įrašai: %(account)s"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_move_view_activity
 msgid "Entry Name"
-msgstr ""
+msgstr "Įrašo pavadinimas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__epd_dirty
 msgid "Epd Dirty"
-msgstr ""
+msgstr "Epd Dirty"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__epd_key
 msgid "Epd Key"
-msgstr ""
+msgstr "Epd raktas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__epd_needed
 msgid "Epd Needed"
-msgstr ""
+msgstr "Reikalingas Epd"
 
 #. module: account
 #. odoo-javascript
@@ -7052,6 +7085,9 @@ msgid ""
 "country %(country_name)s. You should probably update your localization app "
 "first."
 msgstr ""
+"Klaida įkeliant lokalizaciją: trūksta mokesčių žymės „ %(tag_name)s “ šaliai "
+"„ %(country_name)s “. Greičiausiai turėtumėte pirmiausia atnaujinti savo "
+"lokalizacijos programą."
 
 #. module: account
 #. odoo-python
@@ -7074,22 +7110,22 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_term__example_amount
 msgid "Example Amount"
-msgstr ""
+msgstr "Pavyzdinė suma"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_term__example_invalid
 msgid "Example Invalid"
-msgstr ""
+msgstr "Pavyzdys: Netinkamas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_term__example_preview
 msgid "Example Preview"
-msgstr ""
+msgstr "Pavyzdžio peržiūra"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_term__example_preview_discount
 msgid "Example Preview Discount"
-msgstr ""
+msgstr "Pavyzdžio peržiūra Nuolaida"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_payment_term_form
@@ -7130,7 +7166,7 @@ msgstr "Neįtraukti žurnalai"
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__expected_currency_rate
 #: model:ir.model.fields,field_description:account.field_account_move__expected_currency_rate
 msgid "Expected Currency Rate"
-msgstr ""
+msgstr "Numatomas valiutos kursas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__expects_chart_of_accounts
@@ -7158,7 +7194,7 @@ msgstr "Išlaidų sąskaita"
 #: model:ir.model.fields,field_description:account.field_account_automatic_entry_wizard__expense_accrual_account
 #: model:ir.model.fields,field_description:account.field_res_company__expense_accrual_account_id
 msgid "Expense Accrual Account"
-msgstr ""
+msgstr "Išlaidų kaupimo sąskaita"
 
 #. module: account
 #: model:account.account,name:account.1_expense
@@ -7173,24 +7209,30 @@ msgid "Expired"
 msgstr "Negaliojanti"
 
 #. module: account
+#: model:ir.actions.server,name:account.action_move_export_zip
+msgid "Export ZIP"
+msgstr "Eksportuoti ZIP"
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_column__expression_label
 msgid "Expression Label"
-msgstr ""
+msgstr "Išraiškos pavadinimas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_line__expression_ids
 msgid "Expressions"
-msgstr ""
+msgstr "Išraiškos"
 
 #. module: account
 #: model:ir.model.constraint,message:account.constraint_account_report_expression_domain_engine_subformula_required
 msgid "Expressions using 'domain' engine should all have a subformula."
 msgstr ""
+"Visos išraiškos, naudojančios „domain“ variklį, turėtų turėti poformulę."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_line__external_formula
 msgid "External Formula Shortcut"
-msgstr ""
+msgstr "Išorinės formulės nuoroda"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__reference
@@ -7200,17 +7242,17 @@ msgstr "Išorinis numeris"
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_report_expression__engine__external
 msgid "External Value"
-msgstr ""
+msgstr "Išorinė reikšmė"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_send_wizard__extra_edi_checkboxes
 msgid "Extra Edi Checkboxes"
-msgstr ""
+msgstr "Papildomi „Edi“ žymimieji langeliai"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_send_wizard__extra_edis
 msgid "Extra Edis"
-msgstr ""
+msgstr "Papildomi redagavimai"
 
 #. module: account
 #: model:account.incoterms,name:account.incoterm_FAS
@@ -7231,12 +7273,12 @@ msgstr "FREE ON BOARD"
 #. odoo-python
 #: code:addons/account/models/account_tax.py:0
 msgid "Factor Percent"
-msgstr ""
+msgstr "Veiksnys Procentas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax_repartition_line__factor
 msgid "Factor Ratio"
-msgstr ""
+msgstr "Veiksnių santykis"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_tax_repartition_line__factor
@@ -7244,6 +7286,8 @@ msgid ""
 "Factor to apply on the account move lines generated from this distribution "
 "line"
 msgstr ""
+"Koeficientas, taikytinas sąskaitos perkėlimo eilutėms, sukurtoms pagal šią "
+"paskirstymo eilutę"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_tax_repartition_line__factor_percent
@@ -7251,6 +7295,8 @@ msgid ""
 "Factor to apply on the account move lines generated from this distribution "
 "line, in percents"
 msgstr ""
+"Koeficientas, taikytinas sąskaitos pervedimo eilutėms, sukurtoms pagal šią "
+"paskirstymo eilutę, procentais"
 
 #. module: account
 #. odoo-python
@@ -7261,7 +7307,7 @@ msgstr "Ne"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report__filter_aml_ir_filters
 msgid "Favorite Filters"
-msgstr ""
+msgstr "Mėgstamiausias filtras"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_search
@@ -7286,19 +7332,19 @@ msgstr "Laukas"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_message_tree_audit_log_search
 msgid "Field Value"
-msgstr ""
+msgstr "Lauko reikšmė"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_column__figure_type
 #: model:ir.model.fields,field_description:account.field_account_report_expression__figure_type
 msgid "Figure Type"
-msgstr ""
+msgstr "Paveikslo tipas"
 
 #. module: account
 #. odoo-javascript
 #: code:addons/account/static/src/js/tours/account.js:0
 msgid "Fill in the details of the product or see the suggestion."
-msgstr ""
+msgstr "Įveskite produkto duomenis arba peržiūrėkite pasiūlymą."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report__filter_fiscal_position
@@ -7309,7 +7355,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_root.py:0
 msgid "Filter on the Account or its Display Name instead"
-msgstr ""
+msgstr "Filtruokite pagal paskyrą arba jos rodomąjį vardą"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_analytic_line__general_account_id
@@ -7320,17 +7366,17 @@ msgstr "Finansinė sąskaita"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_analytic_applicability__account_prefix
 msgid "Financial Accounts Prefixes"
-msgstr ""
+msgstr "Finansinių sąskaitų priešdėliai"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_analytic_line__journal_id
 msgid "Financial Journal"
-msgstr ""
+msgstr "Finansų žurnalas"
 
 #. module: account
 #: model:account.account.tag,name:account.account_tag_financing
 msgid "Financing Activities"
-msgstr ""
+msgstr "Finansavimo veikla"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model_partner_mapping__payment_ref_regex
@@ -7345,33 +7391,33 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_resequence_wizard__first_date
 msgid "First Date"
-msgstr ""
+msgstr "Pirmasis pasimatymas"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_hash_integrity
 msgid "First Entry"
-msgstr ""
+msgstr "Pirmasis įrašas"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_hash_integrity
 msgid "First Hash"
-msgstr ""
+msgstr "Pirmasis „hash“"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__first_line_index
 msgid "First Line Index"
-msgstr ""
+msgstr "Pirmojo eilutės rodyklė"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_resequence_wizard__first_name
 msgid "First New Sequence"
-msgstr ""
+msgstr "Pirmoji nauja seka"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__auto_post_origin_id
 #: model:ir.model.fields,field_description:account.field_account_move__auto_post_origin_id
 msgid "First recurring entry"
-msgstr ""
+msgstr "Pirmasis pasikartojantis įrašas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__account_fiscal_country_id
@@ -7382,7 +7428,7 @@ msgstr "Kilmės šalis"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__account_fiscal_country_id
 msgid "Fiscal Country Code"
-msgstr ""
+msgstr "Fiskalinis šalies kodas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_term__fiscal_country_codes
@@ -7393,7 +7439,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account.field_res_users__fiscal_country_codes
 #: model:ir.model.fields,field_description:account.field_uom_uom__fiscal_country_codes
 msgid "Fiscal Country Codes"
-msgstr ""
+msgstr "Fiskaliniai šalių kodai"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_partner_property_form
@@ -7436,7 +7482,7 @@ msgstr "Mokestinės aplinkos"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.setup_financial_year_opening_form
 msgid "Fiscal Year End"
-msgstr ""
+msgstr "Finansinių metų pabaiga"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_external_value__foreign_vat_fiscal_position_id
@@ -7477,7 +7523,7 @@ msgstr "terminuota"
 #. module: account
 #: model:account.account,name:account.1_fixed_assets
 msgid "Fixed Asset"
-msgstr ""
+msgstr "Ilgalaikis turtas"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_account__account_type__asset_fixed
@@ -7493,12 +7539,12 @@ msgstr "Pozicija"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model_line__amount
 msgid "Float Amount"
-msgstr ""
+msgstr "Plaukiojančio skaičiaus suma"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_line__foldable
 msgid "Foldable"
-msgstr ""
+msgstr "Sulankstoma"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.portal_my_home_invoice
@@ -7558,6 +7604,8 @@ msgstr "Dėl bet kokio kito klausimo rašykite"
 msgid ""
 "For new invoices, please ensure a PDF or electronic invoice file is attached"
 msgstr ""
+"Pateikiant naujas sąskaitas faktūras, įsitikinkite, kad pridėtas PDF arba "
+"elektroninis sąskaitos faktūros failas"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_payment_term_line__value_amount
@@ -7575,12 +7623,12 @@ msgstr ""
 #. module: account
 #: model:ir.model.constraint,message:account.constraint_account_move_line_check_non_accountable_fields_null
 msgid "Forbidden balance or account on non-accountable line"
-msgstr ""
+msgstr "Draudžiama balanso ar sąskaitos eilutė, kuriai netaikoma atskaitomybė"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_validate_account_move__force_post
 msgid "Force"
-msgstr ""
+msgstr "Priversti"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_reconcile_model_line__force_tax_included
@@ -7594,6 +7642,9 @@ msgid ""
 "Forces all journal items in this account to have a specific currency (i.e. "
 "bank journals). If no currency is set, entries can use any currency."
 msgstr ""
+"Priverčia visus šio sąskaitos žurnalo įrašus turėti konkrečią valiutą (t. y. "
+"banko žurnalus). Jei valiuta nenustatyta, įrašuose gali būti naudojama bet "
+"kuri valiuta."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__foreign_currency_id
@@ -7623,31 +7674,31 @@ msgstr "Užsienio PVM šalys"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__foreign_vat_header_mode
 msgid "Foreign Vat Header Mode"
-msgstr ""
+msgstr "Užsienio PVM antraštės režimas"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/chart_template.py:0
 msgid "Foreign tax account (%s)"
-msgstr ""
+msgstr "Užsienio mokesčių sąskaita (%s)"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/chart_template.py:0
 msgid "Foreign tax account advance payment (%s)"
-msgstr ""
+msgstr "Išankstinis mokėjimas už užsienio mokesčių sąskaitą (%s)"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/chart_template.py:0
 msgid "Foreign tax account payable (%s)"
-msgstr ""
+msgstr "Užsienio mokesčių mokėtina suma (%s)"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/chart_template.py:0
 msgid "Foreign tax account receivable (%s)"
-msgstr ""
+msgstr "Užsienio mokesčių gautinos sumos (%s)"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_expression__formula
@@ -7661,6 +7712,9 @@ msgid ""
 "target of the carryover for this expression (on a _carryover_*-labeled "
 "expression), in case it is different from the parent line."
 msgstr ""
+"Formulė forma line_code.expression_label. Tai leidžia nustatyti šio "
+"išraiškos pernešimo tikslą (išraiškoje, pažymėtoje _carryover_*), jei jis "
+"skiriasi nuo pagrindinės eilutės."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_group_form
@@ -7670,32 +7724,32 @@ msgstr "Iš"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_base_document_layout__from_invoice
 msgid "From Invoice"
-msgstr ""
+msgstr "Iš sąskaitos faktūros"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
 msgid "From Non Trade Receivable accounts"
-msgstr ""
+msgstr "Iš nekomercinių gautinų sumų sąskaitų"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
 msgid "From P&L accounts"
-msgstr ""
+msgstr "Iš pelno ir nuostolių ataskaitų"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
 msgid "From Trade Payable accounts"
-msgstr ""
+msgstr "Iš mokėtinų sąskaitų"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
 msgid "From Trade Receivable accounts"
-msgstr ""
+msgstr "Iš prekybos gautinų sumų sąskaitų"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_reconcile_model_line__amount_type__regex
 msgid "From label"
-msgstr ""
+msgstr "Iš etiketės"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_analytic_line_filter_inherit_account
@@ -7759,7 +7813,7 @@ msgstr "Būsimos veiklos"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.validate_account_move_view
 msgid "Future-dated"
-msgstr ""
+msgstr "Ateities data"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -7776,7 +7830,7 @@ msgstr "Gauti sąskaitos keitimo kursą"
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__payment_tolerance_param
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model_line__payment_tolerance_param
 msgid "Gap"
-msgstr ""
+msgstr "Atotrūkis"
 
 #. module: account
 #. odoo-python
@@ -7798,12 +7852,12 @@ msgstr "Bendro pobūdžio mokesčių ataskaita"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "Get Paid online. Send electronic invoices."
-msgstr ""
+msgstr "Gaukite atlygį internetu. Siųskite elektronines sąskaitas faktūras."
 
 #. module: account
 #: model:ir.model,name:account.model_report_account_report_hash_integrity
 msgid "Get hash integrity result as PDF."
-msgstr ""
+msgstr "Atsisiųskite hash vientisumo rezultatą PDF formatu."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -7821,7 +7875,7 @@ msgstr "Bendra užrakinimo data"
 #. odoo-python
 #: code:addons/account/wizard/account_move_send_batch_wizard.py:0
 msgid "Go to cron configuration"
-msgstr ""
+msgstr "Eiti į „cron“ konfigūraciją"
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_account_audit_trail_report
@@ -7905,11 +7959,13 @@ msgid ""
 "Groupby feature isn't supported by '%(engine)s' engine. Please remove the "
 "groupby value on '%(report_line)s'"
 msgstr ""
+"„Groupby“ funkcija nepalaikoma „%(engine)s “ varikliu. Prašome pašalinti „"
+"groupby“ reikšmę iš „%(report_line)s “"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_merge_wizard_line__grouping_key
 msgid "Grouping Key"
-msgstr ""
+msgstr "Grupavimo raktas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report__filter_growth_comparison
@@ -7961,12 +8017,12 @@ msgstr "Turi žinutę"
 #: model:ir.model.fields,field_description:account.field_account_setup_bank_manual_config__has_money_transfer_warning
 #: model:ir.model.fields,field_description:account.field_res_partner_bank__has_money_transfer_warning
 msgid "Has Money Transfer Warning"
-msgstr ""
+msgstr "Yra įspėjimas apie pinigų pervedimą"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax__has_negative_factor
 msgid "Has Negative Factor"
-msgstr ""
+msgstr "Yra neigiamas veiksnys"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__has_posted_entries
@@ -7982,7 +8038,7 @@ msgstr "Turi sudengus įrašus"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__has_sequence_holes
 msgid "Has Sequence Holes"
-msgstr ""
+msgstr "Yra sekos spragų"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__has_statement_lines
@@ -7992,17 +8048,17 @@ msgstr "Turi išrašo eilutes"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_secure_entries_wizard__hash_date
 msgid "Hash All Entries"
-msgstr ""
+msgstr "Pažymėti visus įrašus"
 
 #. module: account
 #: model:ir.actions.report,name:account.action_report_account_hash_integrity
 msgid "Hash integrity result PDF"
-msgstr ""
+msgstr "Hash vientisumo rezultatas PDF"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.autopost_bills_wizard
 msgid "Hey there !"
-msgstr ""
+msgstr "Sveiki!"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.email_template_mail_gateway_failed
@@ -8012,12 +8068,16 @@ msgid ""
 "    Your email has been discarded. the e-mail address you have used only "
 "accepts new invoices:"
 msgstr ""
+"Sveiki,\n"
+"   <br/><br/> \n"
+"    Jūsų el. laiškas buvo atmestas. Jūsų nurodytu el. pašto adresu priimamos "
+"tik naujos sąskaitos:"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__hide_post_button
 #: model:ir.model.fields,field_description:account.field_account_move__hide_post_button
 msgid "Hide Post Button"
-msgstr ""
+msgstr "Mygtukas „Paslėpti pranešimą“"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax__hide_tax_exigibility
@@ -8027,7 +8087,7 @@ msgstr "Slėpti pasirinkimą \"naudoti grynųjų pinigų principą\""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_register__hide_writeoff_section
 msgid "Hide Writeoff Section"
-msgstr ""
+msgstr "Paslėpti skyrių „Nurašymas“"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_line__hide_if_zero
@@ -8046,17 +8106,20 @@ msgid ""
 "date are secured. Only journal entries after the hard lock date are "
 "considered."
 msgstr ""
+"Vėliausia data, iki kurios visi iki tos datos (įskaitant ją) paskelbti "
+"žurnalo įrašai yra apsaugoti. Atsižvelgiama tik į žurnalo įrašus, paskelbtus "
+"po galutinės užrakinimo datos."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__highest_name
 #: model:ir.model.fields,field_description:account.field_account_move__highest_name
 msgid "Highest Name"
-msgstr ""
+msgstr "Aukščiausias vardas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_line__horizontal_split_side
 msgid "Horizontal Split Side"
-msgstr ""
+msgstr "Horizontalus puslapių padalijimas"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -8066,7 +8129,7 @@ msgstr "Kaip visa mokesčių suma apskaičiuojama užsakymuose ir sąskaitose"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "ICE:"
-msgstr ""
+msgstr "ICE:"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__id
@@ -8131,22 +8194,22 @@ msgstr "SĄS"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "INV/2023/00001"
-msgstr ""
+msgstr "INV/2023/00001"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "INV/2023/0001"
-msgstr ""
+msgstr "INV/2023/00001"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
 msgid "INV0001"
-msgstr ""
+msgstr "INV0001"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
 msgid "INV001"
-msgstr ""
+msgstr "INV001"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__activity_exception_icon
@@ -8174,6 +8237,8 @@ msgid ""
 "If a payment is still outstanding more than sixty (60) days after the due "
 "payment date,"
 msgstr ""
+"Jei mokėjimas vis dar nėra atliktas praėjus daugiau nei šešiasdešimt (60) "
+"dienų po mokėjimo termino,"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_report__filter_aml_ir_filters
@@ -8228,6 +8293,9 @@ msgid ""
 "If empty, the discount will be discounted directly on the income/expense "
 "account. If set, discount on invoices will be realized in separate accounts."
 msgstr ""
+"Jei laukelis paliktas tuščias, nuolaida bus atskaityta tiesiogiai iš pajamų/"
+"išlaidų sąskaitos. Jei nustatyta, sąskaitose faktūrose nurodyta nuolaida bus "
+"įskaityta į atskiras sąskaitas."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_move_reversal__journal_id
@@ -8242,6 +8310,8 @@ msgid ""
 "If set, taxes with a higher sequence than this one will be affected by it, "
 "provided they accept it."
 msgstr ""
+"Jei šis parametras nustatytas, jis turės įtakos mokesčiams, kurių seka yra "
+"aukštesnė už šią, su sąlyga, kad jie jį priima."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_tax__is_base_affected
@@ -8249,6 +8319,8 @@ msgid ""
 "If set, taxes with a lower sequence might affect this one, provided they try "
 "to do it."
 msgstr ""
+"Jei nustatyta, mokesčiai su žemesniu numeriu gali turėti įtakos šiam "
+"mokesčiui, jei jie bandys tai padaryti."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_tax__analytic
@@ -8273,6 +8345,10 @@ msgid ""
 "If not, this account will belong to Trade Receivable/Payable in reports and "
 "filters."
 msgstr ""
+"Jei nustatyta, ataskaitose ir filtruose ši sąskaita bus priskirta "
+"neprekybinėms gautinoms/mokėtinoms sumoms.\n"
+"Jei nenustatyta, ataskaitose ir filtruose ši sąskaita bus priskirta "
+"prekybinėms gautinoms/mokėtinoms sumoms."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_tax_group__preceding_subtotal
@@ -8281,6 +8357,10 @@ msgid ""
 "excluding this tax group before displaying it. If not set, the tax group "
 "will be displayed after the 'Untaxed amount' subtotal."
 msgstr ""
+"Jei ši reikšmė nustatyta, ji bus naudojama dokumentuose kaip tarpinių sumų, "
+"neįskaitant šios mokesčių grupės, pavadinimas prieš jas rodant. Jei "
+"nenustatyta, mokesčių grupė bus rodoma po tarpinių sumų „Neapmokestinta suma"
+"“."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_payment_term__active
@@ -8309,6 +8389,10 @@ msgid ""
 "sequence from the entry back to the last hashed entry. The hash can also be "
 "performed on demand by the Secure Entries wizard."
 msgstr ""
+"Jei pažymėta, kai įrašas paskelbiamas, mes atgaline data sugeneruojame visų "
+"veiksmų sekos, pradedant nuo šio įrašo ir baigiant paskutiniu įrašu, kuriam "
+"jau buvo sugeneruotas hash. Hash taip pat galima sugeneruoti pagal užklausą "
+"naudojant „Saugių įrašų“ vedlį."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -8352,24 +8436,24 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_validate_account_move__ignore_abnormal_amount
 msgid "Ignore Abnormal Amount"
-msgstr ""
+msgstr "Ignoruoti neįprastą kiekį"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_validate_account_move__ignore_abnormal_date
 msgid "Ignore Abnormal Date"
-msgstr ""
+msgstr "Ignoruoti nenormalų datą"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__ignore_abnormal_invoice_amount
 #: model:ir.model.fields,field_description:account.field_res_users__ignore_abnormal_invoice_amount
 msgid "Ignore Abnormal Invoice Amount"
-msgstr ""
+msgstr "Ignoruoti nenormalų sąskaitos sumą"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__ignore_abnormal_invoice_date
 #: model:ir.model.fields,field_description:account.field_res_users__ignore_abnormal_invoice_date
 msgid "Ignore Abnormal Invoice Date"
-msgstr ""
+msgstr "Ignoruoti nenormalią sąskaitos faktūros datą"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.validate_account_move_view
@@ -8436,7 +8520,7 @@ msgstr "Importuokite banko išrašus QIF formatu"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_line_tree
 msgid "In Currency"
-msgstr ""
+msgstr "Valiuta"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_invoice_report__payment_state__in_payment
@@ -8450,27 +8534,27 @@ msgstr "Mokėjime"
 #: model:ir.model.fields.selection,name:account.selection__account_payment__state__in_process
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_search
 msgid "In Process"
-msgstr ""
+msgstr "Vyksta"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_default_terms_and_conditions
 msgid "In order for it to be admissible,"
-msgstr ""
+msgstr "Kad tekstas būtų priimtinas,"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "In order to validate this bill, you must"
-msgstr ""
+msgstr "Norėdami patvirtinti šį sąskaitos projektą, turite"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "In order to validate this invoice, you must"
-msgstr ""
+msgstr "Norėdami patvirtinti šią sąskaitą, turite"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_filter
 msgid "In payment"
-msgstr ""
+msgstr "Apmokėjimas"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_tax_search
@@ -8497,7 +8581,7 @@ msgstr "Įeinantys"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__inbound_payment_method_line_ids
 msgid "Inbound Payment Methods"
-msgstr ""
+msgstr "Įeinančių mokėjimų būdai"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax__analytic
@@ -8528,7 +8612,7 @@ msgstr "Pajamų sąskaita"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
 msgid "Incoming Payments"
-msgstr ""
+msgstr "Gautieji mokėjimai"
 
 #. module: account
 #. odoo-python
@@ -8906,7 +8990,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__invoice_partner_display_name
 #: model:ir.model.fields,field_description:account.field_account_move__invoice_partner_display_name
 msgid "Invoice Partner Display Name"
-msgstr ""
+msgstr "Sąskaitos faktūros partnerio rodomasis vardas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__invoice_payments_widget
@@ -9073,7 +9157,7 @@ msgstr "Sąskaitų statistika"
 #. odoo-python
 #: code:addons/account/wizard/account_move_send_batch_wizard.py:0
 msgid "Invoices are being sent in the background."
-msgstr ""
+msgstr "Sąskaitos faktūros siunčiamos fone."
 
 #. module: account
 #. odoo-python
@@ -9267,7 +9351,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_register__is_register_payment_on_draft
 msgid "Is Register Payment On Draft"
-msgstr ""
+msgstr "Ar užregistruotas mokėjimas yra neapmokėtas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__is_same_currency
@@ -9277,7 +9361,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_merge_wizard_line__is_selected
 msgid "Is Selected"
-msgstr ""
+msgstr "Yra pasirinkta"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment__is_sent
@@ -9309,6 +9393,8 @@ msgid ""
 "It indicates that the invoice/payment has been sent or the PDF has been "
 "generated."
 msgstr ""
+"Tai reiškia, kad sąskaita faktūra / mokėjimo pavedimas buvo išsiųstas arba "
+"buvo sukurtas PDF failas."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.autopost_bills_wizard
@@ -9556,6 +9642,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:account.action_account_journal_form
 #: model:ir.model.fields,field_description:account.field_account_report__filter_journals
 #: model:ir.ui.menu,name:account.menu_action_account_journal_form
+#: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
 msgid "Journals"
 msgstr "Žurnalai"
 
@@ -9807,6 +9894,8 @@ msgid ""
 "Last date at which the discounted amount must be paid in order for the Early "
 "Payment Discount to be granted"
 msgstr ""
+"Paskutinė data, iki kurios turi būti sumokėta suma su nuolaida, kad būtų "
+"suteikta nuolaida už išankstinį mokėjimą"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
@@ -10007,6 +10096,7 @@ msgid "Looks great!"
 msgstr "Atrodo puikiai!"
 
 #. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_analytic_line__analytic_profitability__loss
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Loss"
 msgstr "Nuostolis"
@@ -10191,7 +10281,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_statement
 msgid "Marc Demo"
-msgstr ""
+msgstr "Marc Demo"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__res_company__fiscalyear_last_month__3
@@ -10260,7 +10350,7 @@ msgstr "Susieti žurnalo įrašai"
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__matched_payment_ids
 #: model:ir.model.fields,field_description:account.field_account_move__matched_payment_ids
 msgid "Matched Payments"
-msgstr ""
+msgstr "Atitinkami mokėjimai"
 
 #. module: account
 #. odoo-python
@@ -10330,7 +10420,7 @@ msgstr "Gegužė"
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
 #, fuzzy
 msgid "Memo"
-msgstr "Mokėjimo paskirtis"
+msgstr "Priminimas"
 
 #. module: account
 #. odoo-javascript
@@ -10338,7 +10428,7 @@ msgstr "Mokėjimo paskirtis"
 #: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
 #, fuzzy
 msgid "Memo:"
-msgstr "Mokėjimo paskirtis:"
+msgstr "Priminimas:"
 
 #. module: account
 #: model:ir.model,name:account.model_ir_ui_menu
@@ -10637,6 +10727,12 @@ msgid "Need Cancel Request"
 msgstr ""
 
 #. module: account
+#. odoo-python
+#: code:addons/account/models/chart_template.py:0
+msgid "Need to update"
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__needed_terms
 #: model:ir.model.fields,field_description:account.field_account_move__needed_terms
 msgid "Needed Terms"
@@ -10789,7 +10885,7 @@ msgstr "Žinučių nėra"
 #. odoo-python
 #: code:addons/account/models/account_payment.py:0
 msgid "No Payment Method"
-msgstr ""
+msgstr "Nėra mokėjimo būdo"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_fiscal_position__foreign_vat_header_mode__no_template
@@ -10826,6 +10922,7 @@ msgstr ""
 #: code:addons/account/models/account_payment.py:0
 msgid "No outstanding account could be found to make the payment"
 msgstr ""
+"Nerasta jokios neapmokėtos sąskaitos, į kurią būtų galima atlikti mokėjimą"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
@@ -10836,7 +10933,7 @@ msgstr "Nesukurti jokie mokėjimo įrašai"
 #. odoo-python
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 msgid "No possible action found with the selected lines."
-msgstr ""
+msgstr "Nerasta jokių galimų veiksmų su pasirinktomis eilutėmis."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__non_trade
@@ -10971,6 +11068,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__note
 msgid "Notes"
 msgstr "Pastabos"
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+msgid "Nothing to export."
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__res_company__fiscalyear_last_month__11
@@ -11142,7 +11245,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment_term__early_pay_discount_computation__included
 msgid "On early payment"
-msgstr ""
+msgstr "Apie išankstinį mokėjimą"
 
 #. module: account
 #: model:onboarding.onboarding.step,step_image_alt:account.onboarding_onboarding_step_fiscal_year
@@ -11213,6 +11316,12 @@ msgid "Online Payments"
 msgstr "Mokėjimai internetu"
 
 #. module: account
+#. odoo-python
+#: code:addons/account/models/partner.py:0
+msgid "Only Accounting managers can create foreign taxes."
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_report__only_tax_exigible
 msgid "Only Tax Exigible Lines"
 msgstr ""
@@ -11248,6 +11357,8 @@ msgstr ""
 msgid ""
 "Only one payment will be created by partner (bank), instead of one per bill."
 msgstr ""
+"Kiekvienas partneris (bankas) atliks tik vieną mokėjimą, o ne po vieną už "
+"kiekvieną sąskaitą."
 
 #. module: account
 #. odoo-python
@@ -11448,6 +11559,9 @@ msgid ""
 "timeframe is indicated on either the invoice or the order. In the event of "
 "non-payment by the due date,"
 msgstr ""
+"Mūsų sąskaitos faktūros turi būti apmokėtos per 21 darbo dieną, nebent "
+"sąskaitoje faktūroje arba užsakyme būtų nurodytas kitas mokėjimo terminas. "
+"Jei iki nustatytos datos nebus atliktas mokėjimas,"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment_method__payment_type__outbound
@@ -11457,12 +11571,12 @@ msgstr "Išeinantys"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__outbound_payment_method_line_ids
 msgid "Outbound Payment Methods"
-msgstr ""
+msgstr "Išeinančių mokėjimų būdai"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
 msgid "Outgoing Payments"
-msgstr ""
+msgstr "Išeinantys mokėjimai"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment__outstanding_account_id
@@ -11474,12 +11588,12 @@ msgstr ""
 #: code:addons/account/models/chart_template.py:0
 #: model:account.account,name:account.1_account_journal_payment_credit_account_id
 msgid "Outstanding Payments"
-msgstr ""
+msgstr "Neapmokėti mokėjimai"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
 msgid "Outstanding Payments accounts"
-msgstr ""
+msgstr "Neapmokėtų mokėjimų sąskaitos"
 
 #. module: account
 #. odoo-python
@@ -11541,6 +11655,7 @@ msgid ""
 msgstr ""
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_account_analytic_line_filter_inherit_account
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
 msgid "P&L Accounts"
 msgstr ""
@@ -11571,7 +11686,7 @@ msgstr "PDF Failas"
 #. module: account
 #: model:ir.actions.report,name:account.account_invoices_without_payment
 msgid "PDF without Payment"
-msgstr ""
+msgstr "PDF be mokėjimo"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -11636,7 +11751,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment__paired_internal_transfer_payment_id
 msgid "Paired Internal Transfer Payment"
-msgstr ""
+msgstr "Poriniai vidiniai pervedimai"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_group__parent_id
@@ -11858,12 +11973,12 @@ msgstr "Mokėjimas"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_method_line__payment_account_id
 msgid "Payment Account"
-msgstr ""
+msgstr "Mokėjimo sąskaita"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
 msgid "Payment Amount:"
-msgstr ""
+msgstr "Mokėjimo suma:"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -11879,7 +11994,7 @@ msgstr "Mokėjimo Paskirtis"
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__payment_count
 #: model:ir.model.fields,field_description:account.field_account_move__payment_count
 msgid "Payment Count"
-msgstr ""
+msgstr "Mokėjimo skaičius"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_tree
@@ -11895,7 +12010,7 @@ msgstr "Sąskaitos faktūros data"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
 msgid "Payment Date:"
-msgstr ""
+msgstr "Mokėjimo data:"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_register__payment_difference
@@ -11910,7 +12025,7 @@ msgstr "Mokėjimo skirtumo tvarkymas"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_line_payment_tree
 msgid "Payment Items"
-msgstr ""
+msgstr "Mokėjimo elementai"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment__payment_method_line_id
@@ -11926,12 +12041,12 @@ msgstr "Mokėjimo būdas"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_search
 msgid "Payment Method Line"
-msgstr ""
+msgstr "Mokėjimo būdo eilutė"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_method_line_tree
 msgid "Payment Method Name"
-msgstr ""
+msgstr "Mokėjimo būdo pavadinimas"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
@@ -11949,7 +12064,7 @@ msgstr "Mokėjimo būdai"
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__qr_code_method
 #: model:ir.model.fields,field_description:account.field_account_move__qr_code_method
 msgid "Payment QR-code"
-msgstr ""
+msgstr "Mokėjimo QR kodas"
 
 #. module: account
 #. odoo-python
@@ -11962,7 +12077,7 @@ msgstr "Mokėjimo kvitas"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment__payment_receipt_title
 msgid "Payment Receipt Title"
-msgstr ""
+msgstr "Mokėjimo kvito pavadinimas"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__payment_reference
@@ -11982,13 +12097,13 @@ msgstr "Mokėjimo statusas"
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_move_line__display_type__payment_term
 msgid "Payment Term"
-msgstr ""
+msgstr "Mokėjimo sąlygos"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__payment_term_details
 #: model:ir.model.fields,field_description:account.field_account_move__payment_term_details
 msgid "Payment Term Details"
-msgstr ""
+msgstr "Mokėjimo sąlygų detalės"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.action_payment_term_form
@@ -12038,7 +12153,7 @@ msgstr "Mokėjimo sąlygos"
 #. module: account
 #: model_terms:account.payment.term,note:account.account_payment_term_30_days_end_month_the_10
 msgid "Payment terms: 10 Days after End of Next Month"
-msgstr ""
+msgstr "Apmokėjimo sąlygos: per 10 dienų po kito mėnesio pabaigos"
 
 #. module: account
 #: model_terms:account.payment.term,note:account.account_payment_term_15days
@@ -12060,6 +12175,8 @@ msgstr " Apmokėjimo terminas: 30 dienų"
 #: model_terms:account.payment.term,note:account.account_payment_term_30days_early_discount
 msgid "Payment terms: 30 Days, 2% Early Payment Discount under 7 days"
 msgstr ""
+"Apmokėjimo sąlygos: 30 dienų, 2% Eankstyvo apmokėjimo nuolaida, jei sumokama "
+"per 7 dienas"
 
 #. module: account
 #: model_terms:account.payment.term,note:account.account_payment_term_advance
@@ -12069,7 +12186,7 @@ msgstr "Mokėjimo sąlygos: 30% avansas sekančio mėnesio pabaiga"
 #. module: account
 #: model_terms:account.payment.term,note:account.account_payment_term_advance_60days
 msgid "Payment terms: 30% Now, Balance 60 Days"
-msgstr ""
+msgstr "Mokėjimo sąlygos: 30% N, likutis – 60 dienų"
 
 #. module: account
 #: model_terms:account.payment.term,note:account.account_payment_term_45days
@@ -12079,7 +12196,7 @@ msgstr "Mokėjimo sąlygos: 45 dienos"
 #. module: account
 #: model_terms:account.payment.term,note:account.account_payment_term_90days_on_the_10th
 msgid "Payment terms: 90 days, on the 10th"
-msgstr ""
+msgstr "Apmokėjimo sąlygos: 90 dienų, 10-ąją dieną"
 
 #. module: account
 #: model_terms:account.payment.term,note:account.account_payment_term_end_following_month
@@ -12094,12 +12211,12 @@ msgstr "Mokėjimo sąlygos: apmokėjimas iš karto"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "Payment within 30 calendar day"
-msgstr ""
+msgstr "Apmokėjimas per 30 kalendorinių dienų"
 
 #. module: account
 #: model:mail.template,name:account.mail_template_data_payment_receipt
 msgid "Payment: Payment Receipt"
-msgstr ""
+msgstr "Apmokėjimas: Apmokėjimo kvitas"
 
 #. module: account
 #. odoo-python
@@ -12132,12 +12249,14 @@ msgstr ""
 msgid ""
 "Payments related to partners with no bank account specified will be skipped."
 msgstr ""
+"Mokėjimai, susiję su partneriais, kurie nenurodė banko sąskaitos, bus "
+"praleisti."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_bank_statement_line__reconciled_payment_ids
 #: model:ir.model.fields,help:account.field_account_move__reconciled_payment_ids
 msgid "Payments that have been reconciled with this invoice."
-msgstr ""
+msgstr "Mokėjimai, kurie buvo suderinti su šia sąskaita faktūra."
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment_term_line__value__percent
@@ -12226,7 +12345,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_payment.py:0
 msgid "Please define a payment method line on your payment."
-msgstr ""
+msgstr "Prašome mokėjimo formoje nurodyti mokėjimo būdą."
 
 #. module: account
 #. odoo-python
@@ -12253,7 +12372,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.bill_preview
 msgid "Please use the following communication for your payment:"
-msgstr ""
+msgstr "Atlikdami mokėjimą, prašome nurodyti šią informaciją:"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax_group__pos_receipt_label
@@ -12285,7 +12404,7 @@ msgstr "Registruoti skirtumą į"
 #. module: account
 #: model:ir.actions.server,name:account.action_account_confirm_payments
 msgid "Post Payments"
-msgstr ""
+msgstr "Mokėjimai po paslaugos suteikimo"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_move__state__posted
@@ -12322,7 +12441,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__preferred_payment_method_line_id
 #: model:ir.model.fields,field_description:account.field_account_move__preferred_payment_method_line_id
 msgid "Preferred Payment Method Line"
-msgstr ""
+msgstr "Pageidaujamas mokėjimo būdas"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_partner__property_outbound_payment_method_line_id
@@ -12490,6 +12609,7 @@ msgstr "Produktų kategorijos"
 #: model:ir.model,name:account.model_product_category
 #: model:ir.model.fields,field_description:account.field_account_analytic_applicability__product_categ_id
 #: model:ir.model.fields,field_description:account.field_account_analytic_distribution_model__product_categ_id
+#: model:ir.model.fields,field_description:account.field_account_analytic_line__product_category
 #: model:ir.model.fields,field_description:account.field_account_invoice_report__product_categ_id
 #: model:ir.model.fields,field_description:account.field_account_move_line__product_category_id
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_report_search
@@ -12544,16 +12664,21 @@ msgid "Profit Account"
 msgstr "Pelno sąskaita"
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_analytic_line__analytic_profitability
+msgid "Profitability"
+msgstr "Pelningumas"
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__property_inbound_payment_method_line_id
 #: model:ir.model.fields,field_description:account.field_res_users__property_inbound_payment_method_line_id
 msgid "Property Inbound Payment Method Line"
-msgstr ""
+msgstr "Nuosavybės įeinančio mokėjimo būdo eilutė"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__property_outbound_payment_method_line_id
 #: model:ir.model.fields,field_description:account.field_res_users__property_outbound_payment_method_line_id
 msgid "Property Outbound Payment Method Line"
-msgstr ""
+msgstr "Nuosavybės išeinančių mokėjimų metodo eilutė"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_journal__type__purchase
@@ -12574,6 +12699,7 @@ msgstr "Pirkimų užrakinimo data"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__group_show_purchase_receipts
+#: model:ir.model.fields.selection,name:account.selection__account_invoice_report__move_type__in_receipt
 #: model:ir.model.fields.selection,name:account.selection__account_move__move_type__in_receipt
 #: model:res.groups,name:account.group_purchase_receipts
 msgid "Purchase Receipt"
@@ -12802,7 +12928,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__reconciled_payment_ids
 #: model:ir.model.fields,field_description:account.field_account_move__reconciled_payment_ids
 msgid "Reconciled Payments"
-msgstr ""
+msgstr "Suderinti mokėjimai"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment__reconciled_statement_line_ids
@@ -12972,7 +13098,7 @@ msgstr "Perkurkite žurnalo įrašų seką."
 #. odoo-python
 #: code:addons/account/models/account_tax.py:0
 msgid "Removed"
-msgstr ""
+msgstr "Pašalinti"
 
 #. module: account
 #: model:account.account,name:account.1_expense_rent
@@ -12997,7 +13123,7 @@ msgstr "Ataskaita"
 #. module: account
 #: model:ir.model,name:account.model_ir_actions_report
 msgid "Report Action"
-msgstr ""
+msgstr "Ataskaitos veiksmas"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
@@ -13013,7 +13139,7 @@ msgstr "Ataskaitos eilutė"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report_expression__report_line_name
 msgid "Report Line Name"
-msgstr ""
+msgstr "Pranešimo eilutės pavadinimas"
 
 #. module: account
 #: model:ir.ui.menu,name:account.account_report_folder
@@ -13099,11 +13225,6 @@ msgid "Responsible User"
 msgstr "Atsakingas vartotojas"
 
 #. module: account
-#: model:ir.model.fields,help:account.field_account_tax__tax_scope
-msgid "Restrict the use of taxes to a type of product."
-msgstr "Apriboti mokesčių naudojimą tik tam tikro tipo produktui."
-
-#. module: account
 #: model:ir.model.fields,help:account.field_account_reconcile_model__match_same_currency
 msgid ""
 "Restrict to propositions having the same currency as the statement line."
@@ -13118,6 +13239,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/wizard/accrued_orders.py:0
 #: model:ir.model.fields,field_description:account.field_digest_digest__kpi_account_total_revenue
+#: model:ir.model.fields.selection,name:account.selection__account_analytic_line__analytic_profitability__revenue
 #: model:ir.model.fields.selection,name:account.selection__account_automatic_entry_wizard__account_type__income
 msgid "Revenue"
 msgstr "Pajamos"
@@ -13165,7 +13287,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/wizard/account_move_reversal.py:0
 msgid "Reversal of: %(move_name)s, %(reason)s"
-msgstr ""
+msgstr "Pakeista iš: %(move_name)s, %(reason)s"
 
 #. module: account
 #. odoo-python
@@ -13405,6 +13527,7 @@ msgid "Sales Lock Date"
 msgstr "Pardavimų užrakinimo data"
 
 #. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_invoice_report__move_type__out_receipt
 #: model:ir.model.fields.selection,name:account.selection__account_move__move_type__out_receipt
 msgid "Sales Receipt"
 msgstr "Pardavimo kvitas"
@@ -13508,7 +13631,7 @@ msgstr "Ieškoti sąskaitos žurnale"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report__search_bar
 msgid "Search Bar"
-msgstr ""
+msgstr "Paieškos juosta"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_filter
@@ -13629,6 +13752,7 @@ msgstr ""
 msgid ""
 "Securing these entries will also secure entries after the selected date."
 msgstr ""
+"Užtikrinus šiuos įrašus, taip pat bus užtikrinti įrašai po pasirinktos datos."
 
 #. module: account
 #. odoo-python
@@ -13680,7 +13804,7 @@ msgstr "Pasirinkite seną tiekėjo sąskaitą"
 #. odoo-javascript
 #: code:addons/account/static/src/js/tours/account.js:0
 msgid "Select first partner"
-msgstr ""
+msgstr "Pasirinkite pirmąjį partnerį"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_payment_term_line__value
@@ -13749,7 +13873,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Send invoices and payment follow-ups by post"
-msgstr ""
+msgstr "Siųskite sąskaitas faktūras ir priminimus apie mokėjimus paštu"
 
 #. module: account
 #: model:ir.actions.server,name:account.ir_cron_account_move_send_ir_actions_server
@@ -13776,12 +13900,12 @@ msgstr ""
 #. module: account
 #: model:ir.actions.act_window,name:account.account_send_payment_receipt_by_email_action
 msgid "Send receipt by email"
-msgstr ""
+msgstr "Siųsti el.paštu"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.account_send_payment_receipt_by_email_action_multi
 msgid "Send receipts by email"
-msgstr ""
+msgstr "Siųsti el.paštu"
 
 #. module: account
 #. odoo-javascript
@@ -13815,6 +13939,10 @@ msgid ""
 "emails are compromised. Once verified, you can activate the ability to send "
 "money."
 msgstr ""
+"Sukčiai dažnai siunčia netikras sąskaitas faktūras, jose nurodydami savo "
+"banko sąskaitos numerį. Norėdami apsisaugoti, visada patikrinkite naują "
+"banko sąskaitos numerį – geriausia paskambinkite tiekėjui. Įsitikinę, kad "
+"sąskaitos numeris teisingas, galite leisti atlikti mokėjimus į šią sąskaitą."
 
 #. module: account
 #. odoo-python
@@ -13843,6 +13971,8 @@ msgid ""
 "Sent manually to customer when clicking on 'Send receipt by email' in "
 "payment action"
 msgstr ""
+"Rankiniu būdu išsiunčiama klientui mokėjimo veiksmų lange spustelėjus "
+"'Siųsti el.paštu'"
 
 #. module: account
 #: model:mail.template,description:account.email_template_edi_credit_note
@@ -14082,7 +14212,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__show_name_warning
 #: model:ir.model.fields,field_description:account.field_account_move__show_name_warning
 msgid "Show Name Warning"
-msgstr ""
+msgstr "Rodyti pavadinimo įspėjimą"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment__show_partner_bank_account
@@ -14093,13 +14223,13 @@ msgstr "Rodyti partnerio banko sąskaitą"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_register__show_payment_difference
 msgid "Show Payment Difference"
-msgstr ""
+msgstr "Rodyti mokėjimo skirtumą"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__show_payment_term_details
 #: model:ir.model.fields,field_description:account.field_account_move__show_payment_term_details
 msgid "Show Payment Term Details"
-msgstr ""
+msgstr "Rodyti mokėjimo sąlygų detales"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__show_reset_to_draft_button
@@ -14184,6 +14314,8 @@ msgid ""
 "Some payment methods supposed to be unique already exists somewhere else.\n"
 "(%s)"
 msgstr ""
+"Kai kurie mokėjimo būdai, kurie turėtų būti unikalūs, jau egzistuoja kitur.\n"
+"(%s)"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_setup_bank_manual_config__bank_bic
@@ -14307,7 +14439,7 @@ msgstr "Išrašai"
 #. module: account
 #: model:ir.model.fields,help:account.field_account_payment__reconciled_statement_line_ids
 msgid "Statements lines matched to this payment"
-msgstr ""
+msgstr "Šiam mokėjimui priskirtos sąskaitos eilutės"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__states_count
@@ -14333,7 +14465,7 @@ msgstr "Būsena"
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__status_in_payment
 #: model:ir.model.fields,field_description:account.field_account_move__status_in_payment
 msgid "Status In Payment"
-msgstr ""
+msgstr "Mokėjimo būsena"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_bank_statement_line__activity_state
@@ -14822,6 +14954,9 @@ msgid ""
 "Taxes exigible on payment and on invoice cannot be mixed on the same journal "
 "item if they share some tag."
 msgstr ""
+"Mokesčiai, mokėtini mokėjimo metu, ir sąskaitoje faktūroje nurodyti "
+"mokesčiai negali būti sumaišyti toje pačioje žurnalo eilutėje, jei jie turi "
+"bendrą žymą."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__display_invoice_tax_company_currency
@@ -14993,7 +15128,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_payment_term.py:0
 msgid "The Early Payment Discount days must be strictly positive."
-msgstr ""
+msgstr "Ankstyvo mokėjimo nuolaidos dienų skaičius turi būti tik teigiamas."
 
 #. module: account
 #. odoo-python
@@ -15002,12 +15137,14 @@ msgid ""
 "The Early Payment Discount functionality can only be used with payment terms "
 "using a single 100% line. "
 msgstr ""
+"Ankstyvo mokėjimo nuolaidos funkcija gali būti naudojama tik su mokėjimo "
+"sąlygomis, kuriose nurodytas vienas 100% line. "
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_payment_term.py:0
 msgid "The Early Payment Discount must be strictly positive."
-msgstr ""
+msgstr "Nuolaida už išankstinį mokėjimą turi būti griežtai teigiama."
 
 #. module: account
 #. odoo-python
@@ -15050,6 +15187,8 @@ msgid ""
 "The Payment Term must have at least one percent line and the sum of the "
 "percent must be 100%."
 msgstr ""
+"Mokėjimo sąlygose turi būti nurodyta bent viena procentinė eilutė, o "
+"procentų suma turi sudaryti 100%."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_base_document_layout__vat
@@ -15166,6 +15305,14 @@ msgstr ""
 "Banko sąskaitos banko žurnale privalo priklausyti tai pačiai įmonei (%s)."
 
 #. module: account
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+msgid ""
+"The bank account of your company is not trusted. Please ask an admin or "
+"someone with approval rights to check it."
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,help:account.field_account_move_line__statement_id
 msgid "The bank statement used for bank reconciliation"
 msgstr "Banko sąskaitos išrašas naudojamas sąskaitų sudengimui"
@@ -15206,7 +15353,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.constraint,message:account.constraint_account_payment_method_name_code_unique
 msgid "The combination code/payment type already exists!"
-msgstr ""
+msgstr "Kodo ir mokėjimo būdo derinys jau egzistuoja!"
 
 #. module: account
 #. odoo-python
@@ -15221,6 +15368,15 @@ msgstr ""
 #: code:addons/account/models/partner.py:0
 msgid ""
 "The commercial partner has been updated for all related accounting entries."
+msgstr ""
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+msgid ""
+"The company bank account (%(account_number)s) linked to this invoice is not "
+"trusted. Go to the Bank Settings, double-check that it is yours or correct "
+"the number, and click on Send Money to trust it."
 msgstr ""
 
 #. module: account
@@ -15300,7 +15456,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 msgid "The date selected is protected by: %(lock_date_info)s."
-msgstr ""
+msgstr "Pasirinkta data apsaugota: %(lock_date_info)s."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_lock_exception__fiscalyear_lock_date
@@ -15353,7 +15509,7 @@ msgstr "Pristatymo adresas bus naudojamas apskaičiuojant mokestinę aplinką."
 #: model:ir.model.fields,help:account.field_account_bank_statement_line__invoice_origin
 #: model:ir.model.fields,help:account.field_account_move__invoice_origin
 msgid "The document(s) that generated the invoice."
-msgstr ""
+msgstr "Dokumentas (-ai), kurio (-ių) pagrindu sugeneruota sąskaita faktūra."
 
 #. module: account
 #. odoo-python
@@ -15552,7 +15708,7 @@ msgstr ""
 #: model:ir.model.fields,help:account.field_account_financial_year_op__fiscalyear_last_day
 #: model:ir.model.fields,help:account.field_account_financial_year_op__fiscalyear_last_month
 msgid "The last day of the month will be used if the chosen day doesn't exist."
-msgstr ""
+msgstr "Jei pasirinktos dienos nėra, bus naudojama paskutinė mėnesio diena."
 
 #. module: account
 #: model:ir.model.constraint,message:account.constraint_account_group_check_length_prefix
@@ -15638,12 +15794,12 @@ msgstr "Mokėjimo suma negali būti neigiama."
 #: model:ir.model.fields,help:account.field_account_bank_statement_line__payment_reference
 #: model:ir.model.fields,help:account.field_account_move__payment_reference
 msgid "The payment reference to set on journal items."
-msgstr ""
+msgstr "Mokėjimo nuoroda, kurią reikia nustatyti žurnalo įrašuose."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_move_line__payment_id
 msgid "The payment that created this entry"
-msgstr ""
+msgstr "Mokėjimas, dėl kurio buvo sukurta ši įrašas"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_payment__currency_id
@@ -15764,6 +15920,8 @@ msgid ""
 "The register payment wizard should only be called on account.move or "
 "account.move.line records."
 msgstr ""
+"Mokėjimo už registrą vedlys turėtų būti iškviečiamas tik „account.move“ arba "
+"„account.move.line“ įrašuose."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_report__root_report_id
@@ -15799,6 +15957,14 @@ msgstr ""
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/account_move_send.py:0
+msgid ""
+"The scheduled action 'Send Invoices automatically' is archived. You won't be "
+"able to send invoices in batch."
+msgstr ""
+
+#. module: account
+#. odoo-python
 #: code:addons/account/models/account_report.py:0
 msgid "The sections defined on a report cannot have sections themselves."
 msgstr ""
@@ -15806,7 +15972,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,help:account.field_account_secure_entries_wizard__hash_date
 msgid "The selected Date"
-msgstr ""
+msgstr "Pasirinkta data"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_automatic_entry_wizard_form
@@ -15823,6 +15989,8 @@ msgid ""
 "The selected payment method is not available for this payment, please select "
 "the payment method again."
 msgstr ""
+"Pasirinktas mokėjimo būdas nėra prieinamas šiam mokėjimui, prašome vėl "
+"pasirinkti mokėjimo būdą."
 
 #. module: account
 #. odoo-python
@@ -15916,6 +16084,8 @@ msgid ""
 "The sequences of this journal are different for Payments and non-Payments "
 "but you selected some of both types."
 msgstr ""
+"Šio žurnalo sekos skiriasi mokėjimų ir nemokėjimų atveju, tačiau jūs "
+"pasirinkote po keletą abiejų tipų."
 
 #. module: account
 #. odoo-python
@@ -16004,13 +16174,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/wizard/account_payment_register.py:0
 msgid "There are payments in progress. Make sure you don't pay twice."
-msgstr ""
+msgstr "Šiuo metu vyksta mokėjimai. Įsitikinkite, kad nemokėsite du kartus."
 
 #. module: account
 #. odoo-python
 #: code:addons/account/wizard/account_secure_entries_wizard.py:0
 msgid "There are still draft entries before the selected date."
-msgstr ""
+msgstr "Iki pasirinktos datos vis dar yra nebaigtų įrašų."
 
 #. module: account
 #. odoo-python
@@ -16255,7 +16425,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "This invoice is being sent in the background."
-msgstr ""
+msgstr "Ši sąskaita faktūra siunčiama fone."
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_account_audit_trail_report
@@ -16509,6 +16679,9 @@ msgid ""
 "manually validated. You should go on the partner bank account of %(partner)s "
 "in order to validate it."
 msgstr ""
+"Norint įregistruoti mokėjimus naudojant „ %(method_name)s “, gavėjo banko "
+"sąskaita turi būti patvirtinta rankiniu būdu. Norėdami ją patvirtinti, "
+"turite pereiti į partnerio banko sąskaitą „ %(partner)s “."
 
 #. module: account
 #. odoo-python
@@ -16518,6 +16691,9 @@ msgid ""
 "be manually validated. You should go on the partner bank account in order to "
 "validate it."
 msgstr ""
+"Norint įregistruoti mokėjimus naudojant „ %(payment_method)s “, gavėjo banko "
+"sąskaita turi būti patvirtinta rankiniu būdu. Norėdami ją patvirtinti, "
+"turite pereiti į partnerio banko sąskaitą."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_partner_bank_search_inherit
@@ -16598,7 +16774,7 @@ msgstr "Bendra mokėtina suma"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_register__total_payments_amount
 msgid "Total Payments Amount"
-msgstr ""
+msgstr "Bendra mokėjimų suma"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__credit
@@ -16822,6 +16998,9 @@ msgid ""
 "printing it. If left blank, the first available and usable method will be "
 "used."
 msgstr ""
+"QR kodo tipas, kuris bus sukurtas šios sąskaitos apmokėjimui, ją "
+"spausdinant. Jei laukelis paliktas tuščias, bus naudojamas pirmasis galimas "
+"ir tinkamas metodas."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_bank_statement_line__activity_exception_decoration
@@ -16840,6 +17019,11 @@ msgid ""
 "Unable to create a statement due to missing transactions. You may want to "
 "reorder the transactions before proceeding."
 msgstr ""
+
+#. module: account
+#: model:ir.model.fields.selection,name:account.selection__account_analytic_line__analytic_profitability__uncategorized
+msgid "Uncategorized"
+msgstr "Nekategorizuotas"
 
 #. module: account
 #. odoo-python
@@ -17020,7 +17204,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_register__untrusted_payments_count
 msgid "Untrusted Payments Count"
-msgstr ""
+msgstr "Neįtikimų mokėjimų skaičius"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -17052,6 +17236,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/res_config_settings.py:0
 msgid "Update Terms & Conditions"
+msgstr ""
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/chart_template.py:0
+msgid "Update app"
 msgstr ""
 
 #. module: account
@@ -17102,7 +17292,7 @@ msgstr "Naudoti grynųjų pinigų principą"
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_report__filter_multi_company__selector
 msgid "Use Company Selector"
-msgstr ""
+msgstr "Naudokite įmonės pasirinkimo funkciją"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__module_account_sepa_direct_debit
@@ -17562,6 +17752,8 @@ msgid ""
 "When an internal transfer is posted, a paired payment is created. They are "
 "cross referenced through this field"
 msgstr ""
+"Kai įrašomas vidinis pervedimas, sukuriama porinė mokėjimo operacija. Jos "
+"susiejamos per šį lauką"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_report_line__print_on_new_page
@@ -17696,6 +17888,8 @@ msgid ""
 "You can choose different models for each type of reference. The default one "
 "is the Odoo reference."
 msgstr ""
+"Kiekvienam nuorodų tipui galite pasirinkti skirtingus modelius. Numatytasis "
+"modelis yra „Odoo“ nuoroda."
 
 #. module: account
 #. odoo-python
@@ -17704,8 +17898,8 @@ msgid ""
 "You can not archive a journal containing draft journal entries.\n"
 "\n"
 "To proceed:\n"
-"1/ click on the top-right button 'Journal Entries' from this journal form\n"
-"2/ then filter on 'Draft' entries\n"
+"1/ go to Accounting > Accounting > Journal Entries\n"
+"2/ filter on this journal and on 'Unposted' entries\n"
 "3/ select them all and post or delete them through the action menu"
 msgstr ""
 
@@ -17755,7 +17949,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "You can only register payment for posted journal entries."
-msgstr ""
+msgstr "Galite užregistruoti tik apmokėjimus už įtrauktus žurnalo įrašus."
 
 #. module: account
 #. odoo-python
@@ -17816,6 +18010,9 @@ msgid ""
 "account set either on the company or the %(payment_method)s payment method "
 "in the %(journal)s journal."
 msgstr ""
+"Negalima sukurti naujo mokėjimo, jei žurnale „ %(journal)s “ nėra nustatyta "
+"nei įmonės, nei mokėjimo būdo „ %(payment_method)s “ sąskaita, skirta "
+"neapmokėtiems mokėjimams ir gautoms įmokoms."
 
 #. module: account
 #. odoo-python
@@ -17832,12 +18029,14 @@ msgid ""
 "You can't create payments for entries belonging to different branches "
 "without access to parent company."
 msgstr ""
+"Negalima sukurti mokėjimų už įrašus, priklausančius skirtingiems filialams, "
+"neturint prieigos prie patronuojančios bendrovės."
 
 #. module: account
 #. odoo-python
 #: code:addons/account/wizard/account_payment_register.py:0
 msgid "You can't create payments for entries belonging to different companies."
-msgstr ""
+msgstr "Negalima kurti mokėjimų už įrašus, priklausančius skirtingoms įmonėms."
 
 #. module: account
 #. odoo-python
@@ -17866,6 +18065,8 @@ msgid ""
 "You can't have two payment method lines of the same payment type (%"
 "(payment_type)s) and with the same name (%(name)s) on a single journal."
 msgstr ""
+"Viename žurnalo įraše negali būti dviejų to paties mokėjimo tipo (%"
+"(payment_type)s) ir to paties pavadinimo (%(name)s) mokėjimo būdų eilučių."
 
 #. module: account
 #. odoo-python
@@ -17874,6 +18075,8 @@ msgid ""
 "You can't open the register payment wizard without at least one receivable/"
 "payable line."
 msgstr ""
+"Negalima atidaryti sąskaitų apmokėjimo vedlio, jei nėra bent vienos gautinų "
+"ar mokėtinų sumų eilutės."
 
 #. module: account
 #. odoo-python
@@ -17905,7 +18108,7 @@ msgstr ""
 msgid ""
 "You can't register payments for both inbound and outbound moves at the same "
 "time."
-msgstr ""
+msgstr "Negalima vienu metu registruoti mokėjimų už įvežimą ir išvežimą."
 
 #. module: account
 #. odoo-python
@@ -17935,7 +18138,7 @@ msgstr ""
 #: code:addons/account/models/account_payment.py:0
 msgid ""
 "You cannot change the amount of a payment with multiple liquidity lines."
-msgstr ""
+msgstr "Jei turite kelias likvidumo linijas, mokėjimo sumos keisti negalima."
 
 #. module: account
 #. odoo-python
@@ -17992,6 +18195,8 @@ msgid ""
 "You cannot delete a payable/receivable line as it would not be consistent "
 "with the payment terms"
 msgstr ""
+"Jūs negalite ištrinti mokėtinos/gautinos sumos eilutės, nes tai neatitiktų "
+"mokėjimo sąlygų"
 
 #. module: account
 #. odoo-python
@@ -18191,7 +18396,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "You cannot register payments for miscellaneous entries."
-msgstr ""
+msgstr "Negalima registruoti mokėjimų už įvairius įrašus."
 
 #. module: account
 #. odoo-python
@@ -18389,7 +18594,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/wizard/account_merge_wizard.py:0
 msgid "You must select at least 2 accounts."
-msgstr ""
+msgstr "Turite pasirinkti mažiausiai 2 paskyras."
 
 #. module: account
 #. odoo-python
@@ -18536,7 +18741,7 @@ msgstr ""
 #: code:addons/account/controllers/portal.py:0
 #: model:ir.model.fields.selection,name:account.selection__res_partner__invoice_sending_method__email
 msgid "by Email"
-msgstr ""
+msgstr "El.paštu"
 
 #. module: account
 #. odoo-python
@@ -18562,6 +18767,12 @@ msgstr "uždaryti"
 #: model_terms:ir.ui.view,arch_db:account.validate_account_move_view
 msgid "dates for"
 msgstr ""
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+msgid "documents"
+msgstr "dokumentai"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -18666,7 +18877,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_register_form
 msgid "has been applied."
-msgstr ""
+msgstr "buvo pritaikytas."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_form
@@ -18753,6 +18964,9 @@ msgid ""
 "to its registered office within 8 days of the delivery of the goods or the "
 "provision of the services."
 msgstr ""
+"Apie bet kokį reikalavimą turi būti pranešta registruotu laišku, išsiųstu į "
+"jos registruotą buveinę per 8 dienas nuo prekių pristatymo arba paslaugų "
+"suteikimo."
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_tax_repartition_line__repartition_type__tax
@@ -18773,7 +18987,7 @@ msgstr "arba"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_register_form
 msgid "out of"
-msgstr ""
+msgstr "iš"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -18815,6 +19029,8 @@ msgid ""
 "reserves the right to request a fixed interest payment amounting to 10% of "
 "the sum remaining due."
 msgstr ""
+"pasilieka teisę reikalauti fiksuotų palūkanų, sudarančių 10% olikusios "
+"sumokėtinos sumos."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax_repartition_line__tag_ids_domain
@@ -18889,6 +19105,8 @@ msgid ""
 "will be authorized to suspend any provision of services without prior "
 "warning in the event of late payment."
 msgstr ""
+"turės teisę be išankstinio įspėjimo sustabdyti bet kokių paslaugų teikimą, "
+"jei vėluojama sumokėti."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.autopost_bills_wizard
@@ -18931,6 +19149,87 @@ msgid ""
 msgstr ""
 "{{ object.company_id.name }} mokėjimo kvitas (nuoroda {{ object.name or 'n/"
 "a' }})"
+
+#~ msgid "<span class=\"o_stat_text\">Journal Entries</span>"
+#~ msgstr "<span class=\"o_stat_text\">Žurnalo įrašai</span>"
+
+#~ msgid "Restrict the use of taxes to a type of product."
+#~ msgstr "Apriboti mokesčių naudojimą tik tam tikro tipo produktui."
+
+#~ msgid "1.05"
+#~ msgstr "1.05"
+
+#~ msgid "100.0"
+#~ msgstr "100.0"
+
+#~ msgid "1000.0"
+#~ msgstr "1000.0"
+
+#~ msgid "11.05"
+#~ msgstr "11.05"
+
+#~ msgid "12345"
+#~ msgstr "12345"
+
+#~ msgid "15%"
+#~ msgstr "15%"
+
+#~ msgid "1500.0"
+#~ msgstr "1500.0"
+
+#~ msgid "20.00"
+#~ msgstr "20.00"
+
+#~ msgid "2021-09-19"
+#~ msgstr "2021-09-19"
+
+#~ msgid "2023-01-01"
+#~ msgstr "2023-01-01"
+
+#~ msgid "2023-01-05"
+#~ msgstr "2023-01-05"
+
+#~ msgid "2023-08-11"
+#~ msgstr "2023-08-11"
+
+#~ msgid "2023-08-15"
+#~ msgstr "2023-08-15"
+
+#~ msgid "2023-08-31"
+#~ msgstr "2023-08-31"
+
+#~ msgid "2023-09-12"
+#~ msgstr "2023-09-12"
+
+#~ msgid "2023-09-25"
+#~ msgstr "2023-09-25"
+
+#~ msgid "2023-10-31"
+#~ msgstr "2023-10-31"
+
+#~ msgid "2024-01-01"
+#~ msgstr "2024-01-01"
+
+#~ msgid "27.00"
+#~ msgstr "27.00"
+
+#~ msgid "3.00"
+#~ msgstr "3.00"
+
+#~ msgid "30.00"
+#~ msgstr "30.00"
+
+#~ msgid "31.05"
+#~ msgstr "31.05"
+
+#~ msgid "4.05"
+#~ msgstr "4.05"
+
+#~ msgid "534677881234"
+#~ msgstr "534677881234"
+
+#~ msgid "9.00"
+#~ msgstr "9.00"
 
 #~ msgid ""
 #~ "Accrual entry created on %(date)s: %(accrual_entry)s.                    "

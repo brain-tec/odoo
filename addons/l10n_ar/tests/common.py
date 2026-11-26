@@ -1,6 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import fields
-from odoo.tests import Form
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 import random
 import logging
@@ -69,6 +68,7 @@ class TestArCommon(AccountTestInvoicingCommon):
             'acc_number': '7982898111100056688080',
             'partner_id': cls.company_ri.partner_id.id,
             'company_id': cls.company_ri.id,
+            'allow_out_payment': True,
         })
 
         # ==== Partners / Customers ====
@@ -594,11 +594,26 @@ class TestArCommon(AccountTestInvoicingCommon):
             }
         }
 
-        for invoice_key, invoice_values in test_invoices_map.items():
-            invoice_values.setdefault('invoice_payment_term_id', cls.env.ref("account.account_payment_term_end_following_month"))
-            if use_current_date:
+        if use_current_date:
+            for invoice_key, invoice_values in test_invoices_map.items():
                 invoice_values.pop('invoice_date')
-            cls.demo_invoices[invoice_key] = cls._create_invoice_ar(**invoice_values)
+                cls.demo_invoices[invoice_key] = cls._create_invoice_ar(**invoice_values)
+        else:
+            form_fields = ('move_type', 'ref', 'partner_id', 'invoice_payment_term_id', 'invoice_date', 'invoice_incoterm_id', 'journal_id')
+            for key, values in test_invoices_map.items():
+                cls.demo_invoices[key] = cls._create_invoice(
+                    **{field: values[field] for field in form_fields if field in values},
+                    invoice_line_ids=[
+                        cls._prepare_invoice_line(
+                            product_id=line['product_id'],
+                            price_unit=line.get('price_unit', 0.0),
+                            quantity=line['quantity'],
+                            name='xxxx',
+                            account_id=cls.company_data['default_account_revenue'],
+                        )
+                        for _command, _id, line in values['invoice_line_ids']
+                    ],
+                )
 
     # -------------------------------------------------------------------------
     # Helpers

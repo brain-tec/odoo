@@ -16,13 +16,14 @@
 # Martin Trigaux, 2024
 # Bayarkhuu Bataa, 2025
 # Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Bayarkhuu Bataa <bbayarkhuu@gmail.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-12-31 08:44+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-27 15:39+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Mongolian <https://translate.odoo.com/projects/odoo-18/"
 "pos_self_order/mn/>\n"
@@ -31,7 +32,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: pos_self_order
 #: model:ir.actions.report,print_report_name:pos_self_order.report_self_order_qr_codes_page
@@ -86,7 +87,7 @@ msgstr "Идэвхтэй"
 #. module: pos_self_order
 #: model_terms:ir.ui.view,arch_db:pos_self_order.res_config_settings_view_form_menu
 msgid "Add Languages"
-msgstr ""
+msgstr "Хэл нэмэх"
 
 #. module: pos_self_order
 #: model_terms:ir.ui.view,arch_db:pos_self_order.res_config_settings_view_form_menu
@@ -144,7 +145,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/cancel_popup/cancel_popup.xml:0
 msgid "Are you sure you want to cancel this order?"
-msgstr ""
+msgstr "Та захиалгаа цуцлахдаа итгэлтэй байна уу?"
 
 #. module: pos_self_order
 #: model:ir.model.fields,field_description:pos_self_order.field_pos_category__hour_after
@@ -450,7 +451,7 @@ msgstr ""
 #. module: pos_self_order
 #: model:ir.model,name:pos_self_order.model_ir_binary
 msgid "File streaming helper model for controllers"
-msgstr ""
+msgstr "Хянагчдад зориулсан файл стриймингийн туслах модель"
 
 #. module: pos_self_order
 #: model:ir.model,name:pos_self_order.model_account_fiscal_position
@@ -578,6 +579,25 @@ msgid "Info"
 msgstr "Мэдээлэл"
 
 #. module: pos_self_order
+#. odoo-python
+#: code:addons/pos_self_order/models/pos_order.py:0
+msgid "Invalid product attribute"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-python
+#: code:addons/pos_self_order/controllers/orders.py:0
+#: code:addons/pos_self_order/models/pos_order.py:0
+msgid "Invalid product configuration"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-python
+#: code:addons/pos_self_order/models/pos_order.py:0
+msgid "Invalid product quantity"
+msgstr ""
+
+#. module: pos_self_order
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/timeout_popup/timeout_popup.xml:0
 msgid ""
@@ -628,7 +648,7 @@ msgstr ""
 #. module: pos_self_order
 #: model:ir.model.fields.selection,name:pos_self_order.selection__pos_self_order_custom_link__style__light
 msgid "Light"
-msgstr ""
+msgstr "Цайвар"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -836,7 +856,7 @@ msgstr ""
 #. module: pos_self_order
 #: model:ir.model,name:pos_self_order.model_pos_load_mixin
 msgid "PoS data loading mixin"
-msgstr ""
+msgstr "PoS өгөгдөл ачаалах mixin"
 
 #. module: pos_self_order
 #: model:ir.model,name:pos_self_order.model_pos_category
@@ -1244,7 +1264,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/product_card/product_card.xml:0
 msgid "Unavailable"
-msgstr ""
+msgstr "Боломжгүй"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -1285,6 +1305,14 @@ msgstr "Таны захиалгыг бэлдэж байна!"
 #: model_terms:ir.ui.view,arch_db:pos_self_order.qr_codes_page
 msgid "Yes"
 msgstr "Тийм"
+
+#. module: pos_self_order
+#. odoo-python
+#: code:addons/pos_self_order/controllers/orders.py:0
+msgid ""
+"You are not authorized to create, update, or delete records of type '%"
+"(model)s'. Only the following models are allowed: %(allowed)s"
+msgstr ""
 
 #. module: pos_self_order
 #. odoo-python
@@ -1355,6 +1383,11 @@ msgid "Your order status has been changed"
 msgstr "Таны захиалгын төлөв өөрчлөгдлөө"
 
 #. module: pos_self_order
+#: model_terms:ir.ui.view,arch_db:pos_self_order.res_config_settings_view_form_menu
+msgid "a"
+msgstr ""
+
+#. module: pos_self_order
 #: model_terms:ir.ui.view,arch_db:pos_self_order.pos_self_order_product_pos_category_form_view
 msgid "and"
 msgstr "ба"
@@ -1379,3 +1412,9 @@ msgstr "odoo"
 #: code:addons/pos_self_order/static/src/app/pages/product_page/product_page.xml:0
 msgid "options"
 msgstr ""
+
+#. module: pos_self_order
+#. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.xml:0
+msgid "x"
+msgstr "x"

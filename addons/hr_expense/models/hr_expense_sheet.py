@@ -287,6 +287,7 @@ class HrExpenseSheet(models.Model):
             else:
                 sheet.selectable_payment_method_line_ids = self.env['account.payment.method.line'].search([
                     ('payment_type', '=', 'outbound'),
+                    ('journal_id.active', '=', True),
                     ('company_id', 'parent_of', sheet.company_id.id)
                 ])
 
@@ -353,10 +354,10 @@ class HrExpenseSheet(models.Model):
 
             elif not is_hr_admin:
                 sheet_employee = sheet.employee_id
-                current_managers = sheet_employee.expense_manager_id \
-                                   | sheet_employee.parent_id.user_id \
-                                   | sheet_employee.department_id.manager_id.user_id \
-                                   | sheet.user_id
+                current_managers = (
+                    sheet_employee.sudo()._get_expense_managers()
+                    | sheet.user_id
+                )
 
                 if sheet_employee.user_id == self.env.user:
                     reason = _("%s: It is your own expense", sheet.name)
@@ -410,7 +411,7 @@ class HrExpenseSheet(models.Model):
                 sheet.is_editable = True
                 continue
 
-            managers = employee.expense_manager_id | employee.parent_id.user_id | employee.department_id.manager_id.user_id
+            managers = employee.sudo()._get_expense_managers()
             if is_approver:
                 managers |= self.env.user
             if not is_own_sheet and self.env.user in managers:
@@ -565,9 +566,10 @@ class HrExpenseSheet(models.Model):
         reports_activity_unlink = self.env['hr.expense.sheet']
         for expense_report in self:
             if expense_report.state == 'submit':
+                user = fields.first(expense_report.sudo()._get_responsible_for_approval())
                 expense_report.activity_schedule(
                     'hr_expense.mail_act_expense_approval',
-                    user_id=expense_report.sudo()._get_responsible_for_approval().id or self.env.user.id)
+                    user_id=user.id or self.env.user.id)
             elif expense_report.state == 'approve':
                 reports_requiring_feedback |= expense_report
             elif expense_report.state in {'draft', 'cancel'}:
@@ -739,7 +741,8 @@ class HrExpenseSheet(models.Model):
             raise UserError(_("You cannot cancel an expense sheet linked to a posted journal entry"))
 
         if draft_moves_sudo:
-            draft_moves_sudo.unlink()  # Else we have lingering moves
+            draft_moves_sudo.origin_payment_id.unlink()  # Also deletes their draft entry, else we have lingering payments
+            draft_moves_sudo.exists().unlink()  # Else we have lingering moves
 
         self.approval_state = 'cancel'
         subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
@@ -802,7 +805,8 @@ class HrExpenseSheet(models.Model):
                 default_values_list=[{'invoice_date': fields.Date.context_today(move), 'ref': False} for move in non_draft_moves_sudo],
                 cancel=True
             )
-            draft_moves_sudo.unlink()
+            draft_moves_sudo.origin_payment_id.unlink()  # Also deletes their draft entry, else we have lingering payments
+            draft_moves_sudo.exists().unlink()
 
     def _calculate_default_accounting_date(self):
         """
@@ -843,6 +847,7 @@ class HrExpenseSheet(models.Model):
             'partner_id': self.employee_id.sudo().work_contact_id.id,
             'commercial_partner_id': self.employee_id.user_partner_id.id,
             'currency_id': self.currency_id.id,
+            'company_id': self.company_id.id,
             'line_ids': [Command.create(expense._prepare_move_lines_vals()) for expense in self.expense_line_ids],
             'attachment_ids': [
                 Command.create(attachment.copy_data({'res_model': 'account.move', 'res_id': False, 'raw': attachment.raw})[0])
@@ -874,13 +879,7 @@ class HrExpenseSheet(models.Model):
             line._validate_distribution(account=line.account_id.id, product=line.product_id.id, business_domain='expense', company_id=line.company_id.id)
 
     def _get_responsible_for_approval(self):
-        if self.user_id:
-            return self.user_id
-        if self.employee_id.parent_id.user_id:
-            return self.employee_id.parent_id.user_id
-        if self.employee_id.department_id.manager_id.user_id:
-            return self.employee_id.department_id.manager_id.user_id
-        return self.env['res.users']
+        return self.user_id | self.employee_id.sudo()._get_expense_managers()
 
     def _get_expense_account_destination(self):
         self.ensure_one()

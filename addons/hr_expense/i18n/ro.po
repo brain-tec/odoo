@@ -1,46 +1,29 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* hr_expense
+# * hr_expense
 #
 # Translators:
 # Lyall Kindmurr, 2024
 # Wil Odoo, 2025
 # Larisa_nexterp, 2025
 #
+# Dorin Hongu <dhongu@gmail.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Larisa_nexterp, 2025\n"
-"Language-Team: Romanian (https://app.transifex.com/odoo/teams/41243/ro/)\n"
+"POT-Creation-Date: 2026-10-24 17:37+0000\n"
+"PO-Revision-Date: 2026-11-20 05:35+0000\n"
+"Last-Translator: Dorin Hongu <dhongu@gmail.com>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-18/"
+"hr_expense/ro/>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?"
-"2:1));\n"
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "$100.00"
-msgstr "$100.00"
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "$120.00"
-msgstr "$120.00"
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "$500.00"
-msgstr "$500.00"
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "$600.00"
-msgstr "$500.00"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
+"20)) ? 1 : 2;\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: hr_expense
 #. odoo-python
@@ -98,11 +81,6 @@ msgstr "(incl)"
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid "1 %(exp_cur)s = %(rate)s %(comp_cur)s"
 msgstr "1 %(exp_cur)s = %(rate)s %(comp_cur)s"
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "2023-08-11"
-msgstr "2023-08-11"
 
 #. module: hr_expense
 #. odoo-javascript
@@ -1080,6 +1058,11 @@ msgid "Hotel, plane ticket, taxi, etc."
 msgstr "Hotel, bilet de avion, taxi, etc."
 
 #. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_account_tax__hr_expense_ids
+msgid "Hr Expense"
+msgstr "Cheltuieli HR"
+
+#. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_res_config_settings__hr_expense_alias_domain_id
 msgid "Hr Expense Alias Domain"
 msgstr "Domeniu alias cheltuieli HR"
@@ -1576,7 +1559,7 @@ msgstr "Parțial"
 #: model:ir.model,name:hr_expense.model_account_payment_register
 #: model_terms:ir.ui.view,arch_db:hr_expense.view_hr_expense_sheet_form
 msgid "Pay"
-msgstr "Plată"
+msgstr "Plătește"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__payment_method_line_id
@@ -1835,7 +1818,7 @@ msgstr "Cheltuială cu aceeași chitanță"
 #: code:addons/hr_expense/static/src/views/kanban.xml:0
 #: code:addons/hr_expense/static/src/views/list.xml:0
 msgid "Scan"
-msgstr "Scanează"
+msgstr "Scanare"
 
 #. module: hr_expense
 #. odoo-javascript
@@ -2052,6 +2035,16 @@ msgid ""
 "The account used to record the outstanding amount of the company expenses."
 msgstr ""
 "Contul folosit pentru a înregistra suma restantă a cheltuielilor companiei."
+
+#. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/ir_actions_report.py:0
+msgid ""
+"The attachment (%(attachment_name)s) has not been added to the report due to "
+"the following error: '%(error)s'"
+msgstr ""
+"Atașamentul (%(attachment_name)s) nu a fost adăugat la raport din cauza "
+"următoarei erori: '%(error)s'"
 
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_res_company__expense_journal_id
@@ -2666,3 +2659,18 @@ msgstr "folosiți OCR pentru a completa datele dintr-o imagine a facturii"
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
 msgid "with the same receipt already exists."
 msgstr "cu aceeași chitanță există deja."
+
+#~ msgid "$100.00"
+#~ msgstr "$100.00"
+
+#~ msgid "$120.00"
+#~ msgstr "$120.00"
+
+#~ msgid "$500.00"
+#~ msgstr "$500.00"
+
+#~ msgid "$600.00"
+#~ msgstr "$500.00"
+
+#~ msgid "2023-08-11"
+#~ msgstr "2023-08-11"

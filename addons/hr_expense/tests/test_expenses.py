@@ -280,6 +280,27 @@ class TestExpenses(TestExpenseCommon):
         self.assertEqual(440, expense_sheet.total_amount)
         self.assertEqual(expense_sheet.payment_state, 'paid', 'payment_state should be paid')
 
+    def test_expense_no_cost_product_zero_quantity(self):
+        """ A zero quantity on a product without cost must not zero the receipt line """
+        expense_sheet = self.create_expense_report({
+            'expense_line_ids': [Command.create({
+                'employee_id': self.expense_employee.id,
+                'product_id': self.product_c.id,
+                'quantity': 0,
+                'total_amount_currency': 100.0,
+                'tax_ids': [Command.clear()],
+                'date': self.frozen_today,
+            })],
+        })
+        self.assertEqual(expense_sheet.expense_line_ids.price_unit, 100.0)
+
+        expense_sheet.action_submit_sheet()
+        expense_sheet.action_approve_expense_sheets()
+        self.assertRecordValues(expense_sheet.account_move_ids.invoice_line_ids, [
+            {'quantity': 1.0, 'price_unit': 100.0, 'price_total': 100.0},
+        ])
+        self.assertEqual(expense_sheet.account_move_ids.amount_total, 100.0)
+
     def test_expense_split_flow(self):
         """ Check Split Expense flow. """
         expense = self.create_expense({'analytic_distribution': {self.analytic_account_1.id: 100}})
@@ -1078,6 +1099,41 @@ class TestExpenses(TestExpenseCommon):
 
         payment.write({'is_sent': True})
 
+    def test_expense_sheet_paid_by_company_reset_and_refuse_delete_draft_payment(self):
+        """ Resetting or refusing an approved expense report paid by the company must delete its draft payments with
+        their entries, else draft payments are left behind at each approval, and confirming them books the expenses twice
+        """
+        sheet_to_reset, sheet_to_refuse = sheets = self.env['hr.expense.sheet'].create([{
+            'company_id': self.env.company.id,
+            'employee_id': self.expense_employee.id,
+            'name': name,
+            'expense_line_ids': [
+                Command.create({
+                    'name': name,
+                    'date': '2016-01-01',
+                    'product_id': self.product_c.id,
+                    'total_amount': amount,
+                    'payment_mode': 'company_account',
+                    'employee_id': self.expense_employee.id,
+                }),
+            ],
+        } for name, amount in (('Sheet to reset', 100.0), ('Sheet to refuse', 200.0))])
+        sheets.action_submit_sheet()
+        sheets.action_approve_expense_sheets()
+        payments = sheets.account_move_ids.origin_payment_id
+        self.assertEqual(len(payments), 2)
+        self.assertEqual(set(payments.mapped('state')), {'draft'})
+
+        sheet_to_reset.action_reset_expense_sheets()
+        sheet_to_refuse._do_refuse('Wrong expense')
+        self.assertRecordValues(sheets, [{'state': 'draft'}, {'state': 'cancel'}])
+        self.assertFalse(payments.exists(), "The draft payments should be deleted with their journal entry")
+
+        # Approving the report again creates a single payment
+        sheet_to_reset.action_submit_sheet()
+        sheet_to_reset.action_approve_expense_sheets()
+        self.assertEqual(self.env['account.payment'].search_count([('memo', 'in', sheets.mapped('name'))]), 1)
+
     def test_corner_case_expense_reported_cannot_be_zero(self):
         """
         Test that the expenses are not submitted if the total amount is 0.0 nor able to be edited that way
@@ -1569,7 +1625,6 @@ class TestExpenses(TestExpenseCommon):
             'total_amount_currency': 350.00,
             'tax_ids': [Command.set(tax_expense.ids)]
         })
-        tax_expense.invalidate_model(fnames=['is_used'])
         self.assertTrue(tax_expense.is_used)
 
     def test_expense_by_company_with_caba_tax(self):
@@ -1912,3 +1967,76 @@ class TestExpenses(TestExpenseCommon):
 
         # Check that there is no fourth autobalancing line on the account move
         self.assertEqual(expense_sheet.account_move_ids.line_ids.mapped('balance'), [86.96, -100.0, 13.04])
+
+    def test_expense_sheet_branch_company(self):
+        """
+        Test that when an expense is created in a branch company, the company of the sheet and the move
+        associated to the expense is in the branch company.
+        """
+        branch_company = self.setup_other_company(name='Branch', parent_id=self.company_data['company'].id)['company']
+        employee = self.env['hr.employee'].create({
+            'name': 'Employee XYZ',
+            'company_id': branch_company.id,
+        })
+        allowed_companies = branch_company + self.company_data['company']
+        # Create an expense paid by company
+        expense_paid_by_company = self.env['hr.expense'].with_context(allowed_company_ids=allowed_companies.ids).create({
+            'employee_id': employee.id,
+            'name': 'Company expense',
+            'date': self.frozen_today,
+            'payment_mode': 'company_account',
+            'account_id': self.company_data['default_account_expense'].id,
+            'product_id': self.product_c.id,
+            'total_amount_currency': 1000.00,
+            'currency_id': self.company_data['currency'].id,
+            'company_id': branch_company.id,
+        })
+        expense_sheet_company_paid = expense_paid_by_company._create_sheets_from_expense()
+        self.assertEqual(
+            expense_sheet_company_paid.company_id,
+            branch_company,
+            "The expense sheet should be in the Branch company",
+        )
+        expense_sheet_company_paid.action_submit_sheet()
+        expense_sheet_company_paid.action_approve_expense_sheets()
+        expense_sheet_company_paid.action_sheet_move_post()
+
+        payment_move_company = expense_sheet_company_paid.account_move_ids
+        self.assertEqual(
+            payment_move_company.company_id,
+            branch_company,
+            "The journal entry linked to the payment should be in the Branch company",
+        )
+        self.assertEqual(
+            payment_move_company.origin_payment_id.company_id,
+            branch_company,
+            "The payment should also be in the Branch company",
+        )
+        # Create an expense paid by employee
+        expense_paid_by_employee = self.env['hr.expense'].with_context(allowed_company_ids=allowed_companies.ids).create({
+            'employee_id': employee.id,
+            'name': 'Employee expense',
+            'date': self.frozen_today,
+            'payment_mode': 'own_account',
+            'account_id': self.company_data['default_account_expense'].id,
+            'product_id': self.product_c.id,
+            'total_amount_currency': 2000.00,
+            'currency_id': self.company_data['currency'].id,
+            'company_id': branch_company.id,
+        })
+        expense_sheet_employee_paid = expense_paid_by_employee._create_sheets_from_expense()
+        self.assertEqual(
+            expense_sheet_employee_paid.company_id,
+            branch_company,
+            "The expense sheet should be in the Branch company",
+        )
+        expense_sheet_employee_paid.action_submit_sheet()
+        expense_sheet_employee_paid.action_approve_expense_sheets()
+        expense_sheet_employee_paid.action_sheet_move_post()
+
+        bill = expense_sheet_employee_paid.account_move_ids
+        self.assertEqual(
+            bill.company_id,
+            branch_company,
+            "The bill generated by the expense should be in the Branch company",
+        )

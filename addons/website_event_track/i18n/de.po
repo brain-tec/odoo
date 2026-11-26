@@ -1,25 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_event_track
+# * website_event_track
 #
 # Translators:
 # Wil Odoo, 2024
 # Martin Trigaux, 2024
 # Larissa Manderfeld, 2025
 #
+# "Larissa Manderfeld (lman)" <lman@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:38+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Larissa Manderfeld, 2025\n"
-"Language-Team: German (https://app.transifex.com/odoo/teams/41243/de/)\n"
+"POT-Creation-Date: 2026-04-10 18:39+0000\n"
+"PO-Revision-Date: 2026-10-20 13:39+0000\n"
+"Last-Translator: \"Larissa Manderfeld (lman)\" <lman@odoo.com>\n"
+"Language-Team: German <https://translate.odoo.com/projects/odoo-18/"
+"website_event_track/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website_event_track
 #: model:mail.template,body_html:website_event_track.mail_template_data_track_confirmation
@@ -50,8 +53,8 @@ msgid ""
 "    </t>\n"
 msgstr ""
 "\n"
-"    Hallo <t t-out=\"object.partner_id.name or object.partner_name or "
-"''\">Brandon Freeman</t>,<br/>\n"
+"    Hallo <t t-out=\"object.partner_id.name or object.partner_name or ''\">"
+"Brandon Freeman</t>,<br/>\n"
 "    wir freuen uns Ihnen mitteilen zu können, dass Ihr Vorschlag <t t-"
 "out=\"object.name or ''\">Alles über diese Veranstaltung</t> eingegangen ist "
 "und für die Veranstaltung <t t-out=\"object.event_id.name or ''\">Online-"
@@ -59,9 +62,9 @@ msgstr ""
 "    <br/>\n"
 "    Mehr Details finden Sie hier:\n"
 "    <div style=\"margin: 16px 0px 16px 0px;\">\n"
-"        <a t-attf-href=\"/event/{{ object.event_id.id }}/track/"
-"{{ object.id }}\" style=\"padding: 8px 16px 8px 16px; font-size: 14px; "
-"color: #FFFFFF; text-decoration: none !important; background-color: #875A7B; "
+"        <a t-attf-href=\"/event/{{ object.event_id.id }}/track/{{ "
+"object.id }}\" style=\"padding: 8px 16px 8px 16px; font-size: 14px; color: "
+"#FFFFFF; text-decoration: none !important; background-color: #875A7B; "
 "border: 0px solid #875A7B; border-radius:3px\">\n"
 "            Vortrag anzeigen\n"
 "        </a>\n"
@@ -165,15 +168,6 @@ msgstr "<i class=\"fa fa-bell mx-2 text-muted\"/> Lieblingsvorträge"
 #: model_terms:ir.ui.view,arch_db:website_event_track.tracks_display_list
 msgid "<span class=\"d-none d-md-block\">&amp;bull;</span>"
 msgstr "<span class=\"d-none d-md-block\">&amp;bull;</span>"
-
-#. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
-"specific.\" groups=\"website.group_multi_website\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
-"specific.\" groups=\"website.group_multi_website\"/>"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.agenda_online
@@ -1215,8 +1209,7 @@ msgstr "Laufend"
 #. module: website_event_track
 #: model_terms:event.track,description:website_event_track.event_7_track_15
 msgid "In this video we will see how lumber is made in a sawmill factory."
-msgstr ""
-"In diesem Video sehen wir, wie Holz in einem Sägewerk verarbeitet wird."
+msgstr "In diesem Video sehen wir, wie Holz in einem Sägewerk verarbeitet wird."
 
 #. module: website_event_track
 #: model_terms:event.track,description:website_event_track.event_7_track_18
@@ -2048,8 +2041,7 @@ msgstr "Danke für Ihre Einrichtung."
 #. module: website_event_track
 #: model:ir.model.fields,help:website_event_track.field_event_track__website_url
 msgid "The full URL to access the document through the website."
-msgstr ""
-"Die vollständige URL, um über die Website auf das Dokument zuzugreifen."
+msgstr "Die vollständige URL, um über die Website auf das Dokument zuzugreifen."
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track17
@@ -2412,6 +2404,11 @@ msgstr ""
 "gebunden und gelöst werden müssen."
 
 #. module: website_event_track
+#: model_terms:ir.ui.view,arch_db:website_event_track.res_config_settings_view_form
+msgid "Values set here are website-specific."
+msgstr "Die hier festgelegten Werte sind websitespezifisch."
+
+#. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_kanban
 msgid "View Track"
 msgstr "Beitrag ansehen"
@@ -2711,3 +2708,16 @@ msgstr "beginnt in"
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_content
 msgid "starts on"
 msgstr "beginnt am"
+
+#. module: website_event_track
+#. odoo-javascript
+#: code:addons/website_event_track/static/src/xml/website_event_pwa.xml:0
+msgid "x"
+msgstr "x"
+
+#~ msgid ""
+#~ "<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
+#~ "specific.\" groups=\"website.group_multi_website\"/>"
+#~ msgstr ""
+#~ "<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
+#~ "specific.\" groups=\"website.group_multi_website\"/>"

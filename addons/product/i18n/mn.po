@@ -28,13 +28,13 @@
 # Torbat Jargalsaikhan, 2024
 # Onii Onii <onii0223@yahoo.com>, 2024
 # Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-12-31 13:12+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-11-08 17:33+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Mongolian <https://translate.odoo.com/projects/odoo-18/"
 "product/mn/>\n"
@@ -43,7 +43,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: product
 #. odoo-python
@@ -65,16 +65,6 @@ msgstr "Барааны Хувилбар #"
 #: model:ir.model.fields,field_description:product.field_product_category__product_count
 msgid "# Products"
 msgstr "Бараанууд #"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
-msgid "$14.00"
-msgstr ""
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
-msgid "$15.00"
-msgstr ""
 
 #. module: product
 #. odoo-python
@@ -181,18 +171,8 @@ msgid "1 year warranty extension"
 msgstr ""
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
-msgid "10"
-msgstr "10"
-
-#. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
 msgid "10 Units"
-msgstr ""
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
-msgid "123456789012"
 msgstr ""
 
 #. module: product
@@ -483,7 +463,7 @@ msgstr "Нэмэх"
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "Add Products"
-msgstr ""
+msgstr "Бараа нэмэх"
 
 #. module: product
 #. odoo-javascript
@@ -774,12 +754,12 @@ msgstr "Хар"
 #. odoo-javascript
 #: code:addons/product/static/src/js/product_attribute_value_list.js:0
 msgid "Bye-bye, record!"
-msgstr ""
+msgstr "Баяртай, бичлэг минь!"
 
 #. module: product
 #: model:product.template,name:product.product_product_10_product_template
 msgid "Cabinet with Doors"
-msgstr ""
+msgstr "Хаалгатай шүүгээ"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__can_image_1024_be_zoomed
@@ -1060,13 +1040,13 @@ msgstr "Барааны хувилбар шинээр үүсгэх"
 #. odoo-javascript
 #: code:addons/product/static/src/product_catalog/kanban_renderer.xml:0
 msgid "Create a product"
-msgstr ""
+msgstr "Бараа үүсгэх"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__service_tracking
 #: model:ir.model.fields,field_description:product.field_product_template__service_tracking
 msgid "Create on Order"
-msgstr ""
+msgstr "Захиалгаар үүсгэх"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__create_uid
@@ -1150,7 +1130,7 @@ msgstr "Өөриймшсөн"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__custom_value
 msgid "Custom Value"
-msgstr ""
+msgstr "Тусгай утга"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__partner_ref
@@ -1343,7 +1323,7 @@ msgstr "Баримтууд"
 #: model:ir.model.fields,field_description:product.field_product_product__product_document_count
 #: model:ir.model.fields,field_description:product.field_product_template__product_document_count
 msgid "Documents Count"
-msgstr ""
+msgstr "Баримтын тоо"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_search
@@ -1505,7 +1485,7 @@ msgstr "Файлын агуулга (base64)"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__raw
 msgid "File Content (raw)"
-msgstr ""
+msgstr "Файлын агуулга (түүхий)"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__file_size
@@ -1873,7 +1853,7 @@ msgstr "Барааны Олон улсын хувийн дугаар"
 #. odoo-javascript
 #: code:addons/product/static/src/js/product_attribute_value_list.js:0
 msgid "Invalid Operation"
-msgstr ""
+msgstr "Буруу үйлдэл"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
@@ -1913,6 +1893,11 @@ msgstr "Нийтийн баримт"
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_weight_in_lbs__0
 msgid "Kilograms"
 msgstr "Килограм"
+
+#. module: product
+#: model:product.attribute.value,name:product.size_attribute_l
+msgid "L"
+msgstr ""
 
 #. module: product
 #: model:product.template,name:product.product_product_6_product_template
@@ -2009,7 +1994,7 @@ msgstr "Мөрүүд"
 #. module: product
 #: model:product.template,name:product.product_product_local_delivery_product_template
 msgid "Local Delivery"
-msgstr ""
+msgstr "Орон нутгийн хүргэлт"
 
 #. module: product
 #: model_terms:product.template,website_description:product.product_product_4_product_template
@@ -2027,6 +2012,11 @@ msgstr "Ложистик"
 msgid ""
 "Looking for a custom bamboo stain to match existing furniture? Contact us "
 "for a quote."
+msgstr ""
+
+#. module: product
+#: model:product.attribute.value,name:product.size_attribute_m
+msgid "M"
 msgstr ""
 
 #. module: product
@@ -2323,7 +2313,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/product/static/src/js/product_document_kanban/upload_button/upload_button.js:0
 msgid "Oops! '%(fileName)s' didn’t upload since its format isn’t allowed."
-msgstr ""
+msgstr "Өө! '%(fileName)s'-ийн формат зөвшөөрөгдөөгүй тул байршуулагдсангүй."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__original_id
@@ -2383,7 +2373,7 @@ msgstr "Хувилсан Үнэ"
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__display_type__pills
 msgid "Pills"
-msgstr ""
+msgstr "Таблет товч"
 
 #. module: product
 #: model:product.attribute.value,name:product.fabric_attribute_plastic
@@ -2636,7 +2626,7 @@ msgstr "Барааны Шинж чанарууд"
 #. module: product
 #: model:ir.model,name:product.model_product_catalog_mixin
 msgid "Product Catalog Mixin"
-msgstr ""
+msgstr "Барааны каталогийн mixin"
 
 #. module: product
 #: model:ir.actions.act_window,name:product.product_category_action_form
@@ -2680,7 +2670,7 @@ msgstr "Бараа үүсгэх"
 #. module: product
 #: model:ir.model,name:product.model_product_document
 msgid "Product Document"
-msgstr ""
+msgstr "Барааны баримт"
 
 #. module: product
 #: model:ir.actions.report,name:product.report_product_template_label_dymo
@@ -2796,7 +2786,7 @@ msgstr "Барааны загвар"
 #. module: product
 #: model:ir.model,name:product.model_product_template_attribute_exclusion
 msgid "Product Template Attribute Exclusion"
-msgstr ""
+msgstr "Барааны загварын шинж чанарын хасалт"
 
 #. module: product
 #: model:ir.model,name:product.model_product_template_attribute_line
@@ -2916,7 +2906,7 @@ msgstr "Бараа: %(category)s"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_res_config_settings__module_loyalty
 msgid "Promotions, Coupons, Gift Card & Loyalty Program"
-msgstr ""
+msgstr "Урамшуулал, Купон, Бэлгийн карт & Лоялти хөтөлбөр"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__product_properties
@@ -3081,6 +3071,11 @@ msgid "Rule Tip"
 msgstr ""
 
 #. module: product
+#: model:product.attribute.value,name:product.size_attribute_s
+msgid "S"
+msgstr ""
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__sale_ok
 #: model:ir.model.fields,field_description:product.field_product_template__sale_ok
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
@@ -3166,6 +3161,12 @@ msgstr ""
 #: model:product.attribute,name:product.size_attribute
 msgid "Size"
 msgstr "Хэмжээ"
+
+#. module: product
+#. odoo-python
+#: code:addons/product/report/product_pricelist_report.py:0
+msgid "Sorry, you are not allowed to access this document."
+msgstr "Уучлаарай, танд энэ баримт руу хандах эрх алга."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_res_partner__specific_property_product_pricelist
@@ -3522,7 +3523,7 @@ msgstr ""
 #. module: product
 #: model:product.template,name:product.consu_delivery_01_product_template
 msgid "Three-Seat Sofa"
-msgstr ""
+msgstr "Гурван суудалтай буйдан"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
@@ -3708,6 +3709,10 @@ msgid ""
 "inventory adjustment).\n"
 "        Used to compute margins on sale orders."
 msgstr ""
+"Барааны үнэ цэнэ (AVCO-д автоматаар тооцоологдоно).\n"
+"        Худалдан авалтын өртөг тодорхойгүй үед (жишээ нь тооллогын "
+"тохируулга) барааг үнэлэхэд ашиглана.\n"
+"        Борлуулалтын захиалгын ашгийн хэмжээг тооцоолоход ашиглана."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__value_ids
@@ -3853,7 +3858,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:product.product_combo_view_form
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Visible to all"
-msgstr ""
+msgstr "Бүгдэд харагдана"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__voice_ids
@@ -3877,7 +3882,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:product.field_product_product__volume_uom_name
 #: model:ir.model.fields,field_description:product.field_product_template__volume_uom_name
 msgid "Volume unit of measure label"
-msgstr ""
+msgstr "Эзлэхүүний хэмжих нэгжийн шошго"
 
 #. module: product
 #. odoo-python
@@ -3929,7 +3934,7 @@ msgstr "Мод"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__write_date
 msgid "Write Date"
-msgstr ""
+msgstr "Бичсэн огноо"
 
 #. module: product
 #. odoo-python
@@ -4254,7 +4259,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "per"
-msgstr ""
+msgstr "тутам"
 
 #. module: product
 #. odoo-python
@@ -4301,3 +4306,6 @@ msgstr "дуусах"
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 msgid "xlsx"
 msgstr ""
+
+#~ msgid "10"
+#~ msgstr "10"

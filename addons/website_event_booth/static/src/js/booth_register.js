@@ -134,7 +134,7 @@ publicWidget.registry.boothRegistration = publicWidget.Widget.extend({
         }
 
         if (errors.includes('existingPartnerError')) {
-            errorMessages.push(_t("It looks like your email is linked to an existing account."));
+            errorMessages.push(_t("It looks like your email is already in our system."));
             if (errorSigninEl) {
                 errorSigninEl.classList.remove('d-none');
             }
@@ -182,14 +182,16 @@ publicWidget.registry.boothRegistration = publicWidget.Widget.extend({
      * @private
      */
     _fetchBoothsAndUpdateUI() {
-        if (this.boothCache[this.activeBoothCategoryId] === undefined) {
-            var self = this;
+        const boothCategoryId = this.activeBoothCategoryId;
+        if (this.boothCache[boothCategoryId] === undefined) {
             rpc('/event/booth_category/get_available_booths', {
                 event_id: this.eventId,
-                booth_category_id: this.activeBoothCategoryId,
-            }).then(function (result) {
-                self.boothCache[self.activeBoothCategoryId] = result;
-                self._updateUiAfterBoothCategoryChange();
+                booth_category_id: boothCategoryId,
+            }).then((result) => {
+                this.boothCache[boothCategoryId] = result;
+                if (this.activeBoothCategoryId === boothCategoryId) {
+                    this._updateUiAfterBoothCategoryChange();
+                }
             });
         } else {
             this._updateUiAfterBoothCategoryChange();

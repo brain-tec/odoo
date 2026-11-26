@@ -117,6 +117,8 @@ class AccountMove(models.Model):
         # EXTENDS 'account'
         super()._compute_delivery_date()
         for move in self:
+            if move.state != 'draft':
+                continue
             sale_order_effective_date = list(filter(None, move.line_ids.sale_line_ids.order_id.mapped('effective_date')))
             effective_date_res = max(sale_order_effective_date) if sale_order_effective_date else False
             # if multiple sale order we take the bigger effective_date
@@ -174,6 +176,9 @@ class AccountMoveLine(models.Model):
             is_line_reversing = False
             if self.move_id.move_type == 'out_refund' and not move_is_downpayment:
                 is_line_reversing = True
+            if is_line_reversing and not so_line.move_ids.filtered(lambda m: m.origin_returned_move_id):
+                return price_unit
+
             qty_to_invoice = self.product_uom_id._compute_quantity(self.quantity, self.product_id.uom_id)
             if self.move_id.move_type == 'out_refund' and move_is_downpayment:
                 qty_to_invoice = -qty_to_invoice
@@ -212,3 +217,12 @@ class AccountMoveLine(models.Model):
             average_price_unit = product._compute_average_price(qty_invoiced, qty_to_invoice, so_line.move_ids, is_returned=is_line_reversing)
             price_unit = self.product_id.uom_id.with_company(self.company_id)._compute_price(average_price_unit, self.product_uom_id)
         return price_unit
+
+    def _related_analytic_distribution(self):
+        # EXTENDS 'account'
+        vals = super()._related_analytic_distribution()
+        sale_line = self.move_id.stock_move_id.sale_line_id
+        if not self.sale_line_ids and not self.analytic_distribution and sale_line \
+                and self._should_use_related_analytic_distribution():
+            vals |= sale_line.analytic_distribution or {}
+        return vals

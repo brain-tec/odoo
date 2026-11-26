@@ -12,7 +12,6 @@ import { KioskGreetings } from "@hr_attendance/components/greetings/greetings";
 import { KioskPinCode } from "@hr_attendance/components/pin_code/pin_code";
 import { KioskBarcodeScanner } from "@hr_attendance/components/kiosk_barcode/kiosk_barcode";
 import { browser } from "@web/core/browser/browser";
-import { isIosApp } from "@web/core/browser/feature_detection";
 import { DocumentationLink } from "@web/views/widgets/documentation_link/documentation_link";
 import { session } from "@web/session";
 
@@ -26,6 +25,7 @@ class kioskAttendanceApp extends Component{
         kioskMode: { type: String },
         barcodeSource: { type: String },
         fromTrialMode: { type: Boolean },
+        lang: { type: String },
     };
     static components = {
         KioskBarcodeScanner,
@@ -66,6 +66,7 @@ class kioskAttendanceApp extends Component{
         onWillStart( async () => {
             this.isFreshDb = await rpc("/hr_attendance/is_fresh_db", { token: this.props.token });
         });
+        luxon.Settings.defaultLocale = this.props.lang;
     }
 
     async setBadgeID() {
@@ -145,29 +146,21 @@ class kioskAttendanceApp extends Component{
     }
 
     async makeRpcWithGeolocation(route, params) {
-        if (!isIosApp()) { // iOS app lacks permissions to call `getCurrentPosition`
-            return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+            return rpc(route, {...params})
+        }
+        this.ui.block();
+        try {
+            const coords = await new Promise((resolve) => {
                 navigator.geolocation.getCurrentPosition(
-                    async ({ coords: { latitude, longitude } }) => {
-                        const result = await rpc(route, {
-                            ...params,
-                            latitude,
-                            longitude,
-                        });
-                        resolve(result);
-                    },
-                    async (err) => {
-                        const result = await rpc(route, {
-                            ...params
-                        });
-                        resolve(result);
-                    },
+                    ({ coords: { latitude, longitude } }) => resolve({ latitude, longitude }),
+                    () => resolve({}),
                     { enableHighAccuracy: true }
                 );
             });
-        }
-        else {
-            return rpc(route, {...params})
+            return await rpc(route, { ...params, ...coords });
+        } finally {
+            this.ui.unblock();
         }
     }
 
@@ -197,7 +190,8 @@ class kioskAttendanceApp extends Component{
 
         let result;
         try {
-            result = await rpc("attendance_barcode_scanned", {
+            result = await this.makeRpcWithGeolocation('attendance_barcode_scanned',
+            {
                 barcode: barcode,
                 token: this.props.token,
             });
@@ -242,6 +236,7 @@ export async function createPublicKioskAttendance(document, kiosk_backend_info) 
                 kioskMode: kiosk_backend_info.kiosk_mode,
                 barcodeSource: kiosk_backend_info.barcode_source,
                 fromTrialMode: kiosk_backend_info.from_trial_mode,
+                lang: kiosk_backend_info.lang,
             },
         dev: env.debug,
         translateFn: _t,

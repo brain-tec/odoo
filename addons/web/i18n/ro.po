@@ -12,22 +12,25 @@
 # Larisa_nexterp, 2025
 #
 # Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Odoo Translation Bot <c3p@odoo.com>, 2026.
+# Alexandru Vajda <vajdasanyi2002@gmail.com>, 2026.
+# Dorin Hongu <dhongu@gmail.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-29 18:37+0000\n"
-"PO-Revision-Date: 2026-01-01 13:43+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-18/web/ro/"
-">\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-11-19 19:36+0000\n"
+"Last-Translator: Dorin Hongu <dhongu@gmail.com>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-18/web/ro/>"
+"\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: web
 #. odoo-javascript
@@ -106,13 +109,13 @@ msgstr "(%(mbLoaded)s/%(mbTotal)sMB)"
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_edition.xml:0
 msgid "(Community Edition)"
-msgstr "(Ediția Comunitate)"
+msgstr "(Ediție comunitate)"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 msgid "(change)"
-msgstr "(modificare)"
+msgstr "(schimbare)"
 
 #. module: web
 #. odoo-javascript
@@ -142,7 +145,7 @@ msgstr "(niciun rezultat)"
 #. odoo-javascript
 #: code:addons/web/static/src/views/view_button/view_button.xml:0
 msgid "(no string)"
-msgstr "(fără text)"
+msgstr "(fără clauză)"
 
 #. module: web
 #. odoo-javascript
@@ -172,133 +175,9 @@ msgstr "+ CHEIE"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "00"
-msgstr "00"
-
-#. module: web
-#: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "07/08/2020"
-msgstr "07/08/2020"
-
-#. module: web
-#: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "08/07/2020"
-msgstr "08/07/2020"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/views/fields/formatters.js:0
 msgid "1 record"
 msgstr "o înregistrare"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "1.30"
-msgstr "1.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "10"
-msgstr "10"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "10.30"
-msgstr "10.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "100"
-msgstr "100"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "10:00"
-msgstr "10:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "10:30"
-msgstr "10:30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "11"
-msgstr "11"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "11.30"
-msgstr "11.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "11:00"
-msgstr "11:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "11:30"
-msgstr "11:30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "12"
-msgstr "12"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "12.30"
-msgstr "12.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "1234"
-msgstr "1234"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "12:00"
-msgstr "12:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "12:30"
-msgstr "12:30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "18"
-msgstr "18"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "1:00"
-msgstr "1:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "1:30"
-msgstr "1:30"
 
 #. module: web
 #. odoo-javascript
@@ -309,68 +188,14 @@ msgstr "Medalie locul 1"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "2.30"
-msgstr "2.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "2:00"
-msgstr "2:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "2:30"
-msgstr "2:30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "2nd place medal"
 msgstr "Medalie locul 2"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "3.30"
-msgstr "3.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "3:00"
-msgstr "3:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "3:30"
-msgstr "3:30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "3rd place medal"
 msgstr "Medalie locul 3"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "4.30"
-msgstr "4.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "4:00"
-msgstr "4:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "4:30"
-msgstr "4:30"
 
 #. module: web
 #. odoo-javascript
@@ -383,96 +208,6 @@ msgstr "4WD"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "4x4"
 msgstr "4x4"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "5.30"
-msgstr "5.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "5:00"
-msgstr "5:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "5:30"
-msgstr "5:30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "6.30"
-msgstr "6.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "6:00"
-msgstr "6:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "6:30"
-msgstr "6:30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "7.30"
-msgstr "7.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "7:00"
-msgstr "7:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "7:30"
-msgstr "7:30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "8.30"
-msgstr "8.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "8:00"
-msgstr "8:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "8:30"
-msgstr "8:30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "9.30"
-msgstr "9.30"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "9:00"
-msgstr "9:00"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "9:30"
-msgstr "9:30"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
@@ -701,6 +436,12 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "A"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "A button (blood type)"
 msgstr "Buton A (tip de sânge)"
 
@@ -798,7 +539,7 @@ msgstr "Drepturi de acces"
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/fields/upgrade_dialog.xml:0
 msgid "Access to all Enterprise Apps"
-msgstr "Acces la toate aplicațiile Enterprise"
+msgstr "Accesează toate aplicațiile Enterprise"
 
 #. module: web
 #. odoo-javascript
@@ -1082,7 +823,7 @@ msgstr "A apărut o eroare la încărcare."
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/fields/upgrade_dialog.xml:0
 msgid "And more"
-msgstr "Și altele"
+msgstr "Și încă"
 
 #. module: web
 #. odoo-javascript
@@ -1281,6 +1022,12 @@ msgstr "Avatar"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "B"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "B button (blood type)"
 msgstr "Buton B (tip de sânge)"
 
@@ -1442,7 +1189,7 @@ msgstr "Buddhist"
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/fields/upgrade_dialog.xml:0
 msgid "Bugfixes guarantee"
-msgstr "Garanție remedieri erori"
+msgstr "Garanție remediere erori"
 
 #. module: web
 #. odoo-javascript
@@ -1490,6 +1237,12 @@ msgstr "Octeți"
 #: code:addons/web/static/src/core/utils/binary.js:0
 msgid "Bytes|Kb|Mb|Gb|Tb|Pb|Eb|Zb|Yb"
 msgstr "Bytes|Kb|Mb|Gb|Tb|Pb|Eb|Zb|Yb"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "C"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -2482,7 +2235,7 @@ msgstr "Afișează orizontal"
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 msgid "Display in Cards"
-msgstr "Afișează în carduri"
+msgstr "Afișează în Carduri"
 
 #. module: web
 #. odoo-javascript
@@ -2617,7 +2370,7 @@ msgstr "Trageți fișierele aici"
 #. odoo-javascript
 #: code:addons/web/static/src/core/signature/name_and_signature.xml:0
 msgid "Draw"
-msgstr "Desenează"
+msgstr "Desenați"
 
 #. module: web
 #. odoo-javascript
@@ -2945,7 +2698,7 @@ msgstr "Ferris"
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 msgid "Field Type"
-msgstr "Tip câmp"
+msgstr "Tip Câmp"
 
 #. module: web
 #. odoo-javascript
@@ -3170,7 +2923,7 @@ msgstr "Obține vizualizarea"
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/fields/upgrade_dialog.xml:0
 msgid "Get this feature and much more with Odoo Enterprise!"
-msgstr "Obțineți această funcționalitate și multe altele cu Odoo Enterprise!"
+msgstr "Această opțiune este disponibilă în varianta Enterprise!"
 
 #. module: web
 #. odoo-javascript
@@ -3542,7 +3295,7 @@ msgstr "E-mail invalid: %(address)s"
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_invite_users.js:0
 msgid "Invalid email addresses: %(2 addresses)s"
-msgstr "Adrese de e-mail invalide:  %(2 addresses)s"
+msgstr "Adrese de e-mail invalide: %(2 addresses)s"
 
 #. module: web
 #. odoo-javascript
@@ -3650,7 +3403,7 @@ msgstr ""
 "șablonului. Deoarece timpul global (în meniul derulant) nu ia în considerare "
 "durata care nu este în randare (căutarea șablonului, citirea, moștenirea, "
 "compilarea...). În timpul randării, timpul global ia parte și din timpul "
-"necesar pentru a face profilul, precum și o parte care nu este înregistrată "
+"necesar pentru a face profilul,  precum și o parte care nu este înregistrată "
 "în funcția generată de qweb."
 
 #. module: web
@@ -4067,6 +3820,12 @@ msgstr "Culoare secundară siglă"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "M"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "Mahjong"
 msgstr "Mahjong"
 
@@ -4245,7 +4004,7 @@ msgstr "Precizie minimă"
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/float/float_field.js:0
 msgid "Minimum Digits"
-msgstr ""
+msgstr "Număr minim de cifre"
 
 #. module: web
 #. odoo-javascript
@@ -4275,7 +4034,7 @@ msgstr "ID înregistrare lipsă"
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/fields/upgrade_dialog.xml:0
 msgid "Mobile support"
-msgstr "Suport mobil"
+msgstr "Suport pentru dispozitive mobile"
 
 #. module: web
 #. odoo-javascript
@@ -4531,7 +4290,7 @@ msgstr "Regulă nouă"
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/fields/upgrade_dialog.xml:0
 msgid "New design"
-msgstr "Design nou"
+msgstr "Nou design"
 
 #. module: web
 #. odoo-javascript
@@ -4653,7 +4412,7 @@ msgstr "Nu sunt date de afișat"
 #. odoo-python
 #: code:addons/web/controllers/pivot.py:0
 msgid "No data to export"
-msgstr ""
+msgstr "Nu există date de exportat"
 
 #. module: web
 #. odoo-javascript
@@ -4781,6 +4540,12 @@ msgstr "Stare inactivă, faceți clic pentru a o schimba"
 #: code:addons/web/static/src/views/fields/many2many_binary/many2many_binary_field.js:0
 msgid "Number of files"
 msgstr "Număr de fișiere"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "O"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -4940,7 +4705,7 @@ msgstr "Offline"
 #. odoo-javascript
 #: code:addons/web/static/src/views/form/form_error_dialog/form_error_dialog.xml:0
 msgid "Oh snap!"
-msgstr "Vai!"
+msgstr "O, nu!"
 
 #. module: web
 #. odoo-javascript
@@ -5012,7 +4777,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 msgid "Only you"
-msgstr "Doar tu"
+msgstr "Numai tu"
 
 #. module: web
 #. odoo-javascript
@@ -5024,7 +4789,7 @@ msgstr "Ups!"
 #. odoo-javascript
 #: code:addons/web/static/src/core/pwa/install_prompt.xml:0
 msgid "Open \"File\" menu from your browser"
-msgstr "Deschideți meniul „Fișier” din browser"
+msgstr "Deschideți meniul „Fișier” din browserul dvs."
 
 #. module: web
 #. odoo-javascript
@@ -5098,6 +4863,12 @@ msgstr "Altele"
 #: code:addons/web/static/src/views/fields/progress_bar/progress_bar_field.js:0
 msgid "Overflow style"
 msgstr "Stil depășire"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "P"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -5205,8 +4976,8 @@ msgid ""
 "Pie chart cannot mix positive and negative numbers. Try to change your "
 "domain to only display positive results"
 msgstr ""
-"Graficul tip plăcintă nu poate combina valori pozitive și negative. "
-"Încercați să modificați domeniul pentru a afișa doar rezultate pozitive."
+"Graficul pie nu poate mixa valori pozitive și negative. Încearcă să afișezi "
+"doar rezultate pozitive."
 
 #. module: web
 #. odoo-javascript
@@ -5497,6 +5268,12 @@ msgstr "Căutare rapidă: %s"
 #: model:ir.model,name:web.model_ir_qweb_field_image_url
 msgid "Qweb Field Image"
 msgstr "Câmp imagine Qweb"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "R"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -5892,6 +5669,12 @@ msgstr "Salvează manual"
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/translation_button.js:0
+msgid "Save this record and its parent to translate"
+msgstr "Salvați această înregistrare și părintele ei pentru a traduce"
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/views/fields/many2one/many2one_field.xml:0
 msgid "Scan barcode"
 msgstr "Scanează cod de bare"
@@ -5923,6 +5706,12 @@ msgstr "Căutare"
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 msgid "Search More..."
 msgstr "Caută mai mult..."
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/reference/reference_field.js:0
+msgid "Search a record..."
+msgstr "Căutați o înregistrare..."
 
 #. module: web
 #. odoo-javascript
@@ -6014,13 +5803,13 @@ msgstr "Selectează"
 #. odoo-javascript
 #: code:addons/web/static/src/core/pwa/install_prompt.xml:0
 msgid "Select \"Add to dock\""
-msgstr "Selectează „Adaugă la dock”"
+msgstr "Selectați „Adăugați la dock”"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/pwa/install_prompt.xml:0
 msgid "Select \"Add to home screen\""
-msgstr "Selectează „Adaugă la ecranul de start”"
+msgstr "Selectați „Adăugați la ecranul de start”"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login
@@ -6231,7 +6020,7 @@ msgstr "Shinto"
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
 msgid "Shortcuts"
-msgstr "Scurtături"
+msgstr "Comenzi rapide"
 
 #. module: web
 #. odoo-javascript
@@ -6267,7 +6056,7 @@ msgstr "Afișează ora"
 #. odoo-javascript
 #: code:addons/web/static/src/views/view_components/view_scale_selector.xml:0
 msgid "Show weekends"
-msgstr "Afișează weekendurile"
+msgstr "Afișare weekenduri"
 
 #. module: web
 #. odoo-javascript
@@ -6385,7 +6174,7 @@ msgstr "Bară de stare"
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/settings_confirmation_dialog.xml:0
 msgid "Stay Here"
-msgstr "Rămâi aici"
+msgstr "Stai aici"
 
 #. module: web
 #. odoo-javascript
@@ -6665,6 +6454,12 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/errors/error_dialogs.js:0
+msgid "The request sent to the server was too large"
+msgstr "Cererea trimisă către server a fost prea mare"
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/utils/files.js:0
 msgid "The resizing of the image failed"
 msgstr "Redimensionarea imaginii a eșuat"
@@ -6746,7 +6541,7 @@ msgstr "Această dată este în viitor. Asigurați-vă că este ceea ce doriți.
 #. odoo-javascript
 #: code:addons/web/static/src/core/domain_selector/domain_selector.xml:0
 msgid "This domain is not supported."
-msgstr "Acest domeniu nu este suportat."
+msgstr "Acest domeniu nu este acceptat."
 
 #. module: web
 #. odoo-javascript
@@ -6760,7 +6555,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/expression_editor/expression_editor.xml:0
 msgid "This expression is not supported."
-msgstr "Această expresie nu este suportată."
+msgstr "Această expresie nu este acceptată."
 
 #. module: web
 #. odoo-javascript
@@ -6831,6 +6626,12 @@ msgstr "Joi"
 #: code:addons/web/static/src/views/fields/float_time/float_time_field.js:0
 msgid "Time"
 msgstr "Timp"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/webclient/debug/profiling/profiling_item.xml:0
+msgid "Time Limit (seconds)"
+msgstr "Limită de timp (secunde)"
 
 #. module: web
 #. odoo-javascript
@@ -7184,7 +6985,7 @@ msgstr "Actualizează la Enterprise"
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/fields/upgrade_dialog.xml:0
 msgid "Upgrade to future versions"
-msgstr "Actualizează la versiunile viitoare"
+msgstr "Treceți la versiunile viitoare"
 
 #. module: web
 #. odoo-javascript
@@ -7198,7 +6999,7 @@ msgstr "Încarcă și setează"
 #: code:addons/web/static/src/views/fields/pdf_viewer/pdf_viewer_field.xml:0
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "Upload your file"
-msgstr "Încarcă fișierul tău"
+msgstr "Încarcă fișier"
 
 #. module: web
 #. odoo-javascript
@@ -15358,6 +15159,12 @@ msgstr "plic roșu (hóngbāo)"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "i"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "ice"
 msgstr "gheață"
 
@@ -18695,6 +18502,12 @@ msgstr "nuci"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "o"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "ocean"
 msgstr "ocean"
 
@@ -20767,6 +20580,12 @@ msgstr "liniște"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "r"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "rabbit"
 msgstr "iepure"
 
@@ -21129,7 +20948,7 @@ msgstr "reîncarcă"
 #. odoo-javascript
 #: code:addons/web/static/src/views/kanban/kanban_renderer.xml:0
 msgid "remaining)"
-msgstr "rămas/rămase)"
+msgstr "ceea ce a rămas)"
 
 #. module: web
 #. odoo-javascript
@@ -24977,6 +24796,12 @@ msgstr "urnă"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "v"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "vague"
 msgstr "vag"
 
@@ -26357,6 +26182,12 @@ msgstr "ironic"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "x"
+msgstr "x"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "yacht"
 msgstr "iaht"
 
@@ -26641,6 +26472,237 @@ msgstr "„loc disponibil”"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "ココ"
 msgstr "aici"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "サ"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "割"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "可"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "合"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "営"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "得"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "指"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "月"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "有"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "満"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "無"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "申"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "祝"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "禁"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "秘"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
+msgid "空"
+msgstr ""
+
+#~ msgid "00"
+#~ msgstr "00"
+
+#~ msgid "07/08/2020"
+#~ msgstr "07/08/2020"
+
+#~ msgid "08/07/2020"
+#~ msgstr "08/07/2020"
+
+#~ msgid "1.30"
+#~ msgstr "1.30"
+
+#~ msgid "10"
+#~ msgstr "10"
+
+#~ msgid "10.30"
+#~ msgstr "10.30"
+
+#~ msgid "100"
+#~ msgstr "100"
+
+#~ msgid "10:00"
+#~ msgstr "10:00"
+
+#~ msgid "10:30"
+#~ msgstr "10:30"
+
+#~ msgid "11"
+#~ msgstr "11"
+
+#~ msgid "11.30"
+#~ msgstr "11.30"
+
+#~ msgid "11:00"
+#~ msgstr "11:00"
+
+#~ msgid "11:30"
+#~ msgstr "11:30"
+
+#~ msgid "12"
+#~ msgstr "12"
+
+#~ msgid "12.30"
+#~ msgstr "12.30"
+
+#~ msgid "1234"
+#~ msgstr "1234"
+
+#~ msgid "12:00"
+#~ msgstr "12:00"
+
+#~ msgid "12:30"
+#~ msgstr "12:30"
+
+#~ msgid "18"
+#~ msgstr "18"
+
+#~ msgid "1:00"
+#~ msgstr "1:00"
+
+#~ msgid "1:30"
+#~ msgstr "1:30"
+
+#~ msgid "2.30"
+#~ msgstr "2.30"
+
+#~ msgid "2:00"
+#~ msgstr "2:00"
+
+#~ msgid "2:30"
+#~ msgstr "2:30"
+
+#~ msgid "3.30"
+#~ msgstr "3.30"
+
+#~ msgid "3:00"
+#~ msgstr "3:00"
+
+#~ msgid "3:30"
+#~ msgstr "3:30"
+
+#~ msgid "4.30"
+#~ msgstr "4.30"
+
+#~ msgid "4:00"
+#~ msgstr "4:00"
+
+#~ msgid "4:30"
+#~ msgstr "4:30"
+
+#~ msgid "5.30"
+#~ msgstr "5.30"
+
+#~ msgid "5:00"
+#~ msgstr "5:00"
+
+#~ msgid "5:30"
+#~ msgstr "5:30"
+
+#~ msgid "6.30"
+#~ msgstr "6.30"
+
+#~ msgid "6:00"
+#~ msgstr "6:00"
+
+#~ msgid "6:30"
+#~ msgstr "6:30"
+
+#~ msgid "7.30"
+#~ msgstr "7.30"
+
+#~ msgid "7:00"
+#~ msgstr "7:00"
+
+#~ msgid "7:30"
+#~ msgstr "7:30"
+
+#~ msgid "8.30"
+#~ msgstr "8.30"
+
+#~ msgid "8:00"
+#~ msgstr "8:00"
+
+#~ msgid "8:30"
+#~ msgstr "8:30"
+
+#~ msgid "9.30"
+#~ msgstr "9.30"
+
+#~ msgid "9:00"
+#~ msgstr "9:00"
+
+#~ msgid "9:30"
+#~ msgstr "9:30"
 
 #~ msgid "<span itemprop=\"name\">Deco Addict</span>"
 #~ msgstr "<span itemprop=\"name\">Deco Addict</span>"

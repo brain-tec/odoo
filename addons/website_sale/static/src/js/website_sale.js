@@ -275,6 +275,23 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, cartHandlerM
     _getProductImageContainer: function () {
         return document.querySelector(this._getProductImageContainerSelector());
     },
+    /**
+     * Returns product images and sorts them by their visual position in grid
+     * layout so that navigation matches the rendered order.
+     *
+     * @private
+     * @param {HTMLElement} salePage
+     * @returns {HTMLImageElement[]}
+     */
+    _getVisuallyOrderedProductImages(salePage) {
+        const images = [...salePage.querySelectorAll(".product_detail_img")];
+        if (this._getProductImageLayout() === "grid") {
+            return images.sort((a, b) => {
+                return a.offsetTop - b.offsetTop;
+            });
+        }
+        return images;
+    },
     _isEditorEnabled() {
         return document.body.classList.contains("editor_enable");
     },
@@ -319,7 +336,7 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, cartHandlerM
         // Zoom on click
         if (salePage.dataset.ecomZoomClick) {
             // In this case we want all the images not just the ones that are "zoomables"
-            const images = salePage.querySelectorAll(".product_detail_img");
+            const images = this._getVisuallyOrderedProductImages(salePage);
             for (const image of images ) {
                 const handler = () => {
                     if (salePage.dataset.ecomZoomAuto) {
@@ -330,7 +347,7 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, cartHandlerM
                         }
                     }
                     this.call("dialog", "add", ProductImageViewer, {
-                        selectedImageIdx: [...images].indexOf(image),
+                        selectedImageIdx: images.indexOf(image),
                         images,
                     });
                 };
@@ -744,6 +761,7 @@ publicWidget.registry.websiteSaleCarouselProduct = publicWidget.Widget.extend({
     disabledInEditableMode: false,
     events: {
         'wheel .o_carousel_product_indicators': '_onMouseWheel',
+        'slide.bs.carousel': '_onSlideCarouselProductVideo',
     },
 
     /**
@@ -754,6 +772,10 @@ publicWidget.registry.websiteSaleCarouselProduct = publicWidget.Widget.extend({
         this._updateCarouselPosition();
         this.throttleOnResize = throttleForAnimation(this._onSlideCarouselProduct.bind(this));
         extraMenuUpdateCallbacks.push(this._updateCarouselPosition.bind(this));
+        for (const iframe of this.$el.find('.carousel-item:not(.active) iframe')) {
+            iframe.dataset.src = iframe.getAttribute('src');
+            iframe.removeAttribute('src');
+        }
         if (this.$el.find('.carousel-indicators').length > 0) {
             this.$el.on('slide.bs.carousel.carousel_product_slider', this._onSlideCarouselProduct.bind(this));
             $(window).on('resize.carousel_product_slider', this.throttleOnResize);
@@ -827,6 +849,19 @@ publicWidget.registry.websiteSaleCarouselProduct = publicWidget.Widget.extend({
             if (($indicatorsDiv.children().last().position().left + this.$el.find('li').outerWidth()) < $indicatorsDiv.outerWidth()) {
                 $indicatorsDiv.css('justify-content', 'center');
             }
+        }
+    },
+    /**
+     * Load the video of the slide the carousel is sliding to.
+     *
+     * @private
+     * @param {Event} ev
+     */
+    _onSlideCarouselProductVideo: function (ev) {
+        const iframe = ev.relatedTarget?.querySelector('iframe[data-src]');
+        if (iframe) {
+            iframe.setAttribute('src', iframe.dataset.src);
+            delete iframe.dataset.src;
         }
     },
     /**

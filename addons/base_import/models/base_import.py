@@ -20,12 +20,11 @@ import os
 import re
 import requests
 
-from PIL import Image
-
 from collections import defaultdict
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools.translate import _
+from odoo.tools.image import ImageProcess
 from odoo.tools.mimetypes import guess_mimetype
 from odoo.tools import config, DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, parse_version
 
@@ -1291,8 +1290,8 @@ class Import(models.TransientModel):
                 index = import_fields.index(name)
                 self._parse_date_from_data(data, index, name, field['type'], options)
             # Check if the field is in import_field and is a relational (followed by /)
-            # Also verify that the field name exactly match the import_field at the correct level.
-            elif any(name + '/' in import_field and name == import_field.split('/')[prefix.count('/')] for import_field in import_fields):
+            # Also verify that an import_field starts with the full path of the field, at any level.
+            elif field.get('relation') and any(import_field.startswith(name + '/') for import_field in import_fields):
                 # Recursive call with the relational as new model and add the field name to the prefix
                 self._parse_import_data_recursive(field['relation'], name + '/', data, import_fields, options)
             elif field['type'] in ('float', 'monetary') and name in import_fields:
@@ -1392,14 +1391,7 @@ class Import(models.TransientModel):
                         field=field
                     )
 
-            image = Image.open(io.BytesIO(content))
-            w, h = image.size
-            if w * h > 42e6:  # Nokia Lumia 1020 photo resolution
-                raise ImportValidationError(
-                    _("Image size excessive, imported images must be smaller than 42 million pixel"),
-                    field=field
-                )
-
+            ImageProcess(bytes(content), verify_resolution=True)
             return base64.b64encode(content)
         except Exception as e:
             _logger.warning(e, exc_info=True)
@@ -1464,7 +1456,7 @@ class Import(models.TransientModel):
             import_skip_records=options.get('import_skip_records', []),
             _import_limit=import_limit)
         import_result = model.load(import_fields, merged_data)
-        _logger.info('done')
+        _logger.info('done importing data into model: %s', model._name)
 
         # If transaction aborted, RELEASE SAVEPOINT is going to raise
         # an InternalError (ROLLBACK should work, maybe). Ignore that.
@@ -1476,6 +1468,7 @@ class Import(models.TransientModel):
             self.pool.clear_all_caches()
             # don't propagate to other workers since it was rollbacked
             self.pool.reset_changes()
+            _logger.info('Previous import was a dry/test run, changes were reset')
 
         # Insert/Update mapping columns when import complete successfully
         if import_result['ids'] and options.get('has_headers'):
@@ -1728,6 +1721,7 @@ def check_patterns(patterns, values):
 def to_re(pattern):
     """ cut down version of TimeRE converting strptime patterns to regex
     """
+    pattern = re.sub(r"([\\.^$*+?\(\){}\[\]|])", r"\\\1", pattern)
     pattern = re.sub(r'\s+', r'\\s+', pattern)
     pattern = re.sub('%([a-z])', _replacer, pattern, flags=re.IGNORECASE)
     pattern = '^' + pattern + '$'

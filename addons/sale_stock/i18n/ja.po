@@ -6,15 +6,15 @@
 # Wil Odoo, 2024
 # Junko Augias, 2025
 # Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
-# Yoshi Tashiro <tashiro@quartile.co>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Yoshi Tashiro <tashiro@quartile.co>, 2025, 2026.
 # "Junko Augias (juau)" <juau@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2026-02-07 10:36+0000\n"
+"PO-Revision-Date: 2026-11-11 07:33+0000\n"
 "Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-18/"
 "sale_stock/ja/>\n"
@@ -23,7 +23,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.exception_on_picking
@@ -120,8 +120,8 @@ msgid ""
 "this sale line\n"
 "  - Stock Moves: the quantity comes from confirmed pickings\n"
 msgstr ""
-"プロダクト構成に応じて、配送済数量はメカニズムによって自動的に計算されま"
-"す：\n"
+"プロダクト構成に応じて、配送済数量はメカニズムによって自動的に計算されます"
+"：\n"
 "  - 手動: 数量を明細上で手動で設定します\n"
 "  - 費用からの分析: 数量は計上された費用からの合計数量です\n"
 "  - タイムシート: 数量は、この売上明細にリンクされたタスクに記録された時間の"
@@ -191,7 +191,7 @@ msgstr "最初の出荷オーダの完了日"
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_res_config_settings
 msgid "Config Settings"
-msgstr "コンフィグ設定"
+msgstr "構成設定"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.report_delivery_document_inherit_sale_stock
@@ -328,7 +328,7 @@ msgstr ""
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.exception_on_so
 msgid "Impacted Transfer(s):"
-msgstr "影響を受けた転送："
+msgstr "影響を受けた移動："
 
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order__incoterm
@@ -338,7 +338,7 @@ msgstr "インコタームズ"
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order__incoterm_location
 msgid "Incoterm Location"
-msgstr "インコタームズロケーション"
+msgstr "インコタームズ指定地"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.report_delivery_document_inherit_sale_stock
@@ -416,8 +416,8 @@ msgid ""
 "for delivery that many days earlier than the actual promised date, to cope "
 "with unexpected delays in the supply chain."
 msgstr ""
-"顧客に約束した日付の誤差。サプライチェーンにおける予期せぬ遅延に対処するた"
-"め、プロダクトは実際の約束日より何日か早く納品されるよう予定されます。"
+"顧客に約束した日付の誤差。サプライチェーンにおける予期せぬ遅延に対処するため"
+"、プロダクトは実際の約束日より何日か早く納品されるよう予定されます。"
 
 #. module: sale_stock
 #: model:ir.model.fields,help:sale_stock.field_res_company__security_lead
@@ -484,7 +484,7 @@ msgstr "一部出荷済"
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_res_config_settings__default_picking_policy
 msgid "Picking Policy"
-msgstr "ピッキングポリシー"
+msgstr "ピッキング方針"
 
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_procurement_group
@@ -500,7 +500,7 @@ msgstr "プロダクト"
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_stock_move_line
 msgid "Product Moves (Stock Move Line)"
-msgstr "プロダクトの移動(在庫移動ライン)"
+msgstr "プロダクト移動(在庫移動明細行)"
 
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order_line__qty_available_today
@@ -626,7 +626,7 @@ msgstr "販売安全日数"
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.res_config_settings_view_form_stock
 msgid "Schedule deliveries earlier to avoid delays"
-msgstr "遅配を避けるために早めに出荷を予定"
+msgstr "遅延を防ぐため、出荷予定日を前倒しで設定"
 
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order_line__scheduled_date
@@ -661,7 +661,7 @@ msgstr "製品が利用可能になり次第出荷 (バック注文作成)"
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order__picking_policy
 msgid "Shipping Policy"
-msgstr "配送ポリシー"
+msgstr "出荷方針"
 
 #. module: sale_stock
 #: model:ir.model.fields.selection,name:sale_stock.selection__sale_order__delivery_status__started
@@ -708,7 +708,7 @@ msgstr "在庫ルールレポート"
 #. odoo-javascript
 #: code:addons/sale_stock/static/src/xml/delay_alert.xml:0
 msgid "The delivery"
-msgstr "配送"
+msgstr "納品"
 
 #. module: sale_stock
 #. odoo-python
@@ -721,8 +721,8 @@ msgid ""
 "document."
 msgstr ""
 "販売オーダ上で配送先が変更されました。<br/>\n"
-"                        変更前： <strong>\"%(old_address)s\"</strong> 変更"
-"後： <strong>\"%(new_address)s\"</strong>,\n"
+"                        変更前： <strong>\"%(old_address)s\"</strong> 変更後"
+"： <strong>\"%(new_address)s\"</strong>,\n"
 "                        このドキュメント上で取引先を更新する必要があるでしょ"
 "う。"
 
@@ -743,8 +743,8 @@ msgid ""
 "The ordered quantity of a sale order line cannot be decreased below the "
 "amount already delivered. Instead, create a return in your inventory."
 msgstr ""
-"販売オーダ明細のオーダ数量を、すでに納入された数量より減らすことはできませ"
-"ん。代わりに、在庫に返品を作成して下さい。"
+"販売オーダ明細のオーダ数量を、すでに納入された数量より減らすことはできません"
+"。代わりに、在庫に返品を作成して下さい。"
 
 #. module: sale_stock
 #. odoo-javascript
@@ -760,12 +760,12 @@ msgstr "在庫追跡"
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_stock_picking
 msgid "Transfer"
-msgstr "転送"
+msgstr "移動"
 
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order__picking_ids
 msgid "Transfers"
-msgstr "転送"
+msgstr "移動"
 
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_res_users

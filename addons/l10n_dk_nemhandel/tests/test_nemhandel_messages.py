@@ -6,7 +6,8 @@ from unittest.mock import patch
 from urllib import parse
 
 from odoo import Command
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
+from odoo.tests import Form
 from odoo.tests.common import tagged, freeze_time
 from odoo.tools.misc import file_open
 
@@ -70,6 +71,7 @@ class TestNemhandelMessage(TestAccountMoveSendCommon):
         cls.env['res.partner.bank'].create({
             'acc_number': '0144748555',
             'partner_id': cls.env.company.partner_id.id,
+            'allow_out_payment': True,
         })
 
     def create_move(self, partner, company=None):
@@ -102,6 +104,7 @@ class TestNemhandelMessage(TestAccountMoveSendCommon):
                 'state': 'done' if not error else 'error',
                 'direction': 'outgoing',
                 'document_type': 'Invoice',
+                'origin_message_uuid': FAKE_UUID[0],
             },
             FAKE_UUID[1]: {
                 'accounting_supplier_party': '0184:16356706',
@@ -111,6 +114,7 @@ class TestNemhandelMessage(TestAccountMoveSendCommon):
                 'state': 'done' if not error else 'error',
                 'direction': 'incoming',
                 'document_type': 'Invoice',
+                'origin_message_uuid': FAKE_UUID[1],
             },
         }
 
@@ -132,7 +136,8 @@ class TestNemhandelMessage(TestAccountMoveSendCommon):
                         'error': False if not error else 'Test error',
                     }
                 ],
-            }}
+            }},
+            '/api/nemhandel/1/send_response': {'result': {'messages': [{'message_uuid': 'rrrrrrrr-rrrr-rrrr-rrrr-rrrrrrrrrrrr'}] * nr_invoices}},
         }
         return proxy_documents, responses
 
@@ -150,23 +155,6 @@ class TestNemhandelMessage(TestAccountMoveSendCommon):
         if r.path_url.startswith('/api/peppol/1/lookup'):
             nemhandel_identifier = parse.parse_qs(r.path_url.rsplit('?')[1])['peppol_identifier'][0].lower()
             url_quoted_nemhandel_identifier = parse.quote_plus(nemhandel_identifier)
-            if nemhandel_identifier.endswith('5798009811512'):
-                response.status_code = 200
-                response.json = lambda: {
-                    "result": {
-                        'identifier': nemhandel_identifier,
-                        'smp_base_url': "https://smp-demo.nemhandel.dk",
-                        'ttl': 60,
-                        'service_group_url': f'http:///smp-demo.nemhandel.dk/iso6523-actorid-upis%3A%3A{url_quoted_nemhandel_identifier}',
-                        'services': [
-                            {
-                                "href": f"https://smp-demo.nemhandel.dk/iso6523-actorid-upis%3A%3A{url_quoted_nemhandel_identifier}/services/busdox-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23OIOUBL-2.1%3A%3A2.1",
-                                "document_id": "busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##OIOUBL-2.1::2.1",
-                            },
-                        ],
-                    },
-                }
-                return response
             if nemhandel_identifier.endswith('12345674'):
                 response.status_code = 404
                 response.json = lambda: {"error": {"code": "NOT_FOUND", "message": "no naptr record", "retryable": False}}
@@ -200,6 +188,22 @@ class TestNemhandelMessage(TestAccountMoveSendCommon):
                     },
                 }
                 return response
+            response.status_code = 200
+            response.json = lambda: {
+                "result": {
+                    'identifier': nemhandel_identifier,
+                    'smp_base_url': "https://smp-demo.nemhandel.dk",
+                    'ttl': 60,
+                    'service_group_url': f'http:///smp-demo.nemhandel.dk/iso6523-actorid-upis%3A%3A{url_quoted_nemhandel_identifier}',
+                    'services': [
+                        {
+                            "href": f"https://smp-demo.nemhandel.dk/iso6523-actorid-upis%3A%3A{url_quoted_nemhandel_identifier}/services/busdox-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23OIOUBL-2.1%3A%3A2.1",
+                            "document_id": "busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##OIOUBL-2.1::2.1",
+                        },
+                    ],
+                },
+            }
+            return response
 
         url = r.path_url.lower()
         body = json.loads(r.body)
@@ -207,6 +211,9 @@ class TestNemhandelMessage(TestAccountMoveSendCommon):
             if not body['params']['documents']:
                 raise UserError('No documents were provided')
             proxy_documents, responses = cls._get_mock_data(cls.env.context.get('error'), nr_invoices=len(body['params']['documents']))
+        elif url == '/api/nemhandel/1/send_response':
+            num_responses = len(body['params']['reference_uuids'])
+            proxy_documents, responses = cls._get_mock_data(cls.env.context.get('error'), nr_invoices=num_responses)
         else:
             proxy_documents, responses = cls._get_mock_data(cls.env.context.get('error'))
 
@@ -252,8 +259,7 @@ class TestNemhandelMessage(TestAccountMoveSendCommon):
             'move_id': move.id,
         })
         self.assertEqual(self.invalid_partner.nemhandel_verification_state, 'not_valid')  # not on nemhandel at all
-        self.assertFalse('nemhandel' in wizard.sending_methods)  # nemhandel is not checked by default
-        self.assertTrue(wizard.sending_method_checkboxes['nemhandel']['readonly'])  # can't select nemhandel
+        self.assertFalse('nemhandel' in wizard.sending_methods)  # nemhandel is not there at all
         self.assertFalse(wizard.alerts)  # there is no alerts
 
     def test_resend_error_nemhandel_message(self):
@@ -365,6 +371,24 @@ class TestNemhandelMessage(TestAccountMoveSendCommon):
 
         self.valid_partner.invoice_sending_method = 'email'
         self.valid_partner.invoice_edi_format = 'ubl_bis3'
+
+    def test_create_partner_with_nemhandel_info(self):
+        """Check that a new contact without a country can be saved with Nemhandel information filled in."""
+        with Form(self.env['res.partner']) as partner_form:
+            partner_form.invoice_sending_method = 'nemhandel'
+            partner_form.invoice_edi_format = 'oioubl_21'
+            partner_form.name = 'New Nemhandel partner'
+        self.assertRecordValues(partner_form.record, [{
+            'invoice_sending_method': 'nemhandel',
+            'invoice_edi_format': 'oioubl_21',
+        }])
+
+        with self.assertRaisesRegex(ValidationError, 'only OIOUBL 2.1 is supported'):
+            self.env['res.partner'].create({
+                'name': 'New Nemhandel partner',
+                'invoice_sending_method': 'nemhandel',
+                'invoice_edi_format': 'ubl_bis3',
+            })
 
     def test_nemhandelsilent_error_while_creating_xml(self):
         """When in multi/async mode, the generation of XML can fail silently (without raising).

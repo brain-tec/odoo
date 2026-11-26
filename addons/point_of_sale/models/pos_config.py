@@ -188,7 +188,7 @@ class PosConfig(models.Model):
     has_active_session = fields.Boolean(compute='_compute_current_session')
     manual_discount = fields.Boolean(string="Line Discounts", default=True)
     ship_later = fields.Boolean(string="Ship Later")
-    warehouse_id = fields.Many2one('stock.warehouse', default=_default_warehouse_id, ondelete='restrict')
+    warehouse_id = fields.Many2one('stock.warehouse', compute='_compute_warehouse_id', store=True, readonly=False, precompute=True, ondelete='restrict')
     route_id = fields.Many2one('stock.route', string="Spefic route for products delivered later.")
     picking_policy = fields.Selection([
         ('direct', 'As soon as possible'),
@@ -217,7 +217,7 @@ class PosConfig(models.Model):
 
         for model, ids in records.items():
             fields = self.env[model]._load_pos_data_fields(self.id)
-            static_records[model] = self.env[model].browse(ids).read(fields, load=False)
+            static_records[model] = self.env[model].with_context(display_default_code=False).browse(ids).read(fields, load=False)
 
         self._notify('SYNCHRONISATION', {
             'static_records': static_records,
@@ -287,6 +287,14 @@ class PosConfig(models.Model):
             'data': data,
             'fields': fields,
         }
+
+    @api.depends('picking_type_id')
+    def _compute_warehouse_id(self):
+        for config in self:
+            if config.picking_type_id.warehouse_id:
+                config.warehouse_id = config.picking_type_id.warehouse_id
+            else:
+                config.warehouse_id = config._default_warehouse_id()
 
     @api.depends('payment_method_ids')
     def _compute_cash_control(self):
@@ -480,8 +488,8 @@ class PosConfig(models.Model):
             val.update(name=_('POS order line %s', vals['name']), code='pos.order.line')
             vals['sequence_line_id'] = IrSequence.create(val).id
         pos_configs = super().create(vals_list)
-        pos_configs.sudo()._check_modules_to_install()
-        pos_configs.sudo()._check_groups_implied()
+        pos_configs._check_modules_to_install()
+        pos_configs._check_groups_implied()
         pos_configs._update_preparation_printers_menuitem_visibility()
         # If you plan to add something after this, use a new environment. The one above is no longer valid after the modules install.
         return pos_configs
@@ -557,9 +565,9 @@ class PosConfig(models.Model):
 
         result = super(PosConfig, self).write(vals)
 
-        self.sudo()._set_fiscal_position()
-        self.sudo()._check_modules_to_install()
-        self.sudo()._check_groups_implied()
+        self._set_fiscal_position()
+        self._check_modules_to_install()
+        self._check_groups_implied()
         if 'is_order_printer' in vals:
             self._update_preparation_printers_menuitem_visibility()
         return result
@@ -629,13 +637,19 @@ class PosConfig(models.Model):
         sequences_to_delete.unlink()
         return res
 
+    def _check_pos_manager_access(self):
+        if not (self.env.is_admin() or self.env.user.has_group('point_of_sale.group_pos_manager')):
+            raise AccessError(_("Only Point of Sale managers can modify a Point of Sale configuration."))
+
     # TODO-JCB: Maybe we can move this logic in `_reset_default_on_vals`
     def _set_fiscal_position(self):
         for config in self:
             if config.tax_regime_selection and config.default_fiscal_position_id and (config.default_fiscal_position_id.id not in config.fiscal_position_ids.ids):
-                config.fiscal_position_ids = [(4, config.default_fiscal_position_id.id)]
+                self._check_pos_manager_access()
+                config.sudo().fiscal_position_ids = [(4, config.default_fiscal_position_id.id)]
             elif not config.tax_regime_selection and config.fiscal_position_ids.ids:
-                config.fiscal_position_ids = [(5, 0, 0)]
+                self._check_pos_manager_access()
+                config.sudo().fiscal_position_ids = [(5, 0, 0)]
 
     def _check_modules_to_install(self):
         # determine modules to install
@@ -650,6 +664,7 @@ class PosConfig(models.Model):
             modules = self.env['ir.module.module'].sudo().search([('name', 'in', expected)])
             modules = modules.filtered(lambda module: module.state not in STATES)
             if modules:
+                self._check_pos_manager_access()
                 modules.button_immediate_install()
                 # just in case we want to do something if we install a module. (like a refresh ...)
                 return True
@@ -662,7 +677,11 @@ class PosConfig(models.Model):
                 if field.type in ('boolean', 'selection') and hasattr(field, 'implied_group'):
                     field_group_xmlids = getattr(field, 'group', 'base.group_user').split(',')
                     field_groups = self.env['res.groups'].concat(*(self.env.ref(it) for it in field_group_xmlids))
-                    field_groups.write({'implied_ids': [(4, self.env.ref(field.implied_group).id)]})
+                    implied_group = self.env.ref(field.implied_group)
+                    field_groups = field_groups.filtered(lambda group: implied_group not in group.implied_ids)
+                    if field_groups:
+                        self._check_pos_manager_access()
+                        field_groups.sudo().write({'implied_ids': [(4, implied_group.id)]})
 
 
     def execute(self):
@@ -1138,7 +1157,7 @@ class PosConfig(models.Model):
         return {
             "has_pos_config": has_pos_config,
             "has_chart_template": has_chart_template,
-            "is_restaurant_installed": bool(self.env['ir.module.module'].search_count([('name', '=', 'pos_restaurant'), ('state', '=', 'installed')])),
+            "is_restaurant_installed": bool(self.env['ir.module.module'].sudo().search_count([('name', '=', 'pos_restaurant'), ('state', '=', 'installed')])),
             "is_main_company": main_company and self.env.company.id == main_company.id or False
         }
 

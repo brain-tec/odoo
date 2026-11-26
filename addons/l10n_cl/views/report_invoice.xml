@@ -146,7 +146,11 @@
             <div name="no_shipping"/>
         </xpath>
 
-        <xpath expr="//t[@t-set='layout_document_title']" position="replace"/>
+        <!-- remove default document title. Header element necessary for wkhtmltopdf to split-->
+        <!-- PDFs generated in batch. Unnecessary once papermuncher is fully integrated.-->
+        <xpath expr="//t[@t-set='layout_document_title']" position="replace">
+            <h3 style="line-height: 0px; margin: 0; padding: 0; color: transparent;" t-out="o.name"/>
+        </xpath>
 
         <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" position="before">
             <t t-set="line_amounts" t-value="line._l10n_cl_get_line_amounts()"/>
@@ -169,7 +173,7 @@
         </xpath>
 
         <td name="td_discount" t-if="display_discount" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}" position="after">
-            <td name="td_discount_currency" t-if="display_discount" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}" position="after">
+            <td name="td_discount_currency" t-if="display_discount" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
                 <span class="text-nowrap" t-out="line_amounts['total_discount']" t-options="{'widget': 'monetary', 'display_currency': line_amounts['main_currency']}"/>
             </td>
         </td>

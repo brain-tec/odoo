@@ -12,19 +12,19 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-22 18:36+0000\n"
-"PO-Revision-Date: 2026-02-07 10:31+0000\n"
-"Last-Translator: \"Anastasiia Koroleva (koan)\" <koan@odoo.com>\n"
+"POT-Creation-Date: 2026-11-13 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 09:29+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Russian <https://translate.odoo.com/projects/odoo-18/"
 "account_edi_ubl_cii_tax_extension/ru/>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural="
-"(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 "
-": n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
-"X-Generator: Weblate 5.14.3\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
+"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: account_edi_ubl_cii_tax_extension
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_category_code__ae
@@ -110,6 +110,16 @@ msgid ""
 "charged, used for electronic invoicing purposes."
 msgstr ""
 "Причина освобождения от НДС или его неначисления для электронных счетов."
+
+#. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields,field_description:account_edi_ubl_cii_tax_extension.field_account_tax__ubl_cii_available_tax_category_codes
+msgid "Ubl Cii Available Tax Category Codes"
+msgstr ""
+
+#. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields,field_description:account_edi_ubl_cii_tax_extension.field_account_tax__ubl_cii_available_tax_exemption_reason_codes
+msgid "Ubl Cii Available Tax Exemption Reason Codes"
+msgstr ""
 
 #. module: account_edi_ubl_cii_tax_extension
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132
@@ -271,6 +281,15 @@ msgid ""
 msgstr ""
 "VATEX-EU-132-1Q - Освобождено на основании статьи 132, раздела 1 (q) "
 "Директивы Совета 2006/112/EC"
+
+#. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-135-1
+msgid ""
+"VATEX-EU-135-1 - Exempt based on article 135, section 1 of Council Directive "
+"2006/112/EC"
+msgstr ""
+"VATEX-EU-135-1 - Exempt based on article 135, section 1 of Council Directive "
+"2006/112/EC"
 
 #. module: account_edi_ubl_cii_tax_extension
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-143
@@ -782,10 +801,12 @@ msgstr ""
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-fr-cgi261d-3
 msgid ""
 "VATEX-FR-CGI261D-3 - Exempt based on 3° of article 261 D of the Code Général "
-"des Impôts (CGI ; General tax code)"
+"des Impôts (CGI ; General tax code) Exonération de TVA - Article 261 D-3° du "
+"Code Général des Impôts"
 msgstr ""
-"VATEX-FR-CGI261D-3 – Освобождено в соответствии с подпунктом 3° статьи 261 D "
-"Общего кодекса налогов Франции (CGI)"
+"VATEX-FR-CGI261D-3 - Exempt based on 3° of article 261 D of the Code Général "
+"des Impôts (CGI ; General tax code) Exonération de TVA - Article 261 D-3° du "
+"Code Général des Impôts"
 
 #. module: account_edi_ubl_cii_tax_extension
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-fr-cgi261d-4
@@ -851,6 +872,11 @@ msgstr ""
 "поставщика учитывать НДС на скидку"
 
 #. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-fr-f
+msgid "VATEX-FR-F - Second-hand sales"
+msgstr ""
+
+#. module: account_edi_ubl_cii_tax_extension
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex_fr-franchise
 msgid "VATEX-FR-FRANCHISE - France domestic VAT franchise in base"
 msgstr ""
@@ -858,6 +884,32 @@ msgstr ""
 "франшизы"
 
 #. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-fr-i
+msgid "VATEX-FR-I - Sales of works of art"
+msgstr ""
+
+#. module: account_edi_ubl_cii_tax_extension
+#: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-fr-j
+msgid "VATEX-FR-J - Sales of antiques"
+msgstr ""
+
+#. module: account_edi_ubl_cii_tax_extension
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii_tax_extension.selection__account_tax__ubl_cii_tax_category_code__z
 msgid "Z - Zero rated goods"
 msgstr "Z - Товары с нулевой ставкой НДС"
+
+#~ msgid ""
+#~ "Invalid Tax Setup for Co-Contractor fiscal position. Please apply the "
+#~ "standard co-contractor tax, or ensure your custom tax uses Reason Code "
+#~ "'AE' and Exemption Reason Code 'VATEX-EU-AE' "
+#~ msgstr ""
+#~ "Invalid Tax Setup for Co-Contractor fiscal position. Please apply the "
+#~ "standard co-contractor tax, or ensure your custom tax uses Reason Code "
+#~ "'AE' and Exemption Reason Code 'VATEX-EU-AE' "
+
+#~ msgid ""
+#~ "VATEX-FR-CGI261D-3 - Exempt based on 3° of article 261 D of the Code "
+#~ "Général des Impôts (CGI ; General tax code)"
+#~ msgstr ""
+#~ "VATEX-FR-CGI261D-3 – Освобождено в соответствии с подпунктом 3° статьи "
+#~ "261 D Общего кодекса налогов Франции (CGI)"

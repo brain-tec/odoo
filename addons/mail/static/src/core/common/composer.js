@@ -62,6 +62,7 @@ export class Composer extends Component {
         NavigableList,
     };
     static defaultProps = {
+        autofocus: 0,
         mode: "normal",
         className: "",
         sidebar: true,
@@ -369,6 +370,7 @@ export class Composer extends Component {
         const props = {
             anchorRef: this.inputContainerRef.el,
             position: this.env.inChatter ? "bottom-fit" : "top-fit",
+            onClose: () => this.suggestion.dismiss(),
             onSelect: (ev, option) => {
                 this.suggestion.insert(option);
                 markEventHandled(ev, "composer.selectSuggestion");
@@ -590,6 +592,8 @@ export class Composer extends Component {
             default_res_ids: [this.thread.id],
             default_subtype_xmlid: this.props.type === "note" ? "mail.mt_note" : "mail.mt_comment",
             mail_post_autofollow: this.thread.hasWriteAccess,
+            body_contains_signature_only: !body || body.trim().length === 0,
+            is_thread_composer: true,
         };
         const action = {
             name: this.props.type === "note" ? _t("Log note") : _t("Compose Email"),
@@ -675,12 +679,15 @@ export class Composer extends Component {
                 return;
             }
             this.state.active = false;
-            await cb(this.props.composer.text);
+            try {
+                await cb(this.props.composer.text);
+            } finally {
+                this.state.active = true;
+            }
             if (this.props.onPostCallback) {
                 this.props.onPostCallback();
             }
             this.clear();
-            this.state.active = true;
             el.focus();
         }
     }
@@ -764,9 +771,10 @@ export class Composer extends Component {
                 MessageConfirmDialog,
                 {
                     message: composer.message,
-                    onConfirm: this.message.remove({
-                        removeFromThread: this.shouldHideFromMessageListOnDelete,
-                    }),
+                    onConfirm: () =>
+                        this.message.remove({
+                            removeFromThread: this.shouldHideFromMessageListOnDelete,
+                        }),
                     prompt: _t("Are you sure you want to delete this message?"),
                 },
                 { context: this }
@@ -792,7 +800,8 @@ export class Composer extends Component {
         }
     }
 
-    onFocusin() {
+    onFocusin(ev) {
+        ev.stopPropagation();
         const composer = toRaw(this.props.composer);
         composer.isFocused = true;
         composer.thread?.markAsRead();

@@ -130,11 +130,11 @@ class StockWarehouseOrderpoint(models.Model):
         rules_cache = {}
         for orderpoint in orderpoints_to_compute:
             cache_key = (orderpoint.location_id, orderpoint.route_id, orderpoint.product_id.route_ids | orderpoint.product_id.categ_id.total_route_ids)
-            rule_ids = rules_cache.get(cache_key) or orderpoint.product_id._get_rules_from_location(
-                orderpoint.location_id, route_ids=orderpoint.route_id
-            )
-            orderpoint.rule_ids = rule_ids
-            rules_cache[cache_key] = rule_ids
+            if cache_key not in rules_cache:
+                rules_cache[cache_key] = orderpoint.product_id._get_rules_from_location(
+                    orderpoint.location_id, route_ids=orderpoint.route_id
+                )
+            orderpoint.rule_ids = rules_cache[cache_key]
         (self - orderpoints_to_compute).rule_ids = False
 
     @api.depends('product_max_qty')
@@ -699,7 +699,7 @@ class StockWarehouseOrderpoint(models.Model):
                         ('res_model_id', '=', self.env.ref('product.model_product_template').id),
                         ('note', '=', error_msg)])
                     if not existing_activity:
-                        orderpoint.product_id.product_tmpl_id.sudo().activity_schedule(
+                        orderpoint.product_id.product_tmpl_id.with_user(SUPERUSER_ID).activity_schedule(
                             'mail.mail_activity_data_warning',
                             note=error_msg,
                             user_id=orderpoint.product_id.responsible_id.id or SUPERUSER_ID,

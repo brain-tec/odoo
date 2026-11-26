@@ -8,13 +8,13 @@
 # Raymond Yu <cl_yu@hotmail.com>, 2024
 # Chloe Wang, 2025
 # Wil Odoo, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-11-21 06:38+0000\n"
+"POT-Creation-Date: 2026-04-10 18:37+0000\n"
+"PO-Revision-Date: 2026-11-02 17:33+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
 "projects/odoo-18/survey/zh_Hans/>\n"
@@ -23,7 +23,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__question_count
@@ -34,36 +34,6 @@ msgstr "# 问题"
 #: model:ir.model.fields,field_description:survey.field_survey_question__random_questions_count
 msgid "# Questions Randomly Picked"
 msgstr "# 随机选择的问题"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_4
-msgid "$100"
-msgstr "100%"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_1
-msgid "$20"
-msgstr "$20"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_5
-msgid "$200"
-msgstr "$200"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_6
-msgid "$300"
-msgstr "$300"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_2
-msgid "$50"
-msgstr "$50"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_3
-msgid "$80"
-msgstr "$80"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_progression
@@ -106,11 +76,6 @@ msgid "'Certification - %s' % (object.survey_id.display_name)"
 msgstr "'证书 - %s' % (object.survey_id.display_name)"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
-msgid "0000000010"
-msgstr "0000000010"
-
-#. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p4_q2_sug2
 msgid "10 kg"
 msgstr "10公斤"
@@ -121,29 +86,14 @@ msgid "100 years"
 msgstr "100年"
 
 #. module: survey
-#: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q1_sug3
-msgid "1055"
-msgstr "1055"
-
-#. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q3_sug3
 msgid "116 years"
 msgstr "116年"
 
 #. module: survey
-#: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q1_sug1
-msgid "1227"
-msgstr "1227"
-
-#. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q3_sug4
 msgid "127 years"
 msgstr "127年"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q1_sug2
-msgid "1324"
-msgstr "1324"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p2_q1_sug1
@@ -154,11 +104,6 @@ msgstr "1450公里"
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p4_q2_sug3
 msgid "16.2 kg"
 msgstr "16.2公斤"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
-msgid "2023-08-18"
-msgstr "2023-08-18"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p2_q1_sug2
@@ -342,8 +287,8 @@ msgid ""
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        亲爱的<t t-out=\"object.partner_id.name or 'participant'\">用户</"
-"t><br/><br/>，\n"
+"        亲爱的<t t-out=\"object.partner_id.name or 'participant'\">用户</t>"
+"<br/><br/>，\n"
 "        <t t-if=\"object.survey_id.certification\">\n"
 "            您已受邀参加一项新认证。 \n"
 "        </t>\n"
@@ -445,8 +390,8 @@ msgid ""
 "<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
 "title=\"Arrow\"/>"
 msgstr ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"箭头图标\" title=\"箭头"
-"\"/>"
+"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"箭头图标\" title=\"箭"
+"头\"/>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
@@ -500,8 +445,8 @@ msgid ""
 "                        </span>"
 msgstr ""
 "<span class=\"fw-bold text-muted ms-2 d-none d-md-inline\">\n"
-"                            <span id=\"enter-tooltip\">或者按下Enter键</"
-"span>\n"
+"                            <span id=\"enter-tooltip\">或者按下Enter键</span>"
+"\n"
 "                        </span>"
 
 #. module: survey
@@ -2090,7 +2035,7 @@ msgstr "食物偏好"
 #. odoo-python
 #: code:addons/survey/models/survey_question.py:0
 msgid "For this question, you can only select one answer."
-msgstr ""
+msgstr "对于此问题，您只能选择一个答案。"
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_user_input_line__answer_type__text_box
@@ -2338,8 +2283,8 @@ msgid ""
 "I actually don't like thinking. I think people think I like to think a lot. "
 "And I don't. I do not like to think at all."
 msgstr ""
-"其实我不喜欢思考。我认为人们认为我喜欢思考很多。而我不喜欢。我根本不喜欢思"
-"考。"
+"其实我不喜欢思考。我认为人们认为我喜欢思考很多。而我不喜欢。我根本不喜欢思考"
+"。"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p5_q3_sug2
@@ -2469,8 +2414,8 @@ msgid ""
 "If randomized is selected, you can configure the number of random questions "
 "by section. This mode is ignored in live session."
 msgstr ""
-"如果选择了随机化，您可以按章节配置随机问题的数量。这种模式在现场会议中被忽"
-"略。"
+"如果选择了随机化，您可以按章节配置随机问题的数量。这种模式在现场会议中被忽略"
+"。"
 
 #. module: survey
 #: model:survey.question,question_placeholder:survey.vendor_certification_page_1_question_5
@@ -3671,8 +3616,8 @@ msgid ""
 "Please make sure you have at least one question in your survey. You also "
 "need at least one section if you chose the \"Page per section\" layout.<br/>"
 msgstr ""
-"请确保您的调查中至少有一个问题。您还需要至少一个节如果您选择“页面每节”布局。"
-"<br/>"
+"请确保您的调查中至少有一个问题。您还需要至少一个节如果您选择“页面每节”布局"
+"。<br/>"
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_3
@@ -5034,8 +4979,7 @@ msgstr "加入："
 msgid ""
 "To take this survey, please close all other tabs on <strong class=\"text-"
 "danger\"/>."
-msgstr ""
-"要参加此调查，请关闭浏览器所有其他的选项卡 <strong class=“text-danger”/>."
+msgstr "要参加此调查，请关闭浏览器所有其他的选项卡 <strong class=“text-danger”/>."
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_search
@@ -5582,8 +5526,7 @@ msgstr "您只能为具有评分机制的调查创建证书。"
 msgid ""
 "You can share your links through different means: email, invite shortcut, "
 "live presentation, ..."
-msgstr ""
-"您可以通过不同的方式共享您的链接：电子邮件，邀请快捷方式，实时演示，..."
+msgstr "您可以通过不同的方式共享您的链接：电子邮件，邀请快捷方式，实时演示，..."
 
 #. module: survey
 #. odoo-python
@@ -5693,8 +5636,7 @@ msgstr "关闭"
 #: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
 msgid ""
 "e.g.  'Rick Sanchez' <rick_sanchez@example.com>, hictor_vugo@example.com"
-msgstr ""
-"例如：'Rick Sanchez' <rick_sanchez@example.com>, hictor_vugo@example.com"
+msgstr "例如：'Rick Sanchez' <rick_sanchez@example.com>, hictor_vugo@example.com"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
@@ -5810,3 +5752,36 @@ msgid ""
 "⚠️ This question is positioned before some or all of its triggers and could "
 "be skipped."
 msgstr "⚠️ 该问题位于某些或所有触发器之前，可以跳过。"
+
+#~ msgid "$100"
+#~ msgstr "100%"
+
+#~ msgid "$20"
+#~ msgstr "$20"
+
+#~ msgid "$200"
+#~ msgstr "$200"
+
+#~ msgid "$300"
+#~ msgstr "$300"
+
+#~ msgid "$50"
+#~ msgstr "$50"
+
+#~ msgid "$80"
+#~ msgstr "$80"
+
+#~ msgid "0000000010"
+#~ msgstr "0000000010"
+
+#~ msgid "1055"
+#~ msgstr "1055"
+
+#~ msgid "1227"
+#~ msgstr "1227"
+
+#~ msgid "1324"
+#~ msgstr "1324"
+
+#~ msgid "2023-08-18"
+#~ msgstr "2023-08-18"

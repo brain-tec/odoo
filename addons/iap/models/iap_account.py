@@ -50,12 +50,8 @@ class IapAccount(models.Model):
                 ))
 
     def web_read(self, *args, **kwargs):
-        if not self.env.context.get('disable_iap_fetch'):
-            self._get_account_information_from_iap()
+        self._get_account_information_from_iap()
         return super().web_read(*args, **kwargs)
-
-    def web_save(self, *args, **kwargs):
-        return super(IapAccount, self.with_context(disable_iap_fetch=True)).web_save(*args, **kwargs)
 
     def write(self, values):
         res = super().write(values)
@@ -103,6 +99,11 @@ class IapAccount(models.Model):
             accounts_information = iap_tools.iap_jsonrpc(url=url, params=params)
         except AccessError as e:
             _logger.warning("Fetch of the IAP accounts information has failed: %s", str(e))
+            self.env.user._bus_send("simple_notification", {
+                'type': 'danger',
+                'message': _("The IAP server is unreachable and the information may not be up to date. Please try again later."),
+                'sticky': True,
+            })
             return
 
         for token, information in accounts_information.items():
@@ -127,16 +128,17 @@ class IapAccount(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        accounts = super().create(vals_list)
-        for account in accounts:
-            if not account.name:
-                account.name = account.service_id.name
-
-        if self.env['ir.config_parameter'].sudo().get_param('database.is_neutralized'):
-            # Disable new accounts on a neutralized database
-            for account in accounts:
-                account.account_token = f"{account.account_token.split('+')[0]}+disabled"
-        return accounts
+        # Complete the values before the creation: internal users may create
+        # accounts (e.g. on their first IAP request) but not write on them
+        is_neutralized = self.env['ir.config_parameter'].sudo().get_param('database.is_neutralized')
+        for vals in vals_list:
+            if not vals.get('name') and vals.get('service_id'):
+                vals['name'] = self.env['iap.service'].browse(vals['service_id']).name
+            if is_neutralized:
+                # Disable new accounts on a neutralized database
+                account_token = vals.get('account_token') or uuid.uuid4().hex
+                vals['account_token'] = f"{account_token.split('+')[0]}+disabled"
+        return super().create(vals_list)
 
     @api.model
     def get(self, service_name, force_create=True):

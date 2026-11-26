@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo import Command
 from odoo.tests import tagged
 
 from .common import TestCommonSaleTimesheet
@@ -236,3 +237,145 @@ class TestSoLineDeterminedInTimesheet(TestCommonSaleTimesheet):
 
         # 6) Check if the task and timesheet has no SOL.
         self.assertFalse(timesheet.so_line, 'No SOL should be linked to the timesheet because the project is non billable')
+
+    def test_update_sol_when_modifying_employee_mapping(self):
+        """
+        Test the update of Sale Order Line (SOL) when modifying the employee/SOL mapping.
+
+        Test Steps:
+        ===========
+        1. Create a billable project with a partner and a Sale Order Line (SOL).
+        2. Create a task and make it non-billable by removing the SOL.
+        3. Add timesheets for employee A on the task.
+        4. Open the project form view → Invoicing tab → Add employee B to the employee/SOL mapping.
+        5. Verify if the timesheets for employee A are billable based on the updated mapping.
+        """
+
+        project = self.project_task_rate.copy({
+            'name': 'Project with Employee Rate Pricing',
+            'sale_line_id': self.so.order_line[1].id,
+        })
+
+        task = self.env['project.task'].create({
+            'name': 'Sample Task',
+            'project_id': project.id,
+            'sale_line_id': False,
+        })
+
+        timesheet = self.env['account.analytic.line'].create({
+            'name': 'Sample Timesheet Entry',
+            'unit_amount': 1,
+            'employee_id': self.employee_manager.id,
+            'project_id': project.id,
+            'task_id': task.id,
+        })
+
+        # Add the SOL mapping for Employee User
+        project.write({
+            'sale_line_employee_ids': [Command.create({
+                'employee_id': self.employee_user.id,
+                'sale_line_id': self.so.order_line[0].id,
+            })],
+        })
+
+        # Ensure the sale order line is correctly set before updating mapping
+        self.assertFalse(task.sale_line_id, "Task should not associated with SOL.")
+        self.assertFalse(timesheet.so_line, "Timesheet should not associated with SO line.")
+
+        # Update mapping for Employee Manager
+        project.write({
+            'sale_line_employee_ids': [Command.create({
+                'employee_id': self.employee_manager.id,
+                'sale_line_id': self.so.order_line[0].id,
+            })],
+        })
+
+        self.assertFalse(timesheet.so_line, "Timesheet should be linked to the correct Sale Order Line after mapping update.")
+        self.assertFalse(task.sale_line_id, "Task should still not have a SOL set.")
+
+    def test_sol_determined_with_multi_company_and_billing_rate(self):
+        """ Test the sol give to the timesheet when the pricing type in the project is employee rate
+
+            Test Case:
+            =========
+            1) Create an employee related to the user for each company,
+            2) Define a SO, with 3 SOL creating tasks in a new billable project,
+            3) Check that the default SOL linked to a newly created timesheet is the first one in the list aswell as the default for the project,
+            4) Create SOL mapping between the other SOL and each employee,
+            5) Check that depending on which company is activated, new timesheets linked to the project assign the correct SOL to the user.
+        """
+        # 1) Create an employee related to the user for each company
+
+        comp1 = self.company_data.get('company')
+        comp2 = self.company_data_2.get('company')
+
+        self.env.user.with_company(comp1).action_create_employee()
+        e1 = self.env.user.with_company(comp1).employee_id
+        self.env.user.with_company(comp2).action_create_employee()
+        e2 = self.env.user.with_company(comp2).employee_id
+
+        # 2) Define a SO, with 3 SOL creating tasks in a new billable project
+
+        so = self.env['sale.order'].create({
+            'partner_id': self.partner_b.id,
+            'partner_invoice_id': self.partner_b.id,
+            'partner_shipping_id': self.partner_b.id,
+        })
+
+        so_lines = self.env['sale.order.line'].create([{
+            'order_id': so.id,
+            'product_id': self.product_delivery_timesheet3.id,
+            'product_uom_qty': 1,
+        }, {
+            'order_id': so.id,
+            'product_id': self.product_delivery_timesheet3.id,
+            'product_uom_qty': 1,
+        }, {
+            'order_id': so.id,
+            'product_id': self.product_delivery_timesheet3.id,
+            'product_uom_qty': 1,
+        }])
+
+        so.action_confirm()
+
+        # 3) Check that the default SOL linked to a newly created timesheet is the first one in the list aswell as the default for the project
+
+        timesheet = self.env['account.analytic.line'].create({
+            'name': 'Test Line',
+            'unit_amount': 1,
+            'auto_account_id': self.analytic_account_sale.id,
+            'project_id': so_lines[0].project_id.id,
+        })
+        self.assertTrue(timesheet.so_line == timesheet.project_id.sale_line_id == so_lines[0])
+
+        # 4) Create SOL mapping between the other SOL and each employee
+
+        mapping = self.env['project.sale.line.employee.map'].create([{
+            'project_id': so_lines[0].project_id.id,
+            'employee_id': e1.id,
+            'sale_line_id': so_lines[2].id
+
+        }, {
+            'project_id': so_lines[0].project_id.id,
+            'employee_id': e2.id,
+            'sale_line_id': so_lines[1].id
+        }])
+        so_lines[0].project_id.sale_line_employee_ids = mapping
+
+        # 5) Check that depending on which company is activated, new timesheets linked to the project assign the correct SOL to the user.
+
+        timesheet = self.env['account.analytic.line'].create({
+            'name': 'Test Line',
+            'unit_amount': 1,
+            'auto_account_id': self.analytic_account_sale.id,
+            'project_id': so_lines[0].project_id.id,
+        })
+        self.assertEqual(timesheet.so_line.id, so_lines[2].id)
+
+        timesheet = self.env['account.analytic.line'].sudo().with_company(comp2).create({
+            'name': 'Test Line',
+            'unit_amount': 1,
+            'auto_account_id': self.analytic_account_sale.id,
+            'project_id': so_lines[0].project_id.id,
+        })
+        self.assertEqual(timesheet.so_line.id, so_lines[1].id)

@@ -33,13 +33,9 @@ export class DiscussChannel extends models.ServerModel {
         string: "Members",
         default: () => [Command.create({ partner_id: serverState.partnerId })],
     });
-    channel_type = fields.Generic({ default: "channel" });
-    group_public_id = fields.Generic({
-        default: () => serverState.groupId,
-    });
-    uuid = fields.Generic({
-        default: () => uniqueId("discuss.channel_uuid-"),
-    });
+    channel_type = fields.Selection({ default: "channel" });
+    group_public_id = fields.Many2one({ default: () => serverState.groupId });
+    uuid = fields.Char({ default: () => uniqueId("discuss.channel_uuid-") });
     last_interest_dt = fields.Datetime({ string: "Last Interest" });
 
     /** @param {number[]} ids */
@@ -592,6 +588,18 @@ export class DiscussChannel extends models.ServerModel {
         );
         const store = new mailDataHelpers.Store(subChannels);
         BusBus._sendone(partner, "mail.record/insert", store.get_result());
+        if (message) {
+            BusBus._sendone(
+                self,
+                "mail.record/insert",
+                new mailDataHelpers.Store(MailMessage.browse(message.id), {
+                    linkedSubChannel: mailDataHelpers.Store.one(
+                        subChannels,
+                        makeKwArgs({ as_thread: true, only_id: true })
+                    ),
+                }).get_result()
+            );
+        }
         this.message_post(
             self.id,
             makeKwArgs({

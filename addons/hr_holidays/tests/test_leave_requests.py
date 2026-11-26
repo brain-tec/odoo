@@ -1251,8 +1251,8 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'request_date_to': '2024-01-27',
         })
         holiday_status = self.holidays_type_4.with_user(self.user_employee_id)
-        self._check_holidays_status(holiday_status, employee, 20.0, 0.0, 20.0, 15.0)
-        self.assertEqual(leave.duration_display, '5 days')
+        self._check_holidays_status(holiday_status, employee, 20.0, 0.0, 20.0, 16.0)
+        self.assertEqual(leave.duration_display, '4 days')
 
     def test_default_request_date_timezone(self):
         """
@@ -1524,6 +1524,35 @@ class TestLeaveRequests(TestHrHolidaysCommon):
                 f"{data['name']} should have {expected_days} days duration"
             )
 
+    def test_flexible_single_day_leave_on_public_holiday_include_in_duration(self):
+        """
+        Test that a single-day flexible leave on a public holiday counts
+        as 1 day when include_public_holidays_in_duration is True on the leave type.
+        """
+        calendar = self.env['resource.calendar'].create({
+            'name': 'Flexible calendar',
+            'hours_per_day': 8,
+            'full_time_required_hours': 40,
+            'flexible_hours': True,
+        })
+        self.employee_emp.resource_calendar_id = calendar
+        self.env['resource.calendar.leaves'].create({
+            'date_from': datetime(2022, 3, 9, 0, 0, 0),
+            'date_to': datetime(2022, 3, 9, 23, 59, 59),
+            'calendar_id': calendar.id,
+            'company_id': self.employee_emp.company_id.id,
+            'resource_id': False,
+        })
+        self.holidays_type_1.include_public_holidays_in_duration = True
+        leave = self.env['hr.leave'].with_user(self.user_employee_id).create({
+            'name': 'Holiday Request',
+            'employee_id': self.employee_emp.id,
+            'holiday_status_id': self.holidays_type_1.id,
+            'request_date_from': date(2022, 3, 9),
+            'request_date_to': date(2022, 3, 9),
+        })
+        self.assertEqual(leave.number_of_days, 1)
+
     def test_coextensive_holidays_one_include_public_leave(self):
         """
             The purpose is to test whether two holidays that span the same time frame,
@@ -1698,3 +1727,75 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         })
 
         self.assertEqual(leave.number_of_hours, 13.0)
+
+    def test_flexible_schedule_hourly_leave_days(self):
+        """Check that an hourly time off of a flexible employee counts its days on the average hours per day."""
+        calendar = self.env['resource.calendar'].create({
+            'name': 'Flexible 40h/week',
+            'tz': 'UTC',
+            'hours_per_day': 8.0,
+            'full_time_required_hours': 40.0,
+            'flexible_hours': True,
+        })
+        self.employee_emp.resource_calendar_id = calendar
+        self.holidays_type_1.request_unit = 'hour'
+
+        leave = self.env['hr.leave'].create({
+            'name': 'Hourly Leave',
+            'employee_id': self.employee_emp.id,
+            'holiday_status_id': self.holidays_type_1.id,
+            'request_date_from': '2025-08-29',
+            'request_date_to': '2025-08-29',
+            'request_unit_hours': True,
+            'request_hour_from': 8,
+            'request_hour_to': 12,
+        })
+
+        self.assertEqual(leave.number_of_hours, 4.0)
+        self.assertEqual(leave.number_of_days, 0.5)
+
+    def test_leave_request_both_notified_users(self):
+        """ Test the Fallback to Responsible Users are notified when a leave request is made
+        with ("both","By Employee's Approver and Time Off Officer") set for leave_validation_type,
+          even if the employee has no manager or time off officer. """
+        user_admin = self.env.ref('base.user_admin')
+        self.employee_emp.write({"parent_id": False, "leave_manager_id": False})
+        leave_type = self.env['hr.leave.type'].with_user(self.user_hrmanager_id).with_context(tracking_disable=True)
+        holidays_type_5 = leave_type.create({
+            'name': 'Limited with 2 approvals and Responsible IDS',
+            'requires_allocation': 'no',
+            'employee_requests': 'yes',
+            'leave_validation_type': 'both',
+            "responsible_ids": [user_admin.id],
+        })
+
+        request = self.env['hr.leave'].with_user(self.employee_emp.user_id).create({
+            'name': '2 Approvers with no manager or time off Leave Request',
+            'employee_id': self.employee_emp.id,
+            'holiday_status_id': holidays_type_5.id,
+            'request_date_from': '2024-07-01',
+            'request_date_to': '2024-07-02',
+        })
+        message_partner_ids = request.message_partner_ids
+        self.assertEqual(len(request.message_partner_ids), 2)
+        self.assertIn(self.employee_emp.user_id.partner_id, message_partner_ids)
+        self.assertIn(user_admin.partner_id, message_partner_ids)
+
+    @freeze_time('2026-04-01')
+    def test_timeoff_duration_employee_without_calendar(self):
+        """ Test time off duration for employees without resource_calendar_id. """
+        employee_no_calendar = self.env['hr.employee'].create({
+            'name': 'Employee Without Calendar',
+        })
+        employee_no_calendar.resource_calendar_id = False
+        leave = self.env['hr.leave'].create({
+            'name': 'Time Off Request',
+            'employee_id': employee_no_calendar.id,
+            'holiday_status_id': self.holidays_type_1.id,
+            'request_date_from': date(2026, 4, 6),
+            'request_date_to': date(2026, 4, 10),
+        })
+
+        self.assertEqual(leave.number_of_days, 5)
+        # This field should be False because the calculated days match the requested days
+        self.assertFalse(leave.leave_type_increases_duration)

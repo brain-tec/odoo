@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.fields import Date
+from datetime import datetime
+from freezegun import freeze_time
+from pytz import timezone
+
 from odoo.tests import tagged, TransactionCase
 
 @tagged('recruitment')
@@ -214,7 +217,9 @@ class TestRecruitment(TransactionCase):
         })
         self.assertEqual(candidate.partner_id.name, 'Test Name')
 
+    @freeze_time('2026-01-01 12:30:00')
     def test_job_overdue_activities(self):
+        self.env.user.tz = 'Europe/Brussels'
         job = self.env["hr.job"].create({
             "name": "Test Job",
         })
@@ -239,7 +244,7 @@ class TestRecruitment(TransactionCase):
         })
         activity = self.env["mail.activity"].create({
             "activity_type_id": persistent_activity_type.id,
-            "date_deadline": Date.today(),
+            "date_deadline": datetime.now(tz=timezone(self.env.user.tz)).date(),
             "res_id": applicant.id,
             "res_model_id": self.env["ir.model"]._get_id("hr.applicant"),
             "user_id": self.env.user.id,
@@ -253,3 +258,67 @@ class TestRecruitment(TransactionCase):
 
         job._compute_activities()
         self.assertEqual(job.activities_today, 0)
+
+    def test_create_employee_from_applicant_other_company(self):
+        """
+        The employee created from an applicant must be in the company of the
+        application, with its working hours, and not in the current company of the user
+        """
+        company_b = self.env['res.company'].create({'name': 'Company B'})
+        self.env.user.company_ids |= company_b
+        job = self.env['hr.job'].create({'name': 'Job B', 'company_id': company_b.id})
+        candidate = self.env['hr.candidate'].create({'partner_name': 'Test Candidate', 'company_id': company_b.id})
+        applicant = self.env['hr.applicant'].create({'candidate_id': candidate.id, 'job_id': job.id})
+
+        employee = self.env['hr.employee'].browse(applicant.create_employee_from_applicant()['res_id'])
+
+        self.assertNotEqual(self.env.company.resource_calendar_id, company_b.resource_calendar_id)
+        self.assertEqual(employee.company_id, company_b)
+        self.assertEqual(employee.resource_calendar_id, company_b.resource_calendar_id)
+
+    def test_create_employee_from_applicant_candidate_without_company(self):
+        """
+        A candidate without company (e.g. created by the mail gateway for a job
+        without company) can still be hired, in the company of the application
+        """
+        company_b = self.env['res.company'].create({'name': 'Company B'})
+        department_b = self.env['hr.department'].create({'name': 'Department B', 'company_id': company_b.id})
+        job = self.env['hr.job'].create({'name': 'Job', 'company_id': False, 'department_id': department_b.id})
+        candidate = self.env['hr.candidate'].create({'partner_name': 'Test Candidate', 'company_id': False})
+        applicant = self.env['hr.applicant'].create({'candidate_id': candidate.id, 'job_id': job.id})
+        self.assertFalse(applicant.candidate_id.company_id)
+        self.assertEqual(applicant.company_id, company_b)
+
+        employee = self.env['hr.employee'].browse(applicant.create_employee_from_applicant()['res_id'])
+
+        self.assertEqual(employee.company_id, applicant.company_id)
+
+    def test_default_template_applicant_refuse_reason_when_archived(self):
+        """
+        Ensure that an archived email template linked to a refuse reason
+        is not automatically set on the refuse wizard
+        """
+        candidate = self.env['hr.candidate'].create({'partner_name': 'Test'})
+        email_template = self.env['mail.template'].create({
+            'model_id': self.env['ir.model']._get('hr.applicant').id,
+            'name': 'template1',
+        })
+        application = self.env['hr.applicant'].create({'candidate_id': candidate.id})
+        refuse_reason = self.env['hr.applicant.refuse.reason'].create({
+            'name': 'Fired',
+            'template_id': email_template.id,
+        })
+        wizard = self.env['applicant.get.refuse.reason'].create({
+            'refuse_reason_id': refuse_reason.id,
+            'applicant_ids': [application.id],
+        })
+
+        self.assertEqual(wizard.template_id, email_template)
+
+        email_template.active = False
+        wizard = self.env['applicant.get.refuse.reason'].create({
+            'refuse_reason_id': refuse_reason.id,
+            'applicant_ids': [application.id],
+        })
+
+        self.assertFalse(wizard.template_id)

@@ -1,25 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* lunch
+# * lunch
 #
 # Translators:
 # Wil Odoo, 2025
 # Tony Ng, 2025
 #
+# "Tony Ng (ngto)" <ngto@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Tony Ng, 2025\n"
-"Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/"
-"zh_TW/)\n"
+"POT-Creation-Date: 2026-03-20 18:37+0000\n"
+"PO-Revision-Date: 2026-11-09 07:42+0000\n"
+"Last-Translator: \"Tony Ng (ngto)\" <ngto@odoo.com>\n"
+"Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
+"projects/odoo-18/lunch/zh_Hant/>\n"
 "Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: lunch
 #: model_terms:lunch.product,description:lunch.product_temaki
@@ -80,8 +82,8 @@ msgid ""
 "<i class=\"fa fa-money\" role=\"img\" aria-label=\"Amount\" title=\"Amount\"/"
 ">"
 msgstr ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Amount\" title=\"Amount\"/"
-">"
+"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Amount\" "
+"title=\"Amount\"/>"
 
 #. module: lunch
 #: model_terms:ir.ui.view,arch_db:lunch.lunch_order_view_kanban
@@ -317,14 +319,14 @@ msgstr ""
 "                    <span style=\"font-size: 10px;\">午餐訂單</span><br/>\n"
 "                </td><td valign=\"middle\" align=\"right\" t-if=\"not "
 "user.company_id.uses_default_logo\">\n"
-"                    <img t-attf-src=\"/logo.png?"
-"company={{ user.company_id.id }}\" style=\"padding: 0px; margin: 0px; "
-"height: auto; width: 80px;\" t-att-alt=\"user.company_id.name\"/>\n"
+"                    <img t-attf-src=\"/logo.png?company={{ "
+"user.company_id.id }}\" style=\"padding: 0px; margin: 0px; height: auto; "
+"width: 80px;\" t-att-alt=\"user.company_id.name\"/>\n"
 "                </td></tr>\n"
 "                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
-"                  <hr width=\"100%\" style=\"background-"
-"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
-"size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
+"                  <hr width=\"100%\" style=\"background-color:rgb"
+"(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-"
+"height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
 "                </td></tr>\n"
 "            </table>\n"
 "        </td>\n"
@@ -340,11 +342,11 @@ msgstr ""
 "    <div>\n"
 "        <t t-set=\"lines\" t-value=\"ctx.get('lines', [])\"/>\n"
 "        <t t-set=\"order\" t-value=\"ctx.get('order')\"/>\n"
-"        <t t-set=\"currency\" t-"
-"value=\"user.env['res.currency'].browse(order.get('currency_id'))\"/>\n"
+"        <t t-set=\"currency\" t-value=\"user.env['res.currency'].browse"
+"(order.get('currency_id'))\"/>\n"
 "        <p>\n"
-"        <t t-out=\"order.get('supplier_name', '')\">Laurie Poiret</t> 你"
-"好！\n"
+"        <t t-out=\"order.get('supplier_name', '')\">Laurie Poiret</t> 你好"
+"！\n"
 "        </p><p>\n"
 "        以下是 <t t-out=\"order.get('company_name', '')\">LunchCompany</t> 今"
 "天的訂單：\n"
@@ -409,9 +411,8 @@ msgstr ""
 "                    <td style=\"width: 100%; font-size: 13px; border-top: "
 "1px solid black;\"><strong>總計</strong></td>\n"
 "                    <td style=\"width: 100%; font-size: 13px; border-top: "
-"1px solid black;\" align=\"right\"><strong t-"
-"out=\"format_amount(order['amount_total'], currency) or ''\">$ 10.00</"
-"strong></td>\n"
+"1px solid black;\" align=\"right\"><strong t-out=\"format_amount"
+"(order['amount_total'], currency) or ''\">$ 10.00</strong></td>\n"
 "                </tr>\n"
 "            </tbody>\n"
 "        </table>\n"
@@ -422,9 +423,9 @@ msgstr ""
 "                </tr>\n"
 "                <tr>\n"
 "                    <td style=\"text-align:center;\">\n"
-"                        <hr width=\"100%\" style=\"background-"
-"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
-"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                        <hr width=\"100%\" style=\"background-color:rgb"
+"(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-"
+"height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
 "                    </td>\n"
 "                </tr>\n"
 "            </table>\n"
@@ -441,14 +442,14 @@ msgstr ""
 "                </td></tr>\n"
 "                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: "
 "0.7;\">\n"
-"                    <t t-out=\"user.company_id.phone or ''\">+1 "
-"650-123-4567</t>\n"
+"                    <t t-out=\"user.company_id.phone or ''\">+1 650-123-"
+"4567</t>\n"
 "                    <t t-if=\"user.company_id.phone and "
 "(user.company_id.email or user.company_id.website)\">|</t>\n"
 "                    <t t-if=\"user.company_id.email\">\n"
-"                        <a t-attf-href=\"'mailto:%s' % "
-"{{ user.company_id.email }}\" style=\"text-decoration:none; color: "
-"#454748;\" t-out=\"user.company_id.email or ''\">info@yourcompany.com</a>\n"
+"                        <a t-attf-href=\"'mailto:%s' % {{ "
+"user.company_id.email }}\" style=\"text-decoration:none; color: #454748;\" t-"
+"out=\"user.company_id.email or ''\">info@yourcompany.com</a>\n"
 "                    </t>\n"
 "                    <t t-if=\"user.company_id.email and "
 "user.company_id.website\">|</t>\n"
@@ -942,7 +943,7 @@ msgstr "說明"
 #. module: lunch
 #: model_terms:ir.ui.view,arch_db:lunch.lunch_order_view_form
 msgid "Discard"
-msgstr "捨棄"
+msgstr "取消"
 
 #. module: lunch
 #: model:ir.model.fields,field_description:lunch.field_lunch_alert__mode
@@ -1088,7 +1089,7 @@ msgstr "關注人（業務夥伴）"
 #. module: lunch
 #: model:ir.model.fields,help:lunch.field_lunch_supplier__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr "Font awesome 圖示，例如，fa-task"
+msgstr "Font Awesome 圖示，例如 fa-tasks"
 
 #. module: lunch
 #: model:ir.model.fields,help:lunch.field_lunch_supplier__email_formatted
@@ -1436,32 +1437,32 @@ msgid "Lunch: Supplier Order"
 msgstr "午餐：供應商訂單"
 
 #. module: lunch
-#: model:ir.actions.server,name:lunch.lunch_alert_cron_sa_228
+#: model:ir.actions.server,name:lunch.lunch_alert_cron_sa_229
 msgid "Lunch: alert chat notification (Alert for Office 3)"
 msgstr "午餐：提醒聊天通知（提醒辦公室 3）。"
 
 #. module: lunch
-#: model:ir.actions.server,name:lunch.lunch_supplier_cron_sa_229
+#: model:ir.actions.server,name:lunch.lunch_supplier_cron_sa_230
 msgid "Lunch: send automatic email to Coin gourmand"
 msgstr "午餐：發送自動電子郵件給coin gourmand"
 
 #. module: lunch
-#: model:ir.actions.server,name:lunch.lunch_supplier_cron_sa_224
+#: model:ir.actions.server,name:lunch.lunch_supplier_cron_sa_225
 msgid "Lunch: send automatic email to Lunch Supplier"
 msgstr "午餐：發送自動電子郵件給午餐供應商"
 
 #. module: lunch
-#: model:ir.actions.server,name:lunch.lunch_supplier_cron_sa_230
+#: model:ir.actions.server,name:lunch.lunch_supplier_cron_sa_231
 msgid "Lunch: send automatic email to Pizza Inn"
 msgstr "午餐：發送自動電子郵件給Pizza Inn"
 
 #. module: lunch
-#: model:ir.actions.server,name:lunch.lunch_supplier_cron_sa_232
+#: model:ir.actions.server,name:lunch.lunch_supplier_cron_sa_233
 msgid "Lunch: send automatic email to Sushi Shop"
 msgstr "午餐：發送自動電子郵件給壽司店"
 
 #. module: lunch
-#: model:ir.actions.server,name:lunch.lunch_supplier_cron_sa_231
+#: model:ir.actions.server,name:lunch.lunch_supplier_cron_sa_232
 msgid "Lunch: send automatic email to The Corner"
 msgstr "午餐：發送自動電子郵件給The Corner"
 
@@ -1796,8 +1797,7 @@ msgstr "付款"
 msgid ""
 "Payments are used to register liquidity movements. You can process those "
 "payments by your own means or by using installed facilities."
-msgstr ""
-"支付用於登記流動性. 您可以通過自己的方式或使用安裝的設備來處理這些付款."
+msgstr "支付用於登記流動性. 您可以通過自己的方式或使用安裝的設備來處理這些付款."
 
 #. module: lunch
 #: model:ir.model.fields,field_description:lunch.field_lunch_supplier__phone
@@ -2088,10 +2088,10 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
-"根據活動的狀態 \n"
-" 逾期：已經超過截止日期 \n"
-" 現今：活動日期是當天 \n"
-" 計劃：未來活動。"
+"根據活動設定的狀態：\n"
+"逾期：截止日期已過。\n"
+"今天：活動日期是今天。\n"
+"已規劃：將於未來進行的活動。"
 
 #. module: lunch
 #: model:ir.model.fields,field_description:lunch.field_lunch_supplier__street
@@ -2483,8 +2483,7 @@ msgstr "您的訂單"
 msgid ""
 "Your wallet does not contain enough money to order that. To add some money "
 "to your wallet, please contact your lunch manager."
-msgstr ""
-"你的錢包裡沒有足夠的錢來訂購。要將一些錢存入您的錢包，請聯繫您的午餐管理員。"
+msgstr "你的錢包裡沒有足夠的錢來訂購。要將一些錢存入您的錢包，請聯繫您的午餐管理員。"
 
 #. module: lunch
 #: model_terms:ir.ui.view,arch_db:lunch.lunch_supplier_view_form

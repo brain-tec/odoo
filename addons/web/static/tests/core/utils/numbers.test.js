@@ -278,7 +278,8 @@ describe("formatFloat", () => {
         expect(formatFloat(3.123, options)).toBe("3.123");
         expect(formatFloat(3.1239, options)).toBe("3.1239");
         expect(formatFloat(3.1231239, options)).toBe("3.123124");
-        expect(formatFloat(1234567890.1234567890, options)).toBe("1,234,567,890.12346");
+        expect(formatFloat(528000000.0, options)).toBe("528,000,000.000");
+        expect(formatFloat(1234567890.1234567890, options)).toBe("1,234,567,890.1235");
 
         options = { minDigits: 3, digits: [15, 4] };
         expect(formatFloat(3, options)).toBe("3.000");
@@ -322,6 +323,19 @@ describe("formatFloat", () => {
             thousandsSep: "@",
         });
         expect(formatFloat(6000)).toBe("60@00!00");
+    });
+
+    test("small numbers", () => {
+        patchWithCleanup(localization, {
+            decimalPoint: ".",
+            grouping: [3, 0],
+            thousandsSep: ",",
+        });
+        const options = { digits: [16, 8] };
+        expect(formatFloat(0.0000001, options)).toBe("0.00000010");
+        expect(formatFloat(-0.0000001, options)).toBe("-0.00000010");
+        expect(formatFloat(0.00000001, options)).toBe("0.00000001");
+        expect(formatFloat(0.000000004, options)).toBe("0.00000000");
     });
 
     test("humanReadable", () => {

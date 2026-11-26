@@ -1,25 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* mass_mailing_sale
+# * mass_mailing_sale
 #
 # Translators:
 # Wil Odoo, 2024
 # Larissa Manderfeld, 2024
 #
+# "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Larissa Manderfeld, 2024\n"
-"Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
+"PO-Revision-Date: 2026-11-19 19:36+0000\n"
+"Last-Translator: \"Noemi Pla Garcia (nopl)\" <nopl@odoo.com>\n"
+"Language-Team: Spanish <https://translate.odoo.com/projects/odoo-18/"
+"mass_mailing_sale/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? "
-"1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
+"0) ? 1 : 2);\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: mass_mailing_sale
 #. odoo-python
@@ -84,7 +87,7 @@ msgid ""
 "Quotations will appear here once your customers add products to their Carts "
 "or when your sales reps assign this mailing."
 msgstr ""
-"Los presupuestos aparecerán aquí una vez que sus clientes añadan productos a "
+"Los presupuestos aparecerán aquí una vez que tus clientes añadan productos a "
 "sus cestas o cuando los comerciales asignen este correo."
 
 #. module: mass_mailing_sale

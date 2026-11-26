@@ -1,7 +1,11 @@
 from datetime import datetime
+from unittest.mock import patch
+
 from dateutil.relativedelta import relativedelta
 from pytz import UTC
 
+from odoo.exceptions import UserError
+from odoo.addons.microsoft_calendar.models.microsoft_sync import MicrosoftSync
 from odoo.addons.microsoft_calendar.utils.microsoft_event import MicrosoftEvent
 from odoo.addons.microsoft_calendar.tests.common import TestCommon, patch_api
 
@@ -30,6 +34,117 @@ class TestMicrosoftEvent(TestCommon):
         # assert
         self.assertEqual(len(mapped._events), 1)
         self.assertEqual(mapped._events[event_id]["_odoo_id"], self.simple_event.id)
+
+    @patch_api
+    def test_cancelled_recurrences_preserve_local_recurrence(self):
+        """Cancellations with and without a UID must preserve unrelated local recurrences."""
+        self.organizer_user.microsoft_calendar_token = 'fake_token'
+        self.attendee_user.microsoft_calendar_token = False
+        event_model = self.env['calendar.event'].with_user(self.organizer_user).with_context(dont_notify=True)
+        local_event = event_model.with_user(self.attendee_user).create({
+            **self.recurrent_event_values,
+            'count': 3,
+            'user_id': self.attendee_user.id,
+        })
+        local_recurrence = local_event.recurrence_id
+        local_events = local_recurrence.calendar_event_ids
+        self.assertEqual(len(local_events), 3)
+        self.assertFalse(local_recurrence.microsoft_id)
+        self.assertFalse(local_recurrence.ms_universal_event_id)
+        for event in local_events:
+            self.assertFalse(event.microsoft_id)
+            self.assertFalse(event.ms_universal_event_id)
+        outlook_events = self.recurrence.calendar_event_ids
+        uid_event = event_model.create({
+            **self.recurrent_event_values,
+            'count': 3,
+            'user_id': self.organizer_user.id,
+        })
+        uid_recurrence = uid_event.recurrence_id
+        uid_recurrence.write({
+            'microsoft_id': 'REC_UID_ID',
+            'ms_universal_event_id': 'REC_UID',
+        })
+        uid_events = uid_recurrence.calendar_event_ids
+
+        event_model.sudo()._sync_microsoft2odoo(MicrosoftEvent([{
+            'id': self.recurrence.microsoft_id,
+            '@removed': {'reason': 'deleted'},
+        }, {
+            # Use a different Microsoft ID to exercise UID-based matching only.
+            'id': 'REC_UID_OTHER_ID',
+            'iCalUId': uid_recurrence.ms_universal_event_id,
+            '@removed': {'reason': 'deleted'},
+        }]))
+
+        self.assertFalse(self.recurrence.exists())
+        self.assertFalse(outlook_events.exists())
+        self.assertFalse(uid_recurrence.exists())
+        self.assertFalse(uid_events.exists())
+        self.assertTrue(local_recurrence.exists())
+        self.assertEqual(local_events.exists(), local_events)
+        for event in local_events:
+            self.assertEqual(event.recurrence_id, local_recurrence)
+
+    def test_forbid_edit_outlook_recurring_event(self):
+        """
+        Test that no user can edit a recurring event imported from Outlook
+        (identified by microsoft_recurrence_master_id), but that the sync
+        mechanism itself can still write through via dont_notify context.
+        """
+        # Give the organizer user a Microsoft token
+        self.organizer_user.microsoft_calendar_token = "fake_token"
+
+        outlook_recurring_event, recurring_event = self.env['calendar.event'].with_context(dont_notify=True).create([
+            {
+                'name': 'Outlook Recurring Event',
+                'start': datetime(2023, 9, 25, 10, 0),
+                'stop': datetime(2023, 9, 25, 11, 0),
+                'microsoft_id': 'AAA123:BBB456',
+                'microsoft_recurrence_master_id': 'MASTER123',
+                'user_id': self.organizer_user.id,
+            },
+            {
+                'name': 'Regular Recurring Event',
+                'start': datetime(2023, 9, 25, 10, 0),
+                'stop': datetime(2023, 9, 25, 11, 0),
+                'user_id': self.organizer_user.id,
+                'partner_ids': [(4, self.organizer_user.partner_id.id)],
+                'recurrency': True,
+                'follow_recurrence': True,
+                'rrule_type': 'daily',
+                'interval': 1,
+                'end_type': 'count',
+                'count': 3,
+            },
+        ])
+
+        # No user should be able to edit the Outlook event through Odoo
+        for user in [self.attendee_user, self.organizer_user]:
+            with self.assertRaises(UserError):
+                outlook_recurring_event.with_user(user).with_context(dont_notify=False).write({
+                    'name': 'Trying to change name',
+                    'recurrence_update': 'future_events',
+                })
+        self.assertEqual(outlook_recurring_event.name, 'Outlook Recurring Event')
+
+        # But changes from Microsoft sync itself should still work
+        outlook_recurring_event.with_context(dont_notify=True).write({
+            'name': 'Updated from Outlook',
+            'recurrence_update': 'future_events'
+        })
+        self.assertEqual(outlook_recurring_event.name, 'Updated from Outlook')
+
+        # Remove token: organizer is no longer synced to Outlook
+        self.organizer_user.microsoft_calendar_token = False
+
+        # Any user should be able to edit a non-Outlook recurring event
+        for user in [self.attendee_user, self.organizer_user]:
+            recurring_event.with_user(user).with_context(dont_notify=False).write({
+                'name': f'Changed by {user.name}',
+                'recurrence_update': 'future_events',
+            })
+            self.assertEqual(recurring_event.name, f'Changed by {user.name}')
 
     def test_map_an_event_using_global_id(self):
         # arrange
@@ -304,6 +419,71 @@ class TestMicrosoftEvent(TestCommon):
 
         self.assertNotIn(self.simple_event, synced_events)
         self.assertIn(self.simple_event, not_synced_events)
+
+    @patch_api
+    def test_single_event_turned_recurrent_in_outlook_no_duplicate(self):
+        """ Sync a single event, then turn it into a recurrence in Outlook. """
+
+        master_id = 'AAAKROSMOZ0001=='
+        master_uid = '040000008200E00074C5B7101A82E0080000000099VULKANIA00000000000000DEADBEEF'
+        future = (datetime.now() + relativedelta(days=1)).isoformat()
+
+        # arrange
+        single = [{
+            '@odata.type': '#microsoft.graph.event',
+            '@odata.etag': 'W/"SINGLE"',
+            'type': 'singleInstance',
+            'subject': 'Bouftou',
+            'isCancelled': False,
+            'id': master_id,
+            'iCalUId': master_uid,
+            'start': {'dateTime': '2021-09-01T10:00:00.0000000', 'timeZone': 'UTC'},
+            'end': {'dateTime': '2021-09-01T10:30:00.0000000', 'timeZone': 'UTC'},
+            'location': {'displayName': ''},
+        }]
+        self.env['calendar.event']._sync_microsoft2odoo(MicrosoftEvent(single))
+        odoo_single = self.env['calendar.event'].search([
+            ('microsoft_id', '=', master_id),
+            ('ms_universal_event_id', '=', master_uid),
+        ])
+        self.assertEqual(len(odoo_single), 1, "The single event should have been created")
+        self.assertFalse(odoo_single.recurrence_id)
+
+        # act
+        recurrent = [
+            {'@odata.type': '#microsoft.graph.event', '@odata.etag': 'W/"MASTER"', 'createdDateTime': '2021-09-01T07:03:49.1444085Z', 'lastModifiedDateTime': future, 'changeKey': 'MASTER', 'categories': [], 'originalStartTimeZone': 'UTC', 'originalEndTimeZone': 'UTC', 'iCalUId': master_uid, 'reminderMinutesBeforeStart': 15, 'isReminderOn': True, 'hasAttachments': False, 'subject': 'Bouftou', 'bodyPreview': '', 'importance': 'normal', 'sensitivity': 'normal', 'isAllDay': False, 'isCancelled': False, 'isOrganizer': True, 'responseRequested': True, 'seriesMasterId': None, 'showAs': 'busy', 'type': 'seriesMaster', 'AllowNewTimeProposals': True, 'IsDraft': False, 'id': master_id, 'responseStatus': {'response': 'organizer', 'time': '0001-01-01T00:00:00Z'}, 'body': {'contentType': 'html', 'content': ''}, 'start': {'dateTime': '2021-09-01T10:00:00.0000000', 'timeZone': 'UTC'}, 'end': {'dateTime': '2021-09-01T10:30:00.0000000', 'timeZone': 'UTC'}, 'location': {'displayName': '', 'locationType': 'default', 'uniqueIdType': 'unknown', 'address': {}, 'coordinates': {}}, 'locations': [], 'recurrence': {'pattern': {'type': 'daily', 'interval': 1, 'month': 0, 'dayOfMonth': 0, 'firstDayOfWeek': 'sunday', 'index': 'first'}, 'range': {'type': 'endDate', 'startDate': '2021-09-01', 'endDate': '2021-09-03', 'recurrenceTimeZone': 'UTC', 'numberOfOccurrences': 0}}, 'attendees': [], 'organizer': {'emailAddress': {'name': 'Kerubim', 'address': 'kerubim@test.com'}}},
+            {'@odata.type': '#microsoft.graph.event', '@odata.etag': 'W/"OCC1"', 'seriesMasterId': master_id, 'type': 'occurrence', 'id': 'OCC0001', 'start': {'dateTime': '2021-09-01T10:00:00.0000000', 'timeZone': 'UTC'}, 'end': {'dateTime': '2021-09-01T10:30:00.0000000', 'timeZone': 'UTC'}},
+            {'@odata.type': '#microsoft.graph.event', '@odata.etag': 'W/"OCC2"', 'seriesMasterId': master_id, 'type': 'occurrence', 'id': 'OCC0002', 'start': {'dateTime': '2021-09-02T10:00:00.0000000', 'timeZone': 'UTC'}, 'end': {'dateTime': '2021-09-02T10:30:00.0000000', 'timeZone': 'UTC'}},
+            {'@odata.type': '#microsoft.graph.event', '@odata.etag': 'W/"OCC3"', 'seriesMasterId': master_id, 'type': 'occurrence', 'id': 'OCC0003', 'start': {'dateTime': '2021-09-03T10:00:00.0000000', 'timeZone': 'UTC'}, 'end': {'dateTime': '2021-09-03T10:30:00.0000000', 'timeZone': 'UTC'}},
+        ]
+        microsoft_delete_calls = []
+
+        def track_microsoft_delete(*args, **kwargs):
+            microsoft_delete_calls.append((args, kwargs))
+
+        with patch.object(MicrosoftSync, '_microsoft_delete', track_microsoft_delete):
+            self.env['calendar.event']._sync_microsoft2odoo(MicrosoftEvent(recurrent))
+
+        # assert
+        self.assertFalse(microsoft_delete_calls, "It should not delete the event from Outlook")
+        recurrence = self.env['calendar.recurrence'].search([
+            ('microsoft_id', '=', master_id),
+            ('ms_universal_event_id', '=', master_uid),
+        ])
+        self.assertTrue(recurrence, "It should have created a recurrence")
+        self.assertEqual(len(recurrence.calendar_event_ids), 3, "It should have created 3 occurrences")
+
+        # The former single event must not survive as an orphan duplicate.
+        leftover_single = self.env['calendar.event'].search([
+            ('ms_universal_event_id', '=', master_uid),
+            ('recurrence_id', '=', False),
+        ])
+        self.assertFalse(
+            leftover_single,
+            "The single event turned recurrent must not remain as a duplicate next to the recurrence",
+        )
+        first_slot = self.env['calendar.event'].search([('start', '=', datetime(2021, 9, 1, 10, 0))])
+        self.assertEqual(len(first_slot), 1, "Only the recurrence occurrence should remain on the first slot")
 
     def test_microsoft_event_readonly(self):
         event = MicrosoftEvent()

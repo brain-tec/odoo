@@ -347,24 +347,27 @@ class Website(models.Model):
             (original_company | self.company_id)._compute_website_id()
 
         if 'cookies_bar' in values:
-            existing_policy_page = self.env['website.page'].search([
-                ('website_id', '=', self.id),
+            existing_policy_pages = self.env['website.page'].search([
+                ('website_id', 'in', self.ids),
                 ('url', '=', '/cookie-policy'),
             ])
             if not values['cookies_bar']:
-                existing_policy_page.unlink()
-            elif not existing_policy_page:
+                existing_policy_pages.unlink()
+            else:
                 cookies_view = self.env.ref('website.cookie_policy', raise_if_not_found=False)
                 if cookies_view:
-                    cookies_view.with_context(website_id=self.id).write({'website_id': self.id})
-                    specific_cook_view = self.with_context(website_id=self.id).viewref('website.cookie_policy')
-                    self.env['website.page'].create({
-                        'is_published': True,
-                        'website_indexed': False,
-                        'url': '/cookie-policy',
-                        'website_id': self.id,
-                        'view_id': specific_cook_view.id,
-                    })
+                    page_vals_list = []
+                    for website in self - existing_policy_pages.website_id:
+                        cookies_view.with_context(website_id=website.id).write({'website_id': website.id})
+                        specific_cook_view = website.with_context(website_id=website.id).viewref('website.cookie_policy')
+                        page_vals_list.append({
+                            'is_published': True,
+                            'website_indexed': False,
+                            'url': '/cookie-policy',
+                            'website_id': website.id,
+                            'view_id': specific_cook_view.id,
+                        })
+                    self.env['website.page'].create(page_vals_list)
 
         return result
 
@@ -504,7 +507,6 @@ class Website(models.Model):
     @api.model
     def configurator_init(self):
         r = dict()
-        theme = self.env["ir.module.module"].search([("name", "=", "theme_default")])
         current_website = self.get_current_website()
         company = current_website.company_id
         configurator_features = self.env['website.configurator.feature'].search([])
@@ -521,7 +523,7 @@ class Website(models.Model):
         if not company.uses_default_logo:
             r['logo'] = company.logo.decode('utf-8')
         if current_website.configurator_done:
-            r['redirect_url'] = theme.button_choose_theme()
+            r['redirect_url'] = current_website.button_go_website()
         try:
             result = self._website_api_rpc('/api/website/1/configurator/industries', {'lang': self.env.context.get('lang')})
             r['industries'] = result['industries']
@@ -605,41 +607,6 @@ class Website(models.Model):
                     {f'o-color-{i}': color for i, color in enumerate(selected_palette, 1)}
                 )
 
-        # Update CTA
-        cta_data = website.get_cta_data(kwargs.get('website_purpose'), kwargs.get('website_type'))
-        if cta_data['cta_btn_text']:
-            xpath_view = 'website.snippets'
-            parent_view = self.env['website'].with_context(website_id=website.id).viewref(xpath_view)
-            self.env['ir.ui.view'].create({
-                'name': parent_view.key + ' CTA',
-                'key': parent_view.key + "_cta",
-                'inherit_id': parent_view.id,
-                'website_id': website.id,
-                'type': 'qweb',
-                'priority': 32,
-                'arch_db': """
-                    <data>
-                        <xpath expr="//t[@t-set='cta_btn_href']" position="replace">
-                            <t t-set="cta_btn_href">%s</t>
-                        </xpath>
-                        <xpath expr="//t[@t-set='cta_btn_text']" position="replace">
-                            <t t-set="cta_btn_text">%s</t>
-                        </xpath>
-                    </data>
-                """ % (cta_data['cta_btn_href'], cta_data['cta_btn_text'])
-            })
-            try:
-                view_id = self.env['website'].viewref('website.header_call_to_action')
-                if view_id:
-                    el = etree.fromstring(view_id.arch_db)
-                    btn_cta_el = el.xpath("//a[hasclass('btn_cta')]")
-                    if btn_cta_el:
-                        btn_cta_el[0].attrib['href'] = cta_data['cta_btn_href']
-                        btn_cta_el[0].text = cta_data['cta_btn_text']
-                    view_id.with_context(website_id=website.id).write({'arch_db': etree.tostring(el)})
-            except ValueError as e:
-                logger.warning(e)
-
         # Configure the features
         features = self.env['website.configurator.feature'].browse(kwargs.get('selected_features'))
 
@@ -689,6 +656,41 @@ class Website(models.Model):
         # some new module and we need the overrides of these new menus e.g. for
         # the call to `get_cta_data`.
         website = self.env['website'].browse(website.id)
+
+        # Update CTA
+        cta_data = website.get_cta_data(kwargs.get('website_purpose'), kwargs.get('website_type'))
+        if cta_data['cta_btn_text']:
+            xpath_view = 'website.snippets'
+            parent_view = self.env['website'].with_context(website_id=website.id).viewref(xpath_view)
+            self.env['ir.ui.view'].create({
+                'name': parent_view.key + ' CTA',
+                'key': parent_view.key + "_cta",
+                'inherit_id': parent_view.id,
+                'website_id': website.id,
+                'type': 'qweb',
+                'priority': 32,
+                'arch_db': """
+                    <data>
+                        <xpath expr="//t[@t-set='cta_btn_href']" position="replace">
+                            <t t-set="cta_btn_href">%s</t>
+                        </xpath>
+                        <xpath expr="//t[@t-set='cta_btn_text']" position="replace">
+                            <t t-set="cta_btn_text">%s</t>
+                        </xpath>
+                    </data>
+                """ % (cta_data['cta_btn_href'], cta_data['cta_btn_text']),
+            })
+            try:
+                view_id = self.env['website'].viewref('website.header_call_to_action')
+                if view_id:
+                    el = etree.fromstring(view_id.arch_db)
+                    btn_cta_el = el.xpath("//a[hasclass('btn_cta')]")
+                    if btn_cta_el:
+                        btn_cta_el[0].attrib['href'] = cta_data['cta_btn_href']
+                        btn_cta_el[0].text = cta_data['cta_btn_text']
+                    view_id.with_context(website_id=website.id).write({'arch_db': etree.tostring(el)})
+            except ValueError as e:
+                logger.warning(e)
 
         # Update footers links, needs to be done after "Features" addition to go
         # through module overrides of `configurator_get_footer_links`.
@@ -1314,14 +1316,14 @@ class Website(models.Model):
             if model_name == 'ir.ui.view':
                 dependency_records = _handle_views_and_pages(dependency_records)
             if dependency_records:
-                model_name = self.env['ir.model']._display_name_for([model_name])[0]['display_name']
+                model_display_name = self.env['ir.model']._display_name_for([model_name])[0]['display_name']
                 field_string = Model.fields_get()[field_name]['string']
-                dependencies.setdefault(model_name, [])
-                dependencies[model_name] += [{
+                dependencies.setdefault(model_display_name, [])
+                dependencies[model_display_name] += [{
                     'field_name': field_string,
                     'record_name': rec.display_name,
                     'link': 'website_url' in rec and rec.website_url or f'/odoo/{model_name}/{rec.id}',
-                    'model_name': model_name,
+                    'model_name': model_display_name,
                 } for rec in dependency_records]
 
         return dependencies
@@ -1367,10 +1369,11 @@ class Website(models.Model):
         # We will now try to find a website matching the request host/domain (if
         # there is one on request) or return a random one.
 
-        # The format of `httprequest.host` is `domain:port`
+        # The format of `httprequest.host` is `domain:port`, while the url set
+        # on the thread is a full url: only keep its `domain:port` part.
         domain_name = (
             request and request.httprequest.host
-            or hasattr(threading.current_thread(), 'url') and threading.current_thread().url
+            or hasattr(threading.current_thread(), 'url') and get_base_domain(threading.current_thread().url)
             or '')
         website_id = self.sudo()._get_current_website_id(domain_name, fallback=fallback)
         return self.browse(website_id)
@@ -1570,6 +1573,10 @@ class Website(models.Model):
             domain += [('url', 'like', query_string)]
 
         pages = self._get_website_pages(domain)
+
+        # Only fetch the fields needed below: lazily reading a view field would
+        # prefetch arch_db arch_prev for every page and may end in a out-of-memory error.
+        pages.view_id.fetch(['name', 'priority', 'write_date'])
 
         for page in pages:
             record = {'loc': page['url'], 'id': page['id'], 'name': page['name']}
@@ -2181,24 +2188,22 @@ class Website(models.Model):
             similarities.extend(indirect_similarities)
             best_similarity = SQL('GREATEST(%(similarities)s)', similarities=SQL(', ').join(similarities))
 
-            # Filter unpublished records for portal and public user for
-            # performance.
-            # TODO: Same for `active` field?
-            filter_is_published = (
-                'is_published' in model._fields
-                and model._fields['is_published'].base_field.model_name == model_name
-                and not self.env.user._is_internal()
-            )
-            if filter_is_published:
-                query.add_where('is_published')
+            # Rank only the records eligible for the provider domain, before the
+            # similarity LIMIT. The eligible ids are a sub-select (not fetched)
+            # to keep the domain's joins/aliases out of the similarity query.
+            query.add_where(SQL(
+                "%(id)s IN %(eligible_ids)s",
+                id=SQL.identifier(model._table, 'id'),
+                eligible_ids=model._search(AND(domain)).subselect(),
+            ))
 
             query.order = '_best_similarity desc'
             query.limit = 1000
-            self.env.cr.execute(query.select(
+            rows = self.env.execute_query(query.select(
                 SQL.identifier(model._table, 'id'),
                 SQL('%s AS _best_similarity', best_similarity),
             ))
-            ids = {row[0] for row in self.env.cr.fetchall() if row[1] and row[1] >= similarity_threshold}
+            ids = {row[0] for row in rows if row[1] and row[1] >= similarity_threshold}
             domain.append([('id', 'in', list(ids))])
             domain = AND(domain)
             records = model.search_read(domain, direct_fields, limit=limit)

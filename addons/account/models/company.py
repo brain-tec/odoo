@@ -34,8 +34,8 @@ MONTH_SELECTION = [
 # !!! KEEP ALIGNED WITH ACCOUNT_PEPPOL MANIFEST -> COUNTRIES
 PEPPOL_DEFAULT_COUNTRIES = [
     'AT', 'BE', 'CH', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI',
-    'FR', 'GR', 'IE', 'IS', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL',
-    'NO', 'PL', 'PT', 'RO', 'SE', 'SI',
+    'FR', 'IE', 'IS', 'LT', 'LU', 'LV', 'MT', 'NL', 'NO', 'SE',
+    'SI',
 ]
 
 # List of countries where Peppol footnote will be added when sending by mail.
@@ -45,8 +45,9 @@ PEPPOL_MAILING_COUNTRIES = [
 
 # List of countries where Peppol is accessible.
 PEPPOL_LIST = PEPPOL_DEFAULT_COUNTRIES + [
-    'AD', 'AL', 'BA', 'BG', 'BL', 'GB', 'GF', 'GP', 'HR', 'HU', 'LI', 'MC', 'ME', 'MF',
-    'MK', 'MQ', 'NC', 'PF', 'PM', 'RE', 'RS', 'SK', 'SM', 'TF', 'TR', 'VA', 'WF', 'YT',
+    'AD', 'AL', 'BA', 'BG', 'BL', 'GB', 'GF', 'GP', 'GR', 'HR', 'HU', 'IT', 'LI', 'MC',
+    'ME', 'MF', 'MK', 'MQ', 'NC', 'PF', 'PL', 'PM', 'PT', 'RE', 'RO', 'RS', 'SK', 'SM',
+    'TF', 'TR', 'VA', 'WF', 'YT',
 ]
 
 INTEGRITY_HASH_BATCH_SIZE = 1000
@@ -158,14 +159,6 @@ class ResCompany(models.Model):
         comodel_name='ir.sequence',
         readonly=True,
         copy=False,
-        default=lambda self: self.env['ir.sequence'].sudo().create({
-            'name': _("Batch Payment Number Sequence"),
-            'implementation': 'no_gap',
-            'padding': 5,
-            'use_date_range': True,
-            'company_id': self.id,
-            'prefix': 'BATCH/%(year)s/',
-        }),
     )
 
     #Fields of the setup step for opening move
@@ -177,7 +170,7 @@ class ResCompany(models.Model):
     terms_type = fields.Selection([('plain', 'Add a Note'), ('html', 'Add a link to a Web Page')],
                                   string='Terms & Conditions format', default='plain')
     invoice_terms_html = fields.Html(string='Default Terms and Conditions as a Web page', translate=True,
-                                     sanitize_attributes=False,
+                                     sanitize_attributes=False, sanitize_form=False,
                                      compute='_compute_invoice_terms_html', store=True, readonly=False)
 
     # Needed in the Point of Sale
@@ -409,6 +402,25 @@ class ResCompany(models.Model):
         for company in self:
             onboardings.with_company(company)._search_or_create_progress()
 
+    def _get_batch_payment_sequence_values(self):
+        self.ensure_one()
+        return {
+            'name': _("Batch Payment Number Sequence"),
+            'implementation': 'no_gap',
+            'padding': 5,
+            'use_date_range': True,
+            'company_id': self.id,
+            'prefix': 'BATCH/%(range_year)s/',
+        }
+
+    def _create_batch_payment_sequence(self):
+        for company in self:
+            if not company.batch_payment_sequence_id:
+                sequence = self.env['ir.sequence'].sudo().create(
+                    company._get_batch_payment_sequence_values()
+                )
+                company.batch_payment_sequence_id = sequence
+
     @api.model_create_multi
     def create(self, vals_list):
         companies = super().create(vals_list)
@@ -421,6 +433,7 @@ class ResCompany(models.Model):
                         install_demo=False,
                     )
                 self.env.cr.precommit.add(try_loading)
+            company._create_batch_payment_sequence()
         return companies
 
     def get_new_account_code(self, current_code, old_prefix, new_prefix):
@@ -899,7 +912,8 @@ class ResCompany(models.Model):
     def _existing_accounting(self) -> bool:
         """Return True iff some accounting entries have already been made for the current company."""
         self.ensure_one()
-        return bool(self.env['account.move.line'].sudo().search_count([('company_id', 'child_of', self.id)], limit=1))
+        child_company_ids = self.sudo().with_context(active_test=False).search([('id', 'child_of', self.id)]).ids
+        return bool(self.env['account.move.line'].sudo().search_count([('company_id', 'in', child_company_ids)], limit=1))
 
     def _chart_template_selection(self):
         return self.env['account.chart.template']._select_chart_template(self.country_id)

@@ -81,8 +81,10 @@ class TestHolidaysOvertime(TransactionCase):
             self.new_attendance(check_in=datetime(2021, 1, 2, 8), check_out=datetime(2021, 1, 2, 16))
             self.assertEqual(self.employee.total_overtime, 8, 'Should have 8 hours of overtime')
 
-            overtime_leave_data = self.leave_type_no_alloc.get_allocation_data(self.employee)
-            self.assertEqual(overtime_leave_data[self.employee][0][1]['virtual_remaining_leaves'], 8.0)
+            overtime_leave_data = self.leave_type_no_alloc.with_company(self.company).with_context(employee_id=self.employee.id).get_allocation_data_request()
+            self.assertEqual(overtime_leave_data[0][0], "Extra Hours")
+            self.assertEqual(overtime_leave_data[0][1]['virtual_remaining_leaves'], 8.0)
+            self.assertEqual(overtime_leave_data[0][1]['max_leaves'], 8.0)
 
             leave = self.env['hr.leave'].create({
                 'name': 'no overtime',
@@ -225,6 +227,46 @@ class TestHolidaysOvertime(TransactionCase):
         alloc.number_of_days = 2
         self.assertEqual(self.employee.total_overtime, 0)
 
+        alloc.action_refuse()
+        self.assertEqual(self.employee.total_overtime, 16)
+        alloc.action_set_to_confirm()
+        self.assertEqual(self.employee.total_overtime, 0)
+        alloc.unlink()
+        self.assertEqual(self.employee.total_overtime, 16)
+
+    def test_allocation_change_leave_type_to_overtime(self):
+        """Changing an allocation's leave type to an overtime-deductible type should validate overtime."""
+        non_overtime_type = self.env['hr.leave.type'].create({
+            'name': 'Regular Leave',
+            'company_id': self.company.id,
+            'requires_allocation': 'yes',
+            'employee_requests': 'yes',
+            'allocation_validation_type': 'hr',
+            'overtime_deductible': False,
+        })
+        # Create allocation with non-overtime type
+        alloc = self.env['hr.leave.allocation'].create({
+            'name': 'test allocation',
+            'holiday_status_id': non_overtime_type.id,
+            'employee_id': self.employee.id,
+            'number_of_days': 1,
+            'state': 'confirm',
+            'date_from': time.strftime('%Y-1-1'),
+            'date_to': time.strftime('%Y-12-31'),
+        })
+        self.assertFalse(alloc.overtime_id)
+
+        # Change to overtime-deductible type without enough overtime → should raise
+        with self.assertRaises(ValidationError):
+            alloc.holiday_status_id = self.leave_type_employee_allocation.id
+
+        # Give employee overtime hours
+        self.new_attendance(check_in=datetime(2021, 1, 2, 8), check_out=datetime(2021, 1, 2, 16))
+        self.assertEqual(self.employee.total_overtime, 8)
+        alloc.holiday_status_id = self.leave_type_employee_allocation.id
+        self.assertTrue(alloc.overtime_id, "An overtime adjustment record should be created")
+        self.assertEqual(alloc.overtime_id.duration, -8, "Overtime adjustment should match allocation duration")
+
     @freeze_time('2022-1-1')
     def test_leave_check_cancel(self):
         self.new_attendance(check_in=datetime(2021, 1, 2, 8), check_out=datetime(2021, 1, 2, 16))
@@ -290,3 +332,145 @@ class TestHolidaysOvertime(TransactionCase):
 
         leave.with_user(self.user_manager).action_approve(check_state=False)
         self.assertEqual(self.employee.total_overtime, 8)
+
+    def test_public_leave_reevaluate_overtime(self):
+        # employee's working schedule needs to be in their company
+        calendar = self.employee.resource_calendar_id.copy({'company_id': self.company.id})
+        self.employee.write({
+            'resource_calendar_id': calendar.id
+        })
+
+        leave_type = self.env['hr.leave.type'].create({
+            'name': 'Sick Leave',
+            'company_id': self.company.id,
+            'requires_allocation': 'no',
+        })
+
+        leave = self.env['hr.leave'].create({
+            'name': '3 day leave',
+            'employee_id': self.employee.id,
+            'holiday_status_id': leave_type.id,
+            'request_date_from': '2025-09-01',
+            'request_date_to': '2025-09-03',
+        })
+        # 1hr attendance every day of the leave
+        self.new_attendance(check_in=datetime(2025, 9, 1, 8), check_out=datetime(2025, 9, 1, 9))
+        self.new_attendance(check_in=datetime(2025, 9, 2, 8), check_out=datetime(2025, 9, 2, 9))
+        self.new_attendance(check_in=datetime(2025, 9, 3, 8), check_out=datetime(2025, 9, 3, 9))
+
+        leave.with_user(self.user_manager).action_validate()
+        self.assertEqual(self.employee.total_overtime, 3)
+
+        # create a public leave that coincides with the leave set for the employee
+        self.env['resource.calendar.leaves'].create({
+            'name': 'Public Holiday',
+            'company_id': self.company.id,
+            'date_from': datetime(2025, 9, 2, 6),
+            'date_to': datetime(2025, 9, 2, 18),
+            'calendar_id': calendar.id,
+        })
+        self.assertEqual(self.employee.total_overtime, 3)
+
+        # 2hr attendance outside the leave
+        self.new_attendance(check_in=datetime(2025, 9, 4, 8), check_out=datetime(2025, 9, 4, 10))
+
+        # create a public leave outside the leave set for the employee to ensure the 2hr attendance turns into overtime
+        self.env['resource.calendar.leaves'].create({
+            'name': 'Public Holiday 2',
+            'company_id': self.company.id,
+            'date_from': datetime(2025, 9, 4, 6),
+            'date_to': datetime(2025, 9, 4, 18),
+            'calendar_id': calendar.id,
+        })
+        self.assertEqual(self.employee.total_overtime, 5)
+
+    def test_overtime_flexible_leave_attendance(self):
+        calendar_flex = self.env['resource.calendar'].create({
+            'name': 'Flexible Schedule',
+            'flexible_hours': 'True',
+            'full_time_required_hours': 40.0,
+            'hours_per_day': 8.0,
+        })
+
+        employee = self.env['hr.employee'].create({
+            'name': 'Flex Employee',
+            'resource_calendar_id': calendar_flex.id
+        })
+
+        leave_type = self.env['hr.leave.type'].create({
+            'name': 'Leave Type Hours',
+            'requires_allocation': 'no',
+            'request_unit': 'hour',
+        })
+
+        leave = self.env['hr.leave'].create({
+            'name': 'Leave',
+            'employee_id': employee.id,
+            'holiday_status_id': leave_type.id,
+            'request_date_from': datetime(2026, 1, 9),
+            'request_date_to': datetime(2026, 1, 9),
+            'request_hour_from': 17,
+            'request_hour_to': 18,
+            'request_unit_hours': True,
+        })
+
+        leave.action_validate()
+
+        attendance = self.env['hr.attendance'].create({
+            'employee_id': employee.id,
+            'check_in': datetime(2026, 1, 9, 10),
+            'check_out': datetime(2026, 1, 9, 17),
+        })
+
+        self.assertEqual(attendance.validated_overtime_hours, 0.0)
+        self.assertEqual(attendance.worked_hours, 7.0)
+
+    def _create_flexible_employee_with_hour_leave(self, hour_from, hour_to):
+        calendar_flex = self.env['resource.calendar'].create({
+            'name': 'Flexible Schedule',
+            'flexible_hours': True,
+            'full_time_required_hours': 40.0,
+            'hours_per_day': 8.0,
+        })
+        employee = self.env['hr.employee'].create({
+            'name': 'Flex Employee',
+            'resource_calendar_id': calendar_flex.id,
+        })
+        leave_type = self.env['hr.leave.type'].create({
+            'name': 'Leave Type Hours',
+            'requires_allocation': 'no',
+            'request_unit': 'hour',
+        })
+        leave = self.env['hr.leave'].create({
+            'name': 'Leave',
+            'employee_id': employee.id,
+            'holiday_status_id': leave_type.id,
+            'request_date_from': datetime(2026, 1, 9),
+            'request_date_to': datetime(2026, 1, 9),
+            'request_hour_from': hour_from,
+            'request_hour_to': hour_to,
+            'request_unit_hours': True,
+        })
+        leave.action_validate()
+        return employee
+
+    def test_overtime_flexible_leave_inside_virtual_attendance(self):
+        # The virtual attendance of an 8h flexible day is 08:00-16:00
+        employee = self._create_flexible_employee_with_hour_leave(10, 11)
+        attendance = self.env['hr.attendance'].create({
+            'employee_id': employee.id,
+            'check_in': datetime(2026, 1, 9, 8),
+            'check_out': datetime(2026, 1, 9, 15),
+        })
+        self.assertEqual(attendance.worked_hours, 7.0)
+        self.assertEqual(attendance.overtime_hours, 0.0)
+
+    def test_overtime_flexible_leave_covering_virtual_attendance(self):
+        employee = self._create_flexible_employee_with_hour_leave(8, 16)
+        attendance = self.env['hr.attendance'].create({
+            'employee_id': employee.id,
+            'check_in': datetime(2026, 1, 9, 17),
+            'check_out': datetime(2026, 1, 9, 19),
+        })
+        self.assertEqual(attendance.worked_hours, 2.0)
+        self.assertEqual(attendance.overtime_hours, 2.0)

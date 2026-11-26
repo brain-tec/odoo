@@ -1,24 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_blog
+# * website_blog
 #
 # Translators:
 # Wil Odoo, 2024
 # Abe Manyo, 2024
 #
+# "Nurul Aini Akrima Sabila (nuaas)" <nuaas@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-29 18:38+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Abe Manyo, 2024\n"
-"Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
+"PO-Revision-Date: 2026-11-09 07:43+0000\n"
+"Last-Translator: \"Nurul Aini Akrima Sabila (nuaas)\" <nuaas@odoo.com>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-18/"
+"website_blog/id/>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.date_selector
@@ -204,8 +207,8 @@ msgid ""
 "<i class=\"fa fa-github text-github\" aria-label=\"Github\" title=\"Github\"/"
 ">"
 msgstr ""
-"<i class=\"fa fa-github text-github\" aria-label=\"Github\" title=\"Github\"/"
-">"
+"<i class=\"fa fa-github text-github\" aria-label=\"Github\" "
+"title=\"Github\"/>"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.blog_post_view_kanban
@@ -242,8 +245,8 @@ msgid ""
 "<i class=\"fa fa-tiktok text-tiktok\" aria-label=\"TikTok\" title=\"TikTok\"/"
 ">"
 msgstr ""
-"<i class=\"fa fa-tiktok text-tiktok\" aria-label=\"TikTok\" title=\"TikTok\"/"
-">"
+"<i class=\"fa fa-tiktok text-tiktok\" aria-label=\"TikTok\" "
+"title=\"TikTok\"/>"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_share_links_display
@@ -743,7 +746,7 @@ msgstr "Dapat Dipublikasikan"
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.snippet_options
 msgid "Cards"
-msgstr "Kartu-Kartu"
+msgstr "Kartu"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_tag__category_id
@@ -1653,7 +1656,7 @@ msgstr "Lainnya"
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_cover_post
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_cover_post_fullwidth_design
 msgid "Our Latest Posts"
-msgstr "Post-Post Terkini Kami"
+msgstr "Postingan Terkini Kami"
 
 #. module: website_blog
 #: model_terms:ir.ui.view,arch_db:website_blog.opt_blog_post_blogs_display
@@ -2145,8 +2148,8 @@ msgid ""
 "Internet, by using travel websites."
 msgstr ""
 "Sepuluh tahun lalu, Anda mungkin mengunjungi agen travel lokal dan "
-"mempercayai nasehat langsung yang diberikan oleh 'ahli' mereka. Cara Abad "
-"ke-21 untuk memilih dan booking hotel Anda tentunya di Internet, menggunakan "
+"mempercayai nasehat langsung yang diberikan oleh 'ahli' mereka. Cara Abad ke-"
+"21 untuk memilih dan booking hotel Anda tentunya di Internet, menggunakan "
 "website travel."
 
 #. module: website_blog

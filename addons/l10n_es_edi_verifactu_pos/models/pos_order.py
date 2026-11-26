@@ -138,16 +138,24 @@ class PosOrder(models.Model):
         pass
 
     def l10n_es_edi_verifactu_button_send(self):
+        self.check_access('write')
         self._l10n_es_edi_verifactu_mark_for_next_batch()
 
     def _l10n_es_edi_verifactu_check(self, cancellation=False):
         self.ensure_one()
         errors = []
 
-        if self.state not in ('paid', 'done'):
-            errors.append(_("Veri*Factu documents can only be generated for paid or posted Point of Sale Orders."))
+        if self.state not in ('paid', 'done', 'invoiced'):
+            errors.append(_("Veri*Factu documents can only be generated for paid, posted or invoiced Point of Sale Orders."))
+
+        if self.state == 'invoiced' and not cancellation:
+            errors.append(_("Veri*Factu documents can only be generated for invoiced Point of Sale Orders for cancellation purpose."))
 
         return errors
+
+    def l10n_es_edi_verifactu_get_invoice_name(self):
+        self.ensure_one()
+        return self.account_move.name if self.account_move else self.name
 
     def _l10n_es_edi_verifactu_get_record_values(self, cancellation=False):
         self.ensure_one()

@@ -2,7 +2,6 @@
 
 import logging
 import requests
-import uuid
 from markupsafe import Markup
 from datetime import timedelta
 
@@ -189,6 +188,29 @@ class ChannelMember(models.Model):
     _sql_constraints = [
         ("partner_or_guest_exists", "CHECK((partner_id IS NOT NULL AND guest_id IS NULL) OR (partner_id IS NULL AND guest_id IS NOT NULL))", "A channel member must be a partner or a guest."),
     ]
+
+    @api.model
+    def _load_records_create(self, vals_list):
+        # A data member loses its xmlid when its partner leaves the channel: reuse the member
+        # created by joining again (module data only, imports must still report duplicates).
+        if not self.env.context.get("install_module"):
+            return super()._load_records_create(vals_list)
+        existing = {}
+        for index, vals in enumerate(vals_list):
+            if vals.get("channel_id") and vals.get("partner_id"):
+                member = self.search([
+                    ("channel_id", "=", vals["channel_id"]),
+                    ("partner_id", "=", vals["partner_id"]),
+                ], limit=1)
+                if member:
+                    existing[index] = member
+        new_members = iter(super()._load_records_create(
+            [vals for index, vals in enumerate(vals_list) if index not in existing]
+        ))
+        return self.browse([
+            existing[index].id if index in existing else next(new_members).id
+            for index in range(len(vals_list))
+        ])
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -381,12 +403,9 @@ class ChannelMember(models.Model):
         sfu_server_url = discuss.get_sfu_url(self.env)
         if not sfu_server_url:
             return
-        sfu_local_key = self.env["ir.config_parameter"].sudo().get_param("mail.sfu_local_key")
-        if not sfu_local_key:
-            sfu_local_key = str(uuid.uuid4())
-            self.env["ir.config_parameter"].sudo().set_param("mail.sfu_local_key", sfu_local_key)
+        channel_key = discuss.get_derived_sfu_key(self.env, self.channel_id.id)
         json_web_token = jwt.sign(
-            {"iss": f"{self.get_base_url()}:channel:{self.channel_id.id}", "key": sfu_local_key},
+            {"iss": f"{self.get_base_url()}:channel:{self.channel_id.id}", "key": channel_key},
             key=discuss.get_sfu_key(self.env),
             ttl=30,
             algorithm=jwt.Algorithm.HS256,
@@ -407,7 +426,7 @@ class ChannelMember(models.Model):
         for session in self.channel_id.rtc_session_ids:
             session._bus_send(
                 "discuss.channel.rtc.session/sfu_hot_swap",
-                {"serverInfo": self._get_rtc_server_info(session, ice_servers, key=sfu_local_key)},
+                {"serverInfo": self._get_rtc_server_info(session, ice_servers, key=channel_key)},
             )
 
     def _get_rtc_server_info(self, rtc_session, ice_servers=None, key=None):
@@ -416,8 +435,9 @@ class ChannelMember(models.Model):
         if not sfu_channel_uuid or not sfu_server_url:
             return None
         if not key:
-            key = self.env["ir.config_parameter"].sudo().get_param("mail.sfu_local_key")
+            key = discuss.get_derived_sfu_key(self.env, self.channel_id.id)
         claims = {
+            "sfu_channel_uuid": sfu_channel_uuid,
             "session_id": rtc_session.id,
             "ice_servers": ice_servers,
         }

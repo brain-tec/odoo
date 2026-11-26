@@ -326,7 +326,7 @@ class HrExpense(models.Model):
         for expense in self:
             if not expense.is_editable:
                 raise UserError(_('You are not authorized to edit this expense.'))
-            expense.price_unit = (expense.total_amount / expense.quantity) if expense.quantity != 0 else 0.
+            expense.price_unit = expense.total_amount / (expense.quantity or 1)
 
     @api.depends(
         'date',
@@ -439,7 +439,7 @@ class HrExpense(models.Model):
                     company=expense.company_id,
                 )[product_id.id]
             else:
-                expense.price_unit = expense.company_currency_id.round(expense.total_amount / expense.quantity) if expense.quantity else 0.
+                expense.price_unit = expense.company_currency_id.round(expense.total_amount / (expense.quantity or 1))
 
     def _needs_product_price_computation(self):
         # Hook to be overridden.
@@ -836,6 +836,7 @@ class HrExpense(models.Model):
             'domain': [('res_model', '=', 'hr.expense'), ('res_id', 'in', self.ids)],
             'context': {'default_res_model': 'hr.expense', 'default_res_id': self.id},
         })
+        res.pop('id', None)  # remove action ID to allow page refresh and keep domain/context
         return res
 
     def action_approve_duplicates(self):
@@ -969,6 +970,7 @@ class HrExpense(models.Model):
             'journal_id': journal.id,
             'partner_id': self.vendor_id.id,
             'currency_id': self.currency_id.id,
+            'company_id': self.company_id.id,
             'line_ids': [Command.create(line) for line in move_lines],
             'attachment_ids': [
                 Command.create(attachment.copy_data({'res_model': 'account.move', 'res_id': False, 'raw': attachment.raw})[0])
@@ -1079,12 +1081,8 @@ class HrExpense(models.Model):
 
         expense_description = msg_dict.get('subject', '')
 
-        if employee.user_id:
-            company = employee.user_id.company_id
-            currencies = company.currency_id | employee.user_id.company_ids.mapped('currency_id')
-        else:
-            company = employee.company_id
-            currencies = company.currency_id
+        company = employee.company_id
+        currencies = company.currency_id
 
         if not company:  # ultimate fallback, since company_id is required on expense
             company = self.env.company

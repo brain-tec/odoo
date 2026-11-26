@@ -1,7 +1,8 @@
-import { setSelection } from "@html_editor/../tests/_helpers/selection";
+import { getContent, setSelection } from "@html_editor/../tests/_helpers/selection";
 import { insertText } from "@html_editor/../tests/_helpers/user_actions";
 import { FileSelector } from "@html_editor/main/media/media_dialog/file_selector";
 import { uploadService } from "@html_editor/main/media/media_dialog/upload_progress_toast/upload_service";
+import { MailComposerAttachmentSelector } from "@mail/core/web/mail_composer_attachment_selector";
 import { HtmlComposerMessageField } from "@mail/views/web/fields/html_composer_message_field/html_composer_message_field";
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
 import {
@@ -10,6 +11,7 @@ import {
     queryAll,
     queryAllTexts,
     queryOne,
+    setInputFiles,
     waitFor,
     waitForNone,
 } from "@odoo/hoot-dom";
@@ -24,7 +26,7 @@ import {
     patchWithCleanup,
     serverState,
 } from "@web/../tests/web_test_helpers";
-import { defineMailModels, mailModels, openFormView, start } from "../mail_test_helpers";
+import { click, defineMailModels, mailModels, onRpcBefore, openFormView, start, startServer } from "../mail_test_helpers";
 
 // Need this hack to use the arch in mountView(...)
 mailModels.MailComposeMessage._views = {};
@@ -150,8 +152,8 @@ test("mention a partner", async () => {
         </form>`,
     });
 
-    const anchorNode = queryOne(`[name='body'] .odoo-editor-editable div.o-paragraph`);
-    setSelection({ anchorNode, anchorOffset: 0 });
+    const editable = queryOne(`[name='body'] .odoo-editor-editable`);
+    setSelection({ anchorNode: editable.firstChild, anchorOffset: 0 });
     await insertText(htmlEditor, "@");
     await animationFrame();
     expect(".overlay .search input[placeholder='Search for a user...']").toBeFocused();
@@ -165,12 +167,10 @@ test("mention a partner", async () => {
     expect.verifySteps(["get_mention_suggestions: a"]);
 
     await press("enter");
-    expect("[name='body'] .odoo-editor-editable").toHaveInnerHTML(`
-    <div class="o-paragraph">
-        <a target="_blank" data-oe-protected="true" contenteditable="false" href="https://www.hoot.test/odoo/res.partner/17" class="o_mail_redirect" data-oe-id="17" data-oe-model="res.partner">
-            @Mitchell Admin
-        </a>
-    </div>`);
+    await animationFrame();
+    expect(getContent(editable)).toBe(
+        '<div class="o-paragraph">\uFEFF<a target="_blank" data-oe-protected="true" contenteditable="false" href="https://www.hoot.test/odoo/res.partner/17" class="o_mail_redirect" data-oe-id="17" data-oe-model="res.partner">@Mitchell Admin</a>\uFEFF[]</div>'
+    );
 });
 
 test("mention a channel", async () => {
@@ -282,4 +282,59 @@ describe("Remove attachments", () => {
         await waitForNone("[name='attachment_ids'] a:contains('test.jpg')");
         await waitForNone(".odoo-editor-editable img[data-attachment-id='1']");
     });
+});
+
+test("prevent sending message when attachments are uploading", async function () {
+    const uploadRelease = new Deferred();
+    const uploadFinished = new Deferred();
+    const mailSent = new Deferred();
+    patchWithCleanup(MailComposerAttachmentSelector.prototype, {
+        async onFileUploaded() {
+            await super.onFileUploaded(...arguments);
+            uploadFinished.resolve();
+        },
+    });
+    onRpcBefore("/mail/attachment/upload", async () => await uploadRelease);
+    onRpc("action_send_mail", () => {
+        expect.step("action_send_mail");
+        mailSent.resolve();
+        return { type: "ir.actions.act_window_close" };
+    });
+
+    const pyEnv = await startServer();
+    const resId = pyEnv["mail.compose.message"].create({
+        display_name: "Some Composer",
+        body: "Hello World!",
+        attachment_ids: [],
+    });
+    const arch = `
+        <form>
+            <field name="body" type="html"/>
+            <widget name="mail_composer_send_dropdown"/>
+            <field name="attachment_ids" widget="mail_composer_attachment_selector"/>
+        </form>
+    `;
+    await start();
+    await openFormView("mail.compose.message", resId, { 
+        arch,
+        context: {
+            active_ids: [serverState.partnerId,],
+        }
+    });
+
+    const file = new File(["test"], "fake_file.txt", { type: "text/plain" });
+    await click(".o_field_mail_composer_attachment_selector button");
+    await setInputFiles([file]);
+    await animationFrame();
+
+    await waitFor(".o_mail_send:disabled");
+    expect.verifySteps([]);
+
+    uploadRelease.resolve();
+    await uploadFinished;
+    expect.verifySteps([]);
+
+    await click(".o_mail_send:enabled");
+    await mailSent;
+    expect.verifySteps(["action_send_mail"]);
 });

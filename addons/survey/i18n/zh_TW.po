@@ -6,14 +6,14 @@
 # Wil Odoo, 2025
 # Tony Ng, 2025
 #
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 # "Tony Ng (ngto)" <ngto@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2026-01-17 09:08+0000\n"
+"POT-Creation-Date: 2026-04-10 18:37+0000\n"
+"PO-Revision-Date: 2026-11-20 12:09+0000\n"
 "Last-Translator: \"Tony Ng (ngto)\" <ngto@odoo.com>\n"
 "Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
 "projects/odoo-18/survey/zh_Hant/>\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__question_count
@@ -33,36 +33,6 @@ msgstr "問題數目"
 #: model:ir.model.fields,field_description:survey.field_survey_question__random_questions_count
 msgid "# Questions Randomly Picked"
 msgstr "隨機問題數目"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_4
-msgid "$100"
-msgstr "<span>網站上的100字說明</span>"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_1
-msgid "$20"
-msgstr "$20"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_5
-msgid "$200"
-msgstr "$200"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_6
-msgid "$300"
-msgstr "$300"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_2
-msgid "$50"
-msgstr "$50"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.vendor_certification_page_2_question_1_choice_3
-msgid "$80"
-msgstr "$80"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_progression
@@ -105,11 +75,6 @@ msgid "'Certification - %s' % (object.survey_id.display_name)"
 msgstr "'認證 - %s' % (object.survey_id.display_name)"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
-msgid "0000000010"
-msgstr "0000000010"
-
-#. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p4_q2_sug2
 msgid "10 kg"
 msgstr "10公斤"
@@ -120,19 +85,9 @@ msgid "100 years"
 msgstr "100年"
 
 #. module: survey
-#: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q1_sug3
-msgid "1055"
-msgstr "1055"
-
-#. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q3_sug3
 msgid "116 years"
 msgstr "116年"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q1_sug1
-msgid "1227"
-msgstr "1227"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q3_sug4
@@ -140,14 +95,9 @@ msgid "127 years"
 msgstr "127年"
 
 #. module: survey
-#: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q1_sug2
-msgid "1324"
-msgstr "1324"
-
-#. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p2_q1_sug1
 msgid "1450 km"
-msgstr "1450公里"
+msgstr "1,450 公里"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p4_q2_sug3
@@ -155,14 +105,9 @@ msgid "16.2 kg"
 msgstr "16.2公斤"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
-msgid "2023-08-18"
-msgstr "2023-08-18"
-
-#. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p2_q1_sug2
 msgid "3700 km"
-msgstr "3700公里"
+msgstr "3,700 公里"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_403_page
@@ -182,7 +127,7 @@ msgstr "5.7公斤"
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p2_q1_sug3
 msgid "6650 km"
-msgstr "6650公里"
+msgstr "6,650 公里"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q3_sug1
@@ -284,8 +229,8 @@ msgstr ""
 "solid #e1e1e1;\">\n"
 "        <tbody>\n"
 "            <tr><td style=\"padding:15px 20px 10px 20px;\">\n"
-"                <p><span t-out=\"object.partner_id.name or '參加者'\">參加者"
-"</span> 你好！</p>\n"
+"                <p><span t-out=\"object.partner_id.name or '參加者'\">參加"
+"者</span> 你好！</p>\n"
 "                <p>\n"
 "                    現附上你的\n"
 "                        <strong t-out=\"object.survey_id.display_name or "
@@ -342,8 +287,8 @@ msgid ""
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        <t t-out=\"object.partner_id.name or '參加者'\">參加者</t> 你好！<br/"
-"><br/>\n"
+"        <t t-out=\"object.partner_id.name or '參加者'\">參加者</t> 你好"
+"！<br/><br/>\n"
 "        <t t-if=\"object.survey_id.certification\">\n"
 "            你已獲邀請參加新的認證。\n"
 "        </t>\n"
@@ -444,8 +389,8 @@ msgid ""
 "<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
 "title=\"Arrow\"/>"
 msgstr ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"箭嘴圖示\" title=\"箭嘴"
-"\"/>"
+"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"箭嘴圖示\" title=\"箭"
+"嘴\"/>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
@@ -2077,7 +2022,7 @@ msgstr "關注人（業務夥伴）"
 #: model:ir.model.fields,help:survey.field_survey_survey__activity_type_icon
 #: model:ir.model.fields,help:survey.field_survey_user_input__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr "Font awesome 圖示，例如，fa-task"
+msgstr "Font Awesome 圖示，例如 fa-tasks"
 
 #. module: survey
 #: model:survey.survey,title:survey.survey_demo_food_preferences
@@ -2335,8 +2280,7 @@ msgstr "你幾歲？"
 msgid ""
 "I actually don't like thinking. I think people think I like to think a lot. "
 "And I don't. I do not like to think at all."
-msgstr ""
-"我其實不喜歡思考。我想人們認為我喜歡思考很多。而我沒有。我一點也不喜歡思考。"
+msgstr "我其實不喜歡思考。我想人們認為我喜歡思考很多。而我沒有。我一點也不喜歡思考。"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p5_q3_sug2
@@ -2344,8 +2288,8 @@ msgid ""
 "I am fascinated by air. If you remove the air from the sky, all the birds "
 "would fall to the ground. And all the planes, too."
 msgstr ""
-"我對空氣很著迷。如果你從天空中去除空氣，所有的鳥都會落到地上。還有所有的飛"
-"機。"
+"我對空氣很著迷。如果你從天空中去除空氣，所有的鳥都會落到地上。還有所有的飛機"
+"。"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_feedback_p2_q2_row5
@@ -2445,7 +2389,7 @@ msgstr "如果勾選了，使用者能夠返回上頁。"
 #: model:ir.model.fields,help:survey.field_survey_survey__users_login_required
 msgid ""
 "If checked, users have to login before answering even with a valid token."
-msgstr "如果勾選此項，使用者必須在回答之前登入並使用有效的代碼(token)。"
+msgstr "若勾選，就算使用者有有效的權杖/代碼(token)，仍須先登入才可作答。"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.question_container
@@ -2465,8 +2409,7 @@ msgstr "如果選擇隨機隨機，請在該部分旁邊添加隨機問題的數
 msgid ""
 "If randomized is selected, you can configure the number of random questions "
 "by section. This mode is ignored in live session."
-msgstr ""
-"如果選擇隨機化，您可以按部分配置隨機問題的數量。在實時會話中忽略此模式。"
+msgstr "如果選擇隨機化，您可以按部分配置隨機問題的數量。在實時會話中忽略此模式。"
 
 #. module: survey
 #: model:survey.question,question_placeholder:survey.vendor_certification_page_1_question_5
@@ -2561,7 +2504,7 @@ msgstr "僅邀請人員"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__is_mail_template_editor
 msgid "Is Editor"
-msgstr "是編輯器"
+msgstr "有編輯權限"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__message_is_follower
@@ -3445,8 +3388,8 @@ msgid ""
 "a placeholder expression that provides the appropriate language, e.g. "
 "{{ object.partner_id.lang }}."
 msgstr ""
-"發送電子郵件時要選擇的可選翻譯語言（ISO 代碼）。如果未設置，將使用英文版本。"
-"這通常應該是提供適當語言的佔位符表達式，例如{{ object.partner_id.lang }}。"
+"發送電子郵件所使用的翻譯語言之 ISO 代碼，可選填。若未有設定，會使用英文版本。"
+"通常會是佔位表達式，指示適當的語言，例如：{{ object.partner_id.lang }}。"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
@@ -3458,8 +3401,7 @@ msgstr "選項"
 #. odoo-python
 #: code:addons/survey/models/survey_survey_template.py:0
 msgid "Organizational Development for Operation Officers"
-msgstr ""
-"Organizational Development for Operation Officers（營運職員的組織發展）"
+msgstr "Organizational Development for Operation Officers（營運職員的組織發展）"
 
 #. module: survey
 #. odoo-python
@@ -3475,7 +3417,7 @@ msgstr "我們公司在幾個問題..."
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__mail_server_id
 msgid "Outgoing mail server"
-msgstr "發信郵件伺服器"
+msgstr "外寄郵件伺服器"
 
 #. module: survey
 #. odoo-javascript
@@ -3879,7 +3821,7 @@ msgstr "已註冊"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__render_model
 msgid "Rendering Model"
-msgstr "呈現模型"
+msgstr "繪製模型"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
@@ -4961,7 +4903,9 @@ msgstr ""
 msgid ""
 "This survey does not allow external people to participate. You should create "
 "user accounts or update survey access mode accordingly."
-msgstr "此調查不允許外部人員參與。 您應該建立使用者帳戶或更新調查存取模式。"
+msgstr ""
+"此調查不允許外部人員參與。你可為調查參加者建立使用者帳戶，或更改調查的存取模"
+"式。"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_closed_expired
@@ -5326,8 +5270,8 @@ msgid ""
 "Welcome to this Odoo certification. You will receive 2 random questions out "
 "of a pool of 3."
 msgstr ""
-"歡迎參加本次 Odoo 認證測驗。我們會由 3 道題目的題庫中，隨機抽取 2 道問題給"
-"你。"
+"歡迎參加本次 Odoo 認證測驗。我們會由 3 道題目的題庫中，隨機抽取 2 道問題給你"
+"。"
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_3_question_5
@@ -5806,3 +5750,36 @@ msgid ""
 "⚠️ This question is positioned before some or all of its triggers and could "
 "be skipped."
 msgstr "⚠️ 此問題放置在它部份或全部觸發問題之前，故此可以跳過。"
+
+#~ msgid "$100"
+#~ msgstr "<span>網站上的100字說明</span>"
+
+#~ msgid "$20"
+#~ msgstr "$20"
+
+#~ msgid "$200"
+#~ msgstr "$200"
+
+#~ msgid "$300"
+#~ msgstr "$300"
+
+#~ msgid "$50"
+#~ msgstr "$50"
+
+#~ msgid "$80"
+#~ msgstr "$80"
+
+#~ msgid "0000000010"
+#~ msgstr "0000000010"
+
+#~ msgid "1055"
+#~ msgstr "1055"
+
+#~ msgid "1227"
+#~ msgstr "1227"
+
+#~ msgid "1324"
+#~ msgstr "1324"
+
+#~ msgid "2023-08-18"
+#~ msgstr "2023-08-18"

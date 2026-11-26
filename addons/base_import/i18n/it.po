@@ -7,13 +7,13 @@
 # pezzin <christian.pezzin@gmail.com>, 2024
 # Marianna Ciofani, 2024
 # Sergio Zanchetta <primes2h@gmail.com>, 2025
-# "Marianna Ciofani (cima)" <cima@odoo.com>, 2025.
+# "Marianna Ciofani (cima)" <cima@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-11-25 09:48+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-20 09:49+0000\n"
 "Last-Translator: \"Marianna Ciofani (cima)\" <cima@odoo.com>\n"
 "Language-Team: Italian <https://translate.odoo.com/projects/odoo-18/"
 "base_import/it/>\n"
@@ -23,7 +23,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
 "0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: base_import
 #. odoo-javascript
@@ -470,15 +470,6 @@ msgstr ""
 "Se il modello utilizza OpenChatter, il monitoraggio della cronologia "
 "imposterà le iscrizioni e invierà le notifiche durante l'importazione. Ciò "
 "porterà a un'importazione più lenta."
-
-#. module: base_import
-#. odoo-python
-#: code:addons/base_import/models/base_import.py:0
-msgid ""
-"Image size excessive, imported images must be smaller than 42 million pixel"
-msgstr ""
-"Dimensione dell'immagine eccessiva, le immagini importate devono essere più "
-"piccole di 42 milioni di pixel"
 
 #. module: base_import
 #. odoo-javascript
@@ -1021,3 +1012,10 @@ msgstr "secondi"
 #: code:addons/base_import/models/base_import.py:0
 msgid "unknown error code %s"
 msgstr "codice errore sconosciuto %s"
+
+#~ msgid ""
+#~ "Image size excessive, imported images must be smaller than 42 million "
+#~ "pixel"
+#~ msgstr ""
+#~ "Dimensione dell'immagine eccessiva, le immagini importate devono essere "
+#~ "più piccole di 42 milioni di pixel"

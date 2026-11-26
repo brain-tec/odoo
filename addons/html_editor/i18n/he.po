@@ -15,13 +15,13 @@
 # Martin Trigaux, 2025
 # ZVI BLONDER <ZVIBLONDER@gmail.com>, 2025
 # or balmas, 2025
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:37+0000\n"
-"PO-Revision-Date: 2025-11-21 02:29+0000\n"
+"POT-Creation-Date: 2026-10-24 17:38+0000\n"
+"PO-Revision-Date: 2026-10-28 03:33+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Hebrew <https://translate.odoo.com/projects/odoo-18/"
 "html_editor/he/>\n"
@@ -30,7 +30,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n == 2) ? 1 : 2);\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: html_editor
 #. odoo-javascript
@@ -110,7 +110,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
 msgid "AI Tools"
-msgstr ""
+msgstr "כלי AI"
 
 #. module: html_editor
 #. odoo-javascript
@@ -267,12 +267,6 @@ msgstr "ניגון אוטומטי"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/column_plugin.js:0
-msgid "Back to one column"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/color_plugin.js:0
 #: code:addons/html_editor/static/src/main/media/icon_plugin.js:0
 msgid "Background Color"
@@ -366,7 +360,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
 msgid "ChatGPT"
-msgstr ""
+msgstr "ChatGPT"
 
 #. module: html_editor
 #. odoo-javascript
@@ -421,6 +415,12 @@ msgstr "תוכן"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_dialog.js:0
 msgid "Content generated"
+msgstr ""
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/column_plugin.js:0
+msgid "Convert columns to regular content"
 msgstr ""
 
 #. module: html_editor
@@ -735,7 +735,7 @@ msgstr "תבנית"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.js:0
 msgid "Friendly"
-msgstr ""
+msgstr "ידידותי"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1181,9 +1181,9 @@ msgstr "מסמך חסר"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/powerbox/powerbox_plugin.js:0
+#: code:addons/html_editor/static/src/main/powerbox/search_powerbox_plugin.js:0
 msgid "More options"
-msgstr ""
+msgstr "אפשרויות נוספות"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1266,6 +1266,12 @@ msgstr "רשימה ממוספרת"
 #. module: html_editor
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
+msgid "Only internal users can use AI text generation."
+msgstr ""
+
+#. module: html_editor
+#. odoo-python
+#: code:addons/html_editor/controllers/main.py:0
 msgid "Oops, it looks like our AI is unreachable!"
 msgstr ""
 
@@ -1330,7 +1336,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.js:0
 msgid "Persuasive"
-msgstr ""
+msgstr "משכנע"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1403,7 +1409,7 @@ msgstr "הסרת קישור"
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/column_plugin.js:0
-msgid "Remove columns"
+msgid "Remove column layout"
 msgstr ""
 
 #. module: html_editor
@@ -1949,7 +1955,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/core/video/video.xml:0
 msgid "Your browser does not support iframe."
-msgstr ""
+msgstr "הדפדפן שלך אינו תומך ב-iframe."
 
 #. module: html_editor
 #. odoo-javascript
@@ -2016,6 +2022,12 @@ msgstr "או"
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "videos"
 msgstr "וידאות"
+
+#. module: html_editor
+#. odoo-javascript
+#: code:addons/html_editor/static/src/main/table/table_picker.xml:0
+msgid "x"
+msgstr "x"
 
 #~ msgid "Hide sharing button"
 #~ msgstr "הסתר את כפתור השיתוף"

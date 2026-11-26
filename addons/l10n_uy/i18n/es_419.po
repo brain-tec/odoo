@@ -9,17 +9,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 19:04+0000\n"
-"PO-Revision-Date: 2026-02-14 09:04+0000\n"
+"POT-Creation-Date: 2026-10-24 18:06+0000\n"
+"PO-Revision-Date: 2026-11-06 17:57+0000\n"
 "Last-Translator: \"Fernanda Alvarez (mfar)\" <mfar@odoo.com>\n"
 "Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
-"odoo-18-l10n/l10n_uy/es_419/>\n"
+"odoo-18/l10n_uy/es_419/>\n"
 "Language: es_419\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: l10n_uy
 #. odoo-python
@@ -44,13 +44,16 @@ msgstr ""
 #. module: l10n_uy
 #. odoo-python
 #: code:addons/l10n_uy/models/res_partner.py:0
-msgid "3:402.010-2 or 93:402.010-1 (CI or NIE)"
-msgstr "3:402.010-2 o 93:402.010-1 (CI o NIE)"
+msgid ""
+"3.402.010-1 or 34020101 (CI), 93.402.010-1 (NIE); dots and dash are optional"
+msgstr ""
+"3.402.010-1 o 34020101 (CI), 93.402.010-1 (NIE); los puntos y el guion son "
+"opcionales"
 
 #. module: l10n_uy
 #: model:ir.model,name:l10n_uy.model_account_chart_template
 msgid "Account Chart Template"
-msgstr "Plantilla de plan contable"
+msgstr "Plantilla del plan de cuentas"
 
 #. module: l10n_uy
 #: model:account.report.column,name:l10n_uy.tax_report_balance
@@ -75,7 +78,7 @@ msgstr "Base 22% Compras"
 #. module: l10n_uy
 #: model:account.report.line,name:l10n_uy.account_tax_report_base_impb_cmprs_reduced
 msgid "Base Purchases Reduced VAT"
-msgstr ""
+msgstr "Base de compras con IVA reducido"
 
 #. module: l10n_uy
 #: model:account.report.line,name:l10n_uy.account_tax_report_base_impb_vnts_0
@@ -95,7 +98,7 @@ msgstr "Base 22% Ventas"
 #. module: l10n_uy
 #: model:account.report.line,name:l10n_uy.account_tax_report_base_impb_vnts_reduced
 msgid "Base Sales Reduced VAT"
-msgstr ""
+msgstr "Base de ventas con IVA reducido"
 
 #. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_boleta_venta_contado
@@ -105,13 +108,13 @@ msgstr "Boleta"
 #. module: l10n_uy
 #: model:l10n_latam.identification.type,name:l10n_uy.it_ci
 msgid "CI"
-msgstr ""
+msgstr "CI"
 
 #. module: l10n_uy
 #. odoo-python
 #: code:addons/l10n_uy/models/res_partner.py:0
 msgid "CI/NIE"
-msgstr ""
+msgstr "CI/NIE"
 
 #. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_recibo_cobranza
@@ -277,7 +280,7 @@ msgstr "Remito"
 #. module: l10n_uy
 #: model:ir.model,name:l10n_uy.model_account_tax
 msgid "ETA tax codes mixin"
-msgstr ""
+msgstr "Mixin de códigos fiscales ETA"
 
 #. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_nc_expo
@@ -352,12 +355,12 @@ msgstr "Tipo de Documento Latam"
 #. module: l10n_uy
 #: model:l10n_latam.identification.type,name:l10n_uy.it_nie
 msgid "NIE"
-msgstr ""
+msgstr "NIE"
 
 #. module: l10n_uy
 #: model:l10n_latam.identification.type,name:l10n_uy.it_nife
 msgid "NIFE"
-msgstr ""
+msgstr "NIFE"
 
 #. module: l10n_uy
 #: model:l10n_latam.identification.type,description:l10n_uy.it_dni
@@ -377,7 +380,7 @@ msgstr "Otros"
 #. module: l10n_uy
 #: model:l10n_latam.identification.type,name:l10n_uy.it_pass
 msgid "PAS"
-msgstr ""
+msgstr "PAS"
 
 #. module: l10n_uy
 #: model:l10n_latam.identification.type,description:l10n_uy.it_pass
@@ -392,17 +395,17 @@ msgstr "Compras IVA Exentas"
 #. module: l10n_uy
 #: model:account.report.line,name:l10n_uy.account_tax_report_cmprs_iva_reduced
 msgid "Purchases Reduced VAT"
-msgstr ""
+msgstr "Compras con IVA reducido"
 
 #. module: l10n_uy
 #: model:l10n_latam.identification.type,name:l10n_uy.it_rut
 msgid "RUT / RUC"
-msgstr ""
+msgstr "RUT / RUC"
 
 #. module: l10n_uy
 #: model:account.report.line,name:l10n_uy.account_tax_report_vnts_iva_reduced
 msgid "Sales Reduced VAT"
-msgstr ""
+msgstr "Ventas con IVA reducido"
 
 #. module: l10n_uy
 #: model:account.report.line,name:l10n_uy.account_tax_report_iva_vnts_10
@@ -528,7 +531,7 @@ msgstr "Facturas de Proveedor"
 #. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_e_boleta
 msgid "e-Boleta"
-msgstr ""
+msgstr "e-Boleta"
 
 #. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_e_remito
@@ -568,12 +571,12 @@ msgstr "Nota de Débito e-Factura Venta por Cuenta Ajena"
 #. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_e_resguardo
 msgid "e-Resguardo"
-msgstr ""
+msgstr "e-Resguardo"
 
 #. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_e_ticket
 msgid "e-Ticket"
-msgstr ""
+msgstr "e-Ticket"
 
 #. module: l10n_uy
 #: model:l10n_latam.document.type,name:l10n_uy.dc_cn_e_ticket
@@ -605,3 +608,6 @@ msgstr "Nota de Débito e-Ticket Venta por Cuenta Ajena"
 #: code:addons/l10n_uy/models/res_partner.py:0
 msgid "partner [%s]"
 msgstr "empresa [%s]"
+
+#~ msgid "3:402.010-2 or 93:402.010-1 (CI or NIE)"
+#~ msgstr "3:402.010-2 o 93:402.010-1 (CI o NIE)"

@@ -41,7 +41,7 @@ class ProjectProject(models.Model):
     vendor_bill_count = fields.Integer(related='account_id.vendor_bill_count', groups='account.group_account_readonly', export_string_translation=False)
     partner_id = fields.Many2one(compute="_compute_partner_id", store=True, readonly=False)
     display_sales_stat_buttons = fields.Boolean(compute='_compute_display_sales_stat_buttons', export_string_translation=False)
-    sale_order_state = fields.Selection(related='sale_order_id.state', export_string_translation=False)
+    sale_order_state = fields.Selection(related='sale_order_id.state', export_string_translation=False, tracking=False)
     reinvoiced_sale_order_id = fields.Many2one('sale.order', string='Sales Order', groups='sales_team.group_sale_salesman', copy=False, domain="[('partner_id', '=', partner_id)]", index='btree_not_null',
         help="Products added to stock pickings, whose operation type is configured to generate analytic costs, will be re-invoiced in this sales order if they are set up for it.",
     )
@@ -170,10 +170,33 @@ class ProjectProject(models.Model):
             projects._ensure_sale_order_linked(list(sol_ids))
         return projects
 
+    def _fetch_linked_products(self, project_ids, limit=None):
+        return self.env["product.template"].search([
+            ("service_tracking", "!=", "no"),
+            "|",
+                ("project_id", "in", project_ids),
+                ("project_template_id", "in", project_ids),
+        ], limit=limit)
+
+    def _fetch_linked_sale_orders(self, project_ids, limit=None):
+        return self.env["sale.order"].search([("project_id", "in", project_ids)], limit=limit)
+
+    def check_allow_billable_projects(self):
+        """ return if the project is linked to product or sales order """
+        self.ensure_one()
+        return bool(self._fetch_linked_products(self.ids, limit=1) or
+                    self._fetch_linked_sale_orders(self.ids, limit=1))
+
+    def _unlink_billable_products(self):
+        linked_product_ids = self._fetch_linked_products(self.ids)
+        linked_product_ids.write({'project_id': False, 'project_template_id': False})
+
     def write(self, vals):
         project = super().write(vals)
         if sol_id := vals.get('sale_line_id'):
             self._ensure_sale_order_linked([sol_id])
+        if vals.get('allow_billable') is False:
+            self._unlink_billable_products()
         return project
 
     def action_view_sols(self):
@@ -278,12 +301,13 @@ class ProjectProject(models.Model):
             return action
 
         if section_name == 'cost_of_goods_sold':
+            move_ids = [res_id] if res_id else self.env['account.move'].search(domain).ids
             action = {
                 'name': _('Cost of Goods Sold Items'),
                 'type': 'ir.actions.act_window',
                 'res_model': 'account.move.line',
                 'views': [[False, 'list'], [False, 'form']],
-                'domain': [('move_id', '=', res_id), ('display_type', '=', 'cogs')],
+                'domain': [('move_id', 'in', move_ids), ('display_type', '=', 'cogs')],
                 'context': {'create': False, 'edit': False},
             }
             return action
@@ -579,8 +603,8 @@ class ProjectProject(models.Model):
                     'to_invoice': -downpayment_amount_invoiced,
                 }
                 if with_action and (
-                    self.env.user.has_group('sales_team.group_sale_salesman_all_leads,')
-                    or self.env.user.has_group('account.group_account_invoice,')
+                    self.env.user.has_group('sales_team.group_sale_salesman_all_leads')
+                    or self.env.user.has_group('account.group_account_invoice')
                     or self.env.user.has_group('account.group_account_readonly')
                 ):
                     invoices = self.env['account.move'].search([('line_ids.sale_line_ids', 'in', downpayment_sol_ids)])
@@ -696,7 +720,8 @@ class ProjectProject(models.Model):
             cogs_lines = []
             for move_line in invoices_move_lines:
                 if move_line['display_type'] == 'cogs':
-                    cogs_lines.append(move_line)
+                    if move_line.account_id.internal_group == 'expense':
+                        cogs_lines.append(move_line)
                 else:
                     revenues_lines.append(move_line)
             for move_lines, ml_type in ((revenues_lines, 'revenues'), (cogs_lines, 'costs')):

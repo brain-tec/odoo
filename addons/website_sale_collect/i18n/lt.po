@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_sale_collect
+# * website_sale_collect
 #
 # Translators:
 # Antanas Muliuolis <an.muliuolis@gmail.com>, 2024
@@ -11,22 +11,24 @@
 # Greta Šeštokė, 2024
 # Linas Versada <linaskrisiukenas@gmail.com>, 2024
 # Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2024
-#
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:38+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2024\n"
-"Language-Team: Lithuanian (https://app.transifex.com/odoo/teams/41243/lt/)\n"
+"POT-Creation-Date: 2026-05-22 17:43+0000\n"
+"PO-Revision-Date: 2026-10-25 00:33+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Lithuanian <https://translate.odoo.com/projects/odoo-18/"
+"website_sale_collect/lt/>\n"
 "Language: lt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < "
-"11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? "
-"1 : n % 1 != 0 ? 2: 3);\n"
+"11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 "
+": n % 1 != 0 ? 2: 3);\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: website_sale_collect
 #: model_terms:payment.provider,pending_msg:website_sale_collect.payment_provider_on_site
@@ -143,7 +145,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/website_sale_collect/controllers/main.py:0
 msgid "Please choose a store to collect your order."
-msgstr ""
+msgstr "Prašome pasirinkti parduotuvę, kurioje norite atsiimti užsakymą."
 
 #. module: website_sale_collect
 #: model:ir.model,name:website_sale_collect.model_product_template
@@ -180,13 +182,13 @@ msgstr ""
 #: code:addons/website_sale_collect/controllers/main.py:0
 #: code:addons/website_sale_collect/models/sale_order.py:0
 msgid "Some products are not available in the selected store."
-msgstr ""
+msgstr "Kai kurių produktų pasirinktame parduotuvėje nėra."
 
 #. module: website_sale_collect
 #. odoo-python
 #: code:addons/website_sale_collect/controllers/main.py:0
 msgid "Sorry, we are unable to ship your order."
-msgstr ""
+msgstr "Atsiprašome, bet negalime išsiųsti jūsų užsakymo."
 
 #. module: website_sale_collect
 #: model:ir.model.fields,field_description:website_sale_collect.field_delivery_carrier__warehouse_ids
@@ -205,6 +207,11 @@ msgstr ""
 #: code:addons/website_sale_collect/models/delivery_carrier.py:0
 msgid "The delivery method must have at least one warehouse to be published."
 msgstr ""
+
+#. module: website_sale_collect
+#: model:ir.model,name:website_sale_collect.model_stock_picking
+msgid "Transfer"
+msgstr "Perkelti"
 
 #. module: website_sale_collect
 #: model:ir.model,name:website_sale_collect.model_stock_warehouse

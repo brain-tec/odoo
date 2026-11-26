@@ -22,8 +22,10 @@ import { ensureTest } from "../main_runner";
 const {
     Blob,
     ClipboardItem = class NonSecureClipboardItem {},
+    DOMException,
     navigator,
-    Object: { assign: $assign },
+    Object: { assign: $assign, entries: $entries },
+    queueMicrotask,
     Set,
     TypeError,
 } = globalThis;
@@ -54,6 +56,27 @@ function getMockValues() {
         /** @type {Navigator["vibrate"]} */
         vibrate: throwNotImplemented("vibrate"),
     };
+}
+
+/**
+ * Returns the descriptors of the mocked permission-gated APIs, only for those that
+ * are natively available, to keep feature detection intact (e.g. `if (navigator.x)`).
+ */
+function getPermissionGatedDescriptors() {
+    const mocks = {
+        credentials: new MockCredentialsContainer(),
+        geolocation: new MockGeolocation(),
+        storage: new MockStorageManager(),
+        wakeLock: new MockWakeLock(),
+    };
+    /** @type {Record<string, PropertyDescriptor>} */
+    const descriptors = {};
+    for (const [name, value] of $entries(mocks)) {
+        if (name in navigator) {
+            descriptors[name] = { value };
+        }
+    }
+    return descriptors;
 }
 
 /**
@@ -179,6 +202,36 @@ function makeUserAgent(platform) {
 }
 
 /**
+ * @param {string} apiName
+ */
+function notAllowed(apiName) {
+    return new DOMException(
+        `${apiName}: not allowed in tests (mock it to provide actual results)`,
+        "NotAllowedError"
+    );
+}
+
+/**
+ * @param {PositionErrorCallback | null} [errorCallback]
+ */
+function rejectPosition(errorCallback) {
+    if (typeof errorCallback !== "function") {
+        return;
+    }
+    const code =
+        currentPermissions.geolocation.state === "granted"
+            ? GEOLOCATION_ERROR_CODES.POSITION_UNAVAILABLE
+            : GEOLOCATION_ERROR_CODES.PERMISSION_DENIED;
+    const error = {
+        ...GEOLOCATION_ERROR_CODES,
+        code,
+        message: "navigator.geolocation: no position available in tests",
+    };
+    // Native callbacks are always called asynchronously
+    queueMicrotask(() => errorCallback(error));
+}
+
+/**
  * @param {string} fnName
  */
 function throwNotImplemented(fnName) {
@@ -187,8 +240,15 @@ function throwNotImplemented(fnName) {
     };
 }
 
+const GEOLOCATION_ERROR_CODES = {
+    PERMISSION_DENIED: 1,
+    POSITION_UNAVAILABLE: 2,
+    TIMEOUT: 3,
+};
+
 /** @type {Set<MockPermissionStatus>} */
 const permissionStatuses = new Set();
+let geolocationWatchId = 0;
 const userAgentBrowser = getUserAgentBrowser();
 const mockValues = getMockValues();
 
@@ -228,6 +288,52 @@ export class MockClipboardItem extends ClipboardItem {
 
     async getType(type) {
         return getSyncValue(this, false)[type];
+    }
+}
+
+/**
+ * Permission-gated APIs (credentials, geolocation, storage, wake lock) are mocked
+ * to behave as if their permission were not granted: production code has to handle
+ * that case anyway, and no prompt nor actual device/storage access is triggered.
+ * Tests requiring actual results are expected to patch them.
+ */
+export class MockCredentialsContainer {
+    async create() {
+        throw notAllowed("navigator.credentials.create");
+    }
+
+    async get() {
+        throw notAllowed("navigator.credentials.get");
+    }
+
+    async preventSilentAccess() {}
+
+    async store() {
+        throw notAllowed("navigator.credentials.store");
+    }
+}
+
+export class MockGeolocation {
+    /**
+     * @param {number} _watchId
+     */
+    clearWatch(_watchId) {}
+
+    /**
+     * @param {PositionCallback} _successCallback
+     * @param {PositionErrorCallback | null} [errorCallback]
+     */
+    getCurrentPosition(_successCallback, errorCallback) {
+        rejectPosition(errorCallback);
+    }
+
+    /**
+     * @param {PositionCallback} _successCallback
+     * @param {PositionErrorCallback | null} [errorCallback]
+     */
+    watchPosition(_successCallback, errorCallback) {
+        rejectPosition(errorCallback);
+        return ++geolocationWatchId;
     }
 }
 
@@ -271,23 +377,171 @@ export class MockPermissionStatus extends MockEventTarget {
     }
 }
 
+export class MockServiceWorker extends MockEventTarget {
+    static publicListeners = ["error", "message"];
+
+    /** @type {ServiceWorkerState} */
+    state = "activated";
+
+    /**
+     * @param {string} scriptURL
+     */
+    constructor(scriptURL) {
+        super(...arguments);
+
+        /** @type {string} */
+        this.scriptURL = scriptURL;
+    }
+
+    /**
+     * @param {any} _message
+     */
+    postMessage(_message) {}
+}
+
+export class MockServiceWorkerContainer extends MockEventTarget {
+    static publicListeners = ["controllerchange", "message", "messageerror"];
+
+    /**
+     * @private
+     */
+    _readyResolved = false;
+
+    /**
+     * @private
+     * @type {Map<string, MockServiceWorkerRegistration>}
+     */
+    _registrations = new Map();
+
+    /** @type {MockServiceWorker | null} */
+    controller = null;
+
+    get ready() {
+        return this._readyPromise;
+    }
+
+    constructor() {
+        super(...arguments);
+
+        const { promise, resolve } = Promise.withResolvers();
+        /**
+         * @type {Promise<MockServiceWorkerRegistration>}
+         * @private
+         */
+        this._readyPromise = promise;
+        /**
+         * @type {(value: MockServiceWorkerRegistration) => void}
+         * @private
+         */
+        this._resolveReady = resolve;
+    }
+
+    async getRegistration(scope = "/") {
+        return this._registrations.get(scope);
+    }
+
+    async getRegistrations() {
+        return Array.from(this._registrations.values());
+    }
+
+    /**
+     * @param {string} scriptURL
+     * @param {{ scope?: string }} [options]
+     */
+    async register(scriptURL, options = {}) {
+        const scope = options.scope ?? "/";
+
+        const registration = new MockServiceWorkerRegistration(scriptURL, scope);
+        this._registrations.set(scope, registration);
+
+        if (!this.controller) {
+            this.controller = registration.active;
+            this.dispatchEvent(new Event("controllerchange"));
+        }
+
+        if (!this._readyResolved) {
+            this._readyResolved = true;
+            this._resolveReady(registration);
+        }
+
+        return registration;
+    }
+
+    startMessages() {}
+}
+
+export class MockServiceWorkerRegistration {
+    /** @type {MockServiceWorker | null} */
+    installing = null;
+    /** @type {MockServiceWorker | null} */
+    waiting = null;
+
+    /**
+     * @param {string} scriptURL
+     * @param {string} scope
+     */
+    constructor(scriptURL, scope) {
+        /** @type {MockServiceWorker | null} */
+        this.active = new MockServiceWorker(scriptURL);
+        /** @type {string} */
+        this.scope = scope;
+    }
+
+    async unregister() {
+        return true;
+    }
+
+    async update() {}
+}
+
+export class MockStorageManager {
+    async estimate() {
+        return { quota: 0, usage: 0 };
+    }
+
+    /**
+     * The origin private file system would otherwise persist between tests.
+     */
+    async getDirectory() {
+        throw notAllowed("navigator.storage.getDirectory");
+    }
+
+    async persist() {
+        return currentPermissions["persistent-storage"].state === "granted";
+    }
+
+    async persisted() {
+        return currentPermissions["persistent-storage"].state === "granted";
+    }
+}
+
+export class MockWakeLock {
+    async request() {
+        throw notAllowed("navigator.wakeLock.request");
+    }
+}
+
 export const currentPermissions = getPermissions();
 
 export const mockClipboard = new MockClipboard();
 
 export const mockPermissions = new MockPermissions();
 
+export const mockServiceWorker = new MockServiceWorkerContainer();
+
 export const mockNavigator = createMock(navigator, {
+    ...getPermissionGatedDescriptors(),
     clipboard: { value: mockClipboard },
     maxTouchPoints: { get: () => (globalThis.ontouchstart === undefined ? 0 : 1) },
     permissions: { value: mockPermissions },
     sendBeacon: { get: () => mockValues.sendBeacon },
-    serviceWorker: { get: () => undefined },
+    serviceWorker: { value: mockServiceWorker },
     userAgent: { get: () => mockValues.userAgent },
     vibrate: { get: () => mockValues.vibrate },
 });
 
 export function cleanupNavigator() {
+    geolocationWatchId = 0;
     permissionStatuses.clear();
     $assign(currentPermissions, getPermissions());
     $assign(mockValues, getMockValues());

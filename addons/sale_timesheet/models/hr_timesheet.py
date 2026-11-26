@@ -106,6 +106,14 @@ class AccountAnalyticLine(models.Model):
                 raise UserError(_('You cannot modify timesheets that are already invoiced.'))
         return super()._check_can_write(values)
 
+    def write(self, vals):
+        project = self.env['project.project'].sudo().browse(vals.get('project_id'))
+
+        if project and not project.allow_billable:
+            vals['is_so_line_edited'] = False
+
+        return super().write(vals)
+
     def _timesheet_determine_sale_line(self):
         """ Deduce the SO line associated to the timesheet line:
             1/ timesheet on task rate: the so line will be the one from the task
@@ -124,15 +132,16 @@ class AccountAnalyticLine(models.Model):
         if self.task_id.allow_billable and self.task_id.sale_line_id:
             if self.task_id.pricing_type in ('task_rate', 'fixed_rate'):
                 return self.task_id.sale_line_id
-            else:  # then pricing_type = 'employee_rate'
-                map_entry = self.project_id.sale_line_employee_ids.filtered(
-                    lambda map_entry:
-                        map_entry.employee_id == (self.employee_id or self.env.user.employee_id)
-                        and map_entry.sale_line_id.order_partner_id.commercial_partner_id == self.task_id.partner_id.commercial_partner_id
-                )
-                if map_entry:
-                    return map_entry.sale_line_id
-                return self.task_id.sale_line_id
+            # then pricing_type = 'employee_rate'
+            employee = self.employee_id or self.env.user.employee_id
+            task_partner = self.task_id.partner_id.commercial_partner_id
+            for mapping in self.project_id.sale_line_employee_ids:
+                if (
+                    mapping.employee_id.id == employee.id
+                    and mapping.sale_line_id.order_partner_id.commercial_partner_id.id == task_partner.id
+                ):
+                    return mapping.sale_line_id
+            return self.task_id.sale_line_id
         return False
 
     def _timesheet_get_portal_domain(self):
@@ -172,7 +181,18 @@ class AccountAnalyticLine(models.Model):
 
     def _get_employee_mapping_entry(self):
         self.ensure_one()
-        return self.env['project.sale.line.employee.map'].search([('project_id', '=', self.project_id.id), ('employee_id', '=', self.employee_id.id or self.env.user.employee_id.id)])
+        mappings = self.project_id.sale_line_employee_ids
+        if not mappings:
+            return mappings
+        if len(self.env.companies) == 1 or self.employee_id:
+            employee_id = self.employee_id.id or self.env.user.employee_id.id
+            for mapping in mappings:
+                if mapping.employee_id.id == employee_id:
+                    return mapping
+            return mappings.browse()
+        user_employees = self.env.user.employee_ids
+        employees = mappings.filtered(lambda m: m.employee_id in user_employees)
+        return employees.filtered(lambda e: e.employee_id.company_id.id == self.env.company.id)[:1] or employees.filtered(lambda e: e.employee_id.company_id.id in self.env.companies.ids)[:1]
 
     def _hourly_cost(self):
         if self.project_id.pricing_type == 'employee_rate':

@@ -8,10 +8,10 @@ import { getAdjacentPreviousSiblings, isBlock, rgbToHex, commonParentGet } from 
 
 const RE_COL_MATCH = /(^| )col(-[\w\d]+)*( |$)/;
 const RE_OFFSET_MATCH = /(^| )offset(-[\w\d]+)*( |$)/;
-const RE_PADDING_MATCH = /[ ]*padding[^;]*;/g;
 const RE_PADDING = /([\d.]+)/;
 const RE_WHITESPACE = /[\s\u200b]*/;
 const SELECTORS_IGNORE = /(^\*$|:hover|:before|:after|:active|:link|::|'|\([^(),]+[,(])|@page/;
+const RE_THEME_COLOR_CLASS = /^bg-o-color-\d+$/;
 // CSS properties relating to font, which Outlook seem to have trouble inheriting.
 const FONT_PROPERTIES_TO_INHERIT = [
     'color',
@@ -34,7 +34,8 @@ export const TABLE_ATTRIBUTES = {
 };
 // Cancel tables default styles.
 export const TABLE_STYLES = {
-    'border-collapse': 'collapse',
+    'border-collapse': 'separate',
+    'border-spacing': '0px',
     'text-align': 'inherit',
     'font-size': 'unset',
     'line-height': 'inherit',
@@ -381,6 +382,7 @@ function cardToTable(editable) {
                 col.append(child);
             }
             const subTable = _createTable();
+            subTable.style.height = '100%';
             const superRow = document.createElement('tr');
             const superCol = document.createElement('td');
             row.append(col);
@@ -446,7 +448,9 @@ function classToStyle($editable, cssRules) {
         // Flexbox
         for (const styleName of node.style) {
             if (styleName.includes('flex') || `${node.style[styleName]}`.includes('flex')) {
-                writes.push(() => { node.style[styleName] = ''; });
+                // inline-flex falls back to inline-block so inline elements (e.g. buttons) keep their box
+                const fallback = styleName === 'display' && node.style[styleName] === 'inline-flex' ? 'inline-block' : '';
+                writes.push(() => { node.style[styleName] = fallback; });
             }
         }
 
@@ -460,13 +464,25 @@ function classToStyle($editable, cssRules) {
             }
         };
         style = correctBorderAttributes(style);
-        if (Object.keys(style || {}).length === 0) {
+        if (Object.keys(style || {}).length === 0 || node.nodeName === "T") {
             writes.push(() => { node.removeAttribute('style'); });
         } else {
             writes.push(() => {
                 node.setAttribute('style', style);
                 if (node.style.width) {
                     node.setAttribute('width', node.style.width.replace('px', '').trim());
+                }
+            });
+        }
+
+        const themeColorClasses = [...node.classList].filter(c => RE_THEME_COLOR_CLASS.test(c));
+        if (themeColorClasses.length) {
+            writes.push(() => {
+                for (const cls of themeColorClasses) {
+                    node.classList.remove(cls);
+                }
+                if (!node.classList.length) {
+                    node.removeAttribute('class');
                 }
             });
         }
@@ -488,24 +504,7 @@ function classToStyle($editable, cssRules) {
             // Append non-breaking spaces to empty table cells.
             writes.push(() => { node.appendChild(document.createTextNode('\u00A0')); });
         }
-        // Outlook
-        if (node.nodeName === 'A' && node.classList.contains('btn') && !node.classList.contains('btn-link') && !node.children.length) {
-            writes.push(() => {
-                node.before(_createMso(`<table align="center" border="0"
-                    role="presentation" cellpadding="0" cellspacing="0"
-                    style="border-radius: 6px; border-collapse: separate !important;">
-                        <tbody>
-                            <tr>
-                                <td style="${node.style.cssText.replace(RE_PADDING_MATCH, '').replaceAll('"', '&quot;')}" ${
-                                    node.parentElement.style.textAlign === 'center' ? 'align="center" ' : ''
-                                }bgcolor="${rgbToHex(node.style.backgroundColor)}">
-                    `));
-                node.after(_createMso(`</td>
-                        </tr>
-                    </tbody>
-                </table>`));
-            });
-        } else if (node.nodeName === 'IMG' && node.classList.contains('mx-auto') && node.classList.contains('d-block')) {
+        if (node.nodeName === 'IMG' && node.classList.contains('mx-auto') && node.classList.contains('d-block')) {
             writes.push(() => { _wrap(node, 'p', 'o_outlook_hack', 'text-align:center;margin:0'); });
         }
 
@@ -682,8 +681,10 @@ function enforceImagesResponsivity(editable) {
     // Remove the height attribute in card images so they can resize
     // responsively, but leave it for Outlook.
     for (const image of editable.querySelectorAll('img[width="100%"][height]')) {
-        image.before(_createMso(image.outerHTML));
-        image.classList.add('mso-hide');
+        if (!image.classList.contains("mso-hide")) {
+            image.before(_createMso(image.outerHTML));
+            image.classList.add('mso-hide');
+        }
         image.removeAttribute('height');
     }
 }
@@ -751,7 +752,7 @@ export async function toInline($editable, options) {
         clone.style.setProperty('width', width + 'px');
         clone.style.removeProperty('max-width');
         image.before(_createMso(clone.outerHTML));
-        _hideForOutlook(image);
+        image.classList.add("mso-hide");
     }
 
     classToStyle($editable, cssRules);
@@ -1274,7 +1275,9 @@ function normalizeRem($editable, rootFontSize=16) {
         // The opening tag of `td` is for the others.
         _hideForOutlook(td, 'opening');
     }
-}
+    equalizeCardHeights(editable);
+    applyVmlToButtons(editable);
+ }
 
 /**
  * Convert image element to an image element with type png
@@ -1307,6 +1310,71 @@ async function convertToPng(img) {
     image.setAttribute('width', width);
     image.setAttribute('height', height);
     return image;
+}
+
+
+function equalizeCardHeights(editable) {
+    for (const td of editable.querySelectorAll(".s_three_columns .align-items-stretch td")) {
+        const cards = [...td.querySelectorAll(":scope > div.o_stacking_wrapper table.card")];
+        if (cards.length < 2) {
+            continue;
+        }
+        const cardBodies = cards.map((card) => card.querySelector("td.card-body"));
+        const headerHeights = cards.map((card) => {
+            const img = card.querySelector(".card-img-top");
+            return img ? img.offsetHeight : 0;
+        });
+
+        const bodyContentHeights = cardBodies.map((body) => body.scrollHeight);
+        const maxTotalHeight = Math.max(
+            ...cards.map((_, i) => headerHeights[i] + bodyContentHeights[i])
+        );
+
+        for (let i = 0; i < cardBodies.length; i++) {
+            const body = cardBodies[i];
+            const newHeight = maxTotalHeight - headerHeights[i];
+            body.setAttribute("height", newHeight);
+            body.setAttribute("valign", "top");
+            body.style.setProperty("height", newHeight + "px");
+        }
+    }
+}
+
+function applyVmlToButtons(editable) {
+    function computeArcsize(s, heightPx) {
+        const radius = parseFloat(s.borderRadius || s.borderTopLeftRadius) || 0;
+        if (!radius || !heightPx) return 0;
+        return Math.round((radius / heightPx) * 100);
+    }
+
+    editable.querySelectorAll("a.btn:not(.btn-link)").forEach((btn) => {
+        const s = btn.style;
+        const rawBg = s.backgroundColor || s.background;
+        if (!rawBg) return;
+
+        const bg = rgbToHex(rawBg);
+        const arcsize = computeArcsize(s, btn.offsetHeight);
+        const href = btn.getAttribute('href') || '';
+        const target = btn.getAttribute('target') || '_blank';
+        const rel = btn.getAttribute('rel') || 'noopener';
+
+        const msoA = btn.cloneNode(true);
+        msoA.style.removeProperty('background-color');
+        msoA.style.removeProperty('background');
+        msoA.style.removeProperty('border-radius');
+
+        btn.before(_createMso(
+            `<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" ` +
+            `href="${href}" rel="${rel}" target="${target}" ` +
+            `style="mso-wrap-style:none;mso-position-horizontal:center;mso-position-vertical:top;" ` +
+            `arcsize="${arcsize}%" stroke="f" fillcolor="${bg}">` +
+            `<w:anchorlock/><v:textbox inset="0,0,0,0" style="mso-fit-shape-to-text:true;"><center>` +
+            msoA.outerHTML +
+            `</center></v:textbox></v:roundrect>`
+        ));
+
+        _hideForOutlook(btn);
+    });
 }
 
 /**
@@ -1480,8 +1548,8 @@ function _createColumnGrid() {
  * @param {string} content
  * @returns {Comment}
  */
-function _createMso(content = "") {
-    // We remove commets having opposite condition fron the one we will insert
+function _createMso(content = '') {
+    // We remove comments having opposite condition from the one we will insert
     // We remove comment tags having the same condition
     const showRegex = /<!--\[if\s+mso\]>([\s\S]*?)<!\[endif\]-->/g;
     const hideRegex = /<!--\[if\s+!mso\]>([\s\S]*?)<!\[endif\]-->/g;
@@ -1701,7 +1769,12 @@ function _getMatchedCSSRules(node, cssRules, checkBlacklisted = false) {
     // flexboxes are not supported in Windows Outlook
     for (const styleName in processedStyle) {
         if (styleName.includes('flex') || `${processedStyle[styleName]}`.includes('flex')) {
-            delete processedStyle[styleName];
+            if (styleName === 'display' && processedStyle[styleName] === 'inline-flex') {
+                // inline-flex falls back to inline-block so inline elements (e.g. buttons) keep their box
+                processedStyle[styleName] = 'inline-block';
+            } else {
+                delete processedStyle[styleName];
+            }
         }
     }
 

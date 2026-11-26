@@ -2,6 +2,7 @@
 # It can be passed as the `template` argument to `dict_to_xml` to enforce the order of nodes.
 
 import odoo.addons.account_edi_ubl_cii.tools.ubl_21_common as cac
+import odoo.addons.account_edi_ubl_cii.tools.ubl_21_extensions as ext
 
 DebitNoteLine = {
     'cbc:ID': {},
@@ -25,7 +26,7 @@ DebitNoteLine = {
 
 DebitNote = {
     '_tag': 'DebitNote',
-    'ext:UBLExtensions': {},
+    'ext:UBLExtensions': ext.UBLExtensions,
     'cbc:UBLVersionID': {},
     'cbc:CustomizationID': {},
     'cbc:ProfileID': {},
@@ -49,6 +50,7 @@ DebitNote = {
     'cac:AccountingSupplierParty': cac.SupplierParty,
     'cac:AccountingCustomerParty': cac.CustomerParty,
     'cac:SellerSupplierParty': cac.SupplierParty,
+    'cac:TaxRepresentativeParty': cac.Party,
     'cac:PrepaidPayment': cac.PrepaidPayment,
     'cac:AllowanceCharge': cac.AllowanceCharge,
     'cac:Delivery': cac.Delivery,

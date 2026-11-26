@@ -91,6 +91,7 @@ class PosOrder(models.Model):
 
         pos_order = False
         combo_child_uuids_by_parent_uuid = self._prepare_combo_line_uuids(order)
+        self._check_combo_item_available(order, combo_child_uuids_by_parent_uuid)
 
         if not existing_order:
             pos_order = self.create({
@@ -111,11 +112,17 @@ class PosOrder(models.Model):
                 if order.get(field):
                     existing_record_ids = self.env[pos_order[field]._name].browse([r[1] for r in order[field] if r[1] != 0]).exists().ids
                     existing_records_vals = [r for r in order[field] if r[0] not in [1, 2, 3, 4] or r[1] in existing_record_ids]
+                    existing_ids = set(pos_order[field].ids)
                     pos_order.write({field: existing_records_vals})
+                    added_ids = set(pos_order[field].ids) - existing_ids
+                    if added_ids:
+                        _logger.info("Added %s %s to pos.order #%s", field, list(added_ids), pos_order.id)
                     order[field] = []
 
             del order['uuid']
-            del order['access_token']
+            if 'access_token' in order:
+                del order['access_token']
+
             pos_order.write(order)
 
         pos_order._link_combo_items(combo_child_uuids_by_parent_uuid)
@@ -144,6 +151,41 @@ class PosOrder(models.Model):
             if not parent_line:
                 continue
             parent_line.combo_line_ids = [(6, 0, self.lines.filtered(lambda line: line.uuid in child_uuids).ids)]
+
+    def _check_combo_item_available(self, order, combo_child_uuids_by_parent_uuid):
+        if not combo_child_uuids_by_parent_uuid:
+            return
+
+        product_by_uuid = {}
+        for line in order.get('lines', []):
+            if len(line) > 2 and isinstance(vals := line[2], dict) and vals.get('uuid'):
+                product_by_uuid[vals['uuid']] = vals['product_id']
+
+        parent_product_ids = {
+            pid
+            for parent_uuid in combo_child_uuids_by_parent_uuid
+            if (pid := product_by_uuid.get(parent_uuid))
+        }
+        parents = self.env['product.product'].browse(parent_product_ids)
+        # Warm the cache for the whole batch: a handful of queries instead of one
+        # set per parent line.
+        parents.product_tmpl_id.combo_ids.combo_item_ids.product_id
+
+        available_ids_by_parent = {
+            parent.id: set(parent.product_tmpl_id.combo_ids.combo_item_ids.product_id.ids)
+            for parent in parents
+        }
+
+        for parent_uuid, children_uuids in combo_child_uuids_by_parent_uuid.items():
+            available_ids = available_ids_by_parent.get(product_by_uuid.get(parent_uuid)) or set()
+            for child_uuid in children_uuids:
+                product_id = product_by_uuid.get(child_uuid)
+                if product_id not in available_ids:
+                    raise UserError(_(
+                        "The combo choice '%s' is no longer available in this combo. "
+                        "Please reload your data.",
+                        self.env['product.product'].browse(product_id).display_name,
+                    ))
 
     def _process_saved_order(self, draft):
         self.ensure_one()
@@ -681,14 +723,27 @@ class PosOrder(models.Model):
         return currency.round(amount) if currency else amount
 
     def _get_partner_bank_id(self):
-        bank_partner_id = False
+        self.ensure_one()
+        partner_bank_id = False
+
+        def _first_allowed(bank_ids):
+            return bank_ids.filtered(lambda b: b.allow_out_payment)[:1]
+
+        # Case 1: refund / negative amount → customer bank
         if self.amount_total <= 0 and self.partner_id.bank_ids:
-            bank_partner_id = self.partner_id.bank_ids[0].id
-        elif self.amount_total >= 0 and self.payment_ids and self.payment_ids[0].payment_method_id.journal_id.bank_account_id:
-            bank_partner_id = self.payment_ids[0].payment_method_id.journal_id.bank_account_id.id
-        elif self.amount_total >= 0 and self.company_id.partner_id.bank_ids:
-            bank_partner_id = self.company_id.partner_id.bank_ids[0].id
-        return bank_partner_id
+            partner_bank_id = _first_allowed(self.partner_id.bank_ids)
+
+        # Case 2: positive amount → payment journal bank
+        elif self.amount_total >= 0 and self.payment_ids:
+            journal_bank = self.payment_ids[0].payment_method_id.journal_id.bank_account_id
+            if journal_bank and journal_bank.allow_out_payment:
+                partner_bank_id = journal_bank
+
+        # Case 3: fallback → company bank
+        if not partner_bank_id and self.amount_total >= 0 and self.company_id.partner_id.bank_ids:
+            partner_bank_id = _first_allowed(self.company_id.partner_id.bank_ids)
+
+        return partner_bank_id.id if partner_bank_id else False
 
     def _create_invoice(self, move_vals):
         self.ensure_one()
@@ -697,7 +752,7 @@ class PosOrder(models.Model):
             .with_context(default_move_type=move_vals['move_type'], linked_to_pos=True)\
             .create(move_vals)
 
-        if self.config_id.cash_rounding:
+        if self.config_id.cash_rounding and invoice.invoice_cash_rounding_id:
             line_ids_commands = []
             rate = invoice.invoice_currency_rate
             sign = invoice.direction_sign
@@ -780,7 +835,7 @@ class PosOrder(models.Model):
             'pos_refunded_invoice_ids': pos_refunded_invoice_ids,
             'pos_order_ids': self.ids,
             'journal_id': self.session_id.config_id.invoice_journal_id.id,
-            'move_type': 'out_invoice' if self.amount_total >= 0 else 'out_refund',
+            'move_type': 'out_invoice' if float_compare(self.amount_total, 0, precision_rounding=self.currency_id.rounding) >= 0 else 'out_refund',
             'ref': self.name,
             'partner_id': self.partner_id.address_get(['invoice'])['invoice'],
             'partner_shipping_id': self.partner_id.address_get(['delivery'])['delivery'],
@@ -791,11 +846,14 @@ class PosOrder(models.Model):
             'fiscal_position_id': self.fiscal_position_id.id,
             'invoice_line_ids': self._prepare_invoice_lines(),
             'invoice_payment_term_id': False,
-            'invoice_cash_rounding_id': self.config_id.rounding_method.id,
         }
         if self.refunded_order_id.account_move:
             vals['ref'] = _('Reversal of: %s', self.refunded_order_id.account_move.name)
             vals['reversed_entry_id'] = self.refunded_order_id.account_move.id
+
+        if self.config_id.cash_rounding and (not self.config_id.only_round_cash_method or any(p.payment_method_id.is_cash_count for p in self.payment_ids)):
+            vals['invoice_cash_rounding_id'] = self.config_id.rounding_method.id
+
         if self.floating_order_name:
             vals.update({'narration': self.floating_order_name})
         return vals
@@ -1090,6 +1148,9 @@ class PosOrder(models.Model):
     def _get_order_log_representation(order):
         return dict((k, order.get(k)) for k in ("name", "uuid"))
 
+    def _should_log_order_data(self):
+        return self.env['ir.config_parameter'].sudo().get_param('point_of_sale.log_order_data', default='False') == 'True'
+
     @api.model
     def sync_from_ui(self, orders):
         """ Create and update Orders from the frontend PoS application.
@@ -1109,7 +1170,8 @@ class PosOrder(models.Model):
         order_ids = []
         for order in orders:
             order_log_name = self._get_order_log_representation(order)
-            _logger.debug("PoS synchronisation #%d processing order %s order full data: %s", sync_token, order_log_name, pformat(order))
+            if self._should_log_order_data():
+                _logger.info("PoS synchronisation #%d processing order %s order full data:\n%s", sync_token, order_log_name, pformat(order))
 
             if len(self._get_refunded_orders(order)) > 1:
                 raise ValidationError(_('You can only refund products from the same order.'))
@@ -1168,6 +1230,8 @@ class PosOrder(models.Model):
 
     def _create_order_picking(self):
         self.ensure_one()
+        if self.picking_ids:
+            return
         if self.shipping_date:
             self.sudo().lines._launch_stock_rule_from_pos_order_lines()
         else:
@@ -1181,7 +1245,8 @@ class PosOrder(models.Model):
                     destination_id = picking_type.default_location_dest_id.id
 
                 pickings = self.env['stock.picking']._create_picking_from_pos_order_lines(destination_id, self.lines, picking_type, self.partner_id)
-                pickings.write({'pos_session_id': self.session_id.id, 'pos_order_id': self.id, 'origin': self.name})
+                all_pickings = pickings | pickings.backorder_ids
+                all_pickings.write({'pos_session_id': self.session_id.id, 'pos_order_id': self.id, 'origin': self.name})
 
     def add_payment(self, data):
         """Create a new payment for the order"""
@@ -1244,7 +1309,9 @@ class PosOrder(models.Model):
                 PosOrderLineLot = self.env['pos.pack.operation.lot']
                 for pack_lot in line.pack_lot_ids:
                     PosOrderLineLot += pack_lot.copy()
-                line.copy(line._prepare_refund_data(refund_order, PosOrderLineLot))
+                line_copy = line.copy(line._prepare_refund_data(refund_order, PosOrderLineLot))
+                line_copy._onchange_amount_line_all()
+            refund_order._onchange_amount_all()
             refund_orders |= refund_order
         refund_orders._compute_prices()
         return refund_orders
@@ -1362,6 +1429,24 @@ class PosOrder(models.Model):
         totalCount = self.search_count(real_domain)
         return {'ordersInfo': list(orders_info.items())[::-1], 'totalCount': totalCount}
 
+    def get_ticket_screen_order_data(self):
+        config = self.config_id[:1]
+        data = self.read_pos_data([], config.id)
+        # The frontend drops orderlines whose product it has not loaded.
+        if config and self.lines.product_id:
+            product_model = self.env['product.product']
+            products = product_model._load_product_with_domain(
+                [('id', 'in', self.lines.product_id.ids)], config.id, load_archived=True,
+            )
+            product_model._process_pos_ui_product_product(products, config)
+            data['product.product'] = products
+        # Same for the partners (limited loading).
+        if config and self.partner_id:
+            data['res.partner'] = self.partner_id.read(
+                self.env['res.partner']._load_pos_data_fields(config.id), load=False,
+            )
+        return data
+
     def _send_order(self):
         # This function is made to be overriden by pos_self_order_preparation_display
         pass
@@ -1403,7 +1488,14 @@ class PosOrderLine(models.Model):
     is_total_cost_computed = fields.Boolean(help="Allows to know if the total cost has already been computed or not")
     discount = fields.Float(string='Discount (%)', digits=0, default=0.0)
     order_id = fields.Many2one('pos.order', string='Order Ref', ondelete='cascade', required=True, index=True)
-    tax_ids = fields.Many2many('account.tax', string='Taxes', readonly=True)
+    tax_ids = fields.Many2many(
+        comodel_name='account.tax',
+        relation='account_tax_pos_order_line_rel',
+        column1='pos_order_line_id',
+        column2='account_tax_id',
+        string='Taxes',
+        readonly=True,
+    )
     tax_ids_after_fiscal_position = fields.Many2many('account.tax', compute='_get_tax_ids_after_fiscal_position', string='Taxes to Apply')
     pack_lot_ids = fields.One2many('pos.pack.operation.lot', 'pos_order_line_id', string='Lot/serial Number')
     product_uom_id = fields.Many2one('uom.uom', string='Product UoM', related='product_id.uom_id')
@@ -1468,6 +1560,7 @@ class PosOrderLine(models.Model):
             'pack_lot_ids': PosOrderLineLot,
             'is_total_cost_computed': False,
             'refunded_orderline_id': self.id,
+            'uuid': str(uuid4()),
         }
 
     @api.model_create_multi
@@ -1576,7 +1669,7 @@ class PosOrderLine(models.Model):
             price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
             self.price_subtotal = self.price_subtotal_incl = price * self.qty
             if (self.tax_ids):
-                taxes = self.tax_ids.compute_all(price, self.order_id.currency_id, self.qty, product=self.product_id, partner=False)
+                taxes = self.tax_ids_after_fiscal_position.compute_all(price, self.order_id.currency_id, self.qty, product=self.product_id, partner=False)
                 self.price_subtotal = taxes['total_excluded']
                 self.price_subtotal_incl = taxes['total_included']
 
@@ -1723,8 +1816,8 @@ class PosOrderLine(models.Model):
         if fiscal_position:
             account = fiscal_position.map_account(account)
 
-        is_refund_order = line.order_id.amount_total < 0.0
-        is_refund_line = line.qty * line.price_unit < 0
+        is_refund_order = float_compare(line.order_id.amount_total, 0, precision_rounding=self.order_id.currency_id.rounding) < 0.0
+        is_refund_line = line.isRefund()
 
         product_name = line.product_id \
             .with_context(lang=line.order_id.partner_id.lang or self.env.user.lang) \
@@ -1771,6 +1864,8 @@ class PosOrderLine(models.Model):
         original_price = self.tax_ids_after_fiscal_position.compute_all(self.price_unit, self.currency_id, self.qty, product=self.product_id, partner=self.order_id.partner_id)['total_included']
         return original_price - self.price_subtotal_incl
 
+    def isRefund(self):
+        return self.qty * self.price_unit < 0
 
 class PosOrderLineLot(models.Model):
     _name = "pos.pack.operation.lot"

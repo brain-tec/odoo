@@ -6,22 +6,23 @@
 # Wil Odoo, 2024
 # Rasareeyar Lappiam, 2025
 #
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
+# Nusara Boonma <nuboo@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-29 18:36+0000\n"
-"PO-Revision-Date: 2025-11-29 18:00+0000\n"
+"PO-Revision-Date: 2026-10-20 09:40+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Thai <https://translate.odoo.com/projects/odoo-18/analytic/th/"
-">\n"
+"Language-Team: Thai <https://translate.odoo.com/projects/odoo-18/analytic/"
+"th/>\n"
 "Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: analytic
 #. odoo-python
@@ -33,7 +34,7 @@ msgstr "%s (สำเนา)"
 #. odoo-python
 #: code:addons/analytic/models/analytic_line.py:0
 msgid "%s analytic lines created"
-msgstr ""
+msgstr "%s รายการวิเคราะห์ที่สร้างขึ้น"
 
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_plan_form_view
@@ -52,8 +53,8 @@ msgid ""
 "A 'Project' plan needs to exist and its id needs to be set as "
 "`analytic.project_plan` in the system variables"
 msgstr ""
-"จำเป็นต้องมีแผน 'โปรเจ็กต์' และต้องตั้งค่ารหัสเป็น `analytic.project_plan` "
-"ในตัวแปรของระบบ"
+"จำเป็นต้องมีแผน 'โปรเจ็กต์' และต้องตั้งค่ารหัสเป็น `analytic.project_plan` ในตัวแปรของระบ"
+"บ"
 
 #. module: analytic
 #. odoo-javascript
@@ -69,7 +70,7 @@ msgstr "บัญชี"
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_agrolait
 msgid "Acme Corporation"
-msgstr ""
+msgstr "Acme Corporation"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_needaction
@@ -190,12 +191,12 @@ msgstr "รายการวิเคราะห์"
 #. module: analytic
 #: model:ir.model,name:analytic.model_account_analytic_line
 msgid "Analytic Line"
-msgstr "บรรทัดการวิเคราะห์"
+msgstr "รายการการวิเคราะห์"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__line_ids
 msgid "Analytic Lines"
-msgstr "บรรทัดการวิเคราะห์"
+msgstr "รายการการวิเคราะห์"
 
 #. module: analytic
 #: model:ir.model,name:analytic.model_analytic_mixin
@@ -654,7 +655,7 @@ msgstr "เบ็ดเตล็ด"
 #. odoo-javascript
 #: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
 msgid "Multi edit"
-msgstr ""
+msgstr "แก้ไขหลายส่วน"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__name
@@ -788,13 +789,13 @@ msgstr "การผลิต"
 #. module: analytic
 #: model:account.analytic.plan,name:analytic.analytic_plan_projects
 msgid "Project"
-msgstr "โปรเจ็กต์"
+msgstr "โปรเจกต์"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__account_id
 #: model:ir.model.fields,field_description:analytic.field_analytic_plan_fields_mixin__account_id
 msgid "Project Account"
-msgstr "บัญชีโปรเจ็กต์"
+msgstr "บัญชีโปรเจกต์"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__unit_amount
@@ -858,7 +859,7 @@ msgstr "ค้นหารายการการวิเคราะห์"
 #. odoo-python
 #: code:addons/analytic/models/analytic_account.py:0
 msgid "See them"
-msgstr ""
+msgstr "ดูเพิ่มเติม"
 
 #. module: analytic
 #: model:ir.model.fields,help:analytic.field_account_analytic_distribution_model__company_id
@@ -867,8 +868,8 @@ msgid ""
 "create new customer invoice or Sales order if we select this company, it "
 "will automatically take this as an analytic account)"
 msgstr ""
-"เลือกบริษัทที่จะใช้การกระจายการวิเคราะห์ (เช่น สร้างใบแจ้งหนี้ลูกค้าใหม่หรือใบสั่งขาย "
-"ถ้าเราเลือกบริษัทนี้ ระบบจะใช้สิ่งนี้เป็นบัญชีวิเคราะห์โดยอัตโนมัติ)"
+"เลือกบริษัทที่จะใช้การกระจายการวิเคราะห์ (เช่น สร้างใบแจ้งหนี้ลูกค้าใหม่หรือใบสั่งขาย ถ้าเราเลือกบ"
+"ริษัทนี้ ระบบจะใช้สิ่งนี้เป็นบัญชีวิเคราะห์โดยอัตโนมัติ)"
 
 #. module: analytic
 #: model:ir.model.fields,help:analytic.field_account_analytic_distribution_model__partner_category_id
@@ -887,8 +888,8 @@ msgid ""
 "create new customer invoice or Sales order if we select this partner, it "
 "will automatically take this as an analytic account)"
 msgstr ""
-"เลือกพาร์ทเนอร์ที่จะใช้การกระจายการวิเคราะห์ (เช่น สร้างใบแจ้งหนี้ของลูกค้าใหม่หรือใบสั่งขาย "
-"หากเราเลือกพาร์ทเนอร์รายนี้ ระบบจะใช้สิ่งนี้เป็นบัญชีการวิเคราะห์โดยอัตโนมัติ)"
+"เลือกพาร์ทเนอร์ที่จะใช้การกระจายการวิเคราะห์ (เช่น สร้างใบแจ้งหนี้ของลูกค้าใหม่หรือใบสั่งขาย หาก"
+"เราเลือกพาร์ทเนอร์รายนี้ ระบบจะใช้สิ่งนี้เป็นบัญชีการวิเคราะห์โดยอัตโนมัติ)"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__sequence
@@ -917,7 +918,7 @@ msgstr "พารามิเตอร์ของระบบ"
 msgid ""
 "The value for %s must be the ID to a valid analytic plan that is not a "
 "subplan"
-msgstr ""
+msgstr "ค่าของ%s ต้องเป็น ID ของแผนวิเคราะห์ที่ถูกต้อง ซึ่งไม่ใช่แผนย่อย"
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_absences
@@ -963,6 +964,7 @@ msgid ""
 "Whoa there! Making this change would wipe out your current data. Let's avoid "
 "that, shall we?"
 msgstr ""
+"เดี๋ยวก่อน! การเปลี่ยนแปลงนี้จะทำให้ข้อมูลปัจจุบันของคุณถูกลบไปทั้งหมด มาหลีกเลี่ยงเรื่องนี้กันดีกว่านะ?"
 
 #. module: analytic
 #. odoo-python
@@ -971,8 +973,8 @@ msgid ""
 "You can't set a different company on your analytic account since there are "
 "some analytic items linked to it."
 msgstr ""
-"คุณไม่สามารถตั้งค่าบริษัทอื่นในบัญชีการวิเคราะห์ของคุณได้ "
-"เนื่องจากมีรายการการวิเคราะห์บางรายการเชื่อมโยงอยู่"
+"คุณไม่สามารถตั้งค่าบริษัทอื่นในบัญชีการวิเคราะห์ของคุณได้ เนื่องจากมีรายการการวิเคราะห์บางรายการเ"
+"ชื่อมโยงอยู่"
 
 #. module: analytic
 #. odoo-python
@@ -987,8 +989,8 @@ msgid ""
 "You defined a distribution with analytic account(s) belonging to a specific "
 "company but a model shared between companies or with a different company"
 msgstr ""
-"คุณกำหนดการกระจายด้วยบัญชีวิเคราะห์ที่เป็นของบริษัทใดบริษัทหนึ่ง "
-"แต่เป็นแบบจำลองที่ใช้ร่วมกันระหว่างบริษัทหรือกับบริษัทอื่น"
+"คุณกำหนดการกระจายด้วยบัญชีวิเคราะห์ที่เป็นของบริษัทใดบริษัทหนึ่ง แต่เป็นแบบจำลองที่ใช้ร่วมกันระหว่าง"
+"บริษัทหรือกับบริษัทอื่น"
 
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_form

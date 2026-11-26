@@ -7,23 +7,23 @@
 # Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2025
 # Fernanda Alvarez, 2025
 # "Fernanda Alvarez (mfar)" <mfar@odoo.com>, 2025, 2026.
-# "Patricia Gutiérrez (pagc)" <pagc@odoo.com>, 2025.
+# "Patricia Gutiérrez (pagc)" <pagc@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-29 18:36+0000\n"
-"PO-Revision-Date: 2026-01-17 09:06+0000\n"
-"Last-Translator: \"Fernanda Alvarez (mfar)\" <mfar@odoo.com>\n"
+"POT-Creation-Date: 2026-04-10 18:37+0000\n"
+"PO-Revision-Date: 2026-10-20 11:34+0000\n"
+"Last-Translator: \"Patricia Gutiérrez (pagc)\" <pagc@odoo.com>\n"
 "Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
 "odoo-18/mrp/es_419/>\n"
 "Language: es_419\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == 0)"
-" ? 1 : 2);\n"
-"X-Generator: Weblate 5.14.3\n"
+"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
+"0) ? 1 : 2);\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_production__state
@@ -228,55 +228,14 @@ msgstr ""
 "mover el producto final de la zona de producción a las existencias."
 
 #. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "100"
-msgstr "100"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrp_production_components
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrp_workorder
-msgid "12345678901"
-msgstr "12345678901"
-
-#. module: mrp
 #: model_terms:product.template,description:mrp.product_product_computer_desk_leg_product_template
 msgid "18″ x 2½″ Square Leg"
 msgstr "Pata cuadrada de 18 \"x 2½\""
 
 #. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "2023-09-15"
-msgstr "15-09-2023"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrp_production_components
-msgid "25"
-msgstr "25"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "50"
-msgstr "50"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "58"
-msgstr "58"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "60"
-msgstr "60"
-
-#. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.report_mrp_production_components
 msgid "8 GB RAM"
 msgstr "8 GB RAM"
-
-#. module: mrp
-#: model_terms:ir.ui.view,arch_db:mrp.report_mrporder
-msgid "987654321098"
-msgstr "987654321098"
 
 #. module: mrp
 #. odoo-javascript
@@ -1786,8 +1745,8 @@ msgid ""
 "Create a backorder if you expect to process the remaining products later. Do "
 "not create a backorder if you will not process the remaining products."
 msgstr ""
-"Cree una orden parcial si espera procesar los productos restantes después. "
-"No cree una orden parcial si no procesará los productos restantes."
+"Crea una orden parcial si planeas procesar los productos restantes después. "
+"No crees una orden parcial si no vas a procesarlos."
 
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.mrp_routing_action
@@ -3249,13 +3208,13 @@ msgstr "Orden de fabricación confirmada"
 #: code:addons/mrp/static/src/components/mo_overview/mrp_mo_overview.xml:0
 #: model_terms:ir.ui.view,arch_db:mrp.mo_overview_content
 msgid "MO Cost"
-msgstr "Costo de orden de fabricación"
+msgstr "Costo de la orden de fabricación"
 
 #. module: mrp
 #. odoo-javascript
 #: code:addons/mrp/static/src/components/mo_overview_display_filter/mrp_mo_overview_display_filter.js:0
 msgid "MO Costs"
-msgstr "Costos de orden de fabricación"
+msgstr "Costos de la orden de fabricación"
 
 #. module: mrp
 #: model:mail.message.subtype,description:mrp.mrp_mo_in_done
@@ -3975,7 +3934,7 @@ msgstr ""
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.stock_production_type_kanban
 msgid "Open"
-msgstr "Abierto"
+msgstr "Abrir"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_workorder_tree_editable_view_mo_form
@@ -3995,7 +3954,7 @@ msgstr "Operación"
 #: model:ir.model.fields,field_description:mrp.field_mrp_bom__allow_operation_dependencies
 #: model:ir.model.fields,field_description:mrp.field_mrp_routing_workcenter__allow_operation_dependencies
 msgid "Operation Dependencies"
-msgstr "Dependencias de operación"
+msgstr "Dependencias de las operaciones"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_stock_move__operation_id
@@ -4355,7 +4314,7 @@ msgstr "Datos JSON de ventana emergente"
 #: model:ir.model.fields,field_description:mrp.field_mrp_bom_line__possible_bom_product_template_attribute_value_ids
 #: model:ir.model.fields,field_description:mrp.field_mrp_routing_workcenter__possible_bom_product_template_attribute_value_ids
 msgid "Possible Product Template Attribute Value"
-msgstr "Posible valor de atributo de plantilla de producto"
+msgstr "Posible valor del atributo de la plantilla del producto"
 
 #. module: mrp
 #. odoo-python
@@ -4406,7 +4365,7 @@ msgstr "Imprimir etiquetas como:"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_picking_type_form_inherit_mrp
 msgid "Print when \"Create new Lot/SN\""
-msgstr "Imprimir al \"Crear nuevo número de lote o serie\""
+msgstr "Imprimir al \"Crear nuevo número de serie o lote\""
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_picking_type_form_inherit_mrp
@@ -4426,8 +4385,7 @@ msgstr "Defecto en el proceso"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
 msgid "Process manufacturing orders from the barcode application"
-msgstr ""
-"Procese las órdenes de fabricación desde la aplicación Código de barras"
+msgstr "Procese las órdenes de fabricación desde la aplicación Código de barras"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
@@ -4950,7 +4908,7 @@ msgstr "Días restantes"
 #. odoo-javascript
 #: code:addons/mrp/static/src/widgets/mrp_workorder_popover.xml:0
 msgid "Replan"
-msgstr "Volver a planear"
+msgstr "Replanificar"
 
 #. module: mrp
 #. odoo-javascript
@@ -5396,8 +5354,7 @@ msgstr "Tornillo de acero inoxidable"
 #. module: mrp
 #: model_terms:product.template,description:mrp.product_product_computer_desk_bolt_product_template
 msgid "Stainless steel screw full (dia - 5mm, Length - 10mm)"
-msgstr ""
-"Tornillo de acero inoxidable completo (diámetro - 5mm, longitud - 10mm)"
+msgstr "Tornillo de acero inoxidable completo (diámetro - 5mm, longitud - 10mm)"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_filter
@@ -5411,7 +5368,7 @@ msgstr "Destacado"
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_workorder_tree_editable_view
 msgid "Start"
-msgstr "Iniciar"
+msgstr "Inicio"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter_productivity__date_start
@@ -7020,18 +6977,17 @@ msgstr ""
 "                        <b invisible=\"consumption != 'strict'\">\n"
 "                            Revise su consumo de componentes o pida a un "
 "gerente que valide\n"
-"                            <span invisible=\"mrp_production_count != "
-"1\">esta orden de fabricación</span>\n"
-"                            <span invisible=\"mrp_production_count == "
-"1\">estas órdenes de fabricación</span>.\n"
+"                            <span invisible=\"mrp_production_count != 1\">"
+"esta orden de fabricación</span>\n"
+"                            <span invisible=\"mrp_production_count == 1\">"
+"estas órdenes de fabricación</span>.\n"
 "                        </b>"
 
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_production.py:0
 msgid "You need at least two production orders to merge them."
-msgstr ""
-"Necesita por lo menos dos órdenes de producción para poder fusionarlas."
+msgstr "Necesita por lo menos dos órdenes de producción para poder fusionarlas."
 
 #. module: mrp
 #. odoo-python
@@ -7213,3 +7169,27 @@ msgstr "dividir"
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_routing_workcenter_form_view
 msgid "work orders"
 msgstr "órdenes de trabajo"
+
+#~ msgid "100"
+#~ msgstr "100"
+
+#~ msgid "12345678901"
+#~ msgstr "12345678901"
+
+#~ msgid "2023-09-15"
+#~ msgstr "15-09-2023"
+
+#~ msgid "25"
+#~ msgstr "25"
+
+#~ msgid "50"
+#~ msgstr "50"
+
+#~ msgid "58"
+#~ msgstr "58"
+
+#~ msgid "60"
+#~ msgstr "60"
+
+#~ msgid "987654321098"
+#~ msgstr "987654321098"

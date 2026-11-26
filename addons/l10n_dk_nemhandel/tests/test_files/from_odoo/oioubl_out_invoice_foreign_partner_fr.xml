@@ -22,12 +22,15 @@
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cbc:EndpointID schemeID="DK:CVR">DK12345674</cbc:EndpointID>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="DK:CVR">DK12345674</cbc:ID>
+      </cac:PartyIdentification>
       <cac:PartyName>
         <cbc:Name>company_1_data</cbc:Name>
       </cac:PartyName>
       <cac:PostalAddress>
         <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredDK</cbc:AddressFormatCode>
-        <cbc:StreetName>Paradisæblevej,</cbc:StreetName>
+        <cbc:StreetName>Paradisæblevej</cbc:StreetName>
         <cbc:BuildingNumber>10</cbc:BuildingNumber>
         <cbc:CityName>Aalborg</cbc:CityName>
         <cbc:PostalZone>9430</cbc:PostalZone>
@@ -41,7 +44,7 @@
         <cbc:CompanyID schemeID="DK:SE">DK12345674</cbc:CompanyID>
         <cac:RegistrationAddress>
           <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredDK</cbc:AddressFormatCode>
-          <cbc:StreetName>Paradisæblevej,</cbc:StreetName>
+          <cbc:StreetName>Paradisæblevej</cbc:StreetName>
           <cbc:BuildingNumber>10</cbc:BuildingNumber>
           <cbc:CityName>Aalborg</cbc:CityName>
           <cbc:PostalZone>9430</cbc:PostalZone>
@@ -60,7 +63,7 @@
         <cbc:CompanyID schemeID="DK:CVR">DK12345674</cbc:CompanyID>
         <cac:RegistrationAddress>
           <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredDK</cbc:AddressFormatCode>
-          <cbc:StreetName>Paradisæblevej,</cbc:StreetName>
+          <cbc:StreetName>Paradisæblevej</cbc:StreetName>
           <cbc:BuildingNumber>10</cbc:BuildingNumber>
           <cbc:CityName>Aalborg</cbc:CityName>
           <cbc:PostalZone>9430</cbc:PostalZone>
@@ -80,12 +83,15 @@
   <cac:AccountingCustomerParty>
     <cac:Party>
       <cbc:EndpointID schemeID="GLN">5798009811639</cbc:EndpointID>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="GLN">5798009811639</cbc:ID>
+      </cac:PartyIdentification>
       <cac:PartyName>
         <cbc:Name>SUPER FRENCH PARTNER</cbc:Name>
       </cac:PartyName>
       <cac:PostalAddress>
         <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredDK</cbc:AddressFormatCode>
-        <cbc:StreetName>Rue Fabricy,</cbc:StreetName>
+        <cbc:StreetName>Rue Fabricy</cbc:StreetName>
         <cbc:BuildingNumber>16</cbc:BuildingNumber>
         <cbc:CityName>Lille</cbc:CityName>
         <cbc:PostalZone>59000</cbc:PostalZone>
@@ -99,7 +105,7 @@
         <cbc:CompanyID schemeID="ZZZ">FR23334175221</cbc:CompanyID>
         <cac:RegistrationAddress>
           <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredDK</cbc:AddressFormatCode>
-          <cbc:StreetName>Rue Fabricy,</cbc:StreetName>
+          <cbc:StreetName>Rue Fabricy</cbc:StreetName>
           <cbc:BuildingNumber>16</cbc:BuildingNumber>
           <cbc:CityName>Lille</cbc:CityName>
           <cbc:PostalZone>59000</cbc:PostalZone>
@@ -118,7 +124,7 @@
         <cbc:CompanyID schemeID="ZZZ">FR12356894100056</cbc:CompanyID>
         <cac:RegistrationAddress>
           <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredDK</cbc:AddressFormatCode>
-          <cbc:StreetName>Rue Fabricy,</cbc:StreetName>
+          <cbc:StreetName>Rue Fabricy</cbc:StreetName>
           <cbc:BuildingNumber>16</cbc:BuildingNumber>
           <cbc:CityName>Lille</cbc:CityName>
           <cbc:PostalZone>59000</cbc:PostalZone>
@@ -139,7 +145,7 @@
     <cac:DeliveryLocation>
       <cac:Address>
         <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredDK</cbc:AddressFormatCode>
-        <cbc:StreetName>Rue Fabricy,</cbc:StreetName>
+        <cbc:StreetName>Rue Fabricy</cbc:StreetName>
         <cbc:BuildingNumber>16</cbc:BuildingNumber>
         <cbc:CityName>Lille</cbc:CityName>
         <cbc:PostalZone>59000</cbc:PostalZone>
@@ -153,8 +159,8 @@
   <cac:PaymentMeans>
     <cbc:PaymentMeansCode name="unknown">1</cbc:PaymentMeansCode>
     <cbc:PaymentDueDate>2017-02-28</cbc:PaymentDueDate>
-    <cbc:InstructionID>INV/2017/00001</cbc:InstructionID>
-    <cbc:PaymentID>INV/2017/00001</cbc:PaymentID>
+    <cbc:InstructionID>+71&lt;000002017000015+40116243&lt;</cbc:InstructionID>
+    <cbc:PaymentID>+71&lt;000002017000015+40116243&lt;</cbc:PaymentID>
     <cac:PayeeFinancialAccount>
       <cbc:ID>DK5000400440116243</cbc:ID>
     </cac:PayeeFinancialAccount>

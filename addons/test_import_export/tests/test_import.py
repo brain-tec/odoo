@@ -539,6 +539,66 @@ class test_convert_import_data(TransactionCase):
         # if results empty, no errors
         self.assertItemsEqual(results['messages'], [])
 
+    def test_date_fields_with_slash_ymd(self):
+        self.env['res.lang']._activate_lang('de_DE')
+        import_wizard = self.env['base_import.import'].with_context(lang='de_DE').create({
+            'res_model': 'import.complex',
+            'file': 'c,d,create_date\n'
+                    '"foo","2023/01/01","2023.01.01 15:15:15"\n',
+            'file_type': 'text/csv',
+        })
+
+        opts = {
+            'date_format': '',
+            'datetime_format': '',
+            'quoting': '"',
+            'separator': ',',
+            'float_decimal_separator': '.',
+            'float_thousand_separator': ',',
+            'has_headers': True
+        }
+        result_parse = import_wizard.parse_preview({**opts})
+
+        opts = result_parse['options']
+        results = import_wizard.execute_import(
+            ['c', 'd', 'create_date'],
+            [],
+            {**opts}
+        )
+
+        # if results empty, no errors
+        self.assertItemsEqual(results['messages'], [])
+
+    def test_date_fields_with_slash_dmy(self):
+        self.env['res.lang']._activate_lang('de_DE')
+        import_wizard = self.env['base_import.import'].with_context(lang='de_DE').create({
+            'res_model': 'import.complex',
+            'file': 'c,d,create_date\n'
+                    '"foo","01/01/2023","2023.01.01 15:15:15"\n',
+            'file_type': 'text/csv',
+        })
+
+        opts = {
+            'date_format': '',
+            'datetime_format': '',
+            'quoting': '"',
+            'separator': ',',
+            'float_decimal_separator': '.',
+            'float_thousand_separator': ',',
+            'has_headers': True
+        }
+        result_parse = import_wizard.parse_preview({**opts})
+
+        opts = result_parse['options']
+        results = import_wizard.execute_import(
+            ['c', 'd', 'create_date'],
+            [],
+            {**opts}
+        )
+
+        # if results empty, no errors
+        self.assertItemsEqual(results['messages'], [])
+
     def test_parse_relational_fields(self):
         """ Ensure that relational fields float and date are correctly
         parsed during the import call.
@@ -566,6 +626,14 @@ class test_convert_import_data(TransactionCase):
         # Check if the data 5,69 as been correctly parsed.
         self.assertEqual(float(result[0][-1]), 5.69)
         self.assertEqual(str(result[0][-2]), '2017-10-12')
+
+    def test_parse_nested_relational_fields(self):
+        import_wizard = self.env['base_import.import'].create({'res_model': 'import.complex', 'file_type': 'text/csv'})
+        options = {'date_format': '%d/%m/%Y', 'float_decimal_separator': ',', 'float_thousand_separator': '.'}
+        data = [['foo', '5,69', '12,34567', '12/10/2017']]
+        import_fields = ['c', 'parent_id/f', 'parent_id/parent_id/f', 'parent_id/parent_id/d']
+        result = import_wizard._parse_import_data(data, import_fields, options)
+        self.assertEqual([str(value) for value in result[0][1:]], ['5.69', '12.34567', '2017-10-12'])
 
     def test_parse_scientific_notation(self):
         """ Ensure that scientific notation is correctly converted to decimal """
@@ -940,6 +1008,44 @@ g,g@example.com
         self.assertEqual(results['nextrow'], 0)
         partners_3 = self.env['res.partner'].search([]) - (partners_before | partners_1 | partners_2)
         self.assertEqual(partners_3.mapped('name'), ['d', 'e', 'f', 'g'])
+
+
+class TestImageImport(TransactionCase):
+    webp = base64.b64decode(
+        b'UklGRjoAAABXRUJQVlA4IC4AAAAwAQCdASoBAAEAAUAmJaAAA3AA/u/uY//8s//2W/7LeM///5Bj'
+    )
+
+    def _import_image(self, content):
+        response = unittest.mock.Mock(
+            headers={},
+            iter_content=unittest.mock.Mock(return_value=[content]),
+        )
+        session = unittest.mock.Mock()
+        session.get.return_value = response
+        return self.env['base_import.import']._import_image_by_url(
+            'https://example.com/image.webp', session, 'image', 0,
+        )
+
+    def test_import_webp_by_url(self):
+        self.assertEqual(self._import_image(self.webp), base64.b64encode(self.webp))
+
+    def test_import_unsupported_webp_by_url(self):
+        # ImageProcess accepts unknown WebP codecs and returns the source bytes.
+        content = b'RIFF\x08\x00\x00\x00WEBPVP8?'
+        self.assertEqual(self._import_image(content), base64.b64encode(content))
+
+    def test_import_oversized_webp_by_url(self):
+        # Above IMAGE_MAX_RESOLUTION (50e6); 8000x8000 = 64e6
+        width = height = 8000
+        dimensions = b''.join(
+            (size - 1).to_bytes(3, 'little') for size in (width, height)
+        )
+        chunk = b'VP8X' + (10).to_bytes(4, 'little') + b'\x00\x00\x00\x00' + dimensions
+        content = b'RIFF' + (len(chunk) + 4).to_bytes(4, 'little') + b'WEBP' + chunk
+
+        with mute_logger('odoo.addons.base_import.models.base_import'), \
+             self.assertRaisesRegex(ImportValidationError, r'Too large image \(above 50\.0Mpx\)'):
+            self._import_image(content)
 
 
 class test_failures(TransactionCase):

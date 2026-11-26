@@ -11,14 +11,17 @@
 # Dylan Kiss, 2025
 # Manon Rondou, 2025
 # Erwin van der Ploeg <erwin@odooexperts.nl>, 2025
-# "Manon Rondou (ronm)" <ronm@odoo.com>, 2025.
+# "Manon Rondou (ronm)" <ronm@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2026.
+# Bren Driesen <brdri@odoo.com>, 2026.
+# "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-15 18:39+0000\n"
-"PO-Revision-Date: 2025-09-03 15:43+0000\n"
-"Last-Translator: \"Manon Rondou (ronm)\" <ronm@odoo.com>\n"
+"POT-Creation-Date: 2026-10-30 17:40+0000\n"
+"PO-Revision-Date: 2026-10-30 09:33+0000\n"
+"Last-Translator: Bren Driesen <brdri@odoo.com>\n"
 "Language-Team: Dutch <https://translate.odoo.com/projects/odoo-18/payment/nl/"
 ">\n"
 "Language: nl\n"
@@ -26,7 +29,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_provider_onboarding_wizard___data_fetched
@@ -452,7 +455,7 @@ msgstr "Toepassen"
 #. module: payment
 #: model:payment.method,name:payment.payment_method_appota
 msgid "Appota"
-msgstr ""
+msgstr "Appota"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_token_form
@@ -664,7 +667,7 @@ msgstr "Belfius"
 #. module: payment
 #: model:payment.method,name:payment.payment_method_benefit
 msgid "Benefit"
-msgstr "Voordeel"
+msgstr "Benefit"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_bharatqr
@@ -795,7 +798,7 @@ msgstr "Carnet"
 #. module: payment
 #: model:payment.method,name:payment.payment_method_cartes_bancaires
 msgid "Cartes Bancaires"
-msgstr "Bankkaarten"
+msgstr "Cartes Bancaires"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_cash_app_pay
@@ -1060,7 +1063,7 @@ msgstr "Uitgeschakeld"
 #. module: payment
 #: model:payment.method,name:payment.payment_method_discover
 msgid "Discover"
-msgstr "Ontdekken"
+msgstr "Discover"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_capture_wizard__display_name
@@ -1086,7 +1089,7 @@ msgstr "Neem gerust contact met ons op als je niets ontvangt."
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_provider__done_msg
 msgid "Done Message"
-msgstr "Bericht bij gereed"
+msgstr "Bericht bij voltooid"
 
 #. module: payment
 #: model:ir.model.fields.selection,name:payment.selection__payment_transaction__state__draft
@@ -1146,7 +1149,7 @@ msgstr "Fout: %s"
 #: model:ir.model.fields,field_description:payment.field_payment_method__support_express_checkout
 #: model:ir.model.fields,field_description:payment.field_payment_provider__support_express_checkout
 msgid "Express Checkout"
-msgstr "Snel bestellen"
+msgstr "Express afrekenen"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_provider__express_checkout_form_view_id
@@ -1454,7 +1457,7 @@ msgstr "KrungThai Bank"
 #. module: payment
 #: model:payment.method,name:payment.payment_method_kfh
 msgid "Kuwait Finance House"
-msgstr ""
+msgstr "Kuwait Finance House"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_linepay
@@ -1929,7 +1932,7 @@ msgstr "Betaal"
 #. module: payment
 #: model:payment.method,name:payment.payment_method_paylater_india
 msgid "Pay Later"
-msgstr "Betaal later"
+msgstr "Pay Later"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_pay_easy
@@ -2017,7 +2020,7 @@ msgstr "Betalingsinstructies"
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_link_wizard__link
 msgid "Payment Link"
-msgstr "Betaal ink"
+msgstr "Betaallink"
 
 #. module: payment
 #: model:ir.model,name:payment.model_payment_method
@@ -2946,6 +2949,12 @@ msgstr ""
 
 #. module: payment
 #. odoo-python
+#: code:addons/payment/controllers/portal.py:0
+msgid "This payment provider is not available."
+msgstr ""
+
+#. module: payment
+#. odoo-python
 #: code:addons/payment/models/payment_transaction.py:0
 msgid ""
 "This transaction has been confirmed following the processing of its partial "
@@ -3080,12 +3089,12 @@ msgstr "VISA"
 #. module: payment
 #: model:payment.method,name:payment.payment_method_vnptwallet
 msgid "VNPT Money"
-msgstr ""
+msgstr "VNPT Money"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_vpbank
 msgid "VP Bank"
-msgstr ""
+msgstr "VP Bank"
 
 #. module: payment
 #: model:ir.model.fields.selection,name:payment.selection__payment_transaction__operation__validation
@@ -3100,7 +3109,7 @@ msgstr "Venmo"
 #. module: payment
 #: model:payment.method,name:payment.payment_method_vietcapital
 msgid "Viet Capital"
-msgstr ""
+msgstr "Viet Capital"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_vietcom
@@ -3110,7 +3119,7 @@ msgstr "Vietcombank"
 #. module: payment
 #: model:payment.method,name:payment.payment_method_viettelpay
 msgid "Viettel Pay"
-msgstr ""
+msgstr "Viettel Pay"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_vipps
@@ -3126,6 +3135,11 @@ msgstr "Geannuleerd resterend bedrag"
 #: model_terms:ir.ui.view,arch_db:payment.payment_transaction_form
 msgid "Void Transaction"
 msgstr "Ongeldige transactie"
+
+#. module: payment
+#: model:payment.method,name:payment.payment_method_wero
+msgid "WERO"
+msgstr "WERO"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_wallets_india
@@ -3203,7 +3217,7 @@ msgstr "Overschrijving"
 #. module: payment
 #: model:payment.method,name:payment.payment_method_woori
 msgid "Woori Bank"
-msgstr ""
+msgstr "Woori Bank"
 
 #. module: payment
 #: model:payment.provider,name:payment.payment_provider_worldline
@@ -3387,7 +3401,7 @@ msgstr "Je betaalmethodes"
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_transaction_form
 msgid "ZIP"
-msgstr "Postcode"
+msgstr "ZIP"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_zalopay
@@ -3395,9 +3409,13 @@ msgid "Zalopay"
 msgstr "Zalopay"
 
 #. module: payment
-#: model:ir.model.fields,field_description:payment.field_payment_transaction__partner_zip
 #: model:payment.method,name:payment.payment_method_zip
 msgid "Zip"
+msgstr "Zip"
+
+#. module: payment
+#: model:ir.model.fields,field_description:payment.field_payment_transaction__partner_zip
+msgid "Zip Code"
 msgstr "Postcode"
 
 #. module: payment
@@ -3418,6 +3436,7 @@ msgstr "snel afrekenen wordt niet ondersteund"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_ideal
+#: model:payment.method,name:payment.payment_method_ideal_brand
 msgid "iDEAL"
 msgstr "iDEAL"
 
