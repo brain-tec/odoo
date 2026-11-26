@@ -202,6 +202,7 @@ class StockMove(models.Model):
     show_lots_text = fields.Boolean("Show lot_name", compute="_compute_show_info")
     scrap_reason_tag_ids = fields.Many2many('stock.scrap.reason.tag', string='Scrap Reason')
     should_replenish_scrapped = fields.Boolean('Should Replenish')
+    weight = fields.Float(compute='_compute_weight', digits='Stock Weight', store=True)
 
     _product_location_index = models.Index("(product_id, location_id, location_dest_id, company_id, state)")
 
@@ -835,6 +836,11 @@ Please change the quantity done or the rounding precision in your settings.""",
                 move.description_picking = product._get_picking_description(move.picking_type_id) or move._get_description()
             else:
                 move.description_picking = ""
+
+    @api.depends('product_id', 'quantity_product_uom')
+    def _compute_weight(self):
+        for move in self:
+            move.weight = move.quantity_product_uom * move.product_id.weight
 
     def _get_description(self):
         product = self.product_id.with_context(lang=self._get_lang())
@@ -2701,9 +2707,15 @@ Please change the quantity done or the rounding precision in your settings.""",
                     ('location_dest_id', '=', move.location_dest_id.id),
                     ('action', '!=', 'push')
                 ]
+                warehouse = move.warehouse_id or move.picking_type_id.warehouse_id
+                rule = self.env['stock.rule']
                 if picking_type_code:
                     domain.append(('picking_type_id.code', '=', picking_type_code))
-                rule = self.env['stock.rule']._search_rule(False, move.packaging_uom_id, product_id, move.warehouse_id or move.picking_type_id.warehouse_id, domain)
+                elif move.picking_type_id:
+                    # Several rules can match, prefer one of the same operation type as the move.
+                    rule = self.env['stock.rule']._search_rule(False, move.packaging_uom_id, product_id, warehouse, domain + [('picking_type_id.code', '=', move.picking_type_id.code)])
+                if not rule:
+                    rule = self.env['stock.rule']._search_rule(False, move.packaging_uom_id, product_id, warehouse, domain)
                 if rule:
                     break
                 location = location.location_id

@@ -1342,6 +1342,12 @@ class HrLeave(models.Model):
                     changes['request_date_to'] = new_request_date_to
                 if float_compare(leave.request_hour_to, new_request_hour_to, precision_digits=2) != 0:
                     changes['request_hour_to'] = new_request_hour_to
+                if changes and leave.work_entry_type_request_unit == 'hour' \
+                        and not leave.request_hour_from and not leave.request_hour_to:
+                    # the hours were never set, so date_from comes from the schedule (see
+                    # _compute_date_from_to): keep that start, the end alone would move it to midnight
+                    changes['request_hour_from'] = time_to_float(
+                        leave.date_from.replace(tzinfo=UTC).astimezone(leave_tz).time())
                 if changes:
                     # create() protects these fields while its inverses run, so an
                     # assignment would reach the cache only and leave date_to stale
@@ -1531,7 +1537,7 @@ class HrLeave(models.Model):
                     date_to=format_date(self.env, holiday.date_to),
                 )
                 if self.env.context.get('import_file'):
-                    message += _("To import it as a new time off request instead, leave the External ID column empty.")
+                    message += "\n" + _("To import it as a new time off request instead, leave the External ID column empty.")
                 raise ValidationError(message)
 
     def _check_validity(self):
@@ -1706,7 +1712,9 @@ class HrLeave(models.Model):
             employees_without_allocation, zero_duration_employees = real_holidays.with_context(multi_leave_request=self.env.context.get('multi_leave_request'))._check_validity()
             invalid_holidays = real_holidays.filtered(lambda l: l.employee_id in (employees_without_allocation | zero_duration_employees))
             holidays -= invalid_holidays
-            invalid_holidays.unlink()
+            # sudo: drop the time off just created, the creator (e.g. the time off manager of the
+            # employee) is not always allowed to delete them
+            invalid_holidays.sudo().unlink()
 
         for holiday in holidays:
             if not self.env.context.get('leave_fast_create'):
@@ -1790,15 +1798,14 @@ class HrLeave(models.Model):
             self.env['hr.time.rule']._reverse_allocation_credits('hr.leave', validated_leaves.ids)
 
         employee_id = values.get('employee_id', False)
-        if not self.env.context.get('leave_fast_create'):
-            if values.get('state'):
-                self._check_approval_update(values['state'])
-                if any(holiday.validation_type == 'both' for holiday in self):
-                    if values.get('employee_id'):
-                        employees = self.env['hr.employee'].browse(values.get('employee_id'))
-                    else:
-                        employees = self.mapped('employee_id')
-                    self._check_double_validation_rules(employees, values['state'])
+        if values.get('state'):
+            self._check_approval_update(values['state'])
+            if any(holiday.validation_type == 'both' for holiday in self):
+                if values.get('employee_id'):
+                    employees = self.env['hr.employee'].browse(values.get('employee_id'))
+                else:
+                    employees = self.mapped('employee_id')
+                self._check_double_validation_rules(employees, values['state'])
 
         skip_leave_version_check = False
         if {'date_from', 'date_to'} & values.keys():

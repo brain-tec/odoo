@@ -81,7 +81,6 @@ test("simple chatter on a record", async () => {
         [
             "mail.thread",
             {
-                access_params: {},
                 request_list: [
                     "activities",
                     "attachments",
@@ -112,8 +111,11 @@ test("can post a message on a record thread", async () => {
                 body: "<div>hey</div>",
                 email_add_signature: true,
                 message_type: "comment",
-                partner_emails: ["new-partner@ex.com"],
-                partner_cc_emails: ["new-cc-partner@ex.com"],
+                // the recipients created from their email are posted as partners
+                partner_ids: pyEnv["res.partner"].search([["email", "=", "new-partner@ex.com"]]),
+                partner_cc_ids: pyEnv["res.partner"].search([
+                    ["email", "=", "new-cc-partner@ex.com"],
+                ]),
                 subtype_xmlid: "mail.mt_comment",
             },
             thread_id: partnerId,
@@ -1021,7 +1023,7 @@ test("can mark message as unread from chatter", async () => {
         res_id: partnerId,
     });
     pyEnv["mail.notification"].create({
-        is_read: true,
+        read_date: "2019-01-01 10:30:00",
         mail_message_id: messageId,
         notification_status: "sent",
         notification_type: "inbox",

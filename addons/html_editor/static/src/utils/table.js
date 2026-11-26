@@ -1,3 +1,4 @@
+import { unwrapContents } from "./dom";
 import { isTableCell } from "./dom_info";
 import { closestElement } from "./dom_traversal";
 
@@ -155,6 +156,32 @@ export function wrapTableInScrollContainer(table) {
     table.before(wrapper);
     wrapper.append(table);
     return wrapper;
+}
+
+/**
+ * Put the tables of the given readonly content in scroll containers, as they
+ * are not saved with it.
+ *
+ * @param {HTMLElement} container
+ */
+export function wrapReadonlyTables(container) {
+    for (const table of container.querySelectorAll(".o_table")) {
+        // Checked as we go, so a table nested in one just wrapped is skipped.
+        if (!table.closest(TABLE_WRAPPER_SELECTOR)) {
+            wrapTableInScrollContainer(table);
+        }
+    }
+}
+
+/**
+ * Remove the scroll containers of the tables of `root`.
+ *
+ * @param {HTMLElement | DocumentFragment} root
+ */
+export function unwrapTables(root) {
+    for (const wrapper of root.querySelectorAll(TABLE_WRAPPER_SELECTOR)) {
+        unwrapContents(wrapper);
+    }
 }
 
 /**

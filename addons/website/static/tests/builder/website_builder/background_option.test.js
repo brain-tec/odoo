@@ -12,7 +12,7 @@ import {
     test,
     waitForNone,
 } from "@odoo/hoot";
-import { animationFrame, queryOne, scroll, waitFor } from "@odoo/hoot-dom";
+import { animationFrame, press, queryOne, scroll, waitFor } from "@odoo/hoot-dom";
 import { contains } from "@web/../tests/web_test_helpers";
 import { PLATFORMS } from "@html_editor/main/media/media_dialog/video_selector";
 import {
@@ -132,6 +132,13 @@ test("Change the background position and click out of the iframe", async () => {
     await contains(".o_customize_tab").click();
     expect(".o_we_image_position_overlay").toHaveCount(0);
     expect("button[data-icon='undo']").not.toBeEnabled();
+});
+
+test("Change the background position and save with Alt+S", async () => {
+    await dragAndDropBgImage();
+    await press(["alt", "s"]);
+    await animationFrame();
+    expect(".o_we_image_position_overlay").toHaveCount(0);
 });
 
 test("Background position overlay layout", async () => {
@@ -727,7 +734,7 @@ test("Change the background position when multiple background layer is applied",
     expect(section).toHaveStyle("background-size: cover");
     await contains("[data-label='Background'] .o_we_color_preview").click();
     await contains(".o_font_color_selector .gradient-tab").click();
-    await contains(".o_colorpicker_sections .o_gradient_color_button").click();
+    await contains(".o_colorpicker_gradient_section .o_gradient_color_button").click();
     await contains("[data-label='Position'] .dropdown-toggle").click();
     await contains("[data-action-value='repeat-pattern']").click();
     expect(section).toHaveClass("o_bg_img_opt_repeat");

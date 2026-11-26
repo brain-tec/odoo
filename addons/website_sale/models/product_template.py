@@ -793,7 +793,9 @@ class ProductTemplate(models.Model):
             pricelist_price, pricelist_rule_ids = pricelist_prices_and_rules[template.id]
             pricelist_rule_id = next(iter(pricelist_rule_ids), False)
 
-            product_taxes = template.sudo().taxes_id._filter_taxes_by_company()
+            # Reset the prefetch so that the taxes of other companies are not computed (e.g. their
+            # `price_include`), which would read those companies.
+            product_taxes = template.sudo().taxes_id._filter_taxes_by_company().with_prefetch()
             taxes = fiscal_position_sudo.map_tax(product_taxes)
 
             base_price = None
@@ -1075,9 +1077,9 @@ class ProductTemplate(models.Model):
             # If the price should be hidden, we don't want to send any price information regarding
             # the product, including the price before discount
             combination_info.update({
-                'compare_list_price': 0,
-                'has_discounted_price': False,
-                'list_price': combination_info['price'],
+                "compare_list_price": 0,
+                "has_discounted_price": False,
+                "list_price": combination_info["price"],
             })
 
         if product_or_template._has_multiple_uoms():
@@ -1087,6 +1089,14 @@ class ProductTemplate(models.Model):
                 uom_price = pricelist._get_product_price(  # unit price in packaging UOM
                     product=product_or_template, quantity=quantity, uom=product_uom
                 )
+                if product_taxes:
+                    uom_price = product_or_template._apply_taxes_to_price(
+                        uom_price,
+                        currency,
+                        product_taxes=product_taxes,
+                        taxes=taxes,
+                        website=website,
+                    )
                 base_uom_price = product_uom._compute_price(  # convert packaging prices to base UOM
                     price=uom_price, to_unit=product_or_template.uom_id
                 )
@@ -1293,16 +1303,25 @@ class ProductTemplate(models.Model):
         if taxes is None:
             taxes = fiscal_position.map_tax(product_taxes)
 
-        price = product._get_tax_included_unit_price_from_price(
+        # Convert the display mode into the document tax mode expected below
+        website_tax_mode = "tax_excluded" if tax_display == "total_excluded" else "tax_included"
+
+        # Changes Fiscal Position when necessary
+        price_after_fp = product._get_tax_included_unit_price_from_price(
             price, product_taxes, product_taxes_after_fp=taxes
         )
-
-        # The list_price is always the price of one.
-        tax_details = taxes.compute_all(
-            price, currency, 1, product or self, self.env.user.partner_id
+        # Adapts the price to the needed tax mode
+        tax_included_price = product._adapt_price_unit_to_document_tax_mode(
+            product_price_unit=price_after_fp,
+            product_taxes=taxes,
+            product_uom=product.uom_id,
+            document_tax_mode=website_tax_mode,
         )
 
-        return tax_details[tax_display]
+        return float_round(
+            tax_included_price,
+            precision_digits=self.env["decimal.precision"].precision_get("Product Price"),
+        )
 
     def create_product_variant(self, product_template_attribute_value_ids):
         """Create if necessary and possible and return the id of the product
@@ -1728,20 +1747,23 @@ class ProductTemplate(models.Model):
             return request.pricelist.with_context(self.env.context)
         return pricelist
 
-    def _website_show_quick_add(self, product=None):
+    def _website_show_quick_add(self, product=None, price=None):
+        """Return whether the "Add to cart" button can be shown for the product.
+
+        :param product.product product: The variant to check instead of the template, if any.
+        :param float price: The displayed price, in the website currency, if already computed. It
+            avoids computing the price again to check whether the product has a zero price.
+        :rtype: bool
+        """
         self.ensure_one()
         website = self.env.website
         product_or_template = product or self
+        is_zero_price = None if price is None else website.currency_id.is_zero(price)
         return (
             product_or_template._is_purchasable()
             and product_or_template._is_published()
             and bool(product_or_template._get_available_uoms())
-            and (
-                not website.prevent_sale
-                or not website._prevent_product_sale(
-                    product_or_template, not product_or_template._get_contextual_price()
-                )
-            )
+            and not website._prevent_product_sale(product_or_template, is_zero_price)
             and not product_or_template._is_sold_out()
         )
 
@@ -2080,8 +2102,11 @@ class ProductTemplate(models.Model):
             website = self.env.website or self.env["website"].browse(
                 self.env.context.get("host_id")
             )
-            if not website.with_context(website_id=website.id).is_view_active(
-                "website_sale.product_comment"
+            if (
+                self.env.user._is_public()
+                or not website.with_context(website_id=website.id).is_view_active(
+                    "website_sale.product_comment"
+                )
             ):
                 return [(Domain.TRUE, "write")]
         return super()._mail_get_operation_for_mail_message_operation(message_operation)

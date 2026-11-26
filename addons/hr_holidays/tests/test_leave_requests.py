@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 
 from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
+from lxml import etree
 
 from odoo import fields, Command
 from odoo.exceptions import AccessError, UserError, ValidationError
@@ -499,6 +500,91 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         valid_ids3 = wizard3.valid_work_entry_type_ids.ids
         self.assertIn(self.holidays_type_2.id, valid_ids3,
             "Allocation-required type should appear when all employees have valid allocations")
+
+    def test_group_time_off_wizard_types_of_selected_employees(self):
+        """The time types of the group time off are the ones of the selected employees, not of the user: the ones
+        without allocation, and the ones allocated to all of them over the whole period. The time types not selectable
+        in time off are left to the allowed ones."""
+        employee = self.env['hr.employee'].create({'name': 'Rambo'})
+        not_selectable_type = self.holidays_type_1.copy({'name': 'Not Selectable', 'time_off_selectable': False})
+        # the user has an allocation of the type, the selected employee too, until the 10th
+        self.env['hr.leave.allocation'].create([{
+            'name': 'Alloc',
+            'employee_id': allocated_employee.id,
+            'work_entry_type_id': self.holidays_type_2.id,
+            'number_of_days': 5,
+            'date_from': date(2020, 1, 1),
+            'date_to': date(2020, 1, 10),
+        } for allocated_employee in self.env.user.employee_id | employee]).action_approve()
+
+        wizard = self.env['hr.leave.generate.multi.wizard'].new({
+            'date_from': date(2020, 1, 2),
+            'date_to': date(2020, 1, 2),
+        })
+        # without employee, the time off is generated for all of them: no type requiring an allocation
+        self.assertIn(self.holidays_type_1, wizard.valid_work_entry_type_ids._origin)
+        self.assertIn(not_selectable_type, wizard.valid_work_entry_type_ids._origin)
+        self.assertNotIn(self.holidays_type_2, wizard.valid_work_entry_type_ids._origin)
+        wizard.employee_ids = employee
+        self.assertIn(self.holidays_type_2, wizard.valid_work_entry_type_ids._origin)
+        # the allocation doesn't cover the whole period
+        wizard.date_to = date(2020, 1, 20)
+        self.assertNotIn(self.holidays_type_2, wizard.valid_work_entry_type_ids._origin)
+
+        # the form proposes the valid types, not the ones the user has an allocation of
+        arch = self.env['hr.leave.generate.multi.wizard'].get_view(
+            self.env.ref('hr_holidays.hr_leave_generate_multi_wizard_view_form').id)['arch']
+        type_domain = etree.fromstring(arch).xpath("//field[@name='work_entry_type_id']")[0].get('domain')
+        self.assertIn('valid_work_entry_type_ids', type_domain)
+        self.assertNotIn('has_valid_allocation', type_domain)
+
+    @users('Titus')
+    def test_create_group_leave_refuse_conflicting_leave_without_hr_right(self):
+        """ The group time off refuses the conflicting time off of the employees, even the ones the
+        Time Off Responsible can't refuse by themselves (validated by a Time Off Officer). """
+        leave_date = date_utils.start_of(date.today() + relativedelta(weeks=2), 'week')
+        leave = self.env['hr.leave'].sudo().create({
+            'employee_id': self.employee_emp_id,
+            'work_entry_type_id': self.holidays_type_1.id,
+            'request_date_from': leave_date,
+            'request_date_to': leave_date,
+        })
+        leave.action_approve()
+        self.assertEqual(leave.state, 'validate')
+
+        self.env['hr.leave.generate.multi.wizard'].create({
+            'work_entry_type_id': self.holidays_type_1.id,
+            'date_from': leave_date,
+            'date_to': leave_date,
+            'employee_ids': self.employee_emp.ids,
+        }).action_generate_time_off()
+
+        self.assertEqual(leave.state, 'refuse')
+        group_leave = self.env['hr.leave'].search([('employee_id', '=', self.employee_emp_id), ('id', '!=', leave.id)])
+        self.assertEqual(len(group_leave), 1)
+
+    @users('Titus')
+    def test_create_group_leave_conflicting_leave_without_write_right(self):
+        """ The group time off can't refuse a conflicting time off the Time Off Responsible isn't allowed to modify. """
+        leave_date = date_utils.start_of(date.today() + relativedelta(weeks=2), 'week')
+        leave = self.env['hr.leave'].sudo().create({
+            'employee_id': self.employee_responsible.id,
+            'work_entry_type_id': self.holidays_type_1.id,
+            'request_date_from': leave_date,
+            'request_date_to': leave_date,
+        })
+        leave.action_approve()
+        self.assertEqual(leave.state, 'validate')
+
+        leave_wizard = self.env['hr.leave.generate.multi.wizard'].create({
+            'work_entry_type_id': self.holidays_type_1.id,
+            'date_from': leave_date,
+            'date_to': leave_date,
+            'employee_ids': self.employee_responsible.ids,
+        })
+        with self.assertRaises(AccessError):
+            leave_wizard.action_generate_time_off()
+        self.assertEqual(leave.state, 'validate')
 
     @users('Titus')
     def test_create_group_leave_form_allocation_mode_without_hr_right(self):
@@ -3641,3 +3727,38 @@ class TestLeaveRequests(TestHrHolidaysCommon):
                          (overtime_rule.work_entry_type_id,
                           self._utc(self._wall(self.monday, 16)), self._utc(self._wall(self.monday, 18))),
                          "the 2 hours beyond the schedule are overtime")
+
+    def test_export_reimport_time_off(self):
+        """ The file of "Export All" (hr_leave_export.js) is re-imported in place: a pending
+        request is updated instead of duplicated, and an approved one is refused with an
+        explanation."""
+        # requested by the employee himself, so that it is not approved right away
+        leaves = self.env['hr.leave'].with_user(self.user_hrmanager_id).create([{
+            'employee_id': self.employee_hrmanager_id,
+            'work_entry_type_id': self.holidays_type_1.id,
+            'request_date_from': request_date,
+            'request_date_to': request_date,
+        } for request_date in ('2026-03-02', '2026-03-09')]).with_env(self.env)
+        pending_leave, approved_leave = leaves
+        approved_leave._action_validate()
+        self.assertEqual(leaves.mapped('state'), ['confirm', 'validate'])
+
+        # same fields as TIME_OFF_EXPORT_FIELDS in hr_leave_export.js, whose "External ID"
+        # header is the one the import auto-maps to the id field
+        export_fields = ['id', 'employee_id', 'work_entry_type_id/id', 'request_date_from', 'request_date_to']
+        rows = [[str(value) for value in row] for row in leaves.export_data(export_fields)['datas']]
+
+        def import_rows(rows):
+            # what the import wizard calls, with the context it sets
+            return self.env['hr.leave'].with_context(import_file=True).load(export_fields, rows)
+
+        pending_row = [*rows[0][:3], '2026-03-03', '2026-03-03']
+        result = import_rows([pending_row])
+        self.assertFalse(result['messages'])
+        self.assertEqual(result['ids'], pending_leave.ids, "The pending request is updated, not duplicated")
+        self.assertEqual(pending_leave.request_date_from, date(2026, 3, 3))
+        self.assertEqual(self.env['hr.leave'].search_count([('employee_id', '=', self.employee_hrmanager_id)]), 2)
+
+        result = import_rows([rows[1]])
+        self.assertEqual(len(result['messages']), 1)
+        self.assertRegex(result['messages'][0]['message'], r"unapprove it first \(Bastien HrManager: .*\)\.\nTo import it as a new time off request")

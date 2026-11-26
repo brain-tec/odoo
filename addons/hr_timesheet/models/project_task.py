@@ -121,6 +121,20 @@ class ProjectTask(models.Model):
                 task.progress = 0.0
                 task.overtime = 0
 
+    def _read_group_select(self, table, aggregate_spec):
+        if aggregate_spec == 'progress:avg':
+            allocated = table.allocated_hours
+            spent = table.total_hours_spent
+            return SQL(
+                """CASE WHEN SUM(%(allocated)s) FILTER (WHERE %(allocated)s > 0) > 0
+                        THEN SUM(%(spent)s) FILTER (WHERE %(allocated)s > 0)
+                             / SUM(%(allocated)s) FILTER (WHERE %(allocated)s > 0)
+                        ELSE 0.0
+                   END""",
+                allocated=allocated, spent=spent,
+            )
+        return super()._read_group_select(table, aggregate_spec)
+
     @api.depends('allocated_hours', 'remaining_hours')
     def _compute_remaining_hours_percentage(self):
         for task in self:
@@ -267,6 +281,11 @@ class ProjectTask(models.Model):
                         task.display_name = f"{task.display_name} \t --{hours_left}--"
                     else:
                         task.display_name = task.display_name + "\u00A0" + hours_left
+                if task.parent_id and task.parent_id.has_access('read'):
+                    if self.env.context.get('formatted_display_name'):
+                        task.display_name = f"{task.display_name} \t --{task.parent_id.name}--"
+                    else:
+                        task.display_name = task.display_name + "\u00A0" + task.parent_id.name
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_contains_entries(self):

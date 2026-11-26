@@ -60,7 +60,6 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
     def _get_shop_page_queries(self):
         res = defaultdict(int)
         res.update({
-            "account_account_tag": 2,
             "account_tax": 2,
             "account_tax_repartition_line": 2,
             "ir_ui_view": 2,
@@ -73,10 +72,8 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
             "product_tag": 1,
             "product_template": 2,
             "product_template_attribute_line": 2,
-            "res_company": 2,
+            "res_company": 1,
             "res_currency": 1,
-            "res_partner": 1,
-            "res_users": 1,
             "website_menu": 1,
             "website_page": 1,
         })
@@ -102,7 +99,6 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
     def _get_product_page_queries(self):
         res = defaultdict(int)
         res.update({
-            "account_account_tag": 2,
             "account_tax": 2,
             "account_tax_repartition_line": 2,
             "ir_attachment": 1,
@@ -188,9 +184,10 @@ class TestWebsiteSalePerformanceWithPricelistNoRules(TestWebsiteSalePerformanceN
 
     def _get_shop_page_queries(self):
         res = super()._get_shop_page_queries()
-        res["product_pricelist"] += 3
+        res["product_pricelist"] += 2
         res["product_category"] += 1
         res["product_pricelist_item"] += 1
+        res["res_users"] += 1
         return res
 
     def test_shop_page_generation(self):
@@ -201,7 +198,7 @@ class TestWebsiteSalePerformanceWithPricelistNoRules(TestWebsiteSalePerformanceN
 
     def _get_product_page_queries(self):
         res = super()._get_product_page_queries()
-        res["product_pricelist"] += 3
+        res["product_pricelist"] += 2
         res["product_category"] += 1
         res["product_pricelist_item"] += 2
         return res
@@ -342,6 +339,24 @@ class TestWebsiteSalePerformanceCategoriesSidebar(TestWebsiteSalePerformanceNoPr
         )
 
 
+# RIBBONS
+
+
+class TestWebsiteSalePerformanceWithAutoAssignedRibbon(TestWebsiteSalePerformanceNoPricelist):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        # The automatically assigned ribbons are fetched with the search, in a single query
+        cls.env["product.ribbon"].create({"name": "New!", "assign": "new"})
+
+    def test_shop_page_generation(self):
+        select_queries = self._get_shop_page_queries()
+        self._check_url_hot_query(
+            "/shop", sum(select_queries.values()), select_tables_perf=select_queries
+        )
+
+
 # STOCK
 
 
@@ -358,6 +373,8 @@ class TestWebsiteSalePerformanceWithTrackedProducts(TestWebsiteSalePerformanceNo
     def _get_shop_page_queries(self):
         res = super()._get_shop_page_queries()
         res["product_product"] += 1
+        res["res_users"] += 1
+        res["res_partner"] += 1
         if "website_sale_stock" in self.installed_modules:
             res["stock_warehouse"] += 2
             res["stock_move"] += 2
@@ -416,12 +433,6 @@ class TestWebsiteSalePerformancePreventZeroPriceSale(TestWebsiteSalePerformanceW
     def setUpClass(cls):
         super().setUpClass()
         cls.website.write({"prevent_sale": True, "prevent_sale_for": "zero_price"})
-
-    def _get_shop_page_queries(self):
-        res = super()._get_shop_page_queries()
-        # The pricelist rules are applied again to check whether each product has a zero price
-        res["product_pricelist_item"] += 3
-        return res
 
     def test_shop_page_generation(self):
         select_queries = self._get_shop_page_queries()

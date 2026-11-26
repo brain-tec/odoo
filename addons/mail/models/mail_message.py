@@ -389,16 +389,22 @@ class MailMessage(models.Model):
         my_messages = self.env['mail.notification'].sudo().search([
             ('mail_message_id', 'in', self.ids),
             ('res_partner_id', '=', self.env.user.partner_id.id),
-            ('is_read', '=', False)]).mapped('mail_message_id')
+            ('read_date', '=', False)]).mapped('mail_message_id')
         for message in self:
             message.needaction = message in my_messages
 
     @api.model
     def _search_needaction(self, operator, operand):
+        """ Search messages with an unread notification for the current user.
+
+        Searching messages without need action is limited: it returns messages
+        with a read notification for the current user, not messages without any
+        notification for them. It is also slower, as only unread notifications
+        are indexed (partial index on 'read_date'). """
         if operator not in ('in', 'not in'):
             return NotImplemented
-        is_read = operator == 'not in'
-        notification_ids = self.env['mail.notification']._search([('res_partner_id', '=', self.env.user.partner_id.id), ('is_read', '=', is_read)])
+        read_operator = '!=' if operator == 'not in' else '='
+        notification_ids = self.env['mail.notification']._search([('res_partner_id', '=', self.env.user.partner_id.id), ('read_date', read_operator, False)])
         return [('notification_ids', 'in', notification_ids)]
 
     def _compute_has_error(self):
@@ -754,7 +760,8 @@ class MailMessage(models.Model):
                                   FROM mail_message_res_partner_cc_rel
                                  WHERE res_partner_id = %s
                                    AND mail_message_id = ANY (%s)
-                               ) notified ON notified.mail_message_id = m.id """,
+                               ) notified ON notified.mail_message_id = m.id
+                         WHERE m.message_type != 'user_notification' """,
                     pid, list(parent_ids_msg_ids), pid, list(parent_ids_msg_ids),
                 )
                 for parent_id, parent_model, parent_res_id in self.env.execute_query(query):
@@ -959,18 +966,18 @@ class MailMessage(models.Model):
     @api.model
     def mark_all_as_read(self, domain=None):
         # not really efficient method: it does one db request for the
-        # search, and one for each message in the result set is_read to True in the
+        # search, and one for each message in the result set to mark as read the
         # current notifications from the relation.
         notif_domain = [
             ('res_partner_id', '=', self.env.user.partner_id.id),
-            ('is_read', '=', False)]
+            ('read_date', '=', False)]
         if domain:
             messages = self.search(domain)
             messages.set_message_done()
             return messages.ids
 
         notifications = self.env['mail.notification'].sudo().search_fetch(notif_domain, ['mail_message_id'])
-        notifications.write({'is_read': True})
+        notifications.write({'read_date': self.env.cr.now()})
 
         self.env.user._bus_send(
             "mail.message/mark_as_read",
@@ -987,11 +994,11 @@ class MailMessage(models.Model):
         notifications = self.env['mail.notification'].sudo().search_fetch([
             ('mail_message_id', 'in', self.ids),
             ('res_partner_id', '=', partner_id.id),
-            ('is_read', '=', False),
+            ('read_date', '=', False),
         ], ['mail_message_id'])
         if not notifications:
             return
-        notifications.write({'is_read': True})
+        notifications.write({'read_date': self.env.cr.now()})
         # notifies changes in messages through the bus.
         self.env.user._bus_send(
             "mail.message/mark_as_read",
@@ -1010,7 +1017,7 @@ class MailMessage(models.Model):
         ])
         if not notifications:
             return
-        notifications.write({"is_read": False, "read_date": False})
+        notifications.write({"read_date": False})
         Store(
             self.env.user,
             notification_type="mail.message/mark_as_unread",
@@ -1420,7 +1427,7 @@ class MailMessage(models.Model):
                 # sudo: mail.message - checking whether there is a notification for the current user is acceptable
                 return not message.env.user._is_public() and bool(
                     message.sudo().notification_ids.filtered(
-                        lambda n: not n.is_read
+                        lambda n: not n.read_date
                         and n.res_partner_id == message.env.user.partner_id,
                     ),
                 )
@@ -1429,7 +1436,7 @@ class MailMessage(models.Model):
                 # sudo: mail.message - checking whether there is a notification for the current user is acceptable
                 return not message.env.user._is_public() and bool(
                     message.sudo().notification_ids.filtered(
-                        lambda n: n.is_read
+                        lambda n: n.read_date
                         and n.res_partner_id == message.env.user.partner_id,
                     ),
                 )
@@ -1595,18 +1602,19 @@ class MailMessage(models.Model):
         res_id = self.res_id if self else (thread and thread.ids and thread.ids[0])
         return bool(res_id) if (res_model and res_model != 'mail.thread') else False
 
-    def _invalidate_documents(self, model=None, res_id=None):
+    def _invalidate_documents(self):
         """ Invalidate the cache of the documents followed by ``self``. """
         fnames = ['message_ids', 'message_needaction', 'message_needaction_counter']
         self.flush_recordset(['model', 'res_id'])
-        for record in self:
-            model = model or record.model
-            res_id = res_id or record.res_id
-            if model not in self.pool:
-                continue
-            # a model can hold those fields without inheriting mail.thread
-            if to_invalidate := [f for f in fnames if f in self.env[model]._fields]:
-                self.env[model].browse(res_id).invalidate_recordset(to_invalidate)
+        # collect documents before invalidating: invalidating 'message_ids' also
+        # drops its inverse 'mail.message.res_id' from cache, for all messages
+        res_ids_by_model = defaultdict(set)
+        for message in self:
+            if message.model and message.model in self.pool and message.res_id:
+                res_ids_by_model[message.model].add(message.res_id)
+        for model_name, res_ids in res_ids_by_model.items():
+            if to_invalidate := [f for f in fnames if f in self.env[model_name]._fields]:
+                self.env[model_name].browse(res_ids).invalidate_recordset(to_invalidate)
 
     def _records_by_model_name(self):
         ids_by_model = defaultdict(OrderedSet)

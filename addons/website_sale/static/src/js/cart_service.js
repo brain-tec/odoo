@@ -6,7 +6,7 @@ import { ProductCombo } from '@sale/js/models/product_combo';
 import {
     ProductConfiguratorDialog
 } from '@sale/js/product_configurator_dialog/product_configurator_dialog';
-import { getSelectedCustomPtav, serializeComboItem } from '@sale/js/sale_utils';
+import { getConfiguredPtavs, serializeComboItem } from '@sale/js/sale_utils';
 import { browser } from '@web/core/browser/browser';
 import { serializeDateTime } from '@web/core/l10n/dates';
 import { rpc } from '@web/core/network/rpc';
@@ -324,10 +324,15 @@ export class CartService {
     /**
      * Opens the product configurator dialog.
      *
+     * The configurator data is preloaded by {@link add} (through
+     * `/website_sale/product_configurator/get_values`) to save the dialog an RPC.
+     *
      * @param {Number} productTemplateId - The product template id, as a `product.template` id.
-     * @param {Number} quantity - The quantity to add to the cart.
-     * @param {Number[]} combination - The combination of the product, as a list of
-     *      `product.template.attribute.value` ids.
+     * @param {Object[]} products - The main product's information, as returned by
+     *      `_get_product_information` (one element).
+     * @param {Object[]} optionalProducts - The optional products' information, as returned by
+     *      `_get_product_information`, with their `parent_product_tmpl_id`.
+     * @param {Number} currencyId - The currency of the prices, as a `res.currency` id.
      * @param {CustomAttributeValues[]} productCustomAttributeValues - An array of objects
      *      representing custom attribute values for the product.
      * @param {Object} [options] - Define how to add products to the cart.
@@ -404,22 +409,12 @@ export class CartService {
             return serializedProduct;
         }
 
-        // Custom attributes.
-        serializedProduct.product_custom_attribute_values = [];
-        for (const ptal of product.attribute_lines) {
-            const selectedCustomPtav = getSelectedCustomPtav(ptal);
-            if (selectedCustomPtav) {
-                serializedProduct.product_custom_attribute_values.push({
-                    custom_product_template_attribute_value_id: selectedCustomPtav.id,
-                    custom_value: ptal.customValue ?? '',
-                });
-            }
-        }
-
-        // No variant attributes.
-        serializedProduct.no_variant_attribute_value_ids = product.attribute_lines
-            .filter(ptal => ptal.create_variant === 'no_variant')
-            .flatMap(ptal => ptal.selected_attribute_value_ids);
+        const { customPtavs, noVariantPtavIds } = getConfiguredPtavs(product);
+        serializedProduct.product_custom_attribute_values = customPtavs.map(customPtav => ({
+            custom_product_template_attribute_value_id: customPtav.id,
+            custom_value: customPtav.value ?? '',
+        }));
+        serializedProduct.no_variant_attribute_value_ids = noVariantPtavIds;
 
         // If this optional product is a combo, also serialize its selected combo items so
         // the server can create the corresponding cart lines linked to this product's line.
