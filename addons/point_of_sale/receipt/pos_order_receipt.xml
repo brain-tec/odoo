@@ -32,19 +32,14 @@
                                 <t t-foreach="extra_data['prices']['taxes']" t-as="tax" name="taxes_foreach">
                                     <tr name="taxes_line">
                                         <td class="text-start w-70">
-                                            <span><t t-out="tax['name']" /></span>
+                                            <span><t t-out="tax['name']" /> on <t t-out="tax['amount_base']" /></span>
                                         </td>
                                         <td class="text-end w-30 text-break">
                                             <span class="font-monospace"><t t-out="tax['amount']" /></span>
                                         </td>
                                     </tr>
-                                    <tr>
-                                        <td class="text-start w-70">
-                                            <span>Base <t t-out="tax['name']" /></span>
-                                        </td>
-                                        <td class="text-end w-30 text-break">
-                                            <span class="font-monospace"><t t-out="tax['amount_base']" /></span>
-                                        </td>
+                                    <tr t-if="False">
+                                        <td class="text-start w-70"/>
                                     </tr>
                                 </t>
                                 <tr class="text-bold" t-if="extra_data['prices'].get('rounding_amount')">
@@ -141,7 +136,7 @@
                             <div t-if="partner.get('street')"><span t-out="partner['street']"/></div>
                             <div t-if="partner.get('street2')"><span t-out="partner['street2']"/></div>
                             <div t-if="partner.get('city') or partner.get('zip')">
-                                <span t-out="partner.get('zip', '')"/>&#160;<span t-out="partner.get('city', '')"/>
+                                <span t-out="partner.get('zip') or ''"/><t t-if="partner.get('city') and partner.get('zip')">&#160;</t><span t-out="partner.get('city') or ''"/>
                             </div>
                         </t>
                         <div t-if="order['mobile']"><span t-out="order['mobile']"/></div>
