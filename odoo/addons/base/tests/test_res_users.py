@@ -13,6 +13,7 @@ from odoo.http import request_var
 from odoo.tests import (
     Form,
     HttpCase,
+    RecordCapturer,
     TransactionCase,
     freeze_time,
     new_test_user,
@@ -20,7 +21,7 @@ from odoo.tests import (
     users,
     warmup,
 )
-from odoo.tools import mute_logger
+from odoo.tools import SQL, api_key, mute_logger
 
 from odoo.addons.base.models.res_groups import ResGroups
 
@@ -772,6 +773,9 @@ class TestUsers2(UsersCommonCase):
         self.assertNotIn(contact_creation_group, self.user_internal.group_ids)
         # Process any tracking message at flush for cleaner queryCount
         self.flush_tracking()
+        # read company_ids to normalize cache between enterprise and community:
+        # l10n_au_hr_payroll_api reads them during write (_records_to_log)
+        self.user_internal.company_ids
 
         # all modules: 51, base: 17; nightly: +1
         with self.assertQueryCount(52):
@@ -1023,6 +1027,14 @@ class TestApiKeys(UsersCommonCase):
         self.assertEqual(len(self.user_internal.api_key_ids), 1)  # load the keys in cache
         self.env['res.users.apikeys'].with_user(self.user_internal)._generate('scope', 'Another key', self.tomorrow)
         self.assertEqual(len(self.user_internal.api_key_ids), 2)
+
+    def test_generate_apikey_readonly(self):
+        # Can create a readonly key
+        with RecordCapturer(self.env['res.users.apikeys'], []) as capture:
+            self.env['res.users.apikeys'].with_user(self.user_internal).generate(
+                self.api_key, 'scope', 'A readonly key', self.tomorrow, readonly=True)
+        index = self.env.execute_query(SQL("SELECT index FROM %s WHERE id = %s", capture.records._table_sql, capture.records.id))[0][0]
+        self.assertStartsWith(index, api_key.READONLY_PREFIX)
 
 
 class TestResUsersForm(TransactionCase):
