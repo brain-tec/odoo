@@ -1909,7 +1909,10 @@ class AccountMove(models.Model):
 
             for message in message_to_log:
                 self.sudo().message_post(body=message)
-            return self
+
+        # Generate a PDF preview of the bill when the XML doesn't embed one, as for UBL/CII imports.
+        self.env['account.edi.ubl']._import_attachments(self, tree)
+        return self
 
     @api.model
     def _is_prediction_enabled(self):
@@ -2486,7 +2489,7 @@ class AccountMove(models.Model):
         if proxy_user.edi_mode == 'demo':
             for move in self:
                 filename = move.l10n_it_edi_attachment_name or '???'
-                self._l10n_it_edi_write_send_state(
+                move._l10n_it_edi_write_send_state(
                     transformed_notification={
                         'l10n_it_edi_state': 'forwarded',
                         'l10n_it_edi_transaction': f'demo_{uuid.uuid4()}',
