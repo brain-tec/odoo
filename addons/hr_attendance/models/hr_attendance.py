@@ -293,9 +293,23 @@ class HrAttendance(models.Model):
             tz = ZoneInfo(employee.sudo()._get_tz())
             local_check_in = min(attendances.mapped('check_in')).replace(tzinfo=UTC).astimezone(tz)
             local_check_out = max(attendances.mapped('check_out')).replace(tzinfo=UTC).astimezone(tz)
-            rulesets = attendances.mapped(lambda att: att.employee_id.sudo()._get_version(att.date)).ruleset_id
-            # append this domain only for weekly rules
-            if any(rule.quantity_period == 'week' for rule in rulesets.sudo().rule_ids):
+            versions = attendances.mapped(lambda att: att.employee_id.sudo()._get_version(att.date))
+            rulesets = versions.ruleset_id
+            # append this domain for weekly rules or flexible daily rules whose expected hours are capped weekly
+            if (
+                any(rule.quantity_period == 'week' for rule in rulesets.sudo().rule_ids)
+                or any(
+                    version.is_flexible
+                    and version.hours_per_week
+                    and any(
+                        rule.base_off == 'quantity'
+                        and rule.quantity_period == 'day'
+                        and rule.expected_hours_from_contract
+                        for rule in version.ruleset_id.sudo().rule_ids
+                    )
+                    for version in versions
+                )
+            ):
                 date_from = local_check_in.date() + relativedelta(weekday=MO(-1))
                 date_to = local_check_out.date() + relativedelta(weekday=SU)
             else:
@@ -322,6 +336,11 @@ class HrAttendance(models.Model):
             lambda l: l.manual_duration != l.duration or l.status == 'to_approve'
         ).mapped(lambda l: (l.attendance_id.id, l.date)))
         all_overtime_lines.unlink()
+
+        # An attendance crossing midnight shares a day with attendances outside
+        # the domain, they are needed to compute that day but keep their overtimes
+        recomputed_attendance_ids = set(all_attendances.ids)
+        all_attendances |= self.env['hr.attendance'].search(all_attendances._get_overtimes_to_update_domain())
 
         start_check_in = min(all_attendances.mapped('check_in')).date() - relativedelta(days=1)  # for timezone
         min_check_in = datetime.combine(start_check_in, time.min).replace(tzinfo=UTC)
@@ -368,6 +387,7 @@ class HrAttendance(models.Model):
                     'status': 'to_approve'
                 } if (val['attendance_id'], val['date']) in manual_overtimes else val
                 for val in ruleset.rule_ids._generate_overtime_vals(min(attendances_dates), max(attendances_dates), ruleset_attendances, schedules_intervals_by_employee)
+                if val['attendance_id'] in recomputed_attendance_ids
             ])
         self.env['hr.attendance.overtime.line'].create(overtime_vals_list)
 
