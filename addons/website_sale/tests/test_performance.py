@@ -73,7 +73,6 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
             "product_template": 2,
             "product_template_attribute_line": 2,
             "res_company": 1,
-            "res_currency": 1,
             "website_menu": 1,
             "website_page": 1,
         })
@@ -114,8 +113,7 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
             "product_template": 3,
             "product_template_attribute_line": 2,
             "product_template_attribute_value": 4,
-            "res_company": 2,
-            "res_currency": 1,
+            "res_company": 1,
             "res_partner": 1,
             "res_users": 1,
             "website_menu": 1,
@@ -246,12 +244,6 @@ class TestWebsiteSalePerformanceWithPricelist(TestWebsiteSalePerformanceWithPric
     def _get_product_page_queries(self):
         res = super()._get_product_page_queries()
         res["product_pricelist_item"] += 1
-        if "website_sale_subscription" not in self.installed_modules:
-            # FIXME VFE magic comeback when sub is installed makes no **** sense
-            # Seems to come from the `website_sale` template, not the sub override strangely
-            # The rules are fixed, product currency (through _get_main_company) does not have to be
-            # computed anymore
-            res["res_company"] -= 1
         return res
 
     def test_product_page_generation(self):
@@ -491,21 +483,13 @@ class TestWebsiteSalePerformanceWithMultipleUoms(TestWebsiteSalePerformanceWithU
 
         cls.heavy_product.uom_ids = [Command.set([cls.uom_dozen.id, cls.uom_pack_6.id])]
 
-    def _get_shop_page_queries(self):
-        res = super()._get_shop_page_queries()
-        res["uom_uom"] += 1
-        return res
+    # the additional units of measure are read from the cached data
 
     def test_shop_page_generation(self):
         select_queries = self._get_shop_page_queries()
         self._check_url_hot_query(
             "/shop", sum(select_queries.values()), select_tables_perf=select_queries
         )
-
-    def _get_product_page_queries(self):
-        res = super()._get_product_page_queries()
-        res["uom_uom"] += 2
-        return res
 
     def test_product_page_generation(self):
         select_queries = self._get_product_page_queries()
