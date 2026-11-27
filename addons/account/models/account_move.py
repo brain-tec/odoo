@@ -637,6 +637,8 @@ class AccountMove(models.Model):
         store=True,
         readonly=False,
     )
+    unreconciled_paid_amount = fields.Monetary(currency_field='currency_id', compute='_compute_unreconciled_paid_amount')
+    amount_residual_after_payments = fields.Monetary(currency_field='currency_id', compute='_compute_amount_residual_after_payments')
 
     # === Reverse feature fields === #
     reversed_entry_id = fields.Many2one(
@@ -2012,13 +2014,32 @@ class AccountMove(models.Model):
             else:
                 move.bank_partner_id = move.commercial_partner_id
 
-    @api.depends('date', 'line_ids.debit', 'line_ids.credit', 'line_ids.tax_line_id', 'line_ids.tax_ids', 'line_ids.tax_tag_ids',
+    @api.depends('date', 'taxable_supply_date', 'line_ids.debit', 'line_ids.credit', 'line_ids.tax_line_id', 'line_ids.tax_ids', 'line_ids.tax_tag_ids',
                  'invoice_line_ids.debit', 'invoice_line_ids.credit', 'invoice_line_ids.tax_line_id', 'invoice_line_ids.tax_ids', 'invoice_line_ids.tax_tag_ids')
     def _compute_tax_lock_date_message(self):
         for move in self:
-            accounting_date = move.date or fields.Date.context_today(move)
             affects_tax_report = move._affect_tax_report()
-            move.tax_lock_date_message = move._get_lock_date_message(accounting_date, affects_tax_report)
+            accounting_date = move.date or fields.Date.context_today(move)
+
+            if (
+                move.taxable_supply_date
+                and (tax_lock_dates := move._get_violated_lock_dates(move.taxable_supply_date, affects_tax_report))
+            ):
+                # Unlike the accounting date, the taxable supply date isn't moved out of a locked period on posting.
+                move.tax_lock_date_message = _(
+                    "The taxable supply date is set prior to: %(lock_date_info)s; posting will be refused.",
+                    lock_date_info=self.env['res.company']._format_lock_dates(tax_lock_dates),
+                )
+            elif lock_dates := move._get_violated_lock_dates(accounting_date, affects_tax_report):
+                posted_date = move._get_accounting_date(accounting_date, affects_tax_report, lock_dates=lock_dates)
+                move.tax_lock_date_message = _(
+                    "The date is being set prior to: %(lock_date_info)s. "
+                    "The Journal Entry will be accounted on %(invoice_date)s upon posting.",
+                    lock_date_info=self.env['res.company']._format_lock_dates(lock_dates),
+                    invoice_date=format_date(self.env, posted_date),
+                )
+            else:
+                move.tax_lock_date_message = False
 
     @api.depends('currency_id')
     def _compute_display_inactive_currency_warning(self):
@@ -2546,6 +2567,78 @@ class AccountMove(models.Model):
             elif not move.document_tax_mode:
                 company = move.company_id or self.env.company
                 move.document_tax_mode = company.account_price_include
+
+    def _get_unreconciled_paid_payments(self):
+        return self.sudo().reconciled_payment_ids.filtered(
+            lambda p: not p.is_reconciled and not p.is_matched and p.state == 'paid'
+        )
+
+    @api.depends('reconciled_payment_ids',
+                 'reconciled_payment_ids.is_reconciled',
+                 'reconciled_payment_ids.is_matched',
+                 'reconciled_payment_ids.state',
+                 'reconciled_payment_ids.amount',
+                 'reconciled_payment_ids.currency_id',
+                 'reconciled_payment_ids.date',
+                 'currency_id',
+                 'company_id')
+    def _compute_unreconciled_paid_amount(self):
+        for record in self:
+            record.unreconciled_paid_amount = sum(
+                payment.currency_id._convert(
+                    payment.amount,
+                    record.currency_id,
+                    record.company_id,
+                    payment.date
+                )
+                for payment in record._get_unreconciled_paid_payments()
+            )
+
+    def _get_amount_residual_with_epd(self, currency, date):
+        """ Amount left to pay when paying in `currency` on `date`, early payment discount included. """
+        self.ensure_one()
+        if not self._is_eligible_for_early_payment_discount(currency, date):
+            return self.amount_residual
+        term_lines = self.line_ids.filtered(lambda line: line.display_type == 'payment_term')
+        return -self.direction_sign * sum(term_lines.mapped('discount_amount_currency'))
+
+    @api.depends(
+        'amount_residual',
+        'unreconciled_paid_amount',
+        'invoice_payment_term_id.early_discount',
+        'line_ids.discount_date',
+        'line_ids.discount_amount_currency',
+        'reconciled_payment_ids.currency_id',
+    )
+    def _compute_amount_residual_after_payments(self):
+        """
+        Computes the amount due of the move, including registered payments.
+        This field takes into account the registered payments that are not yet
+        reconciled to compute what is left to pay, as the field 'amount_residual'
+        does not take into account the non-reconciled registered payments.
+        """
+        for record in self:
+            record.amount_residual_after_payments = max(
+                0.0,
+                record.amount_residual - record._get_unreconciled_payment_epd_discount() - record.unreconciled_paid_amount,
+            )
+
+    def _get_unreconciled_payment_epd_discount(self):
+        """
+        Early payment discount of the non-reconciled payments.
+        The discount holds only if a single payment, made before the discount deadline,
+        covers the discounted amount. A payment in several parts loses the discount.
+        """
+        self.ensure_one()
+        if not self.unreconciled_paid_amount:
+            return 0.0
+        payments = self._get_unreconciled_paid_payments()
+        if len(payments) != 1:
+            return 0.0
+        discounted = self._get_amount_residual_with_epd(payments.currency_id, payments.date)
+        if self.currency_id.compare_amounts(self.unreconciled_paid_amount, discounted) < 0:
+            return 0.0
+        return self.amount_residual - discounted
 
     @api.depends('currency_id', 'partner_id.category_id', 'preferred_payment_method_line_id')
     def _compute_invoice_cash_rounding_id(self):
@@ -3992,12 +4085,20 @@ class AccountMove(models.Model):
 
         unmodifiable_fields = [
             'line_ids', 'invoice_line_ids',
-            'date', 'invoice_date',
+            'date', 'invoice_date', 'taxable_supply_date',
             'partner_id', 'fiscal_position_id',
             'invoice_payment_term_id',
             'currency_id',
             'invoice_cash_rounding_id',
         ]
+
+        moves_changing_date = moves_changing_taxable_supply_date = self.browse()
+        if 'date' in vals:
+            new_date = fields.Date.to_date(vals['date']) or False
+            moves_changing_date = self.filtered(lambda m: m.date != new_date)
+        if 'taxable_supply_date' in vals:
+            new_taxable_supply_date = fields.Date.to_date(vals['taxable_supply_date']) or False
+            moves_changing_taxable_supply_date = self.filtered(lambda m: m.taxable_supply_date != new_taxable_supply_date)
 
         is_user_able_to_review, _unused = self._get_review_state_access_groups()
         move_ids_review_done = []
@@ -4037,18 +4138,36 @@ class AccountMove(models.Model):
             ):
                 raise UserError(_('You cannot edit the journal of a journal entry with a sequence number assigned, unless the name is removed or set to "/". This might create a gap in the sequence.'))
 
-            # You can't change the date or name of a move being inside a locked period.
-            if move.state == "posted" and (
-                    ('name' in vals and move.name != vals['name'])
-                    or ('date' in vals and move.date != vals['date'])
-            ):
-                move._check_fiscal_lock_dates()
-                move.line_ids._check_tax_lock_date()
+            # Checking the fiscal and tax locks before allowing modifications to posted moves.
+            # This should mimic the checks performed after the write operation on posted moves.
+            if move.state == "posted":
+                check_fiscal_date = check_date = check_taxable_date = False
 
-            # You can't post subtract a move to a locked period.
-            if 'state' in vals and move.state == 'posted' and vals['state'] != 'posted':
-                move._check_fiscal_lock_dates()
-                move.line_ids._check_tax_lock_date()
+                # You can't change the name of a move being inside a locked period.
+                if 'name' in vals and move.name != vals['name']:
+                    check_fiscal_date = check_date = True
+
+                # You can't change the date of a move being inside a locked period.
+                if move in moves_changing_date:
+                    check_fiscal_date = True
+                    # The tax period of a move with a taxable supply date doesn't depend on its accounting date.
+                    if not move.taxable_supply_date:
+                        check_date = True
+
+                # You can't change the taxable supply date of a move being inside a locked period, nor set one on a move
+                # whose accounting date is.
+                if move in moves_changing_taxable_supply_date:
+                    check_taxable_date = True
+                    if not move.taxable_supply_date:
+                        check_date = True
+
+                # You can't un-post a move inside a locked period.
+                if 'state' in vals and move.state != vals['state']:
+                    check_fiscal_date = check_date = check_taxable_date = True
+
+                if check_fiscal_date:
+                    move._check_fiscal_lock_dates()
+                move.line_ids._check_tax_lock_dates(date=check_date, taxable_date=check_taxable_date)
 
             # Disallow modifying readonly fields on a posted move
             move_state = vals.get('state', move.state)
@@ -4088,12 +4207,36 @@ class AccountMove(models.Model):
                     draft_move.name = False
                     draft_move._compute_name()
 
-                # You can't change the date of a not-locked move to a locked period.
-                # You can't post a new journal entry inside a locked period.
-                if 'date' in vals or 'state' in vals:
-                    posted_move = self.filtered(lambda m: m.state == 'posted')
-                    posted_move._check_fiscal_lock_dates()
-                    posted_move.line_ids._check_tax_lock_date()
+                # Checking the fiscal and tax locks after modifications to posted moves.
+                # This should mimic the checks performed before the write operation on posted moves.
+                for move in self.filtered(lambda m: m.state == 'posted'):
+                    check_fiscal_date = check_date = check_taxable_date = False
+
+                    # You can't change the name of a move being inside a locked period.
+                    if 'name' in vals:
+                        check_fiscal_date = check_date = True
+
+                    # You can't post a move inside a locked period.
+                    if 'state' in vals:
+                        check_fiscal_date = check_date = check_taxable_date = True
+
+                    # You can't change the date of a move to a locked period.
+                    if move in moves_changing_date:
+                        # The tax period of a move with a taxable supply date doesn't depend on its accounting date.
+                        check_fiscal_date = True
+                        if not move.taxable_supply_date:
+                            check_date = True
+
+                    # You can't change the taxable supply date of a move to a locked period, nor remove it from a move
+                    # whose accounting date is.
+                    if move in moves_changing_taxable_supply_date:
+                        check_taxable_date = True
+                        if not move.taxable_supply_date:
+                            check_date = True
+
+                    if check_fiscal_date:
+                        move._check_fiscal_lock_dates()
+                    move.line_ids._check_tax_lock_dates(date=check_date, taxable_date=check_taxable_date)
 
                 if vals.get('state') == 'posted':
                     self.flush_recordset()  # Ensure that the name is correctly computed
@@ -7476,21 +7619,7 @@ class AccountMove(models.Model):
         term_lines = self.line_ids.filtered(lambda line: line.display_type == 'payment_term')
         if not term_lines:
             return {}
-        unreconciled_paid_amount = sum(
-            payment.currency_id._convert(
-                payment.amount,
-                self.currency_id,
-                self.company_id,
-                payment.date
-            )
-            for payment in self.sudo().reconciled_payment_ids.filtered(
-                lambda p: (
-                    not p.is_reconciled
-                    and not p.is_matched
-                    and p.state == 'paid'
-                )
-            )
-        )
+
         installments = term_lines._get_installments_data()
         not_reconciled_installments = [x for x in installments if not x['reconciled']]
         overdue_installments = [x for x in not_reconciled_installments if x['type'] == 'overdue']
@@ -7542,8 +7671,8 @@ class AccountMove(models.Model):
             })
         else:
             installment_state = None
-            amount_due = self.amount_residual - unreconciled_paid_amount
-            next_amount_to_pay = self.amount_residual - unreconciled_paid_amount
+            amount_due = self.amount_residual_after_payments
+            next_amount_to_pay = self.amount_residual_after_payments
             next_payment_reference = self.name
             next_due_date = self.invoice_date_due
 
@@ -7567,7 +7696,7 @@ class AccountMove(models.Model):
             'due_date': self.invoice_date_due,
             'not_reconciled_installments': not_reconciled_installments,
             'is_last_installment': len(not_reconciled_installments) == 1,
-            'unreconciled_paid_amount': unreconciled_paid_amount,
+            'unreconciled_paid_amount': self.unreconciled_paid_amount,
             **additional_info,
         }
 
@@ -7626,24 +7755,6 @@ class AccountMove(models.Model):
         """
         self.ensure_one()
         return self.company_id._get_violated_lock_dates(invoice_date, has_tax, self.journal_id)
-
-    def _get_lock_date_message(self, invoice_date, has_tax):
-        """Get a message describing the latest lock date affecting the specified date.
-        :param invoice_date: The date to be checked
-        :param has_tax: If any taxes are involved in the lines of the invoice
-        :return: a message describing the latest lock date affecting this move and the date it will be
-                 accounted on if posted, or False if no lock dates affect this move.
-        """
-        lock_dates = self._get_violated_lock_dates(invoice_date, has_tax)
-        if lock_dates:
-            invoice_date = self._get_accounting_date(invoice_date, has_tax, lock_dates=lock_dates)
-            tax_lock_date_message = _(
-                "The date is being set prior to: %(lock_date_info)s. "
-                "The Journal Entry will be accounted on %(invoice_date)s upon posting.",
-                lock_date_info=self.env['res.company']._format_lock_dates(lock_dates),
-                invoice_date=format_date(self.env, invoice_date))
-            return tax_lock_date_message
-        return False
 
     @api.model
     def _move_dict_to_preview_vals(self, move_vals, currency_id=None):

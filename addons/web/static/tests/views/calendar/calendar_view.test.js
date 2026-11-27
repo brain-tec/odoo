@@ -1233,6 +1233,26 @@ test(`create and change events on desktop`, async () => {
     expect.verifySteps(["web_save"]);
 });
 
+test.tags("desktop");
+test(`reload when the form dialog is closed`, async () => {
+    onRpc("event", "search_read", () => {
+        expect.step("load");
+    });
+    await mountView({
+        resModel: "event",
+        type: "calendar",
+        arch: `<calendar event_open_popup="1" date_start="start" date_stop="stop" all_day="is_all_day" mode="month"/>`,
+    });
+    expect.verifySteps(["load"]);
+
+    await clickEvent(4);
+    await contains(`.o_calendar_popover .o_calendar_popover_edit`).click();
+    expect(`.modal`).toHaveCount(1);
+    await contains(`.modal .btn-close`).click();
+    expect(`.modal`).toHaveCount(0);
+    expect.verifySteps(["load"]);
+});
+
 test.tags("mobile");
 test(`create and change events on mobile`, async () => {
     onRpc("web_save", ({ args }) => {
@@ -5754,6 +5774,52 @@ test("save selected date during view switching", async () => {
     await getService("action").switchView("list");
     await getService("action").switchView("calendar");
     expect(`.o_calendar_week_number_header:eq(0)`).toHaveText(weekNumber);
+});
+
+test.tags("desktop");
+test("date filters are hidden, and restored when switching view", async () => {
+    Event._views = {
+        calendar: `<calendar date_start="start" date_stop="stop" mode="month"/>`,
+        list: `<list><field name="name"/></list>`,
+        search: `
+            <search>
+                <filter name="typed" string="Typed" domain="[('type_id', '!=', False)]"/>
+                <separator/>
+                <filter name="start_filter" string="Start" date="start"/>
+            </search>
+        `,
+    };
+    onRpc("event", "search_read", ({ kwargs }) => expect.step(kwargs.domain));
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction({
+        res_model: "event",
+        type: "ir.actions.act_window",
+        views: [
+            [false, "list"],
+            [false, "calendar"],
+        ],
+        context: { search_default_typed: 1, search_default_start_filter: 1 },
+    });
+    const facets = ["Typed", "Start: December 2016"];
+    expect(queryAllTexts`.o_searchview_facet`).toEqual(facets);
+
+    await getService("action").switchView("calendar");
+    expect(queryAllTexts`.o_searchview_facet`).toEqual(["Typed"]);
+    expect.verifySteps([
+        [
+            ["type_id", "!=", false],
+            "&",
+            ["start", "<=", "2017-01-07 22:59:59"],
+            "|",
+            ["stop", ">=", "2016-11-26 23:00:00"],
+            ["start", ">=", "2016-11-26 23:00:00"],
+        ],
+    ]);
+    await contains(".o_searchview_dropdown_toggler").click();
+    expect(queryAllTexts`.o_filter_menu .o_menu_item`).not.toInclude("Start");
+
+    await getService("action").switchView("list");
+    expect(queryAllTexts`.o_searchview_facet`).toEqual(facets);
 });
 
 test(`check if active fields are fetched in addition to field names in record data(search_read rpc)`, async () => {

@@ -185,6 +185,16 @@ class TestHrAttendance(HttpCase, TransactionCase):
             self.assertEqual(test_attendance.check_out, fields.Datetime.now())
             self.assertEqual(test_attendance.worked_hours, 8.0)
 
+    def test_archive_attendance_approver(self):
+        """The attendance approver is emptied when their employee is archived, also by an HR officer without
+        attendance rights, like the other approvers."""
+        approver_user = new_test_user(self.env, login='archived_approver', groups='base.group_user,hr_attendance.group_hr_attendance_officer')
+        approver = self.env['hr.employee'].create({'name': 'Approver', 'user_id': approver_user.id})
+        self.test_employee.attendance_manager_id = approver_user
+
+        approver.with_user(self.hr_user).action_archive()
+        self.assertFalse(self.test_employee.attendance_manager_id)
+
     def test_break_duration_updates_worked_hours(self):
         attendance = self.env['hr.attendance'].create({
             'employee_id': self.test_employee.id,
@@ -1031,6 +1041,26 @@ class TestAttendanceValidationTimeRules(TransactionCase):
             {'state': 'validated'},
             {'state': 'draft'},
             {'state': 'draft'},
+        ])
+
+    @freeze_time('2024-01-03 06:00:00')
+    def test_officer_gives_kiosk_attendances_to_self(self):
+        """Attendances an officer gives to themselves are their own edit: they go back to To Review, and their times
+        become encoded by hand, so the review by exception does not review them once the day has no issue left."""
+        self.env.company.attendance_validation = 'exception_validation'
+        officer = new_test_user(
+            self.env, login='att_officer_move',
+            groups='base.group_user,hr_attendance.group_hr_attendance_own,hr_attendance.group_hr_attendance_officer',
+        )
+        self.employee.attendance_manager_id = officer
+        officer_employee = self.env['hr.employee'].create({'name': 'Officer', 'user_id': officer.id, 'tz': 'UTC'})
+        morning, afternoon = self._create_kiosk_attendances(((8, 0), (12, 0)), ((13, 0), (17, 0)))
+        self.assertRecordValues(morning | afternoon, [{'state': 'validated'}, {'state': 'validated'}])
+        morning.with_user(officer).write({'employee_id': officer_employee.id})
+        afternoon.with_user(officer).write({'employee_id': officer_employee.id})
+        self.assertRecordValues(morning | afternoon, [
+            {'employee_id': officer_employee.id, 'state': 'draft', 'in_mode': 'manual', 'out_mode': 'manual'},
+            {'employee_id': officer_employee.id, 'state': 'draft', 'in_mode': 'manual', 'out_mode': 'manual'},
         ])
 
     @freeze_time('2024-01-03 06:00:00')
