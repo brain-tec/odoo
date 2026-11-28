@@ -6,6 +6,7 @@ import {
     getStrNotes,
     filterChangeByCategories,
 } from "@point_of_sale/app/models/utils/order_change";
+import { downloadFile } from "@web/core/network/download";
 import { prepareRoundingVals } from "../accounting/utils";
 import { getService, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { localization } from "@web/core/l10n/localization";
@@ -837,6 +838,40 @@ describe("pos_store.js", () => {
         expect(store.router.currentScreenParams().orderUuid).toBe(newOrder.uuid);
     });
 
+    test("onDeleteOrder ignores a second deletion of the same order", async () => {
+        const store = await setupPosEnv();
+        const order = store.addNewOrder();
+        let deleteCount = 0;
+        patch(store, {
+            async deleteOrders() {
+                deleteCount++;
+                return super.deleteOrders(...arguments);
+            },
+        });
+
+        const [firstDeletion, secondDeletion] = await Promise.all([
+            store.onDeleteOrder(order),
+            store.onDeleteOrder(order),
+        ]);
+        expect(firstDeletion).toBe(true);
+        expect(secondDeletion).toBe(false);
+        expect(deleteCount).toBe(1);
+        expect(store.isOrderDeleting(order, false)).toBe(false);
+    });
+
+    test("syncAllOrders skips an order being deleted", async () => {
+        const store = await setupPosEnv();
+        const order = await getFilledOrder(store);
+
+        store.deletingOrders.add(order.uuid);
+        await store.syncAllOrders();
+        expect(order.isSynced).toBe(false);
+
+        // An explicit sync of the order still goes through (e.g. sending the cancellation in preparation)
+        await store.syncAllOrders({ orders: [order] });
+        expect(order.isSynced).toBe(true);
+    });
+
     test("setNextOrderRefs", async () => {
         const store = await setupPosEnv();
         const order = store.addNewOrder();
@@ -1185,6 +1220,7 @@ describe("pos_store.js", () => {
             patchWithCleanup(store.dialog, {
                 add(component, props) {
                     expect.step(props.title);
+                    props.cancel();
                 },
             });
 
@@ -1192,6 +1228,92 @@ describe("pos_store.js", () => {
             expect.verifySteps(["Reload Data"]);
             expect(store.models["pos.order"].get(order.id)).toBe(order);
             expect(order.isSynced).toBe(false);
+        });
+
+        const getPaidOrder = async (store) => {
+            const order = await getFilledOrder(store);
+            order.state = "paid";
+            store.models["pos.payment"].create({
+                amount: order.priceIncl,
+                pos_order_id: order,
+                payment_method_id: store.models["pos.payment.method"].find(
+                    (m) => m.name === "Cash"
+                ),
+            });
+            return order;
+        };
+        const reloadAndExport = async (store) => {
+            let file;
+            patchWithCleanup(store.data, {
+                async resetIndexedDB() {
+                    throw new Error("stop before leaving the page");
+                },
+            });
+            patchWithCleanup(store.dialog, {
+                add(component, props) {
+                    props.confirm();
+                },
+            });
+            patchWithCleanup(downloadFile, {
+                _download(data) {
+                    file = JSON.parse(data);
+                },
+            });
+            await expect(store.reloadData()).rejects.toThrow("stop before leaving the page");
+            return file;
+        };
+
+        test("exports the unsynced paid orders before reloading", async () => {
+            const store = await setupPosEnv();
+            const order = await getPaidOrder(store);
+            store.data.network.offline = true;
+            // Hoot stubs the IndexedDB layer, use the real synchronization
+            patchWithCleanup(store.data, {
+                synchronizeLocalDataInIndexedDB() {
+                    return this._synchronizeLocalDataInIndexedDB();
+                },
+            });
+
+            const file = await reloadAndExport(store);
+            expect(file["pos.order"].map((o) => o.uuid)).toEqual([order.uuid]);
+            expect(file["pos.order.line"].length).toBe(2);
+            expect(file["pos.payment"].length).toBe(1);
+        });
+
+        test("exports the unsynced paid orders when IndexedDB fails", async () => {
+            const store = await setupPosEnv();
+            const order = await getPaidOrder(store);
+            store.data.network.offline = true;
+            patchWithCleanup(store.data, {
+                synchronizeLocalDataInIndexedDB() {
+                    return this._synchronizeLocalDataInIndexedDB();
+                },
+            });
+            patchWithCleanup(store.data.indexedDB, {
+                async create() {
+                    return [{ status: "rejected", reason: "IndexedDB transaction timeout" }];
+                },
+            });
+
+            const file = await reloadAndExport(store);
+            expect(file["pos.order"].map((o) => o.uuid)).toEqual([order.uuid]);
+            expect(file["pos.order.line"].length).toBe(2);
+            expect(file["pos.payment"].length).toBe(1);
+        });
+
+        test("an empty paid order does not block the reload", async () => {
+            const store = await setupPosEnv();
+            const order = store.addNewOrder();
+            order.state = "paid";
+            patchWithCleanup(store.data, {
+                async resetIndexedDB() {
+                    expect.step("resetIndexedDB");
+                    throw new Error("stop before leaving the page");
+                },
+            });
+
+            await expect(store.reloadData()).rejects.toThrow("stop before leaving the page");
+            expect.verifySteps(["resetIndexedDB"]);
         });
 
         test("syncs a paid order before wiping local data", async () => {

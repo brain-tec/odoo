@@ -742,7 +742,7 @@ class _RelationalMulti(_Relational[tuple['IdType', ...]]):
             read_access = env._access_cache[Comodel._name]
             if all(map(read_access.get, corecords._ids)):
                 pass  # all records are accessible
-            elif all(map(read_access.__contains__, corecords._origin)):
+            elif all(map(read_access.__contains__, corecords._origin._ids)):
                 # we have a value for all origins in access
                 # consider inaccessible records as inaccessible
                 if not corecords.browse().has_access('read'):
@@ -896,19 +896,22 @@ class _RelationalMulti(_Relational[tuple['IdType', ...]]):
         if isinstance(value, Domain):
             domain = value & field_domain
             bypass_access = self.bypass_search_access or operator in ('any!', 'not any!')
+            registry = model.env.registry
             if (
-                domain.is_condition('id', operator='any!', value=Query)
-                and model._search is BaseModel._search
-                and not (model._active_name and model.env.context.get('active_test', True))
+                bypass_access
+                and domain.is_condition('id', operator='any!', value=Query)
+                and registry[comodel._name]._search is BaseModel._search
+                and not (comodel._active_name and comodel.env.context.get('active_test', True))
             ):
-                # ('id', 'any!', Query), so we can just use the query
+                # ('id', 'any!', Query), and comodel._search() would neither
+                # add access rules, nor filter on active, nor be overridden:
+                # so we can just use the query
                 query = domain.value
             else:
-                registry = model.env.registry
                 for inverse_field in registry.field_inverses[self]:
                     # if the inverse is a column, already make sure it's set
                     # this is usually the case for one2many
-                    if inverse_field.column_type and inverse_field not in comodel.env.registry.not_null_fields:
+                    if inverse_field.column_type and inverse_field not in registry.not_null_fields:
                         domain &= Domain(inverse_field.name, '!=', False)
                 query = comodel._search(domain, bypass_access=bypass_access, search_from_field=self)
             assert isinstance(query, Query)
@@ -994,6 +997,8 @@ class One2many(_RelationalMulti):
             if isinstance(invf, (Many2one, Many2oneReference)):
                 # setting one2many fields only invalidates many2one inverses;
                 inverses.add(self, invf)
+                if not hasattr(invf, 'ondelete'):
+                    raise RegistrySetupError(f"Missing ondelete on {invf}")
             else:
                 setup_warning(self, f"inverse field {invf} is not a many2one or many2one_reference")
             inverses.add(invf, self)
@@ -1097,7 +1102,15 @@ class One2many(_RelationalMulti):
             comodel_domain = self.get_comodel_domain(model).optimize_dynamic(comodel)
 
             def unlink(lines):
-                if getattr(comodel._fields[inverse], 'ondelete', False) == 'cascade':
+                if not lines:
+                    return
+                inverse_field = comodel._fields[inverse]
+                ondelete = inverse_field.ondelete
+                if callable(ondelete):  # many2one_reference may be dynamic
+                    inverse_values = [line[inverse] for line in lines]
+                    assert all(isinstance(inverse_value, int) for inverse_value in inverse_values)
+                    ondelete = ondelete(lines, model.browse(inverse_values))
+                if ondelete == 'cascade':
                     to_delete.extend(lines._ids)
                 else:
                     lines[inverse] = False

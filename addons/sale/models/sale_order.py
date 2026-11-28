@@ -362,6 +362,7 @@ class SaleOrder(models.Model):
         groups="base.group_user",
         aggregator=None,
     )
+    amount_to_pay = fields.Monetary(string="Amount to Pay", compute="_compute_amount_to_pay")
     amount_to_invoice = fields.Monetary(
         string="Un-invoiced Balance", compute="_compute_amount_to_invoice"
     )
@@ -751,6 +752,15 @@ class SaleOrder(models.Model):
             order.amount_tax = tax_totals["tax_amount_currency"]
             order.amount_total = tax_totals["total_amount_currency"]
 
+    @api.depends("amount_total")
+    def _compute_amount_to_pay(self):
+        """Compute the amount paid online to settle the order, the order total by default.
+
+        Override to charge another amount upfront, e.g. only the prorated first period of a subscription
+        """
+        for order in self:
+            order.amount_to_pay = order.amount_total
+
     def _add_base_lines_for_early_payment_discount(self):
         """Add the necessary lines in case of mixed early payment discount.
 
@@ -807,7 +817,7 @@ class SaleOrder(models.Model):
         # directly linked to the SO.
         for order in self:
             invoices = order.order_line.invoice_lines.move_id.filtered(
-                lambda r: r.move_type in ("out_invoice", "out_refund")
+                lambda r: r.move_type in ("out_invoice", "out_refund", "out_receipt")
             )
             order.invoice_ids = invoices
             order.invoice_count = len(invoices)
@@ -839,7 +849,7 @@ class SaleOrder(models.Model):
                     (
                         "order_line",
                         "not any",
-                        [("invoice_lines.move_id.move_type", "in", ("out_invoice", "out_refund"))],
+                        [("invoice_lines.move_id.move_type", "in", ("out_invoice", "out_refund", "out_receipt"))],
                     )
                 ]
                 if len(value) == 1:
@@ -854,7 +864,7 @@ class SaleOrder(models.Model):
                         JOIN account_move_line aml ON aml.id = soli_rel.invoice_line_id
                         JOIN account_move am ON am.id = aml.move_id
                     WHERE
-                        am.move_type in ('out_invoice', 'out_refund') AND
+                        am.move_type in ('out_invoice', 'out_refund', 'out_receipt') AND
                         am.id = ANY(%s)
                     """,
                     list(value),
@@ -867,7 +877,7 @@ class SaleOrder(models.Model):
                 "order_line.invoice_lines",
                 "any",
                 [
-                    ("move_id.move_type", "in", ("out_invoice", "out_refund")),
+                    ("move_id.move_type", "in", ("out_invoice", "out_refund", "out_receipt")),
                     ("move_id", operator, value),
                 ],
             )
@@ -2659,7 +2669,7 @@ class SaleOrder(models.Model):
 
         if self.prepayment_percent == 0:
             return 0
-        return self.currency_id.round(self.amount_total * self.prepayment_percent)
+        return self.currency_id.round(self.amount_to_pay * self.prepayment_percent)
 
     def _is_confirmation_amount_reached(self):
         """Return whether `self.amount_paid` is higher than the prepayment required amount.
@@ -2808,13 +2818,13 @@ class SaleOrder(models.Model):
         """Return whether the sale order is paid or not based on the linked transactions.
 
         A sales order is considered paid if the sum of all the paid (i.e., `authorized` or `done`)
-        transactions' amount is equal to or higher than `self.amount_total`.
+        transactions' amount is equal to or higher than the amount to pay.
 
         :return: Whether the order is considered paid
         :rtype: bool
         """
         self.ensure_one()
-        return self.currency_id.compare_amounts(self.amount_paid, self.amount_total) >= 0
+        return self.currency_id.compare_amounts(self.amount_paid, self.amount_to_pay) >= 0
 
     def _check_not_partially_paid(self):
         """Check if the order is partially paid, and raises an error if so.

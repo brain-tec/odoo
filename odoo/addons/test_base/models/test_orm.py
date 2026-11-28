@@ -121,6 +121,12 @@ class TestOrmMessage(models.Model):
 
     discussion = fields.Many2one('test_orm.discussion', ondelete='cascade')
     body = fields.Text(index='trigram')
+    subject = fields.Char()
+    code = fields.Char(size=8, default='Code')
+    score = fields.Float()
+    reference_id = fields.Many2one('res.users')
+    content = fields.Html()
+    state = fields.Selection([('new', 'New')], default='new')
     author = fields.Many2one('res.users', default=lambda self: self.env.user)
     name = fields.Char(string='Title', compute='_compute_name', store=True)
     display_name = fields.Char(string='Abstract')
@@ -336,7 +342,13 @@ class TestOrmCreativeworkEdition(models.Model):
     _description = 'Test ORM Creative Work Edition'
 
     name = fields.Char()
-    res_id = fields.Many2oneReference(model_field='res_model', ondelete='ignore')
+    res_id = fields.Many2oneReference(
+        model_field='res_model',
+        ondelete=lambda self, model: {
+            'test_orm.creativework.book': 'cascade',
+            'test_orm.creativework.movie': 'set null',
+        }.get(model._name, 'ignore'),
+    )
     res_model_id = fields.Many2one('ir.model', required=True, ondelete='cascade')
     res_model = fields.Char(related='res_model_id.model', store=True, readonly=False)
 
@@ -410,6 +422,11 @@ class TestOrmRelated(models.Model):
 
     message = fields.Many2one('test_orm.message')
     message_name = fields.Text(related="message.body", related_sudo=False, string='Message Body')
+    message_code = fields.Char(related='message.code')
+    message_score = fields.Float(related='message.score')
+    message_reference_id = fields.Many2one(related='message.reference_id')
+    message_content = fields.Html(related='message.content')
+    message_state = fields.Selection(related='message.state')
     message_currency = fields.Many2one(related="message.author", string='Message Author')
     message_priority = fields.Integer(related='message.priority', store=True, readonly=False)
 
@@ -443,6 +460,22 @@ class TestOrmRelated(models.Model):
     foo_binary_bin_sudo = fields.Binary(related='foo_id.binary_bin', related_sudo=True, string='Binary Bin Sudo')
 
     foo_float_id = fields.Float(related='foo_id.test_float')
+
+
+class TestOrmRelatedStored(models.Model):
+    _name = 'test_orm.related_stored'
+    _description = 'Stored Related Message'
+
+    message = fields.Many2one('test_orm.message')
+    message_name = fields.Char(related='message.subject', store=True, string='Stored Message Subject')
+    message_code = fields.Char(related='message.code', store=True)
+    message_score = fields.Float(related='message.score', store=True)
+    message_reference_id = fields.Many2one(related='message.reference_id', store=True)
+    message_content = fields.Html(related='message.content', store=True)
+    message_state = fields.Selection(related='message.state', store=True)
+    message_name_untranslated = fields.Char(
+        related='message.subject', store=True, translate=False, string='Untranslated Stored Message Subject',
+    )
 
 
 class TestOrmRelated_Foo(models.Model):

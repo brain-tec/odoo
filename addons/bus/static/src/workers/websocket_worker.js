@@ -76,10 +76,11 @@ export class WebsocketWorker {
         this.connectRetryDelay = this.INITIAL_RECONNECT_DELAY;
         this.connectTimeout = null;
         this.currentDB = null;
+        /** @type {number|false|null} null when not known yet. */
         this.currentUID = null;
-        this.firstSubscribeResolver = Promise.withResolvers();
         this.isReconnecting = false;
-        this.isWaitingForNewUID = true;
+        /** Whether the current websocket sent its first subscription. */
+        this.isSubscribed = false;
         this.lastChannelSubscription = null;
         this.lastNotificationId = null;
         /** @type {?{force: boolean, minId: number|null}} */
@@ -308,27 +309,24 @@ export class WebsocketWorker {
      * @param {Number} param0.startTs Timestamp of start of bus service sender.
      */
     _initializeConnection(client, { db, lastNotificationId, uid, websocketURL, startTs }) {
-        if (this.newestStartTs && this.newestStartTs > startTs) {
-            this.sendToClient(client, "BUS:WORKER_STATE_UPDATED", this.state);
-            this.sendToClient(client, "BUS:INITIALIZED");
-            return;
-        }
-        this.newestStartTs = startTs;
-        this.websocketURL = websocketURL;
-        this.lastNotificationId ??= lastNotificationId;
-        const isCurrentUserKnown = uid !== undefined;
-        if (this.isWaitingForNewUID && isCurrentUserKnown) {
-            this.isWaitingForNewUID = false;
-            this.currentUID = uid;
-        }
-        this.currentDB ||= db;
-        if ((this.currentUID !== uid && isCurrentUserKnown) || (db && this.currentDB !== db)) {
-            this.currentUID = uid;
-            this.currentDB = db || this.currentDB;
-            if (this.websocket) {
-                this.websocket.close(WEBSOCKET_CLOSE_CODES.CLEAN);
+        const isStale = this.newestStartTs > startTs;
+        if (!isStale) {
+            this.newestStartTs = startTs;
+            this.websocketURL = websocketURL;
+            this.lastNotificationId ??= lastNotificationId;
+            const uidChanged =
+                uid !== undefined && this.currentUID !== null && this.currentUID !== uid;
+            const dbChanged = Boolean(db && this.currentDB && this.currentDB !== db);
+            if (uid !== undefined || dbChanged) {
+                this.currentUID = uid ?? null;
             }
-            this.channelsByClient.forEach((_, key) => this.channelsByClient.set(key, []));
+            if (db) {
+                this.currentDB = db;
+            }
+            if (uidChanged || dbChanged) {
+                this.websocket?.close(WEBSOCKET_CLOSE_CODES.CLEAN);
+                this.channelsByClient.forEach((_, key) => this.channelsByClient.set(key, []));
+            }
         }
         this.sendToClient(client, "BUS:WORKER_STATE_UPDATED", this.state);
         this.sendToClient(client, "BUS:INITIALIZED");
@@ -354,7 +352,7 @@ export class WebsocketWorker {
         this._logDebug("_onWebsocketClose", code, reason);
         this._updateState(WORKER_STATE.DISCONNECTED);
         this.lastChannelSubscription = null;
-        this.firstSubscribeResolver = Promise.withResolvers();
+        this.isSubscribed = false;
         if (IMMEDIATE_RECONNECT_CLOSE_CODES.includes(code)) {
             this.connectRetryDelay = 0;
         }
@@ -383,7 +381,8 @@ export class WebsocketWorker {
         this.broadcast("BUS:RECONNECTING", { closeCode: code });
         this.isReconnecting = true;
         if (code === WEBSOCKET_CLOSE_CODES.SESSION_EXPIRED) {
-            this.isWaitingForNewUID = true;
+            // The next known uid is adopted, not seen as a user change.
+            this.currentUID = null;
         }
         this._retryConnectionWithDelay();
     }
@@ -444,8 +443,8 @@ export class WebsocketWorker {
     }
 
     /**
-     * Triggered on websocket open. Send message that were waiting for
-     * the connection to open.
+     * Triggered on websocket open. Schedule the subscription of the new
+     * connection, which sends the queued messages.
      */
     _onWebsocketOpen() {
         this._logDebug("_onWebsocketOpen");
@@ -455,13 +454,6 @@ export class WebsocketWorker {
         this.connectRetryDelay = this.INITIAL_RECONNECT_DELAY;
         this.connectTimeout = null;
         this.isReconnecting = false;
-        this.firstSubscribeResolver.promise.then(() => {
-            if (!this.websocket) {
-                return;
-            }
-            this.messageWaitQueue.forEach((msg) => this.websocket.send(msg));
-            this.messageWaitQueue = [];
-        });
         this._restartConnectionCheckInterval();
     }
 
@@ -515,32 +507,33 @@ export class WebsocketWorker {
     }
 
     /**
-     * Send a message to the server through the websocket connection.
-     * If the websocket is not open, enqueue the message and send it
-     * upon the next reconnection.
+     * Send a message to the server through the websocket connection. Until
+     * the websocket is open and subscribed, enqueue the message: the first
+     * subscription of the next connection sends it. A subscription is never
+     * enqueued, as each new connection subscribes on open.
      *
      * @param {{event_name: string, data: any }} message Message to send to the server.
      */
     _sendToServer(message) {
         this._logDebug("_sendToServer", message);
-        const payload = JSON.stringify(message);
-        if (this.websocket?.readyState !== WebSocket.OPEN) {
-            if (message["event_name"] === "subscribe") {
-                this.messageWaitQueue = this.messageWaitQueue.filter(
-                    (msg) => JSON.parse(msg).event_name !== "subscribe"
-                );
-                this.messageWaitQueue.unshift(payload);
-            } else {
-                this.messageWaitQueue.push(payload);
+        const isOpen = this.websocket?.readyState === WebSocket.OPEN;
+        if (message["event_name"] === "subscribe") {
+            if (!isOpen) {
+                return;
             }
+            this.websocket.send(JSON.stringify(message));
+            this.isSubscribed = true;
+            for (const queuedMessage of this.messageWaitQueue) {
+                this.websocket.send(JSON.stringify(queuedMessage));
+            }
+            this.messageWaitQueue = [];
+        } else if (isOpen && this.isSubscribed) {
+            this.websocket.send(JSON.stringify(message));
         } else {
-            if (message["event_name"] === "subscribe") {
-                this.websocket.send(payload);
-            } else {
-                this.firstSubscribeResolver.promise.then(() => this.websocket.send(payload));
-            }
-            this._restartConnectionCheckInterval();
+            this.messageWaitQueue.push(message);
+            return;
         }
+        this._restartConnectionCheckInterval();
     }
 
     _removeWebsocketListeners() {
@@ -589,6 +582,7 @@ export class WebsocketWorker {
         clearTimeout(this._connectionCheckPongTimeout);
         this.connectRetryDelay = this.INITIAL_RECONNECT_DELAY;
         this.isReconnecting = false;
+        this.isSubscribed = false;
         this.lastChannelSubscription = null;
         const shouldBroadcastClose =
             this.websocket && this.websocket.readyState !== WebSocket.CLOSED;
@@ -607,6 +601,10 @@ export class WebsocketWorker {
     _debouncedUpdateChannels = debounce(() => {
         const { force, minId } = this.nextSubscribeData;
         this.nextSubscribeData = null;
+        if (this.websocket?.readyState !== WebSocket.OPEN) {
+            // The next connection subscribes on open.
+            return;
+        }
         const allTabsChannels = [
             ...new Set([].concat.apply([], [...this.channelsByClient.values()])),
         ].sort();
@@ -624,7 +622,6 @@ export class WebsocketWorker {
                     last: minId,
                 },
             });
-            this.firstSubscribeResolver.resolve();
         }
     }, WebsocketWorker.OUTGOING_BATCH_DELAY);
 

@@ -31,6 +31,10 @@ registry.category("web_tour.tours").add('test_manufacturing_and_byproduct_sm_to_
             run: "click",
         },
         {
+            trigger: ".o_data_cell[name=quantity]",
+            run: "click",
+        },
+        {
             trigger: ".o_field_widget[name=quantity] input",
             run: 'edit 21',
         },
@@ -43,7 +47,7 @@ registry.category("web_tour.tours").add('test_manufacturing_and_byproduct_sm_to_
             run: "click",
         },
         {
-            trigger: ".modal .modal-body .o_data_row > td:contains('WH/Stock')",
+            trigger: ".modal .modal-body .o_data_row > td:contains('WH / Stock')",
             run: "click",
         },
         {
@@ -93,7 +97,7 @@ registry.category("web_tour.tours").add('test_manufacturing_and_byproduct_sm_to_
             run: "click",
         },
         {
-            trigger: ".modal .modal-body .o_data_row > td:contains('WH/Stock')",
+            trigger: ".modal .modal-body .o_data_row > td:contains('WH / Stock')",
             run: "click",
         },
         {
@@ -110,6 +114,10 @@ registry.category("web_tour.tours").add('test_manufacturing_and_byproduct_sm_to_
             run: "dblclick",
         },
         {
+            trigger: ".o_data_cell[name=quantity]",
+            run: "click",
+        },
+        {
             trigger: ".o_field_widget[name=quantity] input",
             run: 'edit 5',
         },
@@ -122,7 +130,7 @@ registry.category("web_tour.tours").add('test_manufacturing_and_byproduct_sm_to_
             run: "click",
         },
         {
-            trigger: ".modal .modal-body .o_data_row > td:contains('WH/Stock')",
+            trigger: ".modal .modal-body .o_data_row > td:contains('WH / Stock')",
             run: "click",
         },
         {

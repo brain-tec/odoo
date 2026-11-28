@@ -639,6 +639,10 @@ class PosOrder(models.Model):
                 message_list.append(_("Added %(payment_method)s with %(amount)s",
                     payment_method=payment_method_id.name,
                     amount=amount))
+                if new_pm[2].get('is_forced'):
+                    message_list.append(self.env._("Payment %(payment_method)s of %(amount)s was forced",
+                        payment_method=payment_method_id.name,
+                        amount=amount))
             elif orm_command == 1:
                 pm_id = self.env['pos.payment'].browse(new_pm[1])
                 old_pm = pm_id.payment_method_id.name
@@ -650,6 +654,11 @@ class PosOrder(models.Model):
                     new_payment_method = self.env['pos.payment.method'].browse(new_pm[2].get('payment_method_id'))
                 if new_pm[2].get('amount'):
                     new_amount = formatLang(self.env, new_pm[2].get('amount'), currency_obj=pm_id.currency_id)
+
+                if new_pm[2].get('is_forced') and not pm_id.is_forced:
+                    message_list.append(self.env._("Payment %(payment_method)s of %(amount)s was forced",
+                        payment_method=old_pm,
+                        amount=old_amount))
 
                 if new_payment_method and new_amount:
                     message_list.append(_("%(old_pm)s changed to %(new_pm)s and from %(old_amount)s to %(new_amount)s",
@@ -1334,29 +1343,12 @@ class PosOrder(models.Model):
         if product:
             name = product.description_sale
 
-        # Untaxed lines get no manual amounts, so the global rounding delta
-        # allocated to them must be kept in the price, or the move is unbalanced.
-        total = base_line['price_unit']
-        tax_details = base_line['tax_details']
-        if not tax_details['taxes_data']:
-            total = tax_details['total_excluded_currency'] + tax_details['delta_total_excluded_currency']
-
-        if self.config_id._is_quantities_set():
-            quantity = base_line['_aggregated_quantity']
-            price_unit = total / quantity if quantity else total
-        else:
-            quantity, price_unit = 1.0, total
-
         line_vals = {
             'name': name,
-            'quantity': quantity,
-            'price_unit': price_unit,
+            'quantity': base_line['quantity'],
+            'price_unit': base_line['price_unit'],
             'display_type': 'product',
-            'extra_tax_data': self.env['account.tax']._export_base_line_extra_tax_data({
-                **base_line,
-                'quantity': quantity,
-                'price_unit': price_unit,
-            }),
+            'extra_tax_data': self.env['account.tax']._export_base_line_extra_tax_data(base_line),
             'account_id': base_line['account_id'].id,
             'tax_ids': [(6, 0, base_line['tax_ids'].ids)],
         }
@@ -1372,17 +1364,25 @@ class PosOrder(models.Model):
 
         AccountTax = self.env['account.tax']
         company = self.company_id
-        aggregated = AccountTax._reduce_base_lines_with_grouping_function(
+        reduced_base_lines = AccountTax._reduce_base_lines_with_grouping_function(
             base_lines,
             grouping_function=self._grouping_function,
             aggregate_function=aggregate_function,
         )
+
+        if self.config_id._is_quantities_set():
+            for base_line in reduced_base_lines:
+                if quantity := base_line['_aggregated_quantity']:
+                    base_line['price_unit'] /= quantity
+                    base_line['quantity'] = quantity
+
         AccountTax._fix_base_lines_tax_details_on_manual_tax_amounts(
-            aggregated,
+            reduced_base_lines,
             company,
         )
+
         to_create = []
-        for base_line in aggregated:
+        for base_line in reduced_base_lines:
             to_create.append({
                 'account.move.line': self._prepare_move_line_vals_from_base_line(base_line),
                 'metadata': {
