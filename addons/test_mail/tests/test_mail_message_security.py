@@ -521,6 +521,20 @@ class TestMailMessageAccess(MessageAccessCommon):
             messages_all.with_user(self.user_portal).read(['subject'])
         messages_all.with_user(self.user_admin).read(['subject'])
 
+    def test_access_read_orphan(self):
+        """ Message of a removed document is not accessible, and does not crash
+        access check of other messages checked in batch. """
+        record, removed = self.env['mail.test.access.custo'].create([{'name': 'Open'}, {'name': 'Removed'}])
+        removed_id = removed.id
+        removed.unlink()
+        message = record.message_post(body='Valid', subtype_id=self.env.ref('mail.mt_comment').id)
+        orphan = self.env['mail.message'].create({
+            'body': 'Orphan', 'model': 'mail.test.access.custo', 'res_id': removed_id,
+        })
+        messages_su = (message + orphan).with_user(self.user_employee).sudo()
+        self.assertFalse(messages_su[1]._get_with_access())
+        self.assertEqual(messages_su[0]._get_with_access(), message)
+
     def test_access_read_portal(self):
         """ Read access check for portal users """
         for msg, msg_vals, should_crash, reason in [
@@ -734,10 +748,21 @@ class TestMailMessageAccess(MessageAccessCommon):
         message.write({'partner_ids': [(4, self.user_portal_2.partner_id.id)]})
         with self.assertRaises(AccessError):
             message.write({'res_id': self.record_public.id})
+        with self.assertRaises(AccessError):
+            message.message_type = 'notification'
         # To change in 18+
         message.write({'notification_ids': [
             (0, 0, {'res_partner_id': self.user_portal_2.partner_id.id})
         ]})
+
+        user_notification = self.env['mail.thread'].with_user(self.user_employee).message_notify(
+            body='Test',
+            model=self.record_admin._name,
+            partner_ids=self.user_employee.partner_id.ids,
+            res_id=self.record_admin.id,
+        )
+        with self.assertRaises(AccessError):
+            user_notification.message_type = 'comment'
 
     @mute_logger('odoo.addons.base.models.ir_rule')
     def test_access_write_portal_notification(self):

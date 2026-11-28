@@ -756,7 +756,9 @@ class MailMessage(models.Model):
         if self.sudo(False).has_access(mode):
             return self
         if self.model and self.res_id:
-            thread_su = self.env[self.model].browse(self.res_id).sudo()
+            thread_su = self.env[self.model].browse(self.res_id).sudo().exists()
+            if not thread_su:
+                return self.browse()
             for domain, access_mode in thread_su._mail_get_operation_for_mail_message_operation(mode):
                 if thread_su.filtered_domain(domain):
                     if self.env[self.model]._get_thread_with_access(self.res_id, mode=access_mode, **kwargs):
@@ -858,10 +860,10 @@ class MailMessage(models.Model):
         if not (self.env.su or self.env.user.has_group('base.group_user')):
             vals.pop('author_id', None)
             vals.pop('email_from', None)
-        record_changed = 'model' in vals or 'res_id' in vals
+        record_changed = {'message_type', 'model', 'res_id'} & vals.keys()
         if record_changed and not self.env.is_system():
-            raise AccessError(_("Only administrators can modify 'model' and 'res_id' fields."))
-        if record_changed or 'message_type' in vals:
+            raise AccessError(_("Only administrators can modify 'model', 'res_id' and 'message_type' fields."))
+        if record_changed:
             self._invalidate_documents()
         res = super().write(vals)
         if vals.get('attachment_ids'):
