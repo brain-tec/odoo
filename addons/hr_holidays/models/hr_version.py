@@ -24,6 +24,25 @@ class HrVersion(models.Model):
     hr_responsible_id = fields.Many2one(ui_domain=lambda self: self._get_hr_responsible_domain())
     allocation_from_working_schedule_id = fields.Many2one('hr.leave.allocation', string="Allocation from working schedule", copy=False, groups="hr.group_hr_user")
 
+    def _get_leave_manager_domain(self):
+        return "[('share', '=', False), ('company_ids', 'in', company_id), ('role', 'in', ['regular_user', 'group_system']), ('all_group_ids', 'in', %s)]" % self.env.ref('hr_holidays.group_hr_holidays_employee').id
+    leave_manager_id = fields.Many2one(
+        'res.users', string='Time Off Approver',
+        compute='_compute_leave_manager', store=True, readonly=False, index='btree_not_null',
+        ui_domain=_get_leave_manager_domain,
+        help='Select the user responsible for approving "Time Off" of this employee.\n'
+             'If empty, the approval is done by an Administrator or Approver (determined in settings/users).')
+
+    @api.depends('parent_id')
+    def _compute_leave_manager(self):
+        for version in self:
+            previous_manager = version._origin.parent_id.user_id
+            manager = version.parent_id.user_id
+            if manager and version.leave_manager_id and version.leave_manager_id == previous_manager:
+                version.leave_manager_id = manager
+            elif not version.leave_manager_id:
+                version.leave_manager_id = False
+
     @api.constrains('contract_date_start', 'contract_date_end')
     def _check_contracts(self):
         """Check that the time off of the versions does not span different working schedules."""
@@ -325,10 +344,12 @@ class HrVersion(models.Model):
         :rtype: list
         """
         result = super()._get_more_vals_leave_interval(interval, leaves)
+        holidays = self.env['hr.leave']
         for leave in leaves:
             if interval[0] >= leave[0] and interval[1] <= leave[1]:
-                if leave[2].holiday_id:
-                    result.append(('leave_ids', leave[2].holiday_id))
+                holidays |= leave[2].holiday_id
+        if holidays:
+            result.append(('leave_ids', holidays))
         return result
 
     def _get_interval_leave_work_entry_type(self, interval, leaves, bypassing_codes):
@@ -356,7 +377,12 @@ class HrVersion(models.Model):
 
         interval_start = interval[0].astimezone(UTC).replace(tzinfo=None)
         interval_stop = interval[1].astimezone(UTC).replace(tzinfo=None)
-        including_rcleaves = [l[2] for l in leaves if l[2] and interval_start >= l[2][0].date_from and interval_stop <= l[2][0].date_to]
+        including_rcleaves = [
+            rcleave
+            for leave in leaves
+            for rcleave in leave[2]
+            if interval_start >= rcleave.date_from and interval_stop <= rcleave.date_to
+        ]
         including_global_rcleaves = [l for l in including_rcleaves if not l.holiday_id]
         including_holiday_rcleaves = [l for l in including_rcleaves if l.holiday_id]
         rc_leave = False
@@ -372,7 +398,8 @@ class HrVersion(models.Model):
         elif including_global_rcleaves:
             rc_leave = including_global_rcleaves[0]
         elif including_holiday_rcleaves:
-            rc_leave = including_holiday_rcleaves[0]
+            # A later employee time off overlays an earlier one when both are kept.
+            rc_leave = max(including_holiday_rcleaves, key=lambda leave: leave.holiday_id.id)
         if rc_leave:
             return self._get_leave_work_entry_type_dates(rc_leave, interval_start, interval_stop, self.employee_id)
         return self.env['hr.work.entry.type'].search([

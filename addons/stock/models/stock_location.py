@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import calendar
+import re
 
 from collections import defaultdict, OrderedDict
 from datetime import timedelta
@@ -101,17 +102,21 @@ class StockLocation(models.Model):
     )
     _parent_path_id_idx = models.Index("(parent_path, id)")
 
-    @api.depends('name', 'location_id.complete_name', 'usage')
-    @api.depends_context('formatted_display_name', 'show_empty')
+    @api.depends('name', 'location_id.complete_name')
+    @api.depends_context('formatted_display_name', 'show_empty', 'short_name')
     def _compute_display_name(self):
         super()._compute_display_name()
         formatted_display_name = self.env.context.get('formatted_display_name')
+        short_name = self.env.context.get('short_name')
+        if short_name and not formatted_display_name:
+            return  # Locations' `display_name` doesn't need further computation.
         for location in self:
-            has_parent = location.location_id and location.usage != 'view'
-            if formatted_display_name and has_parent:
-                location.display_name = f"--{location.location_id.complete_name}/--{location.name}"
-            elif has_parent:
-                location.display_name = f"{location.location_id.complete_name}/{location.name}"
+            has_parent = location.location_id
+            if not short_name and has_parent:
+                if formatted_display_name:
+                    location.display_name = f"--{location.location_id.complete_name} / --{location.name}"
+                else:
+                    location.display_name = f"{location.location_id.complete_name} / {location.name}"
             if formatted_display_name and self.env.context.get('show_empty') and location.is_empty:
                 location.display_name += self.env._("\t--Empty--")
 
@@ -125,11 +130,11 @@ class StockLocation(models.Model):
             location.net_weight = weight_by_location[location]['net_weight']
             location.forecast_weight = weight_by_location[location]['forecast_weight']
 
-    @api.depends('name', 'location_id.complete_name', 'usage')
+    @api.depends('name', 'location_id.complete_name')
     def _compute_complete_name(self):
         for location in self:
-            if location.location_id and location.usage != 'view':
-                location.complete_name = '%s/%s' % (location.location_id.complete_name, location.name)
+            if location.location_id:
+                location.complete_name = '%s / %s' % (location.location_id.complete_name, location.name)
             else:
                 location.complete_name = location.name
 
@@ -278,12 +283,12 @@ class StockLocation(models.Model):
     @api.model
     def name_create(self, name):
         if name:
-            name_split = name.split('/')
+            name_split = re.split(r' ?/ ?', name)
             parent_location = self.env['stock.location'].search([
-                ('complete_name', '=', '/'.join(name_split[:-1])),
+                ('complete_name', '=', ' / '.join(name_split[:-1])),
             ], limit=1)
             new_location = self.create({
-                'name': name.split('/')[-1],
+                'name': name_split[-1],
                 'location_id': parent_location.id if parent_location else False,
             })
             return new_location.id, new_location.display_name
@@ -502,8 +507,9 @@ class StockLocation(models.Model):
         return self._child_of(inter_comp_location)
 
     def _get_weight(self, excluded_sml_ids=False):
-        """Returns a dictionary with the net and forecasted weight of the location.
-        param excluded_sml_ids: set of stock.move.line ids to exclude from the computation
+        """Returns a dictionary with the net weight, forecasted weight and forecasted product
+        quantities of the location.
+        :param excluded_sml_ids: set of stock.move.line ids to exclude from the computation
         """
         if not excluded_sml_ids:
             excluded_sml_ids = set()
@@ -532,14 +538,22 @@ class StockLocation(models.Model):
             weight = quantity_sum * product.weight
             result[loc]['net_weight'] += weight
             result[loc]['forecast_weight'] += weight
+            result[loc][product] += quantity_sum
 
         for loc, product, quantity_product_uom_sum in outgoing_move_lines:
             result[loc]['forecast_weight'] -= quantity_product_uom_sum * product.weight
+            result[loc][product] -= quantity_product_uom_sum
 
         for dest_loc, product, quantity_product_uom_sum in incoming_move_lines:
             result[dest_loc]['forecast_weight'] += quantity_product_uom_sum * product.weight
+            result[dest_loc][product] += quantity_product_uom_sum
 
         return result
+
+    @api.model
+    def search_panel_select_range(self, field_name, **kwargs):
+        recordset = self.with_context(short_name=True) if field_name == 'location_id' else self
+        return super(StockLocation, recordset).search_panel_select_range(field_name, **kwargs)
 
 
 class StockRoute(models.Model):

@@ -3030,6 +3030,37 @@ test(`Colors: dynamic filters without color attr (related)`, async () => {
     expect(`.o_calendar_filter[data-name="type_id"] .o_calendar_filter_color`).toHaveCount(3);
 });
 
+test.tags("desktop");
+test(`Colors: an event colored by an index, its filter and its popover share the badge tones`, async () => {
+    Event._records = [
+        {
+            id: 8,
+            user_id: 4,
+            partner_id: 1,
+            name: "event 8",
+            start: "2016-12-11 09:00:00",
+            stop: "2016-12-11 10:00:00",
+            is_all_day: false,
+            type_id: 3,
+        },
+    ];
+    await mountView({
+        resModel: "event",
+        type: "calendar",
+        arch: `
+            <calendar event_open_popup="1" date_start="start" date_stop="stop" color="color">
+                <field name="type_id" filters="1"/>
+            </calendar>
+        `,
+    });
+    expect(`.o_event[data-event-id="8"]`).toHaveClass("o_badge_color_4");
+    expect(`.o_calendar_filter[data-name="type_id"] .o_calendar_filter_item`).toHaveClass(
+        "o_badge_color_4"
+    );
+    await clickEvent(8);
+    expect(".o_calendar_popover").toHaveClass("o_badge_color_4");
+});
+
 test(`Colors: dynamic filters without color attr (direct)`, async () => {
     onRpc("event.type", "search_read", () => {
         throw makeServerError({ message: "should not fetch event.type filter colors" });
@@ -5774,6 +5805,52 @@ test("save selected date during view switching", async () => {
     await getService("action").switchView("list");
     await getService("action").switchView("calendar");
     expect(`.o_calendar_week_number_header:eq(0)`).toHaveText(weekNumber);
+});
+
+test.tags("desktop");
+test("date filters are hidden, and restored when switching view", async () => {
+    Event._views = {
+        calendar: `<calendar date_start="start" date_stop="stop" mode="month"/>`,
+        list: `<list><field name="name"/></list>`,
+        search: `
+            <search>
+                <filter name="typed" string="Typed" domain="[('type_id', '!=', False)]"/>
+                <separator/>
+                <filter name="start_filter" string="Start" date="start"/>
+            </search>
+        `,
+    };
+    onRpc("event", "search_read", ({ kwargs }) => expect.step(kwargs.domain));
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction({
+        res_model: "event",
+        type: "ir.actions.act_window",
+        views: [
+            [false, "list"],
+            [false, "calendar"],
+        ],
+        context: { search_default_typed: 1, search_default_start_filter: 1 },
+    });
+    const facets = ["Typed", "Start: December 2016"];
+    expect(queryAllTexts`.o_searchview_facet`).toEqual(facets);
+
+    await getService("action").switchView("calendar");
+    expect(queryAllTexts`.o_searchview_facet`).toEqual(["Typed"]);
+    expect.verifySteps([
+        [
+            ["type_id", "!=", false],
+            "&",
+            ["start", "<=", "2017-01-07 22:59:59"],
+            "|",
+            ["stop", ">=", "2016-11-26 23:00:00"],
+            ["start", ">=", "2016-11-26 23:00:00"],
+        ],
+    ]);
+    await contains(".o_searchview_dropdown_toggler").click();
+    expect(queryAllTexts`.o_filter_menu .o_menu_item`).not.toInclude("Start");
+
+    await getService("action").switchView("list");
+    expect(queryAllTexts`.o_searchview_facet`).toEqual(facets);
 });
 
 test(`check if active fields are fetched in addition to field names in record data(search_read rpc)`, async () => {

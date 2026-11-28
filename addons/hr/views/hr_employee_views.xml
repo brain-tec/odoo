@@ -223,7 +223,7 @@
                                 <div class="row" id="o_hr_work_information_container">
                                     <div id="o_work_information" class="o_hr_column col-lg-7 d-flex flex-column">
                                         <group name="work" string="work">
-                                            <field name="company_id" groups="base.group_multi_company" domain="[('id', 'in', allowed_company_ids)]"/>
+                                            <field name="company_id" groups="base.group_multi_company" domain="[('id', 'in', allowed_company_ids)]" widget="hr_employee_company" options="{'no_create': True}"/>
                                             <field name="department_id"/>
                                             <field name="job_id" string="Job Position" context="{'default_no_of_recruitment': 0, 'default_is_favorite': False}" placeholder="e.g. Sales Manager"/>
                                             <field name="parent_id" widget="many2one_avatar_employee"/>
@@ -341,9 +341,10 @@
                                         <div class="d-flex align-items-start justify-content-between" invisible="not has_multiple_bank_accounts">
                                                 <field name="bank_account_ids"
                                                         widget="many2many_tags_salary_bank"
+                                                        class="flex-grow-1 min-w-0"
                                                         context="{'default_partner_id': work_contact_id}"
                                                         options="{'color_field': 'color', 'no_quick_create': True, 'on_tag_click': 'open_form'}"/>
-                                            <div class="pt-0 ms-2">
+                                            <div class="pt-0 ms-2 flex-shrink-0">
                                                 <button name="action_open_allocation_wizard"
                                                         type="object"
                                                         string="Salary Allocation"
@@ -355,9 +356,10 @@
                                         <div class="o-row d-flex justify-content-between gap-2 align-items-start" invisible="has_multiple_bank_accounts">
                                             <field name="bank_account_ids"
                                                 widget="many2many_tags_salary_bank"
+                                                class="flex-grow-1 min-w-0"
                                                 context="{'default_partner_id': work_contact_id}"
                                                 options="{'color_field': 'color', 'no_quick_create': True, 'on_tag_click': 'open_form'}"/>
-                                            <div class="d-flex align-items-start" invisible="not bank_account_ids">
+                                            <div class="d-flex align-items-start flex-shrink-0" invisible="not bank_account_ids">
                                                 <span class="d-flex w-50">
                                                     <span invisible="is_trusted_bank_account" class="text-muted">Untrusted</span>
                                                     <span invisible="not is_trusted_bank_account" class="text-success">Trusted</span>
@@ -917,7 +919,7 @@
             <field name="path">employees</field>
             <field name="res_model">hr.employee</field>
             <field name="view_mode">kanban,list,form,activity,graph,pivot</field>
-            <field name="domain">[('company_id', 'in', allowed_company_ids)]</field>
+            <field name="domain">['|', ('company_id', 'in', allowed_company_ids), ('version_company_ids', 'in', allowed_company_ids)]</field>
             <field name="context">{'chat_icon': True}</field>
             <field name="view_id" eval="False"/>
             <field name="search_view_id" ref="view_employee_filter"/>
@@ -985,7 +987,7 @@
             <field name="path">all_activities</field>
             <field name="res_model">hr.employee</field>
             <field name="domain">[
-                ('company_id', 'in', allowed_company_ids),
+                '|', ('company_id', 'in', allowed_company_ids), ('version_company_ids', 'in', allowed_company_ids),
                 ('activity_ids', '!=', False),
             ]</field>
             <field name="context">{'chat_icon': True, 'searchpanel_default_company_id': allowed_company_ids[0]}</field>

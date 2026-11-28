@@ -1,13 +1,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import Command
-from odoo.addons.hr_expense.tests.common import TestExpenseCommon
-from odoo.addons.sale.tests.common import TestSaleCommon
 from odoo.exceptions import UserError
 from odoo.tests import tagged
 
+from odoo.addons.account_hr_expense.tests.common import TestAccountExpenseCommon
+from odoo.addons.sale.tests.common import TestSaleCommon
+
 
 @tagged('post_install', '-at_install')
-class TestSaleExpense(TestExpenseCommon, TestSaleCommon):
+class TestSaleExpense(TestAccountExpenseCommon, TestSaleCommon):
 
     _test_user_groups = None  # FIXME list needed groups
 
@@ -87,6 +88,30 @@ class TestSaleExpense(TestExpenseCommon, TestSaleCommon):
         # both expenses should be invoiced
         inv = so._create_invoices()
         self.assertEqual(inv.amount_untaxed, 621.5 + (prod_exp_2.list_price * 100.0), 'Sale Expense: invoicing of expense is wrong')
+
+    def test_approve_creates_one_analytic_account_per_sale_order(self):
+        sale_orders = self.env['sale.order'].create([{
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({'product_id': self.company_data['product_delivery_no'].id})],
+        }] * 2)
+        sale_orders.action_confirm()
+        own_analytic_account = self.env['account.analytic.account'].create(sale_orders[0]._prepare_analytic_account_data())
+        expenses = self.create_expenses([{**values, 'product_id': self.company_data['product_delivery_cost'].id} for values in [
+            {'name': 'first order 1', 'quantity': 1, 'sale_order_id': sale_orders[0].id},
+            {'name': 'first order 2', 'quantity': 2, 'sale_order_id': sale_orders[0].id},
+            {'name': 'first order 3', 'quantity': 3, 'sale_order_id': sale_orders[0].id,
+             'analytic_distribution': {own_analytic_account.id: 100}},
+            {'name': 'second order', 'quantity': 4, 'sale_order_id': sale_orders[1].id},
+        ]]).sorted('id')
+        expenses.action_submit()
+        expenses.with_user(self.expense_user_manager).action_approve()  # An approver without sales rights
+
+        first_order_new_distribution = expenses[0].analytic_distribution
+        self.assertEqual(len(first_order_new_distribution), 1)
+        self.assertNotEqual(first_order_new_distribution, {str(own_analytic_account.id): 100})
+        self.assertEqual(expenses[1].analytic_distribution, first_order_new_distribution)
+        self.assertEqual(expenses[2].analytic_distribution, {str(own_analytic_account.id): 100})
+        self.assertNotIn(expenses[3].analytic_distribution, (first_order_new_distribution, {str(own_analytic_account.id): 100}))
 
     def test_expense_multi_id_analytic_distribution(self):
         """
@@ -246,3 +271,77 @@ class TestSaleExpense(TestExpenseCommon, TestSaleCommon):
             {'name': new_attachments[1].name, 'checksum': new_attachments[1].checksum},
         ])
         self.assertFalse((attachments + new_attachments) & linked_attachments)
+
+    def test_expense_reinvoice_purchase_price(self):
+        # re-invoiceable products
+        product_with_cost = self.product_a
+        product_with_cost.write({'standard_price': 1000, 'reinvoice_policy': 'sales_price'})
+        product_with_no_cost = self.product_c
+        product_with_no_cost.write({'reinvoice_policy': 'sales_price'})
+
+        # create SO line and confirm SO (with only one line)
+        sale_order = self.env['sale.order'].with_context(
+            mail_create_nolog=True,
+        ).sudo().create({
+            'partner_id': self.partner_a.id,
+            'partner_invoice_id': self.partner_a.id,
+            'partner_shipping_id': self.partner_a.id,
+            'order_line': [Command.create({
+                'name': product_with_cost.name,
+                'product_id': product_with_cost.id,
+                'product_uom_qty': 2.0,
+            })],
+        })
+
+        sale_order.action_confirm()
+
+        expense = self.create_expenses([
+            {
+                # expense with zero cost product, with 15% tax
+                'name': 'expense_1',
+                'date': '2020-10-07',
+                'product_id': product_with_no_cost.id,
+                'total_amount_currency': 100,
+                'tax_ids': [Command.set(self.company_data['default_tax_purchase'].ids)],
+                'sale_order_id': sale_order.id,
+            },
+            {
+                # expense with zero cost product, with no tax
+                'name': 'expense_2',
+                'date': '2020-10-07',
+                'product_id': product_with_no_cost.id,
+                'total_amount_currency': 100,
+                'tax_ids': False,
+                'sale_order_id': sale_order.id,
+            },
+            {
+                # expense with product with cost (1000), with 15% tax
+                'name': 'expense_3',
+                'date': '2020-10-07',
+                'product_id': product_with_cost.id,
+                'quantity': 3,
+                'tax_ids': [Command.set(self.company_data['default_tax_purchase'].ids)],
+                'sale_order_id': sale_order.id,
+            },
+            {
+                # expense with product with cost (1000), with no tax
+                'name': 'expense_4',
+                'date': '2020-10-07',
+                'product_id': product_with_cost.id,
+                'quantity': 5,
+                'tax_ids': False,
+                'sale_order_id': sale_order.id,
+            },
+        ]).sorted('name')
+
+        expense.action_submit()
+        expense._do_approve()  # Skip duplicate wizard
+        self.post_expenses(expense)
+
+        self.assertAlmostEqual(sale_order.order_line[0].purchase_price, 1000.0)
+        self.assertFalse(sale_order.order_line[0].is_expense)
+
+        # Expense Lines
+        for line, expected_purchase_price in zip(sale_order.order_line[1:], [86.96, 100.0, 869.5666667, 1000.0]):
+            self.assertAlmostEqual(line.purchase_price, expected_purchase_price)
+            self.assertTrue(line.is_expense)

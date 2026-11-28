@@ -20,6 +20,10 @@ registry.category("web_tour.tours").add("test_stock_picking_batch_sm_to_sml_sync
             run: "click",
         },
         {
+            trigger: ".o_data_cell[name=quantity]",
+            run: "click",
+        },
+        {
             trigger: ".modal:contains(open: transfers) .o_list_number > div[name=quantity] input",
             run: "edit 7",
         },
@@ -32,7 +36,7 @@ registry.category("web_tour.tours").add("test_stock_picking_batch_sm_to_sml_sync
         },
         {
             trigger:
-                ".modal:contains(Open: Stock Move) .o_field_pick_from > .o_many2one:contains('WH/Stock/Shelf A')",
+                ".modal:contains(Open: Stock Move) .o_field_pick_from > .o_many2one:contains('WH / Stock / Shelf A')",
             run: "click",
         },
         {
@@ -63,6 +67,10 @@ registry.category("web_tour.tours").add("test_stock_picking_batch_sm_to_sml_sync
             run: "click",
         },
         {
+            trigger: ".o_data_cell[name=quantity]",
+            run: "click",
+        },
+        {
             trigger: ".modal:contains(open: transfers) .o_list_number[name=quantity] input",
             run: "edit 21",
         },
@@ -76,7 +84,7 @@ registry.category("web_tour.tours").add("test_stock_picking_batch_sm_to_sml_sync
         {
             content: "Click in cell to start edition",
             trigger:
-                ".modal:contains(Open: Stock Move) .o_field_pick_from > .o_many2one:contains('WH/Stock/Shelf A')",
+                ".modal:contains(Open: Stock Move) .o_field_pick_from > .o_many2one:contains('WH / Stock / Shelf A')",
             run: "click",
         },
         {

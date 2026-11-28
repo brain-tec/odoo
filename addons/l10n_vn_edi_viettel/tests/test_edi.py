@@ -102,7 +102,7 @@ class TestVNEDI(AccountTestInvoicingCommon):
                     'buyerName': 'partner_a',
                     'buyerLegalName': 'partner_a',
                     'buyerTaxCode': '0100109106-505',
-                    'buyerAddressLine': '121 Hang Bac Street, Hà Nội, Hà Nội Vietnam',
+                    'buyerAddressLine': '121 Hang Bac Street, Hà Nội, Hà Nội, Vietnam',
                     'buyerPhoneNumber': '38257670',
                     'buyerEmail': 'partner_a@gmail.com',
                     'buyerCityName': 'Hà Nội',
@@ -112,7 +112,7 @@ class TestVNEDI(AccountTestInvoicingCommon):
                 'sellerInfo': {
                     'sellerLegalName': 'company_1_data',
                     'sellerTaxCode': '0100109106-506',
-                    'sellerAddressLine': '3 Alley 45 Phan Dinh Phung, Quan Thanh Ward, Hà Nội Vietnam',
+                    'sellerAddressLine': '3 Alley 45 Phan Dinh Phung, Quan Thanh Ward, Hà Nội, Vietnam',
                     'sellerPhoneNumber': '62661275',
                     'sellerEmail': 'test_company@gmail.com',
                     'sellerDistrictName': 'Hà Nội',
@@ -171,7 +171,7 @@ class TestVNEDI(AccountTestInvoicingCommon):
                     'buyerName': 'partner_a',
                     'buyerLegalName': 'partner_a',
                     'buyerTaxCode': '0100109106-505',
-                    'buyerAddressLine': '121 Hang Bac Street, Hà Nội, Hà Nội Vietnam',
+                    'buyerAddressLine': '121 Hang Bac Street, Hà Nội, Hà Nội, Vietnam',
                     'buyerPhoneNumber': '38257670',
                     'buyerEmail': 'partner_a@gmail.com',
                     'buyerCityName': 'Hà Nội',
@@ -181,7 +181,7 @@ class TestVNEDI(AccountTestInvoicingCommon):
                 'sellerInfo': {
                     'sellerLegalName': 'company_1_data',
                     'sellerTaxCode': '0100109106-506',
-                    'sellerAddressLine': '3 Alley 45 Phan Dinh Phung, Quan Thanh Ward, Hà Nội Vietnam',
+                    'sellerAddressLine': '3 Alley 45 Phan Dinh Phung, Quan Thanh Ward, Hà Nội, Vietnam',
                     'sellerPhoneNumber': '62661275',
                     'sellerEmail': 'test_company@gmail.com',
                     'sellerDistrictName': 'Hà Nội',
@@ -219,6 +219,67 @@ class TestVNEDI(AccountTestInvoicingCommon):
         self.env.company.email = False
         invoice = self.init_invoice('out_invoice', products=self.product_a, taxes=self.tax_sale_a, post=True)
         self.assertEqual(invoice._l10n_vn_edi_generate_invoice_json()['sellerInfo']['sellerEmail'], '')
+
+    @freeze_time('2024-01-01')
+    def test_json_data_studio_fields(self):
+        """ The buyer identifiers and the SInvoice fields added with Studio are sent in their block, overriding the defaults. """
+        studio_fields = {
+            'account.move': ['x_studio_sinvoice_payment_method_name'],
+            'account.move.line': ['x_studio_sinvoice_batch_no', 'x_studio_sinvoice_exp_date'],
+        }
+        self.env['ir.model.fields'].create([
+            {
+                'name': name,
+                'model': model,
+                'model_id': self.env['ir.model']._get_id(model),
+                'ttype': 'date' if name == 'x_studio_sinvoice_exp_date' else 'char',
+                'state': 'manual',
+            }
+            for model, names in studio_fields.items()
+            for name in names
+        ])
+
+        self.partner_a.additional_identifiers = {'VN_BUDGET_CODE': '1234567', 'OTHER': '0100109106'}
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'x_studio_sinvoice_payment_method_name': 'CK',
+            'invoice_line_ids': [Command.create({
+                'product_id': self.product_a.id,
+                'x_studio_sinvoice_batch_no': 'LOT-001',
+                'x_studio_sinvoice_exp_date': '2025-12-31',
+            })],
+        })
+        invoice.action_post()
+        json_data = invoice._l10n_vn_edi_generate_invoice_json()
+
+        actual = json_data['buyerInfo']
+        self.assertDictEqual(actual, actual | {'buyerBudgetCode': '1234567'})
+        self.assertNotIn('buyerForeignOrganizationId', actual)
+        self.assertEqual(json_data['payments'], [{'paymentMethodName': 'CK'}])
+        expected = {
+            'batchNo': 'LOT-001',
+            'expDate': '31/12/2025',
+        }
+        actual = json_data['itemInfo'][0]
+        self.assertDictEqual(actual, actual | expected)
+
+    @freeze_time('2024-01-01')
+    def test_json_data_buyer_id(self):
+        """ A foreign buyer is identified by their passport, or by their company ID for an organization. """
+        for country, identifiers, expected in (
+            ('base.fr', {'PASSPORT': 'B1234567'}, {'buyerIdType': '3', 'buyerIdNo': 'B1234567'}),
+            ('base.fr', {'FR_SIRET': '33417522101010'}, {'buyerForeignOrganizationId': '33417522101010'}),
+            ('base.us', {'OTHER': 'US-12345'}, {'buyerForeignOrganizationId': 'US-12345'}),
+        ):
+            buyer = self.env['res.partner'].create({
+                'name': 'Foreign buyer',
+                'country_id': self.env.ref(country).id,
+                'additional_identifiers': identifiers,
+            })
+            invoice = self.init_invoice(move_type='out_invoice', partner=buyer, products=self.product_a, post=True)
+            actual = invoice._l10n_vn_edi_generate_invoice_json()['buyerInfo']
+            self.assertDictEqual(actual, actual | expected)
 
     @freeze_time('2024-01-01')
     def test_adjustment_invoice(self):

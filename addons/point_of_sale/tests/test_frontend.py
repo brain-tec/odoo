@@ -914,13 +914,39 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.write({
             'fallback_nomenclature_id': default_nomenclature_id
         })
-        self.env['product.product'].create({
+        product_1 = self.env['product.product'].create({
             'name': 'Product 1',
             'available_in_pos': True,
             'list_price': 10,
             'taxes_id': False,
             'barcode': '08431673020125',
         })
+
+        pack_of_6, pack_of_12 = self.env['uom.uom'].create([
+            {
+                'name': 'Pack of 6',
+                'relative_factor': 6,
+                'relative_uom_id': self.env.ref('uom.product_uom_unit').id,
+                'is_pos_groupable': True,
+            }, {
+                'name': 'Pack of 12',
+                'relative_factor': 12,
+                'relative_uom_id': self.env.ref('uom.product_uom_unit').id,
+                'is_pos_groupable': True,
+            }
+        ])
+        # Stored with and without leading 0
+        self.env['product.uom'].create([
+            {
+                'barcode': '12345678901200',
+                'product_id': product_1.id,
+                'uom_id': pack_of_6.id,
+            }, {
+                'barcode': '9999999999987',
+                'product_id': product_1.id,
+                'uom_id': pack_of_12.id,
+            }
+        ])
 
         self.env['product.product'].create({
             'name': 'Product 2',
@@ -1739,6 +1765,9 @@ class TestUi(TestPointOfSaleHttpCommon):
             'auto_validate_electronic_payment': True
         })
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_auto_validate_force_done', login="pos_user")
+        payment = self.main_pos_config.current_session_id.order_ids.payment_ids
+        self.assertEqual(len(payment), 1)
+        self.assertTrue(payment.is_forced, "The force-done payment should be flagged as forced")
 
     def test_pos_ui_round_globally(self):
         self.main_pos_config.company_id.tax_calculation_rounding_method = 'round_globally'

@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
 import re
 from collections import defaultdict
 from datetime import UTC, date, datetime, time, timedelta
@@ -24,8 +25,9 @@ from odoo.addons.hr.models.hr_version import format_date_abbr
 from odoo.addons.mail.tools.discuss import Store
 from odoo.addons.resource.models.utils import extract_comodel_domain, filter_map_domain
 
-
 from .hr_employee_location import DAYS
+
+_logger = logging.getLogger(__name__)
 
 # This sentinel object, when in the context, provides read access to the
 # model 'hr.employee' in certain situations, like when setting a many2many
@@ -84,6 +86,14 @@ class HrEmployee(models.Model):
         ui_required=True
     )
     versions_count = fields.Integer(string="Employee Records Count", compute='_compute_versions_count', groups="hr.group_hr_user")
+    version_company_ids = fields.Many2many(
+        'res.company',
+        string="Employee Records Companies",
+        compute='_compute_version_company_ids',
+        search='_search_version_company_ids',
+        # also on hr.employee.public: readable by every internal user (the companies of the employee's records)
+        compute_sudo=True,
+    )
     version_revision = fields.Char(compute="_compute_version_revision", groups="hr.group_hr_user")
 
     contract_template_id = fields.Many2one(
@@ -289,9 +299,10 @@ class HrEmployee(models.Model):
         groups="hr.group_hr_user"
     )
     # Direct subordinates
-    parent_id = fields.Many2one('hr.employee', 'Manager', tracking=True, index=True,
-                                ui_domain="['|', ('company_id', '=', False), ('company_id', 'in', allowed_company_ids)]")
-    child_ids = fields.One2many('hr.employee', 'parent_id', string='Direct subordinates', domain=[('active', '=', True)])
+    parent_id = fields.Many2one(readonly=False, related='version_id.parent_id', inherited=True, tracking=True)
+    managed_version_ids = fields.One2many('hr.version', 'parent_id', groups="hr.group_hr_user")
+    child_ids = fields.One2many('hr.employee', string='Direct subordinates', compute='_compute_child_ids',
+        search='_search_child_ids')
     child_count = fields.Integer('Direct Subordinates Count', compute='_compute_child_count',
         recursive=True, compute_sudo=True)
 
@@ -303,11 +314,7 @@ class HrEmployee(models.Model):
         store=False, compute_sudo=True)
     department_color = fields.Integer("Department Color", related="department_id.color")
 
-    coach_id = fields.Many2one(
-        'hr.employee', 'Coach', compute='_compute_coach', store=True, readonly=False,
-        ui_domain="['|', ('company_id', '=', False), ('company_id', 'in', allowed_company_ids)]",
-        help='Select the "Employee" who is the coach of this employee.\n'
-             'The "Coach" has no specific rights or responsibilities by default.')
+    coach_id = fields.Many2one(readonly=False, related='version_id.coach_id', inherited=True)
     category_ids = fields.Many2many(
         'hr.employee.category', 'employee_category_rel',
         'employee_id', 'category_id', groups="hr.group_hr_user",
@@ -506,6 +513,10 @@ class HrEmployee(models.Model):
                 first_id = str(ordered[0][0])
                 if new_salary_distribution[first_id]['amount_is_percentage']:
                     new_salary_distribution[first_id]['amount'] += removed_percentage
+                elif len(ordered) > 1 and not added_ids:
+                    # Only fixed amounts are left: the last account of the Salary Allocation gets the rest of the salary.
+                    last_id = str(max(ordered, key=lambda x: x[1].get('sequence', 0))[0])
+                    new_salary_distribution[last_id] = dict(new_salary_distribution[last_id], amount=100.0, amount_is_percentage=True)
 
             # Add new entries with remaining %
             total_allocated = sum(d['amount'] for d in new_salary_distribution.values() if d['amount_is_percentage'])
@@ -539,12 +550,16 @@ class HrEmployee(models.Model):
                 is_percentage = ba_values.get('amount_is_percentage', True)
                 if is_percentage and (not isinstance(amount, (float, int)) or not (0 <= amount <= 100)):
                     raise ValidationError(self.env._("Each amount percentage must be a number between 0 and 100."))
+                if not is_percentage and (not isinstance(amount, (float, int)) or amount <= 0):
+                    raise ValidationError(self.env._("Each fixed amount must be greater than 0."))
                 if is_percentage:
                     check_total = True
                     total += amount
 
             if check_total and not float_is_zero(total - 100.0, precision_digits=4):
                 raise ValidationError(self.env._("Total salary distribution on bank accounts must be exactly 100%."))
+            if len(dist) > 1 and not check_total:
+                raise ValidationError(self.env._("At least one bank account must receive a percentage of the remaining salary."))
 
     @api.model
     def _create(self, data_list):
@@ -778,7 +793,7 @@ class HrEmployee(models.Model):
             employee.split_legal_name = employee.company_country_code in splitting_country_codes
 
     @api.depends('current_version_id')
-    @api.depends_context('version_id')
+    @api.depends_context('version_id', 'allowed_company_ids')
     def _compute_version_id(self):
         """Compute ``version_id``, the version that the inherited (``_inherits``) fields read and write.
 
@@ -788,17 +803,72 @@ class HrEmployee(models.Model):
         past or future version)::
 
             employee.with_context(version_id=old_version.id).wage
+
+        When the context restricts the companies (``allowed_company_ids``, as
+        in the web client) and the current version belongs to another company
+        (e.g. the employee moved to another company), it is the version that
+        would be current among the versions of the allowed companies. Searching
+        on inherited fields still uses ``current_version_id``
+        (:meth:`_compute_sql_version_id`).
         """
         context_version_id = self.env.context.get('version_id', False)
         context_version = self.env['hr.version'].browse(context_version_id).exists() if context_version_id else self.env['hr.version']
+        allowed_company_ids = self.env.context.get('allowed_company_ids')
+        today = fields.Date.context_today(self)
 
         for employee in self:
             if context_version.employee_id == employee:
                 version = context_version
             else:
                 version = employee.current_version_id
+                if allowed_company_ids and version.company_id and version.company_id.id not in allowed_company_ids:
+                    company_versions = employee.version_ids.filtered(lambda v: v.company_id.id in allowed_company_ids)
+                    past_versions = company_versions.filtered(lambda v: v.date_version <= today)
+                    if past_versions:
+                        version = max(past_versions, key=lambda v: v.date_version)
+                    elif company_versions:
+                        version = min(company_versions, key=lambda v: v.date_version)
             employee.version_id = version
 
+    @api.depends('version_ids.company_id')
+    def _compute_version_company_ids(self):
+        for employee in self:
+            employee.version_company_ids = employee.version_ids.company_id
+
+    def _search_version_company_ids(self, operator, value):
+        if operator != 'in':
+            return NotImplemented
+        return Domain('id', 'in', self.env['hr.version']._search(
+            Domain('company_id', 'in', value),
+        ).select(SQL('employee_id')))
+
+    @api.depends_context('uid', 'allowed_company_ids')
+    @api.depends('managed_version_ids', 'managed_version_ids.employee_id.active', 'managed_version_ids.employee_id.current_version_id')
+    def _compute_child_ids(self):
+        children_per_parent = dict(self._read_group(
+            [('parent_id', 'in', self.ids), ('active', '=', True)],
+            ['parent_id'],
+            ['id:recordset'],
+        ))
+        for employee in self:
+            employee.child_ids = children_per_parent.get(employee._origin, self.browse())
+
+    def _search_child_ids(self, operator, value):
+        if operator not in ('in', 'any'):
+            return NotImplemented
+        # Only active employees are direct subordinates (as in _compute_child_ids), whatever
+        # the context: a many2one ``any`` (e.g. from hr.version) searches with active_test=False.
+        Employee = self.env['hr.employee'].with_context(active_test=True)
+        if operator == 'any':
+            return [('id', 'in', Employee.search(value).parent_id.ids)]
+        domain = Domain.FALSE
+        if child_ids := [child_id for child_id in value if child_id]:
+            domain |= Domain('id', 'in', Employee.search([('id', 'in', child_ids)]).parent_id.ids)
+        if False in value:
+            domain |= Domain('id', 'not in', Employee.search([('parent_id', '!=', False)]).parent_id.ids)
+        return domain
+
+    @api.depends('managed_version_ids', 'managed_version_ids.employee_id.active', 'managed_version_ids.employee_id.current_version_id')
     def _compute_child_count(self):
         employee_read_group = self._read_group(
             [('parent_id', 'in', self.ids)],
@@ -810,7 +880,7 @@ class HrEmployee(models.Model):
             employee.child_count = child_count_per_parent_id.get(employee._origin, 0)
 
     @api.depends_context('uid', 'company')
-    @api.depends('parent_id')
+    @api.depends('version_id.parent_id')
     def _compute_is_subordinate(self):
         subordinates = self.env.user.employee_id.subordinate_ids
         if not subordinates:
@@ -871,7 +941,7 @@ class HrEmployee(models.Model):
                 location_type = 'other'
             employee.work_location_type = location_type
 
-    @api.depends('version_ids.date_version', 'version_ids.active')
+    @api.depends('version_ids.date_version', 'version_ids.active', 'version_ids.company_id')
     def _compute_current_version_id(self):
         """Compute the stored ``current_version_id``.
 
@@ -883,7 +953,8 @@ class HrEmployee(models.Model):
 
         When the current version is replaced by a version with another
         timezone, the timezone of the employee's user follows
-        (:meth:`_sync_user_tz`).
+        (:meth:`_sync_user_tz`). The company of the employee is the one of
+        its current version (:meth:`_sync_company`).
         """
         today = fields.Date.context_today(self)
         current_version_per_employee = {}
@@ -912,6 +983,50 @@ class HrEmployee(models.Model):
                     employees_tz_changed |= employee
                 employee.current_version_id = new_current_version
         employees_tz_changed._sync_user_tz()
+        self.filtered(
+            lambda e: e.current_version_id.company_id and e.company_id != e.current_version_id.company_id,
+        )._sync_company()
+
+    def _sync_company(self):
+        """Write the company of the current version of the employees on them (through their resource).
+
+        Only done when it differs, not to recompute the fields depending on the company of the employee.
+        """
+        for employee in self:
+            company = employee.current_version_id.company_id
+            if employee._get_company_user_conflict(company):
+                # never break the computation of the current versions (daily cron) for a single employee
+                _logger.warning(
+                    "Employee %s not moved to company %s: its user is already linked to an employee there.",
+                    employee.id, company.id)
+                continue
+            employee.resource_id.sudo().company_id = company
+
+    def _get_company_user_conflict(self, company):
+        """Return the other employee of the user of the employee in ``company`` (an employee can't be moved
+        there: a user is linked to one employee per company). Single employee only.
+
+        :param company: the new company
+        :type company: res.company
+        :rtype: hr.employee
+        """
+        self.ensure_one()
+        if not self.user_id:
+            return self.browse()
+        return self.sudo().with_context(active_test=False).search([
+            ('user_id', '=', self.user_id.id),
+            ('company_id', '=', company.id),
+            ('id', '!=', self.id),
+        ], limit=1)
+
+    def _check_company_move(self, company):
+        """Raise if the employees can't be moved to ``company`` (see :meth:`_get_company_user_conflict`)."""
+        for employee in self:
+            if employee._get_company_user_conflict(company):
+                raise ValidationError(self.env._(
+                    "%(employee)s can't be moved to %(company)s: the user %(user)s is already linked to another "
+                    "employee in this company.",
+                    employee=employee.name, company=company.name, user=employee.user_id.name))
 
     def _sync_user_tz(self):
         """Write the timezone of the current version of the employees on their user (same company)."""
@@ -1297,16 +1412,6 @@ class HrEmployee(models.Model):
         } for employee in self])
         for employee, work_contact in zip(self, work_contacts):
             employee.work_contact_id = work_contact
-
-    @api.depends('parent_id')
-    def _compute_coach(self):
-        for version in self:
-            manager = version.parent_id
-            previous_manager = version._origin.parent_id
-            if manager and (version.coach_id == previous_manager or not version.coach_id):
-                version.coach_id = manager
-            elif not version.coach_id:
-                version.coach_id = False
 
     @api.depends('work_contact_id', 'work_contact_id.phone', 'work_contact_id.email')
     def _compute_work_contact_details(self):
@@ -2402,6 +2507,9 @@ class HrEmployee(models.Model):
         employees.filtered(lambda e: not e.work_contact_id).sudo()._create_work_contacts()
         if self.env.context.get('salary_simulation'):
             return employees
+        if any('bank_account_ids' in vals for vals in vals_list):
+            for employee in employees:
+                employee.bank_account_ids._check_employee_bank_accounts(employee)
         for employee_sudo in employees.sudo():
             # creating 'svg/xml' attachments requires specific rights
             if not employee_sudo.image_1920 and self.env['ir.ui.view'].sudo(False).has_access('write'):
@@ -2468,10 +2576,24 @@ class HrEmployee(models.Model):
                 employee.message_post(body=self.env._(
                     'Additional Information: \n %(description)s',
                     description=vals.get('departure_description')))
+        if 'company_id' in vals:
+            # without payslips, the employee is moved with all its versions (see hr.version._get_company_change_date);
+            # the company dependent values written with it take precedence on the reset ones
+            vals = dict(vals)
+            company = self.env['res.company'].browse(self._fields['company_id'].convert_to_cache(vals.pop('company_id'), self))
+            self._check_company_move(company)
+            for version in self.version_ids.filtered(lambda v: v.company_id != company):
+                version.write(version._get_company_change_values(company))
+            self._share_work_contact(company)
         # Only one write call for all the fields from hr.version
         new_vals = vals.copy()
         version_vals = {val: new_vals.pop(val) for val in vals if val in self._fields and self._fields[val].inherited}
+        # only the added accounts: an older refused account must not block the fix of the employee
+        previous_bank_accounts = {employee: employee.bank_account_ids for employee in self} if 'bank_account_ids' in vals else {}
         res = super().write(new_vals)
+
+        for employee, bank_accounts in previous_bank_accounts.items():
+            (employee.bank_account_ids - bank_accounts)._check_employee_bank_accounts(employee)
         if previous_skills_summary:
             self._log_skill_changes(previous_skills_summary)
         if 'work_contact_id' in vals:
@@ -2558,7 +2680,9 @@ class HrEmployee(models.Model):
             user_fields_to_empty = self._get_user_m2o_to_empty_on_archived_employees()
             employee_domain = Domain.OR(Domain(field, 'in', archived_employees.ids) for field in employee_fields_to_empty)
             user_domain = Domain.OR(Domain(field, 'in', archived_employees.user_id.ids) for field in user_fields_to_empty)
-            employees = self.env['hr.employee'].search(employee_domain | user_domain)
+            # sudo: the references are emptied on all the employees, also on the fields restricted to some groups
+            # (e.g. the attendance approver) and in the companies the user does not access
+            employees = self.env['hr.employee'].sudo().search(employee_domain | user_domain)
             for employee in employees:
                 for field in employee_fields_to_empty:
                     if employee[field] in archived_employees:
@@ -2566,16 +2690,96 @@ class HrEmployee(models.Model):
                 for field in user_fields_to_empty:
                     if employee[field] in archived_employees.user_id:
                         employee[field] = False
+            # The versioned fields are also emptied on the future versions, the past ones keep the history
+            version_employee_fields_to_empty = [field for field in employee_fields_to_empty if self._fields[field].inherited]
+            version_user_fields_to_empty = [field for field in user_fields_to_empty if self._fields[field].inherited]
+            versions = self.env['hr.version'].sudo().search(
+                Domain.OR(Domain(field, 'in', archived_employees.ids) for field in version_employee_fields_to_empty)
+                | Domain.OR(Domain(field, 'in', archived_employees.user_id.ids) for field in version_user_fields_to_empty),
+            ).filtered(lambda v: not v.employee_id or v.date_version >= v.employee_id.current_version_id.date_version)
+            for field in version_employee_fields_to_empty:
+                versions.filtered(lambda v: v[field] in archived_employees).write({field: False})
+            for field in version_user_fields_to_empty:
+                versions.filtered(lambda v: v[field] in archived_employees.user_id).write({field: False})
         return res
 
-    @api.onchange('company_id')
-    def _onchange_company_id(self):
-        if self._origin:
-            return {'warning': {
-                'title': self.env._("Warning"),
-                'message': self.env._("To avoid multi company issues (losing the access to your previous contracts, leaves, ...), you should create another employee in the new company instead.")
-            }}
-        return None
+    def action_change_company(self, company_id):
+        """Return the action moving the employee to the company ``company_id``, or ``False`` if the company can
+        directly be changed on the employee (with all its versions).
+
+        Called by the company field of the employee form when another company is selected: once versions are
+        covered by payslips (see :meth:`hr.version._get_company_change_date`), the employee can only be moved to
+        another company from an effective date after them (see :meth:`_move_to_company`). Single employee only.
+
+        :param int company_id: the new company
+        :rtype: dict or bool
+        """
+        self.ensure_one()
+        self.check_access('write')
+        if not any(version._get_company_change_date() for version in self.version_ids):
+            return False
+        return {
+            'type': 'ir.actions.act_window',
+            'name': self.env._("Move employee to a new company"),
+            'res_model': 'hr.employee.company.change.wizard',
+            'views': [(False, 'form')],
+            'target': 'new',
+            'context': {
+                'default_version_id': self.version_id.id,
+                'default_company_id': company_id,
+                'dialog_size': 'medium',
+            },
+        }
+
+    def _move_to_company(self, company, date):
+        """Move the employee to ``company`` from ``date``.
+
+        A new open-ended contract starts on ``date`` on a version belonging to ``company`` (see
+        :meth:`hr.version._get_company_change_values`); the contract running on ``date`` ends the day before.
+        Between two companies of the same legal employer (same root company, e.g. branches), the contract goes on:
+        only a new version of ``company`` starts on ``date``, without ending the contract (no new contract, so the
+        same seniority and no exit declaration). The employee belongs to ``company`` once that version is the
+        current one. Single employee only.
+
+        :param company: the new company
+        :type company: res.company
+        :param datetime.date date: the effective date of the move
+        :return: the version starting on ``date``
+        :rtype: hr.version
+        """
+        self.ensure_one()
+        self._check_company_move(company)
+        same_employer = self._get_version(date).company_id.root_id == company.root_id
+        contract_date_start = self.sudo()._get_contract_dates(date)[0]
+        if same_employer:
+            # the contract goes on: only the company of the versions changes from the effective date
+            contract_values = {}
+        else:
+            if contract_date_start and contract_date_start < date:
+                self._get_version(date).contract_date_end = date - relativedelta(days=1)
+            contract_values = {'contract_date_start': date, 'contract_date_end': False}
+        if version := self.version_ids.filtered(lambda v: v.date_version == date):
+            version.write(contract_values)
+        else:
+            version = self.create_version({'date_version': date, **contract_values})
+        version.write(version._get_company_change_values(company))
+        self._share_work_contact(company)
+        return version
+
+    def _share_work_contact(self, company):
+        """Share the work contact of the employees between their companies when they are moved to ``company``.
+
+        Without it, the new company could not read the work contact (and the partner of the bank accounts) of
+        the employees created in the old company, while the old company still needs it for its documents (e.g.
+        payslips, journal items). The work contacts of users are left untouched.
+
+        :param company: the new company
+        :type company: res.company
+        """
+        for employee in self:
+            contact = employee.work_contact_id
+            if contact.company_id and contact.company_id not in company.parent_ids and not contact.user_ids:
+                contact.sudo().company_id = False
 
     def _load_scenario(self):
         demo_tag = self.env.ref('hr.employee_category_demo', raise_if_not_found=False)
@@ -3353,7 +3557,7 @@ class HrEmployee(models.Model):
                 employee.primary_bank_account_id = False
 
     def get_accounts_with_fixed_allocations(self):
-        """Return the bank accounts receiving a fixed amount (not a percentage) of the salary.
+        """Return the bank accounts receiving a fixed amount (not a percentage) of the salary, in their Salary Allocation order.
 
         Based on ``salary_distribution`` (``{str(bank_account_id): {'sequence',
         'amount', 'amount_is_percentage'}}``); accounts absent from it count as
@@ -3364,7 +3568,7 @@ class HrEmployee(models.Model):
         self.ensure_one()
         return self.bank_account_ids.filtered(
             lambda a: not self.salary_distribution.get(str(a.id), {}).get('amount_is_percentage', True)
-        )
+        ).sorted(lambda a: self.salary_distribution[str(a.id)].get('sequence', float('inf')))
 
     def get_bank_account_salary_allocation(self, account_id):
         """Return the salary allocation of a bank account from ``salary_distribution``.

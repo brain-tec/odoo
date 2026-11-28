@@ -243,10 +243,11 @@ export function convertCSSColorToRgba(cssColor = "") {
 
     if (/^#([0-9A-F]{6}|[0-9A-F]{8})$/i.test(cssColor)) {
         return {
-            red: parseInt(cssColor.substr(1, 2), 16),
-            green: parseInt(cssColor.substr(3, 2), 16),
-            blue: parseInt(cssColor.substr(5, 2), 16),
-            opacity: (cssColor.length === 9 ? parseInt(cssColor.substr(7, 2), 16) / 255 : 1) * 100,
+            red: parseInt(cssColor.substring(1, 3), 16),
+            green: parseInt(cssColor.substring(3, 5), 16),
+            blue: parseInt(cssColor.substring(5, 7), 16),
+            opacity:
+                (cssColor.length === 9 ? parseInt(cssColor.substring(7, 9), 16) / 255 : 1) * 100,
         };
     }
 
@@ -279,29 +280,35 @@ export function convertCSSColorToRgba(cssColor = "") {
 }
 
 /**
- * Returns whether the given color's luminance is light.
- * Formula adapted from APCA's simplification at
- * https://gist.github.com/Myndex/e1025706436736166561d339fd667493#the-38-flip
+ * Converts color value from sRGB to linear RGB.
  *
- * @param {string} color - CSS color
- * @returns {boolean|undefined} true if the color is light, false if it is dark,
- * undefined if the color is not recognized.
+ * @param {number} value standard rgb in [0, 255]
+ * @returns {number} linear rgb
  */
-function isRelativeLuminanceLight(color) {
-    color = convertCSSColorToRgba(color);
-    if (!color) {
-        return;
+function srgbToLin(value) {
+    value = value / 255;
+    if (value <= 0.04045) {
+        return value / 12.92;
     }
-    const { red, green, blue } = color;
-    const rgbContrastRatios = { red: 0.2126, green: 0.7152, blue: 0.0722 };
-    const channelLuminance = (channel, value) =>
-        Math.pow(value / 255, 2.2) * rgbContrastRatios[channel];
-    const luminance =
-        channelLuminance("red", red) +
-        channelLuminance("green", green) +
-        channelLuminance("blue", blue);
-    // Perceptual luminance inflection point for the human eye is 0.38, not 0.5.
-    return luminance > 0.38;
+    return Math.pow((value + 0.055) / 1.055, 2.4);
+}
+
+/**
+ * @param {number[]} rgb [r, g, b] in [0, 255]
+ * @returns {number} WCAG relative luminance
+ */
+export function getRelativeLuminance([r, g, b]) {
+    return 0.2126 * srgbToLin(r) + 0.7152 * srgbToLin(g) + 0.0722 * srgbToLin(b);
+}
+
+/**
+ * @param {number[]} fg [r, g, b]
+ * @param {number[]} bg [r, g, b]
+ * @returns {number} WCAG contrast ratio, from 1 to 21
+ */
+export function getContrastRatio(fg, bg) {
+    const [hi, lo] = [getRelativeLuminance(fg), getRelativeLuminance(bg)].sort((a, b) => b - a);
+    return (hi + 0.05) / (lo + 0.05);
 }
 
 /**
@@ -311,7 +318,14 @@ function isRelativeLuminanceLight(color) {
  * @returns {"#000000"|"#FFFFFF"}
  */
 export function getContrastingColor(color) {
-    return isRelativeLuminanceLight(color) ? "#000000" : "#FFFFFF";
+    const rgba = convertCSSColorToRgba(color);
+    if (!rgba) {
+        return "#FFFFFF";
+    }
+    const rgb = [rgba.red, rgba.green, rgba.blue];
+    const blackContrast = getContrastRatio(rgb, [0, 0, 0]);
+    const whiteContrast = getContrastRatio(rgb, [255, 255, 255]);
+    return blackContrast > whiteContrast ? "#000000" : "#FFFFFF";
 }
 
 /**
@@ -382,6 +396,46 @@ export function standardizeGradient(gradient) {
         gradient = el.style.getPropertyValue("background-image");
     }
     return gradient;
+}
+
+export function extractGradientData(gradient) {
+    if (!gradient || !isColorGradient(gradient)) {
+        return;
+    }
+    gradient = standardizeGradient(gradient);
+    const data = { colors: [] };
+    const colors = [
+        ...gradient.matchAll(
+            /(#[0-9a-f]{6}|rgba?\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*[,\s*[0-9.]*]?\s*\)|[a-z]+)\s*([[0-9]+%]?)/g
+        ),
+    ].filter((color) => rgbaToHex(color[1]) !== "#");
+
+    for (const color of colors) {
+        data.colors.push({ hex: rgbaToHex(color[1]), percentage: color[2].replace("%", "") });
+    }
+
+    const isLinear = gradient.includes("linear-gradient(");
+    const isRadial = gradient.includes("radial-gradient(");
+    const isConic = gradient.includes("conic-gradient(");
+
+    data.type = isLinear ? "linear" : isRadial ? "radial" : "conic";
+    data.repeating = gradient.startsWith("repeating-");
+
+    if (isRadial) {
+        const size = gradient.match(/(closest|farthest)-(side|corner)/);
+        data.size = size ? size[0] : "farthest-corner";
+    }
+    if (isLinear || isConic) {
+        const angle = gradient.match(/(-?[0-9]+)deg/);
+        data.angle = angle ? parseInt(angle[1]) : 180;
+    }
+    if (isRadial || isConic) {
+        data.position = {};
+        const position = gradient.match(/ at (-?[0-9]+)% (-?[0-9]+)%/) || ["", "50", "50"];
+        data.position.x = position[1];
+        data.position.y = position[2];
+    }
+    return data;
 }
 
 export const RGBA_REGEX = /[\d.]{1,5}/g;
